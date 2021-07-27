@@ -1,0 +1,8 @@
+https://github.com/aspnet/Announcements/issues/324
+https://github.com/aspnet/AspNetCore/issues/7749
+https://docs.microsoft.com/en-us/aspnet/core/migration/22-to-30
+
+https://github.com/tbebekis/Tripous.git
+
+https://github.com/github/VisualStudio/blob/master/docs/getting-started/authenticating-to-github.md
+https://github.com/settings/tokens

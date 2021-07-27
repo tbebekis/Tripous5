@@ -1,0 +1,4 @@
+﻿    <ItemGroup>
+      <Folder Include="Data\Dapper\" />
+      <Folder Include="Model\" />
+    </ItemGroup>
