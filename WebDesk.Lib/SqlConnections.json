@@ -1,0 +1,9 @@
+{
+    "SqlConnections": [
+        {
+            "Name": "Default",
+            "Provider": "SQLite",
+            "ConnectionString": "Data Source=WebDesk.db3"
+        }
+    ]
+}

@@ -1,0 +1,74 @@
+﻿/*
+    https://hookagency.com/website-color-schemes/
+    https://www.behance.net/gallery/80191113/Minimalist-Color-Palettes-are-back
+*/
+
+:root {
+    --White: white;
+    --Black: #000000;
+
+    --Color1: #16365A;
+    --Color2: #104684;
+    --Color3: #337FD7;
+    --Color4: #E97A25;
+    --Color5: #F7E3D4; 
+
+    --Red: #e74c3c;
+    --Green: #2ecc71;
+    --Yellow: #f1c40f;
+
+    --Dark: var(--Black);
+    --Dark2: var(--Color1);
+    --Dark3: var(--Color2);
+    --Light: var(--Color3);
+    --Light2: var(--Color4);
+    --Light3: var(--Color5);
+
+    --GrayLightLight: #E6E6E6;
+    --GrayLight: #EFEFEF;
+    --Gray: #BCBCBC;
+    --GrayDark: #939393;
+    --GrayDarkDeep: #6E6E6E;
+
+
+    --SemiBold: 400;
+    --HeavyBold: 800;
+}
+
+/*---------------------------------------------------------------------------------------
+  responsive variables
+---------------------------------------------------------------------------------------*/
+/* XSmall */
+:root {
+    --Page-Padding: 0 3%;
+
+    --DialogBox-Width: 90vw;
+}
+
+
+/* Small */
+@media all and (min-width: 576px) {
+    :root {
+        --Page-Padding: 0 3.4%;
+
+        --DialogBox-Width: 60vw;
+    } 
+}
+
+/* Medium */
+@media all and (min-width: 992px) {
+    :root {
+        --Page-Padding: 0 7%;
+
+        --DialogBox-Width: 50vw;
+    }  
+}
+
+/* Large */
+@media all and (min-width: 1200px) {
+    :root {
+        --Page-Padding: 0 9.4%;
+
+        --DialogBox-Width: 35vw;
+    } 
+}

@@ -1,0 +1,973 @@
+/*
+            from            to
+XSmall         0             576
+Small        577             991
+Medium       992            1199
+Large       1200         
+    
+@XSmallMax	:  576px;
+@SmallMin	:  577px;
+@SmallMax	:  991px;
+@MediumMin	:  992px;
+@MediumMax	: 1199px;
+@LargeMin	: 1200px;
+*/
+
+:root {
+
+/* 12-grid column widths for all screen sizes */
+--c1: 8.33333%;
+--c2: 16.66666%;
+--c3: 24.99999%;
+--c4: 33.33333%;
+--c5: 41.66666%;
+--c6: 49.99999%;
+--c7: 58.33333%;
+--c8: 66.66666%;
+--c9: 74.99999%;
+--c10: 83.33333%;
+--c11: 91.66666%;
+--c12: 99.99999%;
+
+/* Column Widths - In percents */
+--p-1: 0.99999%;
+--p-2: 1.99999%;
+--p-3: 2.99999%;
+--p-4: 3.99999%;
+--p-5: 4.99999%;
+--p-10: 9.99999%;
+--p-15: 14.99999%;
+--p-20: 19.99999%;
+--p-25: 24.99999%;
+--p-30: 29.99999%;
+--p-35: 34.99999%;
+--p-40: 39.99999%;
+--p-45: 44.99999%;
+--p-50: 49.99999%;
+--p-55: 54.99999%;
+--p-60: 59.99999%;
+--p-65: 64.99999%;
+--p-70: 69.99999%;
+--p-75: 74.99999%;
+--p-80: 79.99999%;
+--p-85: 84.99999%;
+--p-90: 89.99999%;
+--p-95: 94.99999%;
+--p-100: 99.99999%;
+--p-33: 33.33333%;
+--p-66: 66.66666%;
+}
+
+
+/*---------------------------------------------------------------------------------------
+  Global
+---------------------------------------------------------------------------------------*/
+* { 
+    margin: 0;
+    padding: 0;
+    outline: none;
+    text-decoration: none;
+}
+
+*:focus {
+    outline: none;
+}
+
+html { 
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+ 
+/*---------------------------------------------------------------------------------------
+  Flex
+---------------------------------------------------------------------------------------*/
+
+.tp-Flex {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+} 
+
+.tp-FlexCenter {
+    position: relative;
+    display: flex;
+    justify-content:center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tp-FlexCenterH {
+    position: relative;
+    display: flex; 
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tp-FlexCenterV {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+ 
+.tp-FlexNoWrap {
+    position: relative;
+    display: flex;
+}
+
+.tp-FlexColumn {
+    flex-direction: column;
+}
+
+.tp-FlexText {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;  
+    text-overflow: ellipsis;  
+    white-space: nowrap;
+}
+
+.tp-FlexFill {
+    position: relative;
+    flex-grow: 1; 
+}
+
+.tp-FlexPic {
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+} 
+
+.tp-FlexPic img {             
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.tp-PicPad8 { 
+    padding: 8px; 
+
+}
+ 
+/*---------------------------------------------------------------------------------------
+  Responsive
+---------------------------------------------------------------------------------------*/
+
+/* a row that wraps its children */
+.tp-Row {
+    position: relative;
+    display: flex;
+    padding-bottom: 8px;
+    flex-wrap: wrap;
+    /* margin: 0 -8px; */
+}
+
+/* children vertical alignment */  
+.tp-RowCenter {                 
+    align-items: center;
+}
+
+/* children vertical alignment */ 
+.tp-RowTop {                    
+    align-items: flex-start; 
+}
+
+/* a row that does NOT wrap its children */ 
+.tp-RowNoWrap {                 
+    position: relative;
+    display: flex;
+    margin: 0 -8px;  
+    flex-wrap: nowrap; 
+    align-items: center;   
+}
+
+.tp-Col {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 0 10px;    
+}
+
+/*---------------------------------------------------------------------------------------
+  Column Widths - 12 column system
+---------------------------------------------------------------------------------------*/
+
+
+/* Column Widths */
+.c1  { width: var(--c1 ); }
+.c2  { width: var(--c2 ); }
+.c3  { width: var(--c3 ); }
+.c4  { width: var(--c4 ); }
+.c5  { width: var(--c5 ); }
+.c6  { width: var(--c6 ); }
+.c7  { width: var(--c7 ); }
+.c8  { width: var(--c8 ); }
+.c9  { width: var(--c9 ); }
+.c10 { width: var(--c10); }
+.c11 { width: var(--c11); }
+.c12 { width: var(--c12); }
+
+/*---------------------------------------------------------------------------------------
+min-width 	Rules applied for any browser width greater than the value defined in the query.
+max-width 	Rules applied for any browser width less than the value defined in the query. 
+---------------------------------------------------------------------------------------*/
+
+/* 0 to XSmallMax */ 
+@media (max-width: 576px) {
+    .xs1  { width: var(--c1 ); }
+    .xs2  { width: var(--c2 ); }
+    .xs3  { width: var(--c3 ); }
+    .xs4  { width: var(--c4 ); }
+    .xs5  { width: var(--c5 ); }
+    .xs6  { width: var(--c6 ); }
+    .xs7  { width: var(--c7 ); }
+    .xs8  { width: var(--c8 ); }
+    .xs9  { width: var(--c9 ); }
+    .xs10 { width: var(--c10); }
+    .xs11 { width: var(--c11); }
+    .xs12 { width: var(--c12); }
+}
+
+/* SmallMin to SmallMax */ 
+@media (min-width: 577px) and (max-width: 991px)  {
+    .s1  { width: var(--c1 ); }
+    .s2  { width: var(--c2 ); }
+    .s3  { width: var(--c3 ); }
+    .s4  { width: var(--c4 ); }
+    .s5  { width: var(--c5 ); }
+    .s6  { width: var(--c6 ); }
+    .s7  { width: var(--c7 ); }
+    .s8  { width: var(--c8 ); }
+    .s9  { width: var(--c9 ); }
+    .s10 { width: var(--c10); }
+    .s11 { width: var(--c11); }
+    .s12 { width: var(--c12); }
+}
+
+/* MediumMin to MediumMax */ 
+@media (min-width: 992px) and (max-width: 1199px) {
+    .m1  { width: var(--c1 ); }
+    .m2  { width: var(--c2 ); }
+    .m3  { width: var(--c3 ); }
+    .m4  { width: var(--c4 ); }
+    .m5  { width: var(--c5 ); }
+    .m6  { width: var(--c6 ); }
+    .m7  { width: var(--c7 ); }
+    .m8  { width: var(--c8 ); }
+    .m9  { width: var(--c9 ); }
+    .m10 { width: var(--c10); }
+    .m11 { width: var(--c11); }
+    .m12 { width: var(--c12); }
+}
+
+/* LargeMin to anything */ 
+@media (min-width: 1200px) {
+    .l1  { width: var(--c1 ); }
+    .l2  { width: var(--c2 ); }
+    .l3  { width: var(--c3 ); }
+    .l4  { width: var(--c4 ); }
+    .l5  { width: var(--c5 ); }
+    .l6  { width: var(--c6 ); }
+    .l7  { width: var(--c7 ); }
+    .l8  { width: var(--c8 ); }
+    .l9  { width: var(--c9 ); }
+    .l10 { width: var(--c10); }
+    .l11 { width: var(--c11); }
+    .l12 { width: var(--c12); }
+}
+
+/*---------------------------------------------------------------------------------------
+  Column Widths - In percents
+---------------------------------------------------------------------------------------*/
+ 
+.p-1   { width:  var(--p-1  ); }
+.p-2   { width:  var(--p-2  ); }
+.p-3   { width:  var(--p-3  ); }
+.p-4   { width:  var(--p-4  ); }
+.p-5   { width:  var(--p-5  ); }
+.p-10  { width:  var(--p-10 ); } 
+.p-15  { width:  var(--p-15 ); }
+.p-20  { width:  var(--p-20 ); }
+.p-25  { width:  var(--p-25 ); }
+.p-30  { width:  var(--p-30 ); }
+.p-35  { width:  var(--p-35 ); }
+.p-40  { width:  var(--p-40 ); }
+.p-45  { width:  var(--p-45 ); }
+.p-50  { width:  var(--p-50 ); }
+.p-55  { width:  var(--p-55 ); }
+.p-60  { width:  var(--p-60 ); }
+.p-65  { width:  var(--p-65 ); }
+.p-70  { width:  var(--p-70 ); }
+.p-75  { width:  var(--p-75 ); }
+.p-80  { width:  var(--p-80 ); }
+.p-85  { width:  var(--p-85 ); }
+.p-90  { width:  var(--p-90 ); }
+.p-95  { width:  var(--p-95 ); }
+.p-100 { width:  var(--p-100); }
+ 
+.p-33  { width:  var(--p-33 ); }
+.p-66  { width:  var(--p-66 ); } 
+
+/* 0 to XSmallMax */ 
+@media (max-width: 576px) {
+    .xs-1   { width: var(--p-1  ); }
+    .xs-2   { width: var(--p-2  ); }
+    .xs-3   { width: var(--p-3  ); }
+    .xs-4   { width: var(--p-4  ); }
+    .xs-5   { width: var(--p-5  ); }
+    .xs-10  { width: var(--p-10 ); } 
+    .xs-15  { width: var(--p-15 ); }
+    .xs-20  { width: var(--p-20 ); }
+    .xs-25  { width: var(--p-25 ); }
+    .xs-30  { width: var(--p-30 ); }
+    .xs-35  { width: var(--p-35 ); }
+    .xs-40  { width: var(--p-40 ); }
+    .xs-45  { width: var(--p-45 ); }
+    .xs-50  { width: var(--p-50 ); }
+    .xs-55  { width: var(--p-55 ); }
+    .xs-60  { width: var(--p-60 ); }
+    .xs-65  { width: var(--p-65 ); }
+    .xs-70  { width: var(--p-70 ); }
+    .xs-75  { width: var(--p-75 ); }
+    .xs-80  { width: var(--p-80 ); }
+    .xs-85  { width: var(--p-85 ); }
+    .xs-90  { width: var(--p-90 ); }
+    .xs-95  { width: var(--p-95 ); }
+    .xs-100 { width: var(--p-100); }
+
+    .xs-33  { width: var(--p-33 ); }
+    .xs-66  { width: var(--p-66 ); }
+}
+
+/* SmallMin to SmallMax */ 
+@media (min-width: 577px) and (max-width: 991px)  {
+    .s-1   { width: var(--p-1  ); }
+    .s-2   { width: var(--p-2  ); }
+    .s-3   { width: var(--p-3  ); }
+    .s-4   { width: var(--p-4  ); }
+    .s-5   { width: var(--p-5  ); }
+    .s-10  { width: var(--p-10 ); } 
+    .s-15  { width: var(--p-15 ); }
+    .s-20  { width: var(--p-20 ); }
+    .s-25  { width: var(--p-25 ); }
+    .s-30  { width: var(--p-30 ); }
+    .s-35  { width: var(--p-35 ); }
+    .s-40  { width: var(--p-40 ); }
+    .s-45  { width: var(--p-45 ); }
+    .s-50  { width: var(--p-50 ); }
+    .s-55  { width: var(--p-55 ); }
+    .s-60  { width: var(--p-60 ); }
+    .s-65  { width: var(--p-65 ); }
+    .s-70  { width: var(--p-70 ); }
+    .s-75  { width: var(--p-75 ); }
+    .s-80  { width: var(--p-80 ); }
+    .s-85  { width: var(--p-85 ); }
+    .s-90  { width: var(--p-90 ); }
+    .s-95  { width: var(--p-95 ); }
+    .s-100 { width: var(--p-100); }
+
+    .s-33  { width: var(--p-33 ); }
+    .s-66  { width: var(--p-66 ); }
+}
+
+/* MediumMin to MediumMax */ 
+@media (min-width: 992px) and (max-width: 1199px) {
+    .m-1   { width: var(--p-1  ); }
+    .m-2   { width: var(--p-2  ); }
+    .m-3   { width: var(--p-3  ); }
+    .m-4   { width: var(--p-4  ); }
+    .m-5   { width: var(--p-5  ); }
+    .m-10  { width: var(--p-10 ); } 
+    .m-15  { width: var(--p-15 ); }
+    .m-20  { width: var(--p-20 ); }
+    .m-25  { width: var(--p-25 ); }
+    .m-30  { width: var(--p-30 ); }
+    .m-35  { width: var(--p-35 ); }
+    .m-40  { width: var(--p-40 ); }
+    .m-45  { width: var(--p-45 ); }
+    .m-50  { width: var(--p-50 ); }
+    .m-55  { width: var(--p-55 ); }
+    .m-60  { width: var(--p-60 ); }
+    .m-65  { width: var(--p-65 ); }
+    .m-70  { width: var(--p-70 ); }
+    .m-75  { width: var(--p-75 ); }
+    .m-80  { width: var(--p-80 ); }
+    .m-85  { width: var(--p-85 ); }
+    .m-90  { width: var(--p-90 ); }
+    .m-95  { width: var(--p-95 ); }
+    .m-100 { width: var(--p-100); }
+
+    .m-33  { width: var(--p-33 ); }
+    .m-66  { width: var(--p-66 ); }
+}
+
+/* LargeMin to anything */ 
+@media (min-width: 1200px) {
+    .l-1   { width: var(--p-1  ); }
+    .l-2   { width: var(--p-2  ); }
+    .l-3   { width: var(--p-3  ); }
+    .l-4   { width: var(--p-4  ); }
+    .l-5   { width: var(--p-5  ); }
+    .l-10  { width: var(--p-10 ); } 
+    .l-15  { width: var(--p-15 ); }
+    .l-20  { width: var(--p-20 ); }
+    .l-25  { width: var(--p-25 ); }
+    .l-30  { width: var(--p-30 ); }
+    .l-35  { width: var(--p-35 ); }
+    .l-40  { width: var(--p-40 ); }
+    .l-45  { width: var(--p-45 ); }
+    .l-50  { width: var(--p-50 ); }
+    .l-55  { width: var(--p-55 ); }
+    .l-60  { width: var(--p-60 ); }
+    .l-65  { width: var(--p-65 ); }
+    .l-70  { width: var(--p-70 ); }
+    .l-75  { width: var(--p-75 ); }
+    .l-80  { width: var(--p-80 ); }
+    .l-85  { width: var(--p-85 ); }
+    .l-90  { width: var(--p-90 ); }
+    .l-95  { width: var(--p-95 ); }
+    .l-100 { width: var(--p-100); }
+
+    .l-33  { width: var(--p-33 ); }
+    .l-66  { width: var(--p-66 ); }
+}
+
+ 
+/*---------------------------------------------------------------------------------------
+  Width in Pixels
+---------------------------------------------------------------------------------------*/ 
+.px50  { width:  50px; }
+.px100 { width: 100px; }
+.px150 { width: 150px; }
+.px200 { width: 200px; }
+
+/*---------------------------------------------------------------------------------------
+  Hide
+---------------------------------------------------------------------------------------*/
+
+.tp-Hide {
+    display: none !important;
+}
+
+@media (max-width: 576px) {
+    .xs0, .tp-Hide-xs {
+        display: none !important;
+    }
+}
+
+@media (min-width: 577px) and (max-width: 991px) {
+    .s0, .tp-Hide-s {
+        display: none !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .m0, .tp-Hide-m {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .l0, .tp-Hide-l {
+        display: none !important;
+    }
+}
+/*---------------------------------------------------------------------------------------
+  Limiter
+---------------------------------------------------------------------------------------*/
+ 
+.tp-Limiter {
+    position: relative;
+    margin: 0 auto !important;
+    padding: 0 8px; 
+} 
+
+@media (max-width: 600px) {
+    .tp-Limiter { width: 100%; } 
+}
+
+@media (min-width: 601px) {
+    .tp-Limiter { width: 100%; } 
+}
+
+@media (min-width: 993px) {
+    .tp-Limiter { width: 970px } 
+}
+ 
+@media (min-width: 1201px) {
+    .tp-Limiter { width: 1170px; } 
+}
+
+@media (min-width: 1301px) {
+    .tp-Limiter { width: 1270px; } 
+}
+
+@media (min-width: 1600px) {
+    .tp-Limiter { width: 1470px; } 
+}
+
+
+/*---------------------------------------------------------------------------------------
+// tp-CtrlRow - label text and control
+// --------------------------------------------------------------------------------------
+
+<div class="tp-Row tp-CtrlRow" id="control_row_Name">
+	<div class="tp-CText">
+		<label for="Name">TITLE GOES HERE</label>
+		<span class="tp-RequiredMark">*</span>
+	</div>
+	<div class="tp-Ctrl">
+		<input class="tp-TextBox" id="Name" name="Name" type="text" value="" data-setup="{ DataField:'UserName', .... } >
+	</div>
+</div>
+// --------------------------------------------------------------------------------------
+// tp-CheckBoxRow
+// --------------------------------------------------------------------------------------
+<div class="tp-Row tp-CheckBoxRow">
+	<label class="tp-CheckBox">
+		<span style="display: none;">*</span>
+		<span class="tp-Text">TEXT GOES HERE</span>
+		<input name="SAME_NAME" type="checkbox" value="1">
+		<span class="checkmark"></span> 
+	</label>
+    <input name="SAME_NAME" type="hidden" value="0">
+</div>
+---------------------------------------------------------------------------------------*/
+ 
+
+.tp-RequiredMark {
+    color: red;
+    font-weight: bolder;
+    padding: 0 3px;
+}
+
+.tp-CtrlRow,
+.tp-CheckBoxRow {
+    position: relative;
+    display: flex;
+    margin-top: 4px;
+    padding: 0 10px 0 15px
+}
+
+/* the text container */ 
+.tp-CtrlRow > .tp-CText {
+    position: relative;
+    display: inline-flex;
+    padding: 3px 4px 0 0;
+    /* color: @FontColor2; */
+}
+
+/* the control container */ 
+.tp-CtrlRow > .tp-Ctrl {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* the actual control */ 
+.tp-CtrlRow > .tp-Ctrl > *:first-child {
+    width: 100%;
+}
+
+/* check-box */
+.tp-CheckBox {
+	display: flex;
+	position: relative;  
+	cursor: pointer;  
+	user-select: none;  
+	padding-left: 28px;	
+    min-height: 32px; /* to fit the check-box */
+}
+
+.tp-CheckBox > .tp-Text {
+	font-size: 14px;	
+	padding: 4px;
+ }
+ 
+ /* hide checkbox */
+ .tp-CheckBox input {
+   position: absolute;
+   opacity: 0;
+   cursor: pointer;
+   height: 0;
+   width: 0;
+ }
+ 
+ /* custom checkbox */
+ .tp-CheckBox .checkmark {
+   position: absolute;
+   top: 0;
+   left: 0;
+   height: 25px;
+   width: 25px;
+   border-radius: 50%; /*  rounded */
+   border: 1px solid gray;
+   margin: 1px 0 0 0;
+ }
+ 
+ /* background color on hover 
+ .tp-CheckBox:hover input ~ .checkmark {
+   background-color: #ccc;
+ }
+ */
+
+ /* background color on checked 
+ .tp-CheckBox input:checked ~ .checkmark {
+   background-color: #F8D31D;
+   border: 2px solid #F8D31D;
+ }
+ */
+ /* checkmark:after */
+ .tp-CheckBox .checkmark:after {
+   content: "";
+   position: absolute;
+   display: none;
+   left: 9px;
+   top: 5px;
+   width: 5px;
+   height: 10px;
+   border-style: solid;
+   border-color: darkslategrey;
+   border-width: 0 3px 3px 0;
+   transform: rotate(45deg);  
+ }
+ 
+ /* display checkmark when checked  */
+ .tp-CheckBox input:checked ~ .checkmark:after {
+   display: block;
+ }
+
+/* grid control row */
+.tp-GridCtrlRow {
+    position: relative;
+    display: flex;
+    margin-top: 8px;
+    padding: 0 10px 0 15px
+}
+
+/* label and control for Extra Small screens */ 
+@media (max-width: 576px) {
+    .tp-CtrlRow > .tp-CText {
+        margin: 4px 2px 4px 6px;
+        width: 100%; /* calc(~"99.99999% - 8px"); */ 
+        align-items: center;
+    }
+
+    .tp-CtrlRow > .tp-Ctrl {
+        margin: 0 2px;
+        width: 100%; /* calc(~"99.99999% - 4px"); */ 
+    }
+}
+
+/* label and control for screen larger than Extra Small screens */ 
+@media (min-width: 577px) {
+    .tp-CtrlRow > .tp-CText {
+        /* justify-content: flex-end; */
+        margin: 2px 2px;
+        align-items: flex-start;
+        flex-grow: 1;
+    }
+
+    .tp-CtrlRow > .tp-Ctrl {
+        margin: 0 2px;
+    }
+}
+
+/*---------------------------------------------------------------------------------------
+// tp-Ctrls - along with sc, mc or lc classes, it controls the width of the control in the whole container,
+//  i.e. a main wrapper div, a tp-Col div, a tp-Row div, or even the body element.
+// 
+// sc   = small  control, i.e. control width in small screen
+// mc   = medium control, i.e. control width in medium screen
+// lc   = large  control, i.e. control width in large screen
+//
+// In extra small screens the text is always above the control and both occupy the 100% of the available width
+---------------------------------------------------------------------------------------*/
+ 
+
+@media (max-width: 576px) {
+    .tp-Ctrls .tp-CText {
+        justify-content: flex-start;
+        margin: 4px 2px 4px 6px;
+        width: 100%;
+        align-items: center;
+        flex-grow: 0;
+    }
+
+    .tp-Ctrls .tp-Ctrl {
+        margin: 0 2px;
+        width: 100%;
+    }
+}
+
+@media (min-width: 577px) {
+
+    .tp-Ctrls:not(.tp-TextTop) .tp-Ctrl {
+        width: 50%;
+    }
+
+    .tp-Ctrls.tp-TextTop .tp-CText {
+        justify-content: flex-start;
+        margin: 4px;
+        width: 100%;
+        align-items: center;
+        flex-grow: 0;
+    }
+
+    .tp-Ctrls.tp-TextTop .tp-Ctrl {
+        margin: 0 2px;
+        width: 100%;
+    }
+}
+
+
+/* control widths for Small screens */ 
+@media (min-width: 576px) {
+    .tp-Ctrls.sc-10:not(.tp-TextTop) .tp-Ctrl {
+        width: 10%;
+    }
+
+    .tp-Ctrls.sc-15:not(.tp-TextTop) .tp-Ctrl {
+        width: 15%;
+    }
+
+    .tp-Ctrls.sc-20:not(.tp-TextTop) .tp-Ctrl {
+        width: 20%;
+    }
+
+    .tp-Ctrls.sc-25:not(.tp-TextTop) .tp-Ctrl {
+        width: 25%;
+    }
+
+    .tp-Ctrls.sc-30:not(.tp-TextTop) .tp-Ctrl {
+        width: 30%;
+    }
+
+    .tp-Ctrls.sc-35:not(.tp-TextTop) .tp-Ctrl {
+        width: 35%;
+    }
+
+    .tp-Ctrls.sc-40:not(.tp-TextTop) .tp-Ctrl {
+        width: 40%;
+    }
+
+    .tp-Ctrls.sc-45:not(.tp-TextTop) .tp-Ctrl {
+        width: 45%;
+    }
+
+    .tp-Ctrls.sc-50:not(.tp-TextTop) .tp-Ctrl {
+        width: 50%;
+    }
+
+    .tp-Ctrls.sc-55:not(.tp-TextTop) .tp-Ctrl {
+        width: 55%;
+    }
+
+    .tp-Ctrls.sc-60:not(.tp-TextTop) .tp-Ctrl {
+        width: 60%;
+    }
+
+    .tp-Ctrls.sc-65:not(.tp-TextTop) .tp-Ctrl {
+        width: 65%;
+    }
+
+    .tp-Ctrls.sc-70:not(.tp-TextTop) .tp-Ctrl {
+        width: 70%;
+    }
+
+    .tp-Ctrls.sc-75:not(.tp-TextTop) .tp-Ctrl {
+        width: 75%;
+    }
+
+    .tp-Ctrls.sc-80:not(.tp-TextTop) .tp-Ctrl {
+        width: 80%;
+    }
+
+    .tp-Ctrls.sc-85:not(.tp-TextTop) .tp-Ctrl {
+        width: 85%;
+    }
+
+    .tp-Ctrls.sc-90:not(.tp-TextTop) .tp-Ctrl {
+        width: 90%;
+    }
+}
+
+/* control widths for Medium screens */ 
+@media (min-width: 992px) {
+    .tp-Ctrls.mc-10:not(.tp-TextTop) .tp-Ctrl {
+        width: 10%;
+    }
+
+    .tp-Ctrls.mc-15:not(.tp-TextTop) .tp-Ctrl {
+        width: 15%;
+    }
+
+    .tp-Ctrls.mc-20:not(.tp-TextTop) .tp-Ctrl {
+        width: 20%;
+    }
+
+    .tp-Ctrls.mc-25:not(.tp-TextTop) .tp-Ctrl {
+        width: 25%;
+    }
+
+    .tp-Ctrls.mc-30:not(.tp-TextTop) .tp-Ctrl {
+        width: 30%;
+    }
+
+    .tp-Ctrls.mc-35:not(.tp-TextTop) .tp-Ctrl {
+        width: 35%;
+    }
+
+    .tp-Ctrls.mc-40:not(.tp-TextTop) .tp-Ctrl {
+        width: 40%;
+    }
+
+    .tp-Ctrls.mc-45:not(.tp-TextTop) .tp-Ctrl {
+        width: 45%;
+    }
+
+    .tp-Ctrls.mc-50:not(.tp-TextTop) .tp-Ctrl {
+        width: 50%;
+    }
+
+    .tp-Ctrls.mc-55:not(.tp-TextTop) .tp-Ctrl {
+        width: 55%;
+    }
+
+    .tp-Ctrls.mc-60:not(.tp-TextTop) .tp-Ctrl {
+        width: 60%;
+    }
+
+    .tp-Ctrls.mc-65:not(.tp-TextTop) .tp-Ctrl {
+        width: 65%;
+    }
+
+    .tp-Ctrls.mc-70:not(.tp-TextTop) .tp-Ctrl {
+        width: 70%;
+    }
+
+    .tp-Ctrls.mc-75:not(.tp-TextTop) .tp-Ctrl {
+        width: 75%;
+    }
+
+    .tp-Ctrls.mc-80:not(.tp-TextTop) .tp-Ctrl {
+        width: 80%;
+    }
+
+    .tp-Ctrls.mc-85:not(.tp-TextTop) .tp-Ctrl {
+        width: 85%;
+    }
+
+    .tp-Ctrls.mc-90:not(.tp-TextTop) .tp-Ctrl {
+        width: 90%;
+    }
+}
+
+/* control widths for Large screens */ 
+@media (min-width: 1200px) {
+    .tp-Ctrls.lc-10:not(.tp-TextTop) .tp-Ctrl {
+        width: 10%;
+    }
+
+    .tp-Ctrls.lc-15:not(.tp-TextTop) .tp-Ctrl {
+        width: 15%;
+    }
+
+    .tp-Ctrls.lc-20:not(.tp-TextTop) .tp-Ctrl {
+        width: 20%;
+    }
+
+    .tp-Ctrls.lc-25:not(.tp-TextTop) .tp-Ctrl {
+        width: 25%;
+    }
+
+    .tp-Ctrls.lc-30:not(.tp-TextTop) .tp-Ctrl {
+        width: 30%;
+    }
+
+    .tp-Ctrls.lc-35:not(.tp-TextTop) .tp-Ctrl {
+        width: 35%;
+    }
+
+    .tp-Ctrls.lc-40:not(.tp-TextTop) .tp-Ctrl {
+        width: 40%;
+    }
+
+    .tp-Ctrls.lc-45:not(.tp-TextTop) .tp-Ctrl {
+        width: 45%;
+    }
+
+    .tp-Ctrls.lc-50:not(.tp-TextTop) .tp-Ctrl {
+        width: 50%;
+    }
+
+    .tp-Ctrls.lc-55:not(.tp-TextTop) .tp-Ctrl {
+        width: 55%;
+    }
+
+    .tp-Ctrls.lc-60:not(.tp-TextTop) .tp-Ctrl {
+        width: 60%;
+    }
+
+    .tp-Ctrls.lc-65:not(.tp-TextTop) .tp-Ctrl {
+        width: 65%;
+    }
+
+    .tp-Ctrls.lc-70:not(.tp-TextTop) .tp-Ctrl {
+        width: 70%;
+    }
+
+    .tp-Ctrls.lc-75:not(.tp-TextTop) .tp-Ctrl {
+        width: 75%;
+    }
+
+    .tp-Ctrls.lc-80:not(.tp-TextTop) .tp-Ctrl {
+        width: 80%;
+    }
+
+    .tp-Ctrls.lc-85:not(.tp-TextTop) .tp-Ctrl {
+        width: 85%;
+    }
+
+    .tp-Ctrls.lc-90:not(.tp-TextTop) .tp-Ctrl {
+        width: 90%;
+    }
+}
+
+ 
+/*---------------------------------------------------------------------------------------
+  miscs
+---------------------------------------------------------------------------------------*/
+.tp-NoBrowserAppearance {
+    appearance: none;  
+}
+
+.tp-Bold {
+    font-weight: bold;
+}
+
+.tp-TextCenter {
+    text-align: center;
+}
+
+.tp-TextRight {
+    text-align: right;
+}
+
+.tp-UnSelectable {
+    user-select: none;
+}
+
+.tp-Selectable {
+    user-select: text;
+} 
+
+.tp-CancelTransition {
+    transition: none !important;
+}
+
+.tp-Shadow {
+    box-shadow: 5px 5px 16px 0 rgba(0,0,0,0.25);
+}

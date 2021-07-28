@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+        <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RootNamespace>WebDesk</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DocumentationFile>X:\_Dev\CSharp\Libs.Tripous5\WebDesk.Lib\WebDesk.Lib.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="AutoMapper" Version="10.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Tripous\Tripous.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="SqlConnections.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>

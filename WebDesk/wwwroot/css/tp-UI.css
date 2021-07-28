@@ -1,0 +1,1636 @@
+@import "tp-Variables.css";
+
+/*---------------------------------------------------------------------------------------
+ tp-GroupBox - fieldset
+---------------------------------------------------------------------------------------*/
+ 
+
+fieldset.tp-GroupBox {
+    border: var(--Border);
+    overflow: auto;
+}
+
+fieldset.tp-GroupBox legend {
+    font-weight: bold;
+    padding: 0 4px;
+}
+
+/*---------------------------------------------------------------------------------------
+ accordion
+---------------------------------------------------------------------------------------*/
+ 
+.tp-Accordion {
+    overflow: hidden;
+}
+
+/* item */ 
+.tp-Accordion > * {
+    margin: 0 0 5px;
+}
+
+/* item caption */ 
+.tp-Accordion > * > :nth-child(1) {
+    background-color: var(--BackColor);
+    line-height: 2.3em;
+    cursor: pointer;
+}
+
+/* item content */ 
+.tp-Accordion > * > :nth-child(2) {
+    display: none;
+    overflow: auto;
+}
+
+/* item content */ 
+.tp-Accordion > .tp-Expanded > :nth-child(2) {
+    display: block;
+}
+
+/* iteme content and caption */ 
+.tp-Accordion > * > * {
+    padding: 4px;
+}
+
+/*---------------------------------------------------------------------------------------
+ panel-list
+---------------------------------------------------------------------------------------*/
+
+.tp-PanelList {
+    position: relative;
+    height: auto;
+    width: 100%;
+    background-color: var(--BackColor);
+    overflow: hidden;
+}
+
+.tp-PanelList > * {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+/*---------------------------------------------------------------------------------------
+tab control
+---------------------------------------------------------------------------------------*/
+
+.tp-TabControl {
+    position: relative;
+}
+
+/* tab buttons container */ 
+.tp-TabControl > :nth-child(1) {
+    position: relative;
+}
+
+/* tab pages container */ 
+.tp-TabControl > :nth-child(2) {
+    position: relative;
+}
+
+/* tab page(s) */ 
+.tp-TabControl > :nth-child(2) > * {
+    position: relative;
+    overflow: auto;
+}
+
+@media (min-width: 992px) {
+    /* tab buttons */ 
+    .tp-TabControl > :nth-child(1) > * {
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: inherit;
+        font-family: inherit;
+        font-weight: normal;
+        padding: 8px 8px;
+        min-width: 120px;
+        background-color: var(--BackColor);
+        border: var(--Border);
+        margin: 1px;
+    }
+    /* tab buttons */ 
+    .tp-TabControl > :nth-child(1) > *.tp-Selected {
+        background-color: var(--BackColor2);
+    }
+}
+
+@media (max-width: 991px) {
+
+    /* toggle zone */ 
+    .tp-TabControl > :nth-child(1) {
+        border: var(--Border);
+    }
+
+    /* toggle zone, button + title */ 
+    .tp-TabControl > :nth-child(1),
+    .tp-TabControl > :nth-child(1) > * {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        background-color: var(--BackColor);
+    }
+
+    /* button */ 
+    .tp-TabControl > :nth-child(1) > :nth-child(1) {
+        align-items: center;
+        border-right: var(--Border);
+        cursor: pointer;
+    }
+
+    /* title */ 
+    .tp-TabControl > :nth-child(1) > :nth-child(2) {
+        justify-content: flex-start;
+        flex-grow: 1;
+        padding: 4px 6px;
+    }
+
+    /* toggle dropdown */ 
+    .tp-TabControl .tp-Toggle.tp-List {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        left: 0;
+        cursor: pointer;
+        background-color: var(--BackColor);
+        border: var(--Border);
+        padding: 6px 12px 0 12px;
+    }
+
+    /* toggle dropdown items */ 
+    .tp-TabControl .tp-Toggle.tp-List > * {
+        padding: 0 0 6px;
+    }
+}
+
+
+/* tab pages */ 
+.tp-TabControl > :nth-child(2) {
+    padding: 6px 4px;
+}
+
+/*---------------------------------------------------------------------------------------
+ image
+---------------------------------------------------------------------------------------*/
+ 
+.tp-ImageBox {
+    position: relative;
+    display: inline-block;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+/*---------------------------------------------------------------------------------------
+ image slider
+---------------------------------------------------------------------------------------*/
+
+.tp-ImageSlider {
+    position: relative;
+    display: block;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.tp-ImageSlider .tp-Next,
+.tp-ImageSlider .tp-Prev {
+    color: #fff;
+    position: absolute;
+    background: #000;
+    background: rgba(0,0,0, .6);
+    top: 50%;
+    z-index: 4;
+    font-size: 26px;
+    margin-top: -1.2em;
+    opacity: .3;
+    user-select: none;
+    font-family: monospace; /* Verdana, Geneva, Tahoma, sans-serif; */ 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    padding-bottom: 3px;
+}
+
+.tp-ImageSlider .tp-Next {
+    right: -1px;
+    /* padding: 10px 5px 15px 10px; */
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.tp-ImageSlider .tp-Prev {
+    left: 0;
+    /* padding: 10px 10px 15px 5px; */
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.tp-ImageSlider:hover .tp-Next,
+.tp-ImageSlider:hover .tp-Prev {
+    cursor: pointer;
+    opacity: 1;
+}
+
+.tp-ImageSlider .tp-Next:after {
+    content: '»'
+}
+
+.tp-ImageSlider .tp-Prev:after {
+    content: '«'
+}
+
+/*---------------------------------------------------------------------------------------
+ splitter
+---------------------------------------------------------------------------------------*/
+ 
+.tp-Splitter {
+    background-color: gray;
+}
+
+.tp-Splitter.tp-Vertical {
+    width: 5px;
+    cursor: col-resize;
+}
+
+.tp-Splitter.tp-Horizontal {
+    height: 5px;
+    cursor: row-resize;
+}
+
+@media (max-width: 991px) {
+    .tp-Splitter {
+        display: none;
+    }
+}
+
+/*---------------------------------------------------------------------------------------
+ frame (tp.IFrame)
+---------------------------------------------------------------------------------------*/
+ 
+.tp-Frame {
+    position: relative;
+}
+
+/*---------------------------------------------------------------------------------------
+ drop-down-box
+---------------------------------------------------------------------------------------*/
+ 
+.tp-DropDownBox {
+    display: none;
+    cursor: default;
+    border: var(--Border);
+    background-color: var(--BackColor);
+}
+
+.tp-DropDownBox.tp-Visible {
+    display: inline-block;
+    min-height: 20px;
+}
+
+/*---------------------------------------------------------------------------------------
+ menu - desktop-like menu
+---------------------------------------------------------------------------------------*/
+ 
+.tp-Menu {
+    position: relative;
+    display: flex;
+    width: auto;
+    align-items: stretch;
+    border: var(--Border);
+    background-color: var(--BackColor);
+    outline: none;
+}
+
+.tp-ContextMenu {
+    position: absolute;
+    display: flex;
+    height: auto;
+    align-items: stretch;
+    flex-direction: column;
+    background-color: var(--BackColor);
+    box-shadow: 5px 5px 16px 0 var(--ShadowColor);
+    border: var(--Border);
+    outline: none;
+}
+
+.tp-MenuItem {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    cursor: default;
+    height: 2.5em; /* @MenuItemHeight; */
+}
+
+.tp-Menu > .tp-MenuItem {
+    border-right: var(--Border);
+}
+
+.tp-MenuItem:hover {
+    background-color: var(--HoverColor);
+}
+
+/* menu-item image */ 
+.tp-MenuItem > :first-child {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    justify-content: space-around;
+    align-items: center;
+    width: 2.5em;
+    border-right: var(--Border);
+}
+
+/* menu-item image */ 
+.tp-Menu > .tp-MenuItem > :first-child {
+    display: none;
+}
+
+/* menu-item text */ 
+.tp-MenuItem > :nth-child(2) {
+    /* tp-FlexText */
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;  
+    text-overflow: ellipsis;  
+	white-space: nowrap;
+	
+    flex-grow: 1;
+    padding: 0 4px 0 6px;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* menu-item arrow ico */ 
+.tp-MenuItem > :nth-child(3) {
+    /* tp-FlexText */
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;  
+    text-overflow: ellipsis;  
+	white-space: nowrap;
+
+    width: 18px;
+    font-size: 16px;
+}
+
+/* child menu-item container */ 
+.tp-MenuItem > :last-child {
+    position: absolute;
+    display: flex;
+    height: auto;
+    left: 0;
+    align-items: stretch;
+    flex-direction: column;
+    box-shadow: 5px 5px 16px 0 var(--ShadowColor);
+    border: var(--Border);
+    background-color: var(--BackColor);
+}
+
+
+.tp-MenuSeparator {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    /* height: 2px; */
+}
+
+/* the hr element, the actual separator */ 
+.tp-MenuSeparator > :nth-child(2) {
+    position: relative;
+    flex-grow: 1;
+    /* height: 1px; */
+}
+
+
+
+/*---------------------------------------------------------------------------------------
+ site menu - document-like menu with a toggle button, can have columns
+---------------------------------------------------------------------------------------*/
+ 
+.tp-SiteMenu {
+    height: auto;
+}
+
+.tp-SiteMenu > .tp-Toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    cursor: default;
+}
+
+/* toggle button or caption */ 
+.tp-SiteMenu > .tp-Toggle > .tp-Btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 2em;
+    background: #ffffff;
+    color: black;
+}
+
+.tp-SiteMenu .tp-Strip {
+    position: relative;
+    background-color: #B6B4B5; /* // #232323; // #1a1a1a; // @BackColor1; */
+    color: var(--FontColor1);
+}
+
+.tp-SiteMenu .tp-Strip.tp-Small {
+    line-height: 32px;
+}
+
+.tp-SiteMenu .tp-Strip.tp-Normal {
+    line-height: 50px;
+    /* justify-content: center; */
+}
+
+.tp-SiteMenu .tp-Strip .tp-Item {
+    display: inline-block;
+    border: none;
+    padding: 0 7px;
+    outline: none;
+    cursor: pointer; /* SEE: http://stackoverflow.com/questions/18047353/fix-css-hover-on-iphone-ipad-ipod */
+    /* text-decoration: none; */
+}
+
+.tp-SiteMenu .tp-Strip > .tp-Item {
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.tp-SiteMenu .tp-Strip .tp-Item > .tp-Content {
+    display: none;
+    background-color: var(--BackColor);
+    white-space: nowrap;
+    color: var(--FontColor);
+}
+
+.tp-SiteMenu .tp-Strip > .tp-Item > .tp-Content > .tp-Item {
+    position: relative;
+    display: block;
+}
+
+.tp-SiteMenu .tp-Strip.tp-Content .tp-Item {
+    text-align: left;
+    font-weight: normal;
+    /* border-bottom: var(--Border); */
+    line-height: 2.3em;
+    white-space: pre-line;
+}
+
+.tp-SiteMenu .tp-Strip .tp-Item.tp-Title {
+    font-size: 15px !important;
+    font-weight: bold !important;
+    white-space: pre-line;
+    color: var(--FontColor2);
+    padding-bottom: 16px;
+    text-transform: uppercase;
+}
+
+/*---------------------------------------------------------------------------------------
+ site menu responsiveness
+---------------------------------------------------------------------------------------*/
+ 
+
+@media all and (max-width : 768px) {
+
+    .tp-SiteMenu {
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+    }
+
+    .tp-SiteMenu .tp-Strip {
+        height: auto;
+    }
+
+    .tp-SiteMenu .tp-Strip.tp-Small {
+        border-top: var(--Border); /* border-top: 1px solid @MenuContentColor;   */
+    }
+
+    .tp-SiteMenu .tp-Strip .tp-Item {
+        width: 100%;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item > .tp-Content {
+        position: relative;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item.tp-Active > .tp-Content {
+        display: block;
+        z-index: 100;
+        width: 96%;
+    }
+
+    .tp-SiteMenu .tp-Strip.tp-Normal > .tp-Logo {
+        display: none;
+    }
+}
+
+@media all and (min-width : 769px) {
+
+    .tp-SiteMenu > .tp-Toggle {
+        display: none;
+    }
+
+    .tp-SiteMenu .tp-Strip {
+        display: flex;
+        align-items: center;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item {
+        margin: 0 15px;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item > .tp-Content {
+        position: absolute;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        margin-top: -10px;
+    }
+
+    .tp-SiteMenu .tp-Strip.tp-Normal > .tp-Item > .tp-Content {
+        border: 1px solid lightgray;
+        position: absolute;
+        left: 0px;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item.tp-Right > .tp-Content {
+        right: 1px;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item.tp-Active > .tp-Content {
+        display: block;
+        z-index: 100;
+        width: 100%;
+    }
+
+    .tp-SiteMenu .tp-Strip > .tp-Item.tp-Active {
+        background-color: green;
+    }
+}
+
+/*---------------------------------------------------------------------------------------
+ site menu columns in menu-item content
+---------------------------------------------------------------------------------------*/
+ 
+
+.tp-SiteMenu .tp-Strip .tp-Column {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 2px solid #535353;
+}
+
+@media (min-width: 768px) {
+    .tp-SiteMenu .tp-Strip .tp-Columns {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .tp-SiteMenu .tp-Strip .tp-Column {
+        width: 50%;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .tp-SiteMenu .tp-Strip .tp-Column {
+        width: 33%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .tp-SiteMenu .tp-Strip .tp-Column {
+        width: 25%;
+    }
+}
+
+/*---------------------------------------------------------------------------------------
+ tool-bar and tool-button
+---------------------------------------------------------------------------------------*/
+ 
+
+.tp-ControlToolBar,
+.tp-ToolBar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: auto;
+    flex-wrap: wrap;
+}
+
+.tp-ControlToolButton,
+.tp-ToolButton {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    cursor: default;
+    margin: 0 1px;
+    border: var(--Border);
+    min-height: 2.2em;
+    min-width: 2.2em;
+}
+
+.tp-ToolButton {
+    padding: 0 4px;
+}
+
+/* .tp-Grid .tp-ControlToolButton.tp-Disabled, */
+.tp-ToolButton.tp-Disabled {
+    background-color: var(--DisabledColor);
+}
+
+.tp-TabBar .tp-ToolButton.tp-Selected {
+    background-color: var(--SelectedColor);
+}
+
+/*---------------------------------------------------------------------------------------
+ button - tp-Button
+---------------------------------------------------------------------------------------*/
+ 
+button {
+    position: relative;
+    text-decoration: none;
+    padding: 0 15px;
+    line-height: inherit;
+}
+
+/*---------------------------------------------------------------------------------------
+ button-ex
+---------------------------------------------------------------------------------------*/
+
+
+/*
+    markup 
+        <a data-setup="{ IcoClasses: 'fa fa-university'}">Button Caption</a>
+
+    produced
+        <a class="tp-ButtonEx">
+            <div class="fa fa-university" ></div>
+            <div>Button Caption</div>
+        </a>       
+*/
+
+.tp-ButtonEx {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    text-decoration: none;
+    color: inherit;
+    height: auto;
+    min-height: 2.4em;
+    min-width: 2.4em;
+    margin: 0 1px;
+}
+
+.tp-ButtonEx.tp-Disabled {
+    color: var(--DisabledColor);
+}
+
+.tp-ButtonEx > :nth-child(1) {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    width: 1.6em;
+    height: 1.6em;
+    margin: 6px 6px;
+}
+
+.tp-ButtonEx > :nth-child(2) {
+    position: relative;
+    display: flex;
+    align-items: center;
+    font: inherit;
+    margin: 0 15px 0 0;
+}
+
+.tp-ButtonEx.tp-NoIco > :nth-child(1) {
+    display: none;
+}
+
+.tp-ButtonEx.tp-NoIco > :nth-child(2) {
+    margin: 0 6px;
+}
+
+.tp-ButtonEx.tp-NoText > :nth-child(2) {
+    display: none;
+}
+
+.tp-ButtonEx.tp-IcoTop {
+    flex-direction: column;
+}
+
+.tp-ButtonEx.tp-IcoTop > :nth-child(1) {
+    margin: 4px 0 0 0;
+}
+
+.tp-ButtonEx.tp-IcoTop > :nth-child(2) {
+    margin: 3px 6px;
+}
+
+/*---------------------------------------------------------------------------------------
+ auto-complete list
+---------------------------------------------------------------------------------------*/
+ 
+.tp-AutocompleteList .tp-List .tp-Item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-left: 4px;
+}
+
+.tp-AutocompleteList .tp-List .tp-Item.tp-Selected {
+    background-color: lightblue;
+}
+
+/*---------------------------------------------------------------------------------------
+ label - tp-Label
+---------------------------------------------------------------------------------------*/
+ 
+label {
+    position: relative;
+    /* line-height: var(--LineHeight); */
+    height: var(--ControlHeight);
+    padding: var(--TextPadding);
+}
+
+/*---------------------------------------------------------------------------------------
+ input - tp-TextBox
+---------------------------------------------------------------------------------------*/
+ 
+input {
+    position: relative;
+    /* line-height: var(--LineHeight); */
+    height: var(--ControlHeight);
+    padding: var(--TextPadding);
+}
+
+
+input.tp-TextBox {
+    border: var(--Border);
+}
+
+/*---------------------------------------------------------------------------------------
+ textarea - tp-Memo
+---------------------------------------------------------------------------------------*/
+
+textarea.tp-Memo {
+    position: relative;
+    border: var(--Border);
+    padding: var(--TextPadding);
+    /* white-space: pre; disable this because we want just the vertical scroll bar*/
+    overflow: auto;
+    resize: none;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+/*---------------------------------------------------------------------------------------
+ check-box - a label element sourrounding a input[type=checkbox] element
+---------------------------------------------------------------------------------------*/
+ 
+label.tp-CheckBox {
+    display: inline-flex;
+    outline: none;
+    height: auto;
+}
+
+label.tp-CheckBox input[type=checkbox] {
+    margin: 0 4px;
+}
+
+
+/*---------------------------------------------------------------------------------------
+number box - tp-NumberBox
+---------------------------------------------------------------------------------------*/
+
+.tp-NumberBox {
+    position: relative;
+    display: flex;
+}
+
+.tp-NumberBox > .tp-Text {
+    flex-grow: 1;
+    order: 1;
+    border: var(--Border);
+}
+
+.tp-NumberBox > .tp-Plus,
+.tp-NumberBox > .tp-Minus {
+    display: flex;
+    justify-content: center;
+    width: 2.2em;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    order: 2;
+    border: var(--Border);
+    border-left: none;
+}
+
+.tp-NumberBox input[type=number] {
+    -moz-appearance: textfield;
+    margin: 0;
+    text-align: right;
+}
+
+.tp-NumberBox input[type=number]::-webkit-inner-spin-button,
+.tp-NumberBox input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.tp-NumberBox.tp-MinusFirst > .tp-Minus {
+    order: 0;
+    border: var(--Border);
+    border-right: none;
+}
+
+/*---------------------------------------------------------------------------------------
+ list control (base of combo-boxes and list-boxes)
+---------------------------------------------------------------------------------------*/
+ 
+.tp-ListControl {
+    position: relative;
+    display: inline-block;
+    width: 140px;
+    border: var(--Border);
+    background-color: var(--BackColor);
+}
+
+.tp-ListControl .tp-List .tp-Item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-left: 4px;
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tp-ListControl .tp-List .tp-Item.tp-Selected {
+    background-color: lightblue;
+}
+
+.tp-ListControl .tp-List .tp-Item:focus {
+    outline: thin dotted;
+    background-color: lightblue;
+}
+
+.tp-ListControl .tp-List .tp-Item:hover {
+    outline: thin dotted;
+    background-color: var(--HoverColor);
+}
+
+/*---------------------------------------------------------------------------------------
+ combo-box
+---------------------------------------------------------------------------------------*/
+ 
+.tp-ComboBox .tp-Strip {
+    position: relative;
+    display: flex;
+}
+
+/* the text-box of the combo-box */ 
+.tp-ComboBox .tp-Strip input.tp-Text {
+    position: relative;
+    display: flex;
+    width: 1px;
+    flex-grow: 1;
+    align-items: center;
+    border: none;
+}
+
+/* .tp-ComboBox .tp-Strip input.tp-Text:focus { outline: none;  } */
+
+/* the drop-down button */ 
+.tp-ComboBox .tp-Strip .tp-Btn {
+    position: relative;
+    display: flex;
+    padding: 0 5px;
+    background-color: var(--BackColor);
+    font-family: monospace;
+    border-left: var(--Border);
+    cursor: default;
+}
+
+/*---------------------------------------------------------------------------------------
+ HtmlComboBox HtmlListBox
+---------------------------------------------------------------------------------------*/
+ 
+select.tp-HtmlComboBox {
+    height: 2.2em;
+    border: var(--Border);
+    padding: 2px 4px;
+}
+
+select.tp-HtmlListBox {
+    border: var(--Border);
+}
+
+/*---------------------------------------------------------------------------------------
+ check combo box
+---------------------------------------------------------------------------------------*/
+ 
+.tp-CheckComboBox .tp-Strip {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* the text-box of the check-combo-box */ 
+.tp-CheckComboBox .tp-Strip input.tp-Text {
+    position: relative;
+    display: flex;
+    width: 1px;
+    flex-grow: 1;
+    align-items: center;
+    border: none;
+}
+
+/*
+.tp-CheckComboBox .tp-Strip input.tp-Text:focus {
+    outline: none;
+}
+*/
+
+/* the label that appears for each checked item in the text-box */ 
+.tp-CheckComboBox .tp-Strip .tp-Item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    /* line-height: var(--LineHeight); */
+    height: var(--ControlHeight);
+    margin: 2px;
+    border: var(--Border);
+    border-radius: 4px;
+}
+
+.tp-CheckComboBox .tp-Strip .tp-Item .tp-Text {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+/* the close button of the label */ 
+.tp-CheckComboBox .tp-Strip .tp-Item .tp-Close {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    background-color: var(--BackColor);
+    cursor: default;
+    font-family: monospace;
+    font-size: 10px;
+    border-left: var(--Border);
+}
+/*---------------------------------------------------------------------------------------
+ list-box
+---------------------------------------------------------------------------------------*/
+ 
+.tp-ListBox,
+.tp-CheckListBox {
+    min-height: 40px;
+}
+/*---------------------------------------------------------------------------------------
+ calendar
+---------------------------------------------------------------------------------------*/
+ 
+
+table.tp-Calendar {
+    position: relative;
+    cursor: default;
+    table-layout: fixed;
+    background-color: var(--BackColor);
+    border: var(--Border);
+    border-collapse: collapse;
+    font-size: 14px;
+    font-family: Arial;
+}
+
+table.tp-Calendar th,
+table.tp-Calendar td {
+    width: 30px;
+    height: 26px;
+    text-align: center;
+    vertical-align: middle;
+    border: var(--Border);
+}
+
+table.tp-Calendar td.tp-Inactive {
+    color: lightgray;
+}
+
+table.tp-Calendar td.tp-Selected {
+    outline: 2px solid var(--FocusColor);
+}
+
+table.tp-Calendar td.tp-Marked {
+    outline: 2px solid var(--MarkColor);
+}
+
+/* .tp-CalendarHeaderRow { } */
+
+.tp-CalendarDaysRow {
+    font-size: 10px;
+}
+
+/* .tp-CalendarWeekRow { } */
+
+/*---------------------------------------------------------------------------------------
+ date-box
+---------------------------------------------------------------------------------------*/
+ 
+.tp-DateBox {
+    position: relative;
+    display: inline-block;
+    width: 140px;
+    border: var(--Border);
+}
+
+.tp-DateBox .tp-Strip {
+    position: relative;
+    display: flex;
+}
+
+.tp-DateBox .tp-Strip .tp-Text {
+    position: relative;
+    display: flex;
+    width: 1px;
+    flex-grow: 1;
+    align-items: center;
+    border: none;
+}
+
+.tp-DateBox .tp-Strip .tp-Btn {
+    position: relative;
+    display: flex;
+    padding: 0 5px;
+    background-color: var(--BackColor);
+    border-left: var(--Border);
+    cursor: default;
+}
+
+.tp-DateBox .tp-DropDownBox {
+    border: none;
+}
+
+
+/*---------------------------------------------------------------------------------------
+ radio-group
+---------------------------------------------------------------------------------------*/
+ 
+.tp-RadioGroup {
+    position: relative;
+    border: var(--Border);
+}
+
+.tp-RadioGroup .tp-List {
+    position: absolute;
+    overflow: auto;
+    left: 6px;
+    /* top: 24px; */
+    top: 2px;
+    right: 6px;
+    bottom: 6px;
+}
+
+.tp-RadioGroup legend {
+    padding: 0 4px;
+}
+
+.tp-RadioGroup label {
+    display: flex;
+    /* line-height: var(--LineHeight); */
+    align-items: center;
+}
+
+.tp-RadioGroup label input[type=radio] {
+    margin-right: 4px;
+}
+
+.tp-RadioButtonList {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+/*---------------------------------------------------------------------------------------
+ value slider
+---------------------------------------------------------------------------------------*/
+ 
+/* input.tp-ValueSlider { } */
+
+
+/*---------------------------------------------------------------------------------------
+  tree-view
+---------------------------------------------------------------------------------------*/
+ 
+.tp-TreeView {
+    position: relative;
+    display: block;
+    cursor: default;
+    outline: none;
+    border: var(--Border);
+    background-color: var(--BackColor);
+    overflow: auto;
+}
+
+/* node or leaf */ 
+.tp-TreeView .tp-Node,
+.tp-TreeView .tp-Leaf {
+    position: relative;
+    display: block;
+    line-height: 1.8;
+    white-space: nowrap;
+    text-overflow: clip;
+}
+
+.tp-TreeView .tp-Node,
+.tp-TreeView .tp-Leaf {
+    padding: 0 0 0 10px;
+}
+
+.tp-TreeView > :first-child > .tp-Node,
+.tp-TreeView > :first-child > .tp-Leaf {
+    padding: 0;
+}
+
+.tp-TreeView .tp-Node > .tp-Strip,
+.tp-TreeView .tp-Leaf > .tp-Strip {
+    position: relative;
+    display: flex;
+    height: 2em;
+}
+
+.tp-TreeView .tp-Node.tp-Focused > .tp-Strip > :nth-child(3),
+.tp-TreeView .tp-Leaf.tp-Focused > .tp-Strip > :nth-child(3) {
+    background-color: var(--FocusColor);
+}
+
+/* + or - */ 
+.tp-TreeView .tp-Node > .tp-Strip > :nth-child(1),
+.tp-TreeView .tp-Leaf > .tp-Strip > :nth-child(1) {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    min-width: 1em;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: monospace;
+    color: darkslategray;
+}
+
+/* image */ 
+.tp-TreeView .tp-Node > .tp-Strip > :nth-child(2),
+.tp-TreeView .tp-Leaf > .tp-Strip > :nth-child(2) {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    justify-content: space-around;
+    align-items: center;
+    min-width: 2em;
+}
+
+/* text */ 
+.tp-TreeView .tp-Node > .tp-Strip > :nth-child(3),
+.tp-TreeView .tp-Leaf > .tp-Strip > :nth-child(3) {
+    /* tp-FlexText */
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;  
+    text-overflow: ellipsis;  
+	white-space: nowrap;
+	
+    flex-grow: 1;
+    padding: 0 0 0 4px;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* child node list */ 
+.tp-TreeView > :first-child,
+.tp-TreeView .tp-Node > :nth-child(2) {
+    position: relative;
+    display: block;
+}
+/* child node list */ 
+.tp-TreeView .tp-Leaf > :nth-child(2) {
+    display: none;
+}
+
+/* collapsed node */ 
+.tp-TreeView .tp-Node:not(.tp-Expanded) > :nth-child(2) {
+    display: none;
+}
+
+/*---------------------------------------------------------------------------------------
+ locator box
+---------------------------------------------------------------------------------------*/
+ 
+.tp-LocatorBox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 120px;
+    overflow: hidden;
+    border: var(--Border);
+}
+
+.tp-LocatorBox > input[type=text] {
+    position: relative;
+    width: 70px;
+    border: none;
+    border-right: var(--Border);
+}
+
+.tp-LocatorBox > .tp-Btn {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 24px;
+    border-left: var(--Border);
+    background-color: var(--BackColor);
+    font-family: monospace;
+    cursor: default;
+}
+
+/*---------------------------------------------------------------------------------------
+ grid
+---------------------------------------------------------------------------------------*/
+ 
+/*
+
+<div id="Grid" class="tp-Grid tp-Object" tabindex="-1">
+    <div class="tp-Grid-ToolBar tp-Object">
+        <div class="tp-FlexFill"></div>
+    </div>
+    <div class="tp-Groups" style="height: 41px; min-height: 41px;"></div>
+    <div class="tp-Columns" style="height: 34px; min-height: 34px;">
+        <div class="tp-Content"></div>
+    </div>
+    <div class="tp-Filters" style="height: 26px; min-height: 26px;">
+        <div class="tp-Content"></div>
+    </div>
+    <div class="tp-Viewport">
+        <div class="tp-Content"></div>
+    </div>
+    <div class="tp-Summaries" style="height: 26px; min-height: 26px;">
+        <div class="tp-Content"></div>
+    </div>
+    <div class="tp-Bottom" style="height: 17px; min-height: 17px;">
+        <div class="tp-Content"></div>
+    </div>
+</div>
+
+// grid column
+
+<div class="tp-Grid-Col tp-Object">
+    <div class="tp-Text" draggable="true" title="Name">Name</div>
+    <div class="tp-Sorter">▴</div>
+    <div class="tp-Resizer"></div>
+</div>
+
+// beneath the column lies the filter cell
+
+<div class="tp-Filter-Cell">
+    <input type="text" />
+</div>
+
+// in the grid footer lies the summary cell
+
+<div class="tp-Summary-Cell">
+    sum=123
+</div>
+
+*/
+
+.tp-Grid {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    border: var(--Border);
+    font-weight: normal;
+    background-color: var(--BackColor);
+    outline: none;
+}
+
+.tp-Grid:focus {
+    outline: none;
+}
+
+.tp-Grid .tp-Cell-Text {
+    position: relative;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0 4px;
+}
+
+.tp-Grid .tp-Grid-Col {
+    font-size: 0.85em;
+}
+
+.tp-Grid .tp-Grid-Col,
+.tp-Grid .tp-Filter-Cell,
+.tp-Grid .tp-Summary-Cell {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    cursor: default;
+    width: 80px;
+}
+
+.tp-Grid .tp-Grid-Col,
+.tp-Grid .tp-Filter-Cell {
+    border-right: var(--Border);
+}
+
+.tp-Grid .tp-Summary-Cell {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+    border-bottom: var(--Border);
+    font-size: 0.85em;
+}
+
+.tp-Grid .tp-Grid-Col.tp-Grouped {
+    margin-left: 5px;
+}
+
+/* grid column text */ 
+.tp-Grid .tp-Grid-Col .tp-Text {
+    position: relative;
+    display: flex;
+    /* flex-direction: column; */
+    /* justify-content: center; */
+    align-items: center;
+    flex-grow: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0px 4px;
+}
+
+/* grid column sort indicator */ 
+.tp-Grid .tp-Grid-Col .tp-Sorter {
+    position: relative;
+    width: auto;
+    overflow: hidden;
+    font-family: monospace;
+    font-size: 20px;
+    text-align: center;
+}
+
+/* grid column resize handle */ 
+.tp-Grid .tp-Grid-Col .tp-Resizer {
+    position: relative;
+    width: 4px;
+    overflow: hidden;
+    cursor: col-resize;
+}
+
+
+/* filter text box */ 
+.tp-Grid .tp-Filter-TextBox {
+    position: relative;
+    flex-grow: 1;
+    border: none;
+    padding: 0 0 0 3px;
+    font: inherit;
+}
+
+.tp-Grid-InplaceEditor {
+    position: fixed;
+    border: none;
+    padding: 0 3px;
+    font: inherit;
+}
+
+input[type=text].tp-Grid-InplaceEditor {
+    outline: none;
+}
+
+.tp-Grid-InplaceEditor input[type=text] {
+    outline: none;
+}
+
+.tp-Grid-InplaceEditor-CheckBox {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
+
+
+.tp-Grid-InplaceEditor-Locator {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+
+.tp-Grid-InplaceEditor-Locator > input[type=text] {
+    position: relative;
+    flex-grow: 1;
+}
+
+.tp-Grid-InplaceEditor-Locator > .tp-Btn {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 24px;
+    border-left: var(--Border);
+    background-color: var(--BackColor);
+    font-family: monospace;
+    cursor: default;
+}
+
+.tp-Grid .tp-Groups,
+.tp-Grid .tp-Columns,
+.tp-Grid .tp-Filters,
+.tp-Grid .tp-Summaries {
+    position: relative;
+    overflow: hidden;
+}
+
+.tp-Grid .tp-Groups {
+    display: flex;
+    align-items: center;
+}
+
+.tp-Grid .tp-Columns {
+    font-weight: bold;
+}
+
+.tp-Grid .tp-Groups,
+.tp-Grid .tp-Columns,
+.tp-Grid .tp-Filters {
+    border-bottom: var(--Border);
+}
+
+.tp-Grid .tp-Summaries {
+    border-top: var(--Border);
+}
+
+.tp-Grid .tp-Columns .tp-Content,
+.tp-Grid .tp-Filters .tp-Content,
+.tp-Grid .tp-Summaries .tp-Content {
+    position: relative;
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
+.tp-Grid .tp-Viewport {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex-grow: 1;
+    cursor: default;
+}
+
+.tp-Grid .tp-Viewport .tp-Content {
+    position: absolute;
+    overflow: hidden;
+}
+
+.tp-Grid .tp-Bottom {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.tp-Grid .tp-Bottom .tp-Content {
+    position: relative;
+    height: 1px;
+    min-height: 1px;
+}
+
+.tp-Grid-Footer {
+    border-top: var(--Border);
+}
+
+/* 
+.tp-Grid .tp-Grid-ToolBar {
+}
+
+.tp-Grid .tp-Grid-ToolButton {
+}
+
+*/
+
+.tp-Grid .tp-Node {
+    position: absolute;
+    display: flex;
+    left: 0;
+    overflow: hidden;
+}
+
+/* 
+.tp-Grid .tp-Node.tp-Group {
+}
+*/
+
+.tp-Grid .tp-Node.tp-Group > .tp-Cell-Text {
+    flex-grow: 1;
+    border-bottom: var(--Border);
+    border-right: var(--Border);
+}
+
+.tp-Grid .tp-Node.tp-Summary {
+    /* border-bottom: var(--Border); */
+    border-right: var(--Border);
+}
+
+/* 
+.tp-Grid .tp-Node.tp-Grid-Row {
+} 
+*/
+
+/* complement cell, used when a column is grouped */ 
+.tp-Grid .tp-Group-Cell {
+    position: relative;
+    overflow: hidden;
+    border-right: var(--Border);
+}
+
+.tp-Grid .tp-Group-Cell.tp-Expander {
+    font-family: monospace;
+    font-size: 17px;
+    text-align: center;
+    cursor: default;
+    border-right: none;
+}
+
+.tp-Grid .tp-Group-Cell.tp-Cell-Tube {
+    border-right: none;
+    border-bottom: var(--Border);
+}
+
+.tp-Grid .tp-Grid-Row:hover {
+    background-color: var(--HoverColor);
+}
+
+.tp-Grid .tp-Grid-Row.tp-Focused {
+    background-color: var(--FocusColor);
+}
+
+.tp-Grid-Cell {
+    border-right: var(--Border);
+    border-bottom: var(--Border);
+}
+
+.tp-Grid input:focus,
+.tp-Grid select:focus,
+.tp-Grid textarea:focus {
+    outline: none;
+}
+
+.tp-Grid .tp-DragSource {
+    border: var(--Border);
+}
+
+.tp-Grid .tp-DropTarget {
+    outline: var(--GridDropTargetOutline);
+    /* border: 5px solid green; */
+}
+
+.tp-Grid .tp-Grid-Col.tp-Grouped {
+    border: var(--Border);
+}
+
+.tp-Grid .tp-ControlToolBar {
+    padding: 2px 0;
+    border-bottom: var(--Border);
+} 

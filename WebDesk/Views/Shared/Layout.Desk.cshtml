@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebDesk</title>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet" />
+    <link href="~/css/tp.css" rel="stylesheet" />
+    <link href="~/css/tp-UI.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/desk.css" />
+    @if (WSys.IsDevelopment)
+    {
+
+    }
+    else
+    {
+
+    }
+</head>
+<body>
+    @await Html.PartialAsync("Desk.Header")
+    <main class="desk-body">
+        @await Html.PartialAsync("Desk.SideBar")
+        @RenderBody()
+    </main>
+    @await Html.PartialAsync("Desk.Footer")
+
+    <section id="CommonHtmlContainer" style="display: none;">
+        @await Html.PartialAsync("Desk.Common")
+    </section>
+
+    @await Html.PartialAsync("Desk.MessageList")
+</body>
+</html>
+
+
