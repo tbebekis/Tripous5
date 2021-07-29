@@ -1,44 +1,4 @@
-﻿@import "desk.Variables.css";
-
-/*---------------------------------------------------------------------------------------
-  Global
----------------------------------------------------------------------------------------*/
-
-
-html {
-    font-family: Open Sans, 'Segoe UI', Tahoma, Verdana, Arial, sans-serif;
-    font-size: 14px;
-}
-
-body {
-    position: relative;
-    display: flex; 
-    flex-direction: column;
-    min-height: 100vh;
-    max-height: 100vh;
-    background-color: var(--White);
-    zoom: 1;
-    -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
-
-    cursor: default;
-} 
-
-.desk-header {
-    position: relative;
-    display: flex; 
-    min-height: 80px;
-    background-color: var(--Dark2);
-}
-
-.desk-footer {
-    position: relative;
-    display: flex; 
-    min-height: 40px;
-    background-color: var(--Dark2);
-}
-
-.desk-body {
+﻿.desk {
     position: relative;
     display: flex; 
     flex-grow: 1;

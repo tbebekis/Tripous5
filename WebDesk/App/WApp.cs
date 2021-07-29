@@ -87,7 +87,17 @@ namespace WebDesk
         {
             return WSys.GetService<T>();
         }
-  
+
+        /// <summary>
+        /// Returns the path url of an image, e.g. ~/themes/THEME/Content/images/IMAGE.png
+        /// </summary>
+        static public string ImageUrl(string FileName)
+        {
+            string S = $"~/images";
+            S = Sys.UrlCombine(S, FileName);
+            return S;
+        }
+
         /* properties */
         /// <summary>
         /// Returns true when in debug mode, i.e. the DEBUG constant is defined.

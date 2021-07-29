@@ -34,7 +34,7 @@ namespace WebDesk
             this.HttpContext = HttpContextAccessor.HttpContext;
 
             // TODO: set selected language when Datastore is initialized
-            Language = DataStore.EnLanguage;
+            Language = Tripous.Languages.DefaultLanguage;
         }
 
         /* properties */

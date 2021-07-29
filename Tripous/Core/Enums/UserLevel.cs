@@ -6,27 +6,28 @@ namespace Tripous
 {
 
     /// <summary>
-    /// The level of the current user.
+    /// The level of a user, i.e. Guest, Admin, User, etc.
     /// </summary>
     [Flags, TypeStoreItem]
     public enum UserLevel
     {
         /// <summary>
-        /// Service
+        /// Guest
         /// </summary>
-        Service = 1,
+        Guest = 0,
         /// <summary>
         /// Admin
         /// </summary>
-        Admin = 2,
+        Admin = 1,
         /// <summary>
         /// User
         /// </summary>
-        User = 4,
+        User = 2,
+
         /// <summary>
-        /// Guest
+        /// Service
         /// </summary>
-        Guest = 8,
+        Service = 0x100,
         
     }
 }

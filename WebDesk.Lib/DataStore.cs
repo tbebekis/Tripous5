@@ -195,8 +195,113 @@ namespace WebDesk
         /// </summary>
         static public Requestor GetRequestor(string Id)
         {
-            return null;
+            Requestor Result = null;
+
+            string SqlText = $@"
+select
+    *
+from
+    AppUser
+where 
+    Id = '{Id}'";
+
+            DataRow Row = SqlStore.SelectResults(SqlText);
+            if (Row != null)
+            {
+                Result = new Requestor();
+                Result.Id = Row.AsString("Id");
+                Result.UserId = Row.AsString("UserId");
+                Result.Name = Row.AsString("Name");
+                Result.Email = Row.AsString("Email");
+                Result.IsBlocked = Row.AsInteger("IsBlocked") > 0;
+                Result.Level = (UserLevel)Row.AsInteger("Level"); 
+            }
+
+            return Result;
         }
+        /// <summary>
+        /// Validates the specified credentials and returns a Visitor on success, else null.
+        /// </summary>
+        static public ItemResponse<Requestor> ValidateRequestor(string UserId, string Password)
+        {
+            ItemResponse<Requestor> Result = new ItemResponse<Requestor>();
+
+            if (string.IsNullOrWhiteSpace(UserId))
+            {
+                Result.AddError(Localize("Requestor.NotRegistered"));
+            }
+            else
+            {
+                string SqlText = $@"
+select
+    *
+from
+    AppUser
+where 
+    UserId = '{UserId}'";
+
+
+                DataRow Row = SqlStore.SelectResults(SqlText);
+
+                if (Row == null)
+                {
+                    Result.AddError(Localize("Requestor.NotRegistered"));
+                }
+                else if (string.IsNullOrWhiteSpace(Row.AsString("Password")) || string.IsNullOrWhiteSpace(Row.AsString("PasswordSalt")))
+                {
+                    Result.AddError(Localize("Requestor.NotRegistered"));
+                }
+                else if (!ValidatePassword(Password, Row.AsString("PasswordSalt"), Row.AsString("Password")))
+                {
+                    Result.AddError(Localize("Requestor.InvalidPassword"));
+                }
+                else if (Row.AsInteger("IsActivated") <= 0)
+                {
+                    Result.AddError(Localize("Requestor.NotActivated"));
+                }
+                else if (Row.AsInteger("IsBlocked") > 0)
+                {
+                    Result.AddError(Localize("Requestor.NotValidRequestor"));
+                }
+                else
+                {
+                    Result.Item = GetRequestor(Row.AsString("Id"));
+                }
+            }
+ 
+
+            if (Result.Item == null && (Result.Errors == null || Result.Errors.Count == 0))
+                Result.AddError("Unknown Error.");
+
+            return Result;
+        }
+
+
+        /* miscs */
+        /// <summary>
+        /// Returns a localized string based on a specified resource key, e.g. Customer, and the culture of the current request, e.g. el-GR
+        /// </summary>
+        static public string Localize(string Key)
+        {
+            return Localize(App.Culture.Name, Key);
+        }
+        /// <summary>
+        /// Returns a localized string based on a specified resource key, e.g. Customer, and a culture code, e.g. el-GR
+        /// </summary>
+        static public string Localize(string CultureCode, string Key)
+        { 
+            if (StoreLanguages == null)
+                Lib.Error($"Cannot Localize(). No Languages");
+
+            Language Lang = StoreLanguages.FirstOrDefault(item => item.CultureCode.IsSameText(CultureCode));
+            if (Lang == null)
+                Lib.Error($"Language not found: {CultureCode}");
+
+            string Result = Lang.Resources.Find(Key);
+
+            return !string.IsNullOrWhiteSpace(Result) ? Result : Key;
+        }
+
 
         /* properties */
         /// <summary>

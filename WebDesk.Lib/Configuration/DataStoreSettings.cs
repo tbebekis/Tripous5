@@ -80,7 +80,11 @@ namespace WebDesk
         /// <para> -1 = never expires, 0 = expire immediately, nnn = expire after nnn hours</para>
         /// </summary>
         public int UserCookieExpirationHours { get; set; } = -1;
- 
+
+        /// <summary>
+        /// Password for the super user
+        /// </summary>
+        public string SuperUserPassword { get; set; }
     }
 
     /// <summary>

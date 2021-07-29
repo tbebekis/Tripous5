@@ -4,6 +4,66 @@
         <name>WebDesk.Lib</name>
     </assembly>
     <members>
+        <member name="T:WebDesk.AppRazorPage`1">
+            <summary>
+            View page class used by this application
+            </summary>
+        </member>
+        <member name="M:WebDesk.AppRazorPage`1.L(System.String,System.Object[])">
+            <summary>
+            Returns a localized string based on a specified resource key, e.g. Customer, and the current (Session's) culture code, e.g. el-GR
+            </summary>
+        </member>
+        <member name="M:WebDesk.AppRazorPage`1.GS(System.String,System.Object[])">
+            <summary>
+            Returns a localized string based on a specified resource key, e.g. Customer, and the current (Session's) culture code, e.g. el-GR
+            </summary>
+        </member>
+        <member name="M:WebDesk.AppRazorPage`1.ToHtml(System.String,System.Object[])">
+            <summary>
+            Returns a string as an <see cref="T:Microsoft.AspNetCore.Html.HtmlString"/>
+            </summary>
+        </member>
+        <member name="M:WebDesk.AppRazorPage`1.ImageUrl(System.String)">
+            <summary>
+            Returns the path url of an image of a theme, e.g. ~/themes/THEME/Content/images/IMAGE.png
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.AbsoluteUrlEncoded">
+            <summary>
+            Returns the absolute Url of this page, along with the Query String, encoded.
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.RelativeUrlEncoded">
+            <summary>
+            Returns the relative Url of this page, along with the Query String, encoded.
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.RelativeRawUrlEncoded">
+            <summary>
+            Returns the relative Url of this page, along with the Query String, encoded.
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.ViewFilePath">
+            <summary>
+            Return the file path of the view
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.ViewFileName">
+            <summary>
+            Returns the file name of the view
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.PageTitle">
+            <summary>
+            Gets or sets the title of the page
+            </summary>
+        </member>
+        <member name="P:WebDesk.AppRazorPage`1.PageDescription">
+            <summary>
+            Gets or sets the description of the page
+            </summary>
+        </member>
         <member name="T:WebDesk.DataStoreSettings">
             <summary>
             Application settings
@@ -57,6 +117,11 @@
             <para> -1 = never expires, 0 = expire immediately, nnn = expire after nnn hours</para>
             </summary>
         </member>
+        <member name="P:WebDesk.GeneralSettings.SuperUserPassword">
+            <summary>
+            Password for the super user
+            </summary>
+        </member>
         <member name="T:WebDesk.HttpSettings">
             <summary>
             Http related settings
@@ -75,6 +140,70 @@
             <para>SEE: https://docs.microsoft.com/en-us/aspnet/core/performance/caching/response </para>
             </summary>
         </member>
+        <member name="T:WebDesk.ControllerApi">
+            <summary>
+            Web Api Controller.
+            <para>CAUTION: This should be used for WebAPIs controllers only, not for AJAX controllers. </para>
+            <para>Use the <see cref="T:Microsoft.AspNetCore.Mvc.Controller"/> as base class for AJAX controllers. Otherwise the ActionExceptionFilter will provide error results. </para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.ControllerApi.RequestContext">
+            <summary>
+            The context regarding the current HTTP request (current visitor, selected warehouse, etc.)
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerApi.Json(System.Object)">
+            <summary>
+            Creates a <see cref="T:Microsoft.AspNetCore.Mvc.JsonResult" /> object that serializes the specified data object to JSON.
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerApi.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="T:WebDesk.ControllerMvc">
+            <summary>
+            Base MVC controller
+            </summary>
+        </member>
+        <member name="P:WebDesk.ControllerMvc.UserContext">
+            <summary>
+            The context regarding the current HTTP request (current visitor, selected warehouse, etc.)
+            </summary>
+        </member>
+        <member name="P:WebDesk.ControllerMvc.Cache">
+            <summary>
+            Returns the cache interface
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerMvc.HandleReturnUrl(System.String)">
+            <summary>
+            Handles the ReturnUrl parameter
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerMvc.ValidateModel(System.Object,System.Boolean,System.Func{System.Collections.Generic.Dictionary{System.String,Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateEntry}})">
+            <summary>
+            Validates a model and returns the result.
+            <para>Returns true if the specified model is ok and has no errors.</para>
+            <para>Returns false if the specified model has errors, collects the error messages and creates the ErrorList entry in the ViewData.</para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerMvc.NotFoundInternal(System.String)">
+            <summary>
+            Returns the "not found" view
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerMvc.NotYetInternal(System.String)">
+            <summary>
+            Returns the "not yet" view
+            </summary>
+        </member>
+        <member name="M:WebDesk.ControllerMvc.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
         <member name="T:WebDesk.DataLogListener">
             <summary>
             LogListener, saves log information to database
@@ -90,6 +219,9 @@
              </summary>
         </member>
         <member name="T:WebDesk.DataStore">
+            <summary>
+            Represents the database
+            </summary>
             <summary>
             Represents the database
             </summary>
@@ -153,6 +285,21 @@
             Returns a user from database found under a specified Id, if any, else null.
             </summary>
         </member>
+        <member name="M:WebDesk.DataStore.ValidateRequestor(System.String,System.String)">
+            <summary>
+            Validates the specified credentials and returns a Visitor on success, else null.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.Localize(System.String)">
+            <summary>
+            Returns a localized string based on a specified resource key, e.g. Customer, and the culture of the current request, e.g. el-GR
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.Localize(System.String,System.String)">
+            <summary>
+            Returns a localized string based on a specified resource key, e.g. Customer, and a culture code, e.g. el-GR
+            </summary>
+        </member>
         <member name="P:WebDesk.DataStore.Initialized">
             <summary>
             Returns true when initialized
@@ -168,9 +315,76 @@
             Returns the default sql store
             </summary>
         </member>
+        <member name="M:WebDesk.DataStore.GenerateRandomText(System.Int32)">
+            <summary>
+            Generates and returns a random text of a specified size.
+            <para>Use it to generate Salt Keys for hashing passwords.</para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.GeneratePasswordHash(System.String,System.String,System.String)">
+            <summary>
+            Generates and returns a hash of a Password specified in clear text, using the SHA1 algorithm. 
+            <para>It appends a specified SaltKey to the password first.</para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.ComputeHash(System.Byte[],System.String)">
+            <summary>
+            Computes the hash value of a specifed byte array
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.ValidatePassword(System.String,System.String,System.String)">
+            <summary>
+            Validates the password of a user/requestor
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.AddEnum(Tripous.Data.SchemaVersion,System.String,System.Boolean)">
+            <summary>
+            Creates an "enum" (integer look-up) table
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.AddEnum(Tripous.Data.SchemaVersion,System.String,System.Type,System.Boolean)">
+            <summary>
+            Creates an "enum" (integer look-up) table and INSERTs the EnumType values to it.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataStore.AddLookUp(Tripous.Data.SchemaVersion,System.String,System.Boolean)">
+            <summary>
+            Creates look-up table
+            </summary>
+        </member>
         <member name="M:WebDesk.DataStore.RegisterSchemas">
             <summary>
-            Creates database tables etc. based on the registered schemas
+            Register database schemas
+            </summary>
+        </member>
+        <member name="T:WebDesk.DataStoreResponse">
+            <summary>
+            Data store response
+            </summary>
+        </member>
+        <member name="T:WebDesk.ItemResponse`1">
+            <summary>
+            Data service response for a single item
+            </summary>
+        </member>
+        <member name="P:WebDesk.ItemResponse`1.Item">
+            <summary>
+            The item
+            </summary>
+        </member>
+        <member name="T:WebDesk.ListResponse`1">
+            <summary>
+            Data service response for lists.
+            </summary>
+        </member>
+        <member name="P:WebDesk.ListResponse`1.TotalItems">
+            <summary>
+            The number of total items when this is a paged response. Used only with paged responses.
+            </summary>
+        </member>
+        <member name="P:WebDesk.ListResponse`1.List">
+            <summary>
+            The list of items
             </summary>
         </member>
         <member name="T:WebDesk.IPlugin">
@@ -226,6 +440,28 @@
         <member name="P:WebDesk.IRequestContext.Settings">
             <summary>
             Application settings
+            </summary>
+        </member>
+        <member name="T:WebDesk.IUserCookieContext">
+            <summary>
+            A requestor user cookie context
+            </summary>
+        </member>
+        <member name="M:WebDesk.IUserCookieContext.SignInAsync(WebDesk.Requestor,System.Boolean,System.Boolean)">
+            <summary>
+            Sign-in. Authenticates a specified, already validated, Visitor
+            </summary>
+        </member>
+        <member name="M:WebDesk.IUserCookieContext.SignOutAsync">
+            <summary>
+            Sign-out.
+            </summary>
+        </member>
+        <member name="P:WebDesk.IUserCookieContext.IsAuthenticated">
+            <summary>
+            True when the user is authenticated.
+            <para>NOTE: We check both 1) the <see cref="T:System.Security.Claims.ClaimsPrincipal"/> of the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/> (the User property)
+            and 2) that the <see cref="F:System.Security.Claims.ClaimTypes.NameIdentifier"/> claim equals to <see cref="P:WebDesk.Requestor.Id"/></para>
             </summary>
         </member>
         <member name="T:WebDesk.IWebAppContext">
@@ -459,9 +695,126 @@
             Format string for formatting money values
             </summary>
         </member>
+        <member name="P:WebDesk.Lib.IsCookieAuthenticated">
+            <summary>
+            True when the user is authenticated with the cookie authentication scheme.
+            </summary>
+        </member>
         <member name="P:WebDesk.Lib.DevMode">
             <summary>
             Returns true when HostEnvironment.IsDevelopment() returns true.
+            </summary>
+        </member>
+        <member name="T:WebDesk.Models.TradeType">
+            <summary>
+            Indicates the type of a trade
+            </summary>
+        </member>
+        <member name="F:WebDesk.Models.TradeType.Unknown">
+            <summary>
+            Unknown
+            </summary>
+        </member>
+        <member name="F:WebDesk.Models.TradeType.SalesOrder">
+            <summary>
+            Sales Order
+            </summary>
+        </member>
+        <member name="F:WebDesk.Models.TradeType.SalesInvoice">
+            <summary>
+            Sales Invoice
+            </summary>
+        </member>
+        <member name="T:WebDesk.Picture">
+            <summary>
+            A picture of an item, i.e. product, etc.
+            </summary>
+        </member>
+        <member name="P:WebDesk.Picture.FileName">
+            <summary>
+            The file name
+            </summary>
+        </member>
+        <member name="P:WebDesk.Picture.DisplayOrder">
+            <summary>
+            Display order
+            </summary>
+        </member>
+        <member name="P:WebDesk.Picture.PictureText">
+            <summary>
+            Base64 text of picture bytes
+            </summary>
+        </member>
+        <member name="P:WebDesk.Picture.ImageUrl">
+            <summary>
+            Url of the image
+            </summary>
+        </member>
+        <member name="T:WebDesk.Pictures">
+            <summary>
+            Helper
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.#cctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.IsValidFileName(System.String)">
+            <summary>
+            Returns true if a specified file name is not null or empty and it just contains characters that are valid for a file name.
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.ValidateFileName(System.String,System.String)">
+            <summary>
+            Validates and returns a file name, complete with a specified prefix.
+            <para>NOTE: If the specified file name is not valid, it uses a random file name.</para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.ValidateFileName(System.String,System.String,System.String)">
+            <summary>
+            Validates and returns a file name, complete with a specified prefix and extension.
+            <para>NOTE: If the specified file name is not valid, it uses a random file name.</para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.Exists(System.String,System.String)">
+            <summary>
+            Returns true if a picture with a specified filename exists in disk.
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.FindImageUrl(System.String,System.String)">
+            <summary>
+            Returns the image url path of a file name ONLY if the file exists in Theme's image folder, else returns EMPTY string.
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.Save(System.String,System.Drawing.Image,System.String)">
+            <summary>
+            Saves an image in Theme's image folder and returns the image url path.
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.Save(System.String,System.String,System.String)">
+            <summary>
+            Saves a base64 string as an image in Theme's image folder and returns the image url path.
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.Save(WebDesk.Picture,System.String)">
+            <summary>
+            Saves a base64 string as an image in Theme's image folder and returns the image url path.
+            </summary>
+        </member>
+        <member name="M:WebDesk.Pictures.DefaultImageUrl(System.String)">
+            <summary>
+            Returns the path url of an image, e.g. ~/themes/THEME/Content/images/IMAGE.png
+            </summary>
+        </member>
+        <member name="P:WebDesk.Pictures.ImagesPath">
+            <summary>
+            The full path where images are placed
+            </summary>
+        </member>
+        <member name="P:WebDesk.Pictures.ImageUrlFunc">
+            <summary>
+            The function to construct a url to an image. Defaults to DefaultImageUrl() method
             </summary>
         </member>
         <member name="T:WebDesk.Requestor">
@@ -472,6 +825,11 @@
         <member name="P:WebDesk.Requestor.Id">
             <summary>
             Required. Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.Requestor.Level">
+            <summary>
+            The level of a user, i.e. Guest, Admin, User, etc.
             </summary>
         </member>
         <member name="P:WebDesk.Requestor.UserId">
@@ -532,6 +890,162 @@
         <member name="M:WebDesk.WebAppException.#ctor(System.String,System.Net.HttpStatusCode,System.Exception)">
             <summary>
             Constructor
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.DisabledAttribute">
+            <summary>
+            Marks a model property as disabled. Results in a disabled html attribute.
+            <para>NOTE: Used by <see cref="T:Tripous.Web.TagHelperControlRow"/> custom tag helper.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.DisabledAttribute.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.DisabledAttribute.ClassName">
+            <summary>
+            The class name of the attribute.
+            <para>NOTE: <see cref="T:Tripous.Web.IModelAttribute"/> implementation. </para>
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.ElementIdGenerator">
+            <summary>
+            Generates unique Ids for HTML elements.
+            <para>WARNING: HTML element id is case-sensitive.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.ElementIdGenerator.GetNextId(System.String)">
+            <summary>
+            Generates and returns a unique id for an HTML Element.
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.HtmlTag">
+            <summary>
+            A slightly better (I hope) <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.TagBuilder"/> that supports nested tags.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.#ctor(System.String,System.String)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.ToString">
+            <summary>
+            Returns a string representation of this instance
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Add(System.String,System.String)">
+            <summary>
+            Adds a tag to the <see cref="P:Tripous.Web.HtmlTag.InnerTags"/> and returns the newly added <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Add(Tripous.Web.HtmlTag)">
+            <summary>
+            Adds a tag to the <see cref="P:Tripous.Web.HtmlTag.InnerTags"/> and returns the newly added <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.AddInput(System.String,System.String)">
+            <summary>
+            Adds a tag to the <see cref="P:Tripous.Web.HtmlTag.InnerTags"/> and returns the newly added <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Attribute(System.String,System.String)">
+            <summary>
+            Adds a new attribute or replaces an existing one, if the specified key is not null or empty. Returns this instance.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Class(System.String)">
+            <summary>
+            Adds one or more class names, delimited by a space, to the tag's css classes, if the specified class names is not a null or empty string. Returns this instance.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.WriteTo(System.IO.TextWriter,System.Text.Encodings.Web.HtmlEncoder)">
+            <summary>
+            Writes the tag by encoding it with the specified encoder to the specified  writer.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Div(System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Button(System.String,System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Submit(System.String,System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Reset(System.String,System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Span(System.String,System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Label(System.String,System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Hidden">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.TextBox(System.String)">
+            <summary>
+            Creates and returns a new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.HtmlTag.Input(System.String,System.String)">
+            <summary>
+            Creates and returns an input tag
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.HtmlTag.InnerTags">
+            <summary>
+            The list of inner tags
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.IModelAttribute">
+            <summary>
+            A custom model attribute.
+            <para>See <see cref="T:Tripous.Web.TagHelperModelMetadataProvider"/> for usage instructions. </para>
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.IModelAttribute.ClassName">
+            <summary>
+            The class name of the attribute
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.IntBoolAttribute">
+            <summary>
+            Marks a model integer property to be used as a boolean and display an html checkbox when rendered.
+            <para>NOTE: Used by <see cref="T:Tripous.Web.TagHelperControlRow"/> custom tag helper.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.IntBoolAttribute.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.IntBoolAttribute.ClassName">
+            <summary>
+            The class name of the attribute.
+            <para>NOTE: <see cref="T:Tripous.Web.IModelAttribute"/> implementation. </para>
             </summary>
         </member>
         <member name="T:Tripous.Web.IWebAppCache">
@@ -640,6 +1154,66 @@
             The default eviction timeout of an entry from the cache, in minutes. Defaults to 0 which means "use the timeouts of the internal implementation".
             </summary>
         </member>
+        <member name="T:Tripous.Web.ModelValidationFilter">
+            <summary>
+            Global filter for throwing an exception when a model with invalid state comes to a controller action.  
+            <para>To register</para>
+            <para><code> services.AddControllersWithViews(o =&gt; { o.Filters.Add&lt;ModelValidationFilter&gt;(); })
+            </code></para>
+            </summary>    
+        </member>
+        <member name="M:Tripous.Web.ModelValidationFilter.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.ModelValidationFilter.OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext)">
+            <summary>
+            Called before the action executes, after model binding is complete.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.ModelValidationFilter.OnActionExecuted(Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext)">
+            <summary>
+            Called after the action executes, before the action result.
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.PlaceholderAttribute">
+            <summary>
+            Marks a model property as disable. Results in a disabled html attribute
+            <para>NOTE: Used by <see cref="T:Tripous.Web.TagHelperControlRow"/> custom tag helper.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.PlaceholderAttribute.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.PlaceholderAttribute.Key">
+            <summary>
+            The resource string key
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.PlaceholderAttribute.Text">
+            <summary>
+            The localized placeholder text
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.PlaceholderAttribute.ClassName">
+            <summary>
+            The class name of the attribute.
+            <para>NOTE: <see cref="T:Tripous.Web.IModelAttribute"/> implementation. </para>
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.RequiredExAttribute">
+            <summary>
+            Extension for the Required attribute
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.RequiredExAttribute.FormatErrorMessage(System.String)">
+            <summary>
+            Applies formatting to an error message based on the data field where the error occurred.
+            </summary>
+        </member>
         <member name="T:Tripous.Web.Session">
             <summary>
             Provides access to session variables (entries)
@@ -726,6 +1300,423 @@
             <summary>
             Gets or sets the current language of the session.
             <para>Represents a language this application supports, i.e. provides localized resources for.</para>
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TagHelperAspForBase">
+            <summary>
+            A <see cref="T:Tripous.Web.TagHelperBase"/> descendant class.
+            <para>For use with asp-for tag helpers, i.e. tag helpers the render a model's property or a full model.</para>
+            </summary>
+        </member>
+        <member name="F:Tripous.Web.TagHelperAspForBase.SFor">
+            <summary>
+            Constant
+            </summary>
+        </member>
+        <member name="F:Tripous.Web.TagHelperAspForBase.HtmlAttributes">
+            <summary>
+            container for additional attributes
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperAspForBase.Initialize(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext,Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput)">
+            <summary>
+            Initializes the helper.
+            <para>CAUTION: Should be called by the first line in <c>Process()</c> or <c>ProcessAsync()</c> method </para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperAspForBase.#ctor(Microsoft.AspNetCore.Mvc.ViewFeatures.IHtmlGenerator,Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperAspForBase.Init(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext)">
+            <summary>
+            Initializes the <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.ITagHelper"/> with the given <paramref name="context"/>. Additions to
+            <see cref="P:Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext.Items"/> should be done within this method to ensure they're added prior to
+            executing the children.
+            <para>NOTE: This method is called automatically by .Net</para>
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.For">
+            <summary>
+            The expression passed to the tag helper. Usually this is a model's property or the full model
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.PropertyValue">
+            <summary>
+            The value of the property, this instance represents, in the current model.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.PropertyType">
+            <summary>
+            The <see cref="T:System.Type"/> of model's property
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.PropertyMetadata">
+            <summary>
+            Property metadata.
+            <para> In order to get all attributes, built-in and custom, typecast Metadata to DefaultModelMetadata. </para>
+            <para> For another technique of getting just the custom attributes marking the property see the <see cref="T:Tripous.Web.TagHelperModelMetadataProvider"/> class </para>
+            <para> see also: https://github.com/aspnet/Mvc/issues/4597 </para>
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.PropertyAttributes">
+            <summary>
+            The list of CSharp attributes marking the model property
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.FullName">
+            <summary>
+            Fully-qualified expression name for the specified partialFieldName in the <see cref="P:Tripous.Web.TagHelperAspForBase.For"/> <see cref="T:Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpression"/>.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.HasErrors">
+            <summary>
+            True when the property value is invalid, after a POST
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperAspForBase.Errors">
+            <summary>
+            Message regarding the errors or null.
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TagHelperBase">
+            <summary>
+            A <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.TagHelper"/> descendant class
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperBase.CreateMainTag">
+            <summary>
+            Creates and assigns the <see cref="P:Tripous.Web.TagHelperBase.MainTag"/> that is the main <see cref="T:Tripous.Web.HtmlTag"/> containing all output markup.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperBase.Initialize(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext,Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput)">
+            <summary>
+            Initializes the helper.
+            <para>CAUTION: Should be called by the first line in <c>Process()</c> or <c>ProcessAsync()</c> method </para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperBase.NextId(System.String)">
+            <summary>
+            Generates and returns a unique id for an HTML Element.
+            <para>WARNING: HTML element id is case-sensitive.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperBase.#ctor(Microsoft.AspNetCore.Mvc.ViewFeatures.IHtmlGenerator,Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperBase.Init(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext)">
+            <summary>
+            Initializes the <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.ITagHelper"/> with the given <paramref name="context"/>. Additions to
+            <see cref="P:Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext.Items"/> should be done within this method to ensure they're added prior to
+            executing the children.
+            <para>NOTE: This method is called automatically by .Net</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperBase.ProcessAsync(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext,Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput)">
+            <summary>
+            Executes the <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.TagHelper"/> a-synchronously.
+            <para>NOTE: It calls <see cref="M:Tripous.Web.TagHelperBase.Initialize(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext,Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput)"/> too. </para>
+            <para>The .Net (Asp.Net Core 3.0) framework calls the <see cref="M:Microsoft.AspNetCore.Razor.TagHelpers.TagHelper.ProcessAsync(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext,Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput)"/> which calls the synchronous <c>Process()</c> in turn </para>
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.MainTag">
+            <summary>
+            The main <see cref="T:Tripous.Web.HtmlTag"/> containing all output markup.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.HtmlHelper">
+            <summary>
+            Html helper
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.Generator">
+            <summary>
+            Helper. Generates html form elements and more.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.TagHelperContext">
+            <summary>
+            A <see cref="P:Tripous.Web.TagHelperBase.TagHelperContext"/> instance as passed to the <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.TagHelper"/> <c>Process()</c> method.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.Output">
+            <summary>
+            A <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput"/> instance as passed to the <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.TagHelper"/> <c>Process()</c> method.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.ViewContext">
+            <summary>
+            View context already contextualized.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.OutputAttributes">
+            <summary>
+            A dictionary of html attributes already defined by the user in the html markup
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperBase.Params">
+            <summary>
+            Custom parameteres.
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TagHelperControlRow">
+            <summary>
+            Renders an editor control, that is an editable control.
+            </summary> 
+        </member>
+        <member name="T:Tripous.Web.TagHelperControlRow.EditorType">
+            <summary>
+            The type of the editor (HTML control)
+            </summary>
+        </member>
+        <member name="F:Tripous.Web.TagHelperControlRow.EditorType.Default">
+            <summary>
+            Default
+            </summary>
+        </member>
+        <member name="F:Tripous.Web.TagHelperControlRow.EditorType.CheckBox">
+            <summary>
+            CheckBox
+            </summary>
+        </member>
+        <member name="F:Tripous.Web.TagHelperControlRow.EditorType.TextArea">
+            <summary>
+            TextArea
+            </summary>
+        </member>
+        <member name="F:Tripous.Web.TagHelperControlRow.EditorType.ComboBox">
+            <summary>
+            ComboBox
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperControlRow.GetEditorType">
+            <summary>
+            Returns the editor type of the current HTML tag
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperControlRow.CreateMainTag">
+            <summary>
+            Creates and assigns the  the main <see cref="T:Tripous.Web.HtmlTag"/> containing all output markup.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperControlRow.#ctor(Microsoft.AspNetCore.Mvc.ViewFeatures.IHtmlGenerator,Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperControlRow.ApplyPropertyAttributes(System.Collections.Generic.IReadOnlyList{System.Object},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Applies property annotation attributes to the specified html attributes dictionary.
+            <para>Later on that html attributes dictionary entries are merged into the output control html attributes. </para>
+            </summary>
+            <param name="PropertyAttributes">A list of CSharp attributes marking the model property</param>
+            <param name="HtmlAttributes">An html attributes dictionary. Later on that html attributes dictionary entries are merged into the output control html attributes. </param>
+        </member>
+        <member name="M:Tripous.Web.TagHelperControlRow.Process(Microsoft.AspNetCore.Razor.TagHelpers.TagHelperContext,Microsoft.AspNetCore.Razor.TagHelpers.TagHelperOutput)">
+            <summary>
+            Synchronously executes the <see cref="T:Microsoft.AspNetCore.Razor.TagHelpers.TagHelper"/> with the a specified context and output.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperControlRow.RowId">
+            <summary>
+            Optional. Defaults to empty string. The Id of the control row.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperControlRow.RowClass">
+            <summary>
+            Optional. Defaults to empty string. The css class(es) of the control row.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperControlRow.DefaultItem">
+            <summary>
+            Optional. Defaults to empty string. When is not empty then this text is added as the default option item to a combo box editor
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperControlRow.Items">
+            <summary>
+            A collection of <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> objects used to populate the &lt;select&gt; element with
+            &lt;optgroup&gt; and &lt;option&gt; elements.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TagHelperControlRow.Template">
+            <summary>
+            The editor template
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TagHelperExtensions">
+            <summary>
+            Extensions
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.ToHtml(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder)">
+            <summary>
+            Returns the encoded html text of a tag
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.InnerHtmlToString(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder)">
+            <summary>
+            Returns the inner html of a specified tag as string
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.WriteTo(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder,System.IO.TextWriter,System.Text.Encodings.Web.HtmlEncoder,System.Nullable{Microsoft.AspNetCore.Mvc.Rendering.TagRenderMode})">
+            <summary>
+            Writes the tag by encoding it with the specified encoder to the specified  writer.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.WriteAttributesTo(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder,System.IO.TextWriter,System.Text.Encodings.Web.HtmlEncoder)">
+            <summary>
+            Writes tag's attributes by encoding them with the specified encoder to the specified  writer.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.RemoveCssClasses(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder)">
+            <summary>
+            Removes all css classes from a specified tag
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.RemoveClientDataValidationAttributes(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder)">
+            <summary>
+            Removes all the data-val-* attributes Asp.Net Core sets to a specified tag.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperExtensions.Clone(Microsoft.AspNetCore.Mvc.Rendering.TagBuilder)">
+            <summary>
+            Clones a source tag and returns the new <see cref="T:Tripous.Web.HtmlTag"/>
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TagHelperModelMetadataProvider">
+            <summary>
+            A metadata provider that adds custom attributes to a model's metadata.
+            <para>Those attributes can be retrieved later. For an example see <see cref="T:Tripous.Web.TagHelperControlRow"/> </para>
+            <para>For the retrieval to work, this provider should be registered in <c>ConfigureServices()</c> as </para>
+            <para> <c>MvcBuilder.AddMvcOptions(o => o.ModelMetadataDetailsProviders.Add(new ModelMetadataProvider()));</c> </para>
+            <para>To retrieve the attribute from inside a TagHelper use the following  </para>
+            <para><c> if (For.Metadata.AdditionalValues.TryGetValue(nameof(MyCustomAttribute), out object value)) {...}</c></para>
+            <para>See Also: https://github.com/aspnet/Mvc/issues/4597 </para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TagHelperModelMetadataProvider.CreateDisplayMetadata(Microsoft.AspNetCore.Mvc.ModelBinding.Metadata.DisplayMetadataProviderContext)">
+            <summary>
+            Sets the additional values for a <see cref="P:Microsoft.AspNetCore.Mvc.ModelBinding.Metadata.DisplayMetadataProviderContext.DisplayMetadata"/>  
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TextAreaAttribute">
+            <summary>
+            Marks a model property as disable. Results in a disabled html attribute
+            <para>NOTE: Used by <see cref="T:Tripous.Web.TagHelperControlRow"/> custom tag helper.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TextAreaAttribute.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TextAreaAttribute.Rows">
+            <summary>
+            The rows
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TextAreaAttribute.Cols">
+            <summary>
+            The columns
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TextAreaAttribute.ClassName">
+            <summary>
+            The class name of the attribute.
+            <para>NOTE: <see cref="T:Tripous.Web.IModelAttribute"/> implementation. </para>
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.TitleAttribute">
+            <summary>
+            A localizable <see cref="T:System.ComponentModel.DisplayNameAttribute"/> attribute, to be used with model properties
+            <para>NOTE: Used by <see cref="T:Tripous.Web.TagHelperControlRow"/> custom tag helper.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.TitleAttribute.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TitleAttribute.Key">
+            <summary>
+            The resource string key
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TitleAttribute.DisplayName">
+            <summary>
+            The localized text.
+            </summary>
+        </member>
+        <member name="P:Tripous.Web.TitleAttribute.ClassName">
+            <summary>
+            The class name of the attribute.
+            <para>NOTE: <see cref="T:Tripous.Web.IModelAttribute"/> implementation. </para>
+            </summary>
+        </member>
+        <member name="T:Tripous.Web.WebExtensions">
+            <summary>
+            Extensions
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetModelInvalidStateEntries(Microsoft.AspNetCore.Mvc.ControllerBase)">
+            <summary>
+            Returns a collection of Key/Value pairs where Key is the Property Name of the current Model and Value a Model error, if any.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetErrorList(Microsoft.AspNetCore.Mvc.ControllerBase,System.Object,System.Collections.Generic.List{System.String}@,System.Boolean,System.Func{System.Collections.Generic.Dictionary{System.String,Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateEntry}})">
+            <summary>
+            Returns true if a specified model state is invalid, along with a string list of errors.
+            <para>The returned list contains the display (localized) names of the invalid properties, along with property names.</para>
+            <para>If specified then enhances the model state errors with the new error strings.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetErrorList(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary,System.Collections.Generic.List{System.String}@)">
+            <summary>
+            Returns true if a specified model state is invalid, along with a string list of errors
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetErrorList(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary)">
+            <summary>
+            Returns a string list of an invalid model state
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetErrorsHtmlText(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary)">
+            <summary>
+            Returns the errors of an invalid model state as a UL list
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetErrorsText(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary)">
+            <summary>
+            Returns the errors of an invalid model state as plain text lines
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.GetAttribute``1(Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpression)">
+            <summary>
+            Returns an <see cref="T:System.Attribute"/> instance that marks a Model's property, if there, else null.
+            <para>NOTE: Assumes that <see cref="P:Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpression.Metadata"/> is a <see cref="T:Microsoft.AspNetCore.Mvc.ModelBinding.Metadata.DefaultModelMetadata"/> instance. </para>
+            <para>The <c>DefaultModelMetadata.Attributes.Attributes</c> collection contains all <see cref="T:System.Attribute"/>s marking the property, either custom or built-in.</para>
+            <para>NOTE 2: The <see cref="P:Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpression.Metadata"/>.ValidatorMetadata contains only validation <see cref="T:System.Attribute"/>s </para>
+            <para>See Also: https://github.com/aspnet/Mvc/issues/4597 </para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.IsIntegerType(System.Type)">
+            <summary>
+            Returns true if a specified type is an integer type, i.e. Byte, SByte, Int16, Int32, Int64, UInt16, UInt32, UInt64
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.NextId(Microsoft.AspNetCore.Http.HttpContext,System.String)">
+            <summary>
+            Generates and returns a unique id for an HTML Element.
+            <para>WARNING: HTML element id is case-sensitive.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WebExtensions.NextId(Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper,System.String)">
+            <summary>
+            Generates and returns a unique id for an HTML Element.
+            <para>WARNING: HTML element id is case-sensitive.</para>
             </summary>
         </member>
         <member name="T:Tripous.Web.WSys">

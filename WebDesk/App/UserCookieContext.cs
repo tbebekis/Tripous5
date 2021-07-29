@@ -19,20 +19,7 @@ using Tripous.Web;
 namespace WebDesk
 {
 
-    /// <summary>
-    /// A requestor user cookie context
-    /// </summary>
-    internal interface IUserCookieContext: IRequestContext
-    {
-        /// <summary>
-        /// Sign-in. Authenticates a specified, already validated, Visitor
-        /// </summary>
-        Task SignInAsync(Requestor V, bool IsPersistent, bool IsImpersonation);
-        /// <summary>
-        /// Sign-out.
-        /// </summary>
-        Task SignOutAsync();
-    }
+
 
     /// <summary>
     /// A requestor user cookie context
@@ -270,11 +257,16 @@ namespace WebDesk
                 {
                     fLanguage = value;
 
-                    string CultureCode = Cookie.CultureCode;
-                    if (fLanguage != null && !fLanguage.CultureCode.IsSameText(CultureCode))
+                    // CAUTION: Language setter is called from the inherited constructor too, when Cookie is still null.
+                    if (Cookie != null)
                     {
-                        Cookie.CultureCode = fLanguage.CultureCode;
+                        string CultureCode = Cookie.CultureCode;
+                        if (fLanguage != null && !fLanguage.CultureCode.IsSameText(CultureCode))
+                        {
+                            Cookie.CultureCode = fLanguage.CultureCode;
+                        }
                     }
+
                 }
             }
         }
@@ -282,25 +274,10 @@ namespace WebDesk
 
 
         /// <summary>
-        /// True when the user is authenticated.
-        /// <para>NOTE: We check both 1) the <see cref="ClaimsPrincipal"/> of the <see cref="HttpContext"/> (the User property)
-        /// and 2) that the <see cref="ClaimTypes.NameIdentifier"/> claim equals to <see cref="Requestor.Id"/></para>
+        /// True when the user is authenticated with the cookie authentication scheme.
         /// </summary>
-        public bool IsAuthenticated
-        {
-            get
-            {
-                bool Result = HttpContext.User.Identity.IsAuthenticated;
-                if (Result)
-                {
-                    // we have Requestor.Id stored in ClaimTypes.NameIdentifier claim
-                    Claim Claim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                    Result = Claim != null && Requestor != null && Claim.Value == Requestor.Id;
-                }
-
-                return Result;
-            }
-        }
+        public bool IsAuthenticated => Lib.IsCookieAuthenticated;
+ 
         /// <summary>
         /// True when the Visitor has loged-in usin the SuperUserPassword
         /// </summary>

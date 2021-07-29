@@ -155,6 +155,8 @@ namespace WebDesk
                 // ● initialize libraries
                 InitializeSysConfig();
 
+                Pictures.ImagesPath = WApp.ImagesPath;
+
                 Tripous.Logging.Logger.AddFileListener();
 
                 ObjectStore.Initialize();
@@ -171,6 +173,7 @@ namespace WebDesk
 
                 // ● languages
                 LoadLanguages();
+ 
             }
             catch (Exception ex)
             {

@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Newtonsoft.Json;
 
@@ -290,7 +292,25 @@ namespace WebDesk
         /// </summary>
         static public string MoneyFormat => GetSettings().General.MoneyFormat;
 
- 
+        /// <summary>
+        /// True when the user is authenticated with the cookie authentication scheme.
+        /// </summary>
+        static public bool IsCookieAuthenticated
+        {
+            get
+            {
+                bool Result = HttpContext.User.Identity.IsAuthenticated;
+                if (Result)
+                {
+                    string Scheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    Result = HttpContext.User.Identity.AuthenticationType == Scheme; 
+                }
+
+                return Result;
+            }
+        }
+
+
         /// <summary>
         /// Returns true when HostEnvironment.IsDevelopment() returns true.
         /// </summary>

@@ -21,7 +21,7 @@
     --Dark2: var(--Color1);
     --Dark3: var(--Color2);
     --Light: var(--Color3);
-    --Light2: var(--Color4);
+    --Light2: #034f84; /*var(--Color4); */ 
     --Light3: var(--Color5);
 
     --GrayLightLight: #E6E6E6;

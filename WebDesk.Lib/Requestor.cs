@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Tripous;
+
 namespace WebDesk
 {
 
@@ -16,7 +18,10 @@ namespace WebDesk
         /// Required. Database Id
         /// </summary>
         public string Id { get; set; } = "";
-
+        /// <summary>
+        /// The level of a user, i.e. Guest, Admin, User, etc.
+        /// </summary>
+        public UserLevel Level { get; set; }
         /// <summary>
         /// Required. Email or User name or something
         /// </summary> 

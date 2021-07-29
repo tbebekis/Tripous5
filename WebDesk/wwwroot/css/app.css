@@ -1,0 +1,375 @@
+﻿@import "Variables.css";
+
+/*---------------------------------------------------------------------------------------
+  Global
+---------------------------------------------------------------------------------------*/
+
+
+html {
+    font-family: Open Sans, 'Segoe UI', Tahoma, Verdana, Arial, sans-serif;
+    font-size: 14px;
+}
+
+body {
+    position: relative;
+    display: flex; 
+    flex-direction: column;
+    min-height: 100vh;
+    max-height: 100vh;
+    background-color: var(--White);
+    zoom: 1;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+
+    cursor: default;
+} 
+
+
+button:focus {
+    outline: thin dotted;
+} 
+
+input,
+select,
+textarea,
+label,
+legend {
+    font: inherit;
+    line-height: 1.7;
+}
+
+a {
+    color: inherit;
+    cursor: pointer;
+}
+
+select {
+    height: 2.15em;
+}
+
+select > option {
+    line-height: 1.7;
+}
+
+script {
+    display: none;
+}
+
+
+/*---------------------------------------------------------------------------------------
+  tp
+---------------------------------------------------------------------------------------*/
+#LogDiv {
+    display: none;
+}
+
+.tp-HasErrors {
+    border-color: red;
+}
+
+.tp-TextTop .tp-CtrlRow,
+.tp-TextTop .tp-CheckBoxRow {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.tp-CtrlRow {
+    margin: 12px 0 ;
+}
+
+.tp-CheckBoxRow {
+    margin: 18px 0 ;
+}
+
+.tp-CtrlRow input[type=text], 
+.tp-CtrlRow input[type=email], 
+.tp-CtrlRow input[type=password], 
+.tp-CtrlRow input[type=number], 
+.tp-CtrlRow input[type=date], 
+.tp-CtrlRow input[type=tel], 
+.tp-CtrlRow select {
+    height: 36px;
+    border: 1px solid var(--Gray);
+    padding: 0 0 0 4px;
+}
+
+.tp-CtrlRow input[type=text]:focus,
+.tp-CtrlRow input[type=email]:focus,
+.tp-CtrlRow input[type=password]:focus,
+.tp-CtrlRow input[type=number]:focus,
+.tp-CtrlRow input[type=date]:focus,
+.tp-CtrlRow input[type=tel]:focus,
+.tp-CtrlRow select:focus {
+    border: 1px solid var(--GrayDarkDeep);
+} 
+
+.tp-CtrlRow textarea {
+    border: 1px solid var(--Gray);
+    padding: 4px;
+}
+
+.tp-CtrlRow textarea:focus {
+    border: 1px solid var(--GrayDarkDeep);
+}
+
+.tp-CtrlRow > .tp-CText > label {
+    font-weight: bold;
+}
+
+.tp-CheckBoxRow > label {
+    display: flex;
+}
+
+.tp-CheckBoxRow input[type=checkbox] {
+    margin: 5px 0 0 0;
+}
+
+.tp-CheckBoxRow .tp-Text {
+    padding: 0 2px 0 4px;
+}
+
+
+
+/* background color on hover */
+.tp-CheckBox:hover input ~ .checkmark {
+    background-color: var(--GrayLight);
+}
+  
+/* background color on checked */
+.tp-CheckBox input:checked ~ .checkmark {
+    background-color: var(--Yellow);
+    border: 2px solid var(--Yellow);
+}
+
+ /* checkmark:after */
+ .tp-CheckBox .checkmark:after { 
+   border-color: var(--White); 
+   transform: rotate(50deg);  
+ }
+
+
+/*---------------------------------------------------------------------------------------
+  general
+---------------------------------------------------------------------------------------*/
+
+.bold {
+    font-weight: bold;
+}
+
+.upper-case {
+    text-transform: uppercase;
+}
+
+.overlay { 
+    position: absolute;
+    display: flex;   
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.15); 
+}
+
+.message-text-area {
+    position: relative;
+    display: flex; 
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: var(--DialogBox-Width);
+    padding: 4px 10px;
+    border: none;
+}
+
+button:not(.btn-test),
+.button:not(.btn-test) {
+    position: relative;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+ 
+.buttons.tp-CtrlRow {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.buttons.tp-CtrlRow > .btn-submit {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--Yellow);
+    height: 68px;
+    width: 45%; 
+}
+
+.buttons.tp-CtrlRow > .btn-submit:hover {
+    background-color: var(--Black);
+    color: var(--White);
+}
+
+.color-underline {
+    text-shadow: 1px 1px black;
+    text-decoration: underline var(--Yellow) solid; 
+    text-decoration-thickness: 4px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 1px;
+}
+
+/*---------------------------------------------------------------------------------------
+  header - footer
+---------------------------------------------------------------------------------------*/
+.header {
+    position: relative;
+    display: flex; 
+    min-height: 80px;
+    background-color: var(--Dark2);
+}
+
+.footer {
+    position: relative;
+    display: flex; 
+    min-height: 40px;
+    background-color: var(--Dark2);
+} 
+
+
+/*---------------------------------------------------------------------------------------
+  page
+---------------------------------------------------------------------------------------*/
+
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--Page-Padding);
+    min-height: 800px;
+}
+
+.page .page-caption {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 30px 0;
+}
+
+.page .page-caption .page-title {
+    position: relative;
+    display: flex;
+    font-size: 28px;
+    font-weight: var(--HeavyBold);
+    flex-grow: 1;
+}
+
+.field-group {
+    position: relative;
+    margin: 0 0 30px 0;
+}
+
+.field-group > .caption {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.field-group > .caption > .title {
+    font-size: 22px;
+    font-weight: var(--HeavyBold);
+    margin: 0 0 25px 0;
+}
+
+.form-buttons {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 30px 0;
+    gap: 0.5em;
+}
+
+.form-buttons .btn-submit {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--Yellow);
+    height: 5em;
+    padding: 0 2.8em;
+}
+
+.form-buttons .btn-submit:hover {
+    background-color: var(--Black);
+    color: var(--White);
+}
+
+a.button { 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--Yellow);
+    height: 5em;
+    padding: 0 2.8em;
+}
+
+a.button:hover {
+    background-color: var(--Black);
+    color: var(--White);
+}
+
+/*---------------------------------------------------------------------------------------
+  error-list
+---------------------------------------------------------------------------------------*/
+
+/* error-list */
+.error-list {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--Red);
+    color: var(--White);
+    opacity: 1;
+    padding: 0 0 20px 0;
+}
+
+/* caption */
+.error-list > .caption {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0px 20px 10px 20px;
+    font-size: 24px;
+}
+
+.error-list > .caption  > .title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 50px;
+    color: var(--White);
+    font-weight: bold;
+    flex-grow: 1;
+    cursor: pointer;
+    user-select: none;    
+    border-bottom: 1px solid var(--GrayDark);
+} 
+
+.error-list > .caption > .close {
+    position: relative;
+    padding: 0 0 0 16px;
+    cursor: pointer;    
+}
+
+.error-list > .list {
+    position: relative;
+}
+
+.error-list > .list > .item {
+    position: relative;
+    line-height: 1.5em;
+}

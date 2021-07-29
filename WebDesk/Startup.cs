@@ -1,57 +1,76 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+using Tripous;
+using Tripous.Web;
 
 namespace WebDesk
 {
+
+
+    /// <summary>
+    /// The startup class. It actually delegates all "action" to <see cref="WApp"/> class
+    /// <para>NOTE: only those two services can be injected into Startup constructor: <see cref="IConfiguration"/>, <see cref="IWebHostEnvironment"/></para>
+    /// </summary>
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        IConfiguration Configuration;
+        IWebHostEnvironment HostEnvironment;
+
+        /* construction */
+        /// <summary>
+        /// Constructor.
+        /// <para>NOTE: only those two services can be injected into Startup constructor: <see cref="IConfiguration"/>, <see cref="IWebHostEnvironment"/></para>
+        /// <para>see: https://docs.microsoft.com/en-gb/aspnet/core/fundamentals/dependency-injection#services-injected-into-startup</para>
+        /// </summary>
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            HostEnvironment = environment;
+
+            WSys.Configuration = Configuration;
+            WSys.HostEnvironment = HostEnvironment;
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /* public */
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            WApp.ConfigureServices(services);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        public void Configure(IApplicationBuilder app, IOptionsMonitor<AppSettings> SettingsAccessor)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            /*
+                         app.Use(async (context, next) =>
+                        {
+                            var url = context.Request.Path.Value;
 
-            app.UseRouting();
+                            // Rewrite to index
+                            if (url.Contains("Localized"))
+                            {
+                                // rewrite and continue processing
+                                //context.Request.Path = "/home/index";
+                            }
 
-            app.UseAuthorization();
+                            await next();
+                        });
+             */
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
+            WApp.Configure(app, SettingsAccessor);
         }
     }
 }

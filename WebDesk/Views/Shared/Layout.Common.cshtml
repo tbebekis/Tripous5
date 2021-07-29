@@ -1,0 +1,76 @@
+﻿@*
+    Place common HTML markup here, e.g. dialog boxes, notification boxes, and the like.
+    HTML elements placed in this partial are NOT visible.
+    The whole markup of this partial is surrounded by a non-visible container.
+*@
+
+@{
+    var Settings = DataStore.GetSettings();
+}
+
+<div class="dialog-box-template">
+    <div class="caption">
+        <div class="title">@*PLACE DIALOG-BOX TITLE HERE*@</div>
+        <img class="close" src='@ImageUrl("close window.png")' asp-append-version="true" />
+    </div>
+    <div class="content-container">
+    </div>
+</div>
+
+<div class="yes-no-box-content-template">
+    <textarea class="message-text-area" rows="10" cols="60">
+        @*PLACE QUESTION TEXT HERE*@
+    </textarea>
+    <div class="buttons">
+        <button class="btn-yes">@L("Yes")</button>
+        <button class="btn-no">@L("No")</button>
+    </div>
+</div>
+
+<div class="notification-box-template">
+    <div class="left">
+        <div class="ico"></div>
+    </div>
+    <div class="right">
+        <div class="caption">
+            <div class="title">@*PLACE NOTIFICATION-BOX TITLE HERE*@</div>
+            <img class="close" src='@ImageUrl("close window.png")' asp-append-version="true" />
+        </div>
+        <div class="text">
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    tp.Ready(() => {
+
+        tp.ScreenWidthsMax = {
+            XSmall: 576,
+            Small: 992,
+            Medium: 1200
+        };
+
+        tp.NotificationBoxSetup.ToTop = false;
+        tp.NotificationBoxSetup.Height = 80;
+
+        tp.NotificationBoxSetup.Titles = {
+            Information: '@L("NotificationBox.Information")',
+            Warning: '@L("NotificationBox.Warning")',
+            Error: '@L("NotificationBox.Error")',
+            Success: '@L("NotificationBox.Success")'
+        };
+
+        app.Config.EmptyValue = '@Lib.EmptyValue';
+        app.Config.CurrencySymbol = '@Settings.General.CurrencySymbol'; 
+
+        // string resources
+        app.Resources.SelectAnItem = '@L("SelectAnItem")';
+        app.Resources.Question = '@L("Question")';
+        app.Resources.DeleteItemQuestion = '@L("DeleteItemQuestion")';
+    });
+
+
+</script>
