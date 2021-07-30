@@ -5,6 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+
 using Newtonsoft.Json;
 
 using Tripous;
@@ -20,19 +25,17 @@ namespace WebDesk
     /// <para>Use the <see cref="Controller"/> as base class for AJAX controllers. Otherwise the ActionExceptionFilter will provide error results. </para>
     /// </summary>
     [ApiController]
+    [Authorize(AuthenticationSchemes = Lib.JwtAuthScheme)]
     public class ControllerApi : ControllerBase
     {
-        IRequestContext fRequestContext;
-       
-
+        IJwtRequestContext fJwtRequestContext;
+ 
         /* properties */
         /// <summary>
         /// The context regarding the current HTTP request (current visitor, selected warehouse, etc.)
         /// </summary>
-        protected IRequestContext RequestContext => fRequestContext ?? (fRequestContext = Lib.GetService<IRequestContext>());
+        protected IJwtRequestContext JwtRequestContext => fJwtRequestContext ?? (fJwtRequestContext = Lib.GetService<IJwtRequestContext>());
  
-
-
         /* public */
         /// <summary>
         /// Creates a <see cref="Microsoft.AspNetCore.Mvc.JsonResult" /> object that serializes the specified data object to JSON.

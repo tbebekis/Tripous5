@@ -22,20 +22,33 @@ namespace WebDesk
 
 
     /// <summary>
-    /// A requestor user cookie context
+    /// Request context for browser clients (cookies)
     /// </summary>
-    internal class UserCookieContext: RequestContext, IUserCookieContext
+    internal class UserRequestContext: RequestContext, IUserRequestContext
     {
-
-        const string SVisitorCookie = "AntyxSoft.DevApp.Visitor";
+        const string SUserCookieName = "WebDesk.User";        
 
         Requestor fRequestor;
-
-        Language fLanguage;
-
-
-
+        UserCookie Cookie;
         bool LoadingCookie;
+
+        /// <summary>
+        /// Returns a user from database found under a specified Id, if any, else null.
+        /// <para>If the user is found, then it sets the cookie too.</para>
+        /// </summary>
+        Requestor GetRequestor(string Id)
+        {
+            Requestor Result = null;
+
+            if (!string.IsNullOrWhiteSpace(Id))
+            {
+                Result = DataStore.GetRequestor(Id);
+                if (Result != null)
+                    Cookie.RequestorId = Result.Id;
+            }
+
+            return Result;
+        }
 
         /// <summary>
         /// Reads the cookie from <see cref="HttpRequest"/> and loads the properties of this instance.
@@ -47,7 +60,7 @@ namespace WebDesk
                 LoadingCookie = true;
                 try
                 {
-                    string Base64 = HttpContext.Request.Cookies[SVisitorCookie];
+                    string Base64 = HttpContext.Request.Cookies[SUserCookieName];
                     if (!string.IsNullOrWhiteSpace(Base64))
                     {
                         string JsonText = Sys.Base64ToString(Base64, Encoding.UTF8);
@@ -73,8 +86,8 @@ namespace WebDesk
             {
                 string JsonText = Json.ToJson(this.Cookie);
                 string Base64 = Sys.StringToBase64(JsonText, Encoding.UTF8);
-                HttpContext.Response.Cookies.Delete(SVisitorCookie);
-                HttpContext.Response.Cookies.Append(SVisitorCookie, Base64, UserCookie.GetCookieOptions());
+                HttpContext.Response.Cookies.Delete(SUserCookieName);
+                HttpContext.Response.Cookies.Append(SUserCookieName, Base64, CookieAuthHelper.GetUserCookieOptions());
             }
         }
 
@@ -90,7 +103,7 @@ namespace WebDesk
         /// <summary>
         /// Constructor
         /// </summary>
-        public UserCookieContext(IHttpContextAccessor HttpContextAccessor)
+        public UserRequestContext(IHttpContextAccessor HttpContextAccessor)
             : base(HttpContextAccessor)
         {
             this.Cookie = new UserCookie();
@@ -99,29 +112,15 @@ namespace WebDesk
             this.Cookie.Changed += Cookie_Changed;
         }
 
-
         /* public */
         /// <summary>
         /// Creates and returns a claim list regarding a specified visitor
         /// </summary>
         public List<Claim> GetClaimList(Requestor V)
         {
-            List<Claim> ClaimList = new List<Claim>();
-
-            if (!string.IsNullOrWhiteSpace(V.Id))
-                ClaimList.Add(new Claim(ClaimTypes.NameIdentifier, V.Id));
-
-
-            if (!string.IsNullOrWhiteSpace(V.Email))
-            {
-                string Name = !string.IsNullOrWhiteSpace(V.Name) ? V.Name : V.Email;
-                ClaimList.Add(new Claim(ClaimTypes.Name, Name));
-                ClaimList.Add(new Claim(ClaimTypes.Email, V.Email));
-            }
-
+            List<Claim> ClaimList = V.GetClaimList(Lib.CookieAuthScheme);
             return ClaimList;
         }
-
         /// <summary>
         /// Sign-in. Authenticates a specified, already validated, Visitor
         /// </summary>
@@ -129,15 +128,13 @@ namespace WebDesk
         {
             // await Task.CompletedTask;
             this.IsImpersonation = IsImpersonation;
-
-            string Scheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
+ 
             // create claim list
-            List<Claim> ClaimList = GetClaimList(V);
+            List<Claim> ClaimList = GetClaimList(V); 
 
             // identity and principal
             // NOTE: setting the second parameter actually authenticates the identity (IsAuthenticated returns true)
-            ClaimsIdentity Identity = new ClaimsIdentity(ClaimList, Scheme);
+            ClaimsIdentity Identity = new ClaimsIdentity(ClaimList, Lib.CookieAuthScheme);
             ClaimsPrincipal Principal = new ClaimsPrincipal(Identity);
 
             // properties
@@ -148,7 +145,7 @@ namespace WebDesk
             AuthProperties.IsPersistent = IsPersistent;
 
             // authenticate the principal under the scheme
-            await HttpContext.SignInAsync(Scheme, Principal, AuthProperties);
+            await HttpContext.SignInAsync(Lib.CookieAuthScheme, Principal, AuthProperties);
             this.Requestor = V;
         }
         /// <summary>
@@ -158,33 +155,13 @@ namespace WebDesk
         {
             IsImpersonation = false;
 
-            string Scheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            string Scheme = Lib.CookieAuthScheme;
 
             await HttpContext.SignOutAsync(Scheme);
             this.Requestor = null;
         }
 
-
-        /* properties */
-        /// <summary>
-        /// Returns a user from database found under a specified Id, if any, else null.
-        /// <para>If the user is found, then it sets the cookie too.</para>
-        /// </summary>
-        Requestor GetRequestor(string Id)
-        {
-            Requestor Result = null;
-
-            if (!string.IsNullOrWhiteSpace(Id))
-            {
-                Result = DataStore.GetRequestor(Id);
-                if (Result != null)
-                    Cookie.RequestorId = Result.Id;
-            }
-
-            return Result;
-        }
-
-
+        /* properties */ 
         /// <summary>
         /// The current Requestor (the session Requestor)
         /// <para>NOTE: Setting or unsetting the Requestor, sets or unsets the Requestor cookie too.</para>
@@ -203,6 +180,11 @@ namespace WebDesk
                 // no visitor at all, so create a new visitor and set the cookie
                 //if (fRequestor == null)
                 //    fRequestor = CreateNewVisitor();
+
+                if (fRequestor == null && Cookie != null)
+                {
+                    Cookie.RequestorId = string.Empty;
+                }
 
                 return fRequestor;
             }
@@ -229,7 +211,6 @@ namespace WebDesk
             }
 
         }
-
         /// <summary>
         /// The selected language (and culture) of the Requestor
         /// </summary>
@@ -237,47 +218,54 @@ namespace WebDesk
         {
             get
             {
-                Language Result = fLanguage;
+                Language Result = null;
 
-                if (Result == null)
+                if (Cookie != null && DataStore.Initialized)
                 {
                     string CultureCode = Cookie.CultureCode;
-                    Result = Tripous.Languages.FindByCultureCode(CultureCode);
+                    Language[] Languages = DataStore.GetLanguages();
+                    Result =  Tripous.Languages.FindByCultureCode(CultureCode);
                 }
 
                 if (Result == null)
-                    Result = Tripous.Languages.DefaultLanguage;
+                    Result = DataStore.EnLanguage;
 
                 return Result;
 
             }
             set
             {
-                if (fLanguage != value)
+                if (Language != value)
                 {
-                    fLanguage = value;
-
                     // CAUTION: Language setter is called from the inherited constructor too, when Cookie is still null.
                     if (Cookie != null)
                     {
                         string CultureCode = Cookie.CultureCode;
-                        if (fLanguage != null && !fLanguage.CultureCode.IsSameText(CultureCode))
+                        if (value != null && !value.CultureCode.IsSameText(CultureCode))
                         {
-                            Cookie.CultureCode = fLanguage.CultureCode;
+                            Cookie.CultureCode = value.CultureCode;
                         }
                     }
-
                 }
             }
         }
-
-
-
         /// <summary>
         /// True when the user is authenticated with the cookie authentication scheme.
         /// </summary>
-        public bool IsAuthenticated => Lib.IsCookieAuthenticated;
- 
+        public override bool IsAuthenticated
+        {
+            get
+            {
+                bool Result = HttpContext.User.Identity.IsAuthenticated;
+                if (Result)
+                {
+                    string Scheme = Lib.CookieAuthScheme;
+                    Result = HttpContext.User.Identity.AuthenticationType == Scheme;
+                }
+
+                return Result;
+            }
+        }
         /// <summary>
         /// True when the Visitor has loged-in usin the SuperUserPassword
         /// </summary>
@@ -293,10 +281,5 @@ namespace WebDesk
             }
         }
 
-
-        /// <summary>
-        /// User cookie
-        /// </summary>
-        public UserCookie Cookie { get; }
     }
 }

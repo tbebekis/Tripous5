@@ -24,8 +24,12 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.CookiePolicy;
 
-
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Http.Features;
@@ -211,8 +215,8 @@ namespace WebDesk
             SysConfig.ExternalModulesFolder = AppSettings.PluginFolder;
 
             // ● custom services 
-            services.AddScoped<IRequestContext, RequestContext>();
-            services.AddScoped<IUserCookieContext, UserCookieContext>();
+            services.AddScoped<IJwtRequestContext, JwtRequestContext>();
+            services.AddScoped<IUserRequestContext, UserRequestContext>();
  
 
             // ● HttpContext and ActionContext
@@ -245,89 +249,95 @@ namespace WebDesk
 
             // ● Request Localization
             // https://www.codemag.com/Article/2009081/A-Deep-Dive-into-ASP.NET-Core-Localization
-            services.Configure((RequestLocalizationOptions options) =>
-            {
+            services.Configure((RequestLocalizationOptions options) => {
+
                 var Provider = new CustomRequestCultureProvider(async (HttpContext) => {
                     await Task.Yield();
-                    IRequestContext RequestContext = GetService<IRequestContext>();
-                    CultureInfo CI = RequestContext.Language.GetCulture();
-                    return new ProviderCultureResult(CI.Name);
+                    IRequestContext RequestContext = Lib.IsMvcRequest(HttpContext) ? GetService<IUserRequestContext>() : GetService<IJwtRequestContext>();
+                    Language Language = RequestContext.Language; 
+                    return new ProviderCultureResult(Language.CultureCode);
                 });
 
-                // var Cultures = new CultureInfo[] { new CultureInfo("en-US"), new CultureInfo("el-GR") };
-                var Cultures = Tripous.Languages.Items.Select(item => item.GetCulture()).ToArray();
-                options.DefaultRequestCulture = new RequestCulture(Cultures[0]);
+                var Cultures = DataStore.GetLanguages().Select(item => item.GetCulture()).ToArray(); // Tripous.Languages.Items.Select(item => item.GetCulture()).ToArray();
+                options.DefaultRequestCulture = new RequestCulture(DataStore.EnLanguage.GetCulture());
                 options.SupportedCultures = Cultures;
                 options.SupportedUICultures = Cultures;
                 options.RequestCultureProviders.Insert(0, Provider);
             });
 
-            // ● Security
-            if (WApp.AppSettings.Security.Enabled)
+
+            // ● Security - authentication
+            AuthenticationBuilder AuthBuilder = services.AddAuthentication(o => {
+                o.DefaultScheme = Lib.CookieAuthScheme;
+                o.DefaultAuthenticateScheme = o.DefaultScheme;
+                o.DefaultChallengeScheme = o.DefaultScheme;
+            });
+
+            // ● Cookie authentication
+            AuthBuilder.AddCookie(Lib.CookieAuthScheme, o => {
+                CookieAuthHelper.SetCookieConfigurationOptions(o);
+                });
+
+            // ● JWT authentication
+            if (AppSettings.Jwt.Enabled)
             {
-                // ● authentication
-                services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, o => {
-                    o.EventsType = typeof(AuthCookieEvents);
-                    o.LoginPath = "/login";
-                    o.ReturnUrlParameter = "ReturnUrl";
-                    //o.AccessDeniedPath = "/Account/Forbidden/";
+                AuthBuilder.AddJwtBearer(Lib.JwtAuthScheme, o => {
+                    JwtAuthHelper.SetJwtBearerConfigurationOptions(o, AppSettings.Jwt);
                 });
-
-                /*
-                //● authentication
-                services.AddAuthentication(o =>
-                {
-                    o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(o =>
-                {
-                    o.Authority = WApp.Settings.Azure.GetAuthority();
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-
-                        // set both AppIdUri and ClientIs as valid audiences in the access token
-                        ValidAudiences = new List<string>
-                        {
-                            WApp.Settings.Azure.ClientId,
-                            WApp.Settings.Azure.GetAppIdUri()
-                        }
-                    };
-                });
-                */
-
-                services.AddScoped<AuthCookieEvents>();
-
-                services.Configure<CookiePolicyOptions>(o =>
-                {
-                    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                    // If CheckConsentNeeded is set to true, then the IsEssential should be also set to true, for any Cookie's CookieOptions setting.
-                    // SEE: https://stackoverflow.com/questions/52456388/net-core-cookie-will-not-be-set
-                    o.CheckConsentNeeded = context => true;
-
-                    // Set the secure flag, which Chrome's changes will require for SameSite none.
-                    // Note this will also require you to be running on HTTPS.
-                    o.MinimumSameSitePolicy = SameSiteMode.None;
-
-                    // Set the cookie to HTTP only which is good practice unless you really do need
-                    // to access it client side in scripts.
-                    o.HttpOnly = HttpOnlyPolicy.Always;
-
-                    // Add the SameSite attribute, this will emit the attribute with a value of none.
-                    o.Secure = CookieSecurePolicy.Always;
-                });
-
-
-                //● authorization
-                // SEE: https://docs.microsoft.com/en-us/aspnet/core/security/authorization/limitingidentitybyscheme
-                services.AddAuthorization(o =>
-                {
-                    o.AddPolicy(Lib.PolicyAuthenticated, policy => { policy.RequireAuthenticatedUser(); });
-                });
-
-
             }
+
+
+            /*
+            //● authentication
+            services.AddAuthentication(o =>
+            {
+                o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(o =>
+            {
+                o.Authority = WApp.Settings.Azure.GetAuthority();
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+
+                    // set both AppIdUri and ClientIs as valid audiences in the access token
+                    ValidAudiences = new List<string>
+                    {
+                        WApp.Settings.Azure.ClientId,
+                        WApp.Settings.Azure.GetAppIdUri()
+                    }
+                };
+            });
+            */
+
+            services.AddScoped<AuthCookieEvents>();
+
+            services.Configure<CookiePolicyOptions>(o =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                // If CheckConsentNeeded is set to true, then the IsEssential should be also set to true, for any Cookie's CookieOptions setting.
+                // SEE: https://stackoverflow.com/questions/52456388/net-core-cookie-will-not-be-set
+                o.CheckConsentNeeded = context => true;
+
+                // Set the secure flag, which Chrome's changes will require for SameSite none.
+                // Note this will also require you to be running on HTTPS.
+                o.MinimumSameSitePolicy = SameSiteMode.None;
+
+                // Set the cookie to HTTP only which is good practice unless you really do need
+                // to access it client side in scripts.
+                o.HttpOnly = HttpOnlyPolicy.Always;
+
+                // Add the SameSite attribute, this will emit the attribute with a value of none.
+                o.Secure = CookieSecurePolicy.Always;
+            });
+
+
+            //● Security - authorization
+            // SEE: https://docs.microsoft.com/en-us/aspnet/core/security/authorization/limitingidentitybyscheme
+            services.AddAuthorization(o =>
+            {
+                o.AddPolicy(Lib.PolicyAuthenticated, policy => { policy.RequireAuthenticatedUser(); });
+            });
 
             // ● HSTS
             if (WApp.HostEnvironment.IsDevelopment())
@@ -386,6 +396,7 @@ namespace WebDesk
             //.AddNewtonsoftJson()
             //.AddJsonOptions(opt => { opt.JsonSerializerOptions.PropertyNamingPolicy = null; })
             ;
+ 
 
             // ● Razor Runtime Compilation
             // see: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation
@@ -542,11 +553,8 @@ namespace WebDesk
             //app.UseCors();
 
             // ● Security
-            if (WApp.AppSettings.Security.Enabled)
-            {
-                app.UseAuthentication();
-                app.UseAuthorization();
-            }
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             // app.UseResponseCompression();
             // app.UseResponseCaching();
@@ -556,9 +564,8 @@ namespace WebDesk
             // https://stackoverflow.com/questions/57846127/what-are-the-differences-between-app-userouting-and-app-useendpoints/61413251#61413251
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                  name: "default",
-                  pattern: "{controller=Home}/{action=Index}/{id?}");
+                //endpoints.MapControllerRoute( name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllers();
             });
 
         }

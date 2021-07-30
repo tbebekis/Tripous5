@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Globalization;
-using System.IO;
-using System.Data;
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.AspNetCore.Http; 
 
 using Tripous;
 using Tripous.Web;
@@ -61,12 +56,22 @@ namespace WebDesk
         /// Returns the application settings
         /// </summary>
         DataStoreSettings GetSettings();
-
+ 
         /// <summary>
         /// The <see cref="CultureInfo"/> culture of the current request.
+        /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+        /// This property here uses that setting to return its value.
+        /// </para>
         /// </summary>
         CultureInfo Culture { get; }
- 
+        /// <summary>
+        /// The <see cref="Language"/> language of the current request.
+        /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+        /// This property here uses that setting to return its value.
+        /// </para>
+        /// </summary>
+        Language Language { get; }
+
         /// <summary>
         /// Returns true when HostEnvironment.IsDevelopment() returns true.
         /// </summary>

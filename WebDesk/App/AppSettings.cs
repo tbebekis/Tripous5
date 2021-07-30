@@ -21,7 +21,7 @@ namespace WebDesk
         /// <summary>
         /// Security settings
         /// </summary>
-        public SecuritySettings Security { get; set; } = new SecuritySettings();
+        public JwtSettings Jwt { get; set; } = new JwtSettings();
         /// <summary>
         /// HSTS settings
         /// <para>SEE: https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security </para>

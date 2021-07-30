@@ -147,7 +147,7 @@
             <para>Use the <see cref="T:Microsoft.AspNetCore.Mvc.Controller"/> as base class for AJAX controllers. Otherwise the ActionExceptionFilter will provide error results. </para>
             </summary>
         </member>
-        <member name="P:WebDesk.ControllerApi.RequestContext">
+        <member name="P:WebDesk.ControllerApi.JwtRequestContext">
             <summary>
             The context regarding the current HTTP request (current visitor, selected warehouse, etc.)
             </summary>
@@ -387,6 +387,16 @@
             The list of items
             </summary>
         </member>
+        <member name="T:WebDesk.IClaimListProvider">
+            <summary>
+            Constructs a list of claims
+            </summary>
+        </member>
+        <member name="M:WebDesk.IClaimListProvider.GetClaimList(System.String)">
+            <summary>
+            Creates and returns a claim list regarding this instance
+            </summary>
+        </member>
         <member name="T:WebDesk.IPlugin">
             <summary>
             A dynamically loadable external module.
@@ -404,64 +414,6 @@
             <para>Instructs plugin to add any object to object mappings may have by calling either:</para>
             <para><c>App.AddObjectMap(Type Source, Type Dest, bool TwoWay = false)</c></para>
             <para>or the passed in Configurator object which in the current implementantion is an AutoMapper.IMapperConfigurationExpression instance </para>
-            </summary>
-        </member>
-        <member name="T:WebDesk.IRequestContext">
-            <summary>
-            Represents a context regarding the current HTTP request.
-            <para>NOTE: Whatever information is intended to have the lifetime of the HTTP request should be added in this interface.</para>
-            </summary>
-        </member>
-        <member name="P:WebDesk.IRequestContext.HttpContext">
-            <summary>
-            The http context
-            </summary>
-        </member>
-        <member name="P:WebDesk.IRequestContext.Request">
-            <summary>
-            The http request
-            </summary>
-        </member>
-        <member name="P:WebDesk.IRequestContext.Query">
-            <summary>
-            The query string as a collection of key-value pairs
-            </summary>
-        </member>
-        <member name="P:WebDesk.IRequestContext.Language">
-            <summary>
-            The language of the current request
-            </summary>
-        </member>
-        <member name="P:WebDesk.IRequestContext.Requestor">
-            <summary>
-            The user or api client of the current request
-            </summary>
-        </member>
-        <member name="P:WebDesk.IRequestContext.Settings">
-            <summary>
-            Application settings
-            </summary>
-        </member>
-        <member name="T:WebDesk.IUserCookieContext">
-            <summary>
-            A requestor user cookie context
-            </summary>
-        </member>
-        <member name="M:WebDesk.IUserCookieContext.SignInAsync(WebDesk.Requestor,System.Boolean,System.Boolean)">
-            <summary>
-            Sign-in. Authenticates a specified, already validated, Visitor
-            </summary>
-        </member>
-        <member name="M:WebDesk.IUserCookieContext.SignOutAsync">
-            <summary>
-            Sign-out.
-            </summary>
-        </member>
-        <member name="P:WebDesk.IUserCookieContext.IsAuthenticated">
-            <summary>
-            True when the user is authenticated.
-            <para>NOTE: We check both 1) the <see cref="T:System.Security.Claims.ClaimsPrincipal"/> of the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/> (the User property)
-            and 2) that the <see cref="F:System.Security.Claims.ClaimTypes.NameIdentifier"/> claim equals to <see cref="P:WebDesk.Requestor.Id"/></para>
             </summary>
         </member>
         <member name="T:WebDesk.IWebAppContext">
@@ -520,6 +472,17 @@
         <member name="P:WebDesk.IWebAppContext.Culture">
             <summary>
             The <see cref="T:System.Globalization.CultureInfo"/> culture of the current request.
+            <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+            This property here uses that setting to return its value.
+            </para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.IWebAppContext.Language">
+            <summary>
+            The <see cref="P:WebDesk.IWebAppContext.Language"/> language of the current request.
+            <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+            This property here uses that setting to return its value.
+            </para>
             </summary>
         </member>
         <member name="P:WebDesk.IWebAppContext.DevMode">
@@ -553,6 +516,21 @@
         <member name="F:WebDesk.Lib.SPhoneRegex">
             <summary>
             Phone number validation regex
+            </summary>
+        </member>
+        <member name="F:WebDesk.Lib.JwtAuthScheme">
+            <summary>
+            The name of the JWT authentication scheme
+            </summary>
+        </member>
+        <member name="F:WebDesk.Lib.CookieAuthScheme">
+            <summary>
+            The name of the Cookie authentication scheme
+            </summary>
+        </member>
+        <member name="F:WebDesk.Lib.DefaultCultureCode">
+            <summary>
+            The default culture code, e.g. en-US
             </summary>
         </member>
         <member name="M:WebDesk.Lib.Initialize(WebDesk.IWebAppContext)">
@@ -665,14 +643,19 @@
             Creates and returns a new ViewDataDictionary
             </summary>
         </member>
+        <member name="M:WebDesk.Lib.IsApiRequest(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Returns true if a request is a Web Api request
+            </summary>
+        </member>
+        <member name="M:WebDesk.Lib.IsMvcRequest(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Returns true if a request is an Mvc request
+            </summary>
+        </member>
         <member name="P:WebDesk.Lib.App">
             <summary>
             Represents the web application
-            </summary>
-        </member>
-        <member name="P:WebDesk.Lib.RequestContext">
-            <summary>
-            Returns the request context
             </summary>
         </member>
         <member name="P:WebDesk.Lib.HttpContext">
@@ -690,6 +673,11 @@
             The query string as a collection of key-value pairs
             </summary>
         </member>
+        <member name="P:WebDesk.Lib.RequestContext">
+            <summary>
+            Returns the current request context (JWT or User/Cookie)
+            </summary>
+        </member>
         <member name="P:WebDesk.Lib.MoneyFormat">
             <summary>
             Format string for formatting money values
@@ -698,6 +686,11 @@
         <member name="P:WebDesk.Lib.IsCookieAuthenticated">
             <summary>
             True when the user is authenticated with the cookie authentication scheme.
+            </summary>
+        </member>
+        <member name="P:WebDesk.Lib.IsJwtAuthenticated">
+            <summary>
+            True when the user is authenticated with the JWT authentication scheme.
             </summary>
         </member>
         <member name="P:WebDesk.Lib.DevMode">
@@ -817,9 +810,148 @@
             The function to construct a url to an image. Defaults to DefaultImageUrl() method
             </summary>
         </member>
+        <member name="T:WebDesk.IRequestContext">
+            <summary>
+            Represents a context regarding the current HTTP request.
+            <para>NOTE: Whatever information is intended to have the lifetime of the HTTP request should be added in this interface.</para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.HttpContext">
+            <summary>
+            The http context
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.Request">
+            <summary>
+            The http request
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.Query">
+            <summary>
+            The query string as a collection of key-value pairs
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.Language">
+            <summary>
+            The language of the current request
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.Requestor">
+            <summary>
+            The user or api client of the current request
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.Settings">
+            <summary>
+            Application settings
+            </summary>
+        </member>
+        <member name="P:WebDesk.IRequestContext.IsAuthenticated">
+            <summary>
+            True when the request is authenticated.
+            </summary>
+        </member>
+        <member name="T:WebDesk.IJwtRequestContext">
+            <summary>
+            A JWT request context (with JWT authentication)
+            </summary>
+        </member>
+        <member name="T:WebDesk.IUserRequestContext">
+            <summary>
+            A user request context (with cookies authentication)
+            </summary>
+        </member>
+        <member name="M:WebDesk.IUserRequestContext.SignInAsync(WebDesk.Requestor,System.Boolean,System.Boolean)">
+            <summary>
+            Sign-in. Authenticates a specified, already validated, Visitor
+            </summary>
+        </member>
+        <member name="M:WebDesk.IUserRequestContext.SignOutAsync">
+            <summary>
+            Sign-out.
+            </summary>
+        </member>
+        <member name="P:WebDesk.IUserRequestContext.IsImpersonation">
+            <summary>
+            True when the user has loged-in usin a SuperUserPassword
+            </summary>
+        </member>
+        <member name="T:WebDesk.RequestContext">
+            <summary>
+            Represents a context regarding the current HTTP request.
+            </summary>
+        </member>
+        <member name="F:WebDesk.RequestContext.fSettings">
+            <summary>
+            Field
+            </summary>
+        </member>
+        <member name="M:WebDesk.RequestContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.HttpContext">
+            <summary>
+            The http context
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.Request">
+            <summary>
+            The http request
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.Query">
+            <summary>
+            The query string as a collection of key-value pairs
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.Language">
+            <summary>
+            The language of the current request
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.Requestor">
+            <summary>
+            The user or api client of the current request
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.IsAuthenticated">
+            <summary>
+            True when the request is authenticated.
+            </summary>
+        </member>
+        <member name="P:WebDesk.RequestContext.Settings">
+            <summary>
+            DataStore settings 
+            </summary>
+        </member>
         <member name="T:WebDesk.Requestor">
             <summary>
             Represents the user or api client of a request
+            </summary>
+        </member>
+        <member name="F:WebDesk.Requestor.SUserLevelClaimType">
+            <summary>
+            A claim type for a private claim. 
+            Designates the level of a user, i.e. Admin, User, Guest, Service, etc.
+            </summary>
+        </member>
+        <member name="F:WebDesk.Requestor.SAuthenticationSchemeClaimType">
+            <summary>
+            A claim type for a private claim.
+            Designates the scheme used in authentication, i.e. Cookies, JWT, etc.
+            </summary>
+        </member>
+        <member name="F:WebDesk.Requestor.SCultureClaimType">
+            <summary>
+            A claim type for a private claim. 
+            Designates the culture code to be used for subsequent calls, e.g. en-US
+            </summary>
+        </member>
+        <member name="M:WebDesk.Requestor.GetClaimList(System.String)">
+            <summary>
+            Creates and returns a claim list regarding this instance
             </summary>
         </member>
         <member name="P:WebDesk.Requestor.Id">
@@ -1809,6 +1941,21 @@
             <para>NOTE: When a parameter is included more than once, e.g. ?page=1&amp;page=2 then the result will be 1,2 hence this function returns an array.</para>
             </summary>
         </member>
+        <member name="M:Tripous.Web.WSys.ContainsClaim(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},System.String)">
+            <summary>
+            Returns true if a claim exists in a sequence of claims
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WSys.FindClaim(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},System.String)">
+            <summary>
+            Finds and returns a claim, if a claim exists in a sequence of claims, else null.
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WSys.GetClaimValue(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},System.String)">
+            <summary>
+            Returns the value of a claim, if a claim exists in a sequence of claims, else null.
+            </summary>
+        </member>
         <member name="M:Tripous.Web.WSys.Localize(System.String)">
             <summary>
             Returns a localized string based on a specified resource key, e.g. Customer, and the culture code of the current request, e.g. el-GR
@@ -1833,6 +1980,11 @@
             <para>Null is returned when no data is passed (null or length = 0) and the file does not exist.</para>
             <para>NOTE: If no binary Data is specified then the function tries to load the binary data from the specified file path. </para>
             <para>CAUTION: FilePath is mandatory.</para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WSys.GetHttpHeader(Microsoft.AspNetCore.Http.HttpRequest,System.String)">
+            <summary>
+            Reads and returns an HTTP header from <see cref="P:Microsoft.AspNetCore.Http.HttpRequest.Headers"/>
             </summary>
         </member>
         <member name="M:Tripous.Web.WSys.GetReferrerUrl(Microsoft.AspNetCore.Http.HttpRequest)">
@@ -1929,6 +2081,18 @@
             Returns true if a specified request is an ajax request
             </summary>
         </member>
+        <member name="M:Tripous.Web.WSys.IsMobile(Microsoft.AspNetCore.Http.HttpRequest)">
+            <summary>
+            Returns true if we are dealing with a mobile device/browser
+            <para>FROM: https://stackoverflow.com/questions/13086856/mobile-device-detection-in-asp-net </para>
+            </summary>
+        </member>
+        <member name="M:Tripous.Web.WSys.IsCrawler(Microsoft.AspNetCore.Http.HttpRequest)">
+            <summary>
+            Returns true if we are dealing with a search endine bot.
+            <para>FROM: https://stackoverflow.com/questions/7576508/how-to-detect-crawlers-in-asp-net-mvc  </para>
+            </summary>
+        </member>
         <member name="P:Tripous.Web.WSys.BaseUrl">
             <summary>
             Returns the base url of this application.
@@ -2002,18 +2166,6 @@
         <member name="P:Tripous.Web.WSys.IsDevelopment">
             <summary>
             True when is development environment.
-            </summary>
-        </member>
-        <member name="P:Tripous.Web.WSys.IsMobile">
-            <summary>
-            Returns true if we are dealing with a mobile device/browser
-            <para>FROM: https://stackoverflow.com/questions/13086856/mobile-device-detection-in-asp-net </para>
-            </summary>
-        </member>
-        <member name="P:Tripous.Web.WSys.IsCrawler">
-            <summary>
-            Returns true if we are dealing with a search endine bot.
-            <para>FROM: https://stackoverflow.com/questions/7576508/how-to-detect-crawlers-in-asp-net-mvc  </para>
             </summary>
         </member>
         <member name="P:Tripous.Web.WSys.LocalizeFunc">

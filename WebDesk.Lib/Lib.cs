@@ -32,7 +32,11 @@ namespace WebDesk
     /// </summary>
     static public partial class Lib
     {
- 
+        /// <summary>
+        /// The default culture code, e.g. en-US
+        /// </summary>
+        public const string DefaultCultureCode = "en-US";
+
         static readonly TaskFactory fTaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None, TaskContinuationOptions.None, TaskScheduler.Default);
 
 
@@ -265,19 +269,35 @@ namespace WebDesk
             return new ViewDataDictionary(Source);
         }
  
+        /// <summary>
+        /// Returns true if a request is a Web Api request
+        /// </summary>
+        static public bool IsApiRequest(HttpContext Context = null)
+        {
+            if (Context == null)
+                Context = Lib.HttpContext;
+
+            string sUrl = WSys.GetRelativeRawUrl(Context.Request);
+            sUrl = sUrl.ToLowerInvariant();
+            return sUrl.Contains(@"/api/");
+        }
+        /// <summary>
+        /// Returns true if a request is an Mvc request
+        /// </summary>
+        static public bool IsMvcRequest(HttpContext Context = null)
+        {
+            return !IsApiRequest(Context);
+        }
+ 
         /* properties */
         /// <summary>
         /// Represents the web application
         /// </summary>
         static public IWebAppContext App { get; private set; }
         /// <summary>
-        /// Returns the request context
-        /// </summary>
-        static public IRequestContext RequestContext => App.GetService<IRequestContext>();
-        /// <summary>
         /// Returns the <see cref="HttpContext"/>
         /// </summary>
-        static public HttpContext HttpContext => RequestContext.HttpContext;
+        static public HttpContext HttpContext => GetService<IHttpContextAccessor>().HttpContext;
         /// <summary>
         /// The http request
         /// </summary>
@@ -286,6 +306,10 @@ namespace WebDesk
         /// The query string as a collection of key-value pairs
         /// </summary>
         static public IQueryCollection Query => Request.Query;
+        /// <summary>
+        /// Returns the current request context (JWT or User/Cookie)
+        /// </summary>
+        static public IRequestContext RequestContext => Lib.IsMvcRequest(HttpContext) ? GetService<IUserRequestContext>() : GetService<IJwtRequestContext>();
 
         /// <summary>
         /// Format string for formatting money values
@@ -295,21 +319,11 @@ namespace WebDesk
         /// <summary>
         /// True when the user is authenticated with the cookie authentication scheme.
         /// </summary>
-        static public bool IsCookieAuthenticated
-        {
-            get
-            {
-                bool Result = HttpContext.User.Identity.IsAuthenticated;
-                if (Result)
-                {
-                    string Scheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    Result = HttpContext.User.Identity.AuthenticationType == Scheme; 
-                }
-
-                return Result;
-            }
-        }
-
+        static public bool IsCookieAuthenticated => GetService<IUserRequestContext>().IsAuthenticated;
+        /// <summary>
+        /// True when the user is authenticated with the JWT authentication scheme.
+        /// </summary>
+        static public bool IsJwtAuthenticated => GetService<IJwtRequestContext>().IsAuthenticated;
 
         /// <summary>
         /// Returns true when HostEnvironment.IsDevelopment() returns true.

@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
+using Tripous;
+using Tripous.Web;
+
 using WebDesk.Models;
 
 namespace WebDesk.Controllers
@@ -17,6 +20,21 @@ namespace WebDesk.Controllers
     /// </summary>
     public class HomeController : ControllerMvc
     {
+        /* general */
+        [Route("/setlanguage", Name = "SetLanguage"), AllowAnonymous]
+        public IActionResult SetLanguage(string LanguageCode, string ReturnUrl = "")
+        {
+            var Languages = DataStore.GetLanguages();
+            Language Lang = Languages.FirstOrDefault(item => item.Code.IsSameText(LanguageCode));
+
+            if (Lang != null && Lang.CultureCode != this.UserContext.Language.CultureCode)
+            {
+                this.UserContext.Language = Lang;
+                string S = Session.GetString("CultureCode");
+            }
+
+            return HandleReturnUrl(ReturnUrl);
+        }
 
         [HttpGet("/", Name = "Home")]
         [HttpGet("/desk", Name = "Desk")]
@@ -70,7 +88,13 @@ namespace WebDesk.Controllers
 
             return View("Login", M); // something went wrong 
         }
+        [Route("/logout", Name = "Logout"), AllowAnonymous]
+        public async Task<IActionResult> Logout()
+        {
+            if (Lib.IsCookieAuthenticated)
+                await UserContext.SignOutAsync();
 
-
+            return RedirectToRoute("Home");
+        }
     }
 }

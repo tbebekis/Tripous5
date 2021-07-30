@@ -1,3 +1,80 @@
-﻿<header class="header">
+﻿
+@{
+    Language[] Languages = DataStore.GetLanguages();
+    Language SelectedLanguage = Lib.App.Language;
+}
 
-</header> 
+<header class="header">
+
+    <div class="top-zone">
+        <div class="inner">
+            @* Logo *@
+            <div class="logo">
+
+            </div>
+            <div class="tp-FlexFill"></div>
+
+
+
+            @* Language *@
+            <div class="language-selector-container">
+                @if (Languages.Length > 0)
+                {
+                    <div class="language-selector">
+                        <div id="btnLanguage" class="language-selector-button">
+                            <div class="tp-Text">@SelectedLanguage.Code</div>
+                            <div><i class="fa fa-caret-down"></i></div>
+                        </div>
+
+                        <div id="cboLanguage" class="tp-List">
+                            @foreach (var Item in Languages)
+                            {
+                                if (Item == SelectedLanguage)
+                                {
+                                    <div class="tp-Selected">@Item.Code</div>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Home" asp-action="SetLanguage" asp-route-LanguageCode="@Item.Code" asp-route-ReturnUrl="@RelativeRawUrlEncoded">
+                                        @Item.Code
+                                    </a>
+                                }
+                            }
+                        </div>
+
+                    </div>
+                }
+
+
+            </div>
+
+            @* Logout *@
+            <div class="logout-container">
+                @if (Lib.IsCookieAuthenticated)
+                {
+                    <a href='@Url.RouteUrl("Logout")' title='@L("Exit")'>
+                        <i class="fa fa-sign-out" aria-hidden="true"></i>
+                    </a>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <div class="tool-bar-zone">
+        tool-bar
+    </div>
+</header>
+
+
+<script>
+
+    let HeaderOptions = {
+        ReturnUrl: '@RelativeRawUrlEncoded',
+    };
+
+    tp.Ready(() => {
+        new app.Header(HeaderOptions);
+    });
+
+</script>

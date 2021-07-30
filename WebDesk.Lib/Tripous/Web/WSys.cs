@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Security.Claims;
 
 using Microsoft.Net.Http.Headers;
 
@@ -220,6 +221,31 @@ namespace Tripous.Web
             return new string[0];
         }
 
+        /* claims */
+        /// <summary>
+        /// Returns true if a claim exists in a sequence of claims
+        /// </summary>
+        static public bool ContainsClaim(IEnumerable<Claim> Claims, string TokenType)
+        {
+            return FindClaim(Claims, TokenType) != null;
+        }
+        /// <summary>
+        /// Finds and returns a claim, if a claim exists in a sequence of claims, else null.
+        /// </summary>
+        static public Claim FindClaim(IEnumerable<Claim> Claims, string TokenType)
+        {
+            TokenType = TokenType.ToLowerInvariant();
+            return  Claims.FirstOrDefault(item => item.Type.ToLowerInvariant() == TokenType);
+        }
+        /// <summary>
+        /// Returns the value of a claim, if a claim exists in a sequence of claims, else null.
+        /// </summary>
+        static public string GetClaimValue(IEnumerable<Claim> Claims, string TokenType)
+        {
+            Claim Claim = FindClaim(Claims, TokenType);
+            return Claim != null ? Claim.Value : null;
+        }
+
         /* miscs */
         /// <summary>
         /// Returns a localized string based on a specified resource key, e.g. Customer, and the culture code of the current request, e.g. el-GR
@@ -281,6 +307,15 @@ namespace Tripous.Web
         {
             byte[] Data = Streams.ToArray(Stream);
             return GetFileContentResult(FilePath, Data);
+        }
+
+        /// <summary>
+        /// Reads and returns an HTTP header from <see cref="HttpRequest.Headers"/>
+        /// </summary>
+        static public string GetHttpHeader(this HttpRequest Request, string Key)
+        {
+            Key = Key.ToLowerInvariant();
+            return Request == null ? string.Empty : Request.Headers.FirstOrDefault(x => x.Key.ToLowerInvariant() == Key).Value.FirstOrDefault();
         }
 
         /// <summary>
@@ -359,22 +394,25 @@ namespace Tripous.Web
             return IsHttps(R) ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
         }
 
+ 
         /// <summary>
         /// Returns the raw relative Url path and query string of a specified request
         /// <note>SEE: https://stackoverflow.com/questions/28120222/get-raw-url-from-microsoft-aspnet-http-httprequest </note>
         /// </summary>
         static public string GetRelativeRawUrl(HttpRequest R = null)
         {
-            string Result = null;
+            string Result = string.Empty;
 
             if (R == null && WSys.IsRequestAvailable)
                 R = WSys.HttpRequest;
 
             Result = R.HttpContext.Features.Get<IHttpRequestFeature>()?.RawTarget;
-
-            // if is empty create it manually
+ 
             if (string.IsNullOrWhiteSpace(Result))
-                Result = $"{R.PathBase}{R.Path}{R.QueryString}";
+            {
+                Result = R.Path.Value;
+                Result = !string.IsNullOrWhiteSpace(Result) ? Uri.UnescapeDataString(Result) : string.Empty;
+            }                 
 
             return Result;
         }
@@ -501,6 +539,40 @@ namespace Tripous.Web
             return R != null ? R.Headers["X-Requested-With"] == "XMLHttpRequest" : false;
         }
 
+        /// <summary>
+        /// Returns true if we are dealing with a mobile device/browser
+        /// <para>FROM: https://stackoverflow.com/questions/13086856/mobile-device-detection-in-asp-net </para>
+        /// </summary>
+        static public bool IsMobile(HttpRequest R = null)
+        {
+            if (R == null && WSys.IsRequestAvailable)
+                R = WSys.HttpRequest;
+
+            if (R != null)
+            {
+                string S = R.Headers[Microsoft.Net.Http.Headers.HeaderNames.UserAgent].ToString();
+                return S.Length >= 4 && (MobileCheck.IsMatch(S) || MobileVersionCheck.IsMatch(S.Substring(0, 4)));
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Returns true if we are dealing with a search endine bot.
+        /// <para>FROM: https://stackoverflow.com/questions/7576508/how-to-detect-crawlers-in-asp-net-mvc  </para>
+        /// </summary>
+        static public bool IsCrawler(HttpRequest R = null)
+        {
+            if (R == null && WSys.IsRequestAvailable)
+                R = WSys.HttpRequest;
+
+            if (R != null)
+            {
+                string S = R.Headers[Microsoft.Net.Http.Headers.HeaderNames.UserAgent].ToString();
+                return S.Length >= 4 && CrawlerCheck.IsMatch(S);
+            }
+
+            return false;
+        }
 
         /* properties */
         /// <summary>
@@ -625,40 +697,7 @@ namespace Tripous.Web
         /// True when is development environment.
         /// </summary>
         static public bool IsDevelopment { get { return HostEnvironment == null? true: HostEnvironment.IsDevelopment(); } }
-        /// <summary>
-        /// Returns true if we are dealing with a mobile device/browser
-        /// <para>FROM: https://stackoverflow.com/questions/13086856/mobile-device-detection-in-asp-net </para>
-        /// </summary>
-        static public bool IsMobile
-        {
-            get
-            {
-                if (HttpContext != null)
-                {
-                    string S = HttpContext.Request.Headers[Microsoft.Net.Http.Headers.HeaderNames.UserAgent].ToString();
-                    return S.Length >= 4 && (MobileCheck.IsMatch(S) || MobileVersionCheck.IsMatch(S.Substring(0, 4)));
-                }
 
-                return false;
-            }
-        }
-        /// <summary>
-        /// Returns true if we are dealing with a search endine bot.
-        /// <para>FROM: https://stackoverflow.com/questions/7576508/how-to-detect-crawlers-in-asp-net-mvc  </para>
-        /// </summary>
-        static public bool IsCrawler
-        {
-            get
-            {
-                if (HttpContext != null)
-                {
-                    string S = HttpContext.Request.Headers[Microsoft.Net.Http.Headers.HeaderNames.UserAgent].ToString();
-                    return S.Length >= 4 && CrawlerCheck.IsMatch(S);
-                }
-
-                return false;
-            }
-        }
 
         /// <summary>
         /// Delegate used by the Localize() method

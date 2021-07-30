@@ -6,10 +6,11 @@ using System.Globalization;
 using System.IO;
 using System.Data;
 
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Caching.Memory;
 
 using Tripous;
 using Tripous.Web;
@@ -63,8 +64,7 @@ namespace WebDesk
         {
             return ObjectMapper.MapTo<TSource, TDestination>(Source, Dest);
         }
-
-
+ 
         /// <summary>
         /// Returns the application settings
         /// </summary>
@@ -72,7 +72,7 @@ namespace WebDesk
         {
             return Lib.GetSettings();
         }
-
+ 
         /* properties */
         /// <summary>
         /// The physical "root path", i.e. the root folder of the application
@@ -88,13 +88,7 @@ namespace WebDesk
         /// Returns the physical path of the images folder, i.e. C:\MyApp\wwwroot\images
         /// </summary>
         public string ImagesPath { get { return WApp.ImagesPath; } }
-
-        /// <summary>
-        /// Returns the request (visitor) context
-        /// </summary>
-        public IRequestContext RequestContext => WSys.GetService<IRequestContext>();
-
-
+ 
         /// <summary>
         /// Represents an application memory cache.
         /// </summary>
@@ -110,16 +104,36 @@ namespace WebDesk
 
         /// <summary>
         /// The <see cref="CultureInfo"/> culture of the current request.
+        /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+        /// This property here uses that setting to return its value.
+        /// </para>
         /// </summary>
         public CultureInfo Culture
         {
             get
             {
-                IRequestCultureFeature Feature = RequestContext.HttpContext.Features.Get<IRequestCultureFeature>();
+                IRequestCultureFeature Feature = Lib.HttpContext.Features.Get<IRequestCultureFeature>();
                 return Feature != null ? Feature.RequestCulture.Culture : new CultureInfo("en-US");
             }
         }
- 
+        /// <summary>
+        /// The <see cref="Language"/> language of the current request.
+        /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+        /// This property here uses that setting to return its value.
+        /// </para>
+        /// </summary>
+        public Language Language
+        {
+            get
+            {
+                Language Result = null;
+                Language[] Languages = DataStore.GetLanguages();
+                Result = Languages.FindByCultureCode(Culture.Name);                  
+                if (Result == null) 
+                    Result = DataStore.EnLanguage;
+                return Result;
+            }
+        }
 
         /// <summary>
         /// Returns true when HostEnvironment.IsDevelopment() returns true.

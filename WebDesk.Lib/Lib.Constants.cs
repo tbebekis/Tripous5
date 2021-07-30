@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+
 namespace WebDesk
 {
     /// <summary>
@@ -27,5 +31,15 @@ namespace WebDesk
         /// Phone number validation regex
         /// </summary>
         public const string SPhoneRegex = @"^\+{0,1}[\d|\s]*$";
+
+
+        /// <summary>
+        /// The name of the JWT authentication scheme
+        /// </summary>
+        public const string JwtAuthScheme = JwtBearerDefaults.AuthenticationScheme;
+        /// <summary>
+        /// The name of the Cookie authentication scheme
+        /// </summary>
+        public const string CookieAuthScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     }
 }

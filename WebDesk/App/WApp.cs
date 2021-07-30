@@ -98,6 +98,9 @@ namespace WebDesk
             return S;
         }
 
+
+
+
         /* properties */
         /// <summary>
         /// Returns true when in debug mode, i.e. the DEBUG constant is defined.

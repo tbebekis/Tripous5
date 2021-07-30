@@ -48,7 +48,6 @@ namespace WebDesk
         {
             WApp.ConfigureServices(services);
         }
-
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
@@ -69,6 +68,7 @@ namespace WebDesk
                             await next();
                         });
              */
+ 
 
             WApp.Configure(app, SettingsAccessor);
         }

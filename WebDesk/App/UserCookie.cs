@@ -29,45 +29,7 @@ namespace WebDesk
         public UserCookie()
         {
         }
-
-        /* static */
-        /// <summary>
-        /// Returns the default cookie options for the visitor cookie.
-        /// </summary>
-        /// <returns></returns>
-        static public CookieOptions GetCookieOptions()
-        {
-            var Settings = DataStore.GetSettings();
-
-            CookieOptions Options = new CookieOptions();
-            Options.HttpOnly = true;
-
-            // NOTE: If the CookiePolicyOptions.CheckConsentNeeded is set to true in the ConfigureServices()
-            // then the CookieOptions.IsEssential must be set to true too.
-            // Otherwise the cookie is considered a non-essential one
-            // and it will not being sent to the browser (no Set-Cookie header) without the user's explicit permission.
-            // SEE: https://stackoverflow.com/questions/52456388/net-core-cookie-will-not-be-set
-            Options.IsEssential = true;
-
-            Options.SameSite = SameSiteMode.Strict;
-
-            // expiration
-            if (Settings.General.UserCookieExpirationHours < 0)             // never 
-            {
-                // SEE: https://stackoverflow.com/questions/51536506/how-to-set-never-expiring-cookie-in-asp-net-core
-                Options.Expires = new DateTimeOffset(2038, 1, 1, 0, 0, 0, TimeSpan.FromHours(0));
-            }
-            else if (Settings.General.UserCookieExpirationHours == 0)       // immediately
-            {
-                // do nothing
-            }
-            else                                                        // after CookieExpirationHours    
-            {
-                Options.Expires = DateTime.Now.AddHours(Settings.General.UserCookieExpirationHours);
-            }
-
-            return Options;
-        }
+ 
 
         /* public */
         /// <summary>

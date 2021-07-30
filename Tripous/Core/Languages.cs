@@ -73,8 +73,17 @@ namespace Tripous
         {
             lock (syncLock)
             {
-                return fItems.FirstOrDefault(item => item.CultureCode.IsSameText(CultureCode));
+                CultureCode = CultureCode.ToLowerInvariant();
+                return fItems.FirstOrDefault(item => item.CultureCode.ToLowerInvariant() == CultureCode);
             }            
+        }
+        /// <summary>
+        /// Finds and returns a language by a Culture code, e.g. en-US
+        /// </summary>
+        static public Language FindByCultureCode(this IEnumerable<Language> Languages, string CultureCode)
+        {
+            CultureCode = CultureCode.ToLowerInvariant();
+            return Languages.FirstOrDefault(item => item.CultureCode.ToLowerInvariant() == CultureCode);
         }
         /// <summary>
         /// Returns a language, specified by a culture code (en-US, el-GR), if registered, else throws an exception.

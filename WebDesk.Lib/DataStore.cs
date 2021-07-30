@@ -293,7 +293,7 @@ where
             if (StoreLanguages == null)
                 Lib.Error($"Cannot Localize(). No Languages");
 
-            Language Lang = StoreLanguages.FirstOrDefault(item => item.CultureCode.IsSameText(CultureCode));
+            Language Lang = StoreLanguages.FindByCultureCode(CultureCode);  
             if (Lang == null)
                 Lib.Error($"Language not found: {CultureCode}");
 

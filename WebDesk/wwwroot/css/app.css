@@ -221,22 +221,100 @@ button:not(.btn-test),
 }
 
 /*---------------------------------------------------------------------------------------
-  header - footer
+  header
 ---------------------------------------------------------------------------------------*/
 .header {
     position: relative;
     display: flex; 
-    min-height: 80px;
+    flex-direction:column;
     background-color: var(--Dark2);
+    color: var(--White);
 }
 
+.header .top-zone {
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    min-height: 55px;
+}
+
+.header .top-zone > .inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--Page-Padding);
+    gap: 15px;
+}
+
+.header .tool-bar-zone {
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    min-height: 36px;
+}
+
+/*---------------------------------------------------------------------------------------
+  footer
+---------------------------------------------------------------------------------------*/
 .footer {
     position: relative;
     display: flex; 
     min-height: 40px;
     background-color: var(--Dark2);
+    color: var(--White);
 } 
 
+/*---------------------------------------------------------------------------------------
+  language-selector
+---------------------------------------------------------------------------------------*/
+ 
+.language-selector {   
+}
+
+.language-selector-button {
+    cursor: pointer;
+    display: flex;
+}
+
+.language-selector-button > * {    
+    padding: 0 4px;
+}
+
+.language-selector .tp-Text {
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    font-weight: var(--SemiBold);
+}
+
+.language-selector .tp-List {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background-color: var(--GrayLight);
+    color: var(--Black);
+}
+
+.language-selector .tp-List > * {
+    display: block;
+    text-transform: uppercase;
+    font-weight: var(--SemiBold);
+    padding: 14px 12px; 
+}
+
+.language-selector .tp-List > *:not(:first-child) {
+    border-top: 1px solid var(--Gray);
+}
+
+.language-selector .tp-List.tp-Visible {
+    display: block;
+}
+
+.language-selector .tp-List .tp-Selected {
+    color: var(--Gray);
+}
 
 /*---------------------------------------------------------------------------------------
   page

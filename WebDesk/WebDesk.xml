@@ -91,7 +91,7 @@
             Plugins folder path
             </summary>
         </member>
-        <member name="P:WebDesk.AppSettings.Security">
+        <member name="P:WebDesk.AppSettings.Jwt">
             <summary>
             Security settings
             </summary>
@@ -106,6 +106,22 @@
             <summary>
             SEE: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie?view=aspnetcore-3.1#react-to-back-end-changes
             SEE: http://codereform.com/blog/post/asp-net-core-2-0-authentication-with-local-logins-responding-to-backend-changes/
+            </summary>
+        </member>
+        <member name="T:WebDesk.CookieAuthHelper">
+            <summary>
+            Cookie authentication helper
+            </summary>
+        </member>
+        <member name="M:WebDesk.CookieAuthHelper.GetUserCookieOptions">
+            <summary>
+            Returns the default cookie options for the user cookie.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WebDesk.CookieAuthHelper.SetCookieConfigurationOptions(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions)">
+            <summary>
+            Sets the <see cref="T:Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions"/>. To be called from Startup.
             </summary>
         </member>
         <member name="T:WebDesk.HSTSSettings">
@@ -147,6 +163,98 @@
         <member name="P:WebDesk.HSTSSettings.ExcludedHosts">
             <summary>
             A list of hosts to exclude
+            </summary>
+        </member>
+        <member name="T:WebDesk.JwtAuthHelper">
+            <summary>
+            Helper for JWT token authentication.
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtAuthHelper.DecodeToken(System.IdentityModel.Tokens.Jwt.JwtSecurityToken)">
+            <summary>
+            Decodes a specified token.
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtAuthHelper.MessageReceived(Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext)">
+            <summary>
+            Event handler. The <see cref="P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnMessageReceived"/> event gives the application an opportunity to get the token from a different location, adjust, or reject the token.
+            <para>The application may set the Context.Token in the OnMessageReceived. Otherwise Context.Token is null.</para>
+            <para>SEE: https://stackoverflow.com/a/54497616/1779320        </para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtAuthHelper.TokenValidated(Microsoft.AspNetCore.Authentication.JwtBearer.TokenValidatedContext)">
+            <summary>
+            Event handler. The <see cref="P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnTokenValidated" /> is called after the passed in <see cref="P:Microsoft.AspNetCore.Authentication.JwtBearer.TokenValidatedContext.SecurityToken"/> is loaded and validated successfully.
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtAuthHelper.ReadTokenFromRequestHeader(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            For debug purposes. 
+            Reads a token by reading the <see cref="F:Microsoft.Net.Http.Headers.HeaderNames.Authorization"/> header 
+            from <see cref="P:Microsoft.AspNetCore.Http.HttpRequest.Headers"/>, 
+            and converting the token string to a <see cref="T:System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtAuthHelper.SetJwtBearerConfigurationOptions(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions,WebDesk.JwtSettings)">
+            <summary>
+            Configures the <see cref="T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions"/>. To be called from Startup.
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtAuthHelper.GetAuthenticatedResult(WebDesk.IClaimListProvider,WebDesk.JwtSettings,System.String)">
+            <summary>
+            Creates and returns a JWT authenticated result (along with token and claims)
+            </summary>
+        </member>
+        <member name="T:WebDesk.JwtRequestContext">
+            <summary>
+            Request context for JWT clients
+            </summary>
+        </member>
+        <member name="M:WebDesk.JwtRequestContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtRequestContext.Language">
+            <summary>
+            The language of the current request
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtRequestContext.IsAuthenticated">
+            <summary>
+            True when the user is authenticated with the cookie authentication scheme.
+            </summary>
+        </member>
+        <member name="T:WebDesk.JwtSettings">
+            <summary>
+            Security settings
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtSettings.Enabled">
+            <summary>
+            True to enable security
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtSettings.Secret">
+            <summary>
+            A string used in signing the Jwt token.
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtSettings.Issuer">
+            <summary>
+            Optional. A case-sensitive string or URI value representing the entity that generates the tokens.
+            <para>SEE: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1 </para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtSettings.Audience">
+            <summary>
+            Optional. A string array or a signle string or URI value identifying the recipients that the Jwt Token is intended for.
+            <para>SEE: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3 </para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.JwtSettings.LifeTimeMinutes">
+            <summary>
+            The number of minutes a Jwt is valid.
             </summary>
         </member>
         <member name="T:WebDesk.DecimalModelBinder">
@@ -214,56 +322,6 @@
             True if the <see cref="M:WebDesk.ObjectMapper.Configure(System.Action{System.Object})"/>() method is already called.
             </summary>
         </member>
-        <member name="T:WebDesk.RequestContext">
-            <summary>
-            Represents a context regarding the current HTTP request (current visitor, selected warehouse, etc.)
-            </summary>
-        </member>
-        <member name="M:WebDesk.RequestContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
-            <summary>
-            Constructor
-            </summary>
-        </member>
-        <member name="P:WebDesk.RequestContext.HttpContext">
-            <summary>
-            The http context
-            </summary>
-        </member>
-        <member name="P:WebDesk.RequestContext.Request">
-            <summary>
-            The http request
-            </summary>
-        </member>
-        <member name="P:WebDesk.RequestContext.Query">
-            <summary>
-            The query string as a collection of key-value pairs
-            </summary>
-        </member>
-        <member name="P:WebDesk.RequestContext.Language">
-            <summary>
-            The language of the current request
-            </summary>
-        </member>
-        <member name="P:WebDesk.RequestContext.Requestor">
-            <summary>
-            The user or api client of the current request
-            </summary>
-        </member>
-        <member name="P:WebDesk.RequestContext.Settings">
-            <summary>
-            DataStore settings 
-            </summary>
-        </member>
-        <member name="T:WebDesk.SecuritySettings">
-            <summary>
-            Security settings
-            </summary>
-        </member>
-        <member name="P:WebDesk.SecuritySettings.Enabled">
-            <summary>
-            True to enable security
-            </summary>
-        </member>
         <member name="T:WebDesk.UserCookie">
             <summary>
             Visitor cookie
@@ -273,12 +331,6 @@
             <summary>
             Constructor. 
             </summary>
-        </member>
-        <member name="M:WebDesk.UserCookie.GetCookieOptions">
-            <summary>
-            Returns the default cookie options for the visitor cookie.
-            </summary>
-            <returns></returns>
         </member>
         <member name="M:WebDesk.UserCookie.ToString">
             <summary>
@@ -305,76 +357,71 @@
             Called whenever a property of this instance changes.
             </summary>
         </member>
-        <member name="T:WebDesk.UserCookieContext">
+        <member name="T:WebDesk.UserRequestContext">
             <summary>
-            A requestor user cookie context
+            Request context for browser clients (cookies)
             </summary>
         </member>
-        <member name="M:WebDesk.UserCookieContext.ReadCookie">
-            <summary>
-            Reads the cookie from <see cref="T:Microsoft.AspNetCore.Http.HttpRequest"/> and loads the properties of this instance.
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.WriteCookie">
-            <summary>
-            Writes cookie's properties to the <see cref="T:Microsoft.AspNetCore.Http.HttpResponse"/> (as base64 string).
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.Cookie_Changed(System.Object,System.EventArgs)">
-            <summary>
-            Called whenever a property of Cookie changes.
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
-            <summary>
-            Constructor
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.GetClaimList(WebDesk.Requestor)">
-            <summary>
-            Creates and returns a claim list regarding a specified visitor
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.SignInAsync(WebDesk.Requestor,System.Boolean,System.Boolean)">
-            <summary>
-            Sign-in. Authenticates a specified, already validated, Visitor
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.SignOutAsync">
-            <summary>
-            Sign-out.
-            </summary>
-        </member>
-        <member name="M:WebDesk.UserCookieContext.GetRequestor(System.String)">
+        <member name="M:WebDesk.UserRequestContext.GetRequestor(System.String)">
             <summary>
             Returns a user from database found under a specified Id, if any, else null.
             <para>If the user is found, then it sets the cookie too.</para>
             </summary>
         </member>
-        <member name="P:WebDesk.UserCookieContext.Requestor">
+        <member name="M:WebDesk.UserRequestContext.ReadCookie">
+            <summary>
+            Reads the cookie from <see cref="T:Microsoft.AspNetCore.Http.HttpRequest"/> and loads the properties of this instance.
+            </summary>
+        </member>
+        <member name="M:WebDesk.UserRequestContext.WriteCookie">
+            <summary>
+            Writes cookie's properties to the <see cref="T:Microsoft.AspNetCore.Http.HttpResponse"/> (as base64 string).
+            </summary>
+        </member>
+        <member name="M:WebDesk.UserRequestContext.Cookie_Changed(System.Object,System.EventArgs)">
+            <summary>
+            Called whenever a property of Cookie changes.
+            </summary>
+        </member>
+        <member name="M:WebDesk.UserRequestContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:WebDesk.UserRequestContext.GetClaimList(WebDesk.Requestor)">
+            <summary>
+            Creates and returns a claim list regarding a specified visitor
+            </summary>
+        </member>
+        <member name="M:WebDesk.UserRequestContext.SignInAsync(WebDesk.Requestor,System.Boolean,System.Boolean)">
+            <summary>
+            Sign-in. Authenticates a specified, already validated, Visitor
+            </summary>
+        </member>
+        <member name="M:WebDesk.UserRequestContext.SignOutAsync">
+            <summary>
+            Sign-out.
+            </summary>
+        </member>
+        <member name="P:WebDesk.UserRequestContext.Requestor">
             <summary>
             The current Requestor (the session Requestor)
             <para>NOTE: Setting or unsetting the Requestor, sets or unsets the Requestor cookie too.</para>
             </summary>
         </member>
-        <member name="P:WebDesk.UserCookieContext.Language">
+        <member name="P:WebDesk.UserRequestContext.Language">
             <summary>
             The selected language (and culture) of the Requestor
             </summary>
         </member>
-        <member name="P:WebDesk.UserCookieContext.IsAuthenticated">
+        <member name="P:WebDesk.UserRequestContext.IsAuthenticated">
             <summary>
             True when the user is authenticated with the cookie authentication scheme.
             </summary>
         </member>
-        <member name="P:WebDesk.UserCookieContext.IsImpersonation">
+        <member name="P:WebDesk.UserRequestContext.IsImpersonation">
             <summary>
             True when the Visitor has loged-in usin the SuperUserPassword
-            </summary>
-        </member>
-        <member name="P:WebDesk.UserCookieContext.Cookie">
-            <summary>
-            User cookie
             </summary>
         </member>
         <member name="T:WebDesk.WApp">
@@ -570,11 +617,6 @@
             Returns the physical path of the images folder, i.e. C:\MyApp\wwwroot\images
             </summary>
         </member>
-        <member name="P:WebDesk.WebAppContext.RequestContext">
-            <summary>
-            Returns the request (visitor) context
-            </summary>
-        </member>
         <member name="P:WebDesk.WebAppContext.Cache">
             <summary>
             Represents an application memory cache.
@@ -583,6 +625,17 @@
         <member name="P:WebDesk.WebAppContext.Culture">
             <summary>
             The <see cref="T:System.Globalization.CultureInfo"/> culture of the current request.
+            <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+            This property here uses that setting to return its value.
+            </para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.WebAppContext.Language">
+            <summary>
+            The <see cref="P:WebDesk.WebAppContext.Language"/> language of the current request.
+            <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+            This property here uses that setting to return its value.
+            </para>
             </summary>
         </member>
         <member name="P:WebDesk.WebAppContext.DevMode">

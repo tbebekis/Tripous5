@@ -40,7 +40,7 @@ namespace WebDesk
         /// </summary>
         public string CultureCode
         {
-            get => !string.IsNullOrWhiteSpace(fCultureCode) ? fCultureCode : "en-US"; // "el-GR";
+            get => !string.IsNullOrWhiteSpace(fCultureCode) ? fCultureCode : Lib.DefaultCultureCode;  
             set => fCultureCode = value;
         }
 

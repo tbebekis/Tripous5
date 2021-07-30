@@ -21,17 +21,17 @@ namespace WebDesk
     /// <summary>
     /// Base MVC controller
     /// </summary>
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = Lib.CookieAuthScheme)]
     public class ControllerMvc : Controller
     {
-        IUserCookieContext fUserContext;
+        IUserRequestContext fUserContext;
         IWebAppCache fCache;
 
         /* properties */
         /// <summary>
         /// The context regarding the current HTTP request (current visitor, selected warehouse, etc.)
         /// </summary>
-        protected IUserCookieContext UserContext => fUserContext ?? (fUserContext = Lib.GetService<IUserCookieContext>());
+        protected IUserRequestContext UserContext => fUserContext ?? (fUserContext = Lib.GetService<IUserRequestContext>());
         /// <summary>
         /// Returns the cache interface
         /// </summary>

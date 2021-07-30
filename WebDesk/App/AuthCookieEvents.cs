@@ -15,9 +15,9 @@ namespace WebDesk
     /// </summary>
     internal class AuthCookieEvents : CookieAuthenticationEvents
     {
-        IUserCookieContext fCookieContext;
+        IUserRequestContext fCookieContext;
 
-        public AuthCookieEvents(IUserCookieContext CookieContext)
+        public AuthCookieEvents(IUserRequestContext CookieContext)
         {
             this.fCookieContext = CookieContext;
         }
