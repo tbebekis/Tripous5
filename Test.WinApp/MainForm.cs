@@ -12,6 +12,9 @@ namespace Test.WinApp
 {
     public partial class MainForm : Form
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public MainForm()
         {
             InitializeComponent();
