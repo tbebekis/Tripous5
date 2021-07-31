@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 using Tripous;
-using Tripous.Web;
+using WebDesk.AspNet;
 
 using WebDesk.Models;
 

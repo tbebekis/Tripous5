@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.ComponentModel.DataAnnotations;
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk.Models
 {

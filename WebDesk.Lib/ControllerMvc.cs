@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Tripous;
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk
 {

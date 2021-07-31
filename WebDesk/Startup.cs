@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Tripous;
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk
 {

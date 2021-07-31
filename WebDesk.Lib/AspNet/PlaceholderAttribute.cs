@@ -3,22 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
-    /// Marks a model property as disabled. Results in a disabled html attribute.
+    /// Marks a model property as disable. Results in a disabled html attribute
     /// <para>NOTE: Used by <see cref="TagHelperControlRow"/> custom tag helper.</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class DisabledAttribute: Attribute, IModelAttribute
+    public class PlaceholderAttribute: Attribute, IModelAttribute
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public DisabledAttribute()
+        public PlaceholderAttribute(string Key)
         {
+            this.Key = Key;
         }
 
+        /// <summary>
+        /// The resource string key
+        /// </summary>
+        public string Key { get; private set; }
+        /// <summary>
+        /// The localized placeholder text
+        /// </summary>
+        public string Text { get { return Key; } } // TODO: return localizable string, see NopLabelTagHelper
         /// <summary>
         /// The class name of the attribute.
         /// <para>NOTE: <see cref="IModelAttribute"/> implementation. </para>

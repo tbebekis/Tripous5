@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
     /// Represents an application memory cache.

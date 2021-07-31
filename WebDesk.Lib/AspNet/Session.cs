@@ -7,7 +7,9 @@ using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-namespace Tripous.Web
+using Tripous;
+
+namespace WebDesk.AspNet
 {
     /// <summary>
     /// Provides access to session variables (entries)

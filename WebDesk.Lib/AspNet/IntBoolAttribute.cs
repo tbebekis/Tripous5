@@ -3,36 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
-    /// Marks a model property as disable. Results in a disabled html attribute
+    /// Marks a model integer property to be used as a boolean and display an html checkbox when rendered.
     /// <para>NOTE: Used by <see cref="TagHelperControlRow"/> custom tag helper.</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class TextAreaAttribute : Attribute, IModelAttribute
+    public class IntBoolAttribute: Attribute, IModelAttribute
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public TextAreaAttribute()
+        public IntBoolAttribute()
         {
         }
-
-        /// <summary>
-        /// The rows
-        /// </summary>
-        public int Rows { get; set; } = 4;
-        /// <summary>
-        /// The columns
-        /// </summary>
-        public int Cols { get; set; } = 20;
 
         /// <summary>
         /// The class name of the attribute.
         /// <para>NOTE: <see cref="IModelAttribute"/> implementation. </para>
         /// </summary>
         public string ClassName { get { return this.GetType().Name; } }
- 
     }
 }

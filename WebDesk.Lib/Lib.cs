@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Newtonsoft.Json;
 
 using Tripous;
-using Tripous.Web;
+using WebDesk.AspNet;
 using Tripous.Logging;
 
 namespace WebDesk 

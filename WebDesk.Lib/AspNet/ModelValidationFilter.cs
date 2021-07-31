@@ -24,7 +24,7 @@ using Microsoft.Extensions.Logging;
 
  
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
 
     /// <summary>

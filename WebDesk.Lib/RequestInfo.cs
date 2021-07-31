@@ -4,7 +4,9 @@ using System.Text;
 using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 
-namespace Tripous.Web
+using Tripous;
+
+namespace WebDesk.AspNet
 {
 
     public class RequestInfo

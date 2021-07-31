@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
-    /// Marks a model property as disable. Results in a disabled html attribute
+    /// A localizable <see cref="DisplayNameAttribute"/> attribute, to be used with model properties
     /// <para>NOTE: Used by <see cref="TagHelperControlRow"/> custom tag helper.</para>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class PlaceholderAttribute: Attribute, IModelAttribute
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    public class TitleAttribute: DisplayNameAttribute, IModelAttribute
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public PlaceholderAttribute(string Key)
+        public TitleAttribute(string Key)
         {
             this.Key = Key;
         }
@@ -25,13 +27,16 @@ namespace Tripous.Web
         /// </summary>
         public string Key { get; private set; }
         /// <summary>
-        /// The localized placeholder text
+        /// The localized text.
         /// </summary>
-        public string Text { get { return Key; } } // TODO: return localizable string, see NopLabelTagHelper
+        public override string DisplayName => WSys.Localize(Key); 
         /// <summary>
         /// The class name of the attribute.
         /// <para>NOTE: <see cref="IModelAttribute"/> implementation. </para>
         /// </summary>
         public string ClassName { get { return this.GetType().Name; } }
     }
+
+
+
 }

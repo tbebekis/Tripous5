@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Web;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
  
     /// <summary>

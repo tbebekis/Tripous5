@@ -47,7 +47,7 @@ using Newtonsoft.Json.Serialization;
 using Tripous;
 using Tripous.Logging;
 using Tripous.Data;
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk
 {
@@ -430,7 +430,7 @@ namespace WebDesk
             // When the controller is decorated with [ApiController] attribute, the framework would automatically register 
             // a ModelStateInvalidFilter which runs on the OnActionExecuting event. 
             // This checks for the model state validity and returns the response accordingly. 
-            // SEE ALSO: The custom Tripous.Web.ModelValidationFilter enables the same behavior to all controllers.
+            // SEE ALSO: The custom WebDesk.AspNet.ModelValidationFilter enables the same behavior to all controllers.
             services.Configure<ApiBehaviorOptions>(o => { o.SuppressModelStateInvalidFilter = true; });
 
         }

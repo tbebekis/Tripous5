@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
-    /// Marks a model integer property to be used as a boolean and display an html checkbox when rendered.
+    /// Marks a model property as disabled. Results in a disabled html attribute.
     /// <para>NOTE: Used by <see cref="TagHelperControlRow"/> custom tag helper.</para>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class IntBoolAttribute: Attribute, IModelAttribute
+    public class DisabledAttribute: Attribute, IModelAttribute
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntBoolAttribute()
+        public DisabledAttribute()
         {
         }
 

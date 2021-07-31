@@ -13,7 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
 
 using Tripous;
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk
 {

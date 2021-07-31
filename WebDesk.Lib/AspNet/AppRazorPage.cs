@@ -10,10 +10,10 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Razor;
 
 using Tripous;
-using Tripous.Web;
+ 
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace WebDesk
+namespace WebDesk.AspNet
 {
 
     /// <summary>

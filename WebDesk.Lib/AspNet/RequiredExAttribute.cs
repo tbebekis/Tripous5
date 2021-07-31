@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
  
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
     /// Extension for the Required attribute

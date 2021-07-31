@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk
 {

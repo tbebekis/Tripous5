@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
     /// A custom model attribute.

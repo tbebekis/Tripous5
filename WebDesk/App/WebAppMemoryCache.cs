@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Caching.Memory;
 
-using Tripous.Web;
+using WebDesk.AspNet;
 
 namespace WebDesk
 {

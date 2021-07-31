@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
     /// A <see cref="TagHelperBase"/> descendant class.

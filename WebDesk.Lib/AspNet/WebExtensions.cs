@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Html;
 
 
 
-namespace Tripous.Web
+namespace WebDesk.AspNet
 {
     /// <summary>
     /// Extensions
