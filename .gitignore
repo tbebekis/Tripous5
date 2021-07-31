@@ -15,4 +15,3 @@
 *.hgignore
 **/ScriptDocs
 **/DocFx
-**/Test.WinApp
