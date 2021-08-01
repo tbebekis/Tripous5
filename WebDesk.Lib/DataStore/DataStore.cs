@@ -20,21 +20,14 @@ using Tripous.Logging;
 using Tripous.Data;
 using WebDesk.AspNet;
 
-using FirebirdSql.Data.FirebirdClient;
-
-
-
 namespace WebDesk
 {
-
 
     /// <summary>
     /// Represents the database
     /// </summary>
     static public partial class DataStore
     {
-
-        static FbConnection FbCon;
 
         /// <summary>
         /// English language

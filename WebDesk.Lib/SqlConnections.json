@@ -4,16 +4,6 @@
             "Name": "Default",
             "Provider": "SQLite",
             "ConnectionString": "Data Source=[AppPath]\\WebDesk.db3"
-        },
-        {
-            "Name": "PostgreSql",
-            "Provider": "PostgreSQL",
-            "ConnectionString": "Server=localhost; Database=test; User Id=postgres; Password=yoda2k;"
-        },
-        {
-            "Name": "Firebird",
-            "Provider": "Firebird",
-            "ConnectionString": "DataSource=localhost; Database=C:\\WebDesk.fdb; User=SYSDBA; Password=yoda2k; Charset=UTF8; "
         }
     ]
 }

@@ -35,58 +35,6 @@ namespace Tripous.Data
 
 
         /* methods */
-
-        /* 
-        /// <summary>
-        /// Returns true if the database exists
-        /// </summary>
-        public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password, string Port = "")
-        {
-            if (string.IsNullOrWhiteSpace(Port))
-                Port = "5432";
-
-            string CS = $"Server={ServerName}; Port={Port}; Database={DatabaseName}; User Id={UserName}; Password={Password}";
-            return DatabaseExists(CS);
-        }
-        /// <summary>
-        /// Creates a new database
-        /// </summary>
-        /// <summary>
-        /// Creates a new database
-        /// </summary>
-        public override bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
-        {
-            bool Result = false;
-            if (!DatabaseExists(ServerName, DatabaseName, UserName, Password))
-            {
-                string CS = $"Server={ServerName}; User Id={UserName}; Password={Password}";  //  Port=5432; 
-
-                using (var Con = Factory.CreateConnection())
-                {
-                    Con.ConnectionString = CS;
-                    Con.Open();
-
-                    using (var Cmd = Factory.CreateCommand())
-                    {
-                        Cmd.Connection = Con;
-
-                        Cmd.CommandText = $"create database {DatabaseName}";
-                        Cmd.ExecuteNonQuery();
-
-                         //  NOTE: There is a problem here: Although the database is created any attempt to connect to it
-                         //   results in an exception. It seems that although the database is created, is not yet
-                         //   ready or attached or something. So the only solution I found is to wait for a while. 
-                        System.Threading.Thread.Sleep(7000);
-
-                        Result = true;
-                    }
-
-                }
-            }
-
-            return Result;
-        }
-        */
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.
         /// </summary>

@@ -33,49 +33,6 @@ namespace Tripous.Data
         }
 
         /* methods */
-        /*
-                /// <summary>
-                /// Returns true if the database exists
-                /// </summary>
-                public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password)
-                {
-                    string CS = string.Format("Server={0}; Database={1}; Uid={2}; Pwd={3}; ", ServerName, DatabaseName, UserName, Password);
-                    return CanConnect(CS, true);
-                }
-                /// <summary>
-                /// Creates a new database
-                /// </summary>
-                public override bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
-                {
-
-                    bool Result = false;
-
-                    if (!DatabaseExists(ServerName, DatabaseName, UserName, Password))
-                    {
-                        string CS = string.Format("Server={0}; Uid={1}; Pwd={2};", ServerName, UserName, Password);
-                        using (var Con = Factory.CreateConnection())
-                        {
-                            Con.ConnectionString = CS;
-                            Con.Open();
-
-                            using (var Cmd = Factory.CreateCommand())
-                            {
-                                Cmd.Connection = Con;
-
-                                Cmd.CommandText = string.Format("CREATE DATABASE IF NOT EXISTS `{0}`;", DatabaseName);
-                                Cmd.ExecuteNonQuery();
-
-                                System.Threading.Thread.Sleep(3000);
-
-                                Result = true;
-                            }
-
-                        }
-                    }
-
-                    return Result;
-                }
-         */
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.
         /// </summary>
@@ -87,9 +44,7 @@ namespace Tripous.Data
             {
                 ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
                 string DatabaseName = CSB.Database;
-
-                CSB["Initial Catalog"] = "master";
-                string CS = CSB.ConnectionString;
+                string CS = CSB.RemoveDatabaseEntry();
 
                 using (var Con = OpenConnection(CS))
                 {
@@ -111,7 +66,6 @@ namespace Tripous.Data
 
                         Result = true;
                     }
-
                 }
             }
 

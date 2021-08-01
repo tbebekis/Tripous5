@@ -20,6 +20,9 @@ namespace Tripous.Data
     /// <summary>
     /// Describes a Sql provider
     /// <para>NOTE: Add the NuGet package https://www.nuget.org/packages/FirebirdSql.Data.FirebirdClient/  </para>
+    /// <para>SEE: https://firebirdsql.org/file/documentation/html/en/refdocs/fblangref40/firebird-40-language-reference.html </para>
+    /// <para>SEE: https://www.ibphoenix.com/files/Authentication_FB3.pdf </para>
+    /// <para>SEE: https://stackoverflow.com/a/67902886/1779320 </para>
     /// </summary>
     public class SqlProviderFirebird: SqlProvider
     {
@@ -34,46 +37,6 @@ namespace Tripous.Data
         }
 
         /* methods */
-        /*
-                /// <summary>
-                /// Returns true if the database exists
-                /// </summary>
-                public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password)
-                {
-                    string CS = string.Format("DataSource={0}; Database={1}; User={2}; Password={3}; Charset=UTF8;", ServerName, DatabaseName, UserName, Password);
-                    return CanConnect(CS, true);
-                }
-                /// <summary>
-                /// Creates a new database
-                /// </summary>
-                public override bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
-                {
-
-                    bool Result = false;
-
-                    if (!DatabaseExists(ServerName, DatabaseName, UserName, Password))
-                    {
-                        string CS = string.Format("DataSource={0}; Database={1}; User={2}; Password={3}; Charset=UTF8;", ServerName, DatabaseName, UserName, Password);
-
-                        using (DbConnection Con = OpenConnection(CS))
-                        {
-                            Type Type = Con.GetType();
-                            MethodInfo Method = Type.GetMethod("CreateDatabase", new Type[] { typeof(string), typeof(int), typeof(bool), typeof(bool) });
-
-                            if (Method != null)
-                            {
-                                Method.Invoke(null, new object[] { CS, 1024 * 16, true, false });
-                                Result = true;
-
-                                System.Threading.Thread.Sleep(3000);
-                            }
-                        }
-                    }
-
-                    return Result;
-                }
-         */
-
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.
         /// </summary>
