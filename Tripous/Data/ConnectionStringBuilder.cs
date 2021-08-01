@@ -124,7 +124,7 @@ namespace Tripous.Data
         /// </summary>
         static public string NormalizeConnectionString(string ConnectionString)
         {
-            return ReplacePathPlaceholders(RemoveAlias(ConnectionString));
+            return ReplacePathPlaceholders(RemoveAliasEntry(ConnectionString));
         }
         /// <summary>
         /// Replaces path placeholders, such as [AppPath], [Data] and [BackUp], contained in ConnectionString
@@ -201,7 +201,7 @@ namespace Tripous.Data
         /// Removes any provider Alias from ConnectionString and returns the ConnectionString
         /// without Alias.
         /// </summary>
-        static public string RemoveAlias(string ConnectionString)
+        static public string RemoveAliasEntry(string ConnectionString)
         {
             if (ConnectionString.ContainsText(ConnectionStringBuilder.AliasKey))
             {
@@ -210,6 +210,8 @@ namespace Tripous.Data
             }
             return ConnectionString;
         }
+
+
 
         /// <summary>
         /// Converts a Provider Alias to a  <see cref="SqlServerType"/> value  
@@ -281,6 +283,21 @@ namespace Tripous.Data
 
             return string.Empty;
         }
+        /// <summary>
+        /// Removes the database entry from the connection string, and returns the connection string
+        /// </summary>
+        public string RemoveDatabaseEntry()
+        {
+            string[] Keys = { "Initial Catalog", "Database", "Data Source" };
+            foreach (string Key in Keys)
+            {
+                if (ContainsKey(Key))
+                    Remove(Key);
+            }
+
+            return this.ConnectionString;
+        }
+
         /// <summary>
         /// Returns the ConnectionString as a DataTable with two fields: Key, Value
         /// </summary>

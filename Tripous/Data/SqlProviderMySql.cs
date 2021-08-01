@@ -33,38 +33,81 @@ namespace Tripous.Data
         }
 
         /* methods */
-        /// <summary>
-        /// Returns true if the database exists
-        /// </summary>
-        public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password)
-        {
-            string CS = string.Format("Server={0}; Database={1}; Uid={2}; Pwd={3}; ", ServerName, DatabaseName, UserName, Password);
-            return CanConnect(CS, true);
-        }
-        /// <summary>
-        /// Creates a new database
-        /// </summary>
-        public override bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
-        {
+        /*
+                /// <summary>
+                /// Returns true if the database exists
+                /// </summary>
+                public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password)
+                {
+                    string CS = string.Format("Server={0}; Database={1}; Uid={2}; Pwd={3}; ", ServerName, DatabaseName, UserName, Password);
+                    return CanConnect(CS, true);
+                }
+                /// <summary>
+                /// Creates a new database
+                /// </summary>
+                public override bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
+                {
 
+                    bool Result = false;
+
+                    if (!DatabaseExists(ServerName, DatabaseName, UserName, Password))
+                    {
+                        string CS = string.Format("Server={0}; Uid={1}; Pwd={2};", ServerName, UserName, Password);
+                        using (var Con = Factory.CreateConnection())
+                        {
+                            Con.ConnectionString = CS;
+                            Con.Open();
+
+                            using (var Cmd = Factory.CreateCommand())
+                            {
+                                Cmd.Connection = Con;
+
+                                Cmd.CommandText = string.Format("CREATE DATABASE IF NOT EXISTS `{0}`;", DatabaseName);
+                                Cmd.ExecuteNonQuery();
+
+                                System.Threading.Thread.Sleep(3000);
+
+                                Result = true;
+                            }
+
+                        }
+                    }
+
+                    return Result;
+                }
+         */
+        /// <summary>
+        /// Creates a new database, if not exists. Returns true only if creates the database.
+        /// </summary>
+        public override bool CreateDatabase(string ConnectionString)
+        {
             bool Result = false;
 
-            if (!DatabaseExists(ServerName, DatabaseName, UserName, Password))
+            if (!DatabaseExists(ConnectionString))
             {
-                string CS = string.Format("Server={0}; Uid={1}; Pwd={2};", ServerName, UserName, Password);
-                using (var Con = Factory.CreateConnection())
+                ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
+                string DatabaseName = CSB.Database;
+
+                CSB["Initial Catalog"] = "master";
+                string CS = CSB.ConnectionString;
+
+                using (var Con = OpenConnection(CS))
                 {
-                    Con.ConnectionString = CS;
-                    Con.Open();
-
-                    using (var Cmd = Factory.CreateCommand())
+                    using (var Cmd = Con.CreateCommand())
                     {
-                        Cmd.Connection = Con;
-
                         Cmd.CommandText = string.Format("CREATE DATABASE IF NOT EXISTS `{0}`;", DatabaseName);
                         Cmd.ExecuteNonQuery();
 
-                        System.Threading.Thread.Sleep(3000);
+                        // NOTE: There is a problem here: Although the database is created any attempt to connect to it
+                        // results in an exception. It seems that although the database is created, is not yet
+                        // ready or attached or something. So the only solution I found is to wait for a while. 
+                        for (int i = 0; i < 10; i++)
+                        {
+                            if (CanConnect(ConnectionString, ThrowIfNot: false))
+                                break;
+
+                            System.Threading.Thread.Sleep(1000);
+                        }
 
                         Result = true;
                     }
@@ -74,6 +117,7 @@ namespace Tripous.Data
 
             return Result;
         }
+
         /// <summary>
         /// Replaces data type place-holders contained in the SqlText statement
         /// according to datatypes of the database server.

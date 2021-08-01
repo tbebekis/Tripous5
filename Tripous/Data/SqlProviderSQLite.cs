@@ -42,17 +42,21 @@ namespace Tripous.Data
         {
             ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
             string FilePath = CSB.Database;
+            FilePath = ConnectionStringBuilder.ReplacePathPlaceholders(FilePath);
             return !string.IsNullOrWhiteSpace(FilePath) && File.Exists(FilePath);
         }
         /// <summary>
-        /// Creates a new database
+        /// Creates a new database, if not exists. Returns true only if creates the database.
         /// </summary>
-        public override bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
+        public override bool CreateDatabase(string ConnectionString)
         {
             bool Result = false;
-            string FilePath = ConnectionStringBuilder.ReplacePathPlaceholders(DatabaseName);
 
-            if (!File.Exists(FilePath))
+            ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
+            string FilePath = CSB.Database;
+            FilePath = ConnectionStringBuilder.ReplacePathPlaceholders(FilePath);
+
+            if (!string.IsNullOrWhiteSpace(FilePath) && !File.Exists(FilePath))
             {
                 string Folder = Path.GetDirectoryName(FilePath);
 
@@ -60,25 +64,12 @@ namespace Tripous.Data
                     Directory.CreateDirectory(Folder);
 
                 SQLiteConnection.CreateFile(FilePath);
-
-                /*
-                                 string TypeName = "System.Data.SQLite.SQLiteConnection";
-
-                                Type T = TypeFinder.GetTypeByName(TypeName, AssemblyFileName);
-                                if (T == null)
-                                    Sys.Error($"Can not create database. Type not found: {TypeName}");
-
-                                BindingFlags Flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.InvokeMethod;
-                                T.InvokeMember("CreateFile", Flags, null, T, new object[] { FilePath });
-                                 */
-
                 Result = true;
             }
 
             return Result;
-
-
         }
+
         /// <summary>
         /// Returns an Sql statement for altering a table column
         /// </summary>

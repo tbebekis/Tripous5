@@ -12,6 +12,8 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 
+using Tripous.Logging;
+
 namespace Tripous.Data
 {
     /// <summary>
@@ -201,6 +203,7 @@ namespace Tripous.Data
         }
 
         /* DbProviderFactory related */
+ 
         /// <summary>
         /// Creates and returns a DbConnection initialized with ConnectionString.
         /// <para>WARNING: It does NOT open the connection.</para>
@@ -208,6 +211,7 @@ namespace Tripous.Data
         public virtual DbConnection CreateConnection(string ConnectionString)
         {
             DbConnection Result = Factory.CreateConnection();
+            ConnectionString = ConnectionStringBuilder.ReplacePathPlaceholders(ConnectionString);
             Result.ConnectionString = ConnectionString;
             return Result;
         }
@@ -248,6 +252,36 @@ namespace Tripous.Data
         public virtual DbParameter CreateParameter()
         {
             return Factory.CreateParameter();
+        }
+
+
+        /// <summary>
+        /// Returns true if the database represented by the specified database exists, by checking the connection.
+        /// </summary>
+        public virtual bool DatabaseExists(string ConnectionString)
+        {
+            bool Result = false;
+            try
+            {
+                using (DbConnection Con = OpenConnection(ConnectionString))
+                {
+                    Con.Close();
+                }
+
+                Result = true;
+            }
+            catch 
+            {
+            }
+
+            return Result;
+        }
+        /// <summary>
+        /// Creates a new database, if not exists. Returns true only if creates the database.
+        /// </summary>
+        public virtual bool CreateDatabase(string ConnectionString)
+        {
+            return false;
         }
 
         /// <summary>
@@ -328,7 +362,7 @@ namespace Tripous.Data
         {
             DataTable Result = new DataTable();
 
-            ConnectionString = ConnectionStringBuilder.RemoveAlias(ConnectionString);
+            ConnectionString = ConnectionStringBuilder.RemoveAliasEntry(ConnectionString);
 
             using (DbConnection Con = OpenConnection(ConnectionString))
             {
@@ -455,7 +489,7 @@ namespace Tripous.Data
         /// </summary> 
         public void ExecSql(string ConnectionString, string SqlText, params object[] Params)
         {
-            ConnectionString = ConnectionStringBuilder.RemoveAlias(ConnectionString);
+            ConnectionString = ConnectionStringBuilder.RemoveAliasEntry(ConnectionString);
 
             using (DbConnection Con = OpenConnection(ConnectionString))
             {
@@ -517,9 +551,7 @@ namespace Tripous.Data
         {
             return string.Format(@"{0} || {1}", A, B);
         }
-
-
-
+ 
         /* public */
         /// <summary>
         /// Replaces data type place-holders contained in the SqlText statement
@@ -1075,39 +1107,8 @@ namespace Tripous.Data
                 Parameter.ParameterName = PrefixToGlobal(Parameter.ParameterName);
         }
 
-        /// <summary>
-        /// Returns true if the database represented by the specified database exists, by checking the connection.
-        /// </summary>
-        public virtual bool DatabaseExists(string ConnectionString)
-        {
-            bool Result = false;
-            try
-            {
-                EnsureConnection(ConnectionString);
-                Result = true;
-            }
-            catch (Exception Ex)
-            {
-                Sys.SaveToFile(Ex);
-            }
 
-            return Result;
-        }
-        /// <summary>
-        /// Creates the database.
-        /// </summary>
-        public virtual bool CreateDatabase(string ConnectionString)
-        {
-            ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
-            return CreateDatabase(CSB.Server, CSB.Database, CSB.User, CSB.Password);
-        }
-        /// <summary>
-        /// Creates the database.
-        /// </summary>
-        public virtual bool CreateDatabase(string ServerName, string DatabaseName, string UserName, string Password)
-        {
-            return false;
-        }
+
 
         /// <summary>
         /// Creates and returns a connection string. The various conStrXXXX formats

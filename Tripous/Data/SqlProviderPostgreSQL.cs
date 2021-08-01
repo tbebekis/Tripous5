@@ -35,6 +35,8 @@ namespace Tripous.Data
 
 
         /* methods */
+
+        /* 
         /// <summary>
         /// Returns true if the database exists
         /// </summary>
@@ -71,9 +73,9 @@ namespace Tripous.Data
                         Cmd.CommandText = $"create database {DatabaseName}";
                         Cmd.ExecuteNonQuery();
 
-                        /*  NOTE: There is a problem here: Although the database is created any attempt to connect to it
-                            results in an exception. It seems that although the database is created, is not yet
-                            ready or attached or something. So the only solution I found is to wait for a while. */
+                         //  NOTE: There is a problem here: Although the database is created any attempt to connect to it
+                         //   results in an exception. It seems that although the database is created, is not yet
+                         //   ready or attached or something. So the only solution I found is to wait for a while. 
                         System.Threading.Thread.Sleep(7000);
 
                         Result = true;
@@ -82,6 +84,45 @@ namespace Tripous.Data
                 }
             }
 
+            return Result;
+        }
+        */
+        /// <summary>
+        /// Creates a new database, if not exists. Returns true only if creates the database.
+        /// </summary>
+        public override bool CreateDatabase(string ConnectionString)
+        {
+            bool Result = false;
+
+            if (!DatabaseExists(ConnectionString))
+            {
+                ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
+                string DatabaseName = CSB.Database;
+                string CS = CSB.RemoveDatabaseEntry();
+
+                using (var Con = OpenConnection(CS))
+                {
+                    using (var Cmd = Con.CreateCommand())
+                    {
+                        Cmd.CommandText = $"create database {DatabaseName}";
+                        Cmd.ExecuteNonQuery();
+
+                        // NOTE: There is a problem here: Although the database is created any attempt to connect to it
+                        // results in an exception. It seems that although the database is created, is not yet
+                        // ready or attached or something. So the only solution I found is to wait for a while. 
+                        for (int i = 0; i < 10; i++)
+                        {
+                            if (CanConnect(ConnectionString, ThrowIfNot: false))
+                                break;
+
+                            System.Threading.Thread.Sleep(1000);
+                        } 
+
+                        Result = true;
+                    }
+                }
+            }
+ 
             return Result;
         }
         /// <summary>

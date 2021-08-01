@@ -19,7 +19,10 @@ using Tripous;
 using Tripous.Logging;
 using Tripous.Data;
 using WebDesk.AspNet;
- 
+
+using FirebirdSql.Data.FirebirdClient;
+
+
 
 namespace WebDesk
 {
@@ -30,6 +33,9 @@ namespace WebDesk
     /// </summary>
     static public partial class DataStore
     {
+
+        static FbConnection FbCon;
+
         /// <summary>
         /// English language
         /// </summary>
@@ -125,7 +131,6 @@ namespace WebDesk
                 }
             }
 
-            Sys.Throw("Stupid");
         }
         /// <summary>
         /// Creates database tables etc. based on the registered schemas
