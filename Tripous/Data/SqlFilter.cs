@@ -160,22 +160,22 @@ namespace Tripous.Data
             if (Mode == SqlFilterMode.EnumConst)
             {
                 if (string.IsNullOrWhiteSpace(Enum.ConstantOptionsList))
-                    Sys.Error(Format, Res.GS("Criterion_Enum_ConstantOptionsList", "List of constants"));
+                    Sys.Throw(Format, Res.GS("Criterion_Enum_ConstantOptionsList", "List of constants"));
             }
             else if (Mode == SqlFilterMode.EnumQuery)
             {
                 if (string.IsNullOrEmpty(Enum.ResultField))
-                    Sys.Error(Format, Res.GS("Criterion_Enum_ResultFieldName", "Criterion Enum Result Field Name"));
+                    Sys.Throw(Format, Res.GS("Criterion_Enum_ResultFieldName", "Criterion Enum Result Field Name"));
 
                 if (string.IsNullOrEmpty(Enum.Sql))
-                    Sys.Error(Format, Res.GS("Criterion_Enum_Sql", "Criterion Enum Sql"));
+                    Sys.Throw(Format, Res.GS("Criterion_Enum_Sql", "Criterion Enum Sql"));
 
                 Format = Res.GS("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
                 string[] Lines = Enum.DisplayLabels.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
                 for (int i = 0; i < Lines.Length; i++)
                     if (!Lines[i].Contains('='))
-                        Sys.Error(Format, i + 1);
+                        Sys.Throw(Format, i + 1);
             }
         }
 

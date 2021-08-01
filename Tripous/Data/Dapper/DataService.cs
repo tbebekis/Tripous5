@@ -38,7 +38,7 @@ namespace Tripous.Data
         protected void CheckForCompoundKey(EntityDescriptor Descriptor)
         {
             if (Descriptor.DetailLists.Count > 0 && Descriptor.PrimaryKeyList.Count > 1)
-                Sys.Error($"{EntityType.Name} Entity has a compound primary key");
+                Sys.Throw($"{EntityType.Name} Entity has a compound primary key");
         }
 
         /* overridables */
@@ -155,7 +155,7 @@ namespace Tripous.Data
 
             StringBuilder Errors = Entity.BeforeSaveCheck(true);
             if (Errors.Length > 0)
-                Sys.Error(Errors.ToString());
+                Sys.Throw(Errors.ToString());
 
             var Params = Descriptor.CreateParams(Entity);
 
@@ -210,7 +210,7 @@ namespace Tripous.Data
  
             StringBuilder Errors = Entity.BeforeSaveCheck(false);
             if (Errors.Length > 0)
-                Sys.Error(Errors.ToString());
+                Sys.Throw(Errors.ToString());
 
             await UpdateDetails(Con, Entity, OriginalEntity, Descriptor);
 
@@ -218,7 +218,7 @@ namespace Tripous.Data
 
             int AffectedRows = await Con.ExecuteAsync(Descriptor.UpdateRowSql, Params);
             if (AffectedRows <= 0)
-                Sys.Error($"{Descriptor.EntityName} not updated. Reason: not found in database"); 
+                Sys.Throw($"{Descriptor.EntityName} not updated. Reason: not found in database"); 
         }
         /// <summary>
         /// Called from Update() to update details.
@@ -465,7 +465,7 @@ namespace Tripous.Data
         public DataService()
         {
             if (Descriptor == null)
-                Sys.Error("No Descriptor for Entity: {0}", EntityType.Name);
+                Sys.Throw("No Descriptor for Entity: {0}", EntityType.Name);
         }
 
 
@@ -623,7 +623,7 @@ namespace Tripous.Data
                     throw new NotSupportedException($"{EntityType.Name}. CRUD mode not supported: GetById");
 
                 if (Descriptor.PrimaryKeyList.Count > 1)
-                    Sys.Error($"{EntityType.Name} Entity has a compound primary key");
+                    Sys.Throw($"{EntityType.Name} Entity has a compound primary key");
 
                 BeforeGetById(Id);
 
@@ -636,7 +636,7 @@ namespace Tripous.Data
 
                     if (Result == null)
                     {
-                        Sys.Error($"{EntityType.Name} Entity not found by Id: {Id}");
+                        Sys.Throw($"{EntityType.Name} Entity not found by Id: {Id}");
                     }
 
                     Trim(Result);
@@ -692,7 +692,7 @@ namespace Tripous.Data
                                 SB.Append(Ids[i].ToString());
                         }
 
-                        Sys.Error(SB.ToString());
+                        Sys.Throw(SB.ToString());
                     }
                     else
                     {

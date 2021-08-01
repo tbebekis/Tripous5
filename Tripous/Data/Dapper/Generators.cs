@@ -56,12 +56,12 @@ namespace Tripous.Data
         static public void Execute(DbConnection Con, DataEntity Entity)
         {
             if (Entity == null)
-                Sys.Error("Can not execute a generator on a null Entity");
+                Sys.Throw("Can not execute a generator on a null Entity");
 
             Type EntityType = Entity.GetType();
 
             if (!Dic.ContainsKey(EntityType))
-                Sys.Error("No generator is registered for this type: {0}", EntityType.FullName);
+                Sys.Throw("No generator is registered for this type: {0}", EntityType.FullName);
 
             MethodInfo Proc = Dic[EntityType];
 

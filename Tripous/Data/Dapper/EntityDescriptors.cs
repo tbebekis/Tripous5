@@ -63,7 +63,7 @@ namespace Tripous.Data
             EntityDescriptor Result = Find(EntityType);
 
             if (Result == null)
-                Sys.Error($"No TableDescriptor found for: {EntityType.Name}");
+                Sys.Throw($"No TableDescriptor found for: {EntityType.Name}");
 
             return Result;
         }
@@ -103,7 +103,7 @@ namespace Tripous.Data
             EntityDescriptor Result = Find(TableName);
 
             if (Result == null)
-                Sys.Error($"No TableDescriptor found for: {TableName}");
+                Sys.Throw($"No TableDescriptor found for: {TableName}");
 
             return Result;
         }

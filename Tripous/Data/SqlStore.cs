@@ -580,6 +580,29 @@ namespace Tripous.Data
             ExecSql(SqlText, null);
         }
 
+        /// <summary>
+        /// Executes a list of executable statements inside a single transaction
+        /// </summary>
+        public virtual void ExecSql(string[] SqlTextList)
+        {
+            using (DbTransaction transaction = this.BeginTransaction())
+            {
+                try
+                {
+                    foreach (string SqlText in SqlTextList)
+                        ExecSql(transaction, SqlText);
+
+                    /* commit the transaction */
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
         /* id generation - Non Transactioned */
         /// <summary>
         /// Returns the next id value of a generator named after the TableName table.
@@ -726,7 +749,7 @@ namespace Tripous.Data
         {
 
             if (string.IsNullOrWhiteSpace(SqlText) && string.IsNullOrWhiteSpace(TableName))
-                Sys.Error("GetNativeSchema(): SqlText and TableName are both null or empty!");
+                Sys.Throw("GetNativeSchema(): SqlText and TableName are both null or empty!");
 
             if (string.IsNullOrWhiteSpace(SqlText) && !string.IsNullOrWhiteSpace(TableName))
                 SqlText = string.Format("select * from {0}", TableName);
@@ -737,7 +760,7 @@ namespace Tripous.Data
             {
                 TableName = SS.GetMainTableName();
                 if (string.IsNullOrWhiteSpace(TableName))
-                    Sys.Error("GetNativeSchema(): Can NOT extract main table name from SqlText!");
+                    Sys.Throw("GetNativeSchema(): Can NOT extract main table name from SqlText!");
             }
 
             if (string.IsNullOrWhiteSpace(SchemaName))
@@ -801,7 +824,7 @@ namespace Tripous.Data
                 if (SB.Length > 0)
                     Message += Environment.NewLine + SB.ToString();
 
-                Sys.Error(Message);
+                Sys.Throw(Message);
             }
 
 

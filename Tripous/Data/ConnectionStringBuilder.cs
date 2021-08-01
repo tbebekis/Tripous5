@@ -234,7 +234,7 @@ namespace Tripous.Data
         {
             SqlProvider SP = SqlProviders.FindSqlProvider(Alias);
             if (SP == null)
-                Sys.Error("Provider not found: " + Alias);
+                Sys.Throw("Provider not found: " + Alias);
 
             return SP.MidwareType;
         }

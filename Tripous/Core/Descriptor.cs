@@ -70,7 +70,7 @@ namespace Tripous
         public virtual void CheckDescriptor()
         {
             if (string.IsNullOrEmpty(Name))
-                Sys.Error(E_NotFullyDefined, this.GetType().Name + ".Name");
+                Sys.Throw(E_NotFullyDefined, this.GetType().Name + ".Name");
         }
         /// <summary>
         /// Throws an exception. It should be used from inside the CheckDescriptor() method,
@@ -88,7 +88,7 @@ namespace Tripous
             Text += Environment.NewLine + "Item Type: " + this.GetType().FullName;
 
 
-            Sys.Error(E_NotFullyDefined, Text);
+            Sys.Throw(E_NotFullyDefined, Text);
         }
 
         /* properties */

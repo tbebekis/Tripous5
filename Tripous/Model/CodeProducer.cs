@@ -134,16 +134,16 @@ namespace Tripous.Model
         protected void CheckExecute(CodePart Part)
         {
             if (((Part.Mode == CodePartMode.FieldName) || (Part.Mode == CodePartMode.LookUpSql) || (Part.Mode == CodePartMode.Sequencer)) && (Store == null))
-                Sys.Error("{0}. Executor is null", this.GetType().Name);
+                Sys.Throw("{0}. Executor is null", this.GetType().Name);
 
             if (((Part.Mode == CodePartMode.FieldName) || (Part.Mode == CodePartMode.LookUpSql)) && (CurrentRow == null))
-                Sys.Error("{0}. CurrentRow is null", this.GetType().Name);
+                Sys.Throw("{0}. CurrentRow is null", this.GetType().Name);
 
             if (((Part.Mode == CodePartMode.FieldName) || (Part.Mode == CodePartMode.LookUpSql)) && (string.IsNullOrEmpty(MainTableName)))
-                Sys.Error("{0}. MainTableName is empty", this.GetType().Name);
+                Sys.Throw("{0}. MainTableName is empty", this.GetType().Name);
 
             if (!IsValidCodeFormat(Part.Format))
-                Sys.Error("CodeProducer. Invalid character in Code Part format");
+                Sys.Throw("CodeProducer. Invalid character in Code Part format");
 
         }
         /// <summary>
@@ -408,17 +408,17 @@ namespace Tripous.Model
         static public void CheckCode(string Format, string Code)
         {
             if (string.IsNullOrEmpty(Format) || string.IsNullOrEmpty(Code))
-                Sys.Error("CodeProducer. Format or Code is null or empty");
+                Sys.Throw("CodeProducer. Format or Code is null or empty");
 
             if (Format.Length != Code.Length)
-                Sys.Error("CodeProducer. Format and Code are not equal in length");
+                Sys.Throw("CodeProducer. Format and Code are not equal in length");
 
 
             for (int i = 0; i < Format.Length; i++)
             {
                 if (Array.IndexOf(ValidCodeFormatDelimiters, Format[i]) >= 0)
                     if (Code[i] != Format[i])
-                        Sys.Error("CodeProducer. Invalid formatted code. Format {0}, Code {1}", Format, Code);
+                        Sys.Throw("CodeProducer. Invalid formatted code. Format {0}, Code {1}", Format, Code);
             }
 
         }

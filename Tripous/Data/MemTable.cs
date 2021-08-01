@@ -104,13 +104,13 @@ namespace Tripous.Data
                     throw new ArgumentNullException("DetailTable");
 
                 if (table.DataSet == null)
-                    Sys.Error("MasterTable Table has no DataSet");
+                    Sys.Throw("MasterTable Table has no DataSet");
 
                 if (DetailTable.DataSet == null)
-                    Sys.Error("A DetailTable Table has no DataSet");
+                    Sys.Throw("A DetailTable Table has no DataSet");
 
                 if (DetailTable.DataSet != table.DataSet)
-                    Sys.Error("MasterTable.DataSet != DetailTable.DataSet");
+                    Sys.Throw("MasterTable.DataSet != DetailTable.DataSet");
 
             }
 

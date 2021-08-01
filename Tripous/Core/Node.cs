@@ -201,7 +201,7 @@ namespace Tripous
         public virtual void Insert(int Index, Node Node)
         {
             if (list.Contains(Node))
-                Sys.Error("Can not insert Node. Node already contained in list.");
+                Sys.Throw("Can not insert Node. Node already contained in list.");
 
             OnBeforeInsert(Index, Node);
             list.Insert(Index, Node);

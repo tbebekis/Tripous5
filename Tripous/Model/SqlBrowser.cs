@@ -68,7 +68,7 @@ namespace Tripous.Model
             var ConnectionInfo = Db.GetConnectionInfo(Descriptor.ConnectionName);
  
             if (ConnectionInfo == null)
-                Sys.Error("No Sql connection defined for Browser. {0}", Descriptor.Name);
+                Sys.Throw("No Sql connection defined for Browser. {0}", Descriptor.Name);
 
             Store = SqlStores.CreateSqlStore(ConnectionInfo);  
         }

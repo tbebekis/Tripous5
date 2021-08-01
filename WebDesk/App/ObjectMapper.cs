@@ -50,7 +50,7 @@ namespace WebDesk
         static public void Configure(Action<object> ConfigureProc)
         {
             if (IsConfigured)
-                Sys.Error($"{nameof(ObjectMapper)} is already configured.");
+                Sys.Throw($"{nameof(ObjectMapper)} is already configured.");
 
             Configuration = new MapperConfiguration(cfg => {
 
@@ -77,7 +77,7 @@ namespace WebDesk
         static public void AddMap(Type Source, Type Dest, bool TwoWay = false)
         {
             if (IsConfigured)
-                Sys.Error($"Can not add map configuration. {nameof(ObjectMapper)} is already configured.");
+                Sys.Throw($"Can not add map configuration. {nameof(ObjectMapper)} is already configured.");
 
             MapList.Add(new MapItem(Source, Dest, TwoWay));
         }
@@ -89,7 +89,7 @@ namespace WebDesk
         static public TDestination Map<TDestination>(this object Source) where TDestination : class
         {
             if (!IsConfigured)
-                Sys.Error($"Can not map objects. {nameof(ObjectMapper)} is not configured.");
+                Sys.Throw($"Can not map objects. {nameof(ObjectMapper)} is not configured.");
 
             if (Source == null)
                 throw new ArgumentNullException(nameof(Source));
@@ -102,7 +102,7 @@ namespace WebDesk
         static public TDestination MapTo<TSource, TDestination>(this TSource Source, TDestination Dest) where TSource : class where TDestination : class
         {
             if (!IsConfigured)
-                Sys.Error($"Can not map objects. {nameof(ObjectMapper)} is not configured.");
+                Sys.Throw($"Can not map objects. {nameof(ObjectMapper)} is not configured.");
 
             if (Source == null)
                 throw new ArgumentNullException(nameof(Source));

@@ -19,6 +19,7 @@ using Tripous;
 using Tripous.Logging;
 using Tripous.Data;
 using WebDesk.AspNet;
+ 
 
 namespace WebDesk
 {
@@ -62,8 +63,13 @@ namespace WebDesk
         /// Registers DbProviderFactory classes
         /// </summary>
         static void RegisterDbProviderFactories()
-        {
+        {  
             DbProviderFactories.RegisterFactory("System.Data.SQLite", System.Data.SQLite.SQLiteFactory.Instance);
+            DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
+            DbProviderFactories.RegisterFactory("FirebirdSql.Data.FirebirdClient", FirebirdSql.Data.FirebirdClient.FirebirdClientFactory.Instance); 
+            DbProviderFactories.RegisterFactory("Npgsql", Npgsql.NpgsqlFactory.Instance);
+            DbProviderFactories.RegisterFactory("MySql.Data.MySqlClient", MySql.Data.MySqlClient.MySqlClientFactory.Instance);
+            DbProviderFactories.RegisterFactory("Oracle.ManagedDataAccess.Client", Oracle.ManagedDataAccess.Client.OracleClientFactory.Instance);
         }
 
         /// <summary>
@@ -92,14 +98,34 @@ namespace WebDesk
         /// </summary>
         static void CreateDatabases()
         {
+            SqlProvider Provider;
+            string ConnectionString;
+
             SqlConnectionInfo DefaultConnectionInfo = Db.DefaultConnectionInfo;
-            SqlProvider Provider = DefaultConnectionInfo.GetSqlProvider();
-            string ConnectionString = DefaultConnectionInfo.ConnectionString;
+
+            Provider = DefaultConnectionInfo.GetSqlProvider();
+            ConnectionString = DefaultConnectionInfo.ConnectionString;
 
             if (!Provider.DatabaseExists(ConnectionString) && Provider.CanCreateDatabases)
             {
                 Provider.CreateDatabase(ConnectionString);
             }
+
+            foreach (var ConInfo in Db.Connections)
+            {
+                if (ConInfo != DefaultConnectionInfo)
+                {
+                    Provider = ConInfo.GetSqlProvider();
+                    ConnectionString = ConInfo.ConnectionString;
+
+                    if (!Provider.DatabaseExists(ConnectionString) && Provider.CanCreateDatabases)
+                    {
+                        Provider.CreateDatabase(ConnectionString);
+                    }
+                }
+            }
+
+            Sys.Throw("Stupid");
         }
         /// <summary>
         /// Creates database tables etc. based on the registered schemas

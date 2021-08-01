@@ -123,13 +123,13 @@ namespace Tripous
                 {
                     Item2 = this.Find(Item.Name);
                     if ((Item2 != null) && (Item2 != Item))
-                        Sys.Error(ErrorText, Item.Name);
+                        Sys.Throw(ErrorText, Item.Name);
                 }
                 /* is a name change of an existing item, or before an add */
                 else
                 {
                     if (Contains(Name))
-                        Sys.Error(ErrorText, Name);
+                        Sys.Throw(ErrorText, Name);
                 }
             }
         }
@@ -151,7 +151,7 @@ namespace Tripous
             {
                 T Result = Find(Name);
                 if (Result == null)
-                    Sys.Error("{0} not found: {1}", typeof(T).Name, Name);
+                    Sys.Throw("{0} not found: {1}", typeof(T).Name, Name);
                 return Result;
             }
         }

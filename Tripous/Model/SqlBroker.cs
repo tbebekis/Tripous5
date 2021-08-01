@@ -78,7 +78,7 @@ namespace Tripous.Model
             ConnectionInfo = Db.GetConnectionInfo(fDescriptor.ConnectionName);
 
             if (ConnectionInfo == null)
-                Sys.Error("No database connection defined for Broker. {0}", fDescriptor.Name);
+                Sys.Throw("No database connection defined for Broker. {0}", fDescriptor.Name);
 
             Store = SqlStores.CreateSqlStore(ConnectionInfo);
         }
@@ -864,7 +864,7 @@ namespace Tripous.Model
                 if (SB.Length > 0)
                 {
                     SB.Insert(0, Res.GS("E_InvalidFieldValues", "Invalid field values") + Environment.NewLine);
-                    Sys.Error(SB.ToString());
+                    Sys.Throw(SB.ToString());
                 }
             }
         }

@@ -264,7 +264,7 @@ namespace Tripous.Data
         public virtual object Save()
         {
             if (!IsValidItem)
-                Sys.Error("Can not save SysDataItem. Invalid SysDataItem");
+                Sys.Throw("Can not save SysDataItem. Invalid SysDataItem");
 
             SysData.Commit(this);
 

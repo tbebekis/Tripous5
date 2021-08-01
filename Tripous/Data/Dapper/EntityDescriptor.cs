@@ -248,7 +248,7 @@ namespace Tripous.Data
         {
             PropDescriptor Result = Find(PropertyOrFieldName);
             if (Result == null)
-                Sys.Error($"Property or Field not found. Entity: {EntityName}, PropertyOrField: {PropertyOrFieldName}");
+                Sys.Throw($"Property or Field not found. Entity: {EntityName}, PropertyOrField: {PropertyOrFieldName}");
             return Result;
         }
         /// <summary>
@@ -306,7 +306,7 @@ namespace Tripous.Data
         public DynamicParameters CreateParams(DataEntity Entity)
         {
             if (Entity.GetType() != this.EntityType)
-                Sys.Error("A TableDescriptor of {0} can not create parameters for {1}", this.EntityType.Name, Entity.GetType().Name);
+                Sys.Throw("A TableDescriptor of {0} can not create parameters for {1}", this.EntityType.Name, Entity.GetType().Name);
 
             var Params = new DynamicParameters();
 
@@ -327,7 +327,7 @@ namespace Tripous.Data
         public object GetPrimaryKeyValue(object Entity)
         {
             if (PrimaryKeyList.Count > 1)
-                Sys.Error($"{EntityType.FullName} Entity has a compound primary key");
+                Sys.Throw($"{EntityType.FullName} Entity has a compound primary key");
 
             PropertyInfo Property = FindProperty(PrimaryKeyList[0].PropertyName);
 

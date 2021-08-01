@@ -4,6 +4,11 @@
             "Name": "Default",
             "Provider": "SQLite",
             "ConnectionString": "Data Source=WebDesk.db3"
+        },
+        {
+            "Name": "PostgreSql",
+            "Provider": "PostgreSQL",
+            "ConnectionString": "Server=localhost; Database=test; User Id=postgres; Password=yoda2k;"
         }
     ]
 }

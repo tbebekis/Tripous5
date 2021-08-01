@@ -719,10 +719,10 @@ namespace Tripous.Data
         static public string NormalizeFieldName(string FieldName, SqlConnectionInfo ConnectionInfo)
         {
             if (string.IsNullOrWhiteSpace(FieldName))
-                Sys.Error("Can not normalize a field name: Field name is null or empty string");
+                Sys.Throw("Can not normalize a field name: Field name is null or empty string");
 
             if (ConnectionInfo == null)
-                Sys.Error("Can not normalize a field name: ConnectionInfo is null");
+                Sys.Throw("Can not normalize a field name: ConnectionInfo is null");
 
             SqlProvider Provider = ConnectionInfo.GetSqlProvider(); 
 
@@ -799,17 +799,17 @@ namespace Tripous.Data
             get
             {
                 if (fConnections == null || fConnections.Count == 0)
-                    Sys.Error("Can not get Connections. No database connections provided");
+                    Sys.Throw("Can not get Connections. No database connections provided");
 
                 return fConnections;
             }
             set
             {
                 if (fConnections != null)
-                    Sys.Error("Connections strings are already set.");
+                    Sys.Throw("Connections strings are already set.");
 
                 if (value == null || value.Count == 0)
-                    Sys.Error("Can not set Connections to a null or empty list. No database connections provided");
+                    Sys.Throw("Can not set Connections to a null or empty list. No database connections provided");
 
                 fConnections = value;
 

@@ -57,11 +57,6 @@ namespace Tripous.Data
                 using (DbConnection Con = OpenConnection(CS))
                 {
                     Type Type = Con.GetType();
-
-                    // public static void CreateDatabase(string connectionString, bool overwrite)
-                    // MethodInfo Method = Type.GetMethod("CreateDatabase", new Type[] { typeof(string), typeof(bool) });
-
-                    // public static void CreateDatabase(string connectionString, int pageSize, bool forcedWrites,  bool overwrite);
                     MethodInfo Method = Type.GetMethod("CreateDatabase", new Type[] { typeof(string), typeof(int), typeof(bool), typeof(bool) });
 
                     if (Method != null)
@@ -334,7 +329,7 @@ namespace Tripous.Data
         /// <summary>
         /// The Blob text
         /// </summary>
-        public override string Blob { get; } = "BLOB SUB_TYPE 0 SEGMENT SIZE 80";
+        public override string Blob { get; } = "BLOB SUB_TYPE 0 SEGMENT SIZE 80";                   // https://www.ibphoenix.com/resources/documents/general/doc_54
         /// <summary>
         /// The TextBlob text
         /// </summary>

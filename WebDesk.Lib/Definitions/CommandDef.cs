@@ -23,7 +23,7 @@ namespace WebDesk
         /// </summary>
         public string OwnerName { get; set; }
         /// <summary>
-        /// A name unique among all groups
+        /// A name unique among all instances of this type
         /// </summary>
         public string Name { get; set; }
         /// <summary>
@@ -52,9 +52,9 @@ namespace WebDesk
     }
  
 
-    public class Command
+    public class CommandDef
     {
-        public Command()
+        public CommandDef()
         {
         }
 

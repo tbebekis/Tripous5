@@ -12,7 +12,7 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using System.IO;
-
+using System.Reflection.Metadata.Ecma335;
 
 namespace Tripous.Data
 {
@@ -38,10 +38,13 @@ namespace Tripous.Data
         /// <summary>
         /// Returns true if the database exists
         /// </summary>
-        public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password)
+        public bool DatabaseExists(string ServerName, string DatabaseName, string UserName, string Password, string Port = "")
         {
-            string CS = $"Server={ServerName}; Port=5432; Database={DatabaseName}; User Id={UserName}; Password={Password}";
-            return CanConnect(CS, true);
+            if (string.IsNullOrWhiteSpace(Port))
+                Port = "5432";
+
+            string CS = $"Server={ServerName}; Port={Port}; Database={DatabaseName}; User Id={UserName}; Password={Password}";
+            return DatabaseExists(CS);
         }
         /// <summary>
         /// Creates a new database
@@ -54,7 +57,7 @@ namespace Tripous.Data
             bool Result = false;
             if (!DatabaseExists(ServerName, DatabaseName, UserName, Password))
             {
-                string CS = $"Server={ServerName}; Port=5432; User Id={UserName}; Password={Password}";
+                string CS = $"Server={ServerName}; User Id={UserName}; Password={Password}";  //  Port=5432; 
 
                 using (var Con = Factory.CreateConnection())
                 {
@@ -280,7 +283,7 @@ limit {RowLimit}";
         /// <summary>
         /// The Bool text
         /// </summary>
-        public override string Bool { get; } = "boolean";
+        public override string Bool { get; } = "integer"; // "boolean";
         /// <summary>
         /// The Blob text
         /// </summary>

@@ -1213,157 +1213,6 @@
             Delegate used by the Localize() method
             </summary>
         </member>
-        <member name="P:WebDesk.CommandGroup.Id">
-            <summary>
-            Database Id
-            </summary>
-        </member>
-        <member name="P:WebDesk.CommandGroup.OwnerName">
-            <summary>
-            Where this view belongs, e.g. Desk, Desk.Menu, etc
-            </summary>
-        </member>
-        <member name="P:WebDesk.CommandGroup.Name">
-            <summary>
-            A name unique among all groups
-            </summary>
-        </member>
-        <member name="P:WebDesk.CommandGroup.TitleKey">
-            <summary>
-            Resource string key
-            </summary>
-        </member>
-        <member name="P:WebDesk.CommandGroup.IconKey">
-            <summary>
-            Icon key
-            </summary>
-        </member>
-        <member name="T:WebDesk.CommandType">
-            <summary>
-            The command type. What a command does when it is called.
-            </summary>
-        </member>
-        <member name="F:WebDesk.CommandType.Ui">
-            <summary>
-            Displays a Ui. The command's Tag is the name of Ui View
-            </summary>
-        </member>
-        <member name="F:WebDesk.CommandType.Proc">
-            <summary>
-            Executes a procedure. The command's Tag is the name procedure
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.Id">
-            <summary>
-            Database Id
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.GroupId">
-            <summary>
-            Database Id
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.Type">
-            <summary>
-            The command type. What a command does when it is called.
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.Name">
-            <summary>
-            A name unique among all commands in command's group
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.TitleKey">
-            <summary>
-            Resource string key
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.IconKey">
-            <summary>
-            Icon key
-            </summary>
-        </member>
-        <member name="P:WebDesk.Command.Tag">
-            <summary>
-            Gets meaning according to command's type
-            </summary>
-        </member>
-        <member name="T:WebDesk.DataStoreSettings">
-            <summary>
-            Application settings
-            </summary>
-        </member>
-        <member name="P:WebDesk.DataStoreSettings.General">
-            <summary>
-            General settings
-            </summary>
-        </member>
-        <member name="P:WebDesk.DataStoreSettings.Http">
-            <summary>
-            Http related settings
-            </summary>
-        </member>
-        <member name="T:WebDesk.GeneralSettings">
-            <summary>
-            General settings
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.CultureCode">
-            <summary>
-            The default culture, i.e. el-GR
-            <para>NOTE: This setting is assigned initially by default to any new visitor.</para>
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.CurrencyCode">
-            <summary>
-            Default currency code, e.g. EUR, USD, etc.
-            <para>NOTE: This setting is assigned initially by default to any new visitor.</para>
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.CurrencySymbol">
-            <summary>
-            Returns the currency symbol. Used in formatting prices
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.MoneyFormat">
-            <summary>
-            Format string for formatting money values
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.DefaultCacheTimeoutMinutes">
-            <summary>
-            Default Cache retention policy, in minutes
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.UserCookieExpirationHours">
-            <summary>
-            How many hours to keep visitor cookie valid.
-            <para> -1 = never expires, 0 = expire immediately, nnn = expire after nnn hours</para>
-            </summary>
-        </member>
-        <member name="P:WebDesk.GeneralSettings.SuperUserPassword">
-            <summary>
-            Password for the super user
-            </summary>
-        </member>
-        <member name="T:WebDesk.HttpSettings">
-            <summary>
-            Http related settings
-            </summary>
-        </member>
-        <member name="M:WebDesk.HttpSettings.#ctor">
-            <summary>
-            Constructor
-            </summary>
-        </member>
-        <member name="P:WebDesk.HttpSettings.StaticFilesCacheControl">
-            <summary>
-            Gets or sets the value of the "Cache-Control" header value for static content.
-            <para>Leave it empty or null, for no setting at all.</para>
-            <para>SEE: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control </para>
-            <para>SEE: https://docs.microsoft.com/en-us/aspnet/core/performance/caching/response </para>
-            </summary>
-        </member>
         <member name="T:WebDesk.ControllerApi">
             <summary>
             Web Api Controller.
@@ -1609,6 +1458,296 @@
         <member name="M:WebDesk.DataStore.RegisterSchemas">
             <summary>
             Register database schemas
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.OwnerName">
+            <summary>
+            Where this view belongs, e.g. Desk, Desk.Menu, etc
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.Name">
+            <summary>
+            A name unique among all instances of this type
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.IconKey">
+            <summary>
+            Icon key
+            </summary>
+        </member>
+        <member name="T:WebDesk.CommandType">
+            <summary>
+            The command type. What a command does when it is called.
+            </summary>
+        </member>
+        <member name="F:WebDesk.CommandType.Ui">
+            <summary>
+            Displays a Ui. The command's Tag is the name of Ui View
+            </summary>
+        </member>
+        <member name="F:WebDesk.CommandType.Proc">
+            <summary>
+            Executes a procedure. The command's Tag is the name procedure
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.GroupId">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.Type">
+            <summary>
+            The command type. What a command does when it is called.
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.Name">
+            <summary>
+            A name unique among all commands in command's group
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.IconKey">
+            <summary>
+            Icon key
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandDef.Tag">
+            <summary>
+            Gets meaning according to command's type
+            </summary>
+        </member>
+        <member name="T:WebDesk.ModuleDef">
+            <summary>
+            A module definition
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.Name">
+            <summary>
+            A name unique among all instances of this type
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.IconKey">
+            <summary>
+            Icon key
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.Author">
+            <summary>
+            The author (company, person, etc) who created this instance
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.CreatedOn">
+            <summary>
+            Creation date-time
+            </summary>
+        </member>
+        <member name="P:WebDesk.ModuleDef.ModifiedOn">
+            <summary>
+            Modification date-time
+            </summary>
+        </member>
+        <member name="T:WebDesk.DataTableDef">
+            <summary>
+            Table definition
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataTableDef.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataTableDef.Name">
+            <summary>
+            A name unique among all instances of this type
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataTableDef.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataTableDef.Fields">
+            <summary>
+            Fields
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataTableDef.UniqueConstraints">
+            <summary>
+            UniqueConstraints
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataTableDef.ForeignKeys">
+            <summary>
+            ForeignKeys
+            </summary>
+        </member>
+        <member name="T:WebDesk.DataFieldType">
+            <summary>
+            The data-type of a data field
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Unknown">
+            <summary>
+            Unknown
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.String">
+            <summary>
+            String (nvarchar, varchar)
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Integer">
+            <summary>
+            Integer
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Float">
+            <summary>
+            Float (float, double precision, etc)
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Decimal">
+            <summary>
+            Decimal (decimal(18, 4))
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Date">
+            <summary>
+            Date (date)
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.DateTime">
+            <summary>
+            DateTime (datetime, timestamp, etc)
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Boolean">
+            <summary>
+            Boolean (integer always, 1 = true, else false)
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.Blob">
+            <summary>
+            Blob
+            </summary>
+        </member>
+        <member name="F:WebDesk.DataFieldType.TextBlob">
+            <summary>
+            Text Blob
+            </summary>
+        </member>
+        <member name="T:WebDesk.DataFieldDef">
+            <summary>
+            Field definition
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.Name">
+            <summary>
+            A name unique among all instances of this type
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.IsPrimaryKey">
+            <summary>
+            True when the field is a primary key
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.DataType">
+            <summary>
+            The data-type of the field. One of the <see cref="T:WebDesk.DataFieldType"/> constants.
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.Length">
+            <summary>
+            Field length. Applicable to varchar fields only.
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.NotNull">
+            <summary>
+            True when the field is NOT nullable  
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataFieldDef.Default">
+            <summary>
+            The default expression, if any. E.g. 0, or ''. Defaults to null.
+            </summary>
+        </member>
+        <member name="T:WebDesk.UniqueConstraintDef">
+            <summary>
+            constraint UC_{TABLE_NAME}_00 unique (FIELD_NAME)
+            </summary>
+        </member>
+        <member name="P:WebDesk.UniqueConstraintDef.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.UniqueConstraintDef.FieldName">
+            <summary>
+            The field name upon where the constraint is applied
+            </summary>
+        </member>
+        <member name="T:WebDesk.ForeignKeyDef">
+            <summary>
+            constraint FC_{TABLE_NAME}_00 foreign key (FIELD_NAME) references FOREIGN_TABLE_NAME (FOREIGN_FIELD_NAME)
+            </summary>
+        </member>
+        <member name="P:WebDesk.ForeignKeyDef.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.ForeignKeyDef.FieldName">
+            <summary>
+            The field name upon where the constraint is applied
+            </summary>
+        </member>
+        <member name="P:WebDesk.ForeignKeyDef.ForeignTableName">
+            <summary>
+            The foreign table name
+            </summary>
+        </member>
+        <member name="P:WebDesk.ForeignKeyDef.ForeignFieldName">
+            <summary>
+            The foreign field name  
             </summary>
         </member>
         <member name="T:WebDesk.IClaimListProvider">
@@ -2206,6 +2345,82 @@
         <member name="P:WebDesk.Requestor.IsBlocked">
             <summary>
             True when requestor is blocked by admins
+            </summary>
+        </member>
+        <member name="T:WebDesk.DataStoreSettings">
+            <summary>
+            Application settings
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataStoreSettings.General">
+            <summary>
+            General settings
+            </summary>
+        </member>
+        <member name="P:WebDesk.DataStoreSettings.Http">
+            <summary>
+            Http related settings
+            </summary>
+        </member>
+        <member name="T:WebDesk.GeneralSettings">
+            <summary>
+            General settings
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.CultureCode">
+            <summary>
+            The default culture, i.e. el-GR
+            <para>NOTE: This setting is assigned initially by default to any new visitor.</para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.CurrencyCode">
+            <summary>
+            Default currency code, e.g. EUR, USD, etc.
+            <para>NOTE: This setting is assigned initially by default to any new visitor.</para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.CurrencySymbol">
+            <summary>
+            Returns the currency symbol. Used in formatting prices
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.MoneyFormat">
+            <summary>
+            Format string for formatting money values
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.DefaultCacheTimeoutMinutes">
+            <summary>
+            Default Cache retention policy, in minutes
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.UserCookieExpirationHours">
+            <summary>
+            How many hours to keep visitor cookie valid.
+            <para> -1 = never expires, 0 = expire immediately, nnn = expire after nnn hours</para>
+            </summary>
+        </member>
+        <member name="P:WebDesk.GeneralSettings.SuperUserPassword">
+            <summary>
+            Password for the super user
+            </summary>
+        </member>
+        <member name="T:WebDesk.HttpSettings">
+            <summary>
+            Http related settings
+            </summary>
+        </member>
+        <member name="M:WebDesk.HttpSettings.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="P:WebDesk.HttpSettings.StaticFilesCacheControl">
+            <summary>
+            Gets or sets the value of the "Cache-Control" header value for static content.
+            <para>Leave it empty or null, for no setting at all.</para>
+            <para>SEE: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control </para>
+            <para>SEE: https://docs.microsoft.com/en-us/aspnet/core/performance/caching/response </para>
             </summary>
         </member>
         <member name="T:WebDesk.WebAppException">

@@ -499,7 +499,7 @@ namespace Tripous.Model
         public virtual void CheckCanInsert()
         {
             if (IsListBroker)
-                Sys.Error("Can not insert item in a list broker.");
+                Sys.Throw("Can not insert item in a list broker.");
         }
         /// <summary>
         /// Called by the <see cref="Edit"/> and throws an exception if, for some reason,
@@ -508,10 +508,10 @@ namespace Tripous.Model
         public virtual void CheckCanEdit(object RowId)
         {
             if (IsListBroker)
-                Sys.Error("Can not edit item in a list broker.");
+                Sys.Throw("Can not edit item in a list broker.");
 
             if (Sys.IsNull(RowId))
-                Sys.Error("Can not edit item. Invalid RowId");
+                Sys.Throw("Can not edit item. Invalid RowId");
 
         }
         /// <summary>
@@ -521,10 +521,10 @@ namespace Tripous.Model
         public virtual void CheckCanDelete(object RowId)
         {
             if (IsListBroker)
-                Sys.Error("Can not delete item in a list broker.");
+                Sys.Throw("Can not delete item in a list broker.");
 
             if (Sys.IsNull(RowId))
-                Sys.Error("Can not delete item. Invalid RowId");
+                Sys.Throw("Can not delete item. Invalid RowId");
         }
         /// <summary>
         /// Called by the <see cref="Commit"/> and throws an exception if, for some reason,
@@ -533,7 +533,7 @@ namespace Tripous.Model
         public virtual void CheckCanCommit(bool Reselect)
         {
             if (IsListBroker)
-                Sys.Error("Can not commit item in a list broker.");
+                Sys.Throw("Can not commit item in a list broker.");
         }
 
         /* item miscs */
@@ -637,7 +637,7 @@ namespace Tripous.Model
             if (Descriptor != null)
                 return Create(Descriptor, Initialized, AsListBroker);
 
-            Sys.Error("BrokerDescriptor not found: {0}", Name);
+            Sys.Throw("BrokerDescriptor not found: {0}", Name);
 
             return null;
 

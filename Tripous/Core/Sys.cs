@@ -64,7 +64,7 @@ namespace Tripous
         /// <summary>
         /// Throws an Exception
         /// </summary>
-        static public void Error(string Text)
+        static public void Throw(string Text)
         {
             if (string.IsNullOrWhiteSpace(Text))
                 Text = "Unknown error";
@@ -74,7 +74,7 @@ namespace Tripous
         /// <summary>
         /// Throws an Exception
         /// </summary>
-        static public void Error(string Text, params object[] Args)
+        static public void Throw(string Text, params object[] Args)
         {
             if ((Args != null) && (Args.Length > 0))
                 Text = string.Format(Text, Args);
@@ -88,7 +88,7 @@ namespace Tripous
             if (Feature == null)
                 Feature = string.Empty;
 
-            Error("Not yet implemented: " + Feature);
+            Throw("Not yet implemented: " + Feature);
         }
         /// <summary>
         /// Throws an exception if Index is out of range
@@ -96,7 +96,7 @@ namespace Tripous
         static public void CheckListIndex(IList List, int Index)
         {
             if ((Index < 0) || (Index > List.Count - 1))
-                Error("Index out of range: {0}", Index);
+                Throw("Index out of range: {0}", Index);
         }
 
         /* Log */

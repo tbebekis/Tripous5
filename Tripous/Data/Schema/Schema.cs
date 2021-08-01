@@ -65,7 +65,7 @@ namespace Tripous.Data
         {
             SchemaVersion Item = FindGreaterOrEqual(Domain, ConnectionName, Version);
             if (Item != null)
-                Sys.Error("Invalid database schema version: Domain: {0}, ConnectionName {1}, Version {2}", Domain, ConnectionName, Version);
+                Sys.Throw("Invalid database schema version: Domain: {0}, ConnectionName {1}, Version {2}", Domain, ConnectionName, Version);
         }
 
         /// <summary>
