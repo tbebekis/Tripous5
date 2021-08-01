@@ -1213,6 +1213,81 @@
             Delegate used by the Localize() method
             </summary>
         </member>
+        <member name="P:WebDesk.CommandGroup.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.OwnerName">
+            <summary>
+            Where this view belongs, e.g. Desk, Desk.Menu, etc
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.Name">
+            <summary>
+            A name unique among all groups
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.CommandGroup.IconKey">
+            <summary>
+            Icon key
+            </summary>
+        </member>
+        <member name="T:WebDesk.CommandType">
+            <summary>
+            The command type. What a command does when it is called.
+            </summary>
+        </member>
+        <member name="F:WebDesk.CommandType.Ui">
+            <summary>
+            Displays a Ui. The command's Tag is the name of Ui View
+            </summary>
+        </member>
+        <member name="F:WebDesk.CommandType.Proc">
+            <summary>
+            Executes a procedure. The command's Tag is the name procedure
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.Id">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.GroupId">
+            <summary>
+            Database Id
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.Type">
+            <summary>
+            The command type. What a command does when it is called.
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.Name">
+            <summary>
+            A name unique among all commands in command's group
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.TitleKey">
+            <summary>
+            Resource string key
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.IconKey">
+            <summary>
+            Icon key
+            </summary>
+        </member>
+        <member name="P:WebDesk.Command.Tag">
+            <summary>
+            Gets meaning according to command's type
+            </summary>
+        </member>
         <member name="T:WebDesk.DataStoreSettings">
             <summary>
             Application settings
@@ -1548,8 +1623,8 @@
         </member>
         <member name="T:WebDesk.IPlugin">
             <summary>
-            A dynamically loadable external module.
-            <para>NOTE: An external module is an assembly with a filename as ewm_FILE_NAME.dll. It uses ewm_ as a filename prefix. </para>
+            A dynamically loadable external plugin.
+            <para>NOTE: An external binary component is an assembly with a filename as ewm_FILE_NAME.dll. It uses ewm_ as a filename prefix. </para>
             </summary>
         </member>
         <member name="M:WebDesk.IPlugin.Initialize(WebDesk.IWebAppContext)">

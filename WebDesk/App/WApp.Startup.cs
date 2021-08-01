@@ -97,14 +97,14 @@ namespace WebDesk
 
  
         /// <summary>
-        /// Loads any plugin modules
+        /// Loads plugins
         /// </summary>
-        static void LoadExternalModules()
+        static void LoadPlugins()
         {
-            if (Directory.Exists(SysConfig.ExternalModulesFolder))
+            if (Directory.Exists(SysConfig.PluginsFolder))
             {
-                ExternalModuleLoader<IPlugin> PluginLoader = new ExternalModuleLoader<IPlugin>();
-                PluginLoader.RootFolder = SysConfig.ExternalModulesFolder;
+                PluginLoader<IPlugin> PluginLoader = new PluginLoader<IPlugin>();
+                PluginLoader.RootFolder = SysConfig.PluginsFolder;
                 PluginLoader.Prefix = "ewm_";
 
                 IPlugin[] Plugins = PluginLoader.Execute();
@@ -170,7 +170,7 @@ namespace WebDesk
                 // ● load the data store (ERP plugin) and any other plugins
                 InitializeDbProviderFactories();                
                 DataStore.Initialize(WApp.AppContext);
-                LoadExternalModules();
+                LoadPlugins();
 
                 // ● object maps
                 ObjectMapper.Configure(AddObjectMaps);
@@ -212,7 +212,7 @@ namespace WebDesk
             AppSettings = AppSettings ?? new AppSettings();
             AppSettingsSection.Bind(AppSettings);
 
-            SysConfig.ExternalModulesFolder = AppSettings.PluginFolder;
+            SysConfig.PluginsFolder = AppSettings.PluginsFolder;
 
             // ● custom services 
             services.AddScoped<IJwtRequestContext, JwtRequestContext>();

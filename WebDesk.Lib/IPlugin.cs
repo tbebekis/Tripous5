@@ -9,8 +9,8 @@ namespace WebDesk
  
 
     /// <summary>
-    /// A dynamically loadable external module.
-    /// <para>NOTE: An external module is an assembly with a filename as ewm_FILE_NAME.dll. It uses ewm_ as a filename prefix. </para>
+    /// A dynamically loadable external plugin.
+    /// <para>NOTE: An external binary component is an assembly with a filename as ewm_FILE_NAME.dll. It uses ewm_ as a filename prefix. </para>
     /// </summary>
     public interface IPlugin
     {

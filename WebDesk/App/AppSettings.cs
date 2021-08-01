@@ -17,7 +17,7 @@ namespace WebDesk
         /// <summary>
         /// Plugins folder path
         /// </summary>
-        public string PluginFolder { get; set; }
+        public string PluginsFolder { get; set; }
         /// <summary>
         /// Security settings
         /// </summary>

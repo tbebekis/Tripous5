@@ -18,7 +18,7 @@ namespace Tripous
     /// <para>The class ResourceProvider provides a base implementation.</para>
     /// <para>Each Assembly may contain a ResourceProvider class
     /// decorated with the ResourceProviderAttribute. It can contain more than one though.</para>
-    /// <para>An external module may implement this interface.</para>
+    /// <para>A plugin or other application component may implement this interface.</para>
     /// <para>The ObjectStore loads automatically those classes marked with ResourceProviderAttribute
     /// and implementing this interface.</para>
     /// </summary>

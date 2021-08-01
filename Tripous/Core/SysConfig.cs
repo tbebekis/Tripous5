@@ -397,9 +397,9 @@ namespace Tripous
         }
 
         /// <summary>
-        /// The folder where the external modules reside
+        /// The folder where the plugins reside
         /// </summary>
-        static public string ExternalModulesFolder { get; set; }
+        static public string PluginsFolder { get; set; }
 
         /// <summary>
         /// The name of the default database connection

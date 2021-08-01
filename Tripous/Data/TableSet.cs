@@ -11,7 +11,7 @@ namespace Tripous.Data
 {
 
     /// <summary>
-    /// Represents a set of correlated tables belonging to a certain module, such as Customers, Suppliers, Trades etc.
+    /// Represents a set of correlated tables belonging to a certain table tree, such as Customers, Suppliers, Trades etc.
     /// </summary>
     public class TableSet
     {

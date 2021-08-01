@@ -18,7 +18,7 @@ namespace Tripous.Model
     /// <summary>
     /// Broker class is the base class for creating Tripous business objects.
     /// <para>A CustomerBroker, a SupplierBroker or a TradeBroker, for example, all should inherit from this base class.</para>
-    /// <para>A broker represents a group of correlated tables which belong to a certain "module". A Customer module, for example,
+    /// <para>A broker represents a group of correlated tables which belong to a certain "tree of tables". A Customer tree, for example,
     /// may use the CUSTOMER, CUSTOMER_ADDRESS and COUNTRY tables.</para>
     /// <para>A broker offers two "views" of the data it represents: a browse (or list) view and an edit (or item) view and provides a set of
     /// methods for handling each "view". </para>

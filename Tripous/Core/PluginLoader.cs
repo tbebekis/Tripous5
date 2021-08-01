@@ -12,12 +12,12 @@ namespace Tripous
 
 
     /// <summary>
-    /// Loads dynamically loadable (plugins) external modules (assemblies) using the <see cref="AssemblyLoadContext"/> class.
+    /// Loads dynamically loadable plugins (assemblies) using the <see cref="AssemblyLoadContext"/> class.
     /// <para>The loading process is done in two steps. </para>
     /// <para>1. Loads assemblies into an un-loadable context and decides whether to load the assembly in step 2, based on contained creatable types.</para>
     /// <para>2. Loads assemblies into the default context, creates instances based on creatable types, and returns a list of instances.</para>
     /// </summary>
-    public class ExternalModuleLoader<TExternalModule> where TExternalModule : class
+    public class PluginLoader<TPlugin> where TPlugin : class
     {
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Tripous
             //List<string> FileNamesList = new List<string>();
 
             bool Unloadable = true;
-            AssemblyLoadContext LoadContext = new AssemblyLoadContext("ExternalModuleFinder", Unloadable);
+            AssemblyLoadContext LoadContext = new AssemblyLoadContext("PluginFinder", Unloadable);
 
             Assembly A;
             //string FileName;
@@ -89,16 +89,16 @@ namespace Tripous
             }
 
             return GetTypesSafe()
-            .Where(type => !type.IsAbstract && typeof(TExternalModule).IsAssignableFrom(type))
+            .Where(type => !type.IsAbstract && typeof(TPlugin).IsAssignableFrom(type))
             .ToArray()
             ;
         }
         /// <summary>
         /// Creates and returns a plugin instance based on a specified type
         /// </summary>
-        protected virtual TExternalModule DefaultCreateInstance(Type T)
+        protected virtual TPlugin DefaultCreateInstance(Type T)
         {
-            return Activator.CreateInstance(T) as TExternalModule;
+            return Activator.CreateInstance(T) as TPlugin;
         }
 
 
@@ -106,10 +106,10 @@ namespace Tripous
         /// Loads assemblies into the default context, creates plugin instances based on creatable types, and returns a list of plugin instances.
         /// </summary>
         /// <returns>Returns a list of created instances.</returns>
-        public TExternalModule[] Execute()
+        public TPlugin[] Execute()
         {
             if (string.IsNullOrWhiteSpace(RootFolder))
-                throw new ApplicationException("Can not load external modules. No root folder defined");
+                throw new ApplicationException("Can not load plugins. No root folder defined");
 
             if (ExcludeAssemblyFunc == null)
                 ExcludeAssemblyFunc = DefaultExcludeAssembly;
@@ -121,7 +121,7 @@ namespace Tripous
                 CreateInstanceFunc = DefaultCreateInstance;
 
 
-            List<TExternalModule> ResultList = new List<TExternalModule>();
+            List<TPlugin> ResultList = new List<TPlugin>();
 
             string[] AssemblyPaths = GetAssemblyPaths();
 
@@ -129,7 +129,7 @@ namespace Tripous
 
             Assembly A;
             Type[] Types;
-            TExternalModule Instance;
+            TPlugin Instance;
             foreach (string AssemblyPath in AssemblyPaths)
             {
                 A = LoadContext.LoadFromAssemblyPath(AssemblyPath);
@@ -149,11 +149,11 @@ namespace Tripous
         
         /* properties */
         /// <summary>
-        /// The folder to start looking for external modules (assemblies), e.g. Debug\bin\Modules
+        /// The folder to start looking for plugins (assemblies), e.g. Debug\bin\Plugins
         /// </summary>
         public string RootFolder { get; set; }
         /// <summary>
-        /// A filename prefix denoting an external module, e.g. ewm_ for ewm_XXXXX
+        /// A filename prefix used in loading plugins, e.g. ewm_ for ewm_XXXXX
         /// </summary>
         public string Prefix { get; set; } = "";
         /// <summary>
@@ -167,7 +167,7 @@ namespace Tripous
         /// <summary>
         /// A function that creates and returns a plugin instance based on a specified type
         /// </summary>
-        public Func<Type, TExternalModule> CreateInstanceFunc { get; set; }  
+        public Func<Type, TPlugin> CreateInstanceFunc { get; set; }  
 
     }
 }

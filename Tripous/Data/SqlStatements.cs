@@ -8,7 +8,7 @@ namespace Tripous.Data
 {
 
     /// <summary>
-    /// Represents the full group of DML S statements of a module
+    /// Represents the full group of DML statements 
     /// </summary>
     public class SqlStatements : Assignable
     {
@@ -38,23 +38,23 @@ namespace Tripous.Data
 
 
         /// <summary>
-        /// Gets the SELECT statement of a Browse part of a module
+        /// Gets the SELECT statement of a Browse part 
         /// </summary>
         public SelectSql BrowseSelect { get; private set; } = new SelectSql();
         /// <summary>
-        /// Gets or sets the SELECT statement of an Edit part of a module. i.e "select * from TABLE_NAME where ID = SomeValue"
+        /// Gets or sets the SELECT statement of an Edit part. i.e "select * from TABLE_NAME where ID = SomeValue"
         /// </summary>
         public string RowSelect { get; set; } = "";
         /// <summary>
-        /// Gets or sets the INSERT statement of an item in a module
+        /// Gets or sets the INSERT statement of an item 
         /// </summary>
         public string Insert { get; set; } = "";
         /// <summary>
-        /// Gets or sets the UPDATE statement of an item in a module
+        /// Gets or sets the UPDATE statement of an item 
         /// </summary>
         public string Update { get; set; } = "";
         /// <summary>
-        /// Gets or sets the DELETE statement of an item in a module
+        /// Gets or sets the DELETE statement of an item 
         /// </summary>
         public string Delete { get; set; } = "";
     }

@@ -12,7 +12,7 @@ namespace Tripous.Data
 
     /// <summary>
     /// The registry of database schemas.
-    /// <para>A Schema is a list of versions under a name, i.e. Application, MyExternalModule etc.</para>
+    /// <para>A Schema is a list of versions under a name, i.e. Application, MyPlugin etc.</para>
     /// </summary>
     static public class Schemas
     {

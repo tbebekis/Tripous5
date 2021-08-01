@@ -86,7 +86,7 @@
             Application settings, coming from appsettings.json
             </summary>
         </member>
-        <member name="P:WebDesk.AppSettings.PluginFolder">
+        <member name="P:WebDesk.AppSettings.PluginsFolder">
             <summary>
             Plugins folder path
             </summary>
@@ -527,9 +527,9 @@
             Initializes <see cref="T:System.Data.Common.DbProviderFactory"/> classes.
             </summary>
         </member>
-        <member name="M:WebDesk.WApp.LoadExternalModules">
+        <member name="M:WebDesk.WApp.LoadPlugins">
             <summary>
-            Loads any plugin modules
+            Loads plugins
             </summary>
         </member>
         <member name="M:WebDesk.WApp.LoadLanguages">

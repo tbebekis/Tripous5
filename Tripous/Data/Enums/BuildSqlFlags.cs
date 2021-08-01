@@ -28,7 +28,7 @@ namespace Tripous.Data
         /// </summary>
         GuidOids = 2,
         /// <summary>
-        /// When is set indicates that blob fields must included into the SELECT of the Browse part of the module
+        /// When is set indicates that blob fields must included into the SELECT of the Browse part.
         /// </summary>
         BrowseBlobFields = 4,
         /// <summary>
