@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+using Tripous;
+using Tripous.Data;
+
 namespace WebDesk
 {
     /// <summary>
@@ -14,7 +18,7 @@ namespace WebDesk
         /// <summary>
         /// Database Id
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
@@ -48,10 +52,120 @@ namespace WebDesk
     /// </summary>
     public class DataTableDef
     {
+        /* construction */
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public DataTableDef()
+        {
+        }
+
+        /* public */
+        /// <summary>
+        /// Returns the table definition text.
+        /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>
+        /// </summary>
+        public string GetDefText()
+        {
+            StringBuilder SB = new StringBuilder();
+
+            SB.AppendLine($"create table {Name} (");
+ 
+            string sDef;
+
+            for (int i = 0; i < Fields.Count; i++)
+            {
+                sDef = i > 0 ? "," + Fields[i].GetDefText() : Fields[i].GetDefText();
+                
+                SB.AppendLine("  " + sDef);
+            }
+
+            for (int i = 0; i < UniqueConstraints.Count; i++)
+            {
+                sDef = $",constraint UC_{Name}_{i} unique ({UniqueConstraints[i].FieldName})";
+                SB.AppendLine("  " + sDef);
+            }
+
+            for (int i = 0; i < ForeignKeys.Count; i++)
+            {
+                sDef = $",constraint FC_{Name}_{i} foreign key ({ForeignKeys[i].FieldName}) references {ForeignKeys[i].ForeignTableName} ({ForeignKeys[i].ForeignFieldName})";
+                SB.AppendLine("  " + sDef);
+            }
+
+            SB.AppendLine(")");
+            return SB.ToString();
+        }
+
+        /// <summary>
+        ///  Creates, adds and returns a primary key field.
+        /// </summary>
+        public DataFieldDef AddPrimaryKey(string FieldName = "Id", string TitleKey = null)
+        {
+            DataFieldDef Result = new DataFieldDef();
+            Result.Name = FieldName;
+            Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
+            Result.IsPrimaryKey = true;
+            Fields.Add(Result);
+            return Result;
+        }
+        /// <summary>
+        ///  Creates, adds and returns a string (nvarchar) field.
+        /// </summary>
+        public DataFieldDef AddStringField(string FieldName, int Length, bool NotNull, string TitleKey = null, string DefaultValue = null)
+        {
+            DataFieldDef Result = new DataFieldDef();
+            Result.Name = FieldName;
+            Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
+            Result.DataType = DataFieldType.String;
+            Result.Length = Length;
+            Result.NotNull = NotNull;
+            Result.DefaultValue = DefaultValue;
+            Fields.Add(Result);
+            return Result;
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field.
+        /// </summary>
+        public DataFieldDef AddField(string FieldName,  DataFieldType DataType, bool NotNull, string TitleKey = null, string DefaultValue = null)
+        {
+            DataFieldDef Result = new DataFieldDef();
+            Result.Name = FieldName;
+            Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
+            Result.DataType = DataType; 
+            Result.NotNull = NotNull;
+            Result.DefaultValue = DefaultValue;
+            Fields.Add(Result);
+            return Result;
+        }
+
+        /// <summary>
+        ///  Creates, adds and returns a unique constraint
+        /// </summary>
+        public UniqueConstraintDef AddUniqueConstraint(string FieldName)
+        {
+            UniqueConstraintDef Result = new UniqueConstraintDef();
+            Result.FieldName = FieldName;
+            UniqueConstraints.Add(Result);
+            return Result;
+        }
+        /// <summary>
+        ///  Creates, adds and returns a foreign key field constraint.
+        /// </summary>
+        public ForeignKeyDef AddForeignKeyConstraint(string FieldName, string ForeignTableName, string ForeignFieldName)
+        {
+            ForeignKeyDef Result = new ForeignKeyDef();
+            Result.FieldName = FieldName;
+            Result.ForeignTableName = ForeignTableName;
+            Result.ForeignFieldName = ForeignFieldName;
+            ForeignKeys.Add(Result);
+            return Result;
+        }
+
+        /* properties */
         /// <summary>
         /// Database Id
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
@@ -130,10 +244,71 @@ namespace WebDesk
     /// </summary>
     public class DataFieldDef
     {
+
+        /// <summary>
+        /// Returns the string representation of a field data type.
+        /// </summary>
+        static public string DataTypeToString(DataFieldType Type)
+        {
+            switch (Type)
+            {
+                case DataFieldType.String: return SqlProvider.CNVARCHAR;
+                case DataFieldType.Integer: return "integer";
+                case DataFieldType.Float: return SqlProvider.CFLOAT;
+                case DataFieldType.Decimal: return SqlProvider.CDECIMAL;
+                case DataFieldType.Date: return SqlProvider.CDATE;
+                case DataFieldType.DateTime: return SqlProvider.CDATE_TIME;
+                case DataFieldType.Boolean: return "integer";
+                case DataFieldType.Blob: return SqlProvider.CBLOB;
+                case DataFieldType.TextBlob: return SqlProvider.CBLOB_TEXT;                   
+            }
+
+            throw new ApplicationException($"DataType not supported in Field definition: {Type}");
+        }
+
+        /// <summary>
+        /// Returns the string representation of a field data type.
+        /// </summary>
+        public string DataTypeToString()
+        {
+            return DataTypeToString(this.DataType);
+        }
+        /// <summary>
+        /// Returns the field definition text.
+        /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>
+        /// </summary>
+        public string GetDefText()
+        {
+ 
+            string sDataType;
+            if (IsPrimaryKey)
+            {
+                sDataType = SysConfig.PrimaryKeyStr;
+            }
+            else if (DataType == DataFieldType.String)
+            {
+                sDataType = $"{SqlProvider.CNVARCHAR}({Length})";
+            }
+            else
+            {
+                sDataType = DataTypeToString(DataType);
+            }
+
+            string sNull = string.Empty;
+            if (!IsPrimaryKey)
+              sNull = NotNull ? SqlProvider.CNOT_NULL : SqlProvider.CNULL; 
+
+            string sDefault = !string.IsNullOrWhiteSpace(DefaultValue) ? $"default {DefaultValue}" : string.Empty;
+
+            string Result = $"{Name} {sDataType} {sDefault} {sNull}";
+
+            return Result;
+        }
+
         /// <summary>
         /// Database Id
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
@@ -163,7 +338,7 @@ namespace WebDesk
         /// <summary>
         /// The default expression, if any. E.g. 0, or ''. Defaults to null.
         /// </summary>
-        public string Default { get; set; } // e.g. produces default 0, or default ''
+        public string DefaultValue { get; set; } // e.g. produces default 0, or default ''
     }
 
 
@@ -175,7 +350,7 @@ namespace WebDesk
         /// <summary>
         /// Database Id
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// The field name upon where the constraint is applied
         /// </summary>
@@ -190,7 +365,7 @@ namespace WebDesk
         /// <summary>
         /// Database Id
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// The field name upon where the constraint is applied
         /// </summary>
@@ -203,7 +378,6 @@ namespace WebDesk
         /// The foreign field name  
         /// </summary>
         public string ForeignFieldName { get; set; }
-
     }
 
 

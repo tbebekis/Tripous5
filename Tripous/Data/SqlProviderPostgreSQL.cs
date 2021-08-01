@@ -81,9 +81,7 @@ namespace Tripous.Data
             string S;
 
             // select * from T where Id > 10 order by Id limit 400 
-
-
-
+ 
             S = $@" 
 limit {RowLimit}";
 

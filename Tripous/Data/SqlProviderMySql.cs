@@ -71,7 +71,28 @@ namespace Tripous.Data
 
             return Result;
         }
+        /// <summary>
+        /// Applies the specified RowLimit to the specified SelectSql according to the server technology.
+        /// </summary>
+        public override void ApplyRowLimit(SelectSql SelectSql, int RowLimit)
+        {
+            string S;
 
+            // select * from T where Id > 10 order by Id limit 0, 400 
+ 
+            S = $@" 
+limit 0, {RowLimit}";
+
+            if (!string.IsNullOrEmpty(SelectSql.OrderBy.Trim()))
+                SelectSql.OrderBy += S;
+            else if (!string.IsNullOrEmpty(SelectSql.Having.Trim()))
+                SelectSql.Having += S;
+            else if (!string.IsNullOrEmpty(SelectSql.GroupBy.Trim()))
+                SelectSql.GroupBy += S;
+            else if (!string.IsNullOrEmpty(SelectSql.Where.Trim()))
+                SelectSql.Where += S;
+
+        }
         /// <summary>
         /// Replaces data type place-holders contained in the SqlText statement
         /// according to datatypes of the database server.

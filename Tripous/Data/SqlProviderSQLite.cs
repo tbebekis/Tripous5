@@ -69,6 +69,28 @@ namespace Tripous.Data
 
             return Result;
         }
+        /// <summary>
+        /// Applies the specified RowLimit to the specified SelectSql according to the server technology.
+        /// </summary>
+        public override void ApplyRowLimit(SelectSql SelectSql, int RowLimit)
+        {
+            string S;
+
+            // select * from T where Id > 10 order by Id limit 400 
+
+            S = $@" 
+limit {RowLimit}";
+
+            if (!string.IsNullOrEmpty(SelectSql.OrderBy.Trim()))
+                SelectSql.OrderBy += S;
+            else if (!string.IsNullOrEmpty(SelectSql.Having.Trim()))
+                SelectSql.Having += S;
+            else if (!string.IsNullOrEmpty(SelectSql.GroupBy.Trim()))
+                SelectSql.GroupBy += S;
+            else if (!string.IsNullOrEmpty(SelectSql.Where.Trim()))
+                SelectSql.Where += S;
+
+        }
 
         /// <summary>
         /// Returns an Sql statement for altering a table column
@@ -233,7 +255,7 @@ namespace Tripous.Data
         /// <summary>
         /// The NVarchar text
         /// </summary>
-        public override string NVarchar { get; } = "varchar";
+        public override string NVarchar { get; } = "nvarchar";
         /// <summary>
         /// The Float text
         /// </summary>

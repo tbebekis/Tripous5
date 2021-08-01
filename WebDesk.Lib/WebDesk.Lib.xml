@@ -1580,6 +1580,42 @@
             Table definition
             </summary>
         </member>
+        <member name="M:WebDesk.DataTableDef.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataTableDef.GetDefText">
+            <summary>
+            Returns the table definition text.
+            <para>WARNING: The returned text must be passed through <see cref="M:Tripous.Data.SqlProvider.ReplaceDataTypePlaceholders(System.String)"/> method, for the final result.</para>
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataTableDef.AddPrimaryKey(System.String,System.String)">
+            <summary>
+             Creates, adds and returns a primary key field.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataTableDef.AddStringField(System.String,System.Int32,System.Boolean,System.String,System.String)">
+            <summary>
+             Creates, adds and returns a string (nvarchar) field.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataTableDef.AddField(System.String,WebDesk.DataFieldType,System.Boolean,System.String,System.String)">
+            <summary>
+             Creates, adds and returns a field.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataTableDef.AddUniqueConstraint(System.String)">
+            <summary>
+             Creates, adds and returns a unique constraint
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataTableDef.AddForeignKeyConstraint(System.String,System.String,System.String)">
+            <summary>
+             Creates, adds and returns a foreign key field constraint.
+            </summary>
+        </member>
         <member name="P:WebDesk.DataTableDef.Id">
             <summary>
             Database Id
@@ -1670,6 +1706,22 @@
             Field definition
             </summary>
         </member>
+        <member name="M:WebDesk.DataFieldDef.DataTypeToString(WebDesk.DataFieldType)">
+            <summary>
+            Returns the string representation of a field data type.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataFieldDef.DataTypeToString">
+            <summary>
+            Returns the string representation of a field data type.
+            </summary>
+        </member>
+        <member name="M:WebDesk.DataFieldDef.GetDefText">
+            <summary>
+            Returns the field definition text.
+            <para>WARNING: The returned text must be passed through <see cref="M:Tripous.Data.SqlProvider.ReplaceDataTypePlaceholders(System.String)"/> method, for the final result.</para>
+            </summary>
+        </member>
         <member name="P:WebDesk.DataFieldDef.Id">
             <summary>
             Database Id
@@ -1705,7 +1757,7 @@
             True when the field is NOT nullable  
             </summary>
         </member>
-        <member name="P:WebDesk.DataFieldDef.Default">
+        <member name="P:WebDesk.DataFieldDef.DefaultValue">
             <summary>
             The default expression, if any. E.g. 0, or ''. Defaults to null.
             </summary>

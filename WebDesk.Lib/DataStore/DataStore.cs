@@ -91,6 +91,8 @@ namespace WebDesk
             DefaultConnectionInfo.ConnectionString = CSB.ConnectionString;
 
             Db.Connections = ConnectionInfoList.SqlConnections;
+
+            //TestDefs();
         }
         /// <summary>
         /// Creates any non-existing creatable database.
@@ -133,7 +135,25 @@ namespace WebDesk
             Schemas.Execute();
         }
 
+        static void TestDefs()
+        {
+            DataTableDef Table = new DataTableDef();
+            Table.Name = "Country";
+            Table.AddPrimaryKey();
+            Table.AddStringField("Code", 40, true, null, "''");
+            Table.AddStringField("Name", 96, false);
+            Table.AddStringField("CustomerId", 40, true);
+            Table.AddField("Date", DataFieldType.DateTime, false);
 
+            Table.AddUniqueConstraint("Name");
+
+            Table.AddForeignKeyConstraint("CustomerId", "Customer", "Id");
+
+            string DefText = Table.GetDefText();
+
+            SqlProvider Provider = Db.DefaultConnectionInfo.GetSqlProvider();
+            DefText = Provider.ReplaceDataTypePlaceholders(DefText);
+        }
 
         /// <summary>
         /// Initializer
@@ -157,6 +177,8 @@ namespace WebDesk
 
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
             }
+
+           
         }
         /// <summary>
         /// Called by the system. 
