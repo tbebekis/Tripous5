@@ -153,6 +153,11 @@ namespace WebDesk
 
             SqlProvider Provider = Db.DefaultConnectionInfo.GetSqlProvider();
             DefText = Provider.ReplaceDataTypePlaceholders(DefText);
+
+
+            string JsonText = Json.ToJson(Table);
+            Table = Json.FromJson<DataTableDef>(JsonText);
+            Table.Check();
         }
 
         /// <summary>

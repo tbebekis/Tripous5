@@ -12,8 +12,37 @@ namespace Test.WinApp
 {
     public partial class MainForm : Form
     {
+        void AnyClick(object sender, EventArgs ea)
+        {
+            if (btnParseSql == sender)
+            {
+                ParseSql();
+            }
+        }
+        void FormInitialize()
+        {
+            btnParseSql.Click += AnyClick;
+        }
+        void ParseSql()
+        {
+            string SqlText = edtSql.Text;
+            SqlParserHelper.Parse(SqlText);
+        }
+
+
+
+
+
+
+        protected override void OnShown(EventArgs e)
+        {
+            if (!DesignMode)
+                FormInitialize();
+            base.OnShown(e);
+        }
+
         /// <summary>
-        /// 
+        /// Construction
         /// </summary>
         public MainForm()
         {
