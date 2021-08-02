@@ -15,5 +15,23 @@ using Tripous.Tokenizing;
 
 namespace Tripous.Parsing
 {
- 
+    /// <summary>
+    /// 
+    /// </summary>
+    public class TokenTester : ParserTester
+    {
+        /**
+         * 
+         */
+        public TokenTester(Parser p) : base(p)
+        {
+        }
+        /**
+         * assembly method comment.
+         */
+        protected override Assembly CreateAssembly(string s)
+        {
+            return new TokenAssembly(s);
+        }
+    }
 }

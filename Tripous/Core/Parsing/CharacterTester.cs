@@ -15,5 +15,31 @@ using Tripous.Tokenizing;
 
 namespace Tripous.Parsing
 {
- 
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CharacterTester : ParserTester
+    {
+        /**
+         * 
+         */
+        public CharacterTester(Parser p) : base(p)
+        {
+        }
+        /**
+         * assembly method comment.
+         */
+        protected override Assembly CreateAssembly(string s)
+        {
+            return new CharacterAssembly(s);
+        }
+        /**
+         * 
+         * @return java.lang.string
+         */
+        protected override string Separator()
+        {
+            return "";
+        }
+    }
 }
