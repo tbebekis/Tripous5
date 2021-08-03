@@ -33,9 +33,9 @@ namespace Tripous.Tokenizing
         /// 
         /// </summary>
         protected byte[] Bytes = new byte[16];
-        /**
-         * Fatten up charbuf as necessary.
-         */
+        /// <summary>
+        /// Fatten up charbuf as necessary.
+        /// </summary>
         protected void CheckBufLength(int i)
         {
             if (i >= Bytes.Length)

@@ -15,40 +15,41 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
-    /**
- * An assembly maintains a stream of language elements along 
- * with FStack and FTarget objects.
- *
- * Parsers use assemblers to record progress at 
- * recognizing language elements from assembly's string. 
- * 
- *
- * 
- *
- * 
- */
+ 
+
+    /// <summary>
+    /// <para>
+    /// An assembly maintains a stream of language elements along 
+    /// with FStack and FTarget objects.
+    /// </para>
+    /// <para>
+    /// Parsers use assemblers to record progress at 
+    /// recognizing language elements from assembly's string. 
+    /// </para>
+    /// </summary>
     public abstract class Assembly : ICloneable
     {
 
-        /**
-         * a place to keep track of consumption progress
-         */
+        /// <summary>
+        /// a place to keep track of consumption progress
+        /// </summary>
         protected Stack FStack = new Stack();
-
-        /** Another place to record progress; this is just an object. 
-         * If a parser were recognizing an HTML page, for 
-         * example, it might create a Page object early, and store it 
-         * as an assembly's "FTarget". As its recognition of the HTML 
-         * progresses, it could use the FStack to build intermediate 
-         * results, like a heading, and then apply them to the FTarget 
-         * object.
-         */
+        /// <summary>
+        /// Another place to record progress; this is just an object. 
+        /// If a parser were recognizing an HTML page, for 
+        /// example, it might create a Page object early, and store it 
+        /// as an assembly's "FTarget". As its recognition of the HTML 
+        /// progresses, it could use the FStack to build intermediate 
+        /// results, like a heading, and then apply them to the FTarget 
+        /// object.
+        /// </summary>
         protected ICloneable FTarget;
-
-        /**
-         * which element is next
-         */
+        /// <summary>
+        /// which element is next
+        /// </summary>
         protected int FIndex = 0;
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -76,162 +77,121 @@ namespace Tripous.Parsing
             }
         }
 
-
-        /**
-         * Return a copy of this object.
-         *
-         * @return a copy of this object
-         */
+        /* public */
+        /// <summary>
+        /// Creates and returns a copy of this instance
+        /// </summary>
         public abstract object Clone();
-
-        /**
-         * Returns the elements of the assembly that have been 
-         * Consumed, separated by the specified delimiter.
-         *
-         * @param   string   the mark to show between Consumed
-         *                   elements
-         *
-         * @return   the elements of the assembly that have been 
-         *           Consumed
-         */
+        /// <summary>
+        /// Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed elements</param>
+        /// <returns>Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.</returns>
         public abstract string Consumed(string delimiter);
-        /**
-         * Returns the default string to show between elements.
-         *
-         * @return   the default string to show between elements
-         */
+        /// <summary>
+        /// Returns the default string to show between elements.
+        /// </summary>
+        /// <returns></returns>
         public abstract string DefaultDelimiter();
-        /**
-         * Returns the number of elements that have been Consumed.
-         *
-         * @return   the number of elements that have been Consumed
-         */
+        /// <summary>
+        /// Returns the number of elements that have been Consumed.
+        /// </summary>
+        /// <returns></returns>
         public int ElementsConsumed()
         {
             return FIndex;
         }
-        /**
-         * Returns the number of elements that have not been Consumed.
-         *
-         * @return   the number of elements that have not been 
-         *           Consumed
-         */
+        /// <summary>
+        /// Returns the number of elements that have not been Consumed.
+        /// </summary>
         public int ElementsRemaining()
         {
             return Length() - ElementsConsumed();
         }
-        /**
-         * Removes this assembly's FStack.
-         *
-         * @return   this assembly's FStack
-         */
+        /// <summary>
+        /// Removes this assembly's Stack.
+        /// </summary>
         public Stack GetStack()
         {
             return FStack;
         }
-        /**
-         * Returns the object identified as this assembly's "FTarget". 
-         * Clients can set and retrieve a FTarget, which can be a 
-         * convenient supplement as a place to work, in addition to 
-         * the assembly's FStack. For example, a parser for an 
-         * HTML file might use a web page object as its "FTarget". As 
-         * the parser recognizes markup commands like , it 
-         * could apply its findings to the FTarget.
-         * 
-         * @return   the FTarget of this assembly
-         */
+        /// <summary>
+        /// Returns the object identified as this assembly's "FTarget". 
+        /// Clients can set and retrieve a FTarget, which can be a 
+        /// convenient supplement as a place to work, in addition to 
+        /// the assembly's FStack. For example, a parser for an 
+        /// HTML file might use a web page object as its "FTarget". As 
+        /// the parser recognizes markup commands like , it 
+        /// could apply its findings to the FTarget.
+        /// </summary>
+        /// <returns>Returns the FTarget of this assembly</returns>
         public object GetTarget()
         {
             return FTarget;
         }
-        /**
-         * Returns true if this assembly has unconsumed elements.
-         *
-         * @return   true, if this assembly has unconsumed elements
-         */
+        /// <summary>
+        /// Returns true if this assembly has unconsumed elements.
+        /// </summary>
         public bool HasMoreElements()
         {
             return ElementsConsumed() < Length();
         }
-        /**
-         * Returns the number of elements in this assembly.
-         *
-         * @return   the number of elements in this assembly
-         */
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
         public abstract int Length();
-        /**
-         * Shows the next object in the assembly, without removing it
-         *
-         * @return   the next object
-         *
-         */
+        /// <summary>
+        /// Returns the next object in the assembly, without removing it
+        /// </summary>
         public abstract object Peek();
-        /**
-         * Removes the object at the top of this assembly's FStack and
-         * returns it.
-         *
-         * @return   the object at the top of this assembly's FStack
-         *
-         * @exception   EmptyStackException   if this FStack is empty
-         */
+        /// <summary>
+        /// Removes the object at the top of this assembly's FStack and returns it.
+        /// </summary>
         public object Pop()
         {
             return FStack.Pop();
         }
-        /**
-         * Pushes an object onto the top of this assembly's FStack. 
-         *
-         * @param   object   the object to be pushed
-         */
+        /// <summary>
+        /// Pushes an object onto the top of this assembly's FStack. 
+        /// </summary>
         public void Push(object o)
         {
             FStack.Push(o);
         }
-        /**
-         * Returns the elements of the assembly that remain to be 
-         * Consumed, separated by the specified delimiter.
-         *
-         * @param   string   the mark to show between unconsumed 
-         *                   elements
-         *
-         * @return   the elements of the assembly that remain to be 
-         *           Consumed
-         */
+        /// <summary>
+        /// Returns the elements of the assembly that remain to be  Consumed, separated by the specified delimiter.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between unconsumed  elements</param>
+        /// <returns>Returns the elements of the assembly that remain to be  Consumed, separated by the specified delimiter.</returns>
         public abstract string Remainder(string delimiter);
-        /**
-         * Sets the FTarget for this assembly. Targets must implement 
-         * <code>Clone()</code> as a public method.
-         * 
-         * @param   FTarget   a publicly cloneable object
-         */
+        /// <summary>
+        /// Sets the FTarget for this assembly. Targets must implement 
+        /// <code>Clone()</code> as a public method.
+        /// </summary>
+        /// <param name="FTarget">a publicly cloneable object</param>
         public void SetTarget(ICloneable FTarget)
         {
             this.FTarget = FTarget;
         }
-        /**
-         * Returns true if this assembly's FStack is empty.
-         *
-         * @return   true, if this assembly's FStack is empty
-         */
+        /// <summary>
+        /// Returns true if this assembly's FStack is empty.
+        /// </summary>
         public bool StackIsEmpty()
         {
             return FStack.Count == 0;
         }
-        /**
-         * Returns a textual description of this assembly.
-         *
-         * @return   a textual description of this assembly
-         */
+        /// <summary>
+        /// Returns a textual description of this assembly.
+        /// </summary>
         public override string ToString()
         {
             string delimiter = DefaultDelimiter();
             return FStack +
                Consumed(delimiter) + "^" + Remainder(delimiter);
         }
-        /**
-         * Put back n objects
-         *
-         */
+        /// <summary>
+        /// Put back n objects
+        /// </summary>
         public void UnGet(int n)
         {
             FIndex -= n;
@@ -240,7 +200,9 @@ namespace Tripous.Parsing
                 FIndex = 0;
             }
         }
-        /** ëåßðåé áðü ôïõ Metsker */
+        /// <summary>
+        /// Returns the next token from the associated token string.
+        /// </summary>
         public abstract string NextElement();
     }
 }

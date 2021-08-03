@@ -21,25 +21,61 @@ namespace Tripous.Data
         {
         }
 
+
+        /// <summary>
+        /// Validates a specified database object identifier an throws an exception if it is invalid.
+        /// </summary>
+        static public void CheckIsValidDatabaseObjectIdentifier(string Name)
+        {
+            void Throw(string Text)
+            {
+                Sys.Throw($"{Name} is not a valid database object identifier. {Text}");
+            }
+
+            if (string.IsNullOrWhiteSpace(Name))
+                Throw("Empty or null string");
+ 
+            if (!char.IsLetter(Name[0]) || Name[0] != '_')
+                Throw("First character should be a letter or _");
+
+            if (Name.Contains(' '))
+                Throw("Spaces not allowed");
+
+            foreach (char C in Name)
+            {
+                if (!(char.IsLetterOrDigit(C) || C == '$'))
+                    Throw("Special characters not allowed");
+            }
+
+            if (Name.Length > 32)
+                Throw("Exceeds 32 character length");
+
+        }
+
         /* public */
         /// <summary>
         /// Throws an exception if this instance is not a valid one.
         /// </summary>
         public void Check()
         {
+             
             void Throw(string Text)
             {
                 Sys.Throw($"Definition of {Name} table is invalid. {Text}");
             }
 
-            // table
+            // table            
             if (string.IsNullOrWhiteSpace(Name))
                 Sys.Throw($"Table definition without Name");
+
+            CheckIsValidDatabaseObjectIdentifier(Name);
 
 
             // fields
             if (Fields == null || Fields.Count == 0)
                 Throw($"No fields.");
+
+            Fields.ForEach(item => CheckIsValidDatabaseObjectIdentifier(item.Name));
 
             int Count = Fields.Count(item => item.IsPrimaryKey);
             if (Count == 0)
@@ -73,6 +109,17 @@ namespace Tripous.Data
         /// </summary>
         public string GetDefText()
         {
+            string EnsureValidLength(string S)
+            {
+                if (!string.IsNullOrWhiteSpace(S))
+                {
+                    if (S.Length > 32)
+                        S = S.Substring(0, 32);
+                }
+
+                return S;
+            }
+
             StringBuilder SB = new StringBuilder();
 
             SB.AppendLine($"create table {Name} (");
@@ -86,15 +133,18 @@ namespace Tripous.Data
                 SB.AppendLine("  " + sDef);
             }
 
+            string sName;
             for (int i = 0; i < UniqueConstraints.Count; i++)
             {
-                sDef = $",constraint UC_{Name}_{i} unique ({UniqueConstraints[i].FieldName})";
+                sName = EnsureValidLength($"UC{i}_{Name}");
+                sDef = $",constraint {sName} unique ({UniqueConstraints[i].FieldName})";
                 SB.AppendLine("  " + sDef);
             }
 
             for (int i = 0; i < ForeignKeys.Count; i++)
             {
-                sDef = $",constraint FC_{Name}_{i} foreign key ({ForeignKeys[i].FieldName}) references {ForeignKeys[i].ForeignTableName} ({ForeignKeys[i].ForeignFieldName})";
+                sName = EnsureValidLength($"FC{i}_{Name}");
+                sDef = $",constraint {sName} foreign key ({ForeignKeys[i].FieldName}) references {ForeignKeys[i].ForeignTableName} ({ForeignKeys[i].ForeignFieldName})";
                 SB.AppendLine("  " + sDef);
             }
 

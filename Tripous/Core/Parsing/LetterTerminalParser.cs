@@ -15,52 +15,41 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
-    /**
- * A Digit matches a digit from a character assembly.
- * 
- *
- * 
- *
- */
-    public class Digit : Terminal
+    /// <summary>
+    /// A parser that matches any letter from a character assembly.
+    /// </summary>
+    public class LetterTerminalParser : TerminalParser
     {
 
-        /**
-         * Returns true if an assembly's next element is a digit.
-         *
-         * @param   object   an element from an assembly
-         *
-         * @return   true, if an assembly's next element is a digit
-         */
+        /// <summary>
+        /// Returns true if an assembly's next element is a letter.
+        /// </summary>
+        /// <param name="o">an element from an assembly</param>
+        /// <returns>Returns true if an assembly's next element is a letter.</returns>
         public override bool Qualifies(object o)
         {
-            return char.IsDigit((char)o);
+            return char.IsLetter((char)o);
         }
-        /**
-         * Create a set with one random digit.
-         */
+        /// <summary>
+        /// Create a set with one random letter.
+        /// </summary>
         public override ArrayList RandomExpansion(int maxDepth, int depth)
         {
             Random Random = new Random();
 
-            char c = (char)(Random.Next(10) + '0');
+            char c = (char)(Random.Next(26) + 'a');
             ArrayList v = new ArrayList();
             v.Add(c.ToString());      //   new string(new char[]{c})
             return v;
         }
-        /**
-         * Returns a textual description of this parser.
-         *
-         * @param   vector   a list of parsers already printed in
-         *                   this description
-         * 
-         * @return   string   a textual description of this parser
-         *
-         * @see Parser#ToString()
-         */
+        /// <summary>
+        /// Returns a textual description of this parser.
+        /// </summary>
+        /// <param name="visited">a list of parsers already printed in this description</param>
+        /// <returns>Returns a textual description of this parser.</returns>
         public override string UnvisitedString(ArrayList visited)
         {
-            return "D";
+            return "L";
         }
     }
 }

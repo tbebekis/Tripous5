@@ -15,39 +15,28 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
-    /**
- * A Char matches a character from a character assembly.
- * 
- *
- * 
- *
- */
-    public class CharTerm : Terminal
+
+    /// <summary>
+    /// A parser that matches a character from a character assembly.
+    /// </summary>
+    public class CharTerminalParser : TerminalParser
     {
 
-        /**
-         * Returns true every time, since this class assumes it is 
-         * working against a CharacterAssembly.
-         *
-         * @param   object   ignored
-         *
-         * @return   true, every time, since this class assumes it is 
-         *           working against a CharacterAssembly
-         */
+        /// <summary>
+        /// The mechanics of matching are the same for many terminals,
+        /// except for the check that the next element on the assembly
+        /// Qualifies as the type of terminal this terminal looks for.
+        /// This method performs that check.
+        /// </summary>
+        /// <param name="o">an element from a assembly</param>
+        /// <returns>Returns true, if the object is the kind of terminal this  parser seeks</returns>
         public override bool Qualifies(object o)
         {
             return true;
         }
-        /**
-         * Returns a textual description of this parser.
-         *
-         * @param   vector   a list of parsers already printed in
-         *                   this description
-         * 
-         * @return   string   a textual description of this parser
-         *
-         * @see Parser#ToString()
-         */
+        /// <summary>
+        /// Returns a textual description of this parser.
+        /// </summary>
         public override string UnvisitedString(ArrayList visited)
         {
             return "C";

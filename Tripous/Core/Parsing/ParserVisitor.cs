@@ -15,61 +15,45 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
-    /**
- * This class provides a "visitor" hierarchy in support of
- * the Visitor pattern -- see the book, "Design Patterns" for
- * an explanation of this pattern.
- * 
- *
- * 
- *
- */
+ 
+
+    /// <summary>
+    /// This class provides a "visitor" hierarchy in support of
+    /// the Visitor pattern -- see the book, "Design Patterns" for
+    /// an explanation of this pattern.
+    /// </summary>
     public abstract class ParserVisitor
     {
-        /**
-         * Visit an alternation.
-         *
-         * @param   Alternation   the parser to visit
-         *
-         * @param   ArrayList   a collection of previously visited parsers
-         *
-         */
-        public abstract void VisitAlternation(Alternation a, ArrayList visited);
-        /**
-         * Visit an empty parser.
-         *
-         * @param   Empty   the parser to visit
-         *
-         * @param   ArrayList   a collection of previously visited parsers
-         *
-         */
-        public abstract void VisitEmpty(Empty e, ArrayList visited);
-        /**
-         * Visit a repetition.
-         *
-         * @param   Repetition   the parser to visit
-         *
-         * @param   ArrayList   a collection of previously visited parsers
-         *
-         */
-        public abstract void VisitRepetition(Repetition r, ArrayList visited);
-        /**
-         * Visit a sequence.
-         *
-         * @param   Sequence   the parser to visit
-         *
-         * @param   ArrayList   a collection of previously visited parsers
-         *
-         */
-        public abstract void VisitSequence(Sequence s, ArrayList visited);
-        /**
-         * Visit a terminal.
-         *
-         * @param   Terminal   the parser to visit
-         *
-         * @param   ArrayList   a collection of previously visited parsers
-         *
-         */
-        public abstract void VisitTerminal(Terminal t, ArrayList visited);
+ 
+        /// <summary>
+        /// Visit an alternation.
+        /// </summary>
+        /// <param name="a">the parser to visit</param>
+        /// <param name="visited">a collection of previously visited parsers</param>
+        public abstract void VisitAlternation(AlternationParser a, ArrayList visited);
+        /// <summary>
+        /// Visit an empty parser.
+        /// </summary>
+        /// <param name="e">the parser to visit</param>
+        /// <param name="visited">a collection of previously visited parsers</param>
+        public abstract void VisitEmpty(EmptyParser e, ArrayList visited);
+        /// <summary>
+        /// Visit a repetition.
+        /// </summary>
+        /// <param name="r">the parser to visit</param>
+        /// <param name="visited">a collection of previously visited parsers</param>
+        public abstract void VisitRepetition(RepetitionParser r, ArrayList visited);
+        /// <summary>
+        /// Visit a sequence.
+        /// </summary>
+        /// <param name="s">the parser to visit</param>
+        /// <param name="visited">a collection of previously visited parsers</param>
+        public abstract void VisitSequence(SequenceCollectionParser s, ArrayList visited);
+        /// <summary>
+        /// Visit a terminal.
+        /// </summary>
+        /// <param name="t">the parser to visit</param>
+        /// <param name="visited">a collection of previously visited parsers</param>
+        public abstract void VisitTerminal(TerminalParser t, ArrayList visited);
     }
 }

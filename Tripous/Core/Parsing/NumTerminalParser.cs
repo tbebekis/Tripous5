@@ -15,34 +15,26 @@ using Tripous.Tokenizing;
 
 namespace Tripous.Parsing
 {
-    /**
- * A Num matches a number from a token assembly.
- * 
- *
- * 
- *
- */
-
-    public class Num : Terminal
+    /// <summary>
+    /// A parser that matches a number from a token assembly.
+    /// </summary>
+    public class NumTerminalParser : TerminalParser
     {
 
-        /**
-         * Returns true if an assembly's next element is a number.
-         *
-         * @param   object   an element from an assembly
-         *
-         * @return   true, if an assembly's next element is a number as
-         *           recognized the tokenizer
-         */
+ 
+        /// <summary>
+        /// Returns true if an assembly's next element is a number.
+        /// </summary>
+        /// <param name="o">an element from an assembly</param>
+        /// <returns>Returns true, if an assembly's next element is a number as recognized the tokenizer</returns>
         public override bool Qualifies(object o)
         {
             Token t = (Token)o;
             return t.IsNumber();
         }
-        /**
-         * Create a set with one random number (between 0 and 100).
-         * 
-         */
+        /// <summary>
+        /// Create a set with one random number (between 0 and 100).
+        /// </summary>
         public override ArrayList RandomExpansion(int maxDepth, int depth)
         {
 
@@ -55,16 +47,11 @@ namespace Tripous.Parsing
             v.Add(d.ToString());
             return v;
         }
-        /**
-         * Returns a textual description of this parser.
-         *
-         * @param   vector   a list of parsers already printed in 
-         *                   this description
-         * 
-         * @return   string   a textual description of this parser
-         *
-         * @see Parser#ToString()
-         */
+        /// <summary>
+        /// Returns a textual description of this parser.
+        /// </summary>
+        /// <param name="visited">a list of parsers already printed in  this description</param>
+        /// <returns>Returns a textual description of this parser.</returns>
         public override string UnvisitedString(ArrayList visited)
         {
             return "Num";

@@ -15,32 +15,27 @@ using Tripous.Tokenizing;
 
 namespace Tripous.Parsing
 {
-    /**
- * A Word matches a word from a token assembly.
- * 
- *
- * 
- *
- */
-    public class Word : Terminal
+ 
+    /// <summary>
+    /// A Word matches a word from a token assembly.
+    /// </summary>
+    public class WordTerminalParser : TerminalParser
     {
 
-        /**
-         * Returns true if an assembly's next element is a word.
-         *
-         * @param   object   an element from an assembly
-         *
-         * @return   true, if an assembly's next element is a word
-         */
+ 
+        /// <summary>
+        /// Returns true if an assembly's next element is a word.
+        /// </summary>
+        /// <param name="o">an element from an assembly</param>
+        /// <returns>Returns true if an assembly's next element is a word.</returns>
         public override bool Qualifies(object o)
         {
             Token t = (Token)o;
             return t.IsWord();
         }
-        /**
-         * Create a set with one random word (with 3 to 7 characters).
-         * 
-         */
+        /// <summary>
+        /// Create a set with one random word (with 3 to 7 characters).
+        /// </summary>
         public override ArrayList RandomExpansion(int maxDepth, int depth)
         {
             Random Random = new Random();
@@ -59,16 +54,11 @@ namespace Tripous.Parsing
             v.Add(new string(letters));
             return v;
         }
-        /**
-         * Returns a textual description of this parser.
-         *
-         * @param   vector   a list of parsers already printed in 
-         *                   this description
-         * 
-         * @return   string   a textual description of this parser
-         *
-         * @see Parser#ToString()
-         */
+        /// <summary>
+        /// Returns a textual description of this parser.
+        /// </summary>
+        /// <param name="visited">a list of parsers already printed in  this description</param>
+        /// <returns>Returns a textual description of this parser.</returns>
         public override string UnvisitedString(ArrayList visited)
         {
             return "Word";

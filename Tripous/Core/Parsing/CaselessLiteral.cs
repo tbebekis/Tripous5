@@ -15,37 +15,28 @@ using Tripous.Tokenizing;
 
 namespace Tripous.Parsing
 {
-    /**
- * A CaselessLiteral matches a specified string from an
- * assembly, disregarding case.
- * 
- *
- * 
- *
- */
-    public class CaselessLiteral : Literal
+ 
+    /// <summary>
+    /// A CaselessLiteral matches a specified string from an assembly, disregarding case.
+    /// </summary>
+    public class CaselessLiteral : LiteralTerminalParser
     {
-        /**
-         * Constructs a literal that will Match the specified string,
-         * given mellowness about case.
-         *
-         * @param   string   the string to Match as a token
-         *
-         * @return   a literal that will Match the specified string,
-         *           disregarding case
-         */
-        public CaselessLiteral(string literal) : base(literal)
+        /* construction */
+        /// <summary>
+        /// Constructs a literal that will Match the specified string, given mellowness about case.
+        /// </summary>
+        /// <param name="literal">the string to Match as a token</param>
+        public CaselessLiteral(string literal) 
+            : base(literal)
         {
         }
-        /**
-         * Returns true if the literal this object Equals an
-         * assembly's next element, disregarding case.
-         *
-         * @param   object   an element from an assembly
-         *
-         * @return   true, if the specified literal Equals the next
-         *           token from an assembly, disregarding case
-         */
+
+        /* public */
+        /// <summary>
+        /// Returns true if the literal this object Equals an assembly's next element, disregarding case.
+        /// </summary>
+        /// <param name="o">an element from an assembly</param>
+        /// <returns>Returns true if the literal this object Equals an assembly's next element, disregarding case.</returns>
         public override bool Qualifies(object o)
         {
             return FLiteral.EqualsIgnoreCase((Token)o);

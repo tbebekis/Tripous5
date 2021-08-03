@@ -15,46 +15,33 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
-    /**
- * A CharacterAssembly is an Assembly whose elements are 
- * characters.
- * 
- *
- * 
- *
- * 
- * @see Assembly
- */
-
+ 
+    /// <summary>
+    /// A CharacterAssembly is an Assembly whose elements are  characters.
+    /// </summary>
     public class CharacterAssembly : Assembly
     {
-        /**
-         * the string to consume
-         */
+        /// <summary>
+        /// the string to consume
+        /// </summary>
         protected string FBuffer;
 
-        /**
-         * Constructs a CharacterAssembly from the given string.
-         *
-         * @param   string   the string to consume
-         *
-         * @return   a CharacterAssembly that will consume the 
-         *           supplied string
-         */
+        /* construction */
+        /// <summary>
+        /// Constructs a CharacterAssembly from the given string.
+        /// </summary>
+        /// <param name="Buffer">the string to consume</param>
         public CharacterAssembly(string Buffer)
         {
             this.FBuffer = Buffer;
         }
-        /**
-         * Returns a textual representation of the amount of this 
-         * characterAssembly that has been Consumed.
-         *
-         * @param   delimiter   the mark to show between Consumed 
-         *                      elements
-         *
-         * @return   a textual description of the amount of this 
-         *           assembly that has been Consumed
-         */
+
+        /* public */
+        /// <summary>
+        /// Returns a textual representation of the amount of this  characterAssembly that has been Consumed.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed  elements</param>
+        /// <returns>Returns a textual representation of the amount of this  characterAssembly that has been Consumed.</returns>
         public override string Consumed(string delimiter)
         {
             if (delimiter.Equals(""))
@@ -70,60 +57,41 @@ namespace Tripous.Parsing
             }
             return buf.ToString();
         }
-        /**
-         * Returns the default string to show between elements 
-         * Consumed or remaining.
-         *
-         * @return   the default string to show between elements 
-         *           Consumed or remaining
-         */
+        /// <summary>
+        /// Returns the default string to show between elements  Consumed or remaining.
+        /// </summary>
         public override string DefaultDelimiter()
         {
             return "";
         }
-        /**
-         * Returns the number of elements in this assembly.
-         *
-         * @return   the number of elements in this assembly
-         */
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
         public override int Length()
         {
             return FBuffer.Length;
         }
-        /**
-         * Returns the next character.
-         *
-         * @return   the next character from the associated token 
-         *           string
-         *
-         * @exception  ArrayIndexOutOfBoundsException  if there are 
-         *             no more characters in this assembly's string
-         */
+        /// <summary>
+        /// Returns the next character from the associated token  string
+        /// </summary>
         public override string NextElement()
         {
             return FBuffer[FIndex++].ToString(); //      string.charAt(index++)
         }
-        /**
-         * Shows the next object in the assembly, without removing it
-         *
-         * @return   the next object
-         */
+        /// <summary>
+        /// Returns the next object in the assembly, without removing it
+        /// </summary>
         public override object Peek()
         {
             if (FIndex < Length())
                 return FBuffer[FIndex];   //new Character(string.charAt(FIndex));
             else return null;
         }
-        /**
-         * Returns a textual representation of the amount of this 
-         * characterAssembly that remains to be Consumed.
-         *
-         * @param   delimiter   the mark to show between Consumed 
-         *                      elements
-         *
-         * @return   a textual description of the amount of this 
-         *           assembly that remains to be Consumed
-         */
+        /// <summary>
+        /// Returns a textual representation of the amount of this  characterAssembly that remains to be Consumed.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed  elements</param>
+        /// <returns>Returns a textual representation of the amount of this  characterAssembly that remains to be Consumed.</returns>
         public override string Remainder(string delimiter)
         {
             if (delimiter.Equals(""))
@@ -140,8 +108,9 @@ namespace Tripous.Parsing
             }
             return buf.ToString();
         }
-        /**
-        */
+        /// <summary>
+        /// Returns a copy of this instance
+        /// </summary>
         public override object Clone()
         {
             return CloneProperties(new CharacterAssembly(FBuffer));

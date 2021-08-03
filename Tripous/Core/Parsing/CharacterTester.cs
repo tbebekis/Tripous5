@@ -16,30 +16,33 @@ using System.Collections;
 namespace Tripous.Parsing
 {
     /// <summary>
-    /// 
+    /// This class generates random language elements for a parser and tests that the parser can Accept them.
     /// </summary>
     public class CharacterTester : ParserTester
     {
-        /**
-         * 
-         */
-        public CharacterTester(Parser p) : base(p)
-        {
-        }
-        /**
-         * assembly method comment.
-         */
+        /// <summary>
+        /// Subclasses must override this, to produce an assembly from the given (random) string.
+        /// </summary>
         protected override Assembly CreateAssembly(string s)
         {
             return new CharacterAssembly(s);
         }
-        /**
-         * 
-         * @return java.lang.string
-         */
+        /// <summary>
+        ///  By default, place a blank between randomly generated "words" of a language.
+        /// </summary>
         protected override string Separator()
         {
             return "";
         }
+
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public CharacterTester(Parser p) :
+            base(p)
+        {
+        }
+
     }
 }

@@ -16,65 +16,62 @@ using System.Collections;
 namespace Tripous.Parsing
 {
 
-    /**
-     * This class abstracts the behavior common to parsers
-     * that consist of a series of other parsers.
-     * 
-     *
-     * 
-     *
-     */
+    /// <summary>
+    /// This class abstracts the behavior common to parsers that consist of a series of other parsers.
+    /// </summary>
     public abstract class CollectionParser : Parser
     {
-        /**
-         * the parsers this parser is a collection of
-         */
+        /// <summary>
+        /// the parsers this parser is a collection of
+        /// </summary>
         protected ArrayList FSubParsers = new ArrayList();
-        /**
-         * Supports subclass constructors with no arguments.
-         */
+
+        /// <summary>
+        /// Helps to textually describe this CollectionParser.Returns the string to place between parsers in the collection
+        /// </summary>
+        protected abstract string ToStringSeparator();
+
+
+        /* construction */
+        /// <summary>
+        /// Constructor. Supports subclass constructors with no arguments.
+        /// </summary>
         public CollectionParser()
         {
         }
-        /**
-         * Supports subclass constructors with a name argument
-         *
-         * @param   string   the name of this parser
-         */
+        /// <summary>
+        /// Constructor. Supports subclass constructors with a name argument
+        /// </summary>
         public CollectionParser(string name) : base(name)
         {
         }
-        /**
-         * A convenient way to construct a CollectionParser with the
-         * given parser.
-         */
+        /// <summary>
+        /// A convenient way to construct a CollectionParser with the given parser.
+        /// </summary>
         public CollectionParser(Parser p)
         {
             FSubParsers.Add(p);
         }
-        /**
-         * A convenient way to construct a CollectionParser with the
-         * given parsers.
-         */
+        /// <summary>
+        /// A convenient way to construct a CollectionParser with the given parsers.
+        /// </summary>
         public CollectionParser(Parser p1, Parser p2)
         {
             FSubParsers.Add(p1);
             FSubParsers.Add(p2);
         }
-        /**
-         * A convenient way to construct a CollectionParser with the
-         * given parsers.
-         */
+        /// <summary>
+        /// A convenient way to construct a CollectionParser with the given parsers.
+        /// </summary>
         public CollectionParser(Parser p1, Parser p2, Parser p3)
         {
             FSubParsers.Add(p1);
             FSubParsers.Add(p2);
             FSubParsers.Add(p3);
         }
-        /**
-         * A convenient way to construct a CollectionParser with the
-         * given parsers.
-         */
+        /// <summary>
+        /// A convenient way to construct a CollectionParser with the given parsers.
+        /// </summary>
         public CollectionParser(Parser p1, Parser p2, Parser p3, Parser p4)
         {
             //
@@ -83,37 +80,27 @@ namespace Tripous.Parsing
             FSubParsers.Add(p3);
             FSubParsers.Add(p4);
         }
-        /**
-         * Adds a parser to the collection.
-         *
-         * @param   Parser   the parser to Add
-         *
-         * @return   this
-         */
+
+        /* public */
+        /// <summary>
+        /// Adds a parser to the collection. Returns this instance.
+        /// </summary>
         public CollectionParser Add(Parser e)
         {
             FSubParsers.Add(e);
             return this;
         }
-        /**
-         * Return this parser's FSubParsers.
-         *
-         * @return   ArrayList   this parser's FSubParsers
-         */
+        /// <summary>
+        /// Return this parser's FSubParsers.
+        /// </summary>
         public ArrayList GetSubParsers()
         {
             return FSubParsers;
         }
-        /**
-         * Helps to textually describe this CollectionParser.
-         *
-         * @returns   the string to place between parsers in 
-         *            the collection
-         */
-        protected abstract string ToStringSeparator();
-        /**
-         * Returns a textual description of this parser.
-         */
+
+        /// <summary>
+        /// Returns a textual description of this parser.
+        /// </summary>
         public override string UnvisitedString(ArrayList visited)
         {
             StringBuilder buf = new StringBuilder("<");

@@ -15,70 +15,51 @@ using Tripous.Tokenizing;
 
 namespace Tripous.Parsing
 {
-    /**
- * A TokenAssembly is an Assembly whose elements are Tokens.
- * Tokens are, roughly, the chunks of text that a <code>
- * Tokenizer</code> returns.
- * 
- *
- * 
- *
- */
-
+    /// <summary>
+    /// A TokenAssembly is an Assembly whose elements are Tokens.
+    /// Tokens are, roughly, the chunks of text that a <code>
+    /// Tokenizer</code> returns.
+    /// </summary>
     public class TokenAssembly : Assembly
     {
-        /**
-         * the "string" of tokens this assembly will consume
-         */
+        /// <summary>
+        ///  the "string" of tokens this assembly will consume
+        /// </summary>
         protected TokenString FTokenString;
 
-        /**
-         * Constructs a TokenAssembly on a TokenString constructed 
-         * from the given string.
-         *
-         * @param   string   the string to consume
-         *
-         * @return   a TokenAssembly that will consume a tokenized 
-         *           version of the supplied string
-         */
-        public TokenAssembly(string s) : this(new TokenString(s))
+        /* construction */
+        /// <summary>
+        /// Constructs a TokenAssembly on a TokenString constructed from the given string.
+        /// </summary>
+        /// <param name="s">the string to consume</param>
+        public TokenAssembly(string s) 
+            : this(new TokenString(s))
         {
         }
-        /**
-         * Constructs a TokenAssembly on a TokenString constructed 
-         * from the given Tokenizer.
-         *
-         * @param   Tokenizer   the tokenizer to consume tokens 
-         *                      from
-         *
-         * @return   a TokenAssembly that will consume a tokenized 
-         *           version of the supplied Tokenizer
-         */
-        public TokenAssembly(Tokenizer t) : this(new TokenString(t))
+        /// <summary>
+        /// Constructs a TokenAssembly on a TokenString constructed from the given Tokenizer.
+        /// </summary>
+        /// <param name="t">the tokenizer to consume tokens  from</param>
+        public TokenAssembly(Tokenizer t) 
+            : this(new TokenString(t))
         {
         }
-        /**
-         * Constructs a TokenAssembly from the given TokenString.
-         *
-         * @param   FTokenString   the FTokenString to consume
-         *
-         * @return   a TokenAssembly that will consume the supplied 
-         *           TokenString
-         */
+        /// <summary>
+        /// Constructs a TokenAssembly from the given TokenString.
+        /// </summary>
+        /// <param name="TokenString">the FTokenString to consume</param>
         public TokenAssembly(TokenString TokenString)
         {
             this.FTokenString = TokenString;
         }
-        /**
-         * Returns a textual representation of the amount of this 
-         * tokenAssembly that has been Consumed.
-         *
-         * @param   delimiter   the mark to show between Consumed 
-         *                      elements
-         *
-         * @return   a textual description of the amount of this 
-         *           assembly that has been Consumed
-         */
+
+
+        /* public */
+        /// <summary>
+        ///  Returns a textual representation of the amount of this  tokenAssembly that has been Consumed.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed  elements</param>
+        /// <returns> Returns a textual representation of the amount of this  tokenAssembly that has been Consumed.</returns>
         public override string Consumed(string delimiter)
         {
             StringBuilder buf = new StringBuilder();
@@ -90,60 +71,41 @@ namespace Tripous.Parsing
             }
             return buf.ToString();
         }
-        /**
-         * Returns the default string to show between elements 
-         * Consumed or remaining.
-         *
-         * @return   the default string to show between elements 
-         *           Consumed or remaining
-         */
+        /// <summary>
+        /// Returns the default string to show between elements  Consumed or remaining.
+        /// </summary>
         public override string DefaultDelimiter()
         {
             return "/";
         }
-        /**
-         * Returns the number of elements in this assembly.
-         *
-         * @return   the number of elements in this assembly
-         */
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
         public override int Length()
         {
             return FTokenString.Length();
         }
-        /**
-         * Returns the next token.
-         *
-         * @return   the next token from the associated token string.
-         *
-         * @exception  ArrayIndexOutOfBoundsException  if there are no 
-         *             more tokens in this tokenizer's string.
-         */
+        /// <summary>
+        /// Returns the next token from the associated token string.
+        /// </summary>
         public override string NextElement()
         {
             return FTokenString.TokenAt(FIndex++).ToString();
         }
-        /**
-         * Shows the next object in the assembly, without removing it
-         *
-         * @return   the next object
-         *
-         */
+        /// <summary>
+        /// Returns the next object in the assembly, without removing it
+        /// </summary>
         public override object Peek()
         {
             if (FIndex < Length())
                 return FTokenString.TokenAt(FIndex);
             else return null;
         }
-        /**
-         * Returns a textual representation of the amount of this 
-         * tokenAssembly that remains to be Consumed.
-         *
-         * @param   delimiter   the mark to show between Consumed 
-         *                      elements
-         *
-         * @return   a textual description of the amount of this 
-         *           assembly that remains to be Consumed
-         */
+        /// <summary>
+        /// Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed  elements</param>
+        /// <returns>Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.</returns>
         public override string Remainder(string delimiter)
         {
             StringBuilder buf = new StringBuilder();
@@ -156,13 +118,9 @@ namespace Tripous.Parsing
             }
             return buf.ToString();
         }
-        /**
-function TZTokenAssembly.Clone: IZInterface;
-begin
-    Result := CloneProperties(TZTokenAssembly.Create(FTokenString.Clone as IZTokenString));
-end;
-
-        */
+        /// <summary>
+        /// Creates and returns a copy of this instance.
+        /// </summary>
         public override object Clone()
         {
             TokenString TS = (TokenString)FTokenString.Clone();

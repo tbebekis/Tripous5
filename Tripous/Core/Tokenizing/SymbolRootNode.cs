@@ -15,6 +15,7 @@ namespace Tripous.Tokenizing
 {
  
     /// <summary>
+    /// <para>Used by the <see cref="SymbolState"/></para>
     /// This class is a special case of a <code>SymbolNode</code>. 
     /// A <code>SymbolRootNode</code> object has no symbol of its own, but has children that represent all possible symbols.
     /// </summary>

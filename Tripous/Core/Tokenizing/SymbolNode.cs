@@ -16,6 +16,7 @@ namespace Tripous.Tokenizing
 
 
     /// <summary>
+    /// <para>Used by the <see cref="SymbolState"/></para>
     /// <para>
     /// A <see cref="SymbolNode"/> object is a member of a tree 
     /// that contains all possible prefixes of allowable symbols. 

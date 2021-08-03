@@ -13,37 +13,24 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /*
- * A wordState returns a word from a reader. Like other 
- * states, a tokenizer transfers the job of reading to this 
- * state, depending on an initial character. Thus, the 
- * tokenizer decides which characters may begin a word, and 
- * this state determines which characters may appear as a 
- * second or later character in a word. These are typically 
- * different sets of characters; in particular, it is typical 
- * for digits to appear as parts of a word, but not as the 
- * initial character of a word. 
- *
- * By default, the following characters may appear in a word.
- * The method <code>SetWordChars()</code> allows customizing
- * this.
- * 
- *     From    To
- *      'a', 'z'
- *      'A', 'Z'
- *      '0', '9'
- *
- *     as well as: minus sign, underscore, and apostrophe.
- * 
- *
- *
- *
- *
- */
 
 
     /// <summary>
     /// <para>A word <see cref="TokenizerState"/> </para>
+    /// <para>
+    /// The decision that a character begins a word is the Tokenizer class's decision. The decision that a
+    /// character belongs inside a word is the WordState class's decision. 
+    /// </para>
+    /// <para> 
+    /// If you want to customize the characters that can make a word, 
+    /// you may need to customize the Tokenizer object, 
+    /// and you may need to customize the WordState object that the Tokenizer uses.
+    /// </para>
+    /// <para>
+    /// To change how words may begin, update the Tokenizer object with a call to setCharacterState().
+    /// To change the characters that may appear inside a word, retrieve the Tokenizer object's WordState
+    /// object with a call to wordState(), and update the WordState object with a call to setWordChars().
+    /// </para>
     /// <para>
     /// A wordState returns a word from a reader. Like other 
     /// states, a tokenizer transfers the job of reading to this 

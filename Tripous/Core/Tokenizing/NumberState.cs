@@ -45,7 +45,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// 
         /// </summary>
-        protected double Fvalue;
+        protected double fValue;
         /// <summary>
         /// 
         /// </summary>
@@ -94,7 +94,7 @@ namespace Tripous.Tokenizing
                 c = r.ReadByte();
                 absorbedLeadingMinus = true;
             }
-            Fvalue = AbsorbDigits(r, false);
+            fValue = AbsorbDigits(r, false);
         }
         /// <summary>
         /// Parse from a decimal point to the end of the number.
@@ -106,7 +106,7 @@ namespace Tripous.Tokenizing
             {
                 c = r.ReadByte();
                 absorbedDot = true;
-                Fvalue += AbsorbDigits(r, true);
+                fValue += AbsorbDigits(r, true);
             }
         }
         /// <summary>
@@ -115,7 +115,7 @@ namespace Tripous.Tokenizing
         protected void Reset(int cin)
         {
             c = cin;
-            Fvalue = 0;
+            fValue = 0;
             absorbedLeadingMinus = false;
             absorbedDot = false;
             gotAdigit = false;
@@ -144,10 +144,10 @@ namespace Tripous.Tokenizing
             }
             if (absorbedLeadingMinus)
             {
-                Fvalue = -Fvalue;
+                fValue = -fValue;
             }
             //return new Token(Token.TT_NUMBER, "", Fvalue);
-            return new Token(Token.TT_NUMBER, Fvalue.ToString(), Fvalue);
+            return new Token(Token.TT_NUMBER, fValue.ToString(), fValue);
         }
 
 
