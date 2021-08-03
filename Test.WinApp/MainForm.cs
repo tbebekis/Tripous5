@@ -12,7 +12,7 @@ namespace Test.WinApp
 {
     public partial class MainForm : Form
     {
-        void AnyClick(object sender, EventArgs ea)
+        void AnyClick(object? sender, EventArgs ea)
         {
             if (btnParseSql == sender)
             {
@@ -26,7 +26,7 @@ namespace Test.WinApp
         void ParseSql()
         {
             string SqlText = edtSql.Text;
-            SqlParserHelper.Parse(SqlText);
+            SqlParserHelper.Tokenize(edtSql.Text, new LogBox(edtSqlParserLog));
         }
 
 

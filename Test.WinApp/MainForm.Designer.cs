@@ -29,18 +29,19 @@ namespace Test.WinApp
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.Pager = new System.Windows.Forms.TabControl();
             this.tabTSqlParser = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.edtSql = new System.Windows.Forms.RichTextBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnParseSql = new System.Windows.Forms.Button();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.edtSqlParserLog = new System.Windows.Forms.RichTextBox();
             this.Pager.SuspendLayout();
             this.tabTSqlParser.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -68,16 +69,6 @@ namespace Test.WinApp
             this.tabTSqlParser.Text = "Sql Parser";
             this.tabTSqlParser.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 24);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(982, 694);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
             // splitContainer1
             // 
             this.splitContainer1.Cursor = System.Windows.Forms.Cursors.HSplit;
@@ -89,6 +80,10 @@ namespace Test.WinApp
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.edtSql);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.edtSqlParserLog);
             this.splitContainer1.Size = new System.Drawing.Size(976, 641);
             this.splitContainer1.SplitterDistance = 302;
             this.splitContainer1.TabIndex = 0;
@@ -101,7 +96,7 @@ namespace Test.WinApp
             this.edtSql.Name = "edtSql";
             this.edtSql.Size = new System.Drawing.Size(976, 302);
             this.edtSql.TabIndex = 0;
-            this.edtSql.Text = resources.GetString("edtSql.Text");
+            this.edtSql.Text = "select Id, Name from Customer";
             this.edtSql.WordWrap = false;
             // 
             // panel1
@@ -122,6 +117,27 @@ namespace Test.WinApp
             this.btnParseSql.Text = "Parse";
             this.btnParseSql.UseVisualStyleBackColor = true;
             // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 24);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(982, 694);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // edtSqlParserLog
+            // 
+            this.edtSqlParserLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.edtSqlParserLog.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.edtSqlParserLog.Location = new System.Drawing.Point(0, 0);
+            this.edtSqlParserLog.Name = "edtSqlParserLog";
+            this.edtSqlParserLog.Size = new System.Drawing.Size(976, 335);
+            this.edtSqlParserLog.TabIndex = 1;
+            this.edtSqlParserLog.Text = "";
+            this.edtSqlParserLog.WordWrap = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -134,6 +150,7 @@ namespace Test.WinApp
             this.Pager.ResumeLayout(false);
             this.tabTSqlParser.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -150,6 +167,7 @@ namespace Test.WinApp
         private System.Windows.Forms.RichTextBox edtSql;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnParseSql;
+        private System.Windows.Forms.RichTextBox edtSqlParserLog;
     }
 }
 

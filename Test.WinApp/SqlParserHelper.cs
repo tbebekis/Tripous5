@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
-using TSQL;
-using TSQL.Statements;
-using TSQL.Tokens;
-using TSQL.Clauses;
+using Tripous.Tokenizing;
+
 
 namespace Test.WinApp
 {
@@ -16,13 +15,52 @@ namespace Test.WinApp
     // https://www.codeproject.com/Articles/32524/SQL-Parser
 
 
-    static public class SqlParserHelper
+    // https://scholarworks.lib.csusb.edu/cgi/viewcontent.cgi?article=3536&context=etd-project - page 56
+
+
+    static public partial class SqlParserHelper
     {
 
-        static public void Parse(string SqlText)
+        static public void Tokenize(string SqlText, LogBox Box)        
         {
-            TSQLSelectStatement Statement = TSQLStatementReader.ParseStatements(SqlText)[0] as TSQLSelectStatement;
-            string S = Statement.From.ToString();
+
+            StringBuilder SB = new StringBuilder(); 
+
+            Tokenizer Tokenizer = new Tokenizer();
+            Tokenizer.SetString(SqlText);
+
+            Token? T = null;
+            string S;
+
+            while (true)
+            {
+                T = Tokenizer.NextToken();
+
+                if (T.Kind == Token.TT_EOF)
+                    break;
+                else if (T.Kind == Token.TT_NEWLINE)
+                {
+                    SB.AppendLine("New Line");
+                }
+                else if (T.Kind == Token.TT_SYMBOL)
+                { 
+                    SB.AppendLine($"Symbol: {T.AsString}" );
+                }
+                else if (T.Kind == Token.TT_WORD)
+                {
+                    SB.AppendLine($"Word: {T.AsString}");
+                }
+                else if (T != null)
+                {
+                    S = T.AsString;
+                    if (!string.IsNullOrWhiteSpace(S))
+                        SB.AppendLine($"Unknown Token: {S}");
+                }
+            }
+
+
+            Box.Clear();
+            Box.Log(SB.ToString());
         }
     }
 }

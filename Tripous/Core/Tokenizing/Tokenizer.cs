@@ -158,7 +158,8 @@ namespace Tripous.Tokenizing
 
             if (c >= 0 && c < characterState.Length)
             {
-                return characterState[c].NextToken(Reader, c, this);
+                TokenizerState State = characterState[c];
+                return State.NextToken(Reader, c, this);
             }
             return Token.EOF;
         }
@@ -168,36 +169,36 @@ namespace Tripous.Tokenizing
         /// Returns the state this tokenizer uses to build numbers.
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public NumberState NumberState { get; protected set; }
+        public NumberState NumberState { get; protected set; } = new NumberState();
         /// <summary>
         /// Returns the state this tokenizer uses to build quoted  strings.
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public QuoteState QuoteState { get; protected set; }
+        public QuoteState QuoteState { get; protected set; } = new QuoteState();
         /// <summary>
         /// Returns the state this tokenizer uses to recognize (and ignore) comments.
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public SlashState SlashState { get; protected set; }
+        public SlashState SlashState { get; protected set; } = new SlashState();
         /// <summary>
         /// Return the state this tokenizer uses to recognize  symbols.
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public SymbolState SymbolState { get; protected set; }
+        public SymbolState SymbolState { get; protected set; } = new SymbolState();
         /// <summary>
         /// Returns the state this tokenizer uses to recognize (and ignore) whitespace.
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public WhitespaceState WhitespaceState { get; protected set; }
+        public WhitespaceState WhitespaceState { get; protected set; } = new WhitespaceState();
         /// <summary>
         /// Returns the state this tokenizer uses to build words.
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public WordState WordState { get; protected set; }
+        public WordState WordState { get; protected set; } = new WordState();
         /// <summary>
         /// <para>The default states that actually consume text and produce a token</para>
         /// </summary>
-        public NewLineState NewLineState { get; protected set; }
+        public NewLineState NewLineState { get; protected set; } = new NewLineState();
         /// <summary>
         /// A stream, the tokenizer reads from and writes to
         /// </summary>
