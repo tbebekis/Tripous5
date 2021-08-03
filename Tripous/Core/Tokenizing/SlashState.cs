@@ -13,14 +13,14 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * This state will either delegate to a comment-handling 
- * state, or return a token with just a slash in it.
- * 
- *
- *
- *
- */
+
+    /// <summary>
+    /// A slash <see cref="TokenizerState"/>
+    /// <para>
+    /// This state will either delegate to a comment-handling 
+    /// state, or return a token with just a slash in it.
+    /// </para>
+    /// </summary>
     public class SlashState : TokenizerState
     {
         /// <summary>
@@ -31,13 +31,12 @@ namespace Tripous.Tokenizing
         /// 
         /// </summary>
         protected SlashSlashState slashSlashState = new SlashSlashState();
-        /**
-         * Either delegate to a comment-handling state, or return a 
-         * token with just a slash in it.
-         *
-         * @return   either just a slash token, or the results of 
-         *           delegating to a comment-handling state
-         */
+
+ 
+        /// <summary>
+        /// Returns either delegate to a comment-handling state, or return a  oken with just a slash in it.
+        /// </summary>
+        /// <returns>either just a slash token, or the results of  delegating to a comment-handling state</returns>
         public override Token NextToken(System.IO.Stream r, int theSlash, Tokenizer t)
         {
 

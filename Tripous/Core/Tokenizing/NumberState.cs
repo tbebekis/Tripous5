@@ -13,17 +13,29 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
-* A NumberState object returns a number from a reader. This 
-* state's idea of a number allows an optional, initial 
-* minus sign, followed by one or more digits. A decimal 
-* point and another string of digits may follow these 
-* digits. 
+    /* 
+* 
+* 
+* 
+* 
+* 
 * 
 *
 *
 *
 */
+
+
+    /// <summary>
+    /// A number <see cref="TokenizerState"/>
+    /// <para>
+    /// A NumberState object returns a number from a reader. 
+    /// This state's idea of a number allows an optional, initial 
+    /// minus sign, followed by one or more digits. A decimal 
+    /// point and another string of digits may follow these 
+    /// digits. 
+    /// </para>
+    /// </summary> 
     public class NumberState : TokenizerState
     {
         /// <summary>
@@ -46,6 +58,7 @@ namespace Tripous.Tokenizing
         /// 
         /// </summary>
         protected bool gotAdigit;
+
         /// <summary>
         /// Convert a stream of digits into a number, making this  number a fraction if the bool parameter is true.
         /// </summary>
@@ -70,19 +83,6 @@ namespace Tripous.Tokenizing
             }
             return v;
         }
-        /**
-        * Return a number token from a reader.
-        *
-        * @return a number token from a reader
-        */
-        public override Token NextToken(System.IO.Stream r, int cin, Tokenizer t)
-        {
-            Reset(cin);
-            ParseLeft(r);
-            ParseRight(r);
-            r.Seek(-1, System.IO.SeekOrigin.Current); // r.unread(c);
-            return Value(r, t);
-        }
         /// <summary>
         /// Parse up to a decimal point.
         /// </summary>
@@ -96,9 +96,9 @@ namespace Tripous.Tokenizing
             }
             Fvalue = AbsorbDigits(r, false);
         }
-        /**
-        * Parse from a decimal point to the end of the number.
-        */
+        /// <summary>
+        /// Parse from a decimal point to the end of the number.
+        /// </summary>
         protected void ParseRight(System.IO.Stream r)
         {
 
@@ -109,9 +109,9 @@ namespace Tripous.Tokenizing
                 Fvalue += AbsorbDigits(r, true);
             }
         }
-        /**
-        * Prepare to assemble a new number.
-        */
+        /// <summary>
+        /// Prepare to assemble a new number.
+        /// </summary>
         protected void Reset(int cin)
         {
             c = cin;
@@ -120,9 +120,9 @@ namespace Tripous.Tokenizing
             absorbedDot = false;
             gotAdigit = false;
         }
-        /**
-        * Put together the pieces of a number.
-        */
+        /// <summary>
+        /// Put together the pieces of a number.
+        /// </summary>
         protected Token Value(System.IO.Stream r, Tokenizer t)
         {
 
@@ -148,6 +148,23 @@ namespace Tripous.Tokenizing
             }
             //return new Token(Token.TT_NUMBER, "", Fvalue);
             return new Token(Token.TT_NUMBER, Fvalue.ToString(), Fvalue);
+        }
+
+
+        /// <summary>
+        /// Return a number token from a reader.
+        /// </summary>
+        /// <param name="r">a reader to ReadByte from</param>
+        /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
+        /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
+        /// <returns> a token that represents a logical piece of the  reader</returns>
+        public override Token NextToken(System.IO.Stream r, int c, Tokenizer t)
+        {
+            Reset(c);
+            ParseLeft(r);
+            ParseRight(r);
+            r.Seek(-1, System.IO.SeekOrigin.Current); // r.unread(c);
+            return Value(r, t);
         }
     }
 }

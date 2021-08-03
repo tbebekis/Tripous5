@@ -13,36 +13,35 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * A TokenStringSource enumerates over a specified reader, 
- * returning TokenStrings delimited by a specified FDelimiter.
- * For example, 
- * <blockquote><pre>
- *   
- *    string s = "I came; I saw; I left in peace;";
- *
- *    TokenStringSource tss =
- *        new TokenStringSource(new Tokenizer(s), ";");
- *
- *    while (tss.HasMoreTokenStrings()) {
- *        System.out.println(tss.NextTokenString());
- *    }	
- * 
- * </pre></blockquote>
- * 
- * prints out:
- * 
- * <blockquote><pre>    
- *     I came
- *     I saw
- *     I left in peace
- * </pre></blockquote>
- * 
- *
- * 
- * @version 1.0
- */
+ 
 
+    /// <summary>
+    /// A TokenStringSource enumerates over a specified reader, 
+    /// returning TokenStrings delimited by a specified FDelimiter.
+    /// For example, 
+    /// <code>
+    ///    
+    ///     string s = "I came; I saw; I left in peace;";
+    /// 
+    ///     TokenStringSource tss =
+    ///         new TokenStringSource(new Tokenizer(s), ";");
+    /// 
+    ///     while (tss.HasMoreTokenStrings()) {
+    ///         System.out.println(tss.NextTokenString());
+    ///     }	
+    ///  
+    /// </code>
+    /// <para>
+    /// prints out:
+    /// </para>
+    /// <para>
+    /// <code>
+    ///     I came
+    ///     I saw
+    ///     I left in peace
+    /// </code>
+    /// </para>
+    /// </summary>
     public class TokenStringSource
     {
         /// <summary>
@@ -57,51 +56,43 @@ namespace Tripous.Tokenizing
         /// 
         /// </summary>
         protected TokenString FCachedTokenString = null;
-        /**
-         * Constructs a TokenStringSource that will read TokenStrings
-         * using the specified FTokenizer, delimited by the specified 
-         * FDelimiter.
-         *
-         * @param   FTokenizer   a FTokenizer to read tokens from
-         *
-         * @param   FDelimiter   the character that fences off where one 
-         *                      TokenString ends and the next begins
-         *
-         * @returns   a TokenStringSource that will read TokenStrings
-         *            from the specified FTokenizer, delimited by the 
-         *            specified FDelimiter
-         */
+ 
+
+        /// <summary>
+        /// Constructs a TokenStringSource that will read TokenStrings
+        /// using the specified FTokenizer, delimited by the specified 
+        /// FDelimiter.
+        /// </summary>
+        /// <param name="Tokenizer">a FTokenizer to read tokens from</param>
+        /// <param name="Delimiter">the character that fences off where one  TokenString ends and the next begins</param>
         public TokenStringSource(Tokenizer Tokenizer, string Delimiter)
         {
             this.FTokenizer = Tokenizer;
             this.FDelimiter = Delimiter;
         }
-        /**
-         * The design of <code>NextTokenString</code> is that is 
-         * always returns a cached value. This method will (at least 
-         * attempt to) load the cache if the cache is empty.
-         */
+ 
+        /// <summary>
+        /// The design of <code>NextTokenString</code> is that is 
+        /// always returns a cached value. This method will (at least 
+        /// attempt to) load the cache if the cache is empty.
+        /// </summary>
         protected void EnsureCacheIsLoaded()
         {
             if (FCachedTokenString == null)
                 LoadCache();
         }
-        /**
-         * Returns true if the source has more TokenStrings.
-         *
-         * @return   true, if the source has more TokenStrings that 
-         *           have not yet been popped with <code>
-         *           NextTokenString</code>.
-         */
+
+        /// <summary>
+        /// Returns true , if the source has more TokenStrings that have not yet been popped with <code> NextTokenString</code>.
+        /// </summary>
         public bool HasMoreTokenStrings()
         {
             EnsureCacheIsLoaded();
             return FCachedTokenString != null;
         }
-        /**
-         * Loads the next TokenString into the cache, or sets the 
-         * cache to null if the source is out of tokens.
-         */
+        /// <summary>
+        /// Loads the next TokenString into the cache, or sets the  cache to null if the source is out of tokens.
+        /// </summary>
         protected void LoadCache()
         {
             ArrayList tokenVector = NextVector();
@@ -114,42 +105,21 @@ namespace Tripous.Tokenizing
                 FCachedTokenString = new TokenString(tokens);
             }
         }
-        /**
-         * Shows the example in the class comment.
-         *
-         * @param args ignored
-
-        public static void main(string args[]) {
-      
-           string s = "I came; I saw; I left in peace;";
-      
-           TokenStringSource tss =
-              new TokenStringSource(new Tokenizer(s), ";");
-          
-           while (tss.HasMoreTokenStrings()) {
-              System.out.println(tss.NextTokenString());
-           }	
-        }  
-        */
-        /**
-         * Returns the next TokenString from the source.
-         *
-         * @return   the next TokenString from the source
-         */
-        public TokenString NextTokenString()
+ 
+        /// <summary>
+        /// Returns the next TokenString from the source.
+        /// </summary>
+         public TokenString NextTokenString()
         {
             EnsureCacheIsLoaded();
             TokenString returnTokenString = FCachedTokenString;
             FCachedTokenString = null;
             return returnTokenString;
         }
-        /**
-         * Returns a ArrayList of the tokens in the source up to either 
-         * the FDelimiter or the end of the source.
-         *
-         * @return   a ArrayList of the tokens in the source up to either
-         *           the FDelimiter or the end of the source.
-         */
+ 
+        /// <summary>
+        /// Returns a ArrayList of the tokens in the source up to either  the FDelimiter or the end of the source.
+        /// </summary>
         protected ArrayList NextVector()
         {
             ArrayList v = new ArrayList();

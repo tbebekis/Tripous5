@@ -13,39 +13,36 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
-* A whitespace state ignores whitespace (such as blanks
-* and tabs), and returns the tokenizer's next token. By 
-* default, all characters from 0 to 32 are whitespace.
-* 
-*
-*
-*
-*/
+
+
+    /// <summary>
+    /// <para>A white space <see cref="TokenizerState"/></para>
+    /// <para>
+    /// A whitespace state ignores whitespace (such as blanks
+    /// and tabs), and returns the tokenizer's next token. By 
+    /// default, all characters from 0 to 32 are whitespace.
+    /// </para>
+    /// </summary>
     public class WhitespaceState : TokenizerState
     {
         /// <summary>
         /// 
         /// </summary>
         protected bool[] whitespaceChar = new bool[256];
-        /**
-        * Constructs a whitespace state with a default idea of what
-        * characters are, in fact, whitespace.
-        *
-        * @return   a state for ignoring whitespace
-        */
+ 
+        /// <summary>
+        /// Constructs a whitespace state with a default idea of what characters are, in fact, whitespace.
+        /// </summary>
         public WhitespaceState()
         {
             SetWhitespaceChars(0, ' ', true);
             SetWhitespaceChars('\r', '\r', false);
             SetWhitespaceChars('\n', '\n', false);
         }
-        /**
-        * Ignore whitespace (such as blanks and tabs), and return 
-        * the tokenizer's next token.
-        *
-        * @return the tokenizer's next token
-        */
+ 
+        /// <summary>
+        /// Ignores whitespace (such as blanks and tabs), and returns  the tokenizer's next token.
+        /// </summary>
         public override Token NextToken(System.IO.Stream r, int aWhitespaceChar, Tokenizer t)
         {
             int i = 0;
@@ -70,16 +67,13 @@ namespace Tripous.Tokenizing
             //return t.NextToken();
             return new Token(Token.TT_WHITESPACE, new string(' ', i), i);
         }
-        /**
-        * Establish the given characters as whitespace to ignore.
-        *
-        * @param   first   char
-        *
-        * @param   second   char
-        *
-        * @param   bool   true, if this state should ignore
-        *                    characters in the given range
-        */
+ 
+        /// <summary>
+        /// Establish the given characters as whitespace to ignore.
+        /// </summary>
+        /// <param name="from">char</param>
+        /// <param name="to">char</param>
+        /// <param name="b">true, if this state should ignore characters in the given range</param>
         public void SetWhitespaceChars(int from, int to, bool b)
         {
             for (int i = from; i <= to; i++)

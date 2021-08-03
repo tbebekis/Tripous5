@@ -13,57 +13,41 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * A TokenString is like a string, but it is a series of 
- * Tokens rather than a series of chars. Once a TokenString is 
- * created, it is "immutable", meaning it cannot change. This
- * lets you freely copy TokenStrings without worrying about 
- * their state. 
- * 
- *
- * 
- *
- */
-
+ 
+    /// <summary>
+    /// A TokenString is like a string, but it is a series of 
+    /// Tokens rather than a series of chars. Once a TokenString is 
+    /// created, it is "immutable", meaning it cannot change. This
+    /// lets you freely copy TokenStrings without worrying about 
+    /// their state. 
+    /// </summary>
     public class TokenString : ICloneable
     {
-        /**
-         * the FTokens in this tokenString
-         */
+        /// <summary>
+        /// the FTokens in this tokenString
+        /// </summary>
         protected Token[] FTokens;
-        /**
-         * Constructs a tokenString from the supplied FTokens.
-         *
-         * @param   FTokens   the FTokens to use
-         *
-         * @return    a tokenString constructed from the supplied 
-         *            FTokens
-         */
+ 
+        /// <summary>
+        /// Constructs a tokenString from the supplied FTokens.
+        /// </summary>
+        /// <param name="Tokens">the FTokens to use</param>
         public TokenString(Token[] Tokens)
         {
             this.FTokens = Tokens;
         }
-        /**
-         * Constructs a tokenString from the supplied string. 
-         *
-         * @param   string   the string to tokenize
-         *
-         * @return    a tokenString constructed from FTokens read from 
-         *            the supplied string
-         */
-        public TokenString(string s) : this(new Tokenizer(s))
+        /// <summary>
+        /// Constructs a tokenString from the supplied string. 
+        /// </summary>
+        /// <param name="s">the string to tokenize</param>
+        public TokenString(string s) 
+            : this(new Tokenizer(s))
         {
         }
-        /**
-         * Constructs a tokenString from the supplied reader and 
-         * tokenizer. 
-         * 
-         * @param   Tokenizer   the tokenizer that will produces the 
-         *                      FTokens
-         *
-         * @return    a tokenString constructed from the tokenizer's 
-         *            FTokens
-         */
+        /// <summary>
+        /// Constructs a tokenString from the supplied reader and  tokenizer. 
+        /// </summary>
+        /// <param name="t">the tokenizer that will produces the FTokens</param>
         public TokenString(Tokenizer t)
         {
             ArrayList v = new ArrayList();
@@ -86,31 +70,24 @@ namespace Tripous.Tokenizing
             FTokens = new Token[v.Count];
             v.CopyTo(FTokens);
         }
-        /**
-         * Returns the number of FTokens in this tokenString.
-         *
-         * @return   the number of FTokens in this tokenString
-         */
+
+        /// <summary>
+        /// Returns the number of FTokens in this tokenString.
+        /// </summary>
         public int Length()
         {
             return FTokens.Length;
         }
-        /**
-         * Returns the token at the specified index.
-         *
-         * @param    index   the index of the desired token
-         * 
-         * @return   token   the token at the specified index
-         */
+        /// <summary>
+        /// Returns the token at the specified index.
+        /// </summary>
         public Token TokenAt(int i)
         {
             return FTokens[i];
         }
-        /**
-         * Returns a string representation of this tokenString. 
-         *
-         * @return   a string representation of this tokenString
-         */
+        /// <summary>
+        /// Returns a string representation of this tokenString. 
+        /// </summary>
         public override string ToString()
         {
             StringBuilder buf = new StringBuilder();
@@ -124,8 +101,9 @@ namespace Tripous.Tokenizing
             }
             return buf.ToString();
         }
-        /**
-        */
+        /// <summary>
+        /// Clones this instance and returns the clone.
+        /// </summary>
         public object Clone()
         {
             Token[] Tokens = new Token[FTokens.Length];

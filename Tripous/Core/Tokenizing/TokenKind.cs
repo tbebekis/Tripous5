@@ -13,31 +13,23 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
-     * Objects of this class represent a type of token, such
-     * as "number" or "word".
-     * 
-     *
-     *
-     *
-     */
+    /// <summary>
+    /// Objects of this class represent a type of token, such as "number" or "word".
+    /// </summary>
     public class TokenKind
-    {
+    { 
+
         /// <summary>
-        /// 
+        /// Creates a token type of the given name.
         /// </summary>
-        protected string FName;
-        /**
-         * Creates a token type of the given name.
-         */
         public TokenKind(string Name)
         {
-            this.FName = Name;
+            this.Name = Name;
         }
         /// <summary>
         /// 
         /// </summary>
-        public string Name { get { return FName; } }
+        public string Name { get; protected set; }
 
 
     }

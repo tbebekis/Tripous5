@@ -13,22 +13,18 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * A slashSlash state ignores everything up to an end-of-line
- * and returns the tokenizer's next token.
- * 
- *
- *
- *
- */
+ 
+    /// <summary>
+    /// A double slash <see cref="TokenizerState"/>
+    /// <para>A slashSlash state ignores everything up to an end-of-line and returns the tokenizer's next token.</para>
+    /// </summary>
     public class SlashSlashState : TokenizerState
     {
-        /**
-         * Ignore everything up to an end-of-line and return the 
-         * tokenizer's next token.
-         *
-         * @return the tokenizer's next token
-         */
+
+        /// <summary>
+        /// Ignore everything up to an end-of-line and return the  tokenizer's next token.
+        /// </summary>
+        /// <returns>Returns the tokenizer's next token</returns>
         public override Token NextToken(System.IO.Stream r, int theSlash, Tokenizer t)
         {
 

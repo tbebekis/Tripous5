@@ -13,47 +13,50 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * A <code>SymbolNode</code> object is a member of a tree that 
- * contains all possible prefixes of allowable symbols. Multi-
- * character symbols appear in a <code>SymbolNode</code> tree 
- * with one node for each character. 
- * 
- * For example, the symbol <code>=:~</code> will appear in a 
- * tree as three nodes. The first node contains an equals sign, 
- * and has a child; that child contains a colon and has a 
- * child; this third child contains a tilde, and has no 
- * children of its own. If the colon node had another child 
- * for a dollar sign character, then the tree would contain 
- * the symbol <code>=:$</code>.
- * 
- * A tree of <code>SymbolNode</code> objects collaborate to 
- * ReadByte a (potentially multi-character) symbol from an input 
- * stream. A root node with no character of its own finds an 
- * initial node that represents the first character in the 
- * input. This node looks to see if the next character in the 
- * stream matches one of its children. If so, the node 
- * delegates its reading task to its child. This approach 
- * walks down the tree, pulling symbols from the input that 
- * match the path down the tree.
- * 
- * When a node does not have a child that matches the next 
- * character, we will have ReadByte the longest possible symbol 
- * prefix. This prefix may or may not be a valid symbol. 
- * Consider a tree that has had <code>=:~</code> added and has 
- * not had <code>=:</code> added. In this tree, of the three 
- * nodes that contain <code>=:~</code>, only the first and 
- * third contain complete symbols. If, say, the input contains 
- * <code>=:a</code>, the colon node will not have a child that 
- * matches the 'a' and so it will stop reading. The colon node 
- * has to "unread": it must push back its character, and ask 
- * its parent to unread. Unreading continues until it reaches 
- * an ancestor that represents a valid symbol.
- * 
- *
- * 
- * @version 1.0
- */
+
+
+    /// <summary>
+    /// <para>
+    /// A <see cref="SymbolNode"/> object is a member of a tree 
+    /// that contains all possible prefixes of allowable symbols. 
+    /// Multi-character symbols appear in a <see cref="SymbolNode"/> tree 
+    /// with one node for each character. 
+    /// </para>
+    /// <para>
+    /// For example, the symbol <code>=:~</code> will appear in a 
+    /// tree as three nodes. The first node contains an equals sign,
+    /// and has a child; that child contains a colon and has a 
+    /// child; this third child contains a tilde, and has no 
+    /// children of its own. If the colon node had another child 
+    /// for a dollar sign character, then the tree would contain 
+    /// the symbol <code>=:$</code>.
+    /// </para>
+    /// <para>
+    /// A tree of <code>SymbolNode</code> objects collaborate to 
+    /// ReadByte a (potentially multi-character) symbol from an input 
+    /// stream. A root node with no character of its own finds an 
+    /// initial node that represents the first character in the 
+    /// input. This node looks to see if the next character in the 
+    /// stream matches one of its children. If so, the node 
+    /// delegates its reading task to its child. This approach 
+    /// walks down the tree, pulling symbols from the input that 
+    /// match the path down the tree.
+    /// </para>
+    /// <para>
+    /// When a node does not have a child that matches the next 
+    /// character, we will have ReadByte the longest possible symbol 
+    /// prefix. This prefix may or may not be a valid symbol. 
+    /// Consider a tree that has had <code>=:~</code> added and has 
+    /// not had <code>=:</code> added. In this tree, of the three 
+    /// nodes that contain <code>=:~</code>, only the first and 
+    /// third contain complete symbols. If, say, the input contains 
+    /// <code>=:a</code>, the colon node will not have a child that 
+    /// matches the 'a' and so it will stop reading. The colon node 
+    /// has to "unread": it must push back its character, and ask 
+    /// its parent to unread. Unreading continues until it reaches 
+    /// an ancestor that represents a valid symbol.
+    /// </para>
+    /// </summary>
     public class SymbolNode
     {
         /// <summary>
@@ -63,7 +66,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// 
         /// </summary>
-        protected System.Collections.ArrayList children = new System.Collections.ArrayList(); // of Node
+        protected ArrayList children = new ArrayList(); // of Node
         /// <summary>
         /// 
         /// </summary>
@@ -72,59 +75,7 @@ namespace Tripous.Tokenizing
         /// 
         /// </summary>
         protected SymbolNode FParent;
-        /**
-         * Constructs a SymbolNode with the given parent, representing 
-         * the given character.
-         *
-         * @param   SymbolNode   this node's parent
-         *
-         * @param   char   this node's character
-         */
-        public SymbolNode(SymbolNode parent, char Value)
-        {
-            this.FParent = parent;
-            this.FValue = Value;
-        }
-        /**
-         * Add a line of descendants that represent the characters
-         * in the given string.
-         */
-        public void AddDescendantLine(string s)    // was protected
-        {
-            if (s.Length > 0)
-            {
-                char c = s[0]; //s.charAt(0);
-                SymbolNode n = EnsureChildWithChar(c);
-                n.AddDescendantLine(s.Substring(1));
-            }
-        }
-        /**
-         * Show the symbol this node represents.
-         *
-         * @return the symbol this node represents
-         */
-        public virtual string Ancestry()
-        {
-            if (FParent == null)
-                return FValue.ToString();
 
-            return FParent.Ancestry() + FValue.ToString();
-        }
-        /// <summary>
-        ///  Find the descendant that takes as many characters as  possible from the input.
-        /// </summary>
-        public SymbolNode DeepestRead(System.IO.Stream r)  // was protected
-        {
-
-            char c = (char)r.ReadByte();
-            SymbolNode n = FindChildWithChar(c);
-            if (n == null)
-            {
-                r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread(c);
-                return this;
-            }
-            return n.DeepestRead(r);
-        }
         /// <summary>
         /// Find or create a child for the given character. 
         /// </summary>
@@ -138,9 +89,9 @@ namespace Tripous.Tokenizing
             }
             return n;
         }
-        /**
-         * Find a child with the given character.
-         */
+        /// <summary>
+        /// Find a child with the given character.
+        /// </summary>
         protected virtual SymbolNode FindChildWithChar(char c)
         {
             for (int i = 0; i < children.Count; i++)
@@ -165,10 +116,9 @@ namespace Tripous.Tokenizing
             return null;
             */
         }
-        /**
-         * Find a descendant which is down the path the given string
-         * indicates. 
-         */
+        /// <summary>
+        /// Find a descendant which is down the path the given string indicates. 
+        /// </summary>
         protected SymbolNode FindDescendant(string s)
         {
             char c = s[0];// s.charAt(0);
@@ -179,29 +129,78 @@ namespace Tripous.Tokenizing
             }
             return n.FindDescendant(s.Substring(1));
         }
-        /**
-         * Mark this node as valid, which means its Ancestry is a
-         * complete symbol, not just a prefix.
-         */
-        public void SetValid(bool b)    // was protected
+ 
+        /* construction */
+        /// <summary>
+        ///  Constructs a SymbolNode with the given parent, representing  the given character.
+        /// </summary>
+        /// <param name="parent">this node's parent</param>
+        /// <param name="Value">this node's character</param>
+        public SymbolNode(SymbolNode parent, char Value)
         {
-            valid = b;
+            this.FParent = parent;
+            this.FValue = Value;
         }
-        /**
-         * Give a string representation of this node.
-         *
-         * @return a string representation of this node
-         */
+
+        /* public */
+        /// <summary>
+        /// Returns a string representation of this node.
+        /// </summary>
         public override string ToString()
         {
             return "" + FValue + '(' + valid + ')';
         }
-        /**
-         * Unwind to a valid node; this node is "valid" if its
-         * Ancestry represents a complete symbol. If this node is
-         * not valid, put back the character and ask the parent to
-         * unwind. 
-         */
+
+
+        /// <summary>
+        /// Add a line of descendants that represent the characters in the given string.
+        /// </summary>
+        public void AddDescendantLine(string s)    // was protected
+        {
+            if (s.Length > 0)
+            {
+                char c = s[0]; //s.charAt(0);
+                SymbolNode n = EnsureChildWithChar(c);
+                n.AddDescendantLine(s.Substring(1));
+            }
+        }
+ 
+        /// <summary>
+        /// Returns the symbol this node represents
+        /// </summary>
+        public virtual string Ancestry()
+        {
+            if (FParent == null)
+                return FValue.ToString();
+
+            return FParent.Ancestry() + FValue.ToString();
+        }
+        /// <summary>
+        ///  Find the descendant that takes as many characters as  possible from the input.
+        /// </summary>
+        public SymbolNode DeepestRead(System.IO.Stream r)  // was protected
+        {
+
+            char c = (char)r.ReadByte();
+            SymbolNode n = FindChildWithChar(c);
+            if (n == null)
+            {
+                r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread(c);
+                return this;
+            }
+            return n.DeepestRead(r);
+        }
+        /// <summary>
+        /// Mark this node as valid, which means its Ancestry is a complete symbol, not just a prefix.
+        /// </summary>
+        public void SetValid(bool b)    // was protected
+        {
+            valid = b;
+        }
+        /// <summary>
+        /// Unwind to a valid node; this node is "valid" if its Ancestry represents a complete symbol. 
+        /// If this node is not valid, put back the character and ask the parent to unwind. 
+        /// </summary>
         public SymbolNode unreadToValid(System.IO.Stream r)  // was protected
         {
 

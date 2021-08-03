@@ -13,22 +13,18 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * A slashStar state ignores everything up to a closing star
- * and slash, and then returns the tokenizer's next token.
- * 
- *
- *
- *
- */
+ 
+    /// <summary>
+    /// A slash + start <see cref="TokenizerState"/>
+    /// <para>A slashStar state ignores everything up to a closing star and slash, and then returns the tokenizer's next token.</para>
+    /// </summary>
     public class SlashStarState : TokenizerState
     {
-        /**
-         * Ignore everything up to a closing star and slash, and 
-         * then return the tokenizer's next token.
-         *
-         * @return the tokenizer's next token
-         */
+ 
+        /// <summary>
+        ///  Ignore everything up to a closing star and slash, and  then return the tokenizer's next token.
+        /// </summary>
+        /// <returns>Returns the tokenizer's next token</returns>
         public override Token NextToken(System.IO.Stream r, int theStar, Tokenizer t)
         {
 
