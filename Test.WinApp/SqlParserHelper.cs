@@ -37,7 +37,10 @@ namespace Test.WinApp
                 T = Tokenizer.NextToken();
 
                 if (T.Kind == Token.TT_EOF)
+                {
+                    SB.AppendLine("EOF");
                     break;
+                }
                 else if (T.Kind == Token.TT_NEWLINE)
                 {
                     SB.AppendLine("New Line");

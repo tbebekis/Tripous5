@@ -64,6 +64,34 @@ group by
 	SalesLines.SalesOrderQty
 
 ";
- 
-    }
+
+
+		public const string SSelectSimple = @"
+select 
+  Customer.Id	as Id
+ ,Customer.Name as Name
+ ,Country.Name	as Country
+from
+  Customer
+	left join Country on Country.Id = Customer.CountryId
+
+";
+
+		public const string SSelectWithSubSelect = @"
+select 
+  Customer.Id	as Id
+ ,Customer.Name as Name
+ ,Country.Name	as Country
+from
+  Customer
+	left join 
+left join 
+(select * from Countries where Continent = 'Europe' order by Name) 
+as Country on Country.Id = Customer.CountryId 
+where
+	Customer.Name like 'teo%'
+order by
+    Customer.Name
+";
+	}
 }

@@ -34,6 +34,10 @@ namespace Tripous.Tokenizing
                 if (c != '\n')
                     r.Seek(-1, System.IO.SeekOrigin.Current);   //r.unread(c);
             }
+            else
+            {
+                r.Seek(-1, System.IO.SeekOrigin.Current);   //r.unread(c);
+            }
 
             return new Token(Token.TT_NEWLINE, " ", 0);
         }
