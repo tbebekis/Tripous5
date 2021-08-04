@@ -19,26 +19,20 @@ namespace Tripous.Parsing
 
     /// <summary>
     /// <para>
-    /// A <code>Parser</code> is an object that recognizes the
-    /// elements of a language.
+    /// A parser is an object that recognizes the elements of a language.
     /// </para>
     /// <para>
-    /// Each <code>Parser</code> object is either a <code>
-    /// Terminal</code> or a composition of other parsers.
-    /// The <code>Terminal</code> class is a subclass of <code>
-    /// Parser</code>, and is itself a hierarchy of 
-    /// parsers that recognize specific patterns of text. For 
-    /// example, a <code>Word</code> recognizes any word, and a 
-    /// <code>Literal</code> matches a specific string. 
+    /// Each parser object is either a <see cref="TerminalParser"/> or a composition of other parsers.
+    /// The <see cref="TerminalParser"/> class is a subclass of <see cref="Parser"/>, 
+    /// and is itself a hierarchy of parsers that recognize specific patterns of text. 
+    /// For example, a <see cref="WordTerminalParser"/> recognizes any word, 
+    /// and a <see cref="LiteralTerminalParser"/> matches a specific string. 
     /// </para>
     /// <para>
-    /// In addition to <code>Terminal</code>, other subclasses of 
-    /// <code>Parser</code> provide composite parsers, 
-    /// describing sequences, alternations, and repetitions of 
-    /// other parsers. For example, the following <code>
-    /// Parser</code> objects culminate in a <code>good
-    /// </code> parser that recognizes a description of good 
-    /// coffee.
+    /// In addition to <see cref="TerminalParser"/>, other subclasses of <see cref="Parser"/> provide composite parsers, 
+    /// describing sequences, alternations, and repetitions of other parsers. 
+    /// For example, the following <see cref="Parser"/> objects culminate in a <code>GoodParser</code> parser 
+    /// that recognizes a description of good coffee.
     /// </para>
     /// <para>
     /// <code>
@@ -67,20 +61,14 @@ namespace Tripous.Parsing
     /// </code>
     /// </para>
     /// <para>
-    /// The parser does not Match directly against a string, 
-    /// it matches against an Assembly.  The 
-    /// resulting assembly shows its stack, with four words on it, 
-    /// along with its sequence of tokens, and the index at the 
-    /// end of these. In practice, parsers will do some work 
-    /// on an assembly, based on the text they recognize. 
+    /// The parser does not match directly against a string, it matches against an <see cref="Assembly"/>.  
+    /// The resulting assembly shows its stack, with four words on it, along with its sequence of tokens, and the index at the end of these. 
+    /// In practice, parsers will do some work on an assembly, based on the text they recognize. 
     /// </para>
     /// </summary>
     public abstract class Parser
     {
-        /// <summary>
-        /// a FName to identify this parser
-        /// </summary>
-        protected string FName;
+ 
         /// <summary>
         /// an object that will work on an assembly whenever this  parser successfully matches against the assembly
         /// </summary>
@@ -98,10 +86,45 @@ namespace Tripous.Parsing
         /// </summary>
         public Parser(string Name)
         {
-            this.FName = Name;
+            this.Name = Name;
         }
 
         /* public */
+        /// <summary>
+        /// Returns textual description of this  parser, taking care to avoid infinite recursion
+        /// </summary>
+        public override string ToString()
+        {
+            return ToString(new ArrayList());
+        }
+        /// <summary>
+        /// Returns a textual description of this parser.
+        /// Parsers can be recursive, so when building a 
+        /// descriptive string, it is important to avoid infinite 
+        /// recursion by keeping track of the objects already 
+        /// described. This method keeps an object from printing 
+        /// twice, and uses <code>UnvisitedString</code> which 
+        /// subclasses must implement.
+        /// </summary>
+        /// <param name="visited">a list of objects already printed </param>
+        /// <returns>returns a textual version of this parser, avoiding recursion</returns>
+        public string ToString(ArrayList visited)
+        {
+            if (Name != null)
+                return Name;
+            else if (visited.IndexOf(this) != -1)
+                return "...";
+            else
+            {
+                visited.Add(this);
+                return UnvisitedString(visited);
+            }
+        }
+        /// <summary>
+        /// Returns a textual description of this string.
+        /// </summary>
+        public abstract string UnvisitedString(ArrayList visited);
+
         /// <summary>
         /// Adds the elements of one vector to another.
         /// </summary>
@@ -142,6 +165,7 @@ namespace Tripous.Parsing
         /// <param name="pv">the visitor to Accept</param>
         /// <param name="visited">a collection of previously visited  parsers.</param>
         public abstract void Accept(ParserVisitor pv, ArrayList visited);
+
         /// <summary>
         /// Returns the most-matched assembly in a collection.
         /// </summary>
@@ -192,13 +216,6 @@ namespace Tripous.Parsing
             }
             return null;
         }
-        /// <summary>
-        /// Returns the name of this parser.
-        /// </summary>
-        public string GetName()
-        {
-            return FName;
-        } 
         /// <summary>
         /// <para>
         /// Given a set (well, a <code>ArrayList</code>, really) of 
@@ -283,39 +300,12 @@ namespace Tripous.Parsing
             this.FAssembler = Assembler;
             return this;
         }
+
+
+        /* properties */
         /// <summary>
-        /// Returns textual description of this  parser, taking care to avoid infinite recursion
+        /// A name that identifies this parser
         /// </summary>
-        public override string ToString()
-        {
-            return ToString(new ArrayList());
-        }
-        /// <summary>
-        /// Returns a textual description of this parser.
-        /// Parsers can be recursive, so when building a 
-        /// descriptive string, it is important to avoid infinite 
-        /// recursion by keeping track of the objects already 
-        /// described. This method keeps an object from printing 
-        /// twice, and uses <code>UnvisitedString</code> which 
-        /// subclasses must implement.
-        /// </summary>
-        /// <param name="visited">a list of objects already printed </param>
-        /// <returns>returns a textual version of this parser, avoiding recursion</returns>
-        public string ToString(ArrayList visited)
-        {
-            if (FName != null)
-                return FName;
-            else if (visited.IndexOf(this) != -1)
-                return "...";
-            else
-            {
-                visited.Add(this);
-                return UnvisitedString(visited);
-            }
-        }
-        /// <summary>
-        /// Returns a textual description of this string.
-        /// </summary>
-        public abstract string UnvisitedString(ArrayList visited);
+        public string Name { get; protected set; }
     }
 }

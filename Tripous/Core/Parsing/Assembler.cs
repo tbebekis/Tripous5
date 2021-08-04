@@ -15,25 +15,18 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
- 
+
 
     /// <summary>
+    /// Parsers that have an Assembler ask it to work on an assembly after a successful match.
     /// <para>
-    /// Parsers that have an Assembler ask it to work on an
-    /// assembly after a successful match.
+    /// By default, terminals Push their matches on a assembly's stack after a successful match. 
     /// </para>
     /// <para>
-    /// By default, terminals Push their matches on a assembly's
-    /// stack after a successful match. 
-    /// </para>
-    /// <para>
-    /// Parsers recognize text, and assemblers provide any 
-    /// sort of work that should occur after this recognition. 
-    /// This work usually has to do with the state of the assembly,
-    /// which is why assemblies have a stack and a target. 
-    /// Essentially, parsers trade advancement on a assembly 
-    /// for work on the assembly's stack or target.
-    /// </para>
+    /// Parsers recognize text, and assemblers provide any sort of work that should occur after this recognition. 
+    /// This work usually has to do with the state of the assembly, which is why assemblies have a stack and a target. 
+    /// Essentially, parsers trade advancement on a assembly for work on the assembly's stack or target.
+    /// </para>    
     /// </summary>
     public abstract class Assembler
     {

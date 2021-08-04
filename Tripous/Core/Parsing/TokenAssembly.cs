@@ -56,6 +56,16 @@ namespace Tripous.Parsing
 
         /* public */
         /// <summary>
+        /// Creates and returns a copy of this instance.
+        /// </summary>
+        public override object Clone()
+        {
+            TokenString TS = (TokenString)FTokenString.Clone();
+            Assembly A = new TokenAssembly(TS);
+            return CloneProperties(A);
+        }
+
+        /// <summary>
         ///  Returns a textual representation of the amount of this  tokenAssembly that has been Consumed.
         /// </summary>
         /// <param name="delimiter">the mark to show between Consumed  elements</param>
@@ -72,12 +82,31 @@ namespace Tripous.Parsing
             return buf.ToString();
         }
         /// <summary>
+        /// Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed  elements</param>
+        /// <returns>Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.</returns>
+        public override string Remainder(string delimiter)
+        {
+            StringBuilder buf = new StringBuilder();
+            for (int i = ElementsConsumed(); i < FTokenString.Length(); i++)
+            {
+                if (i > ElementsConsumed())
+                    buf.Append(delimiter);
+
+                buf.Append(FTokenString.TokenAt(i));
+            }
+            return buf.ToString();
+        }
+
+        /// <summary>
         /// Returns the default string to show between elements  Consumed or remaining.
         /// </summary>
         public override string DefaultDelimiter()
         {
             return "/";
         }
+        
         /// <summary>
         /// Returns the number of elements in this assembly.
         /// </summary>
@@ -101,32 +130,8 @@ namespace Tripous.Parsing
                 return FTokenString.TokenAt(FIndex);
             else return null;
         }
-        /// <summary>
-        /// Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.
-        /// </summary>
-        /// <param name="delimiter">the mark to show between Consumed  elements</param>
-        /// <returns>Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.</returns>
-        public override string Remainder(string delimiter)
-        {
-            StringBuilder buf = new StringBuilder();
-            for (int i = ElementsConsumed(); i < FTokenString.Length(); i++)
-            {
-                if (i > ElementsConsumed())
-                    buf.Append(delimiter);
 
-                buf.Append(FTokenString.TokenAt(i));
-            }
-            return buf.ToString();
-        }
-        /// <summary>
-        /// Creates and returns a copy of this instance.
-        /// </summary>
-        public override object Clone()
-        {
-            TokenString TS = (TokenString)FTokenString.Clone();
-            Assembly A = new TokenAssembly(TS);
-            return CloneProperties(A);
-        }
+
 
     }
 }

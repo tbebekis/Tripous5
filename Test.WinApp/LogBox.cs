@@ -22,12 +22,12 @@ namespace Test.WinApp
         }
         public void Append(string Text)
         {
-            if (string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(Text))
             {
                 Box.AppendText(Text);
             }
         }
-        public void Log(string? Text = null)
+        public void Log(string Text = null)
         {
             if (string.IsNullOrWhiteSpace(Text))
             {

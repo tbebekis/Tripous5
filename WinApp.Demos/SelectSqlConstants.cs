@@ -4,13 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
-namespace Test.WinApp
+namespace WinApp.Demos
 {
- 
-
-    static public partial class SqlParserHelper
+    static public class SelectSqlConstants
     {
 		public const string SSelectClauses = @"
 SELECT column_name(s)

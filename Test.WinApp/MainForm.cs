@@ -12,7 +12,7 @@ namespace Test.WinApp
 {
     public partial class MainForm : Form
     {
-        void AnyClick(object? sender, EventArgs ea)
+        void AnyClick(object sender, EventArgs ea)
         {
             if (btnParseSql == sender)
             {

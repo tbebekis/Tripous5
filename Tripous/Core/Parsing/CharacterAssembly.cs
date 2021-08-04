@@ -38,6 +38,14 @@ namespace Tripous.Parsing
 
         /* public */
         /// <summary>
+        /// Returns a copy of this instance
+        /// </summary>
+        public override object Clone()
+        {
+            return CloneProperties(new CharacterAssembly(FBuffer));
+        }
+
+        /// <summary>
         /// Returns a textual representation of the amount of this  characterAssembly that has been Consumed.
         /// </summary>
         /// <param name="delimiter">the mark to show between Consumed  elements</param>
@@ -57,6 +65,28 @@ namespace Tripous.Parsing
             }
             return buf.ToString();
         }
+        /// <summary>
+        /// Returns a textual representation of the amount of this  characterAssembly that remains to be Consumed.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between Consumed  elements</param>
+        /// <returns>Returns a textual representation of the amount of this  characterAssembly that remains to be Consumed.</returns>
+        public override string Remainder(string delimiter)
+        {
+            if (delimiter.Equals(""))
+                return FBuffer.Substring(ElementsConsumed());
+
+            StringBuilder buf = new StringBuilder();
+            for (int i = ElementsConsumed(); i < FBuffer.Length; i++)
+            {
+
+                if (i > ElementsConsumed())
+                    buf.Append(delimiter);
+
+                buf.Append(FBuffer[i]);
+            }
+            return buf.ToString();
+        }
+
         /// <summary>
         /// Returns the default string to show between elements  Consumed or remaining.
         /// </summary>
@@ -87,34 +117,8 @@ namespace Tripous.Parsing
                 return FBuffer[FIndex];   //new Character(string.charAt(FIndex));
             else return null;
         }
-        /// <summary>
-        /// Returns a textual representation of the amount of this  characterAssembly that remains to be Consumed.
-        /// </summary>
-        /// <param name="delimiter">the mark to show between Consumed  elements</param>
-        /// <returns>Returns a textual representation of the amount of this  characterAssembly that remains to be Consumed.</returns>
-        public override string Remainder(string delimiter)
-        {
-            if (delimiter.Equals(""))
-                return FBuffer.Substring(ElementsConsumed());
 
-            StringBuilder buf = new StringBuilder();
-            for (int i = ElementsConsumed(); i < FBuffer.Length; i++)
-            {
 
-                if (i > ElementsConsumed())
-                    buf.Append(delimiter);
-
-                buf.Append(FBuffer[i]);
-            }
-            return buf.ToString();
-        }
-        /// <summary>
-        /// Returns a copy of this instance
-        /// </summary>
-        public override object Clone()
-        {
-            return CloneProperties(new CharacterAssembly(FBuffer));
-        }
 
 
     }

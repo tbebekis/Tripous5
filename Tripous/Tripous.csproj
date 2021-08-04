@@ -23,6 +23,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Include="..\.editorconfig" Link=".editorconfig" />
         <None Include="..\_Files\Licence.txt">
             <Pack>True</Pack>
             <PackagePath></PackagePath>

@@ -15,17 +15,15 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
- 
+
 
     /// <summary>
-    /// <para>
-    /// An assembly maintains a stream of language elements along 
-    /// with FStack and FTarget objects.
-    /// </para>
-    /// <para>
-    /// Parsers use assemblers to record progress at 
-    /// recognizing language elements from assembly's string. 
-    /// </para>
+    /// An assembly maintains a stream of language elements along with Stack and Target objects.
+    /// <para>Parsers use assemblers to record progress at recognizing language elements from assembly's string.</para>
+    /// <para>The two types of assemblies are assemblies of tokens and assemblies of characters</para>
+    /// <para>To allow parsing text as strings of tokens, Assembly has two subclasses: <see cref="CharacterAssembly"/> and <see cref="TokenAssembly"/> </para>
+    /// <para>Essentially, a <see cref="CharacterAssembly"/> object manipulates an array of characters, 
+    /// and a <see cref="TokenAssembly"/> object manipulates an array of <see cref="Tripous.Tokenizing.Token"/> tokens.</para>
     /// </summary>
     public abstract class Assembly : ICloneable
     {
@@ -79,9 +77,19 @@ namespace Tripous.Parsing
 
         /* public */
         /// <summary>
+        /// Returns a textual description of this assembly.
+        /// </summary>
+        public override string ToString()
+        {
+            string delimiter = DefaultDelimiter();
+            return FStack +
+               Consumed(delimiter) + "^" + Remainder(delimiter);
+        }
+        /// <summary>
         /// Creates and returns a copy of this instance
         /// </summary>
         public abstract object Clone();
+
         /// <summary>
         /// Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.
         /// </summary>
@@ -89,10 +97,35 @@ namespace Tripous.Parsing
         /// <returns>Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.</returns>
         public abstract string Consumed(string delimiter);
         /// <summary>
-        /// Returns the default string to show between elements.
+        /// Returns the elements of the assembly that remain to be Consumed, separated by the specified delimiter.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="delimiter">the mark to show between unconsumed  elements</param>
+        /// <returns>Returns the elements of the assembly that remain to be  Consumed, separated by the specified delimiter.</returns>
+        public abstract string Remainder(string delimiter);
+
+        /// <summary>
+        /// Returns the default string to show between elements.
+        /// <para>The DefaultDelimiter() method allows the Assembly subclasses to decide how to separate their elements.</para>
+        /// </summary>
         public abstract string DefaultDelimiter();
+
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
+        public abstract int Length();
+
+        /// <summary>
+        /// Returns true if this assembly has unconsumed elements.
+        /// </summary>
+        public bool HasMoreElements()
+        {
+            return ElementsConsumed() < Length();
+        }
+        /// <summary>
+        /// Returns the next token from the associated token string.
+        /// </summary>
+        public abstract string NextElement();
+
         /// <summary>
         /// Returns the number of elements that have been Consumed.
         /// </summary>
@@ -108,13 +141,9 @@ namespace Tripous.Parsing
         {
             return Length() - ElementsConsumed();
         }
-        /// <summary>
-        /// Removes this assembly's Stack.
-        /// </summary>
-        public Stack GetStack()
-        {
-            return FStack;
-        }
+
+
+
         /// <summary>
         /// Returns the object identified as this assembly's "FTarget". 
         /// Clients can set and retrieve a FTarget, which can be a 
@@ -130,16 +159,30 @@ namespace Tripous.Parsing
             return FTarget;
         }
         /// <summary>
-        /// Returns true if this assembly has unconsumed elements.
+        /// Sets the FTarget for this assembly. Targets must implement 
+        /// <code>Clone()</code> as a public method.
         /// </summary>
-        public bool HasMoreElements()
+        /// <param name="FTarget">a publicly cloneable object</param>
+        public void SetTarget(ICloneable FTarget)
         {
-            return ElementsConsumed() < Length();
+            this.FTarget = FTarget;
+        }
+
+        /// <summary>
+        /// Removes this assembly's Stack.
+        /// </summary>
+        public Stack GetStack()
+        {
+            return FStack;
         }
         /// <summary>
-        /// Returns the number of elements in this assembly.
+        /// Returns true if this assembly's FStack is empty.
         /// </summary>
-        public abstract int Length();
+        public bool StackIsEmpty()
+        {
+            return FStack.Count == 0;
+        }
+
         /// <summary>
         /// Returns the next object in the assembly, without removing it
         /// </summary>
@@ -158,37 +201,7 @@ namespace Tripous.Parsing
         {
             FStack.Push(o);
         }
-        /// <summary>
-        /// Returns the elements of the assembly that remain to be  Consumed, separated by the specified delimiter.
-        /// </summary>
-        /// <param name="delimiter">the mark to show between unconsumed  elements</param>
-        /// <returns>Returns the elements of the assembly that remain to be  Consumed, separated by the specified delimiter.</returns>
-        public abstract string Remainder(string delimiter);
-        /// <summary>
-        /// Sets the FTarget for this assembly. Targets must implement 
-        /// <code>Clone()</code> as a public method.
-        /// </summary>
-        /// <param name="FTarget">a publicly cloneable object</param>
-        public void SetTarget(ICloneable FTarget)
-        {
-            this.FTarget = FTarget;
-        }
-        /// <summary>
-        /// Returns true if this assembly's FStack is empty.
-        /// </summary>
-        public bool StackIsEmpty()
-        {
-            return FStack.Count == 0;
-        }
-        /// <summary>
-        /// Returns a textual description of this assembly.
-        /// </summary>
-        public override string ToString()
-        {
-            string delimiter = DefaultDelimiter();
-            return FStack +
-               Consumed(delimiter) + "^" + Remainder(delimiter);
-        }
+ 
         /// <summary>
         /// Put back n objects
         /// </summary>
@@ -200,9 +213,6 @@ namespace Tripous.Parsing
                 FIndex = 0;
             }
         }
-        /// <summary>
-        /// Returns the next token from the associated token string.
-        /// </summary>
-        public abstract string NextElement();
+
     }
 }

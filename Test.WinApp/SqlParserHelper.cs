@@ -29,7 +29,7 @@ namespace Test.WinApp
             Tokenizer Tokenizer = new Tokenizer();
             Tokenizer.SetString(SqlText);
 
-            Token? T = null;
+            Token T = null;
             string S;
 
             while (true)

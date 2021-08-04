@@ -13,30 +13,28 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
-    /**
- * A token represents a logical chunk of a string. For 
- * example, a typical tokenizer would break the string 
- * <code>"1.23 &lt;= 12.3"</code> into three tokens: the number 
- * 1.23, a less-than-or-equal symbol, and the number 12.3. A 
- * token is a receptacle, and relies on a tokenizer to decide 
- * precisely how to divide a string into tokens. 
- * 
- *
- *
- *
- */
+
+
+    /// <summary>
+    /// A token represents a logical chunk of a string. 
+    /// <para> For example, a typical tokenizer would break the string  <code>"1.23 &lt;= 12.3"</code> 
+    /// into three tokens: the number 1.23, a less-than-or-equal symbol, and the number 12.3. 
+    /// </para>
+    /// <para>A token is a receptacle, and relies on a tokenizer to decide 
+    /// precisely how to divide a string into tokens. </para>
+    /// </summary>
     public class Token : ICloneable
     {
         /// <summary>
-        /// 
+        /// The kind of a token
         /// </summary>
         protected TokenKind FKind;
         /// <summary>
-        /// 
+        /// Holds the value, when the value is a string
         /// </summary>
         protected string FStringValue;
         /// <summary>
-        /// 
+        /// Holds the value, when the value is a number
         /// </summary>
         protected double FNumericValue;
 
@@ -66,11 +64,11 @@ namespace Tripous.Tokenizing
         /// </summary>
         static public TokenKind TT_QUOTED = new TokenKind("quoted");
         /// <summary>
-        /// 
+        /// Indicates a whitespace token
         /// </summary>
         static public TokenKind TT_WHITESPACE = new TokenKind("whitespace");
         /// <summary>
-        /// 
+        /// Indicates a new line token
         /// </summary>
         static public TokenKind TT_NEWLINE = new TokenKind("newline");
 
