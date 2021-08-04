@@ -67,7 +67,7 @@ namespace WinApp.Demos
         }
     }
 
-
+      
 
     public class DemoTokenizer1 : IDemo
     {
