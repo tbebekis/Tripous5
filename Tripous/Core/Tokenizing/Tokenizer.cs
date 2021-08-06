@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.IO;
 
 namespace Tripous.Tokenizing
 {
@@ -78,8 +79,14 @@ namespace Tripous.Tokenizing
         /// The state lookup table
         /// </summary>
         protected TokenizerState[] characterState = new TokenizerState[256];
- 
- 
+
+        StreamReader Reader2;
+        StringReader Reader3;
+        BufferedStream Reader4;
+        StringReader Reader5;
+        
+
+
         /* construction */
         /// <summary>
         /// Constructs a tokenizer with a default state table (as described in the class comment). 
@@ -159,8 +166,8 @@ namespace Tripous.Tokenizing
 
             if (c >= 0 && c < characterState.Length)
             {
-                TokenizerState State = characterState[c];
-                return State.NextToken(Reader, c, this);
+                //TokenizerState State = characterState[c];
+                return characterState[c].NextToken(Reader, c, this);
             }
             return Token.EOF;
         }

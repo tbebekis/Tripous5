@@ -114,6 +114,35 @@ namespace WinApp.Demos
             return SB.ToString();
         }
 
+        void Use_Tokenizer(string Text)
+        {
+            AppendLine(">> Tokenizer.NextToken()");
+
+            TokenString TS = new TokenString(Text);
+            AppendLine($"TokenString Length: {TS.Length()}");
+            AppendLine($"{TS.ToString()}");
+
+            Tokenizer Tokenizer = new Tokenizer();
+            Tokenizer.SetString(Text);
+
+            Token T;
+
+            while (true)
+            {
+                T = Tokenizer.NextToken();
+                AppendLine(!string.IsNullOrWhiteSpace(T.Kind.Name)? T.Kind.Name: "<UNKNOWN TOKEN>");
+
+                if (T.Kind == Token.TT_EOF)
+                {     
+                    break;
+                }
+                 
+            }
+
+
+
+            AppendSplitLine();
+        }
         void Use_Assembly_NextElement(string Text)
         {
             // Text: Let's 'rock and roll'!
@@ -170,7 +199,9 @@ namespace WinApp.Demos
 
             string S;
             TokenString TS = new TokenString(Text);
- 
+            AppendLine($"TokenString Length: {TS.Length()}");
+            AppendLine($"{TS.ToString()}");
+
 
             TokenAssembly A = new TokenAssembly(Text);
             AppendLine(A.ToString());   // must be []^steaming/hot/coffee
@@ -221,13 +252,16 @@ namespace WinApp.Demos
             else
                 AppendLine("[no match]");
         }
+        
+        
         public void Execute(string Text)
         {
             fControl.Clear();
-            Use_Assembly_NextElement(Text);
+            Use_Tokenizer(Text);
+            //Use_Assembly_NextElement(Text);
             //Use_TerminalParserWithTokenAssemply(Text);
             //Use_QuotedStringParserWithTokenAssemply(Text);
-            Use_RepetitionParserWithWordTerminalParser(Text);
+            //Use_RepetitionParserWithWordTerminalParser(Text);
             //Use_CompositeParsers(Text);
         }
 

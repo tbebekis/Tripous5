@@ -44,10 +44,6 @@ namespace Tripous.Tokenizing
         /// </summary>
         static public TokenKind TT_EOF = new TokenKind("eof");
         /// <summary>
-        /// A constant indicating that there are no more tokens
-        /// </summary>
-        static public Token EOF = new Token(TT_EOF, "", 0);
-        /// <summary>
         /// A constant indicating that a token is a number, like 3.14
         /// </summary>
         static public TokenKind TT_NUMBER = new TokenKind("number");
@@ -71,6 +67,11 @@ namespace Tripous.Tokenizing
         /// Indicates a new line token
         /// </summary>
         static public TokenKind TT_NEWLINE = new TokenKind("newline");
+
+        /// <summary>
+        /// A constant indicating that there are no more tokens
+        /// </summary>
+        static public Token EOF = new Token(TT_EOF, "", 0);
 
         /* construction */
         /// <summary>

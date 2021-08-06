@@ -114,7 +114,8 @@ namespace Tripous.Tokenizing
 
             if (c >= 0)
             {
-                r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread(c);
+                int N = -(sizeof(char));
+                r.Seek(N, System.IO.SeekOrigin.Current);//r.unread(c);
             }
 
             char[] Chars = new char[Encoding.Default.GetCharCount(Bytes, 0, i)];
