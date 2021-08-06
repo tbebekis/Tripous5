@@ -56,30 +56,22 @@ namespace Tripous.Parsing
 
         /* public */
         /// <summary>
-        /// Creates and returns a copy of this instance.
-        /// </summary>
-        public override object Clone()
-        {
-            TokenString TS = (TokenString)FTokenString.Clone();
-            Assembly A = new TokenAssembly(TS);
-            return CloneProperties(A);
-        }
-
-        /// <summary>
         ///  Returns a textual representation of the amount of this  tokenAssembly that has been Consumed.
         /// </summary>
         /// <param name="delimiter">the mark to show between Consumed  elements</param>
         /// <returns> Returns a textual representation of the amount of this  tokenAssembly that has been Consumed.</returns>
         public override string Consumed(string delimiter)
         {
-            StringBuilder buf = new StringBuilder();
+            StringBuilder SB = new StringBuilder();
+            string sToken;
             for (int i = 0; i < ElementsConsumed(); i++)
             {
                 if (i > 0)
-                    buf.Append(delimiter);
-                buf.Append(FTokenString.TokenAt(i));
+                    SB.Append(delimiter);
+                sToken = FTokenString.TokenAt(i).ToString();
+                SB.Append(sToken);
             }
-            return buf.ToString();
+            return SB.ToString();
         }
         /// <summary>
         /// Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.
@@ -88,15 +80,15 @@ namespace Tripous.Parsing
         /// <returns>Returns a textual representation of the amount of this  tokenAssembly that remains to be Consumed.</returns>
         public override string Remainder(string delimiter)
         {
-            StringBuilder buf = new StringBuilder();
+            StringBuilder SB = new StringBuilder();
             for (int i = ElementsConsumed(); i < FTokenString.Length(); i++)
             {
                 if (i > ElementsConsumed())
-                    buf.Append(delimiter);
+                    SB.Append(delimiter);
 
-                buf.Append(FTokenString.TokenAt(i));
+                SB.Append(FTokenString.TokenAt(i));
             }
-            return buf.ToString();
+            return SB.ToString();
         }
 
         /// <summary>

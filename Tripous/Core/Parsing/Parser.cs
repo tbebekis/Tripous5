@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Linq;
 
  
 
@@ -20,6 +21,7 @@ namespace Tripous.Parsing
     /// <summary>
     /// <para>
     /// A parser is an object that recognizes the elements of a language.
+    /// A parser recognizes a string (wrapped in an Assembly object) and assemble a result.
     /// </para>
     /// <para>
     /// Each parser object is either a <see cref="TerminalParser"/> or a composition of other parsers.
@@ -90,6 +92,8 @@ namespace Tripous.Parsing
         }
 
         /* public */
+
+
         /// <summary>
         /// Returns textual description of this  parser, taking care to avoid infinite recursion
         /// </summary>
@@ -108,7 +112,7 @@ namespace Tripous.Parsing
         /// </summary>
         /// <param name="visited">a list of objects already printed </param>
         /// <returns>returns a textual version of this parser, avoiding recursion</returns>
-        public string ToString(ArrayList visited)
+        public virtual string ToString(ArrayList visited)
         {
             if (Name != null)
                 return Name;
@@ -124,7 +128,7 @@ namespace Tripous.Parsing
         /// Returns a textual description of this string.
         /// </summary>
         public abstract string UnvisitedString(ArrayList visited);
-
+       
         /// <summary>
         /// Adds the elements of one vector to another.
         /// </summary>
@@ -132,7 +136,8 @@ namespace Tripous.Parsing
         /// <param name="v2">the vector with elements to Add</param>
         static public void Add(ArrayList v1, ArrayList v2)
         {
-            v1.AddRange(v2);
+            foreach (var Element in v2)
+                v1.Add(Element); 
         }
         /// <summary>
         /// Creates and returns a copy of a vector, cloning each element of the vector.
@@ -142,14 +147,13 @@ namespace Tripous.Parsing
         static public ArrayList ElementClone(ArrayList v)
         {
             ArrayList copy = new ArrayList();
-            for (int i = 0; i < v.Count; i++)
+            foreach (Assembly A in v)
             {
-                Assembly A = (Assembly)v[i];
                 copy.Add(A.Clone());
             }
             return copy;
         }
-
+        
         /// <summary>
         /// Accepts a "visitor" which will perform some operation on
         /// a parser structure. The book, "Design Patterns", explains
@@ -174,10 +178,9 @@ namespace Tripous.Parsing
         public Assembly Best(ArrayList v)
         {
             Assembly best = null;
-            for (int i = 0; i < v.Count; i++)
-            {
-                Assembly A = (Assembly)v[i];
 
+            foreach (Assembly A in v)
+            {
                 if (!A.HasMoreElements())
                     return A;
 
@@ -185,8 +188,7 @@ namespace Tripous.Parsing
                     best = A;
                 else if (A.ElementsConsumed() > best.ElementsConsumed())
                     best = A;
-
-            }
+            } 
 
             return best;
         }
@@ -216,6 +218,8 @@ namespace Tripous.Parsing
             }
             return null;
         }
+ 
+
         /// <summary>
         /// <para>
         /// Given a set (well, a <code>ArrayList</code>, really) of 
@@ -247,20 +251,13 @@ namespace Tripous.Parsing
             ArrayList Out = Match(In);
             if (FAssembler != null)
             {
-
-                for (int i = 0; i < Out.Count; i++)
-                    FAssembler.WorkOn((Assembly)Out[i]);
-
-                /*
-                 Enumeration e = Out.elements();
-                 while (e.HasMoreElements()) 
-                 {
-                     FAssembler.WorkOn((Assembly) e.nextElement());
-                 }
-                 */
+                foreach (Assembly Element in Out)
+                    FAssembler.WorkOn(Element);
             }
             return Out;
         }
+
+
         /// <summary>
         /// Create a random expansion for this parser, where a
         /// concatenation of the returned collection will be a
@@ -276,17 +273,16 @@ namespace Tripous.Parsing
             ArrayList E = RandomExpansion(maxDepth, 0);
             bool first = true;
 
-            for (int i = 0; i < E.Count; i++)
+            foreach (var Element in E)
             {
                 if (!first)
                     buf.Append(separator);
 
-                buf.Append(E[i]);
+                buf.Append(Element);
                 first = false;
             }
 
             return buf.ToString();
-
         }
         /// <summary>
         /// Sets the object that will work on an assembly whenever 

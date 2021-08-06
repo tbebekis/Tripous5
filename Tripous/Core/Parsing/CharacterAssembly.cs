@@ -38,14 +38,6 @@ namespace Tripous.Parsing
 
         /* public */
         /// <summary>
-        /// Returns a copy of this instance
-        /// </summary>
-        public override object Clone()
-        {
-            return CloneProperties(new CharacterAssembly(FBuffer));
-        }
-
-        /// <summary>
         /// Returns a textual representation of the amount of this  characterAssembly that has been Consumed.
         /// </summary>
         /// <param name="delimiter">the mark to show between Consumed  elements</param>

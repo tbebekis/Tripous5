@@ -30,7 +30,7 @@ namespace Tripous.Parsing
         /// </summary>
         /// <param name="a">the parser to visit</param>
         /// <param name="visited">a collection of previously visited parsers</param>
-        public abstract void VisitAlternation(AlternationParser a, ArrayList visited);
+        public abstract void VisitAlternation(AlternationCollectionParser a, ArrayList visited);
         /// <summary>
         /// Visit an empty parser.
         /// </summary>

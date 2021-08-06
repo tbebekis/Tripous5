@@ -55,31 +55,11 @@ namespace Tripous.Parsing
         /// <summary>
         /// A convenient way to construct a CollectionParser with the given parsers.
         /// </summary>
-        public CollectionParser(Parser p1, Parser p2)
+        public CollectionParser(Parser[] Parsers)
         {
-            FSubParsers.Add(p1);
-            FSubParsers.Add(p2);
+            FSubParsers.AddRange(Parsers);
         }
-        /// <summary>
-        /// A convenient way to construct a CollectionParser with the given parsers.
-        /// </summary>
-        public CollectionParser(Parser p1, Parser p2, Parser p3)
-        {
-            FSubParsers.Add(p1);
-            FSubParsers.Add(p2);
-            FSubParsers.Add(p3);
-        }
-        /// <summary>
-        /// A convenient way to construct a CollectionParser with the given parsers.
-        /// </summary>
-        public CollectionParser(Parser p1, Parser p2, Parser p3, Parser p4)
-        {
-            //
-            FSubParsers.Add(p1);
-            FSubParsers.Add(p2);
-            FSubParsers.Add(p3);
-            FSubParsers.Add(p4);
-        }
+
 
         /* public */
         /// <summary>

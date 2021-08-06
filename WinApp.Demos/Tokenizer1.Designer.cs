@@ -80,7 +80,7 @@ namespace WinApp.Demos
             this.edtEditor.Name = "edtEditor";
             this.edtEditor.Size = new System.Drawing.Size(711, 277);
             this.edtEditor.TabIndex = 0;
-            this.edtEditor.Text = "Let\'s \'rock and roll\'!";
+            this.edtEditor.Text = "steaming hot coffee";
             this.edtEditor.WordWrap = false;
             // 
             // edtLog

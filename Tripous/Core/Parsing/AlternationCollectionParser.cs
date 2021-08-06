@@ -14,14 +14,13 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
- 
+
 
     /// <summary>
-    /// An <code>Alternation</code> object is a collection of 
-    /// parsers, any one of which can successfully Match against
-    /// an assembly.
+    /// An <see cref="AlternationCollectionParser"/> object is a collection of  parsers, 
+    /// any one of which can successfully Match against an assembly.
     /// </summary>
-    public class AlternationParser : CollectionParser
+    public class AlternationCollectionParser : CollectionParser
     {
 
         /// <summary>
@@ -90,46 +89,31 @@ namespace Tripous.Parsing
         /// <summary>
         /// Constructs a nameless alternation.
         /// </summary>
-        public AlternationParser()
+        public AlternationCollectionParser()
         {
         }
         /// <summary>
         /// Constructs an alternation with the given name.
         /// </summary>
-        public AlternationParser(string name) 
+        public AlternationCollectionParser(string name) 
             : base(name)
         {
         }
         /// <summary>
         /// A convenient way to construct a CollectionParser with a parser.
         /// </summary>
-        public AlternationParser(Parser p) 
+        public AlternationCollectionParser(Parser p) 
             : base(p)
         {
         }
         /// <summary>
         /// A convenient way to construct a CollectionParser with the given parsers.
         /// </summary>
-        public AlternationParser(Parser p1, Parser p2) 
-            : base(p1, p2)
+        public AlternationCollectionParser(Parser[] Parsers)
+            : base(Parsers)
         {
         }
-        /// <summary>
-        /// A convenient way to construct a CollectionParser with the given parsers.
-        /// </summary>
-        public AlternationParser(Parser p1, Parser p2, Parser p3) 
-            : base(p1, p2, p3)
-        {
-        }
-        /// <summary>
-        /// A convenient way to construct a CollectionParser with the given parsers.
-        /// </summary>
-        public AlternationParser(Parser p1, Parser p2, Parser p3, Parser p4) 
-            : base(p1, p2, p3, p4)
-        {
-        }
-
-
+ 
         /* public */
         /// <summary>
         /// Accept a "visitor" and a collection of previously visited parsers.

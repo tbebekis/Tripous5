@@ -17,9 +17,8 @@ namespace Tripous.Parsing
 {
 
     /// <summary>
-    /// A <code>Sequence</code> object is a collection of 
-    /// parsers, all of which must in turn Match against an 
-    /// assembly for this parser to successfully Match.
+    /// A <see cref="SequenceCollectionParser"/> object is a collection of  parsers, 
+    /// all of which must in turn Match against an assembly for this parser to successfully Match.
     /// </summary>
     public class SequenceCollectionParser : CollectionParser
     {
@@ -61,25 +60,10 @@ namespace Tripous.Parsing
         /// <summary>
         /// A convenient way to construct a CollectionParser with the given parsers.
         /// </summary>
-        public SequenceCollectionParser(Parser p1, Parser p2) 
-            : base(p1, p2)
+        public SequenceCollectionParser(Parser[] Parsers)
+            : base(Parsers)
         {
         }
-        /// <summary>
-        /// A convenient way to construct a CollectionParser with the given parsers.
-        /// </summary>
-        public SequenceCollectionParser(Parser p1, Parser p2, Parser p3) 
-            : base(p1, p2, p3)
-        {
-        }
-        /// <summary>
-        /// A convenient way to construct a CollectionParser with the given parsers.
-        /// </summary>
-        public SequenceCollectionParser(Parser p1, Parser p2, Parser p3, Parser p4) 
-            : base(p1, p2, p3, p4)
-        {
-        }
-
  
         /* public */
         /// <summary>
@@ -101,9 +85,9 @@ namespace Tripous.Parsing
         public override ArrayList Match(ArrayList In)
         {
             ArrayList Out = In;
-            for (int i = 0; i < FSubParsers.Count; i++)
+
+            foreach (Parser P in FSubParsers)
             {
-                Parser P = (Parser)FSubParsers[i];
                 Out = P.MatchAndAssemble(Out);
                 if (Out.Count == 0)
                     return Out;
@@ -111,6 +95,22 @@ namespace Tripous.Parsing
 
             return Out;
         }
+
+        /*
+        public Vector match(Vector in) {
+            Vector out = in;
+            Enumeration e = subparsers.elements();
+            while (e.hasMoreElements()) {
+                Parser p = (Parser) e.nextElement();
+                out = p.matchAndAssemble(out);
+                if (out.isEmpty()) {
+                    return out;
+                }
+            }
+            return out;
+        } 
+         */
+
         /// <summary>
         /// Create a random expansion for each parser in this  sequence and return a collection of all these expansions.
         /// </summary>

@@ -9,12 +9,12 @@ namespace WinApp.Demos
     static public class SelectSqlConstants
     {
 		public const string SSelectClauses = @"
-SELECT column_name(s)
+SELECT column_name
 FROM table_name
 WHERE condition
-GROUP BY column_name(s)
+GROUP BY column_name 
 HAVING condition
-ORDER BY column_name(s);
+ORDER BY column_name;
 ";
 
 

@@ -58,7 +58,6 @@ namespace Tripous.Tokenizing
                     Token tok = t.NextToken();
                     if (tok.Kind == Token.TT_EOF)
                         break;
-
                     v.Add(tok);
                 };
             }
@@ -93,10 +92,9 @@ namespace Tripous.Tokenizing
             StringBuilder buf = new StringBuilder();
             for (int i = 0; i < FTokens.Length; i++)
             {
-                if (i > 0)
-                {
-                    buf.Append(" ");
-                }
+                //if (i > 0)
+                //    buf.Append(" ");
+
                 buf.Append(FTokens[i]);
             }
             return buf.ToString();

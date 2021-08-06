@@ -20,9 +20,7 @@ namespace Tripous.Parsing
     /// A Word matches a word from a token assembly.
     /// </summary>
     public class WordTerminalParser : TerminalParser
-    {
-
- 
+    { 
         /// <summary>
         /// Returns true if an assembly's next element is a word.
         /// </summary>
@@ -45,7 +43,6 @@ namespace Tripous.Parsing
             char[] letters = new char[n];
             for (int i = 0; i < n; i++)
             {
-
                 int c = Random.Next(26) + 'a';
                 letters[i] = (char)c;
             }

@@ -16,13 +16,29 @@ using System.Collections;
 namespace Tripous.Parsing
 {
 
+
+
     /// <summary>
-    /// A <code>Terminal</code> is a parser that is not a 
-    /// composition of other parsers. Terminals are "terminal" 
-    /// because they do not pass matching work on to other 
-    /// parsers. The criterion that terminals use to check a 
-    /// Match is something other than another parser. Terminals 
-    /// are also the only parsers that advance an assembly. 
+    /// A Terminal parser is a parser that can match an assembly without the aid of other parsers. 
+    /// <para>
+    /// Terminal parsers get their name from the fact 
+    /// that they terminate the recursion inherent in the idea that parsers are compositions of parsers.
+    /// </para>
+    /// <para>
+    /// A Terminal parser is a parser that is not a composition of other parsers. 
+    /// Terminals are "terminal" because they do not pass matching work on to other parsers. 
+    /// </para>
+    /// <para>
+    /// The criterion that terminals use to check a Match is something other than another parser. 
+    /// </para>
+    /// <para>
+    /// Terminals are also the only parsers that advance an assembly. 
+    /// </para>
+    /// <para>
+    /// IMPORTANT: Each time a terminal parser asks an assembly for its nextElement(), 
+    /// the terminal parser must anticipate receiving either a character or a token.
+    /// The terminal parser decides whether the character or token it receives is a match.
+    /// </para>
     /// </summary>
     public class TerminalParser : Parser
     {

@@ -14,20 +14,23 @@ using System.Collections;
 namespace Tripous.Tokenizing
 {
 
-
     /// <summary>
     /// <para> A tokenizer divides a string into tokens.</para> 
     /// 
     /// <para> This class is  highly customizable with regard to exactly how this division occurs, 
     /// but it also has defaults that are suitable for many  languages. </para>
-    /// 
+    /// <para>NOTE: By default the following characters a treated as symbols
+    ///  <code>! # $ % &amp; ( ) * + , : ; &lt; = &gt; ? @ ` [ \ ] ^ _ { | } ~</code>
+    /// </para>
+    /// <para>In addition, the default value of Tokenizer treats the following multicharacter sequences as symbols:
+    /// <code>!= &lt;= &gt;= :- </code>
+    ///</para>
     /// <para> This class assumes that the character values ReadByte 
     /// from the string lie in the range 0-255. </para>
     /// 
     /// <para>For example, the Unicode value of a capital A is 65, so
     /// <code> System.out.println((char)65); </code> 
     /// prints out a capital A. </para>
-    /// 
     /// <para>
     /// The behavior of a tokenizer depends on its character state table. 
     /// This table is an array of 256 <see cref="TokenizerState"/> states. 
@@ -43,7 +46,6 @@ namespace Tripous.Tokenizing
     /// The default table sets a SymbolState for every character 
     /// from 0 to 255, and then overrides this with:
     /// </para>
-    /// <para>
     /// <code>
     ///      From    To     State
     ///        0     ' '    WhitespaceState
@@ -57,7 +59,6 @@ namespace Tripous.Tokenizing
     ///      '\''   '\''    QuoteState
     ///       '/'    '/'    SlashState
     /// </code>
-    /// </para>
     /// <para>
     /// In addition to allowing modification of the state table, 
     /// this class makes each of the states above available. Some 

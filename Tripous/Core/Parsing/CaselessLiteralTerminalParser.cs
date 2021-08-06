@@ -19,14 +19,14 @@ namespace Tripous.Parsing
     /// <summary>
     /// A CaselessLiteral matches a specified string from an assembly, disregarding case.
     /// </summary>
-    public class CaselessLiteral : LiteralTerminalParser
+    public class CaselessLiteralTerminalParser : LiteralTerminalParser
     {
         /* construction */
         /// <summary>
         /// Constructs a literal that will Match the specified string, given mellowness about case.
         /// </summary>
         /// <param name="literal">the string to Match as a token</param>
-        public CaselessLiteral(string literal) 
+        public CaselessLiteralTerminalParser(string literal) 
             : base(literal)
         {
         }

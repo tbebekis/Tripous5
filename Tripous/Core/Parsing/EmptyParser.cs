@@ -15,30 +15,20 @@ using System.Collections;
 
 namespace Tripous.Parsing
 {
- 
+
     /// <summary>
+    /// An empty parser reports a successful match without consuming any elements from the assembly.
     /// <para>
-    /// An  parser that matches any assembly once, 
-    /// and applies its assembler that one time.
+    /// An empty parser is a parser that matches any assembly once, and applies its assembler that one time.
     /// </para>
     /// <para>
-    /// Language elements often contain empty parts. For example, 
-    /// a language may at some point allow a list of parameters
-    /// in parentheses, and may allow an empty list. An empty
-    /// parser makes it easy to Match, within the 
-    /// parenthesis, either a list of parameters or "empty".
+    /// Language elements often contain empty parts. 
+    /// For example, a language may at some point allow a list of parameters in parentheses, and may allow an empty list. 
+    /// An empty parser makes it easy to Match, within the parenthesis, either a list of parameters or "empty".
     /// </para>
     /// </summary>
     public class EmptyParser : Parser
     {
-        /*
-         * 
-         *
-         * @param   ParserVisitor   the visitor to Accept
-         *
-         * @param   ArrayList   a collection of previously visited parsers
-         */
-
         /// <summary>
         /// Accept a "visitor" and a collection of previously visited parsers.
         /// </summary>

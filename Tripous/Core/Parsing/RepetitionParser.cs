@@ -16,7 +16,7 @@ using System.Collections;
 namespace Tripous.Parsing
 {
     /// <summary>
-    /// A <code>Repetition</code> matches its underlying parser  repeatedly against a assembly.
+    /// A <see cref="RepetitionParser"/> matches its underlying parser repeatedly against a assembly.
     /// </summary>
     public class RepetitionParser : Parser
     {
@@ -33,14 +33,13 @@ namespace Tripous.Parsing
         /// </summary>
         protected Assembler FPreAssembler;
 
-
         /* construction */
         /// <summary>
         /// Constructs a repetiton that will Match the given  parser repeatedly in successive matches
         /// </summary>
-        /// <param name="p">the parser to repeat</param>
-        public RepetitionParser(Parser p) 
-            : this(p, null)
+        /// <param name="SubParser">the parser to repeat</param>
+        public RepetitionParser(Parser SubParser) 
+            : this(SubParser, null)
         {
         } 
         /// <summary>
@@ -52,6 +51,7 @@ namespace Tripous.Parsing
         {
             this.FSubParser = SubParser;
         }
+       
         /// <summary>
         /// Accept a "visitor" and a collection of previously visited parsers.
         /// </summary>
@@ -88,11 +88,14 @@ namespace Tripous.Parsing
         {
             if (FPreAssembler != null)
             {
-                for (int i = 0; i < In.Count; i++)
-                    FPreAssembler.WorkOn((Assembly)In[i]);
+                foreach (Assembly Element in In)
+                {
+                    FPreAssembler.WorkOn(Element);
+                }
             }
+
             ArrayList Out = ElementClone(In);
-            ArrayList s = In; // a working state
+            ArrayList s = In;               // a working state
             while (s.Count > 0)            // !s.IsEmpty()
             {
                 s = FSubParser.MatchAndAssemble(s);
@@ -100,6 +103,23 @@ namespace Tripous.Parsing
             }
             return Out;
         }
+        /*
+        public Vector match(Vector in) {
+            if (preAssembler != null) {
+                Enumeration e = in.elements();
+                while (e.hasMoreElements()) {
+                    preAssembler.workOn((Assembly) e.nextElement());
+                }
+            }
+            Vector out = elementClone(in);
+            Vector s = in; // a working state
+            while (!s.isEmpty()) {
+                s = subparser.matchAndAssemble(s);
+                add(out, s);
+            }
+            return out;
+        } 
+         */
         /// <summary>
         /// Create a collection of random elements that correspond to this repetition.
         /// </summary>

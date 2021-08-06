@@ -20,8 +20,8 @@ namespace Tripous.Parsing
     /// <summary>
     /// An assembly maintains a stream of language elements along with Stack and Target objects.
     /// <para>Parsers use assemblers to record progress at recognizing language elements from assembly's string.</para>
-    /// <para>The two types of assemblies are assemblies of tokens and assemblies of characters</para>
-    /// <para>To allow parsing text as strings of tokens, Assembly has two subclasses: <see cref="CharacterAssembly"/> and <see cref="TokenAssembly"/> </para>
+    /// <para>There are two types of assemblies: assemblies of tokens and assemblies of characters.</para>
+    /// <para>To allow parsing text as strings of tokens, <see cref="Assembly"/> has two subclasses: <see cref="CharacterAssembly"/> and <see cref="TokenAssembly"/> </para>
     /// <para>Essentially, a <see cref="CharacterAssembly"/> object manipulates an array of characters, 
     /// and a <see cref="TokenAssembly"/> object manipulates an array of <see cref="Tripous.Tokenizing.Token"/> tokens.</para>
     /// </summary>
@@ -31,7 +31,7 @@ namespace Tripous.Parsing
         /// <summary>
         /// a place to keep track of consumption progress
         /// </summary>
-        protected Stack FStack = new Stack();
+        protected Stack fStack = new Stack();
         /// <summary>
         /// Another place to record progress; this is just an object. 
         /// If a parser were recognizing an HTML page, for 
@@ -47,33 +47,25 @@ namespace Tripous.Parsing
         /// </summary>
         protected int FIndex = 0;
 
-
         /// <summary>
-        /// 
+        /// Returns the content of the stack as a string.
         /// </summary>
-        protected virtual Assembly CloneProperties(Assembly A)
+        protected string StackToString()
         {
-            try
+            StringBuilder SB = new StringBuilder();
+            SB.Append("[");
+            object[] Items =  fStack.ToArray();
+            for (int i = 0; i < Items.Length; i++)
             {
-                //deep clone the FStack
-                object[] StackElements = FStack.ToArray();
-                Array.Reverse(StackElements);
-
-                for (int i = 0; i < StackElements.Length; i++)
-                    if (StackElements[i] is ICloneable)
-                        A.FStack.Push(((ICloneable)StackElements[i]).Clone());
-                    else A.FStack.Push(StackElements[i]);
-
-                if (FTarget != null)
-                    A.FTarget = (ICloneable)FTarget.Clone();
-
-                return A;
+                SB.Append($"{Items[i]}");
+                if (i < Items.Length - 1)
+                    SB.Append(",");
             }
-            catch
-            {
-                throw new Exception("CloneProperties() failed");
-            }
+ 
+            SB.Append("]");
+            return SB.ToString();
         }
+ 
 
         /* public */
         /// <summary>
@@ -82,14 +74,13 @@ namespace Tripous.Parsing
         public override string ToString()
         {
             string delimiter = DefaultDelimiter();
-            return FStack +
-               Consumed(delimiter) + "^" + Remainder(delimiter);
+            string Result = StackToString() +           //fStack +
+                            Consumed(delimiter) + 
+                            "^" + 
+                            Remainder(delimiter)
+                            ;
+            return Result;            
         }
-        /// <summary>
-        /// Creates and returns a copy of this instance
-        /// </summary>
-        public abstract object Clone();
-
         /// <summary>
         /// Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.
         /// </summary>
@@ -104,16 +95,31 @@ namespace Tripous.Parsing
         public abstract string Remainder(string delimiter);
 
         /// <summary>
-        /// Returns the default string to show between elements.
-        /// <para>The DefaultDelimiter() method allows the Assembly subclasses to decide how to separate their elements.</para>
-        /// </summary>
-        public abstract string DefaultDelimiter();
-
-        /// <summary>
         /// Returns the number of elements in this assembly.
         /// </summary>
         public abstract int Length();
 
+        /// <summary>
+        /// Creates and returns a copy of this instance
+        /// </summary>
+        public virtual object Clone()
+        {
+            Assembly Result = base.MemberwiseClone() as Assembly;
+
+            Result.fStack = Result.fStack.Clone() as Stack;
+
+            if (FTarget != null)
+                Result.FTarget = FTarget.Clone() as ICloneable;
+
+            return Result;
+        }
+ 
+        /// <summary>
+        /// Returns the default string to show between elements.
+        /// <para>The DefaultDelimiter() method allows the Assembly subclasses to decide how to separate their elements.</para>
+        /// </summary>
+        public abstract string DefaultDelimiter();
+ 
         /// <summary>
         /// Returns true if this assembly has unconsumed elements.
         /// </summary>
@@ -141,9 +147,7 @@ namespace Tripous.Parsing
         {
             return Length() - ElementsConsumed();
         }
-
-
-
+ 
         /// <summary>
         /// Returns the object identified as this assembly's "FTarget". 
         /// Clients can set and retrieve a FTarget, which can be a 
@@ -173,14 +177,14 @@ namespace Tripous.Parsing
         /// </summary>
         public Stack GetStack()
         {
-            return FStack;
+            return fStack;
         }
         /// <summary>
         /// Returns true if this assembly's FStack is empty.
         /// </summary>
         public bool StackIsEmpty()
         {
-            return FStack.Count == 0;
+            return fStack.Count == 0;
         }
 
         /// <summary>
@@ -192,14 +196,14 @@ namespace Tripous.Parsing
         /// </summary>
         public object Pop()
         {
-            return FStack.Pop();
+            return fStack.Pop();
         }
         /// <summary>
         /// Pushes an object onto the top of this assembly's FStack. 
         /// </summary>
         public void Push(object o)
         {
-            FStack.Push(o);
+            fStack.Push(o);
         }
  
         /// <summary>
