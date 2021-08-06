@@ -25,16 +25,23 @@ namespace Tripous.Tokenizing
         /// Ignore everything up to an end-of-line and return the  tokenizer's next token.
         /// </summary>
         /// <returns>Returns the tokenizer's next token</returns>
-        public override Token NextToken(System.IO.Stream r, int theSlash, Tokenizer t)
+        public override Token NextToken(ICharReader r, int theSlash, Tokenizer t)
         {
+            /* was..............
+             
+                int c;
+                while ((c = r.read()) != '\n' && c != '\r' && c >= 0) {
+                }
+                return t.nextToken(); 
+             */
 
             int c;
-            //while ((c = r.ReadByte()) != '\n' && c != '\r' && c >= 0) 
-            while ((c = r.ReadByte()) >= 0)
+ 
+            while ((c = r.Read()) >= 0)
             {
                 if ("\n\r".IndexOf((char)c) != -1)
                 {
-                    r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread(c);
+                    r.Unread(c);
                     break;
                 }
             }

@@ -10,8 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
-
-
+using System.Linq;
 
 namespace Tripous.Parsing
 {
@@ -19,7 +18,7 @@ namespace Tripous.Parsing
 
     /// <summary>
     /// An assembly maintains a stream of language elements along with Stack and Target objects.
-    /// <para>Parsers use assemblers to record progress at recognizing language elements from assembly's string.</para>
+    /// <para>Parsers use <see cref="Assembler"/> assemblers to record progress at recognizing language elements from assembly's string.</para>
     /// <para>There are two types of assemblies: assemblies of tokens and assemblies of characters.</para>
     /// <para>To allow parsing text as strings of tokens, <see cref="Assembly"/> has two subclasses: <see cref="CharacterAssembly"/> and <see cref="TokenAssembly"/> </para>
     /// <para>Essentially, a <see cref="CharacterAssembly"/> object manipulates an array of characters, 
@@ -54,12 +53,12 @@ namespace Tripous.Parsing
         {
             StringBuilder SB = new StringBuilder();
             SB.Append("[");
-            object[] Items =  fStack.ToArray();
+            object[] Items =  fStack.ToArray().Reverse().ToArray();
             for (int i = 0; i < Items.Length; i++)
             {
                 SB.Append($"{Items[i]}");
                 if (i < Items.Length - 1)
-                    SB.Append(",");
+                    SB.Append(", ");
             }
  
             SB.Append("]");

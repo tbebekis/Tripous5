@@ -62,7 +62,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Convert a stream of digits into a number, making this  number a fraction if the bool parameter is true.
         /// </summary>
-        protected double AbsorbDigits(System.IO.Stream r, bool fraction)
+        protected double AbsorbDigits(ICharReader r, bool fraction)
         {
 
             int divideBy = 1;
@@ -71,7 +71,7 @@ namespace Tripous.Tokenizing
             {
                 gotAdigit = true;
                 v = v * 10 + (c - '0');
-                c = r.ReadByte();
+                c = r.Read();
                 if (fraction)
                 {
                     divideBy *= 10;
@@ -86,12 +86,11 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Parse up to a decimal point.
         /// </summary>
-        protected void ParseLeft(System.IO.Stream r)
+        protected void ParseLeft(ICharReader r)
         {
-
             if (c == '-')
             {
-                c = r.ReadByte();
+                c = r.Read();
                 absorbedLeadingMinus = true;
             }
             fValue = AbsorbDigits(r, false);
@@ -99,12 +98,11 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Parse from a decimal point to the end of the number.
         /// </summary>
-        protected void ParseRight(System.IO.Stream r)
+        protected void ParseRight(ICharReader r)
         {
-
             if (c == '.')
             {
-                c = r.ReadByte();
+                c = r.Read();
                 absorbedDot = true;
                 fValue += AbsorbDigits(r, true);
             }
@@ -123,14 +121,13 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Put together the pieces of a number.
         /// </summary>
-        protected Token Value(System.IO.Stream r, Tokenizer t)
+        protected Token Value(ICharReader r, Tokenizer t)
         {
-
             if (!gotAdigit)
             {
                 if (absorbedLeadingMinus && absorbedDot)
                 {
-                    r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread('.');
+                    r.Unread('.');
                     return t.SymbolState.NextToken(r, '-', t);
                 }
                 if (absorbedLeadingMinus)
@@ -149,8 +146,6 @@ namespace Tripous.Tokenizing
             //return new Token(Token.TT_NUMBER, "", Fvalue);
             return new Token(Token.TT_NUMBER, fValue.ToString(), fValue);
         }
-
-
         /// <summary>
         /// Return a number token from a reader.
         /// </summary>
@@ -158,12 +153,12 @@ namespace Tripous.Tokenizing
         /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
         /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
         /// <returns> a token that represents a logical piece of the  reader</returns>
-        public override Token NextToken(System.IO.Stream r, int c, Tokenizer t)
+        public override Token NextToken(ICharReader r, int c, Tokenizer t)
         {
             Reset(c);
             ParseLeft(r);
             ParseRight(r);
-            r.Seek(-1, System.IO.SeekOrigin.Current); // r.unread(c);
+            r.Unread(c);
             return Value(r, t);
         }
     }

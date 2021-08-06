@@ -25,7 +25,7 @@ namespace Tripous.Tokenizing
         ///  Ignore everything up to a closing star and slash, and  then return the tokenizer's next token.
         /// </summary>
         /// <returns>Returns the tokenizer's next token</returns>
-        public override Token NextToken(System.IO.Stream r, int theStar, Tokenizer t)
+        public override Token NextToken(ICharReader r, int theStar, Tokenizer t)
         {
 
             int c = 0;
@@ -37,7 +37,7 @@ namespace Tripous.Tokenizing
                     break;
                 }
                 lastc = c;
-                c = r.ReadByte();
+                c = r.Read();
             }
             return t.NextToken();
         }

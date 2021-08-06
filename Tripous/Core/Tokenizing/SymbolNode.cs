@@ -63,7 +63,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// 
         /// </summary>
-        protected char FValue;
+        protected char fChar;
         /// <summary>
         /// 
         /// </summary>
@@ -98,7 +98,7 @@ namespace Tripous.Tokenizing
             for (int i = 0; i < children.Count; i++)
             {
                 SymbolNode n = (SymbolNode)children[i];
-                if (n.FValue == c)
+                if (n.fChar == c)
                 {
                     return n;
                 }
@@ -140,7 +140,7 @@ namespace Tripous.Tokenizing
         public SymbolNode(SymbolNode parent, char Value)
         {
             this.FParent = parent;
-            this.FValue = Value;
+            this.fChar = Value;
         }
 
         /* public */
@@ -149,7 +149,7 @@ namespace Tripous.Tokenizing
         /// </summary>
         public override string ToString()
         {
-            return "" + FValue + '(' + valid + ')';
+            return "" + fChar + '(' + valid + ')';
         }
 
 
@@ -172,21 +172,21 @@ namespace Tripous.Tokenizing
         public virtual string Ancestry()
         {
             if (FParent == null)
-                return FValue.ToString();
+                return fChar.ToString();
 
-            return FParent.Ancestry() + FValue.ToString();
+            return FParent.Ancestry() + fChar.ToString();
         }
         /// <summary>
         ///  Find the descendant that takes as many characters as  possible from the input.
         /// </summary>
-        public SymbolNode DeepestRead(System.IO.Stream r)  // was protected
+        public SymbolNode DeepestRead(ICharReader r)  // was protected
         {
 
-            char c = (char)r.ReadByte();
+            char c = (char)r.Read();
             SymbolNode n = FindChildWithChar(c);
             if (n == null)
             {
-                r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread(c);
+                r.Unread(c);
                 return this;
             }
             return n.DeepestRead(r);
@@ -202,14 +202,13 @@ namespace Tripous.Tokenizing
         /// Unwind to a valid node; this node is "valid" if its Ancestry represents a complete symbol. 
         /// If this node is not valid, put back the character and ask the parent to unwind. 
         /// </summary>
-        public SymbolNode unreadToValid(System.IO.Stream r)  // was protected
+        public SymbolNode unreadToValid(ICharReader r)  // was protected
         {
-
             if (valid)
             {
                 return this;
             }
-            r.Seek(-1, System.IO.SeekOrigin.Current);//r.unread(myChar);
+            r.Unread(fChar);
             return FParent.unreadToValid(r);
         }
     }

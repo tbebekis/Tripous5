@@ -64,11 +64,11 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// 
         /// </summary>
-        protected byte[] Bytes = new byte[16];
+        protected char[] CharBuf = new char[16];
         /// <summary>
         /// 
         /// </summary>
-        protected bool[] FwordChar = new bool[256];
+        protected bool[] fWordChar = new bool[256];
 
 
         /// <summary>
@@ -91,38 +91,32 @@ namespace Tripous.Tokenizing
         /// </summary>
         protected void CheckBufLength(int i)
         {
-            if (i >= Bytes.Length)
+            if (i >= CharBuf.Length)
             {
-                byte[] nb = new byte[Bytes.Length * 2];
-                System.Array.Copy(Bytes, 0, nb, 0, Bytes.Length);
-                Bytes = nb;
+                char[] nb = new char[CharBuf.Length * 2];
+                System.Array.Copy(CharBuf, 0, nb, 0, CharBuf.Length);                
+                CharBuf = nb;
             }
         }
         /// <summary>
         /// Return a word token from a reader.
         /// </summary>
-        public override Token NextToken(System.IO.Stream r, int c, Tokenizer t)
+        public override Token NextToken(ICharReader r, int c, Tokenizer t)
         {
-
             int i = 0;
             do
             {
                 CheckBufLength(i);
-                Bytes[i++] = (byte)c;
-                c = r.ReadByte();
-            } while (wordChar(c));
+                CharBuf[i++] = Convert.ToChar(c);
+                c = r.Read();
+            } while (WordChar(c));
 
             if (c >= 0)
             {
-                int N = -(sizeof(char));
-                r.Seek(N, System.IO.SeekOrigin.Current);//r.unread(c);
+                r.Unread(c);
             }
-
-            char[] Chars = new char[Encoding.Default.GetCharCount(Bytes, 0, i)];
-            Encoding.Default.GetChars(Bytes, 0, i, Chars, 0);
-
-            string sval = new string(Chars);   //string sval = string.copyValueOf(charbuf, 0, i);
-
+ 
+            string sval = new string(CharBuf, 0, i);   // string sval = string.copyValueOf(charbuf, 0, i);
             return new Token(Token.TT_WORD, sval, 0);
         }
         /// <summary>
@@ -138,22 +132,23 @@ namespace Tripous.Tokenizing
         {
             for (int i = from; i <= to; i++)
             {
-                if (i >= 0 && i < FwordChar.Length)
+                if (i >= 0 && i < fWordChar.Length)
                 {
-                    FwordChar[i] = b;
+                    fWordChar[i] = b;
                 }
             }
         }
         /// <summary>
         /// Just a test of the wordChar array.
         /// </summary>
-        protected bool wordChar(int c)
+        protected bool WordChar(int c)
         {
-            if (c >= 0 && c < FwordChar.Length)
+            if (c >= 0 && c < fWordChar.Length)
             {
-                return FwordChar[c];
+                return fWordChar[c];
             }
             return false;
         }
+
     }
 }

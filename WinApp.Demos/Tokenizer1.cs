@@ -95,32 +95,15 @@ namespace WinApp.Demos
             fControl.AppendLine("----------------------------------------------");
         }
 
-        string EnumerableToString(IEnumerable Source)
-        {
-            StringBuilder SB = new StringBuilder();
-
-            if (Source == null)
-            {
-                SB.Append("null");
-            }
-            else
-            {
-                foreach (var Item in Source)
-                {
-                    SB.Append(Item == null ? "null" : Item.ToString());
-                }
-            }
-
-            return SB.ToString();
-        }
+   
 
         void Use_Tokenizer(string Text)
         {
             AppendLine(">> Tokenizer.NextToken()");
 
             TokenString TS = new TokenString(Text);
-            AppendLine($"TokenString Length: {TS.Length()}");
-            AppendLine($"{TS.ToString()}");
+            //AppendLine($"TokenString Length: {TS.Length()}");
+            //AppendLine($"{TS.ToString()}");
 
             Tokenizer Tokenizer = new Tokenizer();
             Tokenizer.SetString(Text);
@@ -194,39 +177,22 @@ namespace WinApp.Demos
         {
             // Text: steaming hot coffee
             // [[]^steaming/hot/coffee, [steaming]steaming^hot/coffee, [steaming, hot]steaming/hot^coffee, [steaming, hot, coffee]steaming/hot/coffee^]
+            // []^steaming/hot/coffee   [steaming]steaming^hot/coffee  [hot,steaming]steaming/hot^coffee   [coffee,hot,steaming]steaming/hot/coffee^
             Text = "steaming hot coffee";
             AppendLine(">> RepetitionParser with a WordTerminalParser sub-parser");
 
-            string S;
-            TokenString TS = new TokenString(Text);
-            AppendLine($"TokenString Length: {TS.Length()}");
-            AppendLine($"{TS.ToString()}");
-
-
             TokenAssembly A = new TokenAssembly(Text);
-            AppendLine(A.ToString());   // must be []^steaming/hot/coffee
-            while (A.HasMoreElements())
-            {
-                AppendLine(A.NextElement());
-            }
-         
-            
+            Parser SubParser = new WordTerminalParser();
+            Parser Parser = new RepetitionParser(SubParser);
+            ArrayList List = new ArrayList();
+            List.Add(A);
 
-            /*
-                        Parser SubParser = new WordTerminalParser();
-                        Parser Parser = new RepetitionParser(SubParser);
-                        ArrayList List = new ArrayList();
-                        List.Add(A);
+            List = Parser.Match(List);
 
-                        List = Parser.Match(List);
-
-                        if (List != null)
-                            AppendLine(EnumerableToString(List));
-                        else
-                            AppendLine("[no match]");
-
-                        
-             */
+            if (List != null)
+                AppendLine(Tokenizer.ToString(List));
+            else
+                AppendLine("[no match]");
 
             AppendSplitLine();
         }
@@ -257,11 +223,11 @@ namespace WinApp.Demos
         public void Execute(string Text)
         {
             fControl.Clear();
-            Use_Tokenizer(Text);
+            //Use_Tokenizer(Text);
             //Use_Assembly_NextElement(Text);
             //Use_TerminalParserWithTokenAssemply(Text);
             //Use_QuotedStringParserWithTokenAssemply(Text);
-            //Use_RepetitionParserWithWordTerminalParser(Text);
+            Use_RepetitionParserWithWordTerminalParser(Text);
             //Use_CompositeParsers(Text);
         }
 

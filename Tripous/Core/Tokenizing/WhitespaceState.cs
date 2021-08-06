@@ -43,13 +43,13 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Ignores whitespace (such as blanks and tabs), and returns  the tokenizer's next token.
         /// </summary>
-        public override Token NextToken(System.IO.Stream r, int aWhitespaceChar, Tokenizer t)
+        public override Token NextToken(ICharReader r, int aWhitespaceChar, Tokenizer t)
         {
             int i = 0;
             int c;
             do
             {
-                c = r.ReadByte();
+                c = r.Read();
                 i++;
             }
             while
@@ -61,11 +61,11 @@ namespace Tripous.Tokenizing
 
             if (c >= 0)
             {
-                r.Seek(-1, System.IO.SeekOrigin.Current);   //r.unread(c);
+                r.Unread(c);
             }
 
-            //return t.NextToken();
-            return new Token(Token.TT_WHITESPACE, new string(' ', i), i);
+            return t.NextToken();
+            //return new Token(Token.TT_WHITESPACE, new string(' ', i), i);
         }
  
         /// <summary>

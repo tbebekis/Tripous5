@@ -32,17 +32,17 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// 
         /// </summary>
-        protected byte[] Bytes = new byte[16];
+        protected char[] CharBuf = new char[16];
         /// <summary>
         /// Fatten up charbuf as necessary.
         /// </summary>
         protected void CheckBufLength(int i)
         {
-            if (i >= Bytes.Length)
+            if (i >= CharBuf.Length)
             {
-                byte[] nb = new byte[Bytes.Length * 2];
-                System.Array.Copy(Bytes, 0, nb, 0, Bytes.Length);
-                Bytes = nb;
+                char[] nb = new char[CharBuf.Length * 2];
+                System.Array.Copy(CharBuf, 0, nb, 0, CharBuf.Length);
+                CharBuf = nb;
             }
         }
 
@@ -53,28 +53,47 @@ namespace Tripous.Tokenizing
         /// state.
         /// </summary>
         /// <returns>Returns a quoted string token from a reader</returns>
-        public override Token NextToken(System.IO.Stream r, int cin, Tokenizer t)
+        public override Token NextToken(ICharReader r, int cin, Tokenizer t)
         {
 
             int i = 0;
-            Bytes[i++] = (byte)cin;
+            CharBuf[i++] = Convert.ToChar(cin);
             int c;
             do
             {
-                c = r.ReadByte();
+                c = r.Read();
                 if (c < 0)
                 {
                     c = cin;
                 }
                 CheckBufLength(i);
-                Bytes[i++] = (byte)c;
+                CharBuf[i++] = Convert.ToChar(c);
             } while (c != cin);
 
-            char[] Chars = new char[Encoding.Default.GetCharCount(Bytes, 0, i)];
-            Encoding.Default.GetChars(Bytes, 0, i, Chars, 0);
-
-            string sval = new string(Chars);   //string sval = string.copyValueOf(charbuf, 0, i);
+            string sval = new string(CharBuf, 0, i);   //   //string sval = string.copyValueOf(charbuf, 0, i);
             return new Token(Token.TT_QUOTED, sval, 0);
         }
+
+        /*
+        public Token nextToken(
+            PushbackReader r, int cin, Tokenizer t)
+            throws IOException {
+
+            int i = 0;
+            charbuf[i++] = (char) cin;
+            int c;
+            do {
+                c = r.read();
+                if (c < 0) {
+                    c = cin;
+                }
+                checkBufLength(i);
+                charbuf[i++] = (char) c;
+            } while (c != cin);
+
+            String sval = String.copyValueOf(charbuf, 0, i);
+            return new Token(Token.TT_QUOTED, sval, 0);
+        } 
+         */
     }
 }

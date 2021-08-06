@@ -25,18 +25,18 @@ namespace Tripous.Tokenizing
         /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
         /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
         /// <returns> a token that represents a logical piece of the  reader</returns>
-        public override Token NextToken(System.IO.Stream r, int c, Tokenizer t)
+        public override Token NextToken(ICharReader r, int c, Tokenizer t)
         {
-            c = r.ReadByte();
+            c = r.Read();
             if (c == '\r')
             {
-                c = r.ReadByte();
+                c = r.Read();
                 if (c != '\n')
-                    r.Seek(-1, System.IO.SeekOrigin.Current);   //r.unread(c);
+                    r.Unread(c);
             }
             else
             {
-                r.Seek(-1, System.IO.SeekOrigin.Current);   //r.unread(c);
+                r.Unread(c);   //r.unread(c);
             }
 
             return new Token(Token.TT_NEWLINE, " ", 0);

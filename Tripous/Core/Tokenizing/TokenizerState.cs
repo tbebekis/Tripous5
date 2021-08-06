@@ -33,7 +33,7 @@ namespace Tripous.Tokenizing
         /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
         /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
         /// <returns> a token that represents a logical piece of the  reader</returns>
-        public abstract Token NextToken(System.IO.Stream r, int c, Tokenizer t);
+        public abstract Token NextToken(ICharReader r, int c, Tokenizer t);
     }
 
 }

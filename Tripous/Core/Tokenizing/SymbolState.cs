@@ -78,7 +78,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Returns a symbol token from a reader.
         /// </summary>
-        public override Token NextToken(System.IO.Stream r, int first, Tokenizer t)
+        public override Token NextToken(ICharReader r, int first, Tokenizer t)
         {
             string s = FSymbols.NextSymbol(r, first);
             return new Token(Token.TT_SYMBOL, s, 0);

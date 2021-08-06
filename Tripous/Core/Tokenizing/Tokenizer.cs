@@ -79,14 +79,7 @@ namespace Tripous.Tokenizing
         /// The state lookup table
         /// </summary>
         protected TokenizerState[] characterState = new TokenizerState[256];
-
-        StreamReader Reader2;
-        StringReader Reader3;
-        BufferedStream Reader4;
-        StringReader Reader5;
-        
-
-
+ 
         /* construction */
         /// <summary>
         /// Constructs a tokenizer with a default state table (as described in the class comment). 
@@ -116,8 +109,51 @@ namespace Tripous.Tokenizing
         {
             SetString(s);
         }
- 
+
         /* public */
+        /// <summary>
+        /// Helper method for displaying the content of a tokenized and parsed elements.
+        /// <example>
+        /// <code>     
+        /// TokenAssembly A = new TokenAssembly("aa bb cc");
+        /// 
+        /// Parser SubParser = new WordTerminalParser(); 
+        /// Parser Parser = new RepetitionParser(SubParser); 
+        /// ArrayList List = new ArrayList(); 
+        /// List.Add(A); 
+        ///  
+        /// List = Parser.Match(List); 
+        ///  
+        /// string S = List != null? Tokenizer.ToString(List): "[no match]";
+        /// </code>
+        /// </example>
+        /// </summary>
+        static public string ToString(IList Source)
+        {
+            StringBuilder SB = new StringBuilder();
+            SB.Append("[");
+            if (Source == null)
+            {
+                SB.Append("null");
+            }
+            else
+            {
+                if (Source != null && Source.Count > 0)
+                {
+                    for (int i = 0; i < Source.Count; i++)
+                    {
+                        SB.Append(Source[i] == null ? "null" : Source[i].ToString());
+                        if (i < Source.Count - 1)
+                        {
+                            SB.Append(", ");
+                        }
+                    }
+                }
+            }
+            SB.Append("]");
+            return SB.ToString();
+        }
+
         /// <summary>
         /// Set the string to ReadByte from.
         /// </summary>
@@ -135,9 +171,9 @@ namespace Tripous.Tokenizing
             s = s + ' ';  // bug when a numeric is the last token   // \n    
 
 
-            byte[] Bytes = System.Text.Encoding.Default.GetBytes(s);
+            // byte[] Bytes = System.Text.Encoding.Default.GetBytes(s);
 
-            Reader = new System.IO.MemoryStream(Bytes);
+            Reader = new CharReader(s); //new System.IO.MemoryStream(Bytes);
 
         }
         /// <summary>
@@ -157,7 +193,7 @@ namespace Tripous.Tokenizing
         /// </summary>
         public Token NextToken()
         {
-            int c = Reader.ReadByte();
+            int c = Reader.Read();
 
             /* There was a defect here, that resulted from the fact 
              * that unreading a -1 results in the next ReadByte having a 
@@ -210,7 +246,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// A stream, the tokenizer reads from and writes to
         /// </summary>
-        public System.IO.Stream Reader { get; protected set; }
+        public ICharReader Reader { get; protected set; }
  
 
     }

@@ -92,8 +92,8 @@ namespace Tripous.Tokenizing
             StringBuilder buf = new StringBuilder();
             for (int i = 0; i < FTokens.Length; i++)
             {
-                //if (i > 0)
-                //    buf.Append(" ");
+                if (i > 0)
+                    buf.Append(" ");
 
                 buf.Append(FTokens[i]);
             }
