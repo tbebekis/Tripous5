@@ -22,19 +22,15 @@ namespace Tripous.Tokenizing
     /// their state. 
     /// </summary>
     public class TokenString : ICloneable
-    {
-        /// <summary>
-        /// the FTokens in this tokenString
-        /// </summary>
-        protected Token[] FTokens;
- 
+    { 
+        /* construction */
         /// <summary>
         /// Constructs a tokenString from the supplied FTokens.
         /// </summary>
         /// <param name="Tokens">the FTokens to use</param>
         public TokenString(Token[] Tokens)
         {
-            this.FTokens = Tokens;
+            this.Tokens = Tokens;
         }
         /// <summary>
         /// Constructs a tokenString from the supplied string. 
@@ -66,36 +62,23 @@ namespace Tripous.Tokenizing
                 throw (new Exception("Problem tokenizing string: " + e.Message));
 
             }
-            FTokens = new Token[v.Count];
-            v.CopyTo(FTokens);
+            Tokens = new Token[v.Count];
+            v.CopyTo(Tokens);
         }
-
-        /// <summary>
-        /// Returns the number of FTokens in this tokenString.
-        /// </summary>
-        public int Length()
-        {
-            return FTokens.Length;
-        }
-        /// <summary>
-        /// Returns the token at the specified index.
-        /// </summary>
-        public Token TokenAt(int i)
-        {
-            return FTokens[i];
-        }
+ 
+        /* public */
         /// <summary>
         /// Returns a string representation of this tokenString. 
         /// </summary>
         public override string ToString()
         {
             StringBuilder buf = new StringBuilder();
-            for (int i = 0; i < FTokens.Length; i++)
+            for (int i = 0; i < Tokens.Length; i++)
             {
                 if (i > 0)
                     buf.Append(" ");
 
-                buf.Append(FTokens[i]);
+                buf.Append(Tokens[i]);
             }
             return buf.ToString();
         }
@@ -104,11 +87,33 @@ namespace Tripous.Tokenizing
         /// </summary>
         public object Clone()
         {
-            Token[] Tokens = new Token[FTokens.Length];
-            for (int i = 0; i < FTokens.Length; i++)
-                Tokens[i] = (Token)FTokens[i].Clone();
+            Token[] Result = new Token[this.Tokens.Length];
+            for (int i = 0; i < this.Tokens.Length; i++)
+                Result[i] = this.Tokens[i].Clone() as Token;
 
-            return new TokenString(Tokens);
+            return new TokenString(Result);
         }
+
+        /// <summary>
+        /// Returns the token at a specified index.
+        /// </summary>
+        public Token TokenAt(int i)
+        {
+            return Tokens[i];
+        }
+
+        /* properties */
+        /// <summary>
+        /// Indexer. Returns the token at a specified index.
+        /// </summary>
+        public Token this[int Index] => Tokens[Index];
+        /// <summary>
+        /// Returns the number of tokens in this token string.
+        /// </summary>
+        public int Length => Tokens.Length;
+        /// <summary>
+        ///  The tokens in this token string.
+        /// </summary>
+        public Token[] Tokens { get; private set; }
     }
 }

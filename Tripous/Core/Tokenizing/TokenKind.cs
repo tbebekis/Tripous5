@@ -26,6 +26,16 @@ namespace Tripous.Tokenizing
         {
             this.Name = Name;
         }
+
+
+        /// <summary>
+        /// Returns a string representation of this instance
+        /// </summary>
+        public override string ToString()
+        {
+            return !string.IsNullOrWhiteSpace(Name)? Name: base.ToString();
+        }
+
         /// <summary>
         /// 
         /// </summary>

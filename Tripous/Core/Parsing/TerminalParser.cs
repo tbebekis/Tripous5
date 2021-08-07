@@ -109,7 +109,7 @@ namespace Tripous.Parsing
         /// <returns>Returns a copy of the incoming assembly, advanced by this  terminal</returns>
         protected Assembly MatchOneAssembly(Assembly In)
         {
-            if (!In.HasMoreElements())
+            if (!In.HasMoreElements)
                 return null;
 
             if (Qualifies(In.Peek()))

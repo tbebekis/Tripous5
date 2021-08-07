@@ -11,68 +11,48 @@ using System;
 using System.Text;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Tripous.Parsing
 {
 
 
     /// <summary>
-    /// An assembly maintains a stream of language elements along with Stack and Target objects.
+    /// An assembly maintains a stream of language elements (strings or characters) along with Stack and Target objects.
     /// <para>Parsers use <see cref="Assembler"/> assemblers to record progress at recognizing language elements from assembly's string.</para>
     /// <para>There are two types of assemblies: assemblies of tokens and assemblies of characters.</para>
     /// <para>To allow parsing text as strings of tokens, <see cref="Assembly"/> has two subclasses: <see cref="CharacterAssembly"/> and <see cref="TokenAssembly"/> </para>
     /// <para>Essentially, a <see cref="CharacterAssembly"/> object manipulates an array of characters, 
     /// and a <see cref="TokenAssembly"/> object manipulates an array of <see cref="Tripous.Tokenizing.Token"/> tokens.</para>
+    /// <para>NOTE: The enumeration of this object consumes its elements since it calls the <see cref="NextElement"/>() method </para>
     /// </summary>
-    public abstract class Assembly : ICloneable
+    public abstract class Assembly : ICloneable, IEnumerable<string>
     {
-
         /// <summary>
-        /// a place to keep track of consumption progress
+        /// <see cref="IEnumerator"/> implementation
         /// </summary>
-        protected Stack fStack = new Stack();
-        /// <summary>
-        /// Another place to record progress; this is just an object. 
-        /// If a parser were recognizing an HTML page, for 
-        /// example, it might create a Page object early, and store it 
-        /// as an assembly's "FTarget". As its recognition of the HTML 
-        /// progresses, it could use the FStack to build intermediate 
-        /// results, like a heading, and then apply them to the FTarget 
-        /// object.
-        /// </summary>
-        protected ICloneable FTarget;
-        /// <summary>
-        /// which element is next
-        /// </summary>
-        protected int FIndex = 0;
-
-        /// <summary>
-        /// Returns the content of the stack as a string.
-        /// </summary>
-        protected string StackToString()
+        IEnumerator<string> IEnumerable<string>.GetEnumerator()
         {
-            StringBuilder SB = new StringBuilder();
-            SB.Append("[");
-            object[] Items =  fStack.ToArray().Reverse().ToArray();
-            for (int i = 0; i < Items.Length; i++)
+            while (HasMoreElements)  
             {
-                SB.Append($"{Items[i]}");
-                if (i < Items.Length - 1)
-                    SB.Append(", ");
+                yield return NextElement();
             }
- 
-            SB.Append("]");
-            return SB.ToString();
+        }
+        /// <summary>
+        /// <see cref="IEnumerator"/> implementation
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (this as IEnumerable<string>).GetEnumerator();
         }
  
-
         /* public */
         /// <summary>
         /// Returns a textual description of this assembly.
         /// </summary>
         public override string ToString()
         {
-            string delimiter = DefaultDelimiter();
+            string delimiter = DefaultDelimiter;
             string Result = StackToString() +           //fStack +
                             Consumed(delimiter) + 
                             "^" + 
@@ -81,10 +61,43 @@ namespace Tripous.Parsing
             return Result;            
         }
         /// <summary>
-        /// Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.
+        /// Returns the content of the stack as a string.
         /// </summary>
-        /// <param name="delimiter">the mark to show between Consumed elements</param>
-        /// <returns>Returns the elements of the assembly that have been Consumed, separated by the specified delimiter.</returns>
+        public string StackToString()
+        {
+            StringBuilder SB = new StringBuilder();
+            SB.Append("[");
+            object[] Items = Stack.ToArray().Reverse().ToArray();
+            for (int i = 0; i < Items.Length; i++)
+            {
+                SB.Append($"{Items[i]}");
+                if (i < Items.Length - 1)
+                    SB.Append(", ");
+            }
+
+            SB.Append("]");
+            return SB.ToString();
+        }
+        /// <summary>
+        /// Creates and returns a copy of this instance
+        /// </summary>
+        public virtual object Clone()
+        {
+            Assembly Result = base.MemberwiseClone() as Assembly;
+
+            Result.Stack = Result.Stack.Clone() as Stack;
+
+            if (Target != null)
+                Result.Target = Target.Clone() as ICloneable;
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Returns the elements of the assembly that have been "consumed", separated by the specified delimiter.
+        /// </summary>
+        /// <param name="delimiter">the mark to show between "consumed" elements</param>
+        /// <returns>Returns the elements of the assembly that have been "consumed", separated by the specified delimiter.</returns>
         public abstract string Consumed(string delimiter);
         /// <summary>
         /// Returns the elements of the assembly that remain to be Consumed, separated by the specified delimiter.
@@ -94,97 +107,11 @@ namespace Tripous.Parsing
         public abstract string Remainder(string delimiter);
 
         /// <summary>
-        /// Returns the number of elements in this assembly.
-        /// </summary>
-        public abstract int Length();
-
-        /// <summary>
-        /// Creates and returns a copy of this instance
-        /// </summary>
-        public virtual object Clone()
-        {
-            Assembly Result = base.MemberwiseClone() as Assembly;
-
-            Result.fStack = Result.fStack.Clone() as Stack;
-
-            if (FTarget != null)
-                Result.FTarget = FTarget.Clone() as ICloneable;
-
-            return Result;
-        }
- 
-        /// <summary>
-        /// Returns the default string to show between elements.
-        /// <para>The DefaultDelimiter() method allows the Assembly subclasses to decide how to separate their elements.</para>
-        /// </summary>
-        public abstract string DefaultDelimiter();
- 
-        /// <summary>
-        /// Returns true if this assembly has unconsumed elements.
-        /// </summary>
-        public bool HasMoreElements()
-        {
-            return ElementsConsumed() < Length();
-        }
-        /// <summary>
-        /// Returns the next token from the associated token string.
+        /// Returns the next token from the associated token string and advances the internal element index (position).
+        /// <para>In a sense it "consumes" the element.</para>
         /// </summary>
         public abstract string NextElement();
 
-        /// <summary>
-        /// Returns the number of elements that have been Consumed.
-        /// </summary>
-        /// <returns></returns>
-        public int ElementsConsumed()
-        {
-            return FIndex;
-        }
-        /// <summary>
-        /// Returns the number of elements that have not been Consumed.
-        /// </summary>
-        public int ElementsRemaining()
-        {
-            return Length() - ElementsConsumed();
-        }
- 
-        /// <summary>
-        /// Returns the object identified as this assembly's "FTarget". 
-        /// Clients can set and retrieve a FTarget, which can be a 
-        /// convenient supplement as a place to work, in addition to 
-        /// the assembly's FStack. For example, a parser for an 
-        /// HTML file might use a web page object as its "FTarget". As 
-        /// the parser recognizes markup commands like , it 
-        /// could apply its findings to the FTarget.
-        /// </summary>
-        /// <returns>Returns the FTarget of this assembly</returns>
-        public object GetTarget()
-        {
-            return FTarget;
-        }
-        /// <summary>
-        /// Sets the FTarget for this assembly. Targets must implement 
-        /// <code>Clone()</code> as a public method.
-        /// </summary>
-        /// <param name="FTarget">a publicly cloneable object</param>
-        public void SetTarget(ICloneable FTarget)
-        {
-            this.FTarget = FTarget;
-        }
-
-        /// <summary>
-        /// Removes this assembly's Stack.
-        /// </summary>
-        public Stack GetStack()
-        {
-            return fStack;
-        }
-        /// <summary>
-        /// Returns true if this assembly's FStack is empty.
-        /// </summary>
-        public bool StackIsEmpty()
-        {
-            return fStack.Count == 0;
-        }
 
         /// <summary>
         /// Returns the next object in the assembly, without removing it
@@ -195,27 +122,78 @@ namespace Tripous.Parsing
         /// </summary>
         public object Pop()
         {
-            return fStack.Pop();
+            return Stack.Pop();
         }
         /// <summary>
         /// Pushes an object onto the top of this assembly's FStack. 
         /// </summary>
         public void Push(object o)
         {
-            fStack.Push(o);
-        }
- 
+            Stack.Push(o);
+        } 
         /// <summary>
         /// Put back n objects
         /// </summary>
         public void UnGet(int n)
         {
-            FIndex -= n;
-            if (FIndex < 0)
+            Index -= n;
+            if (Index < 0)
             {
-                FIndex = 0;
+                Index = 0;
             }
         }
 
+        /* properties */
+        /// <summary>
+        /// The index of the next element
+        /// </summary>
+        public int Index { get; protected set; }
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
+        public abstract int Length { get; }
+        /// <summary>
+        /// Returns the number of elements that have been Consumed.
+        /// </summary>
+        /// <returns></returns>
+        public int ElementsConsumed => Index;
+        /// <summary>
+        /// Returns the number of elements that have not been Consumed.
+        /// </summary>
+        public int ElementsRemaining => Length - ElementsConsumed;
+        /// <summary>
+        /// Returns true if this assembly has unconsumed elements.
+        /// </summary>
+        public bool HasMoreElements => ElementsConsumed < Length; 
+        /// <summary>
+        /// Returns the default string to show between elements.
+        /// <para>The DefaultDelimiter method allows the Assembly subclasses to decide how to separate their elements.</para>
+        /// </summary>
+        public abstract string DefaultDelimiter { get; }
+        /// <summary>
+        /// The "target" of this assembly.
+        /// <para>
+        /// Clients can set and retrieve a target, which can be a convenient supplement as a place to work, 
+        /// in addition to the assembly's Stack. 
+        /// </para>
+        /// <para>
+        /// For example, a parser for an HTML file might use a Web Page object as its "target". 
+        /// As the parser recognizes markup commands, it could apply its findings to the target.
+        /// The parser might create a Page object early, and store it as an assembly's "target". 
+        /// As its recognition of the HTML  progresses, it could use the stack to build intermediate results, 
+        /// like a heading, and then apply them to the target object.
+        /// </para>
+        /// <para>NOTE: Targets must be <see cref="ICloneable"/> objects.</para>
+        /// </summary>
+        public ICloneable Target { get; set; }
+        /// <summary>
+        /// A stack to keep track of consumption progress
+        /// </summary>
+        public Stack Stack { get; private set; } = new Stack();
+        /// <summary>
+        /// Returns true if stack is empty.
+        /// </summary>
+        public bool IsStackEmpty => Stack.Count == 0;
+ 
     }
 }

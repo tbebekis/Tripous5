@@ -42,7 +42,7 @@ namespace Tripous.Parsing
             string s = FParser.RandomInput(depth, Separator());
             LogTestString(s);
             Assembly a = CreateAssembly(s);
-            a.SetTarget(FreshTarget());
+            a.Target = FreshTarget();
             ArrayList In = new ArrayList();
             In.Add(a);
             ArrayList Out = CompleteMatches(FParser.Match(In));
@@ -143,7 +143,7 @@ namespace Tripous.Parsing
             for (int i = 0; i < In.Count; i++)
             {
                 Assembly a = (Assembly)In[i];
-                if (!a.HasMoreElements())
+                if (!a.HasMoreElements)
                     Out.Add(a);
 
             }

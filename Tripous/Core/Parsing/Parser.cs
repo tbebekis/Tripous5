@@ -181,12 +181,12 @@ namespace Tripous.Parsing
 
             foreach (Assembly A in v)
             {
-                if (!A.HasMoreElements())
+                if (!A.HasMoreElements)
                     return A;
 
                 if (best == null)
                     best = A;
-                else if (A.ElementsConsumed() > best.ElementsConsumed())
+                else if (A.ElementsConsumed > best.ElementsConsumed)
                     best = A;
             } 
 
@@ -212,7 +212,7 @@ namespace Tripous.Parsing
         public Assembly CompleteMatch(Assembly a)
         {
             Assembly best = BestMatch(a);
-            if (best != null && !best.HasMoreElements())
+            if (best != null && !best.HasMoreElements)
             {
                 return best;
             }

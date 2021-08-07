@@ -49,7 +49,7 @@ namespace Tripous.Parsing
         {
             ArrayList Items = new ArrayList();
 
-            while (!A.StackIsEmpty())
+            while (!A.IsStackEmpty)
             {
                 object Top = A.Pop();
                 if (Top.Equals(Fence))

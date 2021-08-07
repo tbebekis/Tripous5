@@ -120,11 +120,7 @@ namespace Tripous.Tokenizing
         /// </summary>
         public override string ToString()
         {
-            if (FKind == TT_EOF)
-            {
-                return "EOF";
-            }
-            return Value.ToString();
+            return FKind == TT_EOF ? "EOF" : Value.ToString(); //$"{FKind.ToString().PadRight(12)}{Value}"; 
         }
         /// <summary>
         /// Clones this instance and returns the clone.
@@ -247,5 +243,9 @@ namespace Tripous.Tokenizing
         /// </summary>
         public string AsString { get { return FStringValue; } }
 
+        /// <summary>
+        /// Returns a string representation of this token for display purposes.
+        /// </summary>
+        public string DisplayText => FKind == TT_EOF ? "EOF" : $"{FKind.ToString().PadRight(12)}{Value}"; 
     }
 }

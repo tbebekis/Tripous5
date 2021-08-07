@@ -21,12 +21,12 @@ namespace Tripous.Parsing
     /// Tokens are, roughly, the chunks of text that a <code>
     /// Tokenizer</code> returns.
     /// </summary>
-    public class TokenAssembly : Assembly //, IEnumerable<string>
+    public class TokenAssembly : Assembly  
     {
         /// <summary>
         ///  the "string" of tokens this assembly will consume
         /// </summary>
-        protected TokenString FTokenString;
+        protected TokenString fTokenString;
 
         /* construction */
         /// <summary>
@@ -51,9 +51,8 @@ namespace Tripous.Parsing
         /// <param name="TokenString">the FTokenString to consume</param>
         public TokenAssembly(TokenString TokenString)
         {
-            this.FTokenString = TokenString;
+            this.fTokenString = TokenString;
         }
-
 
         /* public */
         /// <summary>
@@ -65,11 +64,11 @@ namespace Tripous.Parsing
         {
             StringBuilder SB = new StringBuilder();
             string sToken;
-            for (int i = 0; i < ElementsConsumed(); i++)
+            for (int i = 0; i < ElementsConsumed; i++)
             {
                 if (i > 0)
                     SB.Append(delimiter);
-                sToken = FTokenString.TokenAt(i).ToString();
+                sToken = fTokenString.TokenAt(i).ToString();
                 SB.Append(sToken);
             }
             return SB.ToString();
@@ -82,48 +81,50 @@ namespace Tripous.Parsing
         public override string Remainder(string delimiter)
         {
             StringBuilder SB = new StringBuilder();
-            for (int i = ElementsConsumed(); i < FTokenString.Length(); i++)
+            for (int i = ElementsConsumed; i < fTokenString.Length; i++)
             {
-                if (i > ElementsConsumed())
+                if (i > ElementsConsumed)
                     SB.Append(delimiter);
 
-                SB.Append(FTokenString.TokenAt(i));
+                SB.Append(fTokenString.TokenAt(i));
             }
             return SB.ToString();
         }
 
         /// <summary>
-        /// Returns the default string to show between elements  Consumed or remaining.
-        /// </summary>
-        public override string DefaultDelimiter()
-        {
-            return "/";
-        }
-        
-        /// <summary>
-        /// Returns the number of elements in this assembly.
-        /// </summary>
-        public override int Length()
-        {
-            return FTokenString.Length();
-        }
-        /// <summary>
-        /// Returns the next token from the associated token string.
+        /// Returns the value of the next token from the associated token string, as a string.
         /// </summary>
         public override string NextElement()
         {
-            return FTokenString.TokenAt(FIndex++).ToString();
+            return fTokenString.TokenAt(Index++).ToString();
         }
         /// <summary>
         /// Returns the next object in the assembly, without removing it
         /// </summary>
         public override object Peek()
         {
-            if (FIndex < Length())
-                return FTokenString.TokenAt(FIndex);
+            if (Index < Length)
+                return fTokenString.TokenAt(Index);
             else return null;
         }
 
+        /* properties */
+        /// <summary>
+        /// Indexer. Returns the token at a specified index.
+        /// </summary>
+        public Token this[int Index] => fTokenString[Index];
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
+        public override int Length => fTokenString.Length;
+        /// <summary>
+        ///  The tokens in this token string.
+        /// </summary>
+        public Token[] Tokens => fTokenString.Tokens;
+        /// <summary>
+        /// Returns the default string to show between elements  Consumed or remaining.
+        /// </summary>
+        public override string DefaultDelimiter => "/";
 
     }
 }

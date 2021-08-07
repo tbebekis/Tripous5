@@ -68,7 +68,7 @@ namespace Tripous.Tokenizing
         {
             lock (syncLock)
             {
-                if (fPosition == SB.Length - 1)
+                if (fPosition > SB.Length - 1)
                 {
                     return -1;
                 }

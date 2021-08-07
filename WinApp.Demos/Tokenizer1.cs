@@ -105,6 +105,8 @@ namespace WinApp.Demos
             //AppendLine($"TokenString Length: {TS.Length()}");
             //AppendLine($"{TS.ToString()}");
 
+            //Text = "a b c";
+
             Tokenizer Tokenizer = new Tokenizer();
             Tokenizer.SetString(Text);
 
@@ -113,16 +115,14 @@ namespace WinApp.Demos
             while (true)
             {
                 T = Tokenizer.NextToken();
-                AppendLine(!string.IsNullOrWhiteSpace(T.Kind.Name)? T.Kind.Name: "<UNKNOWN TOKEN>");
+                //AppendLine(!string.IsNullOrWhiteSpace(T.Kind.Name)? T.Kind.Name: "<UNKNOWN TOKEN>");
+                AppendLine(T.DisplayText);
 
                 if (T.Kind == Token.TT_EOF)
                 {     
                     break;
-                }
-                 
+                }                 
             }
-
-
 
             AppendSplitLine();
         }
@@ -133,11 +133,12 @@ namespace WinApp.Demos
             AppendLine(">> TokenAssembly.NextElement()");
             TokenAssembly A = new TokenAssembly(Text);
             AppendLine(A.ToString());   // []^aa/bb/cc
-            while (A.HasMoreElements())
-                AppendLine(A.NextElement());
+            
+            //while (A.HasMoreElements)
+            //    AppendLine(A.NextElement());
 
-            //foreach (var item in A)
-            //    AppendLine(item);
+            foreach (var item in A)
+                AppendLine(item);
                
  
             AppendSplitLine();

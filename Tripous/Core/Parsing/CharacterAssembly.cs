@@ -20,12 +20,7 @@ namespace Tripous.Parsing
     /// A CharacterAssembly is an Assembly whose elements are  characters.
     /// </summary>
     public class CharacterAssembly : Assembly
-    {
-        /// <summary>
-        /// the string to consume
-        /// </summary>
-        protected string FBuffer;
-
+    { 
         /* construction */
         /// <summary>
         /// Constructs a CharacterAssembly from the given string.
@@ -33,7 +28,7 @@ namespace Tripous.Parsing
         /// <param name="Buffer">the string to consume</param>
         public CharacterAssembly(string Buffer)
         {
-            this.FBuffer = Buffer;
+            this.Buffer = Buffer;
         }
 
         /* public */
@@ -45,15 +40,15 @@ namespace Tripous.Parsing
         public override string Consumed(string delimiter)
         {
             if (delimiter.Equals(""))
-                return FBuffer.Substring(0, ElementsConsumed());
+                return Buffer.Substring(0, ElementsConsumed);
 
             StringBuilder buf = new StringBuilder();
-            for (int i = 0; i < ElementsConsumed(); i++)
+            for (int i = 0; i < ElementsConsumed; i++)
             {
                 if (i > 0)
                     buf.Append(delimiter);
 
-                buf.Append(FBuffer[i]);
+                buf.Append(Buffer[i]);
             }
             return buf.ToString();
         }
@@ -65,53 +60,49 @@ namespace Tripous.Parsing
         public override string Remainder(string delimiter)
         {
             if (delimiter.Equals(""))
-                return FBuffer.Substring(ElementsConsumed());
+                return Buffer.Substring(ElementsConsumed);
 
             StringBuilder buf = new StringBuilder();
-            for (int i = ElementsConsumed(); i < FBuffer.Length; i++)
+            for (int i = ElementsConsumed; i < Buffer.Length; i++)
             {
-
-                if (i > ElementsConsumed())
+                if (i > ElementsConsumed)
                     buf.Append(delimiter);
 
-                buf.Append(FBuffer[i]);
+                buf.Append(Buffer[i]);
             }
             return buf.ToString();
         }
 
         /// <summary>
-        /// Returns the default string to show between elements  Consumed or remaining.
-        /// </summary>
-        public override string DefaultDelimiter()
-        {
-            return "";
-        }
-        /// <summary>
-        /// Returns the number of elements in this assembly.
-        /// </summary>
-        public override int Length()
-        {
-            return FBuffer.Length;
-        }
-        /// <summary>
         /// Returns the next character from the associated token  string
         /// </summary>
         public override string NextElement()
         {
-            return FBuffer[FIndex++].ToString(); //      string.charAt(index++)
+            return Buffer[Index++].ToString(); //      string.charAt(index++)
         }
         /// <summary>
         /// Returns the next object in the assembly, without removing it
         /// </summary>
         public override object Peek()
         {
-            if (FIndex < Length())
-                return FBuffer[FIndex];   //new Character(string.charAt(FIndex));
+            if (Index < Length)
+                return Buffer[Index];   //new Character(string.charAt(FIndex));
             else return null;
         }
 
-
-
+        /* properties */
+        /// <summary>
+        /// Returns the default string to show between elements  Consumed or remaining.
+        /// </summary>
+        public override string DefaultDelimiter => ""; 
+        /// <summary>
+        /// Returns the number of elements in this assembly.
+        /// </summary>
+        public override int Length => Buffer.Length;
+        /// <summary>
+        /// The string to consume. It is passed in the constructor.
+        /// </summary>
+        public virtual string Buffer { get; protected set; }
 
     }
 }
