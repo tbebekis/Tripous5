@@ -143,8 +143,8 @@ namespace Tripous.Tokenizing
             {
                 fValue = -fValue;
             }
-            //return new Token(Token.TT_NUMBER, "", Fvalue);
-            return new Token(Token.TT_NUMBER, fValue.ToString(), fValue);
+            return new Token(Token.TT_NUMBER, "", fValue);
+            //return new Token(Token.TT_NUMBER, fValue.ToString(), fValue);
         }
         /// <summary>
         /// Return a number token from a reader.

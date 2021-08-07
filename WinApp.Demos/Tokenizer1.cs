@@ -100,7 +100,7 @@ namespace WinApp.Demos
         void Use_Tokenizer(string Text)
         {
             AppendLine(">> Tokenizer.NextToken()");
-
+             
             TokenString TS = new TokenString(Text);
             //AppendLine($"TokenString Length: {TS.Length()}");
             //AppendLine($"{TS.ToString()}");
@@ -129,14 +129,16 @@ namespace WinApp.Demos
         void Use_Assembly_NextElement(string Text)
         {
             // Text: Let's 'rock and roll'!
-            Text =  "aa bb cc";
+            Text =  "aa bb cc yy ; 123 a";
             AppendLine(">> TokenAssembly.NextElement()");
             TokenAssembly A = new TokenAssembly(Text);
             AppendLine(A.ToString());   // []^aa/bb/cc
             while (A.HasMoreElements())
-            {
                 AppendLine(A.NextElement());
-            }            
+
+            //foreach (var item in A)
+            //    AppendLine(item);
+               
  
             AppendSplitLine();
         }
@@ -223,11 +225,11 @@ namespace WinApp.Demos
         public void Execute(string Text)
         {
             fControl.Clear();
-            //Use_Tokenizer(Text);
+            Use_Tokenizer(Text);
             //Use_Assembly_NextElement(Text);
             //Use_TerminalParserWithTokenAssemply(Text);
             //Use_QuotedStringParserWithTokenAssemply(Text);
-            Use_RepetitionParserWithWordTerminalParser(Text);
+            //Use_RepetitionParserWithWordTerminalParser(Text);
             //Use_CompositeParsers(Text);
         }
 

@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
 using Tripous.Tokenizing;
 
@@ -20,7 +21,7 @@ namespace Tripous.Parsing
     /// Tokens are, roughly, the chunks of text that a <code>
     /// Tokenizer</code> returns.
     /// </summary>
-    public class TokenAssembly : Assembly
+    public class TokenAssembly : Assembly //, IEnumerable<string>
     {
         /// <summary>
         ///  the "string" of tokens this assembly will consume
@@ -122,7 +123,6 @@ namespace Tripous.Parsing
                 return FTokenString.TokenAt(FIndex);
             else return null;
         }
-
 
 
     }

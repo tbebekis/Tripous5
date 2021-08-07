@@ -168,7 +168,7 @@ namespace Tripous.Tokenizing
         /// <param name="symbolMax">the maximum Length of a symbol, which establishes the size of pushback buffer we need</param>
         public void SetString(string s, int symbolMax)
         {
-            s = s + ' ';  // bug when a numeric is the last token   // \n    
+            //s = s + ' ';  // bug when a numeric is the last token   // \n    
 
 
             // byte[] Bytes = System.Text.Encoding.Default.GetBytes(s);
@@ -202,8 +202,8 @@ namespace Tripous.Tokenizing
 
             if (c >= 0 && c < characterState.Length)
             {
-                //TokenizerState State = characterState[c];
-                return characterState[c].NextToken(Reader, c, this);
+                TokenizerState State = characterState[c];
+                return State.NextToken(Reader, c, this);
             }
             return Token.EOF;
         }
