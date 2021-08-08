@@ -205,7 +205,7 @@ namespace Tripous.Parsing
             return Best(Out);
         }
         /// <summary>
-        ///  Returns either null, or a completely matched version of  the supplied assembly.
+        ///  Returns either null, or a completely matched version of the supplied assembly.
         /// </summary>
         /// <param name="a">an assembly to Match against</param>
         /// <returns> Returns either null, or a completely matched version of  the supplied assembly.</returns>

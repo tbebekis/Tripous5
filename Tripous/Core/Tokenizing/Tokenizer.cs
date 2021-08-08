@@ -94,7 +94,7 @@ namespace Tripous.Tokenizing
             SetCharacterState(0xc0, 0xff, WordState);
             SetCharacterState('0', '9', NumberState);
             SetCharacterState('-', '-', NumberState);
-            SetCharacterState('.', '.', NumberState);
+            //SetCharacterState('.', '.', NumberState); NO
             SetCharacterState('"', '"', QuoteState);
             SetCharacterState('\'', '\'', QuoteState);
             SetCharacterState('/', '/', SlashState);
@@ -168,13 +168,7 @@ namespace Tripous.Tokenizing
         /// <param name="symbolMax">the maximum Length of a symbol, which establishes the size of pushback buffer we need</param>
         public void SetString(string s, int symbolMax)
         {
-            //s = s + ' ';  // bug when a numeric is the last token   // \n    
-
-
-            // byte[] Bytes = System.Text.Encoding.Default.GetBytes(s);
-
-            Reader = new CharReader(s); //new System.IO.MemoryStream(Bytes);
-
+            Reader = new CharReader(s); 
         }
         /// <summary>
         /// Change the state the tokenizer will enter upon reading any character between "from" and "to".

@@ -96,16 +96,24 @@ namespace WinApp.Demos
         }
 
    
-
-        void Use_Tokenizer(string Text)
+        void Test()
         {
-            AppendLine(">> Tokenizer.NextToken()");
-             
-            TokenString TS = new TokenString(Text);
-            //AppendLine($"TokenString Length: {TS.Length()}");
-            //AppendLine($"{TS.ToString()}");
+            string Text = "12 12.34 .1234 1234e-2"; // @"a(1)";
+            AppendLine($">> Text: {Text}");
 
-            //Text = "a b c";
+            TokenAssembly A = new TokenAssembly(Text);
+            AppendLine(A.ToString());
+
+            foreach (string Element in A)
+                AppendLine(Element);
+        }
+        void Test_Tokenizer()
+        {
+            AppendLine($">> Tokenizer.NextToken()");
+
+            string Text = @"Let's 'rock and roll'!";            
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
 
             Tokenizer Tokenizer = new Tokenizer();
             Tokenizer.SetString(Text);
@@ -115,7 +123,6 @@ namespace WinApp.Demos
             while (true)
             {
                 T = Tokenizer.NextToken();
-                //AppendLine(!string.IsNullOrWhiteSpace(T.Kind.Name)? T.Kind.Name: "<UNKNOWN TOKEN>");
                 AppendLine(T.DisplayText);
 
                 if (T.Kind == Token.TT_EOF)
@@ -126,13 +133,39 @@ namespace WinApp.Demos
 
             AppendSplitLine();
         }
-        void Use_Assembly_NextElement(string Text)
+        void Test_AssemplyDisplay()
         {
-            // Text: Let's 'rock and roll'!
-            Text =  "aa bb cc yy ; 123 a";
-            AppendLine(">> TokenAssembly.NextElement()");
+            AppendLine($">> TokenAssembly.ToString()");
+
+            // 1.
+            string Text = "Congress admitted Colorado in 1876."; // @"1.2"; // Congress admitted Colorado in 1876.
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
+
             TokenAssembly A = new TokenAssembly(Text);
-            AppendLine(A.ToString());   // []^aa/bb/cc
+            AppendLine(A.ToString());
+
+            AppendSplitLine();
+
+            // 2.
+            Text = @"admitted(colorado, 1876) ";
+            AppendLine($">> Text: {Text}");
+
+            A = new TokenAssembly(Text);
+            AppendLine(A.ToString());
+
+            AppendSplitLine();
+        }
+        void Test_Assembly_NextElement()
+        {
+            AppendLine(">> TokenAssembly.NextElement()");
+
+            string Text =  "aa bb cc yy ; 123 a";
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
+
+            TokenAssembly A = new TokenAssembly(Text);
+            AppendLine(A.ToString());   
             
             //while (A.HasMoreElements)
             //    AppendLine(A.NextElement());
@@ -143,27 +176,34 @@ namespace WinApp.Demos
  
             AppendSplitLine();
         }
-        void Use_TerminalParserWithTokenAssemply(string Text)
+        void Test_TerminalParserWithTokenAssemply()
         {
-
-            // Text: Let's 'rock and roll'!
+            // 2.5.1 Using Terminals
             AppendLine(">> WordTerminalParser with a TokenAssembly");
+            string Text = "steaming hot coffee";
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
 
             Parser Parser = new WordTerminalParser();
             Assembly A = new TokenAssembly(Text);
 
-            A = Parser.BestMatch(A);
-            if (A != null)
+            while (true)
+            {
+                A = Parser.BestMatch(A);
+                if (A == null)
+                    break;
                 AppendLine(A.ToString());
-            else
-                AppendLine("[no match]");
+            }
 
             AppendSplitLine();
         }
-        void Use_QuotedStringParserWithTokenAssemply(string Text)
+        void Test_QuotedStringParserWithTokenAssemply()
         {
-            // Text: "steaming hot coffee"
+            // 2.5.7 Quoted Strings
             AppendLine(">> QuotedStringTerminalParser with a TokenAssembly");
+            string Text = "\"Clark Kent\"";
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
 
             Parser Parser = new QuotedStringTerminalParser();
             Assembly A = new TokenAssembly(Text);
@@ -176,20 +216,22 @@ namespace WinApp.Demos
 
             AppendSplitLine();
         }
-        void Use_RepetitionParserWithWordTerminalParser(string Text)
+        void Test_RepetitionParserWithWordTerminalParser()
         {
-            // Text: steaming hot coffee
             // [[]^steaming/hot/coffee, [steaming]steaming^hot/coffee, [steaming, hot]steaming/hot^coffee, [steaming, hot, coffee]steaming/hot/coffee^]
-            // []^steaming/hot/coffee   [steaming]steaming^hot/coffee  [hot,steaming]steaming/hot^coffee   [coffee,hot,steaming]steaming/hot/coffee^
-            Text = "steaming hot coffee";
+
+            // 2.6.1 Repetition
             AppendLine(">> RepetitionParser with a WordTerminalParser sub-parser");
+            string Text = "steaming hot coffee";
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
 
             TokenAssembly A = new TokenAssembly(Text);
             Parser SubParser = new WordTerminalParser();
             Parser Parser = new RepetitionParser(SubParser);
+
             ArrayList List = new ArrayList();
             List.Add(A);
-
             List = Parser.Match(List);
 
             if (List != null)
@@ -199,11 +241,13 @@ namespace WinApp.Demos
 
             AppendSplitLine();
         }
-        void Use_CompositeParsers(string Text)
+        void Test_CompositeParsers()
         {
-            // Text: hot hot steaming hot coffee
-            Text = "hot hot steaming hot coffee";
+            // 2.6.2 Alternation and Sequence
             AppendLine(">> SequenceCollectionParser with composite parsers: Alternation, Sequence and Repetition parser");
+            string Text = "hot hot steaming hot coffee";
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
 
             AlternationCollectionParser adjective = new AlternationCollectionParser();
             adjective.Add(new LiteralTerminalParser("steaming"));
@@ -226,17 +270,22 @@ namespace WinApp.Demos
         public void Execute(string Text)
         {
             fControl.Clear();
-            Use_Tokenizer(Text);
-            //Use_Assembly_NextElement(Text);
-            //Use_TerminalParserWithTokenAssemply(Text);
-            //Use_QuotedStringParserWithTokenAssemply(Text);
-            //Use_RepetitionParserWithWordTerminalParser(Text);
-            //Use_CompositeParsers(Text);
+
+            //Test();
+
+            //Test_Tokenizer();
+            //Test_AssemplyDisplay();
+            //Test_Assembly_NextElement();
+            //Test_TerminalParserWithTokenAssemply();
+            //Test_QuotedStringParserWithTokenAssemply();
+            //Test_RepetitionParserWithWordTerminalParser();
+
+            Test_CompositeParsers();
         }
 
         public bool Singleton => false;
         public string Title => "Tokenizer 1";
-        public string Description => "TokenAssembly demo. Uses the NextElement() ";
+        public string Description => "Tokenizing and parsing demo";
     }
 
 

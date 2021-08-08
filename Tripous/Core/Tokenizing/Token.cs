@@ -247,5 +247,9 @@ namespace Tripous.Tokenizing
         /// Returns a string representation of this token for display purposes.
         /// </summary>
         public string DisplayText => FKind == TT_EOF ? "EOF" : $"{FKind.ToString().PadRight(12)}{Value}"; 
+
+
+        public int LineIndex { get; set; }
+        public int CharIndex { get; set; }
     }
 }

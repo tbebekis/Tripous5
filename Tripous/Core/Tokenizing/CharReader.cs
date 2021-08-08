@@ -23,6 +23,12 @@ namespace Tripous.Tokenizing
         /// </summary>
         /// <param name="C">The int value representing a character to be pushed back</param>
         void Unread(int C);
+        /// <summary>
+        /// Pushes back a single character by placing it to the current position of the buffer. 
+        /// <para>NOTE: The push-back is performed only if the specified character is greater than or equal to zero. </para>
+        /// <para>After this method returns, the next character to be read will have the value of the specified character.</para>
+        /// </summary>
+        void UnreadSafe(int C);
 
         /* properties */
         /// <summary>
@@ -94,6 +100,21 @@ namespace Tripous.Tokenizing
                     throw new ApplicationException("Character reader buffer overflow");
                 fPosition--;
                 SB[fPosition] = Convert.ToChar(C);
+            }
+        }
+        /// <summary>
+        /// Pushes back a single character by placing it to the current position of the buffer. 
+        /// <para>NOTE: The push-back is performed only if the specified character is greater than or equal to zero. </para>
+        /// <para>After this method returns, the next character to be read will have the value of the specified character.</para>
+        /// </summary>
+        public void UnreadSafe(int C)
+        {
+            lock (syncLock)
+            {
+                if (C >= 0)
+                {
+                    Unread(C);
+                }
             }
         }
  

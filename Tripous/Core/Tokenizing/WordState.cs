@@ -70,7 +70,31 @@ namespace Tripous.Tokenizing
         /// </summary>
         protected bool[] fWordChar = new bool[256];
 
+        /// <summary>
+        /// Fatten up charbuf as necessary.
+        /// </summary>
+        protected void CheckBufLength(int i)
+        {
+            if (i >= CharBuf.Length)
+            {
+                char[] nb = new char[CharBuf.Length * 2];
+                System.Array.Copy(CharBuf, 0, nb, 0, CharBuf.Length);
+                CharBuf = nb;
+            }
+        }
+        /// <summary>
+        /// Just a test of the wordChar array.
+        /// </summary>
+        protected bool WordChar(int c)
+        {
+            if (c >= 0 && c < fWordChar.Length)
+            {
+                return fWordChar[c];
+            }
+            return false;
+        }
 
+        /* construction */
         /// <summary>
         /// Constructs a word state with a default idea of what 
         /// characters are admissible inside a word (as described in 
@@ -86,18 +110,8 @@ namespace Tripous.Tokenizing
             SetWordChars('\'', '\'', true);
             SetWordChars(0xc0, 0xff, true);
         }
-        /// <summary>
-        /// Fatten up charbuf as necessary.
-        /// </summary>
-        protected void CheckBufLength(int i)
-        {
-            if (i >= CharBuf.Length)
-            {
-                char[] nb = new char[CharBuf.Length * 2];
-                System.Array.Copy(CharBuf, 0, nb, 0, CharBuf.Length);                
-                CharBuf = nb;
-            }
-        }
+ 
+        /* public */
         /// <summary>
         /// Return a word token from a reader.
         /// </summary>
@@ -116,7 +130,7 @@ namespace Tripous.Tokenizing
                 r.Unread(c);
             }
  
-            string sval = new string(CharBuf, 0, i);   // string sval = string.copyValueOf(charbuf, 0, i);
+            string sval = new string(CharBuf, 0, i);    
             return new Token(Token.TT_WORD, sval, 0);
         }
         /// <summary>
@@ -138,17 +152,5 @@ namespace Tripous.Tokenizing
                 }
             }
         }
-        /// <summary>
-        /// Just a test of the wordChar array.
-        /// </summary>
-        protected bool WordChar(int c)
-        {
-            if (c >= 0 && c < fWordChar.Length)
-            {
-                return fWordChar[c];
-            }
-            return false;
-        }
-
     }
 }

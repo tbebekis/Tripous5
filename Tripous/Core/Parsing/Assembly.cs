@@ -187,7 +187,8 @@ namespace Tripous.Parsing
         /// </summary>
         public ICloneable Target { get; set; }
         /// <summary>
-        /// A stack to keep track of consumption progress
+        /// A stack to keep track of consumption progress.
+        /// <para>The stack can gain contents only when a parser parses the assembly.</para>
         /// </summary>
         public Stack Stack { get; private set; } = new Stack();
         /// <summary>
