@@ -14,6 +14,103 @@ using System.IO;
 
 namespace Tripous.Tokenizing
 {
+    /// <summary>
+    /// A buffered character reader
+    /// </summary>
+    public interface ITokenizer
+    {
+        /// <summary>
+        /// The character read, or -1 if the end of the stream has been reached
+        /// </summary>
+        int Read();
+        /// <summary>
+        /// Pushes back a single character by placint it to the current position of the buffer. 
+        /// After this method returns, the next character to be read will have the value of the specified character.
+        /// </summary>
+        /// <param name="C">The int value representing a character to be pushed back</param>
+        void Unread(int C);
+        /// <summary>
+        /// Pushes back a single character by placing it to the current position of the buffer. 
+        /// <para>NOTE: The push-back is performed only if the specified character is greater than or equal to zero. </para>
+        /// <para>After this method returns, the next character to be read will have the value of the specified character.</para>
+        /// <para>NOTE: Returns true only if a push-back is happened.</para>
+        /// </summary>
+        bool UnreadSafe(int C);
+
+        /// <summary>
+        /// Returns the next token.
+        /// </summary>
+        Token NextToken();
+        /// <summary>
+        /// Constructs a token of the indicated type and associated string or numeric values.
+        /// </summary>
+        /// <param name="Kind">the type of the token, typically one  of the constants this class defines</param>
+        /// <param name="StringValue">the string value of the token, typically null except for WORD and QUOTED tokens</param>
+        /// <param name="NumericValue">the numeric value of the token, typically 0 except for NUMBER tokens</param>
+        /// <param name="LineIndex">The line index in the source text, of the token</param>
+        /// <param name="CharIndex">The starting character index in the current line in the source text, of the token</param>
+        /// <returns>Returns a token</returns>
+        Token CreateToken(TokenKind Kind, string StringValue, double NumericValue, int LineIndex, int CharIndex);
+
+        /* properties */
+        /// <summary>
+        /// The length of the internal buffer
+        /// </summary>
+        int Length { get; }
+        /// <summary>
+        /// The current position in the internal buffer. Essentially the next position to be read.  
+        /// </summary>
+        int Position { get; }
+        /// <summary>
+        /// Returns the text of the internal buffer.
+        /// </summary>
+        string Text { get; }
+
+        /// <summary>
+        /// The current line index in the source text
+        /// </summary>
+        int CurrentLineIndex { get; }
+        /// <summary>
+        /// The current character index in the current line in the source text
+        /// </summary>
+        int CurrentCharIndex { get; }
+ 
+        /// <summary>
+        /// Returns the state this tokenizer uses to build numbers.
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        NumberState NumberState { get; }
+        /// <summary>
+        /// Returns the state this tokenizer uses to build quoted  strings.
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        QuoteState QuoteState { get; }
+        /// <summary>
+        /// Returns the state this tokenizer uses to recognize (and ignore) comments.
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        SlashState SlashState { get; }
+        /// <summary>
+        /// Return the state this tokenizer uses to recognize  symbols.
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        SymbolState SymbolState { get; }
+        /// <summary>
+        /// Returns the state this tokenizer uses to recognize (and ignore) whitespace.
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        WhitespaceState WhitespaceState { get; }
+        /// <summary>
+        /// Returns the state this tokenizer uses to build words.
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        WordState WordState { get; }
+        /// <summary>
+        /// <para>The default states that actually consume text and produce a token</para>
+        /// </summary>
+        NewLineState NewLineState { get; }
+    }
+
 
     /// <summary>
     /// <para> A tokenizer divides a string into tokens.</para> 
@@ -68,7 +165,7 @@ namespace Tripous.Tokenizing
     /// word, after the first character. 
     /// </para>
     /// </summary>
-    public class Tokenizer
+    public class Tokenizer: ITokenizer
     {
  
         /// <summary>
@@ -182,27 +279,101 @@ namespace Tripous.Tokenizing
                 if (i >= 0 && i < characterState.Length)
                     characterState[i] = state;
         }
+ 
+        /// <summary>
+        /// The character read, or -1 if the end of the stream has been reached
+        /// </summary>
+        public int Read()
+        {
+            CurrentCharIndex++;
+            return Reader.Read();
+        }
+        /// <summary>
+        /// Pushes back a single character by placint it to the current position of the buffer. 
+        /// After this method returns, the next character to be read will have the value of the specified character.
+        /// </summary>
+        /// <param name="C">The int value representing a character to be pushed back</param>
+        public void Unread(int C)
+        {
+            CurrentCharIndex--;
+            Reader.Unread(C);
+        }
+        /// <summary>
+        /// Pushes back a single character by placing it to the current position of the buffer. 
+        /// <para>NOTE: The push-back is performed only if the specified character is greater than or equal to zero. </para>
+        /// <para>After this method returns, the next character to be read will have the value of the specified character.</para>
+        /// <para>NOTE: Returns true only if a push-back is happened.</para>
+        /// </summary>
+        public bool UnreadSafe(int C)
+        {
+            bool Result = Reader.UnreadSafe(C);
+            if (Result)
+                CurrentCharIndex--;
+            return Result;
+        }
+
+        /// <summary>
+        /// Constructs a token of the indicated type and associated string or numeric values.
+        /// </summary>
+        /// <param name="Kind">the type of the token, typically one  of the constants this class defines</param>
+        /// <param name="StringValue">the string value of the token, typically null except for WORD and QUOTED tokens</param>
+        /// <param name="NumericValue">the numeric value of the token, typically 0 except for NUMBER tokens</param>
+        /// <param name="LineIndex">The line index in the source text, of the token</param>
+        /// <param name="CharIndex">The starting character index in the current line in the source text, of the token</param>
+        /// <returns>Returns a token</returns>
+        public Token CreateToken(TokenKind Kind, string StringValue, double NumericValue, int LineIndex, int CharIndex)
+        {
+            Token Result = Token.Create(Kind, StringValue, NumericValue);
+
+            Result.LineIndex = LineIndex;
+            Result.CharIndex = CharIndex;
+
+            if (Kind == Token.TT_NEWLINE)
+            {
+                CurrentLineIndex++;
+                CurrentCharIndex = -1;
+            }
+
+            return Result;
+        }
         /// <summary>
         /// Returns the next token.
         /// </summary>
         public Token NextToken()
         {
-            int c = Reader.Read();
-
-            /* There was a defect here, that resulted from the fact 
-             * that unreading a -1 results in the next ReadByte having a 
-             * value of (int)(char)-1, which is 65535. This may be
-             * a defect in System.IO.Stream. */
+            int c = Read();
 
             if (c >= 0 && c < characterState.Length)
             {
                 TokenizerState State = characterState[c];
-                return State.NextToken(Reader, c, this);
+                return State.NextToken(this as ITokenizer, c);
             }
             return Token.EOF;
         }
 
         /* properties */
+        /// <summary>
+        /// The length of the internal buffer
+        /// </summary>
+        public int Length => Reader.Length;
+        /// <summary>
+        /// The current position in the internal buffer. Essentially the next position to be read.  
+        /// </summary>
+        public int Position => Reader.Position;
+        /// <summary>
+        /// Returns the text of the internal buffer.
+        /// </summary>
+        public string Text => Reader.Text;
+
+        /// <summary>
+        /// The current line index in the source text
+        /// </summary>
+        public int CurrentLineIndex { get; protected set; } = 0;
+        /// <summary>
+        /// The current character index in the current line in the source text
+        /// </summary>
+        public int CurrentCharIndex { get; protected set; } = -1;
+
         /// <summary>
         /// Returns the state this tokenizer uses to build numbers.
         /// <para>The default states that actually consume text and produce a token</para>
@@ -240,8 +411,6 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// A stream, the tokenizer reads from and writes to
         /// </summary>
-        public ICharReader Reader { get; protected set; }
- 
-
+        protected CharReader Reader { get; set; }
     }
 }

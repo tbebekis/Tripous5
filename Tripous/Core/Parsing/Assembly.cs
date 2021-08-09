@@ -45,7 +45,13 @@ namespace Tripous.Parsing
         {
             return (this as IEnumerable<string>).GetEnumerator();
         }
- 
+
+        /// <summary>
+        /// A stack to keep track of consumption progress.
+        /// <para>NOTE: The stack can gain contents only when a parser parses the assembly.</para>
+        /// </summary>
+        protected Stack Stack { get; private set; } = new Stack();
+
         /* public */
         /// <summary>
         /// Returns a textual description of this assembly.
@@ -93,6 +99,7 @@ namespace Tripous.Parsing
             return Result;
         }
 
+        /* elements */
         /// <summary>
         /// Returns the elements of the assembly that have been "consumed", separated by the specified delimiter.
         /// </summary>
@@ -105,14 +112,26 @@ namespace Tripous.Parsing
         /// <param name="delimiter">the mark to show between unconsumed  elements</param>
         /// <returns>Returns the elements of the assembly that remain to be  Consumed, separated by the specified delimiter.</returns>
         public abstract string Remainder(string delimiter);
-
         /// <summary>
         /// Returns the next token from the associated token string and advances the internal element index (position).
         /// <para>In a sense it "consumes" the element.</para>
         /// </summary>
         public abstract string NextElement();
+       
 
+        /// <summary>
+        /// Put back n objects (tokens if this is a token assembly, or characters if this is a character assembly)
+        /// </summary>
+        public void UnGet(int n)
+        {
+            Index -= n;
+            if (Index < 0)
+            {
+                Index = 0;
+            }
+        }
 
+        /* stack */
         /// <summary>
         /// Returns the next object in the assembly, without removing it
         /// </summary>
@@ -131,18 +150,7 @@ namespace Tripous.Parsing
         {
             Stack.Push(o);
         } 
-        /// <summary>
-        /// Put back n objects
-        /// </summary>
-        public void UnGet(int n)
-        {
-            Index -= n;
-            if (Index < 0)
-            {
-                Index = 0;
-            }
-        }
-
+ 
         /* properties */
         /// <summary>
         /// The index of the next element
@@ -186,11 +194,7 @@ namespace Tripous.Parsing
         /// <para>NOTE: Targets must be <see cref="ICloneable"/> objects.</para>
         /// </summary>
         public ICloneable Target { get; set; }
-        /// <summary>
-        /// A stack to keep track of consumption progress.
-        /// <para>The stack can gain contents only when a parser parses the assembly.</para>
-        /// </summary>
-        public Stack Stack { get; private set; } = new Stack();
+
         /// <summary>
         /// Returns true if stack is empty.
         /// </summary>

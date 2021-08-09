@@ -37,23 +37,25 @@ namespace Tripous.Tokenizing
         /// Returns either delegate to a comment-handling state, or return a  oken with just a slash in it.
         /// </summary>
         /// <returns>either just a slash token, or the results of  delegating to a comment-handling state</returns>
-        public override Token NextToken(ICharReader r, int theSlash, Tokenizer t)
+        public override Token NextToken(ITokenizer t, int theSlash)
         {
+            int LineIndex = t.CurrentLineIndex;
+            int CharIndex = t.CurrentCharIndex;
 
-            int c = r.Read();
+            int c = t.Read();
             if (c == '*')
             {
-                return slashStarState.NextToken(r, '*', t);
+                return slashStarState.NextToken(t, '*');
             }
             if (c == '/')
             {
-                return slashSlashState.NextToken(r, '/', t);
+                return slashSlashState.NextToken(t, '/');
             }
             if (c >= 0)
             {
-                r.Unread(c);
+                t.Unread(c);
             }
-            return new Token(Token.TT_SYMBOL, "/", 0);
+            return t.CreateToken(Token.TT_SYMBOL, "/", 0, LineIndex, CharIndex);
         }
     }
 }

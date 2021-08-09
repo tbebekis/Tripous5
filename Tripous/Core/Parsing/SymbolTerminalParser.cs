@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
 using Tripous.Tokenizing;
 
@@ -20,10 +21,7 @@ namespace Tripous.Parsing
     /// </summary>
     public class SymbolTerminalParser : TerminalParser
     {
-        /// <summary>
-        /// the literal to Match
-        /// </summary>
-        protected Token FSymbol;
+ 
  
         /* construction */
         /// <summary>
@@ -40,26 +38,35 @@ namespace Tripous.Parsing
         /// <param name="s">the characters to Match. The characters must be a sequence that the tokenizer will return as a Symbol token, such as greater.</param>
         public SymbolTerminalParser(string s)
         {
-            FSymbol = new Token(Token.TT_SYMBOL, s, 0);
+            Symbol = s;
         }
 
         /* public */
         /// <summary>
-        /// Returns true if the FSymbol this object represents Equals an ssembly's next element.
+        /// Returns true if the Symbol this object represents Equals an assembly's next element.
         /// </summary>
         /// <param name="o">an element from an assembly</param>
-        /// <returns>Returns true if the FSymbol this object represents Equals an ssembly's next element.</returns>
+        /// <returns>Returns true if the Symbol this object represents Equals an ssembly's next element.</returns>
         public override bool Qualifies(object o)
         {
-            return FSymbol.Equals((Token)o);
+            Token T = o as Token;
+            return T != null && T.Kind == Token.TT_SYMBOL && Symbol.Equals(T.StringValue);
         }
         /// <summary>
         /// Returns a textual description of this parser.
+        /// <para>Used in avoiding to produce the textual representation of this instance twice.</para>
         /// </summary>
-        /// <param name="visited">a list of parsers already printed in  this description</param>
-        public override string UnvisitedString(ArrayList visited)
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public override string UnvisitedString(List<Parser> visited)
         {
-            return FSymbol.ToString();
+            return Symbol;
         }
+
+        /* properties */
+        /// <summary>
+        /// The symbol to match.
+        /// </summary>
+        public string Symbol { get; private set; }
     }
 }

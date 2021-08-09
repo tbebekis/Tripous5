@@ -22,11 +22,15 @@ namespace WinApp.Demos
         {
             if (btnExecute == sender)
                 Demo.Execute(edtEditor.Text);
+            else if (btnExecutePresetTests == sender)
+                Demo.ExecutePresetTests();
+
         }
 
         void ControlInitialize()
         {
             btnExecute.Click += AnyClick;
+            btnExecutePresetTests.Click += AnyClick;
         }
 
         public void Clear()
@@ -96,17 +100,10 @@ namespace WinApp.Demos
         }
 
    
-        void Test()
-        {
-            string Text = "12 12.34 .1234 1234e-2"; // @"a(1)";
-            AppendLine($">> Text: {Text}");
+ 
 
-            TokenAssembly A = new TokenAssembly(Text);
-            AppendLine(A.ToString());
+        // Preset tests ============================================
 
-            foreach (string Element in A)
-                AppendLine(Element);
-        }
         void Test_Tokenizer()
         {
             AppendLine($">> Tokenizer.NextToken()");
@@ -230,7 +227,7 @@ namespace WinApp.Demos
             Parser SubParser = new WordTerminalParser();
             Parser Parser = new RepetitionParser(SubParser);
 
-            ArrayList List = new ArrayList();
+            List<Assembly> List = new List<Assembly>();
             List.Add(A);
             List = Parser.Match(List);
 
@@ -245,17 +242,21 @@ namespace WinApp.Demos
         {
             // 2.6.2 Alternation and Sequence
             AppendLine(">> SequenceCollectionParser with composite parsers: Alternation, Sequence and Repetition parser");
-            string Text = "hot hot steaming hot coffee";
+            string Text = @"hot hot steaming 
+hot coffee";
             AppendLine($">> Text: {Text}");
             AppendSplitLine();
 
             AlternationCollectionParser adjective = new AlternationCollectionParser();
             adjective.Add(new LiteralTerminalParser("steaming"));
             adjective.Add(new LiteralTerminalParser("hot"));
+            adjective.Add(new LiteralTerminalParser("NOT_EXISTING_TERMINAL"));  // <<< does not prevent the Alternation parser from matching
+            adjective.Add(new NewLineParser());                                 // <<< added new line (added to text too)
 
             SequenceCollectionParser good = new SequenceCollectionParser();
             good.Add(new RepetitionParser(adjective));
             good.Add(new LiteralTerminalParser("coffee"));
+             
 
             Assembly A = new TokenAssembly(Text);
             A = good.BestMatch(A);
@@ -264,28 +265,94 @@ namespace WinApp.Demos
                 AppendLine(A.ToString());
             else
                 AppendLine("[no match]");
+
+            AppendSplitLine();
         }
-        
-        
-        public void Execute(string Text)
+        void Test_EmptyParser()
+        {
+            // 2.6.4 The Empty Parser
+            // The output shows that the list parser recognizes lists with many elements, zero elements, or one element.
+
+            EmptyParser Empty = new EmptyParser();
+
+            SequenceCollectionParser CommaTerm = new SequenceCollectionParser();
+            CommaTerm.Add(new SymbolTerminalParser(',').Discard());
+            CommaTerm.Add(new WordTerminalParser());
+
+            SequenceCollectionParser ActualList = new SequenceCollectionParser();
+            ActualList.Add(new WordTerminalParser());
+            ActualList.Add(new RepetitionParser(CommaTerm));
+
+            AlternationCollectionParser Contents = new AlternationCollectionParser();
+            Contents.Add(Empty);
+            Contents.Add(ActualList);
+
+            SequenceCollectionParser List = new SequenceCollectionParser();
+            List.Add(new SymbolTerminalParser('[').Discard());
+            List.Add(Contents);
+            List.Add(new SymbolTerminalParser(']').Discard());
+
+            string[] Texts = {
+                "[die_bonder_2, oven_7, wire_bonder_3, mold_1]",
+                "[]",
+                "[mold_1]"
+            };
+
+
+            Assembly A;
+             
+            foreach (string Text in Texts)
+            {
+                AppendLine(">> The Empty Parser");
+                AppendSplitLine();
+                AppendLine($">> Text: {Text}");
+
+                A = new TokenAssembly(Text);
+                A = List.CompleteMatch(A);
+                AppendLine(A.StackToString());
+                AppendSplitLine();
+            }
+
+ 
+        }
+
+
+        public void ExecutePresetTests()
         {
             fControl.Clear();
 
-            //Test();
-
-            //Test_Tokenizer();
-            //Test_AssemplyDisplay();
-            //Test_Assembly_NextElement();
-            //Test_TerminalParserWithTokenAssemply();
-            //Test_QuotedStringParserWithTokenAssemply();
-            //Test_RepetitionParserWithWordTerminalParser();
-
+            Test_Tokenizer();
+            Test_AssemplyDisplay();
+            Test_Assembly_NextElement();
+            Test_TerminalParserWithTokenAssemply();
+            Test_QuotedStringParserWithTokenAssemply();
+            Test_RepetitionParserWithWordTerminalParser();
             Test_CompositeParsers();
+            Test_EmptyParser();
+        }
+        public void Execute(string Text)
+        {
+            fControl.Clear();
+    
+            if (string.IsNullOrWhiteSpace(Text))
+                Text = "12 12.34 .1234 1234e-2"; // @"a(1)";
+
+            AppendLine($">> Assemply elements enumeration (same as calling Assemply.NextElement()");
+            AppendLine($">> Text: {Text}");
+            AppendSplitLine();
+
+            TokenAssembly A = new TokenAssembly(Text);
+            AppendLine(A.ToString());
+
+            foreach (string Element in A)
+                AppendLine(Element);
+
+
         }
 
         public bool Singleton => false;
-        public string Title => "Tokenizer 1";
-        public string Description => "Tokenizing and parsing demo";
+        public string Title => "Parsing 1";
+        public string Description => "Chapter 2: The Elements of a Parser";
     }
 
 

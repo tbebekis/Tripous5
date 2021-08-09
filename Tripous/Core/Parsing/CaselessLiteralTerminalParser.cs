@@ -39,7 +39,8 @@ namespace Tripous.Parsing
         /// <returns>Returns true if the literal this object Equals an assembly's next element, disregarding case.</returns>
         public override bool Qualifies(object o)
         {
-            return FLiteral.EqualsIgnoreCase((Token)o);
+            Token T = o as Token;
+            return T != null && string.Compare(LiteralValue, T.StringValue, true) == 0;  
         }
     }
 }

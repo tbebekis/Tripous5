@@ -25,18 +25,6 @@ namespace Tripous.Tokenizing
     /// </summary>
     public class Token : ICloneable
     {
-        /// <summary>
-        /// The kind of a token
-        /// </summary>
-        protected TokenKind FKind;
-        /// <summary>
-        /// Holds the value, when the value is a string
-        /// </summary>
-        protected string FStringValue;
-        /// <summary>
-        /// Holds the value, when the value is a number
-        /// </summary>
-        protected double FNumericValue;
 
         /* static public fields */
         /// <summary>
@@ -71,7 +59,7 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// A constant indicating that there are no more tokens
         /// </summary>
-        static public Token EOF = new Token(TT_EOF, "", 0);
+        static public Token EOF = new Token() { Kind = TT_EOF };
 
         /* construction */
         /// <summary>
@@ -80,37 +68,20 @@ namespace Tripous.Tokenizing
         private Token()
         {
         }
-        /// <summary>
-        /// Constructs a token from the given char.
-        /// </summary>
-        public Token(char C) 
-            : this(TT_SYMBOL, new string(new char[] { C }), 0)
-        {
-        }
-        /// <summary>
-        /// Constructs a token from the given number.
-        /// </summary>
-        public Token(double N) 
-            : this(TT_NUMBER, "", N)
-        {
-        }
-        /// <summary>
-        /// Constructs a token from the given string.
-        /// </summary>
-        public Token(string S) : this(TT_WORD, S, 0)
-        {
-        }
+
         /// <summary>
         /// Constructs a token of the indicated type and associated string or numeric values.
         /// </summary>
         /// <param name="Kind">the type of the token, typically one  of the constants this class defines</param>
-        /// <param name="S">the string value of the token, typically null except for WORD and QUOTED tokens</param>
-        /// <param name="N">the numeric value of the token, typically 0 except for NUMBER tokens</param>
-        public Token(TokenKind Kind, string S, double N)
+        /// <param name="StringValue">the string value of the token, typically null except for WORD and QUOTED tokens</param>
+        /// <param name="NumericValue">the numeric value of the token, typically 0 except for NUMBER tokens</param>
+        static public Token Create(TokenKind Kind, string StringValue, double NumericValue)
         {
-            this.FKind = Kind;
-            this.FStringValue = S;
-            this.FNumericValue = N;
+            Token Result = new Token();
+            Result.Kind = Kind;
+            Result.StringValue = StringValue;
+            Result.NumericValue = NumericValue;
+            return Result;
         }
 
 
@@ -120,18 +91,18 @@ namespace Tripous.Tokenizing
         /// </summary>
         public override string ToString()
         {
-            return FKind == TT_EOF ? "EOF" : Value.ToString(); //$"{FKind.ToString().PadRight(12)}{Value}"; 
+            return Kind == TT_EOF ? "EOF" : Value.ToString(); //$"{Kind.ToString().PadRight(12)}{Value}"; 
         }
         /// <summary>
         /// Clones this instance and returns the clone.
         /// </summary>
         public object Clone()
         {
-            Token Res = new Token();
-            Res.FKind = FKind;
-            Res.FStringValue = FStringValue;
-            Res.FNumericValue = FNumericValue;
-            return Res;
+            Token Result = new Token();
+            Result.Kind = Kind;
+            Result.StringValue = StringValue;
+            Result.NumericValue = NumericValue;
+            return Result;
         }
 
         /// <summary>
@@ -139,51 +110,51 @@ namespace Tripous.Tokenizing
         /// </summary>
         /// <param name="o">the object to compare</param>
         /// <returns>Returns true, if the supplied object is of the same type and value</returns>
-        new public bool Equals(Object o)
+        new public bool Equals(object o)
         {
             if (!(o is Token))
                 return false;
 
             Token t = (Token)o;
 
-            if (FKind != t.FKind)
+            if (Kind != t.Kind)
             {
                 return false;
             }
-            if (FKind == TT_NUMBER)
+            if (Kind == TT_NUMBER)
             {
-                return FNumericValue == t.FNumericValue;
+                return NumericValue == t.NumericValue;
             }
-            if (FStringValue == null || t.FStringValue == null)
+            if (StringValue == null || t.StringValue == null)
             {
                 return false;
             }
-            return FStringValue.Equals(t.FStringValue);
+            return StringValue.Equals(t.StringValue);
         }
         /// <summary>
         /// Returns true, if the supplied object is of the same type and value. 
         /// This method disregards case when  comparing the string value of tokens.
         /// </summary>
-        public bool EqualsIgnoreCase(Object o)
+        public bool EqualsIgnoreCase(object o)
         {
             if (!(o is Token))
                 return false;
 
             Token t = (Token)o;
 
-            if (FKind != t.FKind)
+            if (Kind != t.Kind)
             {
                 return false;
             }
-            if (FKind == TT_NUMBER)
+            if (Kind == TT_NUMBER)
             {
-                return FNumericValue == t.FNumericValue;
+                return NumericValue == t.NumericValue;
             }
-            if (FStringValue == null || t.FStringValue == null)
+            if (StringValue == null || t.StringValue == null)
             {
                 return false;
             }
-            return string.Compare(FStringValue, t.FStringValue, true) == 0; // FStringValue.EqualsIgnoreCase(t.FStringValue);
+            return string.Compare(StringValue, t.StringValue, true) == 0;  
         }
 
         /// <summary>
@@ -191,35 +162,35 @@ namespace Tripous.Tokenizing
         /// </summary>
         public bool IsNumber()
         {
-            return FKind == TT_NUMBER;
+            return Kind == TT_NUMBER;
         }
         /// <summary>
         /// Returns true if this token is a quoted string.
         /// </summary>
         public bool IsQuotedString()
         {
-            return FKind == TT_QUOTED;
+            return Kind == TT_QUOTED;
         }
         /// <summary>
         /// Returns true if this token is a symbol.
         /// </summary>
         public bool IsSymbol()
         {
-            return FKind == TT_SYMBOL;
+            return Kind == TT_SYMBOL;
         }
         /// <summary>
         /// Returns true if this token is a word.
         /// </summary>
         public bool IsWord()
         {
-            return FKind == TT_WORD;
+            return Kind == TT_WORD;
         }
 
         /* properties */
         /// <summary>
         /// Returns the type of this token., typically one of the constants this class defines
         /// </summary>
-        public TokenKind Kind { get { return FKind; } }
+        public TokenKind Kind { get; protected set; }
         /// <summary>
         /// Returns an object that represents the value of this token.
         /// </summary>
@@ -227,29 +198,46 @@ namespace Tripous.Tokenizing
         {
             get
             {
-                if (FKind == TT_NUMBER) return FNumericValue;
-                if (FKind == TT_EOF) return EOF;
-                if (FStringValue != null) return FStringValue;
+                if (Kind == TT_NUMBER) return NumericValue;
+                if (Kind == TT_EOF) return EOF;
+                if (StringValue != null) return StringValue;
 
-                return FKind;
+                return Kind;
             }
         }
         /// <summary>
         /// Returns the numeric value of this token.
         /// </summary>
-        public double AsNumeric { get { return FNumericValue; } }
+        public double NumericValue { get; protected set; } = 0;
         /// <summary>
         /// Returns the string value of this token.
         /// </summary>
-        public string AsString { get { return FStringValue; } }
+        public string StringValue { get; protected set; } = "";
 
         /// <summary>
         /// Returns a string representation of this token for display purposes.
         /// </summary>
-        public string DisplayText => FKind == TT_EOF ? "EOF" : $"{FKind.ToString().PadRight(12)}{Value}"; 
+        public string DisplayText
+        {
+            get
+            {
+                if (Kind == TT_EOF)
+                    return "EOF";
 
+                string sKind = Kind.ToString(); //.PadRight(10);
+                string sPos = $"{LineIndex},{CharIndex}";
 
+                return $"{sPos.PadRight(10)} {sKind.PadRight(10)} {Value}";
+            }
+        }
+
+        /// <summary>
+        /// Returns the line index of the source text, this token is found
+        /// </summary>
         public int LineIndex { get; set; }
+        /// <summary>
+        /// Returns the character index, in the line this token is found, of the first character of this token.
+        /// </summary>
         public int CharIndex { get; set; }
     }
 }

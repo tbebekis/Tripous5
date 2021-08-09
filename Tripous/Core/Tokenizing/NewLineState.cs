@@ -21,48 +21,53 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Constant. An integer value of the character \r (Carriage Return) in the ASCII table
         /// </summary>
-        public const int CR = 13;   // \r   carriage return
+        public const int CR = 13;   // carriage return  \r
         /// <summary>
         /// Constant. An integer value of the character \r (Line Feed) in the ASCII table
         /// </summary>
-        public const int LF = 10;   // \n   line feed 
+        public const int LF = 10;   // line feed        \n
 
-        Token NextToken_Original(ICharReader r, int c, Tokenizer t)
+
+        /*
+                Token NextToken_Original(ITokenizer t, int c)
         {
-            c = r.Read();
+            c = t.Read();
             if (c == '\r')
             {
-                c = r.Read();
+                c = t.Read();
                 if (c != '\n')
-                    r.Unread(c);
+                    t.Unread(c);
             }
             else
             {
-                r.Unread(c);   //r.unread(c);
+                t.Unread(c);   //t.unread(c);
             }
 
-            return new Token(Token.TT_NEWLINE, " ", 0);
-        }
+            return t.CreateToken(Token.TT_NEWLINE, " ", 0);
+        } 
+         */
+
         /// <summary>
         /// Return a token that represents a logical piece of a reader.
         /// </summary>
-        /// <param name="r">a reader to ReadByte from</param>
+        /// <param name="t">the tokenizer and reader, conducting the overall tokenization</param>
         /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
-        /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
-        /// <returns> a token that represents a logical piece of the  reader</returns>
-        public override Token NextToken(ICharReader r, int c, Tokenizer t)
+        /// <returns> Returns a token that represents a logical piece of the  reader</returns>
+        public override Token NextToken(ITokenizer t, int c)
         {
-            c = r.Read();
-            int c2 = r.Read();
+            int LineIndex = t.CurrentLineIndex;
+            int CharIndex = t.CurrentCharIndex;
+
+            int c2 = t.Read();
 
             bool IsDoubleChar = (c == CR && c2 == LF) || (c == LF && c2 == CR);
 
             if (!IsDoubleChar)
             {
-                r.UnreadSafe(c2);
+                t.UnreadSafe(c2);
             }
 
-            return new Token(Token.TT_NEWLINE, " ", 0);
+            return t.CreateToken(Token.TT_NEWLINE, " ", 0, LineIndex, CharIndex);
         }
 
     }

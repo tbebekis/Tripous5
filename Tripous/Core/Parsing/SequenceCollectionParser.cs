@@ -10,8 +10,8 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
- 
 
 namespace Tripous.Parsing
 {
@@ -82,18 +82,18 @@ namespace Tripous.Parsing
         /// </summary>
         /// <param name="In">a vector of assemblies to Match against</param>
         /// <returns>Returns a ArrayList of assemblies that result from   matching against a beginning set of assemblies</returns>
-        public override ArrayList Match(ArrayList In)
+        public override List<Assembly> Match(List<Assembly> In)
         {
-            ArrayList Out = In;
+            List<Assembly> Result = In;
 
-            foreach (Parser P in FSubParsers)
+            foreach (Parser P in fSubParsers)
             {
-                Out = P.MatchAndAssemble(Out);
-                if (Out.Count == 0)
-                    return Out;
+                Result = P.MatchAndAssemble(Result);
+                if (Result.Count == 0)
+                    return Result;
             }
 
-            return Out;
+            return Result;
         }
 
         /*
@@ -117,9 +117,9 @@ namespace Tripous.Parsing
         public override ArrayList RandomExpansion(int maxDepth, int depth)
         {
             ArrayList v = new ArrayList();
-            for (int i = 0; i < FSubParsers.Count; i++)
+            for (int i = 0; i < fSubParsers.Count; i++)
             {
-                Parser P = (Parser)FSubParsers[i];
+                Parser P = (Parser)fSubParsers[i];
                 ArrayList w = P.RandomExpansion(maxDepth, depth++);
 
                 for (int j = 0; j < w.Count; j++)

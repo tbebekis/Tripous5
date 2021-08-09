@@ -53,15 +53,17 @@ namespace Tripous.Tokenizing
         /// state.
         /// </summary>
         /// <returns>Returns a quoted string token from a reader</returns>
-        public override Token NextToken(ICharReader r, int cin, Tokenizer t)
+        public override Token NextToken(ITokenizer t, int cin)
         {
+            int LineIndex = t.CurrentLineIndex;
+            int CharIndex = t.CurrentCharIndex;
 
             int i = 0;
             CharBuf[i++] = Convert.ToChar(cin);
             int c;
             do
             {
-                c = r.Read();
+                c = t.Read();
                 if (c < 0)
                 {
                     c = cin;
@@ -71,7 +73,7 @@ namespace Tripous.Tokenizing
             } while (c != cin);
 
             string sval = new string(CharBuf, 0, i);   //   //string sval = string.copyValueOf(charbuf, 0, i);
-            return new Token(Token.TT_QUOTED, sval, 0);
+            return t.CreateToken(Token.TT_QUOTED, sval, 0, LineIndex, CharIndex);
         }
 
         /*
@@ -83,7 +85,7 @@ namespace Tripous.Tokenizing
             charbuf[i++] = (char) cin;
             int c;
             do {
-                c = r.read();
+                c = t.read();
                 if (c < 0) {
                     c = cin;
                 }

@@ -34,6 +34,7 @@ namespace WinApp.Demos
             this.edtEditor = new System.Windows.Forms.RichTextBox();
             this.edtLog = new System.Windows.Forms.RichTextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btnExecutePresetTests = new System.Windows.Forms.Button();
             this.btnExecute = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -69,7 +70,7 @@ namespace WinApp.Demos
             // 
             this.splitContainer1.Panel2.Controls.Add(this.edtLog);
             this.splitContainer1.Size = new System.Drawing.Size(711, 590);
-            this.splitContainer1.SplitterDistance = 277;
+            this.splitContainer1.SplitterDistance = 87;
             this.splitContainer1.TabIndex = 1;
             // 
             // edtEditor
@@ -78,9 +79,9 @@ namespace WinApp.Demos
             this.edtEditor.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.edtEditor.Location = new System.Drawing.Point(0, 0);
             this.edtEditor.Name = "edtEditor";
-            this.edtEditor.Size = new System.Drawing.Size(711, 277);
+            this.edtEditor.Size = new System.Drawing.Size(711, 87);
             this.edtEditor.TabIndex = 0;
-            this.edtEditor.Text = "steaming hot coffee";
+            this.edtEditor.Text = "aa bb\ncc 123.5 ? ";
             this.edtEditor.WordWrap = false;
             // 
             // edtLog
@@ -89,19 +90,29 @@ namespace WinApp.Demos
             this.edtLog.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.edtLog.Location = new System.Drawing.Point(0, 0);
             this.edtLog.Name = "edtLog";
-            this.edtLog.Size = new System.Drawing.Size(711, 309);
+            this.edtLog.Size = new System.Drawing.Size(711, 499);
             this.edtLog.TabIndex = 1;
             this.edtLog.Text = "";
             this.edtLog.WordWrap = false;
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.btnExecutePresetTests);
             this.panel2.Controls.Add(this.btnExecute);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(711, 59);
             this.panel2.TabIndex = 0;
+            // 
+            // btnExecutePresetTests
+            // 
+            this.btnExecutePresetTests.Location = new System.Drawing.Point(241, 10);
+            this.btnExecutePresetTests.Name = "btnExecutePresetTests";
+            this.btnExecutePresetTests.Size = new System.Drawing.Size(160, 38);
+            this.btnExecutePresetTests.TabIndex = 1;
+            this.btnExecutePresetTests.Text = "Execute Preset Tests";
+            this.btnExecutePresetTests.UseVisualStyleBackColor = true;
             // 
             // btnExecute
             // 
@@ -137,5 +148,6 @@ namespace WinApp.Demos
         public System.Windows.Forms.RichTextBox edtEditor;
         public System.Windows.Forms.RichTextBox edtLog;
         public System.Windows.Forms.Button btnExecute;
+        public System.Windows.Forms.Button btnExecutePresetTests;
     }
 }

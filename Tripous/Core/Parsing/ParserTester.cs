@@ -10,8 +10,9 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
- 
+
 
 namespace Tripous.Parsing
 {
@@ -43,9 +44,9 @@ namespace Tripous.Parsing
             LogTestString(s);
             Assembly a = CreateAssembly(s);
             a.Target = FreshTarget();
-            ArrayList In = new ArrayList();
+            List<Assembly> In = new List<Assembly>();
             In.Add(a);
-            ArrayList Out = CompleteMatches(FParser.Match(In));
+            List<Assembly> Out = CompleteMatches(FParser.Match(In));
             if (Out.Count != 1)
             {
                 LogProblemFound(s, Out.Count);
@@ -86,7 +87,6 @@ namespace Tripous.Parsing
         /// </summary>
         protected string LogProblemFound(string s, int matchSize)
         {
-
             StringBuilder Buf = new StringBuilder();
             Buf.Append("Problem found for string:");
             Buf.Append(Environment.NewLine);
@@ -137,17 +137,16 @@ namespace Tripous.Parsing
         /// </summary>
         /// <param name="In">a collection of partially or completely matched assemblies</param>
         /// <returns>Returns a collection of completely matched assemblies</returns>
-        static public ArrayList CompleteMatches(ArrayList In)
+        static public List<Assembly> CompleteMatches(List<Assembly> In)
         {
-            ArrayList Out = new ArrayList();
-            for (int i = 0; i < In.Count; i++)
+            List<Assembly> ResultList = new List<Assembly>();
+            foreach (Assembly A in In)
             {
-                Assembly a = (Assembly)In[i];
-                if (!a.HasMoreElements)
-                    Out.Add(a);
-
+                if (!A.HasMoreElements)
+                    ResultList.Add(A);
             }
-            return Out;
+
+            return ResultList;
         }
 
         /// <summary>

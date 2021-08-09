@@ -115,23 +115,26 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Return a word token from a reader.
         /// </summary>
-        public override Token NextToken(ICharReader r, int c, Tokenizer t)
+        public override Token NextToken(ITokenizer t, int c)
         {
+            int LineIndex = t.CurrentLineIndex;
+            int CharIndex = t.CurrentCharIndex;
+
             int i = 0;
             do
             {
                 CheckBufLength(i);
                 CharBuf[i++] = Convert.ToChar(c);
-                c = r.Read();
+                c = t.Read();
             } while (WordChar(c));
 
             if (c >= 0)
             {
-                r.Unread(c);
+                t.Unread(c);
             }
  
             string sval = new string(CharBuf, 0, i);    
-            return new Token(Token.TT_WORD, sval, 0);
+            return t.CreateToken(Token.TT_WORD, sval, 0, LineIndex, CharIndex);
         }
         /// <summary>
         /// Establish characters in the given range as valid 

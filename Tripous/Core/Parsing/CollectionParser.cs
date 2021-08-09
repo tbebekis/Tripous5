@@ -10,8 +10,8 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
- 
 
 namespace Tripous.Parsing
 {
@@ -24,7 +24,7 @@ namespace Tripous.Parsing
         /// <summary>
         /// the parsers this parser is a collection of
         /// </summary>
-        protected ArrayList FSubParsers = new ArrayList();
+        protected ArrayList fSubParsers = new ArrayList();
 
         /// <summary>
         /// Helps to textually describe this CollectionParser.Returns the string to place between parsers in the collection
@@ -50,14 +50,14 @@ namespace Tripous.Parsing
         /// </summary>
         public CollectionParser(Parser p)
         {
-            FSubParsers.Add(p);
+            fSubParsers.Add(p);
         }
         /// <summary>
         /// A convenient way to construct a CollectionParser with the given parsers.
         /// </summary>
         public CollectionParser(Parser[] Parsers)
         {
-            FSubParsers.AddRange(Parsers);
+            fSubParsers.AddRange(Parsers);
         }
 
 
@@ -67,7 +67,7 @@ namespace Tripous.Parsing
         /// </summary>
         public CollectionParser Add(Parser e)
         {
-            FSubParsers.Add(e);
+            fSubParsers.Add(e);
             return this;
         }
         /// <summary>
@@ -75,23 +75,26 @@ namespace Tripous.Parsing
         /// </summary>
         public ArrayList GetSubParsers()
         {
-            return FSubParsers;
+            return fSubParsers;
         }
 
         /// <summary>
         /// Returns a textual description of this parser.
+        /// <para>Used in avoiding to produce the textual representation of this instance twice.</para>
         /// </summary>
-        public override string UnvisitedString(ArrayList visited)
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public override string UnvisitedString(List<Parser> visited)
         {
             StringBuilder buf = new StringBuilder("<");
             bool needSeparator = false;
 
-            for (int i = 0; i < FSubParsers.Count; i++)
+            for (int i = 0; i < fSubParsers.Count; i++)
             {
                 if (needSeparator)
                     buf.Append(ToStringSeparator());
 
-                Parser next = (Parser)FSubParsers[i];
+                Parser next = (Parser)fSubParsers[i];
                 buf.Append(next.ToString(visited));
                 needSeparator = true;
             }

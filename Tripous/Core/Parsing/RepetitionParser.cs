@@ -10,8 +10,8 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
- 
 
 namespace Tripous.Parsing
 {
@@ -23,7 +23,7 @@ namespace Tripous.Parsing
         /// <summary>
         /// the parser this parser is a repetition of
         /// </summary>
-        protected Parser FSubParser;
+        protected Parser fSubParser;
         /// <summary>
         /// the width of a random expansion
         /// </summary>
@@ -31,7 +31,7 @@ namespace Tripous.Parsing
         /// <summary>
         /// an assembler to apply at the beginning of a Match
         /// </summary>
-        protected Assembler FPreAssembler;
+        protected Assembler fPreAssembler;
 
         /* construction */
         /// <summary>
@@ -49,7 +49,7 @@ namespace Tripous.Parsing
         /// <param name="name">a name to be known by</param>
         public RepetitionParser(Parser SubParser, string name) : base(name)
         {
-            this.FSubParser = SubParser;
+            this.fSubParser = SubParser;
         }
        
         /// <summary>
@@ -66,7 +66,7 @@ namespace Tripous.Parsing
         /// </summary>
         public Parser GetSubParser()
         {
-            return FSubParser;
+            return fSubParser;
         }
  
         /// <summary>
@@ -84,24 +84,24 @@ namespace Tripous.Parsing
         /// </summary>
         /// <param name="In">a vector of assemblies to Match against</param>
         /// <returns>Returns a ArrayList of assemblies that result from  matching against a beginning set of assemblies</returns>
-        public override ArrayList Match(ArrayList In)
+        public override List<Assembly> Match(List<Assembly> In)
         {
-            if (FPreAssembler != null)
+            if (fPreAssembler != null)
             {
                 foreach (Assembly Element in In)
                 {
-                    FPreAssembler.WorkOn(Element);
+                    fPreAssembler.WorkOn(Element);
                 }
             }
 
-            ArrayList Out = ElementClone(In);
-            ArrayList s = In;               // a working state
-            while (s.Count > 0)            // !s.IsEmpty()
+            List<Assembly> ResultList = ElementClone(In);
+            List<Assembly> s = In;               // a working state
+            while (s.Count > 0)                  // !s.IsEmpty()
             {
-                s = FSubParser.MatchAndAssemble(s);
-                Add(Out, s);
+                s = fSubParser.MatchAndAssemble(s);
+                ResultList.AddRange(s); 
             }
-            return Out;
+            return ResultList;
         }
         /*
         public Vector match(Vector in) {
@@ -136,7 +136,7 @@ namespace Tripous.Parsing
             int n = Random.Next(EXPWIDTH);
             for (int j = 0; j < n; j++)
             {
-                ArrayList w = FSubParser.RandomExpansion(maxDepth, depth++);
+                ArrayList w = fSubParser.RandomExpansion(maxDepth, depth++);
                 for (int i = 0; i < w.Count; i++)
                     v.Add(w[i]);
             }
@@ -149,15 +149,15 @@ namespace Tripous.Parsing
         /// <returns>Returns this instance.</returns>
         public Parser SetPreAssembler(Assembler FPreAssembler)
         {
-            this.FPreAssembler = FPreAssembler;
+            this.fPreAssembler = FPreAssembler;
             return this;
         }
         /// <summary>
         /// Returns a textual description of this parser.
         /// </summary>
-        public override string UnvisitedString(ArrayList visited)
+        public override string UnvisitedString(List<Parser> visited)
         {
-            return FSubParser.ToString(visited) + "*";
+            return fSubParser.ToString(visited) + "*";
         }
     }
 }

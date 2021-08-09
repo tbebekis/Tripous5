@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
 using Tripous.Tokenizing;
 
@@ -21,7 +22,6 @@ namespace Tripous.Parsing
     public class NumTerminalParser : TerminalParser
     {
 
- 
         /// <summary>
         /// Returns true if an assembly's next element is a number.
         /// </summary>
@@ -37,7 +37,6 @@ namespace Tripous.Parsing
         /// </summary>
         public override ArrayList RandomExpansion(int maxDepth, int depth)
         {
-
             Random Random = new Random();
             double d = Convert.ToDouble(Random.Next(100));
 
@@ -49,10 +48,11 @@ namespace Tripous.Parsing
         }
         /// <summary>
         /// Returns a textual description of this parser.
+        /// <para>Used in avoiding to produce the textual representation of this instance twice.</para>
         /// </summary>
-        /// <param name="visited">a list of parsers already printed in  this description</param>
-        /// <returns>Returns a textual description of this parser.</returns>
-        public override string UnvisitedString(ArrayList visited)
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public override string UnvisitedString(List<Parser> visited)
         {
             return "Num";
         }

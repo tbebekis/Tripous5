@@ -18,40 +18,39 @@ namespace Tripous.Parsing
 {
     /// <summary>
     /// A TokenAssembly is an Assembly whose elements are Tokens.
-    /// Tokens are, roughly, the chunks of text that a <code>
-    /// Tokenizer</code> returns.
+    /// Tokens are, roughly, the chunks of text that a tokenizer returns.
     /// </summary>
-    public class TokenAssembly : Assembly  
+    public class TokenAssembly: Assembly  
     {
         /// <summary>
         ///  the "string" of tokens this assembly will consume
         /// </summary>
-        protected TokenString fTokenString;
+        protected TokenList fTokenList;
 
         /* construction */
         /// <summary>
-        /// Constructs a TokenAssembly on a TokenString constructed from the given string.
+        /// Constructs a <see cref="TokenAssembly"/> on a <see cref="TokenList"/> constructed from the given string.
         /// </summary>
-        /// <param name="s">the string to consume</param>
+        /// <param name="s">The string to consume</param>
         public TokenAssembly(string s) 
-            : this(new TokenString(s))
+            : this(new TokenList(s))
         {
         }
         /// <summary>
-        /// Constructs a TokenAssembly on a TokenString constructed from the given Tokenizer.
+        /// Constructs a <see cref="TokenAssembly"/> on a <see cref="TokenList"/> constructed from the given <see cref="Tokenizer"/>.
         /// </summary>
-        /// <param name="t">the tokenizer to consume tokens  from</param>
+        /// <param name="t">The tokenizer to consume tokens  from</param>
         public TokenAssembly(Tokenizer t) 
-            : this(new TokenString(t))
+            : this(new TokenList(t))
         {
         }
         /// <summary>
-        /// Constructs a TokenAssembly from the given TokenString.
+        /// Constructs a <see cref="TokenAssembly"/> from the given <see cref="TokenList"/>.
         /// </summary>
-        /// <param name="TokenString">the FTokenString to consume</param>
-        public TokenAssembly(TokenString TokenString)
+        /// <param name="TokenList">The <see cref="TokenList"/> to consume</param>
+        public TokenAssembly(TokenList TokenList)
         {
-            this.fTokenString = TokenString;
+            this.fTokenList = TokenList;
         }
 
         /* public */
@@ -68,7 +67,7 @@ namespace Tripous.Parsing
             {
                 if (i > 0)
                     SB.Append(delimiter);
-                sToken = fTokenString.TokenAt(i).ToString();
+                sToken = fTokenList.TokenAt(i).ToString();
                 SB.Append(sToken);
             }
             return SB.ToString();
@@ -81,12 +80,12 @@ namespace Tripous.Parsing
         public override string Remainder(string delimiter)
         {
             StringBuilder SB = new StringBuilder();
-            for (int i = ElementsConsumed; i < fTokenString.Length; i++)
+            for (int i = ElementsConsumed; i < fTokenList.Length; i++)
             {
                 if (i > ElementsConsumed)
                     SB.Append(delimiter);
 
-                SB.Append(fTokenString.TokenAt(i));
+                SB.Append(fTokenList.TokenAt(i));
             }
             return SB.ToString();
         }
@@ -96,7 +95,7 @@ namespace Tripous.Parsing
         /// </summary>
         public override string NextElement()
         {
-            return fTokenString.TokenAt(Index++).ToString();
+            return fTokenList.TokenAt(Index++).ToString();
         }
         /// <summary>
         /// Returns the next object in the assembly, without removing it
@@ -104,7 +103,7 @@ namespace Tripous.Parsing
         public override object Peek()
         {
             if (Index < Length)
-                return fTokenString.TokenAt(Index);
+                return fTokenList.TokenAt(Index);
             else return null;
         }
 
@@ -112,15 +111,15 @@ namespace Tripous.Parsing
         /// <summary>
         /// Indexer. Returns the token at a specified index.
         /// </summary>
-        public Token this[int Index] => fTokenString[Index];
+        public Token this[int Index] => fTokenList[Index];
         /// <summary>
         /// Returns the number of elements in this assembly.
         /// </summary>
-        public override int Length => fTokenString.Length;
+        public override int Length => fTokenList.Length;
         /// <summary>
         ///  The tokens in this token string.
         /// </summary>
-        public Token[] Tokens => fTokenString.Tokens;
+        public Token[] Tokens => fTokenList.Tokens;
         /// <summary>
         /// Returns the default string to show between elements  Consumed or remaining.
         /// </summary>

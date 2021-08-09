@@ -61,11 +61,10 @@ namespace Tripous.Parsing
             return Items;
         }
         /// <summary>
-        /// This is the one method all subclasses must implement. It 
-        /// specifies what to do when a parser successfully 
-        /// matches against a assembly.
+        /// Called after a parser matched an assembly.
+        /// <para>It specifies what to do when a parser successfully matches against a assembly.</para>
         /// </summary>
-        /// <param name="a"></param>
+        /// <param name="a">The matched assembly</param>
         public abstract void WorkOn(Assembly a);
     }
 }

@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
  
@@ -92,27 +93,25 @@ namespace Tripous.Parsing
         }
 
         /* public */
-
-
         /// <summary>
         /// Returns textual description of this  parser, taking care to avoid infinite recursion
         /// </summary>
         public override string ToString()
         {
-            return ToString(new ArrayList());
+            return ToString(new List<Parser>());
         }
         /// <summary>
         /// Returns a textual description of this parser.
-        /// Parsers can be recursive, so when building a 
-        /// descriptive string, it is important to avoid infinite 
-        /// recursion by keeping track of the objects already 
-        /// described. This method keeps an object from printing 
-        /// twice, and uses <code>UnvisitedString</code> which 
-        /// subclasses must implement.
+        /// <para> 
+        /// Parsers can be recursive, so when building a  descriptive string, it is important to avoid infinite 
+        /// recursion by keeping track of the objects already  described. 
+        /// </para>
+        /// This method keeps an object from printing twice, and uses <see cref="UnvisitedString"/>() 
+        /// which subclasses must implement.
         /// </summary>
-        /// <param name="visited">a list of objects already printed </param>
-        /// <returns>returns a textual version of this parser, avoiding recursion</returns>
-        public virtual string ToString(ArrayList visited)
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public virtual string ToString(List<Parser> visited)
         {
             if (Name != null)
                 return Name;
@@ -125,33 +124,27 @@ namespace Tripous.Parsing
             }
         }
         /// <summary>
-        /// Returns a textual description of this string.
+        /// Returns a textual description of this parser.
+        /// <para>Used in avoiding to produce the textual representation of this instance twice.</para>
         /// </summary>
-        public abstract string UnvisitedString(ArrayList visited);
-       
-        /// <summary>
-        /// Adds the elements of one vector to another.
-        /// </summary>
-        /// <param name="v1">the vector to Add to</param>
-        /// <param name="v2">the vector with elements to Add</param>
-        static public void Add(ArrayList v1, ArrayList v2)
-        {
-            foreach (var Element in v2)
-                v1.Add(Element); 
-        }
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public abstract string UnvisitedString(List<Parser> visited);
+
+
         /// <summary>
         /// Creates and returns a copy of a vector, cloning each element of the vector.
         /// </summary>
-        /// <param name="v">the vector to copy</param>
+        /// <param name="Source">the vector to copy</param>
         /// <returns>Creates and returns a copy of a vector, cloning each element of the vector.</returns>
-        static public ArrayList ElementClone(ArrayList v)
+        static public List<Assembly> ElementClone(List<Assembly> Source)
         {
-            ArrayList copy = new ArrayList();
-            foreach (Assembly A in v)
+            List<Assembly> ResultList = new List<Assembly>();
+            foreach (Assembly A in Source)
             {
-                copy.Add(A.Clone());
+                ResultList.Add(A.Clone() as Assembly);
             }
-            return copy;
+            return ResultList;
         }
         
         /// <summary>
@@ -171,11 +164,48 @@ namespace Tripous.Parsing
         public abstract void Accept(ParserVisitor pv, ArrayList visited);
 
         /// <summary>
+        /// <para>
+        /// Given a set (well, a <code>ArrayList</code>, really) of 
+        /// assemblies, this method matches this parser against 
+        /// all of them, and returns a new set (also really a 
+        /// <code>ArrayList</code>) of the assemblies that result from 
+        /// the matches.
+        /// </para>
+        /// <para>
+        /// For example, consider matching the regular expression 
+        /// <code>a*</code> against the string <code>"aaab"</code>. 
+        /// The initial set of states is <code>{^aaab}</code>, where 
+        /// the ^ indicates how far along the assembly is. When 
+        /// <code>a*</code> matches against this initial state, it 
+        /// creates a new set <code>{^aaab, a^aab, aa^ab, aaa^b}</code>. 
+        /// </para>
+        /// </summary>
+        /// <param name="In">a vector of assemblies to Match against</param>
+        /// <returns>Returns  a ArrayList of assemblies that result from  matching against a beginning set of assemblies</returns>
+        public abstract List<Assembly> Match(List<Assembly> In);
+        /// <summary>
+        /// Match this parser against an input state, and then
+        /// apply this parser's FAssembler against the resulting state.
+        /// </summary>
+        /// <param name="In">a vector of assemblies to Match against</param>
+        /// <returns>Returns a ArrayList of assemblies that result from matching against a beginning set of assemblies</returns>
+        public List<Assembly> MatchAndAssemble(List<Assembly> In)
+        {
+            List<Assembly> Out = Match(In);
+            if (FAssembler != null)
+            {
+                foreach (Assembly Element in Out)
+                    FAssembler.WorkOn(Element);
+            }
+            return Out;
+        }
+
+        /// <summary>
         /// Returns the most-matched assembly in a collection.
         /// </summary>
         /// <param name="v">the collection to look through</param>
         /// <returns> Returns the most-matched assembly in a collection.</returns>
-        public Assembly Best(ArrayList v)
+        public Assembly Best(List<Assembly> v)
         {
             Assembly best = null;
 
@@ -199,9 +229,9 @@ namespace Tripous.Parsing
         /// <returns>Returns an assembly with the greatest possible number of elements Consumed by matches of this parser.</returns>
         public Assembly BestMatch(Assembly a)
         {
-            ArrayList In = new ArrayList();
+            List<Assembly> In = new List<Assembly>();
             In.Add(a);
-            ArrayList Out = MatchAndAssemble(In);
+            List<Assembly> Out = MatchAndAssemble(In);
             return Best(Out);
         }
         /// <summary>
@@ -219,45 +249,6 @@ namespace Tripous.Parsing
             return null;
         }
  
-
-        /// <summary>
-        /// <para>
-        /// Given a set (well, a <code>ArrayList</code>, really) of 
-        /// assemblies, this method matches this parser against 
-        /// all of them, and returns a new set (also really a 
-        /// <code>ArrayList</code>) of the assemblies that result from 
-        /// the matches.
-        /// </para>
-        /// <para>
-        /// For example, consider matching the regular expression 
-        /// <code>a*</code> against the string <code>"aaab"</code>. 
-        /// The initial set of states is <code>{^aaab}</code>, where 
-        /// the ^ indicates how far along the assembly is. When 
-        /// <code>a*</code> matches against this initial state, it 
-        /// creates a new set <code>{^aaab, a^aab, aa^ab, aaa^b}</code>. 
-        /// </para>
-        /// </summary>
-        /// <param name="In">a vector of assemblies to Match against</param>
-        /// <returns>Returns  a ArrayList of assemblies that result from  matching against a beginning set of assemblies</returns>
-        public abstract ArrayList Match(ArrayList In);
-        /// <summary>
-        /// Match this parser against an input state, and then
-        /// apply this parser's FAssembler against the resulting state.
-        /// </summary>
-        /// <param name="In">a vector of assemblies to Match against</param>
-        /// <returns>Returns a ArrayList of assemblies that result from matching against a beginning set of assemblies</returns>
-        public ArrayList MatchAndAssemble(ArrayList In)
-        {
-            ArrayList Out = Match(In);
-            if (FAssembler != null)
-            {
-                foreach (Assembly Element in Out)
-                    FAssembler.WorkOn(Element);
-            }
-            return Out;
-        }
-
-
         /// <summary>
         /// Create a random expansion for this parser, where a
         /// concatenation of the returned collection will be a
@@ -285,18 +276,20 @@ namespace Tripous.Parsing
             return buf.ToString();
         }
         /// <summary>
-        /// Sets the object that will work on an assembly whenever 
-        /// this parser successfully matches against the  assembly. 
-        /// Returns this instance.
+        /// Sets the object that will work on an assembly whenever this parser successfully matches against that assembly. 
+        /// <para>
+        /// When a parser is a composite, it can have its own assembler, 
+        /// and any of its subparsers can have their own assemblers, all the way down to the terminals
+        /// </para>
+        /// <para>Returns this instance.</para>
         /// </summary>
-        /// <param name="Assembler">the FAssembler to apply</param>
+        /// <param name="Assembler">the <see cref="Assembler"/> to apply</param>
         /// <returns>Returns this instance</returns>
         public Parser SetAssembler(Assembler Assembler)
         {
             this.FAssembler = Assembler;
             return this;
         }
-
 
         /* properties */
         /// <summary>

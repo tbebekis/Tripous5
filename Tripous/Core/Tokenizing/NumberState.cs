@@ -89,10 +89,10 @@ namespace Tripous.Tokenizing
                     }
                 }
 
-                ctemp = r.Read();
+                ctemp = t.Read();
                 if (!IsDigit(ctemp))
                 {  
-                    r.Unread(ctemp);
+                    t.Unread(ctemp);
                     break;
                 }
                 else
@@ -114,7 +114,7 @@ namespace Tripous.Tokenizing
         {
             if (c == Minus)
             {
-                c = r.Read();
+                c = t.Read();
                 absorbedLeadingMinus = true;
             }
             fValue = AbsorbDigits(r, false);
@@ -126,7 +126,7 @@ namespace Tripous.Tokenizing
         {
             if (c == Dot)
             {
-                c = r.Read();
+                c = t.Read();
                 absorbedDot = true;
                 fValue += AbsorbDigits(r, true);
             }
@@ -151,7 +151,7 @@ namespace Tripous.Tokenizing
             {
                 if (absorbedLeadingMinus && absorbedDot)
                 {
-                    r.Unread(Dot);
+                    t.Unread(Dot);
                     return t.SymbolState.NextToken(r, Minus, t);
                 }
                 if (absorbedLeadingMinus)
@@ -181,7 +181,7 @@ namespace Tripous.Tokenizing
             Reset(c);
             ParseLeft(r);
             ParseRight(r);
-            //r.Unread(c);  // why this unread here?
+            //t.Unread(c);  // why this unread here?
             return Value(r, t);
         }
         */
@@ -205,8 +205,11 @@ namespace Tripous.Tokenizing
 
             return Result;
         }
-        Token ConstructResult(bool LeadingMinusFound, bool DotFound, StringBuilder Integers, StringBuilder Decimals)
+        Token ConstructResult(ITokenizer t, bool LeadingMinusFound, bool DotFound, StringBuilder Integers, StringBuilder Decimals)
         {
+            int LineIndex = t.CurrentLineIndex;
+            int CharIndex = t.CurrentCharIndex;
+
             StringBuilder SB = new StringBuilder();
 
             if (LeadingMinusFound)
@@ -228,17 +231,16 @@ namespace Tripous.Tokenizing
             }
             else
             {
-                return new Token(Token.TT_NUMBER, "", V);
+                return t.CreateToken(Token.TT_NUMBER, "", V, LineIndex, CharIndex);
             }
         }
         /// <summary>
-        /// Return a number token from a reader.
+        /// Return a token that represents a logical piece of a reader.
         /// </summary>
-        /// <param name="r">a reader to ReadByte from</param>
+        /// <param name="t">the tokenizer and reader, conducting the overall tokenization</param>
         /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
-        /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
-        /// <returns> a token that represents a logical piece of the  reader</returns>
-        public override Token NextToken(ICharReader r, int c, Tokenizer t)
+        /// <returns> Returns a token that represents a logical piece of the  reader</returns>
+        public override Token NextToken(ITokenizer t, int c)
         {
             bool LeadingMinusFound = false;
             bool DotFound = false; 
@@ -251,7 +253,7 @@ namespace Tripous.Tokenizing
             if (c == Minus)
             {
                 LeadingMinusFound = true;
-                c = r.Read();
+                c = t.Read();
                 SB.Append('-');
             }
 
@@ -276,34 +278,34 @@ namespace Tripous.Tokenizing
                     }
                     else if (LeadingMinusFound && Integers.Length == 0)
                     {
-                        r.Unread(Dot);
-                        r.Unread(Minus);
-                        return t.SymbolState.NextToken(r, Minus, t);
+                        t.Unread(Dot);
+                        t.Unread(Minus);
+                        return t.SymbolState.NextToken(t, Minus);
                     }
                     else
                     {
-                        int temp = r.Read();
+                        int temp = t.Read();
                         if (IsDigit(temp))
                         {
                             DotFound = true;
                             SB.Append('.');
-                            r.UnreadSafe(temp);
+                            t.UnreadSafe(temp);
                         }
                         else
                         {
-                            r.Unread(Dot);
-                            r.UnreadSafe(temp);
-                            return ConstructResult(LeadingMinusFound, DotFound, Integers, Decimals);
+                            t.Unread(Dot);
+                            t.UnreadSafe(temp);
+                            return ConstructResult(t, LeadingMinusFound, DotFound, Integers, Decimals);
                         }                     
                     }                 
                 }
 
-                c = r.Read();
+                c = t.Read();
 
                 if (!IsDigit(c) && c != Minus && c != Dot)
                 {
-                    r.UnreadSafe(c);
-                    return ConstructResult(LeadingMinusFound, DotFound, Integers, Decimals);
+                    t.UnreadSafe(c);
+                    return ConstructResult(t, LeadingMinusFound, DotFound, Integers, Decimals);
                 }
 
             }

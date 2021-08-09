@@ -17,7 +17,7 @@ namespace Tripous.Parsing
 {
  
     /// <summary>
-    /// A CharacterAssembly is an Assembly whose elements are  characters.
+    /// A CharacterAssembly is an Assembly whose elements are characters.
     /// </summary>
     public class CharacterAssembly : Assembly
     { 
@@ -25,10 +25,10 @@ namespace Tripous.Parsing
         /// <summary>
         /// Constructs a CharacterAssembly from the given string.
         /// </summary>
-        /// <param name="Buffer">the string to consume</param>
-        public CharacterAssembly(string Buffer)
+        /// <param name="S">The string to consume</param>
+        public CharacterAssembly(string S)
         {
-            this.Buffer = Buffer;
+            this.CharList = S;
         }
 
         /* public */
@@ -40,7 +40,7 @@ namespace Tripous.Parsing
         public override string Consumed(string delimiter)
         {
             if (delimiter.Equals(""))
-                return Buffer.Substring(0, ElementsConsumed);
+                return CharList.Substring(0, ElementsConsumed);
 
             StringBuilder buf = new StringBuilder();
             for (int i = 0; i < ElementsConsumed; i++)
@@ -48,7 +48,7 @@ namespace Tripous.Parsing
                 if (i > 0)
                     buf.Append(delimiter);
 
-                buf.Append(Buffer[i]);
+                buf.Append(CharList[i]);
             }
             return buf.ToString();
         }
@@ -60,15 +60,15 @@ namespace Tripous.Parsing
         public override string Remainder(string delimiter)
         {
             if (delimiter.Equals(""))
-                return Buffer.Substring(ElementsConsumed);
+                return CharList.Substring(ElementsConsumed);
 
             StringBuilder buf = new StringBuilder();
-            for (int i = ElementsConsumed; i < Buffer.Length; i++)
+            for (int i = ElementsConsumed; i < CharList.Length; i++)
             {
                 if (i > ElementsConsumed)
                     buf.Append(delimiter);
 
-                buf.Append(Buffer[i]);
+                buf.Append(CharList[i]);
             }
             return buf.ToString();
         }
@@ -78,7 +78,7 @@ namespace Tripous.Parsing
         /// </summary>
         public override string NextElement()
         {
-            return Buffer[Index++].ToString(); //      string.charAt(index++)
+            return CharList[Index++].ToString(); //      string.charAt(index++)
         }
         /// <summary>
         /// Returns the next object in the assembly, without removing it
@@ -86,7 +86,7 @@ namespace Tripous.Parsing
         public override object Peek()
         {
             if (Index < Length)
-                return Buffer[Index];   //new Character(string.charAt(FIndex));
+                return CharList[Index];   //new Character(string.charAt(FIndex));
             else return null;
         }
 
@@ -98,11 +98,11 @@ namespace Tripous.Parsing
         /// <summary>
         /// Returns the number of elements in this assembly.
         /// </summary>
-        public override int Length => Buffer.Length;
+        public override int Length => CharList.Length;
         /// <summary>
         /// The string to consume. It is passed in the constructor.
         /// </summary>
-        public virtual string Buffer { get; protected set; }
+        public virtual string CharList { get; protected set; }
 
     }
 }

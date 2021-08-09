@@ -179,17 +179,17 @@ namespace Tripous.Tokenizing
         /// <summary>
         ///  Find the descendant that takes as many characters as  possible from the input.
         /// </summary>
-        public SymbolNode DeepestRead(ICharReader r)  // was protected
+        public SymbolNode DeepestRead(ITokenizer t)  // was protected
         {
 
-            char c = (char)r.Read();
+            char c = (char)t.Read();
             SymbolNode n = FindChildWithChar(c);
             if (n == null)
             {
-                r.Unread(c);
+                t.Unread(c);
                 return this;
             }
-            return n.DeepestRead(r);
+            return n.DeepestRead(t);
         }
         /// <summary>
         /// Mark this node as valid, which means its Ancestry is a complete symbol, not just a prefix.
@@ -202,14 +202,14 @@ namespace Tripous.Tokenizing
         /// Unwind to a valid node; this node is "valid" if its Ancestry represents a complete symbol. 
         /// If this node is not valid, put back the character and ask the parent to unwind. 
         /// </summary>
-        public SymbolNode unreadToValid(ICharReader r)  // was protected
+        public SymbolNode unreadToValid(ITokenizer t)  // was protected
         {
             if (valid)
             {
                 return this;
             }
-            r.Unread(fChar);
-            return FParent.unreadToValid(r);
+            t.Unread(fChar);
+            return FParent.unreadToValid(t);
         }
     }
 }

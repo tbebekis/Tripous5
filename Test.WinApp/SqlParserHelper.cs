@@ -47,15 +47,15 @@ namespace Test.WinApp
                 }
                 else if (T.Kind == Token.TT_SYMBOL)
                 { 
-                    SB.AppendLine($"Symbol: {T.AsString}" );
+                    SB.AppendLine($"Symbol: {T.StringValue}" );
                 }
                 else if (T.Kind == Token.TT_WORD)
                 {
-                    SB.AppendLine($"Word: {T.AsString}");
+                    SB.AppendLine($"Word: {T.StringValue}");
                 }
                 else if (T != null)
                 {
-                    S = T.AsString;
+                    S = T.StringValue;
                     if (!string.IsNullOrWhiteSpace(S))
                         SB.AppendLine($"Unknown Token: {S}");
                 }

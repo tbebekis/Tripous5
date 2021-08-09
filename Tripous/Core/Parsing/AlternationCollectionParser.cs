@@ -10,7 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
- 
+using System.Collections.Generic;
 
 namespace Tripous.Parsing
 {
@@ -34,9 +34,9 @@ namespace Tripous.Parsing
 
             ArrayList terms = new ArrayList();
 
-            for (int i = 0; i < FSubParsers.Count; i++)
+            for (int i = 0; i < fSubParsers.Count; i++)
             {
-                P = (Parser)FSubParsers[i];
+                P = (Parser)fSubParsers[i];
                 if (P is TerminalParser)
                     terms.Add(P);
             }
@@ -58,7 +58,7 @@ namespace Tripous.Parsing
             ArrayList which = terms;
             if (terms.Count == 0)
             {
-                which = FSubParsers;
+                which = fSubParsers;
             }
 
             Random Random = new Random();
@@ -131,16 +131,18 @@ namespace Tripous.Parsing
         /// </summary>
         /// <param name="In"> a ArrayList of assemblies that result from matching against a beginning set of assemblies</param>
         /// <returns>Returns a list of assemblies to Match against</returns>
-        public override ArrayList Match(ArrayList In)
+        public override List<Assembly> Match(List<Assembly> In)
         {
-            ArrayList Out = new ArrayList();
+            List<Assembly> ResultList = new List<Assembly>();
 
-            for (int i = 0; i < FSubParsers.Count; i++)
+            List<Assembly> Matched;
+            for (int i = 0; i < fSubParsers.Count; i++)
             {
-                Parser p = (Parser)FSubParsers[i];
-                Add(Out, p.MatchAndAssemble(In));
+                Parser p = (Parser)fSubParsers[i];
+                Matched = p.MatchAndAssemble(In);
+                ResultList.AddRange(Matched);
             }
-            return Out;
+            return ResultList;
         }
         /// <summary>
         /// Create a random collection of elements that correspond to this alternation.
@@ -153,8 +155,8 @@ namespace Tripous.Parsing
             //double n = (double) FSubParsers.Count;
             Random Random = new Random();
 
-            int i = Random.Next(FSubParsers.Count);
-            Parser j = (Parser)FSubParsers[i];
+            int i = Random.Next(fSubParsers.Count);
+            Parser j = (Parser)fSubParsers[i];
             return j.RandomExpansion(maxDepth, depth++);
 
         }

@@ -10,8 +10,8 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
- 
 
 namespace Tripous.Parsing
 {
@@ -36,8 +36,11 @@ namespace Tripous.Parsing
         }
         /// <summary>
         /// Returns a textual description of this parser.
+        /// <para>Used in avoiding to produce the textual representation of this instance twice.</para>
         /// </summary>
-        public override string UnvisitedString(ArrayList visited)
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public override string UnvisitedString(List<Parser> visited)
         {
             return "C";
         }

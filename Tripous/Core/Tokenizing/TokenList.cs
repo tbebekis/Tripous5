@@ -13,22 +13,21 @@ using System.Collections;
 
 namespace Tripous.Tokenizing
 {
- 
+
     /// <summary>
-    /// A TokenString is like a string, but it is a series of 
-    /// Tokens rather than a series of chars. Once a TokenString is 
-    /// created, it is "immutable", meaning it cannot change. This
-    /// lets you freely copy TokenStrings without worrying about 
-    /// their state. 
+    /// A <see cref="TokenList"/> is a list of tokens that can present its tokens as a string. 
+    /// <para>Once a <see cref="TokenList"/> is created, it is "immutable", meaning it cannot change. </para>
+    /// <para>This lets you freely copy instances of this class without worrying about their state. </para>
+    /// <para>NOTE: TokenString in the original code.</para>
     /// </summary>
-    public class TokenString : ICloneable
+    public class TokenList: ICloneable
     { 
         /* construction */
         /// <summary>
         /// Constructs a tokenString from the supplied FTokens.
         /// </summary>
         /// <param name="Tokens">the FTokens to use</param>
-        public TokenString(Token[] Tokens)
+        public TokenList(Token[] Tokens)
         {
             this.Tokens = Tokens;
         }
@@ -36,7 +35,7 @@ namespace Tripous.Tokenizing
         /// Constructs a tokenString from the supplied string. 
         /// </summary>
         /// <param name="s">the string to tokenize</param>
-        public TokenString(string s) 
+        public TokenList(string s) 
             : this(new Tokenizer(s))
         {
         }
@@ -44,14 +43,15 @@ namespace Tripous.Tokenizing
         /// Constructs a tokenString from the supplied reader and  tokenizer. 
         /// </summary>
         /// <param name="t">the tokenizer that will produces the FTokens</param>
-        public TokenString(Tokenizer t)
+        public TokenList(Tokenizer t)
         {
+            Token tok = null;
             ArrayList v = new ArrayList();
             try
             {
                 while (true)
                 {
-                    Token tok = t.NextToken();
+                    tok = t.NextToken();
                     if (tok.Kind == Token.TT_EOF)
                         break;
                     v.Add(tok);
@@ -59,9 +59,11 @@ namespace Tripous.Tokenizing
             }
             catch (Exception e)
             {
-                throw (new Exception("Problem tokenizing string: " + e.Message));
-
+                string Message = tok != null ? $"Position: {tok.LineIndex}, {tok.CharIndex}. " : string.Empty;
+                Message = $"{Message}Problem tokenizing string: {e.Message}";
+                throw new ApplicationException(Message);
             }
+
             Tokens = new Token[v.Count];
             v.CopyTo(Tokens);
         }
@@ -91,7 +93,7 @@ namespace Tripous.Tokenizing
             for (int i = 0; i < this.Tokens.Length; i++)
                 Result[i] = this.Tokens[i].Clone() as Token;
 
-            return new TokenString(Result);
+            return new TokenList(Result);
         }
 
         /// <summary>

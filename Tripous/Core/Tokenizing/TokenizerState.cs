@@ -29,11 +29,10 @@ namespace Tripous.Tokenizing
         /// <summary>
         /// Return a token that represents a logical piece of a reader.
         /// </summary>
-        /// <param name="r">a reader to ReadByte from</param>
+        /// <param name="t">the tokenizer and reader, conducting the overall tokenization</param>
         /// <param name="c">the character that a tokenizer used to  determine to use this state</param>
-        /// <param name="t">the tokenizer conducting the overall tokenization of the reader</param>
-        /// <returns> a token that represents a logical piece of the  reader</returns>
-        public abstract Token NextToken(ICharReader r, int c, Tokenizer t);
+        /// <returns> Returns a token that represents a logical piece of the  reader</returns>
+        public abstract Token NextToken(ITokenizer t, int c);
     }
 
 }

@@ -85,7 +85,7 @@ namespace Tripous.Tokenizing
         /// <param name="r"> a reader to ReadByte from</param>
         /// <param name="first">the first character of this symbol, already ReadByte from the reader</param>
         /// <returns>Returns a symbol string from a reader.</returns>
-        public string NextSymbol(ICharReader r, int first)
+        public string NextSymbol(ITokenizer r, int first)
         {
             SymbolNode n1 = FindChildWithChar((char)first);
             SymbolNode n2 = n1.DeepestRead(r);

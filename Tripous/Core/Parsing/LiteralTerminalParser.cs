@@ -10,6 +10,7 @@
 using System;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
 using Tripous.Tokenizing;
 
@@ -20,10 +21,7 @@ namespace Tripous.Parsing
     /// </summary>
     public class LiteralTerminalParser : TerminalParser
     {
-        /// <summary>
-        /// the FLiteral to Match
-        /// </summary>
-        protected Token FLiteral;
+ 
 
         /* construction */
         /// <summary>
@@ -32,7 +30,8 @@ namespace Tripous.Parsing
         /// <param name="s">the string to Match as a token</param>
         public LiteralTerminalParser(string s)
         {
-            FLiteral = new Token(s);
+            LiteralValue = s;
+            //FLiteral = new Token(s);
         }
 
         /* public */
@@ -43,16 +42,27 @@ namespace Tripous.Parsing
         /// <returns>Returns true if the FLiteral this object Equals an assembly's next element.</returns>
         public override bool Qualifies(object o)
         {
-            return FLiteral.Equals((Token)o);
+            Token T = o as Token;
+            return T != null && LiteralValue.Equals(T.StringValue);
         }
         /// <summary>
         /// Returns a textual description of this parser.
+        /// <para>Used in avoiding to produce the textual representation of this instance twice.</para>
         /// </summary>
-        /// <param name="visited">a list of parsers already printed in  this description</param>
-        /// <returns>Returns a textual description of this parser.</returns>
-        public override string UnvisitedString(ArrayList visited)
+        /// <param name="visited">A list of parsers already printed </param>
+        /// <returns>Returns a textual version of this parser, avoiding recursion</returns>
+        public override string UnvisitedString(List<Parser> visited)
         {
-            return FLiteral.ToString();
+            return LiteralValue;
         }
+
+        /* properties */
+        /// <summary>
+        /// A string value against which this parser matches, i.e. the literal to match.
+        /// </summary>
+        public string LiteralValue { get; protected set; }
     }
+
+
+
 }
