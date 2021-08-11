@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Tripous.Model2
 {
 
-#warning EDW EISAI KOUFALA - Θα φτιάξουμε τους Brokers από την αρχή
+#warning TODO: EDW EISAI KOUFALA - Θα φτιάξουμε τους Brokers από την αρχή
 
     public class BrokerFieldDef
     {
