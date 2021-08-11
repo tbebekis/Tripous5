@@ -16,3 +16,5 @@
 **/ScriptDocs
 **/DocFx
 *.editorconfig
+/WebDesk/WebDesk.xml
+/WebDesk.Lib/WebDesk.Lib.xml
