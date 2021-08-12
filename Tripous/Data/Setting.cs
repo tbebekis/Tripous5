@@ -138,7 +138,7 @@ namespace Tripous.Data
                     Value = Row.AsDateTime("VDateTime");
                     break;
                 case SettingDataType.Boolean:
-                    Value = Row.AsInteger("VInteger", 0) == 1;
+                    Value = Row.AsInteger("VInteger", 0) > 1;
                     break;
                 case SettingDataType.SingleSelect:
                     Value = Row.AsInteger("VInteger");

@@ -422,6 +422,8 @@ namespace Tripous
         /// Gets the size of a field for  the default SimpleType data type for Id fields
         /// </summary>
         static public int OidSize { get { return OidDataType == SimpleType.String ? 40 : 0; } }
+
+        /* 
         /// <summary>
         /// A string to be used for primary keys when formating CREATE TABLE statements
         /// </summary>
@@ -430,6 +432,7 @@ namespace Tripous
         ///  A string to be used for foreign keys when formating CREATE TABLE statements
         /// </summary>
         static public string ForeignKeyStr { get { return SysConfig.GuidOids ? "@NVARCHAR(40)" : "integer"; } }
+        */
     }
 
 }

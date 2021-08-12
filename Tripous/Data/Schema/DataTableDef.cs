@@ -78,11 +78,15 @@ namespace Tripous.Data
             Fields.ForEach(item => CheckIsValidDatabaseObjectIdentifier(item.Name));
 
             int Count = Fields.Count(item => item.IsPrimaryKey);
-            if (Count == 0)
-                Throw($"No primary key.");
+            //if (Count == 0)
+            //    Throw($"No primary key.");
 
             if (Count > 1)
                 Throw($"Compound primary keys not supported.");
+
+            DataFieldDef F = Fields.FirstOrDefault(item => item.IsPrimaryKey);
+            if (!(F.DataType == DataFieldType.String || F.DataType == DataFieldType.Integer))
+                Throw($"Not supported data-type for primary key: {F.DataType.ToString()}");
 
             Count = Fields.Count(item => item.DataType == DataFieldType.Unknown);
             if (Count > 1)
@@ -92,16 +96,23 @@ namespace Tripous.Data
             if (Count > 1)
                 Throw($"Fields without Name.");
 
+            Fields.ForEach((item) => {
+                bool Flag = (string.IsNullOrWhiteSpace(item.ForeignTableName) && string.IsNullOrWhiteSpace(item.ForeignFieldName))
+                            || (!string.IsNullOrWhiteSpace(item.ForeignTableName) && !string.IsNullOrWhiteSpace(item.ForeignFieldName));
+
+                if (!Flag)
+                    Throw($"Foreign Key constraint not fully defined in Field: {item.Name}");
+            });
 
             // unique constraints
-            Count = UniqueConstraints.Count(item => string.IsNullOrWhiteSpace(item.FieldName));
-            if (Count > 1)
-                Throw($"Unique constraints without FieldName.");
+           // Count = UniqueConstraints.Count(item => string.IsNullOrWhiteSpace(item.FieldName));
+           // if (Count > 1)
+           //     Throw($"Unique constraints without FieldName.");
 
             // foreign key constraints
-            Count = ForeignKeys.Count(item => string.IsNullOrWhiteSpace(item.FieldName) || string.IsNullOrWhiteSpace(item.ForeignTableName) || string.IsNullOrWhiteSpace(item.ForeignFieldName));
-            if (Count > 1)
-                Throw($"Foreign key constraints not fully defined.");
+            //Count = ForeignKeys.Count(item => string.IsNullOrWhiteSpace(item.FieldName) || string.IsNullOrWhiteSpace(item.ForeignTableName) || string.IsNullOrWhiteSpace(item.ForeignFieldName));
+            //if (Count > 1)
+            //    Throw($"Foreign key constraints not fully defined.");
         }
         /// <summary>
         /// Returns the table definition text.
@@ -133,21 +144,35 @@ namespace Tripous.Data
                 SB.AppendLine("  " + sDef);
             }
 
+
+            // unique constraints
             string sName;
-            for (int i = 0; i < UniqueConstraints.Count; i++)
+            int Index = 0;
+            foreach (DataFieldDef Field in Fields)
             {
-                sName = EnsureValidLength($"UC{i}_{Name}");
-                sDef = $",constraint {sName} unique ({UniqueConstraints[i].FieldName})";
-                SB.AppendLine("  " + sDef);
+                if (Field.Unique)
+                {
+                    sName = EnsureValidLength($"UC{Index}_{Name}");
+                    sDef = $",constraint {sName} unique ({Field.Name})";
+                    SB.AppendLine("  " + sDef);
+                    Index++;
+                }
             }
 
-            for (int i = 0; i < ForeignKeys.Count; i++)
+            // foreign key constraints
+            Index = 0;
+            foreach (DataFieldDef Field in Fields)
             {
-                sName = EnsureValidLength($"FC{i}_{Name}");
-                sDef = $",constraint {sName} foreign key ({ForeignKeys[i].FieldName}) references {ForeignKeys[i].ForeignTableName} ({ForeignKeys[i].ForeignFieldName})";
-                SB.AppendLine("  " + sDef);
+                if (!string.IsNullOrWhiteSpace(Field.ForeignTableName) && !string.IsNullOrWhiteSpace(Field.ForeignFieldName))
+                {
+                    sName = EnsureValidLength($"FC{Index}_{Name}");
+                    sDef = $",constraint {sName} foreign key ({Field.Name}) references {Field.ForeignTableName} ({Field.ForeignFieldName})";
+                    SB.AppendLine("  " + sDef);
+                    Index++;
+                }
             }
 
+ 
             SB.AppendLine(")");
             return SB.ToString();
         }
@@ -155,45 +180,106 @@ namespace Tripous.Data
         /// <summary>
         ///  Creates, adds and returns a primary key field.
         /// </summary>
-        public DataFieldDef AddPrimaryKey(string FieldName = "Id", string TitleKey = null)
+        public DataFieldDef AddPrimaryKey(string FieldName = "Id", int Length = 40, string TitleKey = null)
         {
             DataFieldDef Result = new DataFieldDef();
             Result.Name = FieldName;
             Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
             Result.IsPrimaryKey = true;
+            Result.DataType = SysConfig.GuidOids ? DataFieldType.String : DataFieldType.Integer;
+            Result.Length = Length;
+            Result.Required = true;
             Fields.Add(Result);
             return Result;
         }
+
+        /// <summary>
+        ///  Creates, adds and returns a field.
+        /// </summary>
+        public DataFieldDef AddField(string FieldName, DataFieldType DataType, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        {
+            DataFieldDef Result = new DataFieldDef();
+            Result.Name = FieldName;
+            Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
+            Result.DataType = DataType;
+            Result.Required = Required;
+            Result.DefaultValue = DefaultValue;
+            Fields.Add(Result);
+            return Result;
+        }
+        
         /// <summary>
         ///  Creates, adds and returns a string (nvarchar) field.
         /// </summary>
-        public DataFieldDef AddStringField(string FieldName, int Length, bool NotNull, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddStringField(string FieldName, int Length, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             DataFieldDef Result = new DataFieldDef();
             Result.Name = FieldName;
             Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
             Result.DataType = DataFieldType.String;
             Result.Length = Length;
-            Result.Required = NotNull;
+            Result.Required = Required;
             Result.DefaultValue = DefaultValue;
             Fields.Add(Result);
             return Result;
         }
         /// <summary>
-        ///  Creates, adds and returns a field.
+        ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddField(string FieldName, DataFieldType DataType, bool NotNull, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddIntegerField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
-            DataFieldDef Result = new DataFieldDef();
-            Result.Name = FieldName;
-            Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
-            Result.DataType = DataType;
-            Result.Required = NotNull;
-            Result.DefaultValue = DefaultValue;
-            Fields.Add(Result);
-            return Result;
+            return AddField(FieldName, DataFieldType.Integer, Required, TitleKey, DefaultValue);
         }
-
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddFloatField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        {
+            return AddField(FieldName, DataFieldType.Float, Required, TitleKey, DefaultValue);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddDecimalField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        {
+            return AddField(FieldName, DataFieldType.Decimal, Required, TitleKey, DefaultValue);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddDateTimeField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        {
+            return AddField(FieldName, DataFieldType.DateTime, Required, TitleKey, DefaultValue);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddDateField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        {
+            return AddField(FieldName, DataFieldType.Date, Required, TitleKey, DefaultValue);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddBooleanField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        {
+            return AddField(FieldName, DataFieldType.Boolean, Required, TitleKey, DefaultValue);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddBlobField(string FieldName, bool Required = false, string TitleKey = null)
+        {
+            return AddField(FieldName, DataFieldType.Blob, Required, TitleKey, null);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a field of a certain type.
+        /// </summary>
+        public DataFieldDef AddTextBlobField(string FieldName, bool Required = false, string TitleKey = null)
+        {
+            return AddField(FieldName, DataFieldType.TextBlob, Required, TitleKey, null);
+        }
+        /*
         /// <summary>
         ///  Creates, adds and returns a unique constraint
         /// </summary>
@@ -216,7 +302,8 @@ namespace Tripous.Data
             ForeignKeys.Add(Result);
             return Result;
         }
-
+        */
+        
         /* properties */
         /// <summary>
         /// Database Id
@@ -239,6 +326,8 @@ namespace Tripous.Data
         /// Fields
         /// </summary>
         public List<DataFieldDef> Fields { get; set; } = new List<DataFieldDef>();
+
+        /*
         /// <summary>
         /// UniqueConstraints
         /// </summary>
@@ -247,6 +336,7 @@ namespace Tripous.Data
         /// ForeignKeys
         /// </summary>
         public List<ForeignKeyDef> ForeignKeys { get; set; } = new List<ForeignKeyDef>();
+        */
     }
 
 
@@ -309,7 +399,7 @@ namespace Tripous.Data
             string sDataType;
             if (IsPrimaryKey)
             {
-                sDataType = SysConfig.PrimaryKeyStr;
+                sDataType = DataType == DataFieldType.String? $"@NVARCHAR({Length})    @NOT_NULL primary key" : "@PRIMARY_KEY";  
             }
             else if (DataType == DataFieldType.String)
             {
@@ -329,6 +419,16 @@ namespace Tripous.Data
             string Result = $"{Name} {sDataType} {sDefault} {sNull}";
 
             return Result;
+        }
+
+        /// <summary>
+        /// Defines a foreign key upon this field. Returns this.
+        /// </summary>
+        public DataFieldDef SetForeign(string TableName, string FieldName)
+        {
+            this.ForeignFieldName = TableName;
+            this.ForeignFieldName = FieldName;
+            return this;
         }
 
         /* properties */
@@ -376,7 +476,7 @@ namespace Tripous.Data
             get
             {
                 if (IsPrimaryKey && SysConfig.GuidOids)
-                    return 40;
+                    return fLength <= 40? 40: fLength;
                 if (DataType == DataFieldType.String)
                     return fLength;
                 return 0;
@@ -397,10 +497,26 @@ namespace Tripous.Data
         /// The default expression, if any. E.g. 0, or ''. Defaults to null.
         /// <para>NOTE:  e.g. produces default 0, or default '' </para>
         /// </summary>
-        public string DefaultValue { get; set; } 
+        public string DefaultValue { get; set; }
+        
+        /// <summary>
+        /// When true denotes a field upon which a unique constraint is applied
+        /// </summary>
+        public bool Unique { get; set; }
+
+        /// <summary>
+        /// When not empty is the name of a foreign table which this field references.
+        /// <para>NOTE: Used in creating a foreign key constraint.</para>
+        /// </summary>
+        public string ForeignTableName { get; set; }
+        /// <summary>
+        /// When not empty is the name of a foreign field which this field references.  
+        /// <para>NOTE: Used in creating a foreign key constraint.</para>
+        /// </summary>
+        public string ForeignFieldName { get; set; }
     }
 
-
+    /*
     /// <summary>
     /// constraint UC_{TABLE_NAME}_00 unique (FIELD_NAME)
     /// </summary>
@@ -438,5 +554,5 @@ namespace Tripous.Data
         /// </summary>
         public string ForeignFieldName { get; set; }
     }
-
+*/
 }

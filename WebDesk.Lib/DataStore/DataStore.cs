@@ -141,13 +141,10 @@ namespace WebDesk
             Table.Name = "Country";
             Table.AddPrimaryKey();
             Table.AddStringField("Code", 40, true, null, "''");
-            Table.AddStringField("Name", 96, false);
-            Table.AddStringField("CustomerId", 40, true);
+            Table.AddStringField("Name", 96, false).Unique = true;
+            Table.AddStringField("CustomerId", 40, true).SetForeign("Customer", "Id");
             Table.AddField("Date", DataFieldType.DateTime, false);
-
-            Table.AddUniqueConstraint("Name");
-
-            Table.AddForeignKeyConstraint("CustomerId", "Customer", "Id");
+ 
 
             string DefText = Table.GetDefText();
 
