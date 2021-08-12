@@ -88,7 +88,7 @@ namespace Tripous
             return GetString(Key, Default);
         }
         /// <summary>
-        /// Returns a resource string for the Key, if any, else string.Empty.
+        /// Returns a resource string for the Key, if any, else returns the Key.
         /// </summary>
         static public string GS(string Key, CultureInfo Culture = null)
         {

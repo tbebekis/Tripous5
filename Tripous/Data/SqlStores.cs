@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 using System.Data.Common;
+using System.ComponentModel;
 
 namespace Tripous.Data
 {
@@ -16,6 +17,8 @@ namespace Tripous.Data
     /// </summary>
     static public class SqlStores
     {
+
+        static SqlStore fDefault;
 
         /* create sql stores */
         /// <summary>
@@ -40,6 +43,20 @@ namespace Tripous.Data
         static public SqlStore CreateSqlStore(string ConnectionName)
         {
             return CreateSqlStore(Db.GetConnectionInfo(ConnectionName));
+        }
+
+
+        /// <summary>
+        /// Returns the default <see cref="SqlStore"/>.
+        /// </summary>
+        static public SqlStore Default
+        {
+            get
+            {
+                if (fDefault == null)
+                    fDefault = CreateDefaultSqlStore();
+                return fDefault;
+            }
         }
 
     }

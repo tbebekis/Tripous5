@@ -90,7 +90,7 @@ namespace Tripous.Data
         /// <summary>
         /// The list of registered schemas
         /// </summary>
-        static public List<Schema> List { get; }
+        static public List<Schema> List { get; } = new List<Schema>();
  
     }
 }

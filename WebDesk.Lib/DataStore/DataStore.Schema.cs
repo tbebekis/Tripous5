@@ -80,8 +80,9 @@ create table {0} (
         static void RegisterSystemSchema_01()
         {
             string SqlText;
-            //string TableName;
-            SchemaVersion schema = Schemas.AppSchema.Add(Sys.SYSTEM, SysConfig.DefaultConnection, 1);
+
+            Schema Schema = Schemas.GetSystemSchema();             
+            SchemaVersion schema = Schema.Add(Version: 1);
 
             /* Company */
             SqlText = $@"
@@ -211,8 +212,11 @@ create table {SysTables.SmtpProvider} (
         {
 
             string SqlText;
-            string TableName;
-            SchemaVersion schema = Schemas.AppSchema.Add(Sys.APPLICATION, SysConfig.DefaultConnection, 1);
+            string TableName; 
+
+            Schema Schema = Schemas.GetApplicationSchema();
+            SchemaVersion schema = Schema.Add(Version: 1);
+ 
 
             /* AppUser */
             TableName = "AppUser";

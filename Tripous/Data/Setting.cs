@@ -18,6 +18,7 @@ namespace Tripous.Data
     /// </summary>
     public class Setting
     {
+        string fTitleKey;
 
         /// <summary>
         /// Constructor
@@ -86,7 +87,7 @@ namespace Tripous.Data
             {
                 Id = Row.AsString("Id");
                 DisplayOrder = Row.AsInteger("DisplayOrder");
-                Enum.TryParse("Active", out SettingDataType vDataType);
+                Enum.TryParse(Row.AsString("DataType"), out SettingDataType vDataType);
                 DataType = vDataType;
                 TitleKey = Row.AsString("TitleKey");
 
@@ -186,7 +187,7 @@ namespace Tripous.Data
                     Result["VDateTime"] = GetValue();
                     break;
                 case SettingDataType.Boolean:
-                    Result["VDateTime"] = GetValue();
+                    Result["VInteger"] = GetValue();
                     break;
                 case SettingDataType.SingleSelect:
                     Result["VInteger"] = GetValue();
@@ -261,16 +262,61 @@ create table {TableName} (
         /// <summary>
         /// Deletes a setting from the database table, based on a specified Id.
         /// </summary>
-        static public void Delete(SqlStore SqlStore, string Id, string TableName = "AppSettings")
+        static public void Delete(string Id, SqlStore SqlStore = null, string TableName = "AppSettings")
         {
+            if (SqlStore == null)
+                SqlStore = SqlStores.Default;
+
             string Prefix = SqlProvider.GlobalPrefix.ToString();
             string SqlText;
 
             SqlText = $@"delete from {TableName} where Id = {Prefix}Id ";
             SqlStore.ExecSql(SqlText, Id);
         }
+        /// <summary>
+        /// Loads and returns all settings from a specified database table.
+        /// </summary>
+        static public List<Setting> LoadAll(SqlStore SqlStore = null, string TableName = "AppSettings")
+        {
+            if (SqlStore == null)
+                SqlStore = SqlStores.Default;
+
+            string SqlText;
+
+            SqlText = $@"select * from {TableName} ";
+            DataTable Table = SqlStore.Select(SqlText);
+
+            List<Setting> ResultList = new List<Setting>();
+
+            foreach (DataRow Row in Table.Rows)
+            {
+                ResultList.Add(new Setting(Row));
+            }
+
+            return ResultList;
+        }
+        /// <summary>
+        /// Saves a list of settings to the database table.
+        /// <para>INSERTs or UPDATEs depending on the value of the <see cref="Id"/> property.</para>
+        /// </summary>
+        static public void SaveAll(List<Setting> SettingList, SqlStore SqlStore = null, string TableName = "AppSettings")
+        {
+            if (SqlStore == null)
+                SqlStore = SqlStores.Default;
+
+            foreach (Setting Instance in SettingList)
+                Instance.Save(SqlStore, TableName);
+        }
 
         /* public */
+        /// <summary>
+        /// Returns a string representation of this instance
+        /// </summary>
+        public override string ToString()
+        {
+            return $"{Id} - {DataType}";
+        }
+
         /// <summary>
         /// Loads an instance of this class from a specified <see cref="DataRow"/>
         /// </summary>
@@ -281,12 +327,15 @@ create table {TableName} (
         /// <summary>
         /// Loads the value only of this instance from the database table
         /// </summary>
-        public void LoadValue(SqlStore SqlStore, string TableName = "AppSettings")
+        public void LoadValue(SqlStore SqlStore = null, string TableName = "AppSettings")
         {
+            if (SqlStore == null)
+                SqlStore = SqlStores.Default;
+
             string Prefix = SqlProvider.GlobalPrefix.ToString();
             string SqlText;
 
-            SqlText = $@"select * {TableName} where Id = {Prefix}Id ";
+            SqlText = $@"select * from {TableName} where Id = {Prefix}Id ";
             DataRow Row = SqlStore.SelectResults(SqlText, Id);
             if (Row != null)
                 LoadFrom(Row, ValueOnly: true);
@@ -295,8 +344,11 @@ create table {TableName} (
         /// Saves an instance of this class in the specified database table.
         /// <para>INSERTs or UPDATEs depending on the value of the <see cref="Id"/> property.</para>
         /// </summary>
-        public void Save(SqlStore SqlStore, string TableName = "AppSettings")
+        public void Save(SqlStore SqlStore = null, string TableName = "AppSettings")
         {
+            if (SqlStore == null)
+                SqlStore = SqlStores.Default;
+
             string SqlText;
 
             string Prefix = SqlProvider.GlobalPrefix.ToString();
@@ -309,7 +361,7 @@ create table {TableName} (
             if (Table.Rows.Count == 0)
             {
                 SqlText = $@"
-insert int {TableName} (
+insert into {TableName} (
      Id               
     ,DisplayOrder     
     ,DataType         
@@ -352,17 +404,22 @@ update {TableName} set
 where
     Id = {Prefix}Id  
 ";
-
-                Dictionary<string, object> ParamsDic = SaveToDictionary();
-                SqlStore.ExecSql(SqlText, ParamsDic);
             }
+
+
+
+            Dictionary<string, object> ParamsDic = SaveToDictionary();
+            SqlStore.ExecSql(SqlText, ParamsDic);
         }
         /// <summary>
         /// Saves just the <see cref="Value"/> of a specified instance to the specified database table.
         /// <para>The <see cref="Id"/> of the instance must have a value.</para>
         /// </summary>
-        public void SaveValue(SqlStore SqlStore, string TableName = "AppSettings")
+        public void SaveValue(SqlStore SqlStore = null, string TableName = "AppSettings")
         {
+            if (SqlStore == null)
+                SqlStore = SqlStores.Default;
+
             string Prefix = SqlProvider.GlobalPrefix.ToString();
             string SqlText;
 
@@ -446,6 +503,16 @@ where
             return (int[])GetValue();
         }
 
+
+        /// <summary>
+        /// Returns the title (label) of this setting, localized.
+        /// </summary>
+        public string GetTitle()
+        {
+            string Result = Res.GS(TitleKey);
+            return Result;
+        }
+
         /* properties */
         /// <summary>
         /// Id
@@ -462,7 +529,11 @@ where
         /// <summary>
         /// The title label or a resource string key
         /// </summary>
-        public string TitleKey { get; set; }
+        public string TitleKey
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitleKey) ? fTitleKey : Id; }
+            set { fTitleKey = value; }
+        }
         /// <summary>
         /// The setting value as it comes from the storage medium, i.e. database.
         /// <para>When the data-type is String, Integer, Float, Decimal, Date, DateTime and Boolean: Value contains the actual typed value.</para>

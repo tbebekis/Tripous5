@@ -125,8 +125,9 @@ namespace Test.WinApp
                     if (Attr != null)
                     {
                         Version = AppSchema.FindOrAdd(Attr.Version);
-                        Method.Invoke(null, new object[] { AppSchema, Version });
-#warning TODO: EDW EIMASTE
+
+                        // static void RegisterSchema(Schema Schema, SchemaVersion Version)
+                        Method.Invoke(null, new object[] { AppSchema, Version });  
                     }
                 }
  
@@ -161,14 +162,7 @@ namespace Test.WinApp
             ExecuteSchemas();
 
             SqlStore = SqlStores.CreateDefaultSqlStore();
-
-
-
-
-            ConnectionInfoList = new SqlConnectionInfoList();
-            //foreach (var Con in ConnectionInfoList.SqlConnections)
-            //    Con.CommandTimeoutSeconds = 60 * 15;  // 15 minutes
-            Db.Connections = ConnectionInfoList.SqlConnections;
+ 
         }
 
         /* log */

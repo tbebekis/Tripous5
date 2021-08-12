@@ -78,7 +78,9 @@ namespace Test.WinApp
 
         void FormInitialize()
         {
-   
+            App.Initialize(this);
+
+            SettingTest.LoadSettings();
         }
  
         /* overrides */
