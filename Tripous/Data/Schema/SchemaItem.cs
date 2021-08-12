@@ -11,19 +11,22 @@ namespace Tripous.Data
 {
 
     /// <summary>
-    /// Represents a name schema item, actually only table and view is supported. 
+    /// Represents a schema item, actually only table and view is supported. 
     /// </summary>
-    public class SchemaItem : NamedItem
+    public class SchemaItem  
     {
-
-
+ 
         /// <summary>
         /// Constructor
         /// </summary>
         public SchemaItem()
         {
         }
-
+ 
+        /// <summary>
+        /// The name of this table or view schema item.
+        /// </summary>
+        public string Name { get; set; }
         /// <summary>
         /// Gets or sets the sql statement text of the item.
         /// </summary>

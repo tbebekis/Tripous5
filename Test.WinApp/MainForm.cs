@@ -12,34 +12,96 @@ namespace Test.WinApp
 {
     public partial class MainForm : Form
     {
+        bool Executing;
+
         void AnyClick(object sender, EventArgs ea)
         {
-            if (btnParseSql == sender)
+ 
+        }
+
+
+        /* public */
+        public void Clear()
+        {
+            edtLog.Clear();
+            Application.DoEvents();
+        }
+        public void Append(string Text)
+        {
+            if (!string.IsNullOrWhiteSpace(Text))
             {
-                ParseSql();
+                edtLog.AppendText(Text);
+                Application.DoEvents();
             }
         }
+        public void AppendLine(string Text)
+        {
+            if (!string.IsNullOrWhiteSpace(Text))
+            {
+                edtLog.AppendText(Text + Environment.NewLine);
+                Application.DoEvents();
+            }
+        }
+        public void Log(string Text = null)
+        {
+            if (string.IsNullOrWhiteSpace(Text))
+            {
+                Clear();
+            }
+            else
+            {
+                AppendLine(Text);
+            }
+        }
+
+        void Execute(Action Proc)
+        {
+            if (Executing)
+            {
+                AppendLine("Cannot Execute(). Already executing!");
+            }
+
+            Executing = true;
+            try
+            {
+                Proc();
+            }
+            catch (Exception e)
+            {
+                AppendLine(e.ToString());
+            }
+            finally
+            {
+                Executing = false;
+            }
+        }
+
         void FormInitialize()
         {
-            btnParseSql.Click += AnyClick;
+   
         }
-        void ParseSql()
-        {
-            string SqlText = edtSql.Text;
-            SqlParserHelper.Tokenize(edtSql.Text, new LogBox(edtSqlParserLog));
-        }
-
-
-
-
-
-
+ 
+        /* overrides */
         protected override void OnShown(EventArgs e)
         {
             if (!DesignMode)
                 FormInitialize();
+
             base.OnShown(e);
         }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (Executing)
+            {
+                e.Cancel = true;
+                AppendLine("Can NOT close. Please STOP executing first." + Environment.NewLine);
+            }
+
+        }
+
+        /* construction */
 
         /// <summary>
         /// Construction

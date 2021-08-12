@@ -12,11 +12,16 @@ namespace Tripous.Data
 
     /// <summary>
     /// The holder of all schema versions of a certain Schema.
+    /// <para>A <see cref="Schema"/> has a unique domain name and a connection name. </para>
+    /// <para>The <see cref="Schema.Domain"/> could be System, Application, or the unique identifier name of an external plugin. </para>
+    /// <para>The <see cref="Schema.ConnectionName"/> connection name, used in creating the relevant <see cref="SqlStore"/> instance that executes the schema.</para>
+    /// <para>A <see cref="Schema"/> has also a list of <see cref="SchemaVersion"/> items. </para>
+    /// <para>A <see cref="SchemaVersion"/> item has an integer version,  
+    /// and collections of <see cref="SchemaItem"/> items for tables and views,
+    /// along with collections of statements to be executed before and after the schema version is executed.</para>
     /// </summary>
-    public class Schema : NamedItem
+    public class Schema  
     {
-        OwnedCollection<SchemaVersion> fVersions = new OwnedCollection<SchemaVersion>();
-
 
         /* construction */
         /// <summary>
@@ -24,79 +29,91 @@ namespace Tripous.Data
         /// </summary>
         public Schema()
         {
-            fVersions = new OwnedCollection<SchemaVersion>();
-            Versions.Owner = this;
         }
-
 
         /* public */
         /// <summary>
-        /// Returns the first schema version with Domain, ConnectionName and Version, if any else null
+        /// Finds or adds, if not exists, a <see cref="SchemaVersion"/>
         /// </summary>
-        public SchemaVersion Find(string Domain, string ConnectionName, int Version)
+        public SchemaVersion FindOrAdd(int Version)
         {
-            return Versions.FirstOrDefault(item => Domain.IsSameText(item.Domain)
-                                                    && ConnectionName.IsSameText(item.ConnectionName)
-                                                    && (Version == item.Version));
+            SchemaVersion Result = Versions.FirstOrDefault(item => (Version == item.Version));
+            if (Result == null)
+                Result = Add(Version);
+
+            return Result;
         }
         /// <summary>
-        /// True if a version with Domain, ConnectionName and Version is already registered.
+        /// Returns the a schema version item with a specified version, if any else null
         /// </summary>
-        public bool Contains(string Domain, string ConnectionName, int Version)
+        public SchemaVersion Find(int Version)
         {
-            return Find(Domain, ConnectionName, Version) != null;
+            return Versions.FirstOrDefault(item => (Version == item.Version));
+        }
+        /// <summary>
+        /// True if a schema version item with a specified version is already registered.
+        /// </summary>
+        public bool Contains(int Version)
+        {
+            return Find(Version) != null;
         }
 
         /// <summary>
-        /// Returns the first schema version with Domain and ConnectionName
-        /// and having a version equal to or greater than the specified Version, if any, else null.
+        /// Returns the first schema version items w having a version equal to or greater than the specified Version, if any, else null.
         /// </summary>
-        public SchemaVersion FindGreaterOrEqual(string Domain, string ConnectionName, int Version)
+        public SchemaVersion FindGreaterOrEqual(int Version)
         {
-            return Versions.FirstOrDefault(item => Domain.IsSameText(item.Domain)
-                                                    && ConnectionName.IsSameText(item.ConnectionName)
-                                                    && (item.Version >= Version));
+            return Versions.FirstOrDefault(item => (item.Version >= Version));
         }
         /// <summary>
-        /// Checks to see if there is already a schema version with this Domain, ConnectionName
-        /// and greater or equal Version. Throws an exception if it finds one.
+        /// Checks to see if there is already a schema version with greater or equal Version. 
+        /// <para>Throws an exception if it finds one.</para>
         /// </summary>
-        public void Check(string Domain, string ConnectionName, int Version)
+        public void Check(int Version)
         {
-            SchemaVersion Item = FindGreaterOrEqual(Domain, ConnectionName, Version);
+            SchemaVersion Item = FindGreaterOrEqual(Version);
             if (Item != null)
-                Sys.Throw("Invalid database schema version: Domain: {0}, ConnectionName {1}, Version {2}", Domain, ConnectionName, Version);
+                Sys.Throw($"Invalid database schema version: Domain: {Domain}, ConnectionName {ConnectionName}, Version {Version}");
         }
 
         /// <summary>
         /// Adds a new schema version
         /// </summary>
-        public SchemaVersion Add(string Domain, string ConnectionName, int Version)
+        public SchemaVersion Add(int Version)
         {
-            Check(Domain, ConnectionName, Version);
+            Check(Version);
             SchemaVersion Result = new SchemaVersion();
-            Result.Domain = Domain;
-            Result.ConnectionName = ConnectionName;
             Result.Version = Version;
             Versions.Add(Result);
             return Result;
         }
-        /// <summary>
-        /// Adds a new schema version for the system
-        /// </summary>
-        internal SchemaVersion AddSystem(string ConnectionName, int Version)
-        {
-            return Add(Sys.SYSTEM, ConnectionName, Version);
-        }
-        /// <summary>
-        /// Adds a new schema version for the application
-        /// </summary>
-        public SchemaVersion Add(string ConnectionName, int Version)
-        {
-            return Add(Sys.APPLICATION, ConnectionName, Version);
-        }
 
         /* execution methods */
+        /// <summary>
+        /// Executes the versions of a schema against a database.
+        /// </summary>
+        /// <param name="Connection">The database connection to execute against.</param>
+        /// <param name="VersionList">VersionList is a by Version sorted list of schemas for that database</param>
+        void ExecuteSchema(SqlConnectionInfo Connection, List<SchemaVersion> VersionList)
+        {
+            /* get the current version of the database  from the dbIni table */
+            DbIni Ini = Db.MainIni;
+            string Entry = string.Format("Database.Version.{0}.{1}", Connection.Name, Domain);
+            int Version = Ini.ReadInteger(Entry, -1);
+
+
+            foreach (SchemaVersion Item in VersionList)
+            {
+                if (Item.Version > Version)
+                {
+                    SchemaExecutor.Execute(Connection, Item);
+                    Db.Metastores.Find(Connection.Name).ReLoad();
+
+                    /* write the version to the dbIni */
+                    Ini.WriteInteger(Entry, Item.Version);  
+                }
+            }
+        }
         /// <summary>
         /// Executes all schemas.
         /// </summary>
@@ -104,85 +121,26 @@ namespace Tripous.Data
         { 
             List<SqlConnectionInfo> Connections = new List<SqlConnectionInfo>(Db.Connections);
 
-            /* group schema versions by Domain */
-            Dictionary<string, List<SchemaVersion>> Dic = Versions
-                .GroupBy(item => item.Domain)                    // IEnumerable<IGrouping<string, SchemaVersion>>
-                .ToDictionary(g => g.Key, g => g.ToList());
+            SqlConnectionInfo Connection = Db.Connections.FirstOrDefault(item => item.Name.IsSameText(ConnectionName));
+            List<SchemaVersion> VersionList = Versions.OrderBy(item => item.Version).ToList();
 
-
-            /*  Executes a schema against a database, registered by Domain.
-                VersionList is a by Version sorted list of schemas for that database. */
-            Action<string, SqlConnectionInfo, List<SchemaVersion>> ExecuteSchema = delegate (string Domain, SqlConnectionInfo Connection, List<SchemaVersion> VersionList)
-            {
-                /* get the current version of the database  from the dbIni table */
-                DbIni Ini = Db.MainIni;
-                string Entry = string.Format("Database.Version.{0}.{1}", Connection.Name, Domain);
-                int Version = Ini.ReadInteger(Entry, -1);
-
-                  
-                foreach (SchemaVersion Item in VersionList)
-                {
-                    if (Item.Version > Version)
-                    {
-                        SchemaExecutor.Execute(Connection, Item);
-                        Db.Metastores.Find(Connection.Name).ReLoad();
-
-                        /* write the version to the dbIni */
-                        Ini.WriteInteger(Entry, Item.Version); ;
-                    }
-                }
-            };
-
-
-            /*  creates a list of versions regarding a certain domain and a certain database. 
-                The list is sorted by Version. 
-                It then sends that sorted list for execution. */
-            Action<string> ExecuteDomain = delegate (string Domain)
-            {
-                List<SchemaVersion> List = Dic[Domain];
-
-                foreach (SqlConnectionInfo Connection in Connections)
-                {
-                    var q = from item in List
-                            where item.ConnectionName.IsSameText(Connection.Name)
-                            orderby item.Version
-                            select item;
-
-                    ExecuteSchema(Domain, Connection, q.ToList());
-                }
-            };
-
-
-            /* executes the SYSTEM domain schema versions first */
-            if (Dic.ContainsKey(Sys.SYSTEM))
-            {
-                ExecuteDomain(Sys.SYSTEM);
-                Dic.Remove(Sys.SYSTEM);
-            }
-
-            /* executes the APPLICATION domain schema versions first */
-            if (Dic.ContainsKey(Sys.APPLICATION))
-            {
-                ExecuteDomain(Sys.APPLICATION);
-                Dic.Remove(Sys.APPLICATION);
-            }
-
-
-            /* execute the rest of the domains */
-            foreach (var item in Dic)
-            {
-                ExecuteDomain(item.Key);
-            }
-
-
-
+            ExecuteSchema(Connection, VersionList);
         }
 
 
         /* property */
         /// <summary>
+        /// Domain is the name of the register (client code) that has registered the schema.
+        /// <para>It could be System, Application, or the unique identifier name of an external plugin.</para>
+        /// </summary>
+        public string Domain { get; set; }
+        /// <summary>
+        /// The name of the database connection this schema is applied against.
+        /// </summary>
+        public string ConnectionName { get; set; }
+        /// <summary>
         /// The registered versions
         /// </summary>
-        public OwnedCollection<SchemaVersion> Versions { get { return fVersions; } }
+        public List<SchemaVersion> Versions { get; set; } = new List<SchemaVersion>();
     }
 }

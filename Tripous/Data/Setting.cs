@@ -25,6 +25,213 @@ namespace Tripous.Data
         public Setting()
         {
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Setting(DataRow Row)
+        {
+            this.LoadFrom(Row, ValueOnly: false);
+        }
+
+        /// <summary>
+        /// Returns the value as a specific type, according to <see cref="DataType"/>.
+        /// </summary>
+        object GetValue()
+        {
+            object Result = null;
+
+            switch (DataType)
+            {
+                case SettingDataType.String:
+                    Result  = Value == null ? "" : Value;
+                    break;
+                case SettingDataType.Integer:
+                    Result  = Value == null ? 0 : Value;
+                    break;
+                case SettingDataType.Float:
+                    Result  = Value == null ? 0D : Value;
+                    break;
+                case SettingDataType.Decimal:
+                    Result  = Value == null ? 0M : Value;
+                    break;
+                case SettingDataType.Date:
+                    Result = Value == null ? DateTime.MinValue.Date : Convert.ToDateTime(Value).Date;
+                    break;
+                case SettingDataType.DateTime:
+                    Result  = Value == null ? DateTime.MinValue : Convert.ToDateTime(Value);
+                    break;
+                case SettingDataType.Boolean:
+                    Result  = Value == null ? false : Convert.ToInt32(Value);
+                    break;
+                case SettingDataType.SingleSelect:
+                    Result  = Value == null ? -1 : Convert.ToInt32(Value);
+                    break;
+                case SettingDataType.MultiSelect:
+                    int[] Values = Value as int[];
+                    Result = Value == null ? new int[0] : Values;
+                    break;
+            }
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Loads an instance of this class from a specified <see cref="DataRow"/>
+        /// </summary>
+        void LoadFrom(DataRow Row, bool ValueOnly)
+        {
+            string[] Parts;
+
+            if (!ValueOnly)
+            {
+                Id = Row.AsString("Id");
+                DisplayOrder = Row.AsInteger("DisplayOrder");
+                Enum.TryParse("Active", out SettingDataType vDataType);
+                DataType = vDataType;
+                TitleKey = Row.AsString("TitleKey");
+
+                // select list items
+                if (DataType == SettingDataType.SingleSelect || DataType == SettingDataType.MultiSelect)
+                {
+                    if (SelectList == null)
+                        SelectList = new List<SettingSelectItem>();
+                    else
+                        SelectList.Clear();
+
+                    string S = Row.AsString("SelectList");
+                    Parts = S.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    string[] Line;
+                    SettingSelectItem SelectItem;
+                    foreach (string Item in Parts)
+                    {
+                        Line = S.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        if (Line.Length == 2 && Line.All(item => !string.IsNullOrWhiteSpace(item)))
+                        {
+                            SelectItem = new SettingSelectItem();
+                            SelectItem.Id = Convert.ToInt32(Line[0]);
+                            SelectItem.ValueKey = Line[1];
+                            SelectList.Add(SelectItem);
+                        }
+                    }
+                }
+            }
+
+
+            // value
+            switch (DataType)
+            {
+                case SettingDataType.String:
+                    Value = Row.AsString("VString");
+                    break;
+                case SettingDataType.Integer:
+                    Value = Row.AsInteger("VInteger");
+                    break;
+                case SettingDataType.Float:
+                    Value = Row.AsFloat("VDecimal");
+                    break;
+                case SettingDataType.Decimal:
+                    Value = Row.AsDecimal("VDecimal");
+                    break;
+                case SettingDataType.Date:
+                case SettingDataType.DateTime:
+                    Value = Row.AsDateTime("VDateTime");
+                    break;
+                case SettingDataType.Boolean:
+                    Value = Row.AsInteger("VInteger", 0) == 1;
+                    break;
+                case SettingDataType.SingleSelect:
+                    Value = Row.AsInteger("VInteger");
+                    break;
+                case SettingDataType.MultiSelect:
+                    Parts = Row.AsString("VString").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    List<int> ValueList = new List<int>();
+                    foreach (string Id in Parts)
+                        ValueList.Add(Convert.ToInt32(Id));
+                    Value = ValueList.ToArray();
+                    break;
+            }
+
+        }
+        /// <summary>
+        /// Creates and returns a dictionary suitable for saving this instance to database using Sql statements.
+        /// </summary>
+        Dictionary<string, object> SaveToDictionary()
+        {
+            StringBuilder SB;
+            Dictionary<string, object> Result = new Dictionary<string, object>();
+
+            Result["Id"] = Id;
+            Result["DisplayOrder"] = DisplayOrder;
+            Result["DataType"] = DataType.ToString();
+            Result["TitleKey"] = TitleKey;
+
+            switch (DataType)
+            {
+                case SettingDataType.String:
+                    Result["VString"] = GetValue();
+                    break;
+                case SettingDataType.Integer:
+                    Result["VInteger"] = GetValue();
+                    break;
+                case SettingDataType.Float:
+                    Result["VDecimal"] = GetValue();
+                    break;
+                case SettingDataType.Decimal:
+                    Result["VDecimal"] = GetValue();
+                    break;
+                case SettingDataType.Date:
+                    Result["VDateTime"] = GetValue();
+                    break;
+                case SettingDataType.DateTime:
+                    Result["VDateTime"] = GetValue();
+                    break;
+                case SettingDataType.Boolean:
+                    Result["VDateTime"] = GetValue();
+                    break;
+                case SettingDataType.SingleSelect:
+                    Result["VInteger"] = GetValue();
+                    break;
+                case SettingDataType.MultiSelect:
+                    int[] Values = Value as int[];
+                    if (Values != null)
+                    {
+                        SB = new StringBuilder();
+                        foreach (int V in Values)
+                        {
+                            if (SB.Length > 0)
+                                SB.Append(",");
+                            SB.Append(V.ToString());
+                        }
+
+                        Result["VString"] = SB.ToString();
+                    }
+                    else
+                    {
+                        Result["VString"] = "";
+                    }
+ 
+                    break;
+            }
+
+            // select list items
+            Result["SelectList"] = "";
+            if ((DataType == SettingDataType.SingleSelect || DataType == SettingDataType.MultiSelect) && SelectList != null)
+            {
+                SB = new StringBuilder();
+
+                foreach (SettingSelectItem Item in SelectList)
+                {
+                    if (SB.Length > 0)
+                        SB.Append(";");
+                    SB.Append($"{Item.Id}|{Item.ValueKey}");
+                }
+
+                Result["SelectList"] = SB.ToString();
+            }
+
+
+            return Result;
+        }
 
         /* static */
         /// <summary>
@@ -32,138 +239,211 @@ namespace Tripous.Data
         /// </summary>
         static public string GetTableDef(string TableName = "AppSettings")
         {
-            DataTableDef Table = new DataTableDef();
-            Table.Name = TableName;
+ 
+            string SqlText = $@"
+create table {TableName} (
+     Id                      @NVARCHAR(96)          @NOT_NULL primary key
+    ,DisplayOrder            integer default 0      @NOT_NULL      
+    ,DataType                @NVARCHAR(16)          @NOT_NULL    
+    ,TitleKey                @NVARCHAR(96)          @NOT_NULL    
 
-            Table.AddPrimaryKey();
-            Table.AddField("DisplayOrder", DataFieldType.Integer, false, "", "0");            
-            Table.AddStringField("Name", 96, true);
-            Table.AddStringField("DataType", 16, true);
-            Table.AddStringField("TitleKey", 96, true);
-
-            Table.AddStringField("StringValue", 96, false);
-            Table.AddField("IntegerValue", DataFieldType.Integer, false);
-            Table.AddField("FloatValue", DataFieldType.Float, false);
-            Table.AddField("DecimalValue", DataFieldType.Decimal, false);
-            Table.AddField("DateTimeValue", DataFieldType.DateTime, false);
-            Table.AddStringField("SelectList", 1024 * 4, false);
-
-            Table.AddStringField("Code", 40, true, null, "''");
-            
-            Table.AddStringField("CustomerId", 40, true);
-            Table.AddField("Date", DataFieldType.DateTime, false);
-
-            Table.AddUniqueConstraint("Name");
-
-            string Result = Table.GetDefText();
-            return Result;
+    ,VString                @NVARCHAR(512)          @NULL
+    ,VInteger               integer                 @NULL
+    ,VDecimal               @DECIMAL                @NULL
+    ,VDateTime              @DATE_TIME              @NULL
+    
+    ,SelectList             @NVARCHAR(4096)         @NULL
+ )
+";       
+ 
+            return SqlText;
         }
+        /// <summary>
+        /// Deletes a setting from the database table, based on a specified Id.
+        /// </summary>
+        static public void Delete(SqlStore SqlStore, string Id, string TableName = "AppSettings")
+        {
+            string Prefix = SqlProvider.GlobalPrefix.ToString();
+            string SqlText;
+
+            SqlText = $@"delete from {TableName} where Id = {Prefix}Id ";
+            SqlStore.ExecSql(SqlText, Id);
+        }
+
+        /* public */
         /// <summary>
         /// Loads an instance of this class from a specified <see cref="DataRow"/>
         /// </summary>
-        static public Setting Load(DataRow Row)
+        public void Load(DataRow Row)
         {
-            Setting Result = new Setting();
-            Load(Result, Row);
-            return Result;
+            LoadFrom(Row, ValueOnly: false);
         }
         /// <summary>
-        /// Loads an instance of this class from a specified <see cref="DataRow"/>
+        /// Loads the value only of this instance from the database table
         /// </summary>
-        static public void Load(Setting Instance, DataRow Row)
+        public void LoadValue(SqlStore SqlStore, string TableName = "AppSettings")
         {
-            string[] Parts;
+            string Prefix = SqlProvider.GlobalPrefix.ToString();
+            string SqlText;
 
-            Instance.Id = Row.AsString("Id");
-            Instance.DisplayOrder = Row.AsInteger("DisplayOrder");
-            Instance.Name = Row.AsString("Name");
-            Enum.TryParse("Active", out SettingDataType DataType);
-            Instance.DataType = DataType;
-            Instance.TitleKey = Row.AsString("TitleKey");
-
-            // select list items
-            if (DataType == SettingDataType.SingleSelect || DataType == SettingDataType.MultiSelect)
-            {
-                if (Instance.SelectList == null)
-                    Instance.SelectList = new List<SettingSelectItem>();
-                else
-                    Instance.SelectList.Clear();
-
-                string S = Row.AsString("SelectList");
-                Parts = S.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                string[] Line;
-                SettingSelectItem SelectItem;
-                foreach (string Item in Parts)
-                {
-                    Line = S.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    if (Line.Length == 2 && Line.All(item => !string.IsNullOrWhiteSpace(item)))
-                    {
-                        SelectItem = new SettingSelectItem();
-                        SelectItem.Id = Convert.ToInt32(Line[0]);
-                        SelectItem.ValueKey = Line[1];
-                        Instance.SelectList.Add(SelectItem);
-                    }                    
-                }
-            }
-
-            // value
-            switch (DataType)
-            {
-                case SettingDataType.String:
-                    Instance.Value = Row.AsString("StringValue");
-                    break;
-                case SettingDataType.Integer:
-                    Instance.Value = Row.AsInteger("IntegerValue");
-                    break;
-                case SettingDataType.Float:
-                    Instance.Value = Row.AsFloat("FloatValue");
-                    break;
-                case SettingDataType.Decimal:
-                    Instance.Value = Row.AsDecimal("DecimalValue");
-                    break;
-                case SettingDataType.Date:
-                case SettingDataType.DateTime:
-                    Instance.Value = Row.AsDateTime("DateTimeValue");
-                    break;
-                case SettingDataType.Boolean:
-                    Instance.Value = Row.AsInteger("IntegerValue", 0) == 1;
-                    break;
-                case SettingDataType.SingleSelect:
-                    Instance.Value = Row.AsInteger("IntegerValue");
-                    break;
-                case SettingDataType.MultiSelect:
-                    Parts = Row.AsString("StringValue").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    List<int> ValueList = new List<int>();
-                    foreach (string Id in Parts)
-                        ValueList.Add(Convert.ToInt32(Id));
-                    Instance.Value = ValueList.ToArray();
-                    break;
-            }
-
+            SqlText = $@"select * {TableName} where Id = {Prefix}Id ";
+            DataRow Row = SqlStore.SelectResults(SqlText, Id);
+            if (Row != null)
+                LoadFrom(Row, ValueOnly: true);
         }
-
         /// <summary>
         /// Saves an instance of this class in the specified database table.
         /// <para>INSERTs or UPDATEs depending on the value of the <see cref="Id"/> property.</para>
         /// </summary>
-        static public void Save(Setting Instance, string TableName = "AppSettings")
+        public void Save(SqlStore SqlStore, string TableName = "AppSettings")
         {
-#warning TODO: Setting.Save
+            string SqlText;
+
+            string Prefix = SqlProvider.GlobalPrefix.ToString();
+
+            SqlText = $"select Id from {TableName} where Id = '{Id}' ";
+            DataTable Table = SqlStore.Select(SqlText);
+
+            
+
+            if (Table.Rows.Count == 0)
+            {
+                SqlText = $@"
+insert int {TableName} (
+     Id               
+    ,DisplayOrder     
+    ,DataType         
+    ,TitleKey         
+                      
+    ,VString          
+    ,VInteger         
+    ,VDecimal         
+    ,VDateTime        
+                      
+    ,SelectList       
+) values (
+     {Prefix}Id               
+    ,{Prefix}DisplayOrder     
+    ,{Prefix}DataType         
+    ,{Prefix}TitleKey         
+                      
+    ,{Prefix}VString          
+    ,{Prefix}VInteger         
+    ,{Prefix}VDecimal         
+    ,{Prefix}VDateTime        
+                      
+    ,{Prefix}SelectList   
+)";
+            }
+            else
+            {
+                SqlText = $@"
+update {TableName} set
+     DisplayOrder = {Prefix}DisplayOrder   
+    ,DataType     = {Prefix}DataType             
+    ,TitleKey     = {Prefix}TitleKey      
+                                   
+    ,VString      = {Prefix}VString      
+    ,VInteger     = {Prefix}VInteger     
+    ,VDecimal     = {Prefix}VDecimal     
+    ,VDateTime    = {Prefix}VDateTime    
+                                   
+    ,SelectList   = {Prefix}SelectList  
+where
+    Id = {Prefix}Id  
+";
+
+                Dictionary<string, object> ParamsDic = SaveToDictionary();
+                SqlStore.ExecSql(SqlText, ParamsDic);
+            }
         }
         /// <summary>
         /// Saves just the <see cref="Value"/> of a specified instance to the specified database table.
         /// <para>The <see cref="Id"/> of the instance must have a value.</para>
         /// </summary>
-        static public void SaveValue(Setting Instance, string TableName = "AppSettings")
+        public void SaveValue(SqlStore SqlStore, string TableName = "AppSettings")
         {
-#warning TODO: Setting.SaveValue
+            string Prefix = SqlProvider.GlobalPrefix.ToString();
+            string SqlText;
+
+            SqlText = $@"
+update {TableName} set
+     VString      = {Prefix}VString      
+    ,VInteger     = {Prefix}VInteger     
+    ,VDecimal     = {Prefix}VDecimal     
+    ,VDateTime    = {Prefix}VDateTime    
+                                   
+    ,SelectList   = {Prefix}SelectList  
+where
+    Id = {Prefix}Id  
+";
+            Dictionary<string, object> ParamsDic = SaveToDictionary();
+            SqlStore.ExecSql(SqlText, ParamsDic);
+        }
+
+
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public string AsString()
+        {
+            return GetValue() as string;
         }
         /// <summary>
-        /// Deletes a setting from the database table, based on a specified Id.
+        /// Returns the value as a specific type.
         /// </summary>
-        static public void Delete(string Id, string TableName = "AppSettings")
+        public int AsInteger()
         {
-#warning TODO: Setting.Delete
+            return (int)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public double AsFloat()
+        {
+            return (double)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public decimal AsDecimal()
+        {
+            return (decimal)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public DateTime AsDate()
+        {
+            return (DateTime)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public DateTime AsDateTime()
+        {
+            return (DateTime)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public bool AsBoolean()
+        {
+            return (bool)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public int AsSingleSelect()
+        {
+            return (int)GetValue();
+        }
+        /// <summary>
+        /// Returns the value as a specific type.
+        /// </summary>
+        public int[] AsMultiSelect()
+        {
+            return (int[])GetValue();
         }
 
         /* properties */
@@ -175,10 +455,6 @@ namespace Tripous.Data
         /// The display order of this instance
         /// </summary>
         public int DisplayOrder { get; set; }
-        /// <summary>
-        /// The name. Must be unique among all settings
-        /// </summary>
-        public string Name { get; set; }
         /// <summary>
         /// The data-type
         /// </summary>
@@ -199,8 +475,9 @@ namespace Tripous.Data
         /// A list of items to be used when this is a single or multi select setting.
         /// </summary>
         public List<SettingSelectItem> SelectList { get; set; } = new List<SettingSelectItem>();
-
     }
+
+
 
 
     /// <summary>
