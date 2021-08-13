@@ -87,7 +87,7 @@ create table {0} (
             /* Company */
             SqlText = $@"
 create table {SysTables.Company}  (
-   Id                   {SysConfig.PrimaryKeyStr}    
+   Id                   {SysConfig.PrimaryKeyStr()}    
   ,Name                 @NVARCHAR(96)    @NOT_NULL
 
   ,constraint UC_{SysTables.Company}_00 unique (Name)
@@ -105,7 +105,7 @@ create table {SysTables.Company}  (
             /*  SYS_LANG  */
             SqlText = $@"
 create table {SysTables.Lang} (
-    Id                      {SysConfig.PrimaryKeyStr}
+    Id                      {SysConfig.PrimaryKeyStr()}
    ,Name                    @NVARCHAR(40)        @NOT_NULL    
    ,Code                    @NVARCHAR(40)        @NOT_NULL    
    ,CultureCode             @NVARCHAR(40)        @NOT_NULL                  
@@ -127,7 +127,7 @@ create table {SysTables.Lang} (
             /* SYS_LOG */
             SqlText = $@" 
 create table {SysTables.Log}  (
-   Id                     {SysConfig.PrimaryKeyStr}
+   Id                     {SysConfig.PrimaryKeyStr()}
   ,LogDate                @DATE            @NULL
   ,LogTime                @NVARCHAR(12)    @NULL
   ,UserName               @NVARCHAR(96)    @NULL
@@ -149,7 +149,7 @@ create table {SysTables.Log}  (
             /* SYS_DATA */
             SqlText = $@"
 create table {SysTables.Data}  (                                                                                      
-   Id                  {SysConfig.PrimaryKeyStr}
+   Id                  {SysConfig.PrimaryKeyStr()}
   ,@COMPANY_ID         {CompanyDataType}
 
   ,DataName            @NVARCHAR(96)   @NOT_NULL
@@ -176,10 +176,10 @@ create table {SysTables.Data}  (
             /*  SYS_STR_RES  */
             SqlText = $@"
 create table {SysTables.StrRes} (
-    Id                      {SysConfig.PrimaryKeyStr} 
-   ,LanguageId              {SysConfig.ForeignKeyStr} @NULL                 
+    Id                      {SysConfig.PrimaryKeyStr()} 
+   ,LanguageId              {SysConfig.ForeignKeyStr()} @NULL                 
    ,TableName               @NVARCHAR(96)        @NULL           
-   ,TableId                 {SysConfig.ForeignKeyStr} @NULL           
+   ,TableId                 {SysConfig.ForeignKeyStr()} @NULL           
    ,EntryKey                @NVARCHAR(96)        @NOT_NULL		 
    ,EntryValue              @NBLOB_TEXT          @NOT_NULL                         
  )
@@ -191,7 +191,7 @@ create table {SysTables.StrRes} (
             /* SYS_SMTP_PROVIDER */
             SqlText = $@"
 create table {SysTables.SmtpProvider} (
-     Id						{SysConfig.PrimaryKeyStr}
+     Id						{SysConfig.PrimaryKeyStr()}
     ,Host                   @NVARCHAR(96)        @NOT_NULL  
     ,Port                   integer default 25   @NOT_NULL  
     ,UserName               @NVARCHAR(96)        @NULL 
@@ -222,7 +222,7 @@ create table {SysTables.SmtpProvider} (
             TableName = "AppUser";
             SqlText = $@"
 create table {TableName} (
-     Id						{SysConfig.PrimaryKeyStr}
+     Id						{SysConfig.PrimaryKeyStr()}
     ,UserId                 @NVARCHAR(96)        @NOT_NULL 
     ,Email                  @NVARCHAR(96)        @NOT_NULL 
     ,Name                   @NVARCHAR(96)        @NULL
@@ -287,7 +287,7 @@ insert into {TableName} (
             TableName = "Product";
             SqlText = $@"
 create table {TableName} (
-     Id						{SysConfig.PrimaryKeyStr}
+     Id						{SysConfig.PrimaryKeyStr()}
     ,Name                   @NVARCHAR(96)               @NOT_NULL
     ,Price                  @DECIMAL default 0          @NOT_NULL  
 )   
@@ -298,7 +298,7 @@ create table {TableName} (
             TableName = "Trader";
             SqlText = $@"
 create table {TableName} (
-     Id						{SysConfig.PrimaryKeyStr}
+     Id						{SysConfig.PrimaryKeyStr()}
     ,Name                   @NVARCHAR(96)        @NULL
 )   
 ";
@@ -314,10 +314,10 @@ create table {TableName} (
             TableName = "Trade";
             SqlText = $@"
 create table {TableName} (
-     Id						{SysConfig.PrimaryKeyStr}
+     Id						{SysConfig.PrimaryKeyStr()}
     ,TradeTypeId            integer                     @NOT_NULL    
     ,TradeDate              @DATE_TIME                  @NOT_NULL 
-    ,TraderId               {SysConfig.ForeignKeyStr}   @NOT_NULL    
+    ,TraderId               {SysConfig.ForeignKeyStr()}   @NOT_NULL    
     ,TotalAmount            @DECIMAL                    @NOT_NULL    
 
     ,constraint FK_{TableName}_00 foreign key (TradeTypeId) references TradeType (Id)
@@ -330,9 +330,9 @@ create table {TableName} (
             TableName = "TradeLine";
             SqlText = $@"
 create table {TableName} (
-     Id						{SysConfig.PrimaryKeyStr}
-    ,TradeId                {SysConfig.ForeignKeyStr}   @NOT_NULL    
-    ,ProductId              {SysConfig.ForeignKeyStr}   @NOT_NULL    
+     Id						{SysConfig.PrimaryKeyStr()}
+    ,TradeId                {SysConfig.ForeignKeyStr()}   @NOT_NULL    
+    ,ProductId              {SysConfig.ForeignKeyStr()}   @NOT_NULL    
     ,Qty                    @DECIMAL                    @NOT_NULL    
     ,Price                  @DECIMAL                    @NOT_NULL    
     ,LineAmount             @DECIMAL                    @NOT_NULL    

@@ -423,6 +423,20 @@ namespace Tripous
         /// </summary>
         static public int OidSize { get { return OidDataType == SimpleType.String ? 40 : 0; } }
 
+        /// <summary>
+        /// A string to be used for primary keys when formating CREATE TABLE statements
+        /// </summary>
+        static public string PrimaryKeyStr(int Length = 40)
+        {
+            return SysConfig.GuidOids ? $"@NVARCHAR({Length})    @NOT_NULL primary key" : "@PRIMARY_KEY";
+        }
+        /// <summary>
+        ///  A string to be used for foreign keys when formating CREATE TABLE statements
+        /// </summary>
+        static public string ForeignKeyStr(int Length = 40)
+        {
+            return SysConfig.GuidOids ? $"@NVARCHAR({40})" : "integer";
+        }
         /* 
         /// <summary>
         /// A string to be used for primary keys when formating CREATE TABLE statements
