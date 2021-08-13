@@ -11,36 +11,45 @@ namespace Test.WinApp
 {
     static public class SettingTest
     {
-        static List<Setting> SettingsList;
+ 
 
         [RegisterSchemaFunc(Version: 1)]
         static void RegisterSchema(Schema Schema, SchemaVersion Version)
         {
-            string SqlText = Setting.GetTableDef(TableName: "AppSettings");
+            string SqlText = Settings.GetTableDef(TableName: "AppSettings");
             Version.AddTable(SqlText);
         }
 
         static public void LoadSettings()
         {
-            SettingsList = Setting.LoadAll();
+            Settings.LoadFromTable();
 
-            if (SettingsList.Count == 0)
+            if (Settings.Items.Count == 0)
             {
                 // select list for the Cities setting
                 List<SettingSelectItem> SelectList = new List<SettingSelectItem>();
-                SelectList.Add(new SettingSelectItem() { Id = 1, ValueKey = "Thessaloniki" });
-                SelectList.Add(new SettingSelectItem() { Id = 2, ValueKey = "Athens" });
-                SelectList.Add(new SettingSelectItem() { Id = 3, ValueKey = "Rome" });
-                SelectList.Add(new SettingSelectItem() { Id = 4, ValueKey = "Madrid" });
+                SelectList.Add(new SettingSelectItem() { Id = "1", TextKey = "Thessaloniki" });
+                SelectList.Add(new SettingSelectItem() { Id = "2", TextKey = "Athens" });
+                SelectList.Add(new SettingSelectItem() { Id = "3", TextKey = "Rome" });
+                SelectList.Add(new SettingSelectItem() { Id = "4", TextKey = "Madrid" });
 
                 // settings
-                SettingsList.Add(new Setting() { Id = "Sales Email", DataType = SettingDataType.String, Value = "sales@company.com"});
-                SettingsList.Add(new Setting() { Id = "Is OK", DataType = SettingDataType.Boolean, Value = true });
-                SettingsList.Add(new Setting() { Id = "Cities", DataType = SettingDataType.MultiSelect, Value = new int[] { 2, 3}, SelectList = SelectList });
+                Settings.Items.Add(new Setting() { Id = "Sales Email", DataType = SettingDataType.String, Value = "sales@company.com"});
+                Settings.Items.Add(new Setting() { Id = "Is OK", DataType = SettingDataType.Boolean, Value = true });
+                Settings.Items.Add(new Setting() { Id = "Cities", DataType = SettingDataType.MultiSelect, Value = new string[] { "2", "3"}, SelectList = SelectList });
 
-                Setting.SaveAll(SettingsList);
+                Settings.SaveToTable();
+                Settings.SaveToFile("AppSettings.json");
+            }
+            else
+            {
+                Settings.SaveToTable();
+                Settings.SaveToFile("AppSettings.json");
             }
 
         }
+
+        /* properties */
+        static public Settings Settings { get; set; } = new Settings();
     }
 }
