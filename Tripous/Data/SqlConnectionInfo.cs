@@ -10,7 +10,7 @@ namespace Tripous.Data
     public class SqlConnectionInfo
     {
 
-        SqlProvider fSqlProvider;
+ 
 
         /* construction */
         /// <summary>
@@ -25,13 +25,8 @@ namespace Tripous.Data
         /// Returns the <see cref="SqlProvider"/> of this connection string. If the provider is not registered with <see cref="SqlProviders"/> an exception is thrown.
         /// </summary>
         public SqlProvider GetSqlProvider()
-        {
-            if (fSqlProvider == null)
-            {
-                fSqlProvider = SqlProviders.GetSqlProvider(Provider);
-            }
-
-            return fSqlProvider;
+        { 
+            return SqlProviders.GetSqlProvider(Provider);
         }
         /// <summary>
         /// Returns a string representation of this instance.
