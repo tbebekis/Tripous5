@@ -20,6 +20,13 @@ namespace Tripous.Data
         {
             Load(); // it'll load connections, if the file exists
         }
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public SqlConnectionInfoList(List<SqlConnectionInfo> SourceSqlConnections)
+        {
+            this.SqlConnections = SourceSqlConnections;
+        }
 
         /// <summary>
         /// Load. 

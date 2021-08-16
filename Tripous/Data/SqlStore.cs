@@ -63,14 +63,21 @@ namespace Tripous.Data
 
         /* connection */
         /// <summary>
+        /// Returns true if this connection info is valid and can connect to a database.
+        /// </summary>
+        public virtual bool CanConnect(bool ThrowIfNot = false)
+        {
+            return Provider.CanConnect(ConnectionInfo.ConnectionString, ThrowIfNot);
+        }
+        /// <summary>
         /// Ensures that a connection can be done by opening and closing the connection.
         /// </summary>
         public virtual void EnsureConnection()
         {
             if (!ConnectionChecked)
-            {
-                ConnectionChecked = true;
+            {                
                 Provider.EnsureConnection(ConnectionInfo.ConnectionString);
+                ConnectionChecked = true;
             }
         }
         /// <summary>
