@@ -160,7 +160,7 @@ namespace Tripous.Model
 
             if (!SelectSqlName.StartsWithText("SELECT")) // it's a SelectSql name
             {
-                SS = this.Descriptor.SelectList.Find(SelectSqlName); 
+                SS = this.Descriptor.SelectList.Find(item => item.Name == SelectSqlName); 
                 SqlText = SS.Text;
             }
 

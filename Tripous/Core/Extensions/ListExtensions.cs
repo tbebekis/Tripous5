@@ -266,6 +266,31 @@ namespace Tripous
 
             return Result;
         }
+        /// <summary>
+        /// Returns a specified string list as a dictionary.
+        /// <para>Each string in the list must contain an equal sign character, e.g. Key=Value, for this to succeed.</para>
+        /// </summary>
+        static public Dictionary<string, string> ToDictionary(this IList<string> SourceList)
+        {
+            Dictionary<string, string> Dictionary = new Dictionary<string, string>();
 
+            if (SourceList != null && SourceList.Count > 0)
+            {
+                string[] Parts;
+                foreach (string TitleKey in SourceList)
+                {
+                    if (!string.IsNullOrWhiteSpace(TitleKey))
+                    {
+                        Parts = TitleKey.Split('=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        if (Parts.Length >= 2)
+                        {
+                            Dictionary[Parts[0]] = Parts[1];
+                        }
+                    }
+                }
+            }
+
+            return Dictionary;
+        }
     }
 }

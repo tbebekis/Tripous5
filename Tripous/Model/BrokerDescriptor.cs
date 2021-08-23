@@ -64,8 +64,6 @@ namespace Tripous.Model
         /// </summary>
         public BrokerDescriptor()
         {
- 
-            SelectList.Owner = this; 
             Tables.Owner = this;            
             Queries.Owner = this;
             GuidOids = SysConfig.GuidOids;            
@@ -113,7 +111,7 @@ namespace Tripous.Model
         /// </summary>
         public void EnsureMainSelect()
         {
-            SelectSql mainSelect = SelectList.Find(Sys.MainSelect);
+            SelectSql mainSelect = SelectList.Find(item => item.Name == Sys.MainSelect);
             if (mainSelect == null)
             {
                 mainSelect = new SelectSql();
@@ -245,7 +243,7 @@ namespace Tripous.Model
         /// <summary>
         /// The list of select statements
         /// </summary>
-        public SelectSqlList SelectList { get; } = new SelectSqlList();
+        public List<SelectSql> SelectList { get; set; } = new List<SelectSql>();
 
         /// <summary>
         /// The main select statement
@@ -256,7 +254,7 @@ namespace Tripous.Model
             get
             {
                 EnsureMainSelect();
-                return SelectList.Find(Sys.MainSelect);
+                return SelectList.Find(item => item.Name == Sys.MainSelect);
             }
         }
         /// <summary>

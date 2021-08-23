@@ -24,7 +24,7 @@ namespace Tripous.Data
     {
 
         static SqlStore fStore;
-        static SqlStatements fSqlStatements = new SqlStatements();
+        static TableSqls fSqlStatements = new TableSqls();
 
         /* construction */
         /// <summary>

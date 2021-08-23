@@ -245,7 +245,7 @@ namespace Tripous.Data
         /// <summary>
         /// Generates Sql statements for the Table.     
         /// </summary>
-        static public void BuildSql(string TableName, string PrimaryKeyField, bool IsStringKey, SqlStore Store, SqlStatements SqlStatements, bool IsTopTable)
+        static public void BuildSql(string TableName, string PrimaryKeyField, bool IsStringKey, SqlStore Store, TableSqls SqlStatements, bool IsTopTable)
         {
             string LB = Environment.NewLine;
             BuildSqlFlags Flags = BuildSqlFlags.None;
@@ -260,11 +260,11 @@ namespace Tripous.Data
             bool OidModeIsBefore = !GuidOid && ((Flags & BuildSqlFlags.OidModeIsBefore) == BuildSqlFlags.OidModeIsBefore);
 
 
-            /* DeleteSQL */
-            SqlStatements.Delete = string.Format("delete from {0} where {1} = :{1}", TableName, PrimaryKeyField);
+            // delete
+            SqlStatements.DeleteRowSql = string.Format("delete from {0} where {1} = :{1}", TableName, PrimaryKeyField);
 
 
-            /* InsertSQL */
+            // insert
             string S = "";              // insert field list
             string S2 = "";             // insert params field list
             string S3 = "";             // update field list AND update params field list
@@ -301,20 +301,27 @@ namespace Tripous.Data
                 S3 = S3.Remove(S3.Length - 2, 2);
 
             string SQL = "insert into {0} ( " + LB + "{1}" + LB + " ) values ( " + LB + "{2}" + LB + " ) ";
-            SqlStatements.Insert = string.Format(SQL, TableName, S, S2);
+            SqlStatements.InsertRowSql = string.Format(SQL, TableName, S, S2);
 
-            /* UpdateSQL */
+            // update
             SQL = "update {0} " + LB + "set {1} " + LB + "where " + LB + "  {2} = :{2} ";
-            SqlStatements.Update = string.Format(SQL, TableName, S3, PrimaryKeyField);
+            SqlStatements.UpdateRowSql = string.Format(SQL, TableName, S3, PrimaryKeyField);
 
-            /* TopTable RowSelect */
-            if (IsTopTable && string.IsNullOrEmpty(SqlStatements.RowSelect))
-                SqlStatements.RowSelect = string.Format("select * from {0} where {1} = :{1}", TableName, PrimaryKeyField);
+            // TopTable RowSelect  
+            if (IsTopTable && string.IsNullOrEmpty(SqlStatements.SelectRowSql))
+                SqlStatements.SelectRowSql = string.Format("select * from {0} where {1} = :{1}", TableName, PrimaryKeyField);
 
-            /* All tables */
-            if (SqlStatements.BrowseSelect.IsEmpty)
-                SqlStatements.BrowseSelect.ParseFromTableName(TableName);
+            // All tables
+            if (string.IsNullOrWhiteSpace(SqlStatements.SelectSql))
+            {
+                SelectSql SS = new SelectSql();
+                SS.ParseFromTableName(TableName);
+                SqlStatements.SelectSql = SS.Text;
+            }
+ 
         }
+ 
+
         /// <summary>
         /// Generates Sql statements for the Table.     
         /// </summary>
@@ -326,18 +333,20 @@ namespace Tripous.Data
         /// Generates Sql statements for the Table.     
         /// <para>WARNING: Assumes that Table primary key field is named Id.</para>
         /// </summary>
-        static public SqlStatements BuildSql(DataTable Table, SqlStore Store, bool IsTopTable)
+        static public TableSqls BuildSql(DataTable Table, SqlStore Store, bool IsTopTable)
         {
-            SqlStatements Result = new SqlStatements();
+            TableSqls Result = new TableSqls();
             BuildSql(Table.TableName, "Id", Table.IsStringField("Id"), Store, Result, IsTopTable);
             return Result;
         }
+
+        
 
         /// <summary>
         /// Commits (INSERT and UPDATE only) Row to TableName.
         /// <para>Handles primary key generation.</para>
         /// </summary>
-        static public void Commit(DataRow Row, string TableName, string PrimaryKeyField, bool IsStringKey, SqlStore Store, SqlStatements SqlStatements)
+        static public void Commit(DataRow Row, string TableName, string PrimaryKeyField, bool IsStringKey, SqlStore Store, TableSqls SqlStatements)
         {
             if (Row != null)
             {
@@ -348,11 +357,11 @@ namespace Tripous.Data
                     if (Sys.IsNull(Row[PrimaryKeyField]) || string.IsNullOrEmpty(Row[PrimaryKeyField].ToString()) || ((string)Store.SelectResult(SqlText + Row[PrimaryKeyField].ToString().QS(), string.Empty) == string.Empty))
                     {
                         Row[PrimaryKeyField] = Sys.GenId();
-                        Store.ExecSql(SqlStatements.Insert, Row);
+                        Store.ExecSql(SqlStatements.InsertRowSql, Row);
                     }
                     else
                     {
-                        Store.ExecSql(SqlStatements.Update, Row);
+                        Store.ExecSql(SqlStatements.UpdateRowSql, Row);
                     }
                 }
                 else
@@ -362,14 +371,14 @@ namespace Tripous.Data
                         if (Store.Provider.OidMode == OidMode.Before)
                             Row[PrimaryKeyField] = Store.NextId(TableName);
 
-                        Store.ExecSql(SqlStatements.Insert, Row);
+                        Store.ExecSql(SqlStatements.InsertRowSql, Row);
 
                         if (Store.Provider.OidMode == OidMode.Along)
                             Row[PrimaryKeyField] = Store.LastId(TableName);
                     }
                     else
                     {
-                        Store.ExecSql(SqlStatements.Update, Row);
+                        Store.ExecSql(SqlStatements.UpdateRowSql, Row);
                     }
                 }
             }
@@ -378,7 +387,7 @@ namespace Tripous.Data
         /// Commits (INSERT and UPDATE only) all rows of the Table
         /// <para>Handles primary key generation.</para>
         /// </summary>
-        static public void Commit(DataTable Table, string TableName, string PrimaryKeyField, bool IsStringKey, SqlStore Store, SqlStatements SqlStatements)
+        static public void Commit(DataTable Table, string TableName, string PrimaryKeyField, bool IsStringKey, SqlStore Store, TableSqls SqlStatements)
         {
             if (Table != null)
             {
@@ -395,11 +404,11 @@ namespace Tripous.Data
                                 if (Sys.IsNull(Row[PrimaryKeyField]) || string.IsNullOrEmpty(Row.AsString(PrimaryKeyField)) || ((string)Store.SelectResult(SqlText + Row[PrimaryKeyField].ToString().QS(), string.Empty) == string.Empty))
                                 {
                                     Row[PrimaryKeyField] = Sys.GenId();
-                                    Store.ExecSql(Transaction, SqlStatements.Insert, Row);
+                                    Store.ExecSql(Transaction, SqlStatements.InsertRowSql, Row);
                                 }
                                 else
                                 {
-                                    Store.ExecSql(Transaction, SqlStatements.Update, Row);
+                                    Store.ExecSql(Transaction, SqlStatements.UpdateRowSql, Row);
                                 }
                             }
                             else
@@ -409,14 +418,14 @@ namespace Tripous.Data
                                     if (Store.Provider.OidMode == OidMode.Before)
                                         Row[PrimaryKeyField] = Store.NextId(TableName);
 
-                                    Store.ExecSql(Transaction, SqlStatements.Insert, Row);
+                                    Store.ExecSql(Transaction, SqlStatements.InsertRowSql, Row);
 
                                     if (Store.Provider.OidMode == OidMode.Along)
                                         Row[PrimaryKeyField] = Store.LastId(TableName);
                                 }
                                 else
                                 {
-                                    Store.ExecSql(Transaction, SqlStatements.Update, Row);
+                                    Store.ExecSql(Transaction, SqlStatements.UpdateRowSql, Row);
                                 }
                             }
                         }
@@ -431,7 +440,7 @@ namespace Tripous.Data
                 }
             }
         }
-
+     
 
         /* to/from base64 */
         /// <summary>

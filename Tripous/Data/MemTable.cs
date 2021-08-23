@@ -54,10 +54,14 @@ namespace Tripous.Data
         /// Field
         /// </summary>
         protected NamedItems<MemTable> fStockTables = new NamedItems<MemTable>();
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected SqlStatements fSqlStatements = new SqlStatements();
+
+        /*
+                /// <summary>
+                /// Field
+                /// </summary>
+                // protected SqlStatements fSqlStatements = new SqlStatements(); 
+         */
+
         /// <summary>
         /// Field
         /// </summary>
@@ -687,7 +691,7 @@ namespace Tripous.Data
             get { return fStockTables; }
         }
 
-        //*
+        /*
         /// <summary>
         /// Gets or sets (assigns) the SqlStatements of this instance
         /// </summary>
@@ -698,7 +702,10 @@ namespace Tripous.Data
         }         
         // */
 
-        //public TableSqls SqlStatements { get; set; }
+        /// <summary>
+        /// The Sql statements for the table
+        /// </summary>
+        public TableSqls SqlStatements { get; set; } = new TableSqls();
 
 
         /// <summary>

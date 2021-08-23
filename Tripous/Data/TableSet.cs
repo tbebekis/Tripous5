@@ -6,6 +6,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Tripous.Data
 {
@@ -95,14 +96,15 @@ namespace Tripous.Data
                 for (int i = 0; i < queries.Count; i++)
                 {
                     Table = queries[i];
-                    if (Table.SqlStatements.BrowseSelect.IsEmpty)
-                        Table.SqlStatements.BrowseSelect.Text = "select * from " + Table.TableName;
 
-                    Store.SelectTo(Table, Table.SqlStatements.BrowseSelect.Text);
+                    if (string.IsNullOrWhiteSpace(Table.SqlStatements.SelectSql))
+                        Table.SqlStatements.SelectSql = "select * from " + Table.TableName; 
 
-                    if (!string.IsNullOrWhiteSpace(Table.SqlStatements.BrowseSelect.DisplayLabels))
+                    Store.SelectTo(Table, Table.SqlStatements.SelectSql);
+
+                    if (Table.SqlStatements.HasTitleKeys())
                     {
-                        Table.SetColumnCaptionsFrom(NameValueStringList.ToDictionary(Table.SqlStatements.BrowseSelect.DisplayLabels), true);
+                        Table.SetColumnCaptionsFrom(Table.SqlStatements.FieldTitleKeys.ToDictionary(), true);
                     }
                     else
                     {
@@ -186,38 +188,39 @@ namespace Tripous.Data
 
         }
         /// <summary>
-        /// Executes the SELECT of the DetailTable. It also executes the script of the DetailTable, if any. 
+        /// Executes the SELECT of the DetailTable.  
         /// </summary>
         private void Select_DoDetail(MemTable MasterTable, MemTable Detail)
         {
-            string ScriptSource = Detail.ExtendedProperties.AsString("ScriptSource", "");
-
-            if ((!Detail.SqlStatements.BrowseSelect.IsEmpty) || (ScriptSource != ""))
+            if (!string.IsNullOrWhiteSpace(Detail.SqlStatements.SelectSql))
             {
-
                 // 1. SqlText execution ===================================================
-                if ((!Detail.SqlStatements.BrowseSelect.IsEmpty) && (MasterTable.Rows.Count > 0) && (MasterTable.Columns.Contains(Detail.MasterKeyField)))
+                if ((MasterTable.Rows.Count > 0) && (MasterTable.Columns.Contains(Detail.MasterKeyField)))
                 {
                     /*  limit the number of elements inside the in (...),  in order
                         to avoid problems with database servers that have such a limit.    */
                     string[] KeyValuesList = MasterTable.GetKeyValuesList(Detail.MasterKeyField, 100, false);
 
+                    StringBuilder SB = new StringBuilder();
                     for (int i = 0; i < KeyValuesList.Length; i++)
                     {
-                        Detail.SqlStatements.BrowseSelect.Where = string.Format("{0}.{1} in {2}", Detail.TableName, Detail.DetailKeyField, KeyValuesList[i]);
-                        Select_DoAddToDetail(Detail.SqlStatements.BrowseSelect.Text, Detail);
-                        Detail.SqlStatements.BrowseSelect.Where = "";
+                        SB.Clear();
+                        SB.AppendLine(Detail.SqlStatements.SelectSql);
+                        SB.AppendLine($"where ");
+                        SB.AppendLine($"{Detail.TableName}.{Detail.DetailKeyField} in {KeyValuesList[i]}");
+
+                        Select_DoAddToDetail(SB.ToString(), Detail);
                     }
                 }
 
- 
-
-                Detail.SetColumnCaptionsFrom(NameValueStringList.ToDictionary(Detail.SqlStatements.BrowseSelect.DisplayLabels), HideUntitleDisplayLabels);
+                Detail.SetColumnCaptionsFrom(Detail.SqlStatements.FieldTitleKeys.ToDictionary(), HideUntitleDisplayLabels);
 
                 if (!Detail.IsEmpty)
                     Select_DoDetails(Detail);
-
             }
+
+
+ 
 
         }
         /// <summary>
@@ -365,45 +368,38 @@ namespace Tripous.Data
             ProcessEmpty();
 
             topTable.EventsDisabled = true;
-            //topTable.Details.Active = false;
             try
             {
-                
-
-                if (!string.IsNullOrWhiteSpace(topTable.SqlStatements.RowSelect))
+                if (!string.IsNullOrWhiteSpace(topTable.SqlStatements.SelectRowSql))
                 {
-                    if (topTable.SqlStatements.RowSelect.Trim() != "")
+                    topTable.BeginLoadData();
+                    try
                     {
-                        topTable.BeginLoadData();
-                        try
-                        {
-                            Store.SelectTo(topTable, topTable.SqlStatements.RowSelect, RowId);
-                        }
-                        finally
-                        {
-                            topTable.EndLoadData();
-                        }
-
-                        topTable.AcceptChanges();
+                        Store.SelectTo(topTable, topTable.SqlStatements.SelectRowSql, RowId);
+                    }
+                    finally
+                    {
+                        topTable.EndLoadData();
                     }
 
- 
-
-                    // select stock tables
-                    if ((RowId != null) && (topTable.Rows.Count >= 1))
-                    {
-                        MemTable StockTable;
-                        for (int i = 0; i < topTable.StockTables.Count; i++)
-                        {
-                            StockTable = topTable.StockTables[i];
-                            Store.SelectTo(StockTable, StockTable.SqlStatements.RowSelect, topTable.Rows[0]);
-                        }
-                    }
-
-                    Select_DoDetails(topTable);
+                    topTable.AcceptChanges();
                 }
 
-                topTable.SetColumnCaptionsFrom(NameValueStringList.ToDictionary(topTable.SqlStatements.BrowseSelect.DisplayLabels), HideUntitleDisplayLabels);
+
+                // select stock tables
+                if ((RowId != null) && (topTable.Rows.Count >= 1))
+                {
+                    MemTable StockTable;
+                    for (int i = 0; i < topTable.StockTables.Count; i++)
+                    {
+                        StockTable = topTable.StockTables[i];
+                        Store.SelectTo(StockTable, StockTable.SqlStatements.SelectRowSql, topTable.Rows[0]);
+                    }
+                }
+
+                Select_DoDetails(topTable); 
+
+                topTable.SetColumnCaptionsFrom(topTable.SqlStatements.FieldTitleKeys.ToDictionary(), HideUntitleDisplayLabels);
 
                 if (!topTable.IsEmpty)
                     SavePessimisticStamp(RowId);
@@ -411,7 +407,6 @@ namespace Tripous.Data
             }
             finally
             {
-                //topTable.Details.Active = true;
                 topTable.EventsDisabled = false;
             }
 
@@ -657,7 +652,7 @@ namespace Tripous.Data
             if (Table != null)
             {
                 if (string.IsNullOrEmpty(SqlText))
-                    SqlText = Table.SqlStatements.BrowseSelect.Text;
+                    SqlText = Table.SqlStatements.SelectSql;
 
                 if (SqlText.Trim() != "")
                 {
@@ -666,7 +661,7 @@ namespace Tripous.Data
                     try
                     {
                         Result = Store.SelectTo(Table, SqlText);
-                        Table.SetColumnCaptionsFrom(NameValueStringList.ToDictionary(Table.SqlStatements.BrowseSelect.DisplayLabels), HideUntitleDisplayLabels);
+                        Table.SetColumnCaptionsFrom(Table.SqlStatements.FieldTitleKeys.ToDictionary(), HideUntitleDisplayLabels);
                     }
                     finally
                     {
@@ -771,7 +766,7 @@ namespace Tripous.Data
                                 if (!Row.IsNull(Table.PrimaryKeyField))
                                 {
                                     Value = Row[Table.PrimaryKeyField];
-                                    Store.ExecSql(Transaction, Table.SqlStatements.Update, Row);
+                                    Store.ExecSql(Transaction, Table.SqlStatements.UpdateRowSql, Row);
                                 }
                             }
                         }
@@ -812,7 +807,7 @@ namespace Tripous.Data
                                 /* primary key is a Guid */
                                 if (IsString)
                                 {
-                                    Store.ExecSql(Transaction, Table.SqlStatements.Insert, Row);
+                                    Store.ExecSql(Transaction, Table.SqlStatements.InsertRowSql, Row);
                                 }
                                 /* primary key is an integer, autoincremented or provided by a generator/sequencer */
                                 else
@@ -829,7 +824,7 @@ namespace Tripous.Data
 
                                     try
                                     {
-                                        Store.ExecSql(Transaction, Table.SqlStatements.Insert, Row);
+                                        Store.ExecSql(Transaction, Table.SqlStatements.InsertRowSql, Row);
                                     }
                                     catch
                                     {

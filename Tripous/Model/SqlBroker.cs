@@ -112,13 +112,13 @@ namespace Tripous.Model
 
             // 1. create sql statements for all Tables of the BrokerDescriptor
             // 2. create DataTable objects for all Tables of the BrokerDescriptor    
-            SqlStatements TempSqlStatements = new SqlStatements();
+            TableSqls TempSqlStatements = new TableSqls();
             foreach (TableDescriptor TableDes in fDescriptor.Tables)
             {
                 Bm.BuildSql(TableDes, TempSqlStatements, SqlFlags);
                 Bm.CreateDescriptorTable(Store, TableDes, Tables, false);
                 Table = Tables.Find(TableDes.Name);
-                Table.SqlStatements.Assign(TempSqlStatements);
+                Table.SqlStatements = TempSqlStatements;
                 Table.PrimaryKeyField = TableDes.PrimaryKeyField;
                 Table.AutoGenerateGuidKeys = fDescriptor.GuidOids;
 
@@ -206,8 +206,8 @@ namespace Tripous.Model
                 {
                     Table = new MemTable(QueryDes.Name);
                     Tables.Add(Table);
-                    Table.SqlStatements.BrowseSelect.Text = QueryDes.Sql;
-                    Table.SqlStatements.BrowseSelect.DisplayLabels = QueryDes.DisplayLabels;
+                    Table.SqlStatements.SelectSql = QueryDes.Sql;
+                    Table.SqlStatements.LoadFieldTitleKeysFromText(QueryDes.DisplayLabels);
                 }
             }
         }
@@ -227,7 +227,7 @@ namespace Tripous.Model
                 {
                     StockTable = new MemTable(StockTableDes.Name);
                     Tables.Add(StockTable);
-                    StockTable.SqlStatements.RowSelect = StockTableDes.Sql;
+                    StockTable.SqlStatements.SelectRowSql = StockTableDes.Sql;
                     Table.StockTables.Add(StockTable);
 
                     InitializeStockTables(StockTable, StockTableDes.StockTables);
@@ -622,7 +622,7 @@ namespace Tripous.Model
 
             if (!SelectSqlName.StartsWithText("SELECT")) // it's a SelectSql name
             {
-                SS = this.Descriptor.SelectList.Find(SelectSqlName);
+                SS = this.Descriptor.SelectList.Find(item => item.Name == SelectSqlName);
                 SqlText = SS.Text;
             }
 

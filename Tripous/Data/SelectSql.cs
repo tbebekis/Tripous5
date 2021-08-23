@@ -57,45 +57,10 @@ from
     /// Represents a SELECT S statement. It provides the means to parse a SELECT statement.
     /// <para>Provides a property for each clause, i.e. Select, From, etc. </para>
     /// </summary>
-    public class SelectSql : NamedItem
+    public class SelectSql 
     {
-        /* private */
-        string fSelect;
-        string fFrom;
-        string fWhere;
-        string fWhereUser;
-        string fGroupBy;
-        string fHaving;
-        string fOrderBy;
-
-        bool fCompanyAware;
+        /* private */ 
         string fConnectionName;
-
-        string fCheckBoxColumns;
-        string fMemoColumns;
-        string fDateTimeColumns;
-        string fDateColumns;
-        string fTimeColumns;
-        string fImageColumns;
-
-        string fDateRangeColumn;
-        DateRange fDateRange = DateRange.Custom;
-
-        string fZoomCommand;
-
-        string fDisplayLabels;
-        ColumnSettings fColumnSettings;
-        SqlFilters fSqlFilters;
-
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fTitle;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fTitleKey;
-
 
         /* static public */
         /// <summary>
@@ -114,107 +79,6 @@ from
         /// Constant
         /// </summary>
         static public readonly string DefaultName = "SelectSql";
-
-        /* overrides */
-        /// <summary>
-        /// Clears the content of the clause properties
-        /// </summary>
-        protected override void DoClear()
-        {
-            base.DoClear();
-
-            Select = string.Empty;
-            From = string.Empty;
-            Where = string.Empty;
-            WhereUser = string.Empty;
-            GroupBy = string.Empty;
-            Having = string.Empty;
-            OrderBy = string.Empty;
-
-            CompanyAware = false;
-            ConnectionName = string.Empty;
-
-            CheckBoxColumns = string.Empty;
-            MemoColumns = string.Empty;
-            DateTimeColumns = string.Empty;
-            DateColumns = string.Empty;
-            TimeColumns = string.Empty;
-            ImageColumns = string.Empty;
-
-            ZoomCommand = string.Empty;
-            AlwaysVisibleView = false;
-            ModalView = false;
-
-            DateRangeColumn = string.Empty;
-            DateRange = Tripous.DateRange.Custom;
-
-            DisplayLabels = string.Empty;
-            fColumnSettings = null;
-            fSqlFilters = null;
-
-            IsAccessible = false;
-
-        }
-        /// <summary>
-        /// Assigns this properties from Source.
-        /// <para>WARNING: We need this because an automated Assign() calls the Text property
-        /// which in turn calls the SelectSqlParser which has no ability to handle fields 
-        /// surrounded by double quotes or [] or something.</para>
-        /// </summary>
-        protected override void DoAssign(object Source)
-        {
-            if (Source is SelectSql)
-            {
-                SelectSql Src = Source as SelectSql;
-
-                this.Name = Src.Name;
-                this.fTitle = Src.fTitle;
-                this.fTitleKey = Src.fTitleKey;
-
-                Select = Src.Select;
-                From = Src.From;
-                Where = Src.Where;
-                WhereUser = Src.WhereUser;
-                GroupBy = Src.GroupBy;
-                Having = Src.Having;
-                OrderBy = Src.OrderBy;
-
-                CompanyAware = Src.CompanyAware;
-                ConnectionName = Src.ConnectionName;
-
-                CheckBoxColumns = Src.CheckBoxColumns;
-                MemoColumns = Src.MemoColumns;
-                DateTimeColumns = Src.DateTimeColumns;
-                DateColumns = Src.DateColumns;
-                TimeColumns = Src.TimeColumns;
-                ImageColumns = Src.ImageColumns;
-
-                ZoomCommand = Src.ZoomCommand;
-                AlwaysVisibleView = Src.AlwaysVisibleView;
-                ModalView = Src.ModalView;
-
-                DateRangeColumn = Src.DateRangeColumn;
-                DateRange = Src.DateRange;
-
-                DisplayLabels = Src.DisplayLabels;
-
-                if (Src.fColumnSettings == null)
-                    this.fColumnSettings = null;
-                else
-                    this.ColumnSettings.Assign(Src.ColumnSettings);
-
-                if (Src.fSqlFilters == null)
-                    this.fSqlFilters = null;
-                else
-                    this.SqlFilters.Assign(Src.SqlFilters);
-
-            }
-            else
-            {
-                DoClear();
-            }
-        }
-
 
         /* construction */
         /// <summary>
@@ -379,6 +243,96 @@ from
         }
 
         /* instance */
+        /// <summary>
+        /// Clears the content of the clause properties
+        /// </summary>
+        public void Clear()
+        {
+
+            Select = string.Empty;
+            From = string.Empty;
+            Where = string.Empty;
+            WhereUser = string.Empty;
+            GroupBy = string.Empty;
+            Having = string.Empty;
+            OrderBy = string.Empty;
+
+            CompanyAware = false;
+            ConnectionName = string.Empty;
+
+            CheckBoxColumns = string.Empty;
+            MemoColumns = string.Empty;
+            DateTimeColumns = string.Empty;
+            DateColumns = string.Empty;
+            TimeColumns = string.Empty;
+            ImageColumns = string.Empty; 
+
+            DateRangeColumn = string.Empty;
+            DateRange = Tripous.DateRange.Custom;
+
+            DisplayLabels = string.Empty;
+            ColumnSettings.Clear();
+            SqlFilters.Clear();
+
+        }
+        /// <summary>
+        /// Assigns this properties from Source.
+        /// <para>WARNING: We need this because an automated Assign() calls the Text property
+        /// which in turn calls the SelectSqlParser which has no ability to handle fields 
+        /// surrounded by double quotes or [] or something.</para>
+        /// </summary>
+        public void Assign(object Source)
+        {
+            if (Source is SelectSql)
+            {
+                SelectSql Src = Source as SelectSql;
+
+                this.Name = Src.Name;
+
+                this.TitleKey = Src.TitleKey;
+
+                Select = Src.Select;
+                From = Src.From;
+                Where = Src.Where;
+                WhereUser = Src.WhereUser;
+                GroupBy = Src.GroupBy;
+                Having = Src.Having;
+                OrderBy = Src.OrderBy;
+
+                CompanyAware = Src.CompanyAware;
+                ConnectionName = Src.ConnectionName;
+
+                CheckBoxColumns = Src.CheckBoxColumns;
+                MemoColumns = Src.MemoColumns;
+                DateTimeColumns = Src.DateTimeColumns;
+                DateColumns = Src.DateColumns;
+                TimeColumns = Src.TimeColumns;
+                ImageColumns = Src.ImageColumns;
+
+                DateRangeColumn = Src.DateRangeColumn;
+                DateRange = Src.DateRange;
+
+                DisplayLabels = Src.DisplayLabels;
+                ColumnSettings = Src.ColumnSettings;
+                SqlFilters = Src.SqlFilters;
+ 
+
+            }
+            else
+            {
+                Clear();
+            }
+        }
+        /// <summary>
+        /// Returns a clone of this instance.
+        /// </summary>
+        public SelectSql Clone()
+        {
+            SelectSql Result = new SelectSql();
+            Result.Assign(this);
+            return Result;
+        }
+
         /// <summary>
         /// Concatenates Keyword + Clause for all clauses
         /// </summary>
@@ -597,7 +551,7 @@ from
                 ColumnSetting Setting;
                 foreach (DataColumn Column in Table.Columns)
                 {
-                    Setting = ColumnSettings.Find(Column.ColumnName);
+                    Setting =   ColumnSettings.Find(item => item.Name == Column.ColumnName);
                     if (Setting == null)
                     {
                         Column.IsVisible(false);
@@ -626,41 +580,21 @@ from
             }
         }
 
+
         /* properties */
+        /// <summary>
+        /// A name for this SELECT statement. Used when this goes into SELECT statement lists.
+        /// </summary>
+        public string Name { get; set; }
         /// <summary>
         /// Gets or sets tha Title of this descriptor, used for display purposes.
         /// </summary>
-        public string Title
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(fTitle))
-                    return fTitle;
-
-                if (!string.IsNullOrWhiteSpace(TitleKey))
-                    return Res.GS(TitleKey, TitleKey);
-
-                return Name;
-            }
-            set
-            {
-                fTitle = value;
-                OnPropertyChanged("Title");
-            }
-        }
+        [JsonIgnore]
+        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name;
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public string TitleKey
-        {
-            get { return string.IsNullOrWhiteSpace(fTitleKey) ? Name : fTitleKey; }
-            set
-            {
-                fTitleKey = value;
-                OnPropertyChanged("TitleKey");
-            }
-
-        }
+        public string TitleKey { get; set; }
 
         /// <summary>
         /// Gets the statement as a whole. 
@@ -668,76 +602,45 @@ from
         /// </summary>
         public string Text
         {
-            get { return string.IsNullOrWhiteSpace(fSelect) ? string.Empty : GetSqlText(); }
-            set
-            {
-                Parse(value);
-                OnPropertyChanged("Text");
-            }
+            get { return string.IsNullOrWhiteSpace(Select) ? string.Empty : GetSqlText(); }
+            set { Parse(value); }
         }
+       
         /// <summary>
         /// Gets or sets the SELECT clause.
         /// </summary>
         [JsonIgnore]
-        public string Select
-        {
-            get { return string.IsNullOrEmpty(fSelect) ? string.Empty : fSelect; }
-            set { fSelect = value; }
-        }
+        public string Select { get; set; }
         /// <summary>
         /// Gets or sets the FROM clause.
         /// </summary>
         [JsonIgnore]
-        public string From
-        {
-            get { return string.IsNullOrEmpty(fFrom) ? string.Empty : fFrom; }
-            set { fFrom = value; }
-        }
+        public string From { get; set; }
         /// <summary>
         /// Gets or sets the WHERE clause.
         /// </summary>
         [JsonIgnore]
-        public string Where
-        {
-            get { return string.IsNullOrEmpty(fWhere) ? string.Empty : fWhere; }
-            set { fWhere = value; }
-        }
+        public string Where { get; set; }
         /// <summary>
         /// Gets or sets the WHERE clause, that part that is considered user where.
         /// </summary>
         [JsonIgnore]
-        public string WhereUser
-        {
-            get { return string.IsNullOrEmpty(fWhereUser) ? string.Empty : fWhereUser; }
-            set { fWhereUser = value; }
-        }
+        public string WhereUser { get; set; }
         /// <summary>
         /// Gets or sets the GROUP BY clause.
         /// </summary>
         [JsonIgnore]
-        public string GroupBy
-        {
-            get { return string.IsNullOrEmpty(fGroupBy) ? string.Empty : fGroupBy; }
-            set { fGroupBy = value; }
-        }
+        public string GroupBy { get; set; }
         /// <summary>
         /// Gets or sets the HAVING clause.
         /// </summary>
         [JsonIgnore]
-        public string Having
-        {
-            get { return string.IsNullOrEmpty(fHaving) ? string.Empty : fHaving; }
-            set { fHaving = value; }
-        }
+        public string Having { get; set; }
         /// <summary>
         /// Gets or sets the ORDER BY clause.
         /// </summary>
         [JsonIgnore]
-        public string OrderBy
-        {
-            get { return string.IsNullOrEmpty(fOrderBy) ? string.Empty : fOrderBy; }
-            set { fOrderBy = value; }
-        }
+        public string OrderBy { get; set; }
 
         /// <summary>
         /// Returns true if the statement is empty
@@ -748,200 +651,75 @@ from
         /// Gets or sets a value indicating whether this object
         /// <para>uses the CompanyFieldName when preparing the statement as a whole</para>
         /// </summary>
-        public bool CompanyAware
-        {
-            get { return fCompanyAware; }
-            set
-            {
-                fCompanyAware = value;
-                OnPropertyChanged("CompanyAware");
-            }
-        }
+        public bool CompanyAware { get; set; }
+ 
         /// <summary>
         /// Gets or sets the database connection name
         /// </summary>
         public string ConnectionName
         {
             get { return string.IsNullOrWhiteSpace(fConnectionName) ? SysConfig.DefaultConnection : fConnectionName; }
-            set
-            {
-                fConnectionName = value;
-                OnPropertyChanged("ConnectionName");
-            }
+            set { fConnectionName = value; }
         }
 
         /// <summary>
         /// Gets or sets the names of the check box columns (integer columns as boolean columns)
         /// as a list of strings separated by the character ;
         /// </summary>
-        public string CheckBoxColumns
-        {
-            get { return string.IsNullOrWhiteSpace(fCheckBoxColumns) ? string.Empty : fCheckBoxColumns; }
-            set
-            {
-                fCheckBoxColumns = value;
-                OnPropertyChanged("CheckBoxColumns");
-            }
-        }
+        public string CheckBoxColumns { get; set; }
         /// <summary>
         /// Gets or sets the names of the DateTime columns  
         /// as a list of strings separated by the character ;
         /// </summary>
-        public string DateTimeColumns
-        {
-            get { return string.IsNullOrWhiteSpace(fDateTimeColumns) ? string.Empty : fDateTimeColumns; }
-            set
-            {
-                fDateTimeColumns = value;
-                OnPropertyChanged("DateTimeColumns");
-            }
-        }
+        public string DateTimeColumns { get; set; }
         /// <summary>
         /// Gets or sets the names of the Date columns (date ONLY, not date and time)
         /// as a list of strings separated by the character ;
         /// </summary>
-        public string DateColumns
-        {
-            get { return string.IsNullOrWhiteSpace(fDateColumns) ? string.Empty : fDateColumns; }
-            set
-            {
-                fDateColumns = value;
-                OnPropertyChanged("DateColumns");
-            }
-        }
+        public string DateColumns { get; set; }
         /// <summary>
         /// Gets or sets the names of the Time columns (Time ONLY, not date and time)
         /// as a list of strings separated by the character ;
         /// </summary>
-        public string TimeColumns
-        {
-            get { return string.IsNullOrWhiteSpace(fTimeColumns) ? string.Empty : fTimeColumns; }
-            set
-            {
-                fTimeColumns = value;
-                OnPropertyChanged("TimeColumns");
-            }
-        }
+        public string TimeColumns { get; set; }
         /// <summary>
         /// Gets or sets the names of the Image columns 
         /// as a list of strings separated by the character ;
         /// </summary>
-        public string ImageColumns
-        {
-            get { return string.IsNullOrWhiteSpace(fImageColumns) ? string.Empty : fImageColumns; }
-            set
-            {
-                fImageColumns = value;
-                OnPropertyChanged("ImageColumns");
-            }
-        }
+        public string ImageColumns { get; set; }
         /// <summary>
         /// Gets or sets the names of the memo columns (text blob columns)
         /// as a list of strings separated by the character ;
         /// </summary>
-        public string MemoColumns
-        {
-            get { return string.IsNullOrWhiteSpace(fMemoColumns) ? string.Empty : fMemoColumns; }
-            set
-            {
-                fMemoColumns = value;
-                OnPropertyChanged("MemoColumns");
-            }
-        }
+        public string MemoColumns { get; set; }
 
         /// <summary>
         /// A fully qualified (i.e. TABLE_NAME.FIELD_NAME) column of type date or datetime.
         /// <para>It works in conjuction with DateRange property in order to produce
         /// a fixed part in the WHERE clause of this select statement.</para>
         /// </summary>
-        public string DateRangeColumn
-        {
-            get { return string.IsNullOrWhiteSpace(fDateRangeColumn) ? string.Empty : fDateRangeColumn; }
-            set
-            {
-                fDateRangeColumn = value;
-                OnPropertyChanged("DateRangeColumn");
-            }
-        }
+        public string DateRangeColumn { get; set; }
         /// <summary>
         /// A DateRange.
         /// <para>It works in conjuction with DateRangeColumn property in order to produce
         /// a fixed part in the WHERE clause of this select statement.</para>
         /// </summary>
-        public DateRange DateRange
-        {
-            get { return fDateRange; }
-            set
-            {
-                fDateRange = value;
-                OnPropertyChanged("DateRange");
-            }
-        }
+        public DateRange DateRange { get; set; }
 
         /* properties */
         /// <summary>
-        /// When true then the statement ui is always visible,
-        /// else it is visible only on demand.
-        /// <para>Defaults to false.</para>
-        /// </summary>
-        public bool AlwaysVisibleView { get; set; }
-        /// <summary>
-        /// When true then the statement ui is shown in a modal form.
-        /// <para>NOTE: Not applicable when AlwaysVisible is true.</para>
-        /// <para>Defaults to false.</para>
-        /// </summary>
-        public bool ModalView { get; set; }
-        /// <summary>
-        /// Gets or sets the zoom command name. A user inteface (form) can use this name to call the command.
-        /// </summary>
-        public string ZoomCommand
-        {
-            get { return string.IsNullOrEmpty(fZoomCommand) ? string.Empty : fZoomCommand; }
-            set
-            {
-                fZoomCommand = value;
-                OnPropertyChanged("ZoomCommand");
-            }
-        }
-
-
-
-        /// <summary>
         /// A dictionary where Keys = FieldNames and Values = User Friendly Titles.
         /// </summary>
-        public string DisplayLabels
-        {
-            get { return string.IsNullOrWhiteSpace(fDisplayLabels) ? string.Empty : fDisplayLabels; }
-            set
-            {
-                fDisplayLabels = value;
-                OnPropertyChanged("DisplayLabels");
-            }
-        }
+        public string DisplayLabels { get; set; }
         /// <summary>
         /// A collection of column settings elements
         /// </summary>
-        public ColumnSettings ColumnSettings
-        {
-            get
-            {
-                if (fColumnSettings == null)
-                    fColumnSettings = new ColumnSettings();
-                return fColumnSettings;
-            }
-        }
+        public List<ColumnSetting> ColumnSettings { get; set; } = new List<ColumnSetting>();
         /// <summary>
         /// The criterion field descriptors used to generate the "user where" clause of the SelectSql
         /// </summary>
-        public SqlFilters SqlFilters
-        {
-            get
-            {
-                if (fSqlFilters == null)
-                    fSqlFilters = new SqlFilters();
-                return fSqlFilters;
-            }
-        }
+        public SqlFilters SqlFilters { get; set; } = new SqlFilters();
+
 
 
         /// <summary>
@@ -953,18 +731,14 @@ from
         /// True if ColumnSettings is NOT null and contains items
         /// </summary>
         [JsonIgnore]
-        public bool HasColumnSettings { get { return (fColumnSettings != null) && (fColumnSettings.Count > 0); } }
+        public bool HasColumnSettings { get { return (ColumnSettings != null) && (ColumnSettings.Count > 0); } }
         /// <summary>
         /// True if CriterionDescriptors is NOT null and contains items
         /// </summary>
         [JsonIgnore]
-        public bool HasSqlFilters { get { return (fSqlFilters != null) && (fSqlFilters.Count > 0); } }
+        public bool HasSqlFilters { get { return (SqlFilters != null) && (SqlFilters.Count > 0); } }
 
-        /// <summary>
-        /// When true then the current user has the right to execute that select
-        /// </summary>
-        [JsonIgnore]
-        public bool IsAccessible { get; set; }
+
         /// <summary>
         /// The DataTable that results after the select execution
         /// </summary>

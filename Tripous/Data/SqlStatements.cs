@@ -6,8 +6,9 @@ using System;
 
 namespace Tripous.Data
 {
-
-    /// <summary>
+    /* TO DELETE
+     
+      /// <summary>
     /// Represents the full group of DML statements 
     /// </summary>
     public class SqlStatements  : Assignable
@@ -59,7 +60,10 @@ namespace Tripous.Data
         /// Gets or sets the DELETE statement of an item 
         /// </summary>
         public string Delete { get; set; } = "";
-    }
+    }   
+     */
+
+
 
 
 }

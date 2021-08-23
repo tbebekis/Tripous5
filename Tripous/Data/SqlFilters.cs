@@ -66,8 +66,6 @@ namespace Tripous.Data
             Result.Locator = Locator;
             return Result;
         }
-
-
  
         /// <summary>
         /// Sets the IsMultiChoise flag to all criterions according to specified Value.

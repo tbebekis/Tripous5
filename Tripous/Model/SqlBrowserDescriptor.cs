@@ -34,8 +34,8 @@ namespace Tripous.Model
         /// Constant
         /// </summary>
         public const string SSysDataType = "SqlBrowser";
- 
-        SelectSqlList fSelectList = new SelectSqlList();
+
+       
 
         /* overrides */
         /// <summary>
@@ -66,7 +66,7 @@ namespace Tripous.Model
         /// </summary>
         public SqlBrowserDescriptor()
         {
-            fSelectList.Owner = this;
+ 
         }
 
 
@@ -114,7 +114,7 @@ namespace Tripous.Model
                 return;
 
             SelectList.Clear();
-            SelectList.Assign(BrokerDes.SelectList);
+            SelectList.AddRange(BrokerDes.SelectList);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Tripous.Model
         /// </summary>
         public void EnsureMainSelect()
         {
-            SelectSql mainSelect = SelectList.Find(Sys.MainSelect);
+            SelectSql mainSelect = SelectList.Find(item => item.Name == Sys.MainSelect);
             if (mainSelect == null)
             {
                 mainSelect = new SelectSql();
@@ -179,34 +179,21 @@ namespace Tripous.Model
         /// Gets or sets the primary key field
         /// </summary>
         public string PrimaryKeyField { get; set; } = "Id";
- 
- 
 
 
- 
+
+
+
         /// <summary>
         /// The list of select statements
         /// </summary>
-        public SelectSqlList SelectList
-        {
-            get
-            {
-                EnsureMainSelect();
-                return fSelectList;
-            }
-        }
+        public List<SelectSql> SelectList { get; set; } = new List<SelectSql>();
+ 
         /// <summary>
         /// The main select statement
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
-        public SelectSql MainSelect
-        {
-            get
-            {
-                EnsureMainSelect();
-                return SelectList.Find(Sys.MainSelect);
-            }
-        }
+        public SelectSql MainSelect  => SelectList.Find(item => item.Name == Sys.MainSelect);
  
  
     }

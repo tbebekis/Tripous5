@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
 
+using Newtonsoft.Json;
+
 namespace Tripous.Data
 {
  
@@ -14,33 +16,21 @@ namespace Tripous.Data
     /// <summary>
     /// Describes a criterion item.
     /// </summary>
-    public class SqlFilter : Descriptor
+    public class SqlFilter 
     {
         /// <summary>
         /// Field
         /// </summary>
         static public readonly List<string> ValidAggregateFunctions = new List<string>(new string[] { "", "count", "avg", "sum", "max", "min" });
- 
-        SqlFilterMode fMode = SqlFilterMode.Simple;
-        SimpleType fDataType = SimpleType.String;
-        bool fUseRange = false;
-
-        string fLocator;
         string fAggregateFunc;
-        bool fPutInHaving = false;
+ 
 
         /// <summary>
         /// It is used when the data type of the criterion is either <see cref="SqlFilterMode.EnumConst"/> or <see cref="SqlFilterMode.EnumQuery"/>
         /// </summary>
-        public class SqlFilterEnum : Assignable
+        public class SqlFilterEnum 
         {
-            string fSql;
-            string fResultField = "Id";
-            bool fIsMultiChoise;
-            string fConstantOptionsList;
-            bool fIncludeAll = true;
-            string fDisplayLabels;
-
+ 
             /* construction */
             /// <summary>
             /// Constructor.
@@ -53,77 +43,28 @@ namespace Tripous.Data
             /// <summary>
             /// Gets or sets the SQL SELECT statement of a <see cref="SqlFilterMode.EnumQuery"/> criterion.
             /// </summary>
-            public string Sql
-            {
-                get { return fSql; }
-                set
-                {
-                    fSql = value;
-                    OnPropertyChanged("Sql");
-                }
-            }
+            public string Sql { get; set; }
             /// <summary>
             /// Ges or sets the result field  
             /// </summary>
-            public string ResultField
-            {
-                get { return fResultField; }
-                set
-                {
-                    fResultField = value;
-                    OnPropertyChanged("ResultField");
-                }
-            }
+            public string ResultField { get; set; } = "Id";
             /// <summary>
             /// For EnumConst and EnumQuery only items. When true the user interface presents
             /// a multi choise control, otherwise a combo box is presented.
             /// </summary>
-            public bool IsMultiChoise
-            {
-                get { return fIsMultiChoise; }
-                set
-                {
-                    fIsMultiChoise = value;
-                    OnPropertyChanged("IsMultiChoise");
-                }
-            }
+            public bool IsMultiChoise { get; set; }
             /// <summary>
             /// Gets the list of constant options. Used only when the is a <see cref="SqlFilterMode.EnumConst"/>  criterion. 
             /// </summary>
-            public string ConstantOptionsList
-            {
-                get { return fConstantOptionsList; }
-                set
-                {
-                    fConstantOptionsList = value;
-                    OnPropertyChanged("ConstantOptionsList");
-                }
-            }
+            public string ConstantOptionsList { get; set; }
             /// <summary>
             /// When true, constant options are displayed initially to the user as checked.
             /// </summary>
-            public bool IncludeAll
-            {
-                get { return fIncludeAll; }
-                set
-                {
-                    fIncludeAll = value;
-                    OnPropertyChanged("IncludeAll");
-                }
-            }
+            public bool IncludeAll { get; set; }
             /// <summary>
             /// A list where each line is FIELD_NAME=Title
             /// </summary>
-            public string DisplayLabels
-            {
-                get { return fDisplayLabels; }
-                set
-                {
-                    fDisplayLabels = value;
-                    OnPropertyChanged("DisplayLabels");
-                }
-            }
-
+            public string DisplayLabels { get; set; }
         }
 
  
@@ -138,12 +79,10 @@ namespace Tripous.Data
 
         /* public */
         /// <summary>
-        /// Override
+        /// Throws exception if this instance is not a valid one.
         /// </summary>
-        public override void CheckDescriptor()
+        public void CheckDescriptor()
         {
-            base.CheckDescriptor();
-
 
             string Format = Res.GS("E_EmptyField", "Field \"{0}\" can not be null or empty");
 
@@ -182,67 +121,38 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
+        /// Gets or sets tha Title of this descriptor, used for display purposes.
+        /// </summary>
+        [JsonIgnore]
+        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : FieldPath;
+        /// <summary>
+        /// Gets or sets a resource Key used in returning a localized version of Title
+        /// </summary>
+        public string TitleKey { get; set; }
+
+        /// <summary>
         /// Indicates how the user enters of selects the criterion value
         /// </summary>
-        public SqlFilterMode Mode
-        {
-            get { return fMode; }
-            set
-            {
-                fMode = value;
-                OnPropertyChanged("Mode");
-            }
-        }
+        public SqlFilterMode Mode { get; set; }
         /// <summary>
         /// Gets or sets the "data type" of the criterion.
         /// </summary>
-        public SimpleType DataType
-        {
-            get { return fDataType; }
-            set
-            {
-                fDataType = value;
-                OnPropertyChanged("DataType");
-            }
-        }
+        public SimpleType DataType { get; set; }
         /// <summary>
         /// The full path to the field, i.e. TableAlias.FieldName
         /// </summary>
-        public string FieldPath
-        {
-            get { return this.Name; }
-            set
-            {
-                Name = value;
-                OnPropertyChanged("FieldPath");
-            }
-        }
+        public string FieldPath { get; set; }
+ 
         /// <summary>
         /// Valid ONLY when Mode is Simple and DataType String, Float or Integer.
         /// <para>Date and Time are ALWAYS used as a range from-to.</para>
         /// <para>Defaults to false</para>
         /// </summary>
-        public bool UseRange
-        {
-            get { return fUseRange; }
-            set
-            {
-                fUseRange = value;
-                OnPropertyChanged("UseRange");
-            }
-        }
+        public bool UseRange { get; set; }
         /// <summary>
         /// Gets or sets the name of the locator descriptor, used when this is of a Locator DataType
         /// </summary>
-        public string Locator
-        {
-            get { return fLocator; }
-            set
-            {
-                fLocator = value;
-                OnPropertyChanged("Locator");
-            }
-        }
+        public string Locator { get; set; }
         /// <summary>
         /// Gets or sets the aggregation function (sum, count, avg, min, max) to use, when <see cref="PutInHaving"/> is true.
         /// It could be an empty string.
@@ -250,24 +160,12 @@ namespace Tripous.Data
         public string AggregateFunc
         {
             get { return ValidAggregateFunctions.IndexOf(fAggregateFunc) != -1 ? fAggregateFunc : string.Empty; }
-            set
-            {
-                fAggregateFunc = value;
-                OnPropertyChanged("AggregateFunc");
-            }
+            set { fAggregateFunc = value; }
         }
         /// <summary>
         /// When true then the produced CommandText goes to the HAVING clause, instead of the WHERE clause
         /// </summary>
-        public bool PutInHaving
-        {
-            get { return fPutInHaving; }
-            set
-            {
-                fPutInHaving = value;
-                OnPropertyChanged("PutInHaving");
-            }
-        }
+        public bool PutInHaving { get; set; }
         /// <summary>
         /// Gets the Enum.
         /// <para>Valid ONLY when DataType is String or Integer</para>

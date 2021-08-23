@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-
+using Newtonsoft.Json;
 
 namespace Tripous.Data
 {
@@ -19,11 +19,10 @@ namespace Tripous.Data
     /// <summary>
     /// Represents the settings of a column, resulting by user actions
     /// </summary>
-    public class ColumnSetting : NamedItem
+    public class ColumnSetting //: NamedItem
     {
-        private string title;
-        private string formatString;
-        private string aggregateFormat;
+        string formatString;
+        string aggregateFormat;
 
 
         /* construction */
@@ -55,21 +54,20 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// Gets or sets the Name property. The Name must be unique when the item is in a collection.
+        /// The Name must be unique.
         /// </summary> 
-        public override string Name
-        {
-            get { return GetName(); }
-            set { SetName(value); }
-        }
+        public string Name { get; set; }
+
         /// <summary>
-        /// Gets or sets the Title of the Column.
+        /// Gets or sets tha Title of this descriptor, used for display purposes.
         /// </summary>
-        public string Title
-        {
-            get { return !string.IsNullOrEmpty(title) ? title : this.Name; }
-            set { title = value; }
-        }
+        [JsonIgnore]
+        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name;
+        /// <summary>
+        /// Gets or sets a resource Key used in returning a localized version of Title
+        /// </summary>
+        public string TitleKey { get; set; }
+
         /// <summary>
         /// Gets or sets the visibility of the Column.
         /// </summary>

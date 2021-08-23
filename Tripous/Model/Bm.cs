@@ -46,9 +46,10 @@ namespace Tripous.Model
         }
 
 
-        static void BuildSql_Select(TableDescriptor TableDes, SelectSql SelectSql, BuildSqlFlags Flags, bool IsBrowserSelect)
+        static SelectSql BuildSql_Select(TableDescriptor TableDes, BuildSqlFlags Flags, bool IsBrowserSelect)
         {
 
+            SelectSql SelectSql = new SelectSql();
 
             // native fields
             string S = string.Empty;
@@ -113,17 +114,13 @@ namespace Tripous.Model
             SelectSql.From = SelectSql.From.TrimEnd(null);
 
 
-
-
-
+            return SelectSql;
 
         }
-
-        /* sql generation */
         /// <summary>
         /// Called by BuildSql to handle join tables
         /// </summary>
-        static private void BuildSql_AddJoinTable(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, JoinTableDescriptor JoinTableDes)
+        static void BuildSql_AddJoinTable(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, JoinTableDescriptor JoinTableDes)
         {
 
             string JoinTableName = Sql.FormatTableNameAlias(JoinTableDes.Name, JoinTableDes.Alias);
@@ -153,10 +150,13 @@ namespace Tripous.Model
                 BuildSql_AddJoinTable(JoinTableNamesList, SelectSql, JoinTableDes.Alias, JoinTableDescriptor);
 
         }
+
+        /* sql generation */
+
         /// <summary>
         /// Generates SQL statements using the TableDes descriptor and the Flags
         /// </summary>
-        static public void BuildSql(TableDescriptor TableDes, SqlStatements Statements, BuildSqlFlags Flags)
+        static public void BuildSql(TableDescriptor TableDes, TableSqls Statements, BuildSqlFlags Flags)
         {
             Statements.Clear();
 
@@ -203,24 +203,23 @@ namespace Tripous.Model
 
             /* Insert */
             string SqlText = "insert into {0} ( {1}" + Environment.NewLine + " ) values ( {2}" + Environment.NewLine + " ) ";
-            Statements.Insert = string.Format(SqlText, TableDes.Name, S, S2);
+            Statements.InsertRowSql = string.Format(SqlText, TableDes.Name, S, S2);
 
             /* Update */
             SqlText = "update {0} " + Environment.NewLine + "set {1} " + Environment.NewLine + "where " + Environment.NewLine + "  {2} = :{2} ";
-            Statements.Update = string.Format(SqlText, TableDes.Name, S3, TableDes.PrimaryKeyField);
+            Statements.UpdateRowSql = string.Format(SqlText, TableDes.Name, S3, TableDes.PrimaryKeyField);
 
             /* Delete */
-            Statements.Delete = string.Format("delete from {0} where {1} = :{2}", TableDes.Name, TableDes.PrimaryKeyField, TableDes.PrimaryKeyField);
+            Statements.DeleteRowSql = string.Format("delete from {0} where {1} = :{2}", TableDes.Name, TableDes.PrimaryKeyField, TableDes.PrimaryKeyField);
 
             /* RowSelect */
-            SelectSql RowSql = new SelectSql();
-            BuildSql_Select(TableDes, RowSql, Flags, false);
-            RowSql.Where = string.Format("where {0}.{1} = :{1}", TableDes.Name, TableDes.PrimaryKeyField);
-            Statements.RowSelect = RowSql.Text;
+            SelectSql SS = BuildSql_Select(TableDes, Flags, false); 
+            SS.Where = string.Format("where {0}.{1} = :{1}", TableDes.Name, TableDes.PrimaryKeyField);
+            Statements.SelectRowSql = SS.Text;
 
 
             /* Browse */
-            BuildSql_Select(TableDes, Statements.BrowseSelect, Flags, true);
+            SS = BuildSql_Select(TableDes, Flags, true);
             // it is a detail table 
             bool IsDetailTable = !string.IsNullOrWhiteSpace(TableDes.MasterTableName)
                                 && !string.IsNullOrWhiteSpace(TableDes.MasterKeyField)
@@ -228,17 +227,17 @@ namespace Tripous.Model
 
             if (IsDetailTable)
             {
-                Statements.BrowseSelect.Where = string.Format("{0}.{1} = :{2}",
+                SS.Where = string.Format("{0}.{1} = :{2}",
                     TableDes.Alias, TableDes.DetailKeyField, Sys.MASTER_KEY_FIELD_NAME);
             }
 
-
+            Statements.SelectSql = SS.Text;
         }
         /// <summary>
         /// Constructs SQL statements based on a TableDescriptor that is created
         /// and updated based on the TableName and Table
         /// </summary>
-        static public void BuildSql(string TableName, DataTable Table, SqlStatements Statements, BuildSqlFlags Flags)
+        static public void BuildSql(string TableName, DataTable Table, TableSqls Statements, BuildSqlFlags Flags)
         {
             TableDescriptor TableDes = new TableDescriptor();
             TableDes.Name = TableName;

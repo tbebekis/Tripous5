@@ -37,6 +37,32 @@ namespace Tripous.Data
             UpdateRowSql = "";
             DeleteRowSql = "";
         }
+        
+        /// <summary>
+        /// Returns true if <see cref="FieldTitleKeys"/> is valid and contains values.
+        /// </summary>
+        public bool HasTitleKeys() { return FieldTitleKeys != null && FieldTitleKeys.Count > 0; } 
+        /// <summary>
+        /// Loads <see cref="FieldTitleKeys"/> from a specified text.
+        /// <para>NOTE: The specified text must contain string lines separated by <see cref="Environment.NewLine"/> 
+        /// where ecah line contains an equal sign character, e.g. FIELD_NAME=TitleKey.</para>
+        /// </summary>
+        /// <param name="Text"></param>
+        public void LoadFieldTitleKeysFromText(string Text)
+        {
+            if (!string.IsNullOrWhiteSpace(Text))
+            {
+                if (FieldTitleKeys == null)
+                    FieldTitleKeys = new List<string>();
+
+                FieldTitleKeys.Clear();
+
+                string[] Lines = Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
+                if (Lines != null && Lines.Length > 0)
+                    FieldTitleKeys.AddRange(Lines);
+            }
+        }
+
 
         /// <summary>
         /// SELECT statement, e.g. select * from TABLE_NAME
@@ -68,5 +94,15 @@ namespace Tripous.Data
         /// UPDATE a row statement, e.g. delete from TABLE_NAME where Id = :Id
         /// </summary>
         public string DeleteRowSql { get; set; }
+
+        /// <summary>
+        /// To be used with <see cref="SelectSql"/>
+        /// <para>A string list, where each string  has the format FIELD_NAME=TitleKey.</para> 
+        /// <para>Determines the visibility of the fields in the drop-down grids: 
+        /// if it is empty then all fields are visible  
+        /// else only the included fields are visible  
+        /// </para>
+        /// </summary>
+        public List<string> FieldTitleKeys { get; set; } = new List<string>();
     }
 }

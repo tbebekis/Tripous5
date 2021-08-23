@@ -34,6 +34,6 @@ namespace Tripous.Data
         /// an exception to be thrown.
         /// </summary>
         NoCascadeDeletes = 4,
-        //GuidOids = 16,
+
     }
 }

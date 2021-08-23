@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace Tripous.Model2
 {
 
+#warning TODO: θα φτιάξουμε καινούριο SqBroker
+
     /// <summary>
     /// A broker table definition
     /// </summary>
