@@ -10,7 +10,7 @@ namespace Tripous.Data
     /// <summary>
     /// Represents the full group of DML statements 
     /// </summary>
-    public class SqlStatements : Assignable
+    public class SqlStatements  : Assignable
     {
 
 
@@ -28,7 +28,6 @@ namespace Tripous.Data
             Delete = "";
         }
 
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -37,10 +36,13 @@ namespace Tripous.Data
         }
 
 
+ 
+
+
         /// <summary>
         /// Gets the SELECT statement of a Browse part 
         /// </summary>
-        public SelectSql BrowseSelect { get; private set; } = new SelectSql();
+        public SelectSql BrowseSelect { get; set; } = new SelectSql();
         /// <summary>
         /// Gets or sets the SELECT statement of an Edit part. i.e "select * from TABLE_NAME where ID = SomeValue"
         /// </summary>

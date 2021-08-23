@@ -41,40 +41,44 @@ namespace Tripous.Model2
         /// </summary>
         Boolean = 0x20,
         /// <summary>
-        /// A memo text field, text blob or just varchar. Must by displayed in a multi-line edit.
+        /// A memo text field, text blob or just varchar. Must by displayed in a multi-line editor.
         /// </summary>
         Memo = 0x40,
-        HtmlMemo,
+        /// <summary>
+        /// An HTML memo field. . Must by displayed in a multi-line editor.
+        /// </summary>
+        HtmlMemo = 0x80,
         /// <summary>
         /// An image blob field.
         /// </summary>
-        Image = 0x80,
+        Image = 0x100,
         /// <summary>
         /// A string field that contains a path to an image
         /// </summary>
-        ImagePath = 0x100,
+        ImagePath = 0x200,
         /// <summary>
         /// The field generates a criterion item 
         /// </summary>
-        Searchable = 0x200,
+        Searchable = 0x400,
         /// <summary>
         /// The field does NOT exist in the database. It just added to the DataTable schema for some reason.
         /// </summary>
-        Extra = 0x400,
+        Extra = 0x800,
         /// <summary>
-        /// It is a look up field. A field that is added using the FieldDescriptors.AddLookUp() method
+        /// It is a foreign key field.  
         /// </summary>
-        LookUp = 0x800,
+        ForeignKey = 0x1000,
         /// <summary>
         /// The field is not used with INSERT or UPDATE statements. 
         /// <para>It maybe something like the ExtraField or an identity/autoinc field,
         /// in a position other than that of a primary key</para>
         /// </summary>
-        NoInsertUpdate = 0x1000,
+        NoInsertUpdate = 0x2000,
         /// <summary>
         /// Must be a string or memo field.
         /// </summary>
-        Localizable = 0x2000,
-        InDropDowm,
+        Localizable = 0x4000,
+ 
+
     }
 }

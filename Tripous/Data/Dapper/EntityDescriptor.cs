@@ -529,7 +529,7 @@ namespace Tripous.Data
             }
         }
         /// <summary>
-        /// Sql statement text for SELECT without WHERE clause
+        /// Sql statement text for DELETE without WHERE clause
         /// </summary>
         public string DeleteSql
         {

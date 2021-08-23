@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <DocumentationFile>X:\_Dev\CSharp\Libs.Tripous5\WebDesk.Lib\WebDesk.Lib.xml</DocumentationFile>
+      <DocumentationFile>$(OutDir)\WebDesk.Lib.xml</DocumentationFile>
       <NoWarn>1701;1702;1591</NoWarn>
     </PropertyGroup>
 

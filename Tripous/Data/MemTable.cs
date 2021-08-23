@@ -686,6 +686,8 @@ namespace Tripous.Data
         {
             get { return fStockTables; }
         }
+
+        //*
         /// <summary>
         /// Gets or sets (assigns) the SqlStatements of this instance
         /// </summary>
@@ -693,7 +695,10 @@ namespace Tripous.Data
         {
             get { return fSqlStatements; }
             set { fSqlStatements.Assign(value); }
-        }
+        }         
+        // */
+
+        //public TableSqls SqlStatements { get; set; }
 
 
         /// <summary>
