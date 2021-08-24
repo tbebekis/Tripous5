@@ -25,11 +25,11 @@ namespace Tripous.Data
         /// <summary>
         /// Field
         /// </summary>
-        protected Tables tableTree = new Tables();
+        protected List<MemTable> tableTree = new List<MemTable>();
         /// <summary>
         /// Field
         /// </summary>
-        protected Tables queries;
+        protected List<MemTable> Queries;
  
 
         /* flags */
@@ -90,12 +90,12 @@ namespace Tripous.Data
         /// </summary>
         protected virtual void SelectQueries()
         {
-            if (queries != null)
+            if (Queries != null)
             {
                 MemTable Table;
-                for (int i = 0; i < queries.Count; i++)
+                for (int i = 0; i < Queries.Count; i++)
                 {
-                    Table = queries[i];
+                    Table = Queries[i];
 
                     if (string.IsNullOrWhiteSpace(Table.SqlStatements.SelectSql))
                         Table.SqlStatements.SelectSql = "select * from " + Table.TableName; 
@@ -340,13 +340,14 @@ namespace Tripous.Data
         /// <summary>
         /// Constructor.
         /// </summary>
-        public TableSet(SqlStore Store, MemTable TopTable, Tables Queries, TableSetFlags Flags = TableSetFlags.GenerateSql)
+        public TableSet(SqlStore Store, MemTable TopTable, List<MemTable> Queries, TableSetFlags Flags = TableSetFlags.GenerateSql)
         {
             if (TopTable == null)
                 throw new ArgumentNullException("TopTable"); 
 
             this.Store = Store;
-            topTable = TopTable; 
+            this.topTable = TopTable;
+            this.Queries = Queries;
 
             generateSql = (Flags & TableSetFlags.GenerateSql) == TableSetFlags.GenerateSql;
             pessimisticMode = (Flags & TableSetFlags.PessimisticMode) == TableSetFlags.PessimisticMode;

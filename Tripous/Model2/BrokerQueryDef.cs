@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 namespace Tripous.Model2
 {
 
@@ -27,6 +29,31 @@ namespace Tripous.Model2
         public override string ToString()
         {
             return Name;
+        }
+ 
+        /// <summary>
+        /// Clears the property values of this instance.
+        /// </summary>
+        public void Clear()
+        {
+            BrokerQueryDef Empty = new BrokerQueryDef();
+            Sys.AssignObject(Empty, this);
+        }
+        /// <summary>
+        /// Assigns property values from a source instance.
+        /// </summary>
+        public void Assign(BrokerQueryDef Source)
+        {
+            Sys.AssignObject(Source, this);
+        }
+        /// <summary>
+        /// Returns a clone of this instance.
+        /// </summary>
+        public BrokerQueryDef Clone()
+        {
+            BrokerQueryDef Result = new BrokerQueryDef();
+            Sys.AssignObject(this, Result);
+            return Result;
         }
 
         /* properties */

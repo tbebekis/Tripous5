@@ -1,45 +1,31 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2019 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
- 
+
 using Tripous.Data;
 
-namespace Tripous.Model
+namespace Tripous.Model2
 {
 
- 
-
     /// <summary>
-    /// Represents a <see cref="Broker"/> which uses a sql database server.
-    /// <para>SqlBroker relies on a <see cref="BrokerDescriptor"/> which must always be provided. Such
-    /// a descriptor may be registered in the <see cref="Registry"/> or it is given by the programmer.</para>
-    /// <para>SqlBroker uses a <see cref="TableSet"/> where its table tree is kept. TableSet is the
-    /// actual SELECT, INSERT, UPDATE, and DELETE engine.</para>
+    /// SqlBroker
     /// </summary>
     public class SqlBroker: Broker
     {
+        /// <summary>
+        /// Constant
+        /// </summary>
+        public const string GENERIC_SQL_BROKER = "_GENERIC_SQL_BROKER_";
 
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected BrokerDescriptor fDescriptor = new BrokerDescriptor();
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected int fEntityId = -1;
         /// <summary>
         /// Field
         /// </summary>
         protected string fEntityName = string.Empty;
- 
 
         /* initialization */
+        #region Initialization
         /// <summary>
         /// Initializes the broker.
         /// </summary>
@@ -47,38 +33,37 @@ namespace Tripous.Model
         {
             base.DoInitialize();
             InitializeDescriptor();
-            if (Descriptor != null)
-                Descriptor.EnsureMainSelect();
- 
             InitializeDatabaseConnection();
             InitializeTables();
         }
+       
         /// <summary>
-        /// Initializes the <see cref="BrokerDescriptor"/> descriptor for this broker.
-        /// <para>The descriptor may come from <see cref="Registry"/>. Otherwise the <see cref="DefineDescriptor"/> is called. </para>
+        /// Initializes the descriptor for this broker.
+        /// <para>The descriptor may come from a descriptor registry. Otherwise the <see cref="DefineDescriptor"/>() is called. </para>
         /// </summary>
         protected virtual void InitializeDescriptor()
         {
             if (!IsDeclarative)
-            {
-                if (Variables.ContainsKey("BrokerDescriptor") && (Variables["BrokerDescriptor"] is BrokerDescriptor))
-                    fDescriptor.Assign(Variables["BrokerDescriptor"] as BrokerDescriptor);
-                else
-                    DefineDescriptor();
-
-            }
+                DefineDescriptor();
         }
- 
+        /// <summary>
+        /// Called if no Descriptor is passed as "BrokerDescriptor"
+        /// and we are going to have a "manully" defined Descriptor 
+        /// </summary>
+        protected virtual void DefineDescriptor()
+        {
+        }
+
         /// <summary>
         /// Initializes the database connection of this broker. A broker needs to know which is 
         /// the database it operates on.
         /// </summary>
         protected virtual void InitializeDatabaseConnection()
         {
-            ConnectionInfo = Db.GetConnectionInfo(fDescriptor.ConnectionName);
+            ConnectionInfo = Db.GetConnectionInfo(Descriptor.ConnectionName);
 
             if (ConnectionInfo == null)
-                Sys.Throw("No database connection defined for Broker. {0}", fDescriptor.Name);
+                Sys.Throw("No database connection defined for Broker. {0}", Descriptor.Name);
 
             Store = SqlStores.CreateSqlStore(ConnectionInfo);
         }
@@ -88,23 +73,23 @@ namespace Tripous.Model
         /// </summary>
         protected virtual void InitializeTables()
         {
-            this.DataSet.DataSetName = "DS_" + fDescriptor.Name;
+            this.DataSet.DataSetName = "DS_" + Descriptor.Name;
 
             MemTable Table;
 
 
             // create the main TableDes if not assigned
-            if (fDescriptor.MainTable == null)
+            if (Descriptor.MainTable == null && !string.IsNullOrWhiteSpace(Descriptor.MainTableName))
             {
-                fDescriptor.Tables.Add(fDescriptor.MainTableName);
+                Descriptor.Tables.Add(new BrokerTableDef() { Name = Descriptor.MainTableName }); 
             }
 
             // ensure that any TableDes is updated with the actual table schema
-            foreach (TableDescriptor TableDes in fDescriptor.Tables)
+            foreach (var TableDes in Descriptor.Tables)
             {
                 Table = new MemTable();
                 Store.GetNativeSchema("", TableDes.Name, TableDes.Name, Table);
-                Bm.UpdateTableDescriptorFrom(Table, TableDes);
+                TableDes.UpdateFrom(Table);
             }
 
             // get the sql generation flags
@@ -113,40 +98,35 @@ namespace Tripous.Model
             // 1. create sql statements for all Tables of the BrokerDescriptor
             // 2. create DataTable objects for all Tables of the BrokerDescriptor    
             TableSqls TempSqlStatements = new TableSqls();
-            foreach (TableDescriptor TableDes in fDescriptor.Tables)
+            foreach (var TableDes in Descriptor.Tables)
             {
-                Bm.BuildSql(TableDes, TempSqlStatements, SqlFlags);
-                Bm.CreateDescriptorTable(Store, TableDes, Tables, false);
-                Table = Tables.Find(TableDes.Name);
+                TableDes.BuildSql(TempSqlStatements, SqlFlags);
+                TableDes.CreateDescriptorTable(Store, Tables, false);
+                Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
                 Table.SqlStatements = TempSqlStatements;
                 Table.PrimaryKeyField = TableDes.PrimaryKeyField;
-                Table.AutoGenerateGuidKeys = fDescriptor.GuidOids;
+                Table.AutoGenerateGuidKeys = Descriptor.GuidOids;
 
                 Table.ExtendedProperties["Descriptor"] = TableDes;
             }
 
-            ftblItem = Tables.Find(fDescriptor.MainTableName);
-            ftblLines = Tables.Find(fDescriptor.LinesTableName);
-            ftblSubLines = Tables.Find(fDescriptor.SubLinesTableName);
+            tblItem = Tables.Find(item => item.Name.IsSameText(Descriptor.MainTableName));
+            tblLines = Tables.Find(item => item.Name.IsSameText(Descriptor.LinesTableName));
+            tblSubLines = Tables.Find(item => item.Name.IsSameText(Descriptor.SubLinesTableName));
 
-
-
-
-
-
-
+ 
             // Detail Tables    -  find the detail Tables of any table
             InitializeDetails();
-            ftblItem.Details.Active = true;
+            tblItem.Details.Active = true;
 
             // DataColumn expressions - must be assigned after DataRelations are constructed
             DataColumn Field;
-            foreach (TableDescriptor TableDes in fDescriptor.Tables)
+            foreach (var TableDes in Descriptor.Tables)
             {
-                Table = Tables.Find(TableDes.Name);
+                Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
                 if (Table != null)
                 {
-                    foreach (FieldDescriptor FieldDes in TableDes.Fields)
+                    foreach (var FieldDes in TableDes.Fields)
                     {
                         if (!string.IsNullOrEmpty(FieldDes.Expression))
                         {
@@ -169,27 +149,47 @@ namespace Tripous.Model
 
             // TableSet
             TableSetFlags TableSetFlags = TableSetFlags.None;
-            if (fDescriptor.PessimisticMode)
-                TableSetFlags |= TableSetFlags.PessimisticMode;
-            if (fDescriptor.NoCascadeDeletes)
+ 
+            if (Descriptor.NoCascadeDeletes)
                 TableSetFlags |= TableSetFlags.NoCascadeDeletes;
 
-            TableSet = new TableSet(Store, ftblItem, GetQueryTables(), TableSetFlags);
+            // collect query tables
+            List<MemTable> QueryTables = new List<MemTable>();
+            MemTable QueryTable;
+
+            foreach (var QueryDes in Descriptor.Queries)
+            {
+                QueryTable = Tables.Find(item => item.Name.IsSameText(QueryDes.Name));
+
+                if (QueryTable != null)
+                    QueryTables.Add(QueryTable);
+            }
+
+
+            TableSet = new TableSet(Store, tblItem, QueryTables, TableSetFlags);
 
             TableSet.TransactionStageCommit += new EventHandler<TransactionStageEventArgs>(TableSet_TransactionStageCommit);
             TableSet.TransactionStageDelete += new EventHandler<TransactionStageEventArgs>(TableSet_TransactionStageDelete);
         }
 
-
-
-
         /// <summary>
-        /// Initializes detail data Tables
+        /// Completes query table descriptors by generating sql SELECT statements if needed.
         /// </summary>
-        protected virtual void InitializeDetails()
+        protected virtual void CompleteQueryDefs()
         {
-            // find the detail datasets of any dataset
-            CollectDetails(ftblItem, fDescriptor.MainTable);
+            foreach (var TableDes in Descriptor.Tables)
+            {
+                foreach (var FieldDes in TableDes.Fields)
+                {                   
+                    if ((FieldDes.IsForeignKeyField) && Descriptor.Queries.Find(item => item.Name.IsSameText(FieldDes.ForeignTableName)) == null)
+                    {
+                        Descriptor.Queries.Add(new BrokerQueryDef() { 
+                            Name = FieldDes.ForeignTableName,
+                            Sql = FieldDes.GetForeignSelectSql()
+                        });
+                    }
+                }
+            }
         }
         /// <summary>
         /// Selects each Query and defines query talbes field titles.
@@ -199,50 +199,89 @@ namespace Tripous.Model
         protected virtual void InitializeQueries()
         {
             MemTable Table;
-            foreach (QueryDescriptor QueryDes in fDescriptor.Queries)
+            foreach (var QueryDes in Descriptor.Queries)
             {
-                Table = Tables.Find(QueryDes.Name);
+                Table = Tables.Find(item => item.Name.IsSameText(QueryDes.Name));
                 if (Table == null)
                 {
                     Table = new MemTable(QueryDes.Name);
                     Tables.Add(Table);
                     Table.SqlStatements.SelectSql = QueryDes.Sql;
-                    Table.SqlStatements.LoadFieldTitleKeysFromText(QueryDes.DisplayLabels);
+                    if (QueryDes.FieldTitleKeys != null)
+                        Table.SqlStatements.FieldTitleKeys = QueryDes.FieldTitleKeys;
                 }
             }
+        }
+
+        /// <summary>
+        /// Initializes detail data Tables
+        /// </summary>
+        protected virtual void InitializeDetails()
+        {
+            // find the detail datasets of any dataset
+            CollectDetails(tblItem, Descriptor.MainTable);
         }
         /// <summary>
-        /// Initializes "stock Tables". A stock table is a helper data table used in look ups etc.
-        /// It is not a table that participates in the table tree when inserting, editing and deleting.
-        /// ??? What's the meaning of heaving stock Tables in secondary detail Tables ???
-        /// ??? What's the meaning a stock table to have nested stock Tables ???
+        /// Constructs the table tree of this broker.
         /// </summary>
-        protected virtual void InitializeStockTables(MemTable Table, StockTableDescriptors StockTablesDes)
+        protected virtual void CollectDetails(MemTable MasterTable, BrokerTableDef MasterDes)
         {
-            MemTable StockTable;
-            foreach (StockTableDescriptor StockTableDes in StockTablesDes)
-            {
-                StockTable = Tables.Find(StockTableDes.Name);
-                if (StockTable == null)
-                {
-                    StockTable = new MemTable(StockTableDes.Name);
-                    Tables.Add(StockTable);
-                    StockTable.SqlStatements.SelectRowSql = StockTableDes.Sql;
-                    Table.StockTables.Add(StockTable);
+            MemTable DetailTable;
 
-                    InitializeStockTables(StockTable, StockTableDes.StockTables);
+            foreach (var DetailDes in Descriptor.Tables)
+            {
+                DetailTable = Tables.Find(item => item.Name.IsSameText(DetailDes.Name));
+                if ((DetailTable != null) && (DetailDes != MasterDes) && Sys.IsSameText(MasterDes.Name, DetailDes.MasterTableName))
+                {
+                    MasterTable.Details.Add(DetailTable);
+
+                    // do a recursion to add detail Tables to this table
+                    CollectDetails(DetailTable, DetailDes);
                 }
             }
         }
+
         /// <summary>
         /// Initializes "stock Tables". A stock table is a helper data table.
         /// It is not a table that participates in the table tree when inserting, editing and deleting.
         /// </summary>
         protected virtual void InitializeStockTables()
         {
-            InitializeStockTables(ftblItem, fDescriptor.MainTable.StockTables);
+            //InitializeStockTables(ftblItem, Descriptor.MainTable.StockTables);
+
+            MemTable StockTable;
+            foreach (var StockTableDes in Descriptor.MainTable.StockTables)
+            {
+                StockTable = Tables.Find(item => item.Name.IsSameText(StockTableDes.Name));
+                if (StockTable == null)
+                {
+                    StockTable = new MemTable(StockTableDes.Name);
+                    Tables.Add(StockTable);
+                    StockTable.SqlStatements.SelectRowSql = StockTableDes.Sql;
+                    tblItem.StockTables.Add(StockTable);
+                }
+            }
         }
 
+        /// <summary>
+        /// Returns a bit field (set) of sql generation flags. Used when initializing Tables and
+        /// their sql statements.
+        /// </summary>
+        protected virtual BuildSqlFlags GetBuildSqlFlags()
+        {
+            BuildSqlFlags Result = BuildSqlFlags.None;
+
+            if (Descriptor.GuidOids)
+                Result |= BuildSqlFlags.GuidOids;
+            else if (Store.Provider.OidMode == OidMode.Before)
+                Result |= BuildSqlFlags.OidModeIsBefore;
+
+            if (IsListBroker)
+                Result |= BuildSqlFlags.BrowseBlobFields;
+
+            return Result;
+        }
+        #endregion
 
 
         /* item */
@@ -309,7 +348,6 @@ namespace Tripous.Model
         protected override void DoEditAfter(object RowId)
         {
             // swallow inherited base call
-
             // SetDefaultValues(); // NO. Calling this sets the Modified flag in the rows of any table
         }
         /// <summary>
@@ -334,78 +372,7 @@ namespace Tripous.Model
             // swallow inherited base call
         }
 
-        /* item checks */
-        /// <summary>
-        /// Called by the Commit and throws an exception if, for some reason,
-        /// commiting item is considered invalid.
-        /// </summary>
-        public override void CheckCanCommit(bool Reselect)
-        {
-            CheckRequiredFields();
-        }
 
-   
-
-        /* miscs */
-        /// <summary>
-        /// Gets a notification from the TableSet when deleting
-        /// </summary>
-        protected virtual void TableSet_TransactionStageDelete(object sender, TransactionStageEventArgs e)
-        {
-        }
-        /// <summary>
-        /// Gets a notification from the TableSet when commiting
-        /// </summary>
-        protected virtual void TableSet_TransactionStageCommit(object sender, TransactionStageEventArgs e)
-        {
-            // ** in web applications we do NOT have TableSet state
-            if (/*(TableSet.IsInsert) && */(e.Stage == TransactionStage.Start) && (e.ExecTime == ExecTime.After))
-            {
-                AssignCodeValue(e.Store, e.Transaction);
-            }
-        }
-        /// <summary>
-        /// Called from inside a commit transaction in order to assign the Code column
-        /// </summary>
-        protected virtual void AssignCodeValue(SqlStore Store, DbTransaction Transaction)
-        {
-            // ** in web applications we do NOT have TableSet state
-            if (/*(TableSet.IsInsert) && */(CodeProducer != null) && (ftblItem != null) && (ftblItem.Rows.Count > 0) && ftblItem.Columns.Contains("Code"))
-            {
-                foreach (DataRow Row in ftblItem.Rows)
-                {
-                    if (Sys.IsNull(Row["Code"]) || string.IsNullOrEmpty(Sys.AsString(Row["Code"], string.Empty).Trim()))
-                    {
-                        Row["Code"] = CodeProducer.Execute(Row, this.Store, Transaction);
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Called if no Descriptor is passed as "BrokerDescriptor"
-        /// and we are going to have a "manully" defined Descriptor 
-        /// </summary>
-        protected virtual void DefineDescriptor()
-        {
-        }
-        /// <summary>
-        /// Completes query table descriptors by generating sql SELECT statements if needed.
-        /// </summary>
-        protected virtual void CompleteQueryDefs()
-        {
-            foreach (TableDescriptor TableDes in fDescriptor.Tables)
-            {
-                foreach (FieldDescriptor FieldDes in TableDes.Fields)
-                {
-                    if ((FieldDes.IsLookUpField) && !fDescriptor.Queries.Contains(FieldDes.LookUpTableName))
-                    {
-                        string S = string.Format("select {0} from {1}",
-                            FieldDes.GetLookUpFieldList(), FieldDes.LookUpTableName);
-                        fDescriptor.Queries.Add(FieldDes.LookUpTableName, S);
-                    }
-                }
-            }
-        }
         /// <summary>
         /// Sets default values for all Tables.
         /// <para>It is called by the DoInsertAfter() and DoCommitBefore() </para>
@@ -415,9 +382,9 @@ namespace Tripous.Model
             if ((this.State == DataMode.Insert) || (IsListBroker && Commiting))
             {
                 MemTable Table;
-                foreach (TableDescriptor TableDes in fDescriptor.Tables)
+                foreach (var TableDes in Descriptor.Tables)
                 {
-                    Table = Tables.Find(TableDes.Name);
+                    Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
                     if (Table != null)
                     {
                         SetDefaultValues(Table);
@@ -446,7 +413,7 @@ namespace Tripous.Model
             if (Row.RowState == DataRowState.Deleted)
                 return;
 
-            if (fDescriptor.MainTableName.IsSameText(Row.Table.TableName))
+            if (Descriptor.MainTableName.IsSameText(Row.Table.TableName))
             {
                 if (IsListBroker)
                 {
@@ -463,9 +430,9 @@ namespace Tripous.Model
 
 
 
-            TableDescriptor TableDes = fDescriptor.Tables.Find(Row.Table.TableName);
-            FieldDescriptorBase FieldBaseDes;
-            FieldDescriptor FieldDes; 
+            var TableDes = Descriptor.Tables.Find(item => item.Name.IsSameText(Row.Table.TableName));
+            //FieldDescriptorBase FieldBaseDes;
+            BrokerFieldDef FieldDes;
 
             foreach (DataColumn Column in Row.Table.Columns)
             {
@@ -475,23 +442,19 @@ namespace Tripous.Model
                     {
                         if (TableDes != null)
                         {
-                            FieldBaseDes = TableDes.FindAnyField(Column.ColumnName);
+                            FieldDes = TableDes.FindAnyField(Column.ColumnName);
 
-                            if (FieldBaseDes != null)
+                            if (FieldDes != null)
                             {
                                 /* skip the column if the column descriptor is marked as read-only */
-                                if (FieldBaseDes.IsReadOnly)
+                                if (FieldDes.IsReadOnly)
                                     continue;
- 
+
                                 /* FieldDescriptor.DefaultValue */
-                                if (FieldBaseDes is FieldDescriptor) // 
-                                {
-                                    FieldDes = FieldBaseDes as FieldDescriptor;
-                                    SqlValueProviders.Process(Row, Column, FieldDes.DefaultValue, Store);      
-                                }
+                                SqlValueProviders.Process(Row, Column, FieldDes.DefaultValue, Store);
 
                                 /* if still is null */
-                                if (Sys.IsNull(Row[Column]) && FieldBaseDes.IsBoolean)
+                                if (Sys.IsNull(Row[Column]) && FieldDes.IsBoolean)
                                 {
                                     Row[Column] = 0;
                                 }
@@ -513,62 +476,53 @@ namespace Tripous.Model
             }
 
         }
+
+        /* item checks */
         /// <summary>
-        /// Constructs the table tree of this broker.
+        /// Called by the Commit and throws an exception if, for some reason,
+        /// commiting item is considered invalid.
         /// </summary>
-        protected virtual void CollectDetails(MemTable MasterTable, TableDescriptor MasterDes)
+        public override void CheckCanCommit(bool Reselect)
         {
-            MemTable DetailTable;
+            CheckRequiredFields();
+        }
 
-            foreach (TableDescriptor DetailDes in fDescriptor.Tables)
-            {
-                DetailTable = Tables.Find(DetailDes.Name);
-                if ((DetailTable != null) && (DetailDes != MasterDes) && Sys.IsSameText(MasterDes.Name, DetailDes.MasterTableName))
-                {
-                    MasterTable.Details.Add(DetailTable);
-
-                    // do a recursion to add detail Tables to this table
-                    CollectDetails(DetailTable, DetailDes);
-                }
-            }
+        /* tableset event handlers */
+        /// <summary>
+        /// Gets a notification from the TableSet when deleting
+        /// </summary>
+        protected virtual void TableSet_TransactionStageDelete(object sender, TransactionStageEventArgs e)
+        {
         }
         /// <summary>
-        /// Returns a bit field (set) of sql generation flags. Used when initializing Tables and
-        /// their sql statements.
+        /// Gets a notification from the TableSet when commiting
         /// </summary>
-        protected virtual BuildSqlFlags GetBuildSqlFlags()
+        protected virtual void TableSet_TransactionStageCommit(object sender, TransactionStageEventArgs e)
         {
-            BuildSqlFlags Result = BuildSqlFlags.None;
-
-            if (fDescriptor.GuidOids)
-                Result |= BuildSqlFlags.GuidOids;
-            else if (Store.Provider.OidMode == OidMode.Before)
-                Result |= BuildSqlFlags.OidModeIsBefore;
-
-            if (IsListBroker)
-                Result |= BuildSqlFlags.BrowseBlobFields;
-
-            return Result;
-        }
-        /// <summary>
-        /// Returns a Tables list of the query Tables of this broker.
-        /// </summary>
-        protected List<MemTable> GetQueryTables()
-        {
-            List<MemTable> Result = new List<MemTable>();
-            MemTable Table;
-
-            foreach (QueryDescriptor QueryDes in fDescriptor.Queries)
+            // ** in web applications we do NOT have TableSet state
+            if (/*(TableSet.IsInsert) && */(e.Stage == TransactionStage.Start) && (e.ExecTime == ExecTime.After))
             {
-                Table = Tables.Find(QueryDes.Name);
+                AssignCodeValue(e.Store, e.Transaction);
+            }
+        }
 
-                if (Table != null)
+        /* miscs */
+        /// <summary>
+        /// Called from inside a commit transaction in order to assign the Code column
+        /// </summary>
+        protected virtual void AssignCodeValue(SqlStore Store, DbTransaction Transaction)
+        {
+            // ** in web applications we do NOT have TableSet state
+            if (/*(TableSet.IsInsert) && */(CodeProducer != null) && (tblItem != null) && (tblItem.Rows.Count > 0) && tblItem.Columns.Contains("Code"))
+            {
+                foreach (DataRow Row in tblItem.Rows)
                 {
-                    Result.Add(Table);
+                    if (Sys.IsNull(Row["Code"]) || string.IsNullOrEmpty(Sys.AsString(Row["Code"], string.Empty).Trim()))
+                    {
+                        Row["Code"] = CodeProducer.Execute(Row, this.Store, Transaction);
+                    }
                 }
             }
-
-            return Result;
         }
 
 
@@ -578,35 +532,9 @@ namespace Tripous.Model
         /// </summary>
         public SqlBroker()
         {
-            fDescriptor.Name = "Generic SQL Broker";
         }
 
-        /* static */
-        /// <summary>
-        /// Creates and returns a SqlBroker based on the passed arguments.
-        /// <para>The returned SqlBroker is initialized as a master broker, not a list broker.</para>
-        /// </summary>
-        static public SqlBroker CreateSingleTableBroker(string ConnectionName, string MainTableName, string CodeProducerName)
-        {
-            SqlBroker Result = new SqlBroker();
-
-            Result.Descriptor.ConnectionName = ConnectionName;
-            Result.Descriptor.MainTableName = MainTableName;
-            Result.Descriptor.CodeProducerName = CodeProducerName;
-            Result.Initialize(false);
-
-            return Result;
-        }
-        /// <summary>
-        /// Creates and returns a SqlBroker based on the passed arguments.
-        /// <para>The returned SqlBroker is initialized as a master broker, not a list broker.</para>
-        /// </summary>
-        static public SqlBroker CreateSingleTableBroker(string MainTableName)
-        {
-            return CreateSingleTableBroker(SysConfig.DefaultConnection, MainTableName, string.Empty);
-        }
-
-
+ 
         /* browser select */
         /// <summary>
         /// Executes a SELECT statements and puts the returned data rows to the Table.
@@ -622,7 +550,7 @@ namespace Tripous.Model
 
             if (!SelectSqlName.StartsWithText("SELECT")) // it's a SelectSql name
             {
-                SS = this.Descriptor.SelectList.Find(item => item.Name == SelectSqlName);
+                SS = this.Descriptor.SelectList.Find(item => item.Name.IsSameText(SelectSqlName));
                 SqlText = SS.Text;
             }
 
@@ -644,20 +572,7 @@ namespace Tripous.Model
         {
             return TableSet.SelectBrowser(Table, SqlText);
         }
-        /// <summary>
-        /// SelectBrowser json counterpart
-        /// <para>SqlText could be the statement text or a SelectSql Name found in Descriptor.SelectList.</para>
-        /// <para>RowLimit greater than zero, is an instruction to apply a row limit to the SELECT statement</para>
-        /// </summary>
-        public virtual JsonDataTable JsonSelectBrowser(string SqlText, int RowLimit)
-        {
-            MemTable Table = new MemTable();
-            SelectBrowser(Table, SqlText, RowLimit);
-            JsonDataTable JTable = new JsonDataTable(Table, null);
-            return JTable;
-        }
-
-
+ 
         /* batch commits */
         /// <summary>
         /// A Commit() version for batch operations.
@@ -783,31 +698,27 @@ namespace Tripous.Model
 
         }
 
- 
-
-
         /* query Tables */
         /// <summary>
-                        /// Re-executes the SELECT for the query Tables.
-                        /// </summary>
-        public virtual void ReselectQueryTables()
+        /// Re-executes the SELECT for all query Tables.
+        /// </summary>
+        public virtual void ReselectQueries()
         {
-            foreach (QueryDescriptor QueryDes in fDescriptor.Queries)
-            {
-                MemTable Table = Tables.Find(QueryDes.Name);
+            foreach (var QueryDes in Descriptor.Queries)
+            { 
+                MemTable Table = Tables.Find(item => item.Name.IsSameText(QueryDes.Name));
                 if (Table != null)
                     Store.SelectTo(Table, QueryDes.Sql);
             }
         }
         /// <summary>
-        /// Re-executes the SELECT for the query Tables.
+        /// Re-executes the SELECT for a query Table.
         /// </summary>
-        public virtual void ReselectQueryTables(string TableName)
+        public virtual void ReselectQuery(string QueryName)
         {
-
-            MemTable Table = Tables.Find(TableName);
-            QueryDescriptor QueryDes = fDescriptor.Queries.Find(TableName);
-            if ((Table != null) && (QueryDes != null))
+            MemTable Table = Tables.Find(item => item.Name.IsSameText(QueryName));
+            BrokerQueryDef QueryDes = Descriptor.Queries.Find(item => item.Name.IsSameText(QueryName));
+            if (QueryDes != null && Table != null)
             {
                 Store.SelectTo(Table, QueryDes.Sql);
             }
@@ -820,9 +731,9 @@ namespace Tripous.Model
         public virtual void CheckRequiredFields()
         {
             MemTable Table;
-            foreach (TableDescriptor TableDes in fDescriptor.Tables)
+            foreach (BrokerTableDef TableDes in Descriptor.Tables)
             {
-                Table = Tables.Find(TableDes.Name);
+                Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
                 if (Table != null)
                 {
                     foreach (DataRow Row in Table.Rows)
@@ -833,13 +744,13 @@ namespace Tripous.Model
         /// <summary>
         /// Throws an exception if any of the required (not null) fields, is null
         /// </summary>
-        public virtual void CheckRequiredFields(DataRow Row, TableDescriptor TableDes)
+        public virtual void CheckRequiredFields(DataRow Row, BrokerTableDef TableDes)
         {
             if ((Row == null) || (TableDes == null) || Bf.Member(DataRowState.Deleted, Row.RowState))
                 return;
 
 
-            FieldDescriptorBase FieldDes;
+            BrokerFieldDef FieldDes;
 
             if (TableDes != null)
             {
@@ -849,13 +760,13 @@ namespace Tripous.Model
 
                 foreach (DataColumn Column in Row.Table.Columns)
                 {
-                    FieldDes = TableDes.Fields.Find(Column.ColumnName);
+                    FieldDes = TableDes.Fields.Find(item => item.Name.IsSameText(Column.ColumnName));
 
                     if ((!Column.AllowDBNull || ((FieldDes != null) && FieldDes.IsRequired)) && Db.IsNullOrEmpty(Row, Column))
                     {
                         /* skip the column if it is the CodeProducer target column. That column 
                            is assigned later from insided the TableSet commit transaction */
-                        IsCodeColumn = (State == DataMode.Insert) && Sys.IsSameText("Code", Column.ColumnName) && (Column.Table == ftblItem) && (CodeProducer != null);
+                        IsCodeColumn = (State == DataMode.Insert) && Sys.IsSameText("Code", Column.ColumnName) && (Column.Table == tblItem) && (CodeProducer != null);
                         if (!IsCodeColumn)
                             SB.AppendLine(string.Format("  {0} -> {1} ({2}.{3})", TableDes.Title, Column.Caption, TableDes.Name, Column.ColumnName));
                     }
@@ -868,13 +779,7 @@ namespace Tripous.Model
                 }
             }
         }
-        /// <summary>
-        /// Executes SqlText and returns a DataTable
-        /// </summary>
-        public DataTable Select(string SqlText, params object[] Params)
-        {
-            return Store.Select(SqlText, Params);
-        }
+
         /// <summary>
         /// Locates and returns a row or null. 
         /// <para>FieldName is the column name to search and Value the value to locate</para>
@@ -898,43 +803,34 @@ namespace Tripous.Model
             return null;
         }
         /// <summary>
-        /// Returns the TableDescriptor of TableName, if any, else null.
+        /// Returns the Table Descriptor of TableName, if any, else null.
         /// <para>If TableName is null or empty, it returns the MainTable (tblItem) descriptor.</para>
         /// </summary>
-        public override TableDescriptor TableDescriptorOf(string TableName)
+        public override BrokerTableDef TableDescriptorOf(string TableName)
         {
             if (string.IsNullOrEmpty(TableName))
-                return fDescriptor.MainTable;
-            return fDescriptor.Tables.Find(TableName);
+                return Descriptor.MainTable;
+            return Descriptor.Tables.Find(item => item.Name.IsSameText(TableName));
         }
         /// <summary>
-        /// Returns the FieldDescriptor of TableName.FieldName, if any, else null.
+        /// Returns the Field Descriptor of TableName.FieldName, if any, else null.
         /// <para>If TableName is null or empty, it returns the MainTable (tblItem) descriptor.</para>
         /// </summary>
-        public override FieldDescriptor FieldDescriptorOf(string TableName, string FieldName)
+        public override BrokerFieldDef FieldDescriptorOf(string TableName, string FieldName)
         {
-            TableDescriptor TableDes = TableDescriptorOf(TableName);
+            BrokerTableDef TableDes = TableDescriptorOf(TableName);
             if (TableDes != null)
-                return TableDes.Fields.Find(FieldName);
+                return TableDes.Fields.Find(item => item.Name.IsSameText(FieldName));
             return null;
         }
+ 
 
         /* properties */
         /// <summary>
         /// Gets or sets the descriptor of this broker
         /// </summary>
-        public BrokerDescriptor Descriptor
-        {
-            get { return fDescriptor; }
-            set
-            {
-                fDescriptor.Assign(value);
-                if (!Initialized)
-                {
-                    IsDeclarative = value != null;
-                }
-            }
-        }
+        public BrokerDef Descriptor { get; set; } = new BrokerDef() { Name = GENERIC_SQL_BROKER };
+
         /// <summary>
         /// Returns the connection info
         /// </summary>
@@ -948,42 +844,20 @@ namespace Tripous.Model
         /// Gets the TableSet
         /// </summary>
         public TableSet TableSet { get; protected set; }
- 
 
         /// <summary>
         /// Returns the table name of the main table
         /// </summary>
-        public override string MainTableName { get { return fDescriptor.MainTableName; } }
+        public override string MainTableName { get { return Descriptor.MainTableName; } }
         /// <summary>
         /// Returns the table name of the Lines table
         /// </summary>
-        public override string LinesTableName { get { return fDescriptor.LinesTableName; } }
+        public override string LinesTableName { get { return Descriptor.LinesTableName; } }
         /// <summary>
         /// Returns the table name of the SubLines table
         /// </summary>
-        public override string SubLinesTableName { get { return fDescriptor.SubLinesTableName; } }
-        /// <summary>
-        /// Returns the table name of the Backup table
-        /// </summary>
-        public override string BackupTableName { get { return string.Empty; } }
-
-        /// <summary>
-        /// An integer Id from the SYS_ENTITY table 
-        /// <para>It may points to an application Entity (for example Customer, Order, Employee, etc)</para>
-        /// <para>Defaults to 0, meaning no entity Id.</para>
-        /// <para>NOTE: EntityId is used by forms in order to call SysAction and Document services. No EntityId, no such services.</para>
-        /// </summary>
-        public override int EntityId
-        {
-            get
-            {
-                if (fEntityId != -1)
-                    return fEntityId;
-
-                return Descriptor.EntityId;
-            }
-            set { fEntityId = value; }
-        }
+        public override string SubLinesTableName { get { return Descriptor.SubLinesTableName; } }
+  
         /// <summary>
         /// The name of the Entity this broker represents
         /// </summary>
@@ -998,13 +872,10 @@ namespace Tripous.Model
             }
             set { fEntityName = value; }
         }
- 
+
         /// <summary>
         /// True means that Descriptor is assigned by the user before the Initialize()
         /// </summary>
-        public bool IsDeclarative   { get; protected set; }
+        public bool IsDeclarative => Descriptor.Name != GENERIC_SQL_BROKER;
     }
-
-
-
 }

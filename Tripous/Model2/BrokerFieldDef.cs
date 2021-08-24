@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 using Tripous.Data;
 
 namespace Tripous.Model2
@@ -33,6 +35,32 @@ namespace Tripous.Model2
         {
             return Name;
         }
+
+        /// <summary>
+        /// Clears the property values of this instance.
+        /// </summary>
+        public void Clear()
+        {
+            BrokerFieldDef Empty = new BrokerFieldDef();
+            Sys.AssignObject(Empty, this);
+        }
+        /// <summary>
+        /// Assigns property values from a source instance.
+        /// </summary>
+        public void Assign(BrokerFieldDef Source)
+        {
+            Sys.AssignObject(Source, this);
+        }
+        /// <summary>
+        /// Returns a clone of this instance.
+        /// </summary>
+        public BrokerFieldDef Clone()
+        {
+            BrokerFieldDef Result = new BrokerFieldDef();
+            Sys.AssignObject(this, Result);
+            return Result;
+        }
+ 
         /// <summary>
         /// Returns the SELECT statement for the foreign table.
         /// </summary>
@@ -73,13 +101,23 @@ from
         public string Alias { get; set; }
 
         /// <summary>
+        /// Gets or sets tha Title of this descriptor, used for display purposes.
+        /// </summary>
+        [JsonIgnore]
+        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name;
+        /// <summary>
+        /// Gets or sets a resource Key used in returning a localized version of Title
+        /// </summary>
+        public string TitleKey { get; set; }
+
+        /// <summary>
         /// The data-type of the field
         /// </summary>
         public DataFieldType DataType { get; set; }
         /// <summary>
         /// The max length of a string field
         /// </summary>
-        public int Length { get; set; }
+        public int MaxLength { get; set; }
         /// <summary>
         /// Gets or sets the decimals of the field. Used when is a float field.
         /// </summary>
@@ -135,8 +173,92 @@ from
         /// <para>NOTE: The <see cref="ForeignKeyField"/> must be included in this SELECT statement.</para>
         /// </summary>
         public string ForeignTableSql { get; set; }
+
+        /// <summary>
+        /// Returns true when the Required flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsRequired => (BrokerFieldFlag.Required & Flags) == BrokerFieldFlag.Required;
+        /// <summary>
+        /// Returns true when the IsHidden flag is NOT set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsVisible => !IsHidden;
+        /// <summary>
+        /// Returns true when the IsHidden flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsHidden => (BrokerFieldFlag.Hidden & Flags) == BrokerFieldFlag.Hidden;
+        /// <summary>
+        /// Returns true when the ReadOnly flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsReadOnly => (BrokerFieldFlag.ReadOnly & Flags) == BrokerFieldFlag.ReadOnly;
+        /// <summary>
+        /// Returns true when the ReadOnlyUI flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsReadOnlyUI => (BrokerFieldFlag.ReadOnlyUI & Flags) == BrokerFieldFlag.ReadOnlyUI;
+        /// <summary>
+        /// Returns true when the ReadOnlyEdit flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsReadOnlyEdit => (BrokerFieldFlag.ReadOnlyEdit & Flags) == BrokerFieldFlag.ReadOnlyEdit;
+
+        /// <summary>
+        /// Returns true when the Boolean flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsBoolean => (BrokerFieldFlag.Boolean & Flags) == BrokerFieldFlag.Boolean;
+        /// <summary>
+        /// Returns true when the Memo flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsMemo => (BrokerFieldFlag.Memo & Flags) == BrokerFieldFlag.Memo;
+        /// <summary>
+        /// Returns true when the Image flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsImage => (BrokerFieldFlag.Image & Flags) == BrokerFieldFlag.Image;
+        /// <summary>
+        /// Returns true when the ImagePath flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsImagePath => (BrokerFieldFlag.ImagePath & Flags) == BrokerFieldFlag.ImagePath;
+        /// <summary>
+        /// Returns true when the Searchable flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsSearchable => (BrokerFieldFlag.Searchable & Flags) == BrokerFieldFlag.Searchable;
+        /// <summary>
+        /// Returns true when the Extra flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsExtraField => (BrokerFieldFlag.Extra & Flags) == BrokerFieldFlag.Extra;
+        /// <summary>
+        /// Returns true when the Extra flag is NOT set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsNativeField { get { return !IsExtraField; } }
+        /// <summary>
+        /// Returns true when the ForeignKey flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsForeignKeyField => (BrokerFieldFlag.ForeignKey & Flags) == BrokerFieldFlag.ForeignKey;
+
+        /// <summary>
+        /// Returns true when the NoInsertUpdate flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsNoInsertOrUpdate => (BrokerFieldFlag.NoInsertUpdate & Flags) == BrokerFieldFlag.NoInsertUpdate;
+        /// <summary>
+        /// Returns true when the Localizable flag is set in Flags.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsLocalizable => (BrokerFieldFlag.Localizable & Flags) == BrokerFieldFlag.Localizable;
     }
-
-
-
 }
+
+
+
+ 

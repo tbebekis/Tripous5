@@ -16,6 +16,10 @@ namespace Tripous.Data
         /// LineBreak
         /// </summary>
         static private readonly string LB = Environment.NewLine; // Line Break
+        /// <summary>
+        /// The spaces to be used when generating Sql statements
+        /// </summary>
+        public const int StatementDefaultSpaces = 30;
 
         /* Where type */
         /// <summary>
