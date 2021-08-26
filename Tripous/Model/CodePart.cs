@@ -72,8 +72,8 @@ namespace Tripous.Model
         /// <para>The Format can NOT contain literal characters.</para>
         /// <para>The only valid characters are the following</para>
         /// <list type="bullet"> 
-        ///   <description> <c>X                  = digit of the Part</c>  </description><para></para>
-        ///   <description> <c>., -, \, /, ' '    = digit separators of the Part</c>  </description><para></para>
+        ///  <item> <description> <c>X                  = digit of the Part</c>  </description></item>
+        ///  <item> <description> <c>., -, \, /, ' '    = digit separators of the Part</c>  </description></item>
         /// </list>     
         ///  for instance XXX-XXX or XX.XX.XXX      
         /// <para></para>     

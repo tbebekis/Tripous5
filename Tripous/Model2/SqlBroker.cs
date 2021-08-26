@@ -513,16 +513,21 @@ namespace Tripous.Model2
         protected virtual void AssignCodeValue(SqlStore Store, DbTransaction Transaction)
         {
             // ** in web applications we do NOT have TableSet state
-            if (/*(TableSet.IsInsert) && */(CodeProducer != null) && (tblItem != null) && (tblItem.Rows.Count > 0) && tblItem.Columns.Contains("Code"))
+            if /*(TableSet.IsInsert) && */(CodeProducer != null)
             {
-                foreach (DataRow Row in tblItem.Rows)
+                string CodeFieldName = CodeProducer.CodeFieldName;
+
+                if (tblItem != null && tblItem.Rows.Count > 0 && tblItem.Columns.Contains(CodeFieldName))
                 {
-                    if (Sys.IsNull(Row["Code"]) || string.IsNullOrEmpty(Sys.AsString(Row["Code"], string.Empty).Trim()))
+                    foreach (DataRow Row in tblItem.Rows)
                     {
-                        Row["Code"] = CodeProducer.Execute(Row, this.Store, Transaction);
+                        if (Sys.IsNull(Row[CodeFieldName]) || string.IsNullOrEmpty(Sys.AsString(Row[CodeFieldName], string.Empty).Trim()))
+                        {
+                            Row[CodeFieldName] = CodeProducer.Execute(Row, this.Store, Transaction);
+                        }
                     }
                 }
-            }
+            } 
         }
 
 
@@ -766,7 +771,7 @@ namespace Tripous.Model2
                     {
                         /* skip the column if it is the CodeProducer target column. That column 
                            is assigned later from insided the TableSet commit transaction */
-                        IsCodeColumn = (State == DataMode.Insert) && Sys.IsSameText("Code", Column.ColumnName) && (Column.Table == tblItem) && (CodeProducer != null);
+                        IsCodeColumn = (State == DataMode.Insert) && Sys.IsSameText(CodeProducer.CodeFieldName, Column.ColumnName) && (Column.Table == tblItem) && (CodeProducer != null);
                         if (!IsCodeColumn)
                             SB.AppendLine(string.Format("  {0} -> {1} ({2}.{3})", TableDes.Title, Column.Caption, TableDes.Name, Column.ColumnName));
                     }
@@ -844,6 +849,11 @@ namespace Tripous.Model2
         /// Gets the TableSet
         /// </summary>
         public TableSet TableSet { get; protected set; }
+
+        /// <summary>
+        /// Gets the code producer of the broker.
+        /// </summary>
+        public CodeProvider CodeProducer { get; protected set; }
 
         /// <summary>
         /// Returns the table name of the main table

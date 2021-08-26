@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
+using Tripous.Model2;
+
 namespace Test.WinApp
 {
     public partial class MainForm : Form
@@ -81,6 +84,24 @@ namespace Test.WinApp
             App.Initialize(this);
 
             SettingTest.LoadSettings();
+
+            Test();
+        }
+        void Test()
+        {
+            DataTable Table = new DataTable();
+            Table.Columns.Add("Code");
+            Table.Columns.Add("Name");
+
+            Table.Rows.Add("000", "Teo");
+
+            CodeProviderDef Def = new CodeProviderDef();
+            Def.Name = "Def";
+            Def.Text = "PO|select max(NumberField) from @TABLE_NAME;XXX-XXX";
+
+            CodeProvider CP = new CodeProvider(Def, "Customer");
+            //string Result = CP.Execute(Table.Rows[0], null, null);
+
         }
  
         /* overrides */

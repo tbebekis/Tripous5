@@ -561,10 +561,6 @@ namespace Tripous.Model2
         public MemTable tblSubLines { get; protected set; }
 
         /// <summary>
-        /// Gets the code producer of the broker.
-        /// </summary>
-        public Tripous.Model.CodeProducer CodeProducer { get; protected set; }
-        /// <summary>
         /// Gets the variables of the broker.
         /// </summary>
         public Dictionary<string, object> Variables { get; protected set; } = new Dictionary<string, object>();
