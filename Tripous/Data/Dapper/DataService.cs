@@ -374,7 +374,7 @@ namespace Tripous.Data
         /// <summary>
         /// For inheritors
         /// </summary>
-        protected virtual void BeforeGetByFilterAsync(EntityFilter Filter)
+        protected virtual void BeforeGetByFilterAsync(WhereSql Filter)
         {
         }
         /// <summary>
@@ -567,7 +567,7 @@ namespace Tripous.Data
         /// <summary>
         /// Returns all entities from the database table, based on a specified entity filter.
         /// </summary>
-        public virtual async Task<List<T>> GetByFilterAsync(EntityFilter Filter)
+        public virtual async Task<List<T>> GetByFilterAsync(WhereSql Filter)
         {
             List<T> Result = null;
 

@@ -6,12 +6,12 @@ using Newtonsoft.Json.Converters;
 
 namespace Tripous.Data
 {
-#warning TODO: Rename it WhereSql
+
 
     /// <summary>
-    /// Helper for constructing a WHERE clause when SELECTing an Entity.
+    /// Helper for constructing a WHERE clause of a SELECT statement.
     /// </summary>
-    public class EntityFilter
+    public class WhereSql
     {
 
         /// <summary>
@@ -106,13 +106,13 @@ namespace Tripous.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        public EntityFilter()
+        public WhereSql()
         {
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public EntityFilter(Bool BoolOp, Condition ConditionOp, string FieldName, string Value)
+        public WhereSql(Bool BoolOp, Condition ConditionOp, string FieldName, string Value)
         {
             this.BoolOp = BoolOp;
             this.ConditionOp = ConditionOp;
@@ -125,9 +125,9 @@ namespace Tripous.Data
         /// <summary>
         /// Creates the root filter
         /// </summary>
-        static public EntityFilter CreateFilter()
+        static public WhereSql CreateFilter()
         {
-            return new EntityFilter();
+            return new WhereSql();
         }
 
         /* public */
@@ -135,9 +135,9 @@ namespace Tripous.Data
         /// Adds a group to the filter.
         /// <para>A group is used in sourrounding moultiple conditions in parenthesis, e.g. (condition0 OR condition1 AND NOT condition2)</para>
         /// </summary>
-        public EntityFilter AddGroup(Bool BoolOp)
+        public WhereSql AddGroup(Bool BoolOp)
         {
-            EntityFilter Result = new EntityFilter();
+            WhereSql Result = new WhereSql();
             Result.BoolOp = BoolOp;
             Items.Add(Result);
             return Result;
@@ -145,7 +145,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds a condition to the filter.
         /// </summary>
-        public EntityFilter AddCondition(Bool BoolOp, Condition ConditionOp, string FieldName, string Value, string Value2 = "")
+        public WhereSql AddCondition(Bool BoolOp, Condition ConditionOp, string FieldName, string Value, string Value2 = "")
         {
             if (string.IsNullOrWhiteSpace(FieldName))
                 throw new ApplicationException("No field name");
@@ -153,7 +153,7 @@ namespace Tripous.Data
             if (ConditionOp == Condition.Between && string.IsNullOrWhiteSpace(Value2))
                 throw new ApplicationException("BETWEEN requires two values");
 
-            EntityFilter Result = new EntityFilter();
+            WhereSql Result = new WhereSql();
             Result.BoolOp = BoolOp;
             Result.ConditionOp = ConditionOp;
             Result.FieldName = FieldName;
@@ -201,7 +201,7 @@ namespace Tripous.Data
         /// <summary>
         /// Used when the item is a group. The list of conditions of a group.
         /// </summary>
-        public List<EntityFilter> Items { get; } = new List<EntityFilter>();
+        public List<WhereSql> Items { get; } = new List<WhereSql>();
 
 
         /// <summary>

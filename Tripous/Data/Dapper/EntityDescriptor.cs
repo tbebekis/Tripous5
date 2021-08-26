@@ -335,13 +335,13 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// The user of an <see cref="EntityFilter" /> may use property names in filter conditions.
+        /// The user of an <see cref="WhereSql" /> may use property names in filter conditions.
         /// This method replaces those property names with database field names.
         /// </summary>
-        public void ProcessEntityFilter(EntityFilter Filter)
+        public void ProcessEntityFilter(WhereSql Filter)
         {
 
-            Action<List<EntityFilter>> ProcessFilterItems = null;
+            Action<List<WhereSql>> ProcessFilterItems = null;
 
             ProcessFilterItems = (Items) =>
             {
