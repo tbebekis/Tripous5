@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-using Tripous.Model2;
+using Tripous.Data;
 
 namespace Test.WinApp
 {
