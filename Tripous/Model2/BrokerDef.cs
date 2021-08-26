@@ -16,6 +16,8 @@ namespace Tripous.Model2
     /// </summary>
     public class BrokerDef
     {
+        static List<BrokerDef> Descriptors = new List<BrokerDef>();
+
         string fEntityName;
 
 
@@ -26,6 +28,37 @@ namespace Tripous.Model2
         public BrokerDef()
         {
         }
+
+        /* static */
+        /// <summary>
+        /// Returns a descriptor by a specified name if any, else, null
+        /// </summary>
+        static public BrokerDef FindDescriptor(string Name)
+        {
+            return Descriptors.Find(item => item.Name.IsSameText(Name));
+        }
+        /// <summary>
+        /// Returns true if a descriptor is already registered under a specified name.
+        /// </summary>
+        static public bool DescriptorExists(string Name)
+        {
+            return FindDescriptor(Name) != null;
+        }
+        /// <summary>
+        /// Registers a descriptor.
+        /// </summary>
+        static public BrokerDef RegisterDescriptor(string Name, string Text)
+        {
+            BrokerDef Result = FindDescriptor(Name);
+            if (Result == null)
+            {
+                Result = new BrokerDef() { Name = Name };
+                Descriptors.Add(Result);
+            }
+
+            return Result;
+        }
+
 
         /* public */
         /// <summary>

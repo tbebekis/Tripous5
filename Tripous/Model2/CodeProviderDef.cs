@@ -14,12 +14,45 @@ namespace Tripous.Model2
     /// </summary>
     public class CodeProviderDef
     {
+        static List<CodeProviderDef> Descriptors = new List<CodeProviderDef>();
+
         /* construction */
         /// <summary>
         /// Constructor.
         /// </summary>
         public CodeProviderDef()
         {
+        }
+
+        /* static */
+        /// <summary>
+        /// Returns a descriptor by a specified name if any, else, null
+        /// </summary>
+        static public CodeProviderDef FindDescriptor(string Name)
+        {
+            return Descriptors.Find(item => item.Name.IsSameText(Name));
+        }
+        /// <summary>
+        /// Returns true if a descriptor is already registered under a specified name.
+        /// </summary>
+        static public bool DescriptorExists(string Name)
+        {
+            return FindDescriptor(Name) != null;
+        }
+        /// <summary>
+        /// Registers a descriptor.
+        /// </summary>
+        static public void RegisterDescriptor(string Name, string Text)
+        {
+            CodeProviderDef Des = FindDescriptor(Name);
+            if (Des != null)
+            {
+                Des.Text = Text;
+            }
+            else
+            {
+                Descriptors.Add(new CodeProviderDef() { Name = Name, Text = Text });
+            }
         }
 
         /* properties */

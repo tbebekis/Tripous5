@@ -12,7 +12,7 @@ using Tripous.Data;
 namespace Tripous.Model2
 {
 
-#warning TODO: SqBroker JSON
+#warning TODO: LocatorDescriptor, SqlBrowser, SqBroker JSON
 
     /// <summary>
     /// A broker table definition
