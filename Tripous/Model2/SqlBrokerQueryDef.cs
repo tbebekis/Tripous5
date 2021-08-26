@@ -12,13 +12,13 @@ namespace Tripous.Model2
     /// <summary>
     /// Describes a SELECT statement.
     /// </summary>
-    public class BrokerQueryDef
+    public class SqlBrokerQueryDef
     {
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public BrokerQueryDef()
+        public SqlBrokerQueryDef()
         {
         }
 
@@ -36,22 +36,22 @@ namespace Tripous.Model2
         /// </summary>
         public void Clear()
         {
-            BrokerQueryDef Empty = new BrokerQueryDef();
+            SqlBrokerQueryDef Empty = new SqlBrokerQueryDef();
             Sys.AssignObject(Empty, this);
         }
         /// <summary>
         /// Assigns property values from a source instance.
         /// </summary>
-        public void Assign(BrokerQueryDef Source)
+        public void Assign(SqlBrokerQueryDef Source)
         {
             Sys.AssignObject(Source, this);
         }
         /// <summary>
         /// Returns a clone of this instance.
         /// </summary>
-        public BrokerQueryDef Clone()
+        public SqlBrokerQueryDef Clone()
         {
-            BrokerQueryDef Result = new BrokerQueryDef();
+            SqlBrokerQueryDef Result = new SqlBrokerQueryDef();
             Sys.AssignObject(this, Result);
             return Result;
         }

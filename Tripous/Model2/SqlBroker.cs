@@ -81,7 +81,7 @@ namespace Tripous.Model2
             // create the main TableDes if not assigned
             if (Descriptor.MainTable == null && !string.IsNullOrWhiteSpace(Descriptor.MainTableName))
             {
-                Descriptor.Tables.Add(new BrokerTableDef() { Name = Descriptor.MainTableName }); 
+                Descriptor.Tables.Add(new SqlBrokerTableDef() { Name = Descriptor.MainTableName }); 
             }
 
             // ensure that any TableDes is updated with the actual table schema
@@ -183,7 +183,7 @@ namespace Tripous.Model2
                 {                   
                     if ((FieldDes.IsForeignKeyField) && Descriptor.Queries.Find(item => item.Name.IsSameText(FieldDes.ForeignTableName)) == null)
                     {
-                        Descriptor.Queries.Add(new BrokerQueryDef() { 
+                        Descriptor.Queries.Add(new SqlBrokerQueryDef() { 
                             Name = FieldDes.ForeignTableName,
                             Sql = FieldDes.GetForeignSelectSql()
                         });
@@ -224,7 +224,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Constructs the table tree of this broker.
         /// </summary>
-        protected virtual void CollectDetails(MemTable MasterTable, BrokerTableDef MasterDes)
+        protected virtual void CollectDetails(MemTable MasterTable, SqlBrokerTableDef MasterDes)
         {
             MemTable DetailTable;
 
@@ -432,7 +432,8 @@ namespace Tripous.Model2
 
             var TableDes = Descriptor.Tables.Find(item => item.Name.IsSameText(Row.Table.TableName));
             //FieldDescriptorBase FieldBaseDes;
-            BrokerFieldDef FieldDes;
+            Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> Pair;
+            SqlBrokerFieldDef FieldDes;
 
             foreach (DataColumn Column in Row.Table.Columns)
             {
@@ -442,23 +443,28 @@ namespace Tripous.Model2
                     {
                         if (TableDes != null)
                         {
-                            FieldDes = TableDes.FindAnyField(Column.ColumnName);
-
-                            if (FieldDes != null)
+                            Pair = TableDes.FindAnyField(Column.ColumnName);
+                            if (Pair != null)
                             {
-                                /* skip the column if the column descriptor is marked as read-only */
-                                if (FieldDes.IsReadOnly)
-                                    continue;
+                                FieldDes = Pair.Item2;
 
-                                /* FieldDescriptor.DefaultValue */
-                                SqlValueProviders.Process(Row, Column, FieldDes.DefaultValue, Store);
-
-                                /* if still is null */
-                                if (Sys.IsNull(Row[Column]) && FieldDes.IsBoolean)
+                                if (FieldDes != null)
                                 {
-                                    Row[Column] = 0;
+                                    /* skip the column if the column descriptor is marked as read-only */
+                                    if (FieldDes.IsReadOnly)
+                                        continue;
+
+                                    /* FieldDescriptor.DefaultValue */
+                                    SqlValueProviders.Process(Row, Column, FieldDes.DefaultValue, Store);
+
+                                    /* if still is null */
+                                    if (Sys.IsNull(Row[Column]) && FieldDes.IsBoolean)
+                                    {
+                                        Row[Column] = 0;
+                                    }
                                 }
                             }
+
                         }
 
                         /* if still is null */
@@ -722,7 +728,7 @@ namespace Tripous.Model2
         public virtual void ReselectQuery(string QueryName)
         {
             MemTable Table = Tables.Find(item => item.Name.IsSameText(QueryName));
-            BrokerQueryDef QueryDes = Descriptor.Queries.Find(item => item.Name.IsSameText(QueryName));
+            SqlBrokerQueryDef QueryDes = Descriptor.Queries.Find(item => item.Name.IsSameText(QueryName));
             if (QueryDes != null && Table != null)
             {
                 Store.SelectTo(Table, QueryDes.Sql);
@@ -736,7 +742,7 @@ namespace Tripous.Model2
         public virtual void CheckRequiredFields()
         {
             MemTable Table;
-            foreach (BrokerTableDef TableDes in Descriptor.Tables)
+            foreach (SqlBrokerTableDef TableDes in Descriptor.Tables)
             {
                 Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
                 if (Table != null)
@@ -749,13 +755,13 @@ namespace Tripous.Model2
         /// <summary>
         /// Throws an exception if any of the required (not null) fields, is null
         /// </summary>
-        public virtual void CheckRequiredFields(DataRow Row, BrokerTableDef TableDes)
+        public virtual void CheckRequiredFields(DataRow Row, SqlBrokerTableDef TableDes)
         {
             if ((Row == null) || (TableDes == null) || Bf.Member(DataRowState.Deleted, Row.RowState))
                 return;
 
 
-            BrokerFieldDef FieldDes;
+            SqlBrokerFieldDef FieldDes;
 
             if (TableDes != null)
             {
@@ -811,7 +817,7 @@ namespace Tripous.Model2
         /// Returns the Table Descriptor of TableName, if any, else null.
         /// <para>If TableName is null or empty, it returns the MainTable (tblItem) descriptor.</para>
         /// </summary>
-        public override BrokerTableDef TableDescriptorOf(string TableName)
+        public virtual SqlBrokerTableDef TableDescriptorOf(string TableName)
         {
             if (string.IsNullOrEmpty(TableName))
                 return Descriptor.MainTable;
@@ -821,9 +827,9 @@ namespace Tripous.Model2
         /// Returns the Field Descriptor of TableName.FieldName, if any, else null.
         /// <para>If TableName is null or empty, it returns the MainTable (tblItem) descriptor.</para>
         /// </summary>
-        public override BrokerFieldDef FieldDescriptorOf(string TableName, string FieldName)
+        public virtual SqlBrokerFieldDef FieldDescriptorOf(string TableName, string FieldName)
         {
-            BrokerTableDef TableDes = TableDescriptorOf(TableName);
+            SqlBrokerTableDef TableDes = TableDescriptorOf(TableName);
             if (TableDes != null)
                 return TableDes.Fields.Find(item => item.Name.IsSameText(FieldName));
             return null;
@@ -834,7 +840,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Gets or sets the descriptor of this broker
         /// </summary>
-        public BrokerDef Descriptor { get; set; } = new BrokerDef() { Name = GENERIC_SQL_BROKER };
+        public SqlBrokerDef Descriptor { get; set; } = new SqlBrokerDef() { Name = GENERIC_SQL_BROKER };
 
         /// <summary>
         /// Returns the connection info
@@ -853,7 +859,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Gets the code producer of the broker.
         /// </summary>
-        public CodeProvider CodeProducer { get; protected set; }
+        public CodeProvider CodeProducer { get; set; }
 
         /// <summary>
         /// Returns the table name of the main table

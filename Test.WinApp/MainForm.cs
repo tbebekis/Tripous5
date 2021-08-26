@@ -99,7 +99,7 @@ namespace Test.WinApp
             Def.Name = "Def";
             Def.Text = "PO|select max(NumberField) from @TABLE_NAME;XXX-XXX";
 
-            CodeProvider CP = new CodeProvider(Def, "Customer");
+            CodeProvider CP = new CodeProvider() { Descriptor = Def, TableName = "Customer" };
             //string Result = CP.Execute(Table.Rows[0], null, null);
 
         }

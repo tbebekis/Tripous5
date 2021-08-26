@@ -418,11 +418,11 @@ namespace Tripous.Model2
 
                 if (Result == null)
                 {
-                    if (Sys.IsSameText(TableName, "Item") || Sys.IsSameText(TableName, BrokerTableDef.ITEM))
+                    if (Sys.IsSameText(TableName, "Item") || Sys.IsSameText(TableName, SqlBrokerTableDef.ITEM))
                         return Tables.Find(item => MainTableName.IsSameText(item.TableName));    
-                    else if (Sys.IsSameText(TableName, "Lines") || Sys.IsSameText(TableName, BrokerTableDef.LINES))
+                    else if (Sys.IsSameText(TableName, "Lines") || Sys.IsSameText(TableName, SqlBrokerTableDef.LINES))
                         return Tables.Find(item => LinesTableName.IsSameText(item.TableName));     
-                    else if (Sys.IsSameText(TableName, "SubLines") || Sys.IsSameText(TableName, BrokerTableDef.SUBLINES))
+                    else if (Sys.IsSameText(TableName, "SubLines") || Sys.IsSameText(TableName, SqlBrokerTableDef.SUBLINES))
                         return Tables.Find(item => SubLinesTableName.IsSameText(item.TableName));   
                 }
             }
@@ -430,22 +430,7 @@ namespace Tripous.Model2
             return Result;
         }
  
-        /// <summary>
-        /// Returns the Table Descriptor of TableName, if any, else null.
-        /// <para>If TableName is null or empty, it returns the MainTable (tblItem) descriptor.</para>
-        /// </summary>
-        public virtual BrokerTableDef TableDescriptorOf(string TableName)
-        {
-            return null;
-        }
-        /// <summary>
-        /// Returns the Field Descriptor of TableName.FieldName, if any, else null.
-        /// <para>If TableName is null or empty, it returns the MainTable (tblItem) descriptor.</para>
-        /// </summary>
-        public virtual BrokerFieldDef FieldDescriptorOf(string TableName, string FieldName)
-        {
-            return null;
-        }
+
 
 
         /* properties */

@@ -15,7 +15,7 @@ namespace Tripous.Model2
     /// <summary>
     /// A broker field definition
     /// </summary>
-    public class BrokerFieldDef
+    public class SqlBrokerFieldDef
     {
         string fDefaultValue = Sys.NULL;
 
@@ -23,7 +23,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Constructor
         /// </summary>
-        public BrokerFieldDef()
+        public SqlBrokerFieldDef()
         {
         }
 
@@ -41,22 +41,22 @@ namespace Tripous.Model2
         /// </summary>
         public void Clear()
         {
-            BrokerFieldDef Empty = new BrokerFieldDef();
+            SqlBrokerFieldDef Empty = new SqlBrokerFieldDef();
             Sys.AssignObject(Empty, this);
         }
         /// <summary>
         /// Assigns property values from a source instance.
         /// </summary>
-        public void Assign(BrokerFieldDef Source)
+        public void Assign(SqlBrokerFieldDef Source)
         {
             Sys.AssignObject(Source, this);
         }
         /// <summary>
         /// Returns a clone of this instance.
         /// </summary>
-        public BrokerFieldDef Clone()
+        public SqlBrokerFieldDef Clone()
         {
-            BrokerFieldDef Result = new BrokerFieldDef();
+            SqlBrokerFieldDef Result = new SqlBrokerFieldDef();
             Sys.AssignObject(this, Result);
             return Result;
         }
@@ -125,7 +125,7 @@ from
         /// <summary>
         /// Gets or sets the flags of the field.
         /// </summary>
-        public BrokerFieldFlag Flags { get; set; }
+        public SqlBrokerFieldFlag Flags { get; set; }
 
         /// <summary>
         /// Gets or sets the default value of the field.
@@ -175,10 +175,15 @@ from
         public string ForeignTableSql { get; set; }
 
         /// <summary>
+        /// The name of a <see cref="LocatorDef"/> to be used with this field.
+        /// </summary>
+        public string LocatorName { get; set; }
+
+        /// <summary>
         /// Returns true when the Required flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsRequired => (BrokerFieldFlag.Required & Flags) == BrokerFieldFlag.Required;
+        public bool IsRequired => (SqlBrokerFieldFlag.Required & Flags) == SqlBrokerFieldFlag.Required;
         /// <summary>
         /// Returns true when the IsHidden flag is NOT set in Flags.
         /// </summary>
@@ -188,53 +193,53 @@ from
         /// Returns true when the IsHidden flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsHidden => (BrokerFieldFlag.Hidden & Flags) == BrokerFieldFlag.Hidden;
+        public bool IsHidden => (SqlBrokerFieldFlag.Hidden & Flags) == SqlBrokerFieldFlag.Hidden;
         /// <summary>
         /// Returns true when the ReadOnly flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsReadOnly => (BrokerFieldFlag.ReadOnly & Flags) == BrokerFieldFlag.ReadOnly;
+        public bool IsReadOnly => (SqlBrokerFieldFlag.ReadOnly & Flags) == SqlBrokerFieldFlag.ReadOnly;
         /// <summary>
         /// Returns true when the ReadOnlyUI flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsReadOnlyUI => (BrokerFieldFlag.ReadOnlyUI & Flags) == BrokerFieldFlag.ReadOnlyUI;
+        public bool IsReadOnlyUI => (SqlBrokerFieldFlag.ReadOnlyUI & Flags) == SqlBrokerFieldFlag.ReadOnlyUI;
         /// <summary>
         /// Returns true when the ReadOnlyEdit flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsReadOnlyEdit => (BrokerFieldFlag.ReadOnlyEdit & Flags) == BrokerFieldFlag.ReadOnlyEdit;
+        public bool IsReadOnlyEdit => (SqlBrokerFieldFlag.ReadOnlyEdit & Flags) == SqlBrokerFieldFlag.ReadOnlyEdit;
 
         /// <summary>
         /// Returns true when the Boolean flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsBoolean => (BrokerFieldFlag.Boolean & Flags) == BrokerFieldFlag.Boolean;
+        public bool IsBoolean => (SqlBrokerFieldFlag.Boolean & Flags) == SqlBrokerFieldFlag.Boolean;
         /// <summary>
         /// Returns true when the Memo flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsMemo => (BrokerFieldFlag.Memo & Flags) == BrokerFieldFlag.Memo;
+        public bool IsMemo => (SqlBrokerFieldFlag.Memo & Flags) == SqlBrokerFieldFlag.Memo;
         /// <summary>
         /// Returns true when the Image flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsImage => (BrokerFieldFlag.Image & Flags) == BrokerFieldFlag.Image;
+        public bool IsImage => (SqlBrokerFieldFlag.Image & Flags) == SqlBrokerFieldFlag.Image;
         /// <summary>
         /// Returns true when the ImagePath flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsImagePath => (BrokerFieldFlag.ImagePath & Flags) == BrokerFieldFlag.ImagePath;
+        public bool IsImagePath => (SqlBrokerFieldFlag.ImagePath & Flags) == SqlBrokerFieldFlag.ImagePath;
         /// <summary>
         /// Returns true when the Searchable flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsSearchable => (BrokerFieldFlag.Searchable & Flags) == BrokerFieldFlag.Searchable;
+        public bool IsSearchable => (SqlBrokerFieldFlag.Searchable & Flags) == SqlBrokerFieldFlag.Searchable;
         /// <summary>
         /// Returns true when the Extra flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsExtraField => (BrokerFieldFlag.Extra & Flags) == BrokerFieldFlag.Extra;
+        public bool IsExtraField => (SqlBrokerFieldFlag.Extra & Flags) == SqlBrokerFieldFlag.Extra;
         /// <summary>
         /// Returns true when the Extra flag is NOT set in Flags.
         /// </summary>
@@ -244,18 +249,18 @@ from
         /// Returns true when the ForeignKey flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsForeignKeyField => (BrokerFieldFlag.ForeignKey & Flags) == BrokerFieldFlag.ForeignKey;
+        public bool IsForeignKeyField => (SqlBrokerFieldFlag.ForeignKey & Flags) == SqlBrokerFieldFlag.ForeignKey;
 
         /// <summary>
         /// Returns true when the NoInsertUpdate flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsNoInsertOrUpdate => (BrokerFieldFlag.NoInsertUpdate & Flags) == BrokerFieldFlag.NoInsertUpdate;
+        public bool IsNoInsertOrUpdate => (SqlBrokerFieldFlag.NoInsertUpdate & Flags) == SqlBrokerFieldFlag.NoInsertUpdate;
         /// <summary>
         /// Returns true when the Localizable flag is set in Flags.
         /// </summary>
         [JsonIgnore]
-        public bool IsLocalizable => (BrokerFieldFlag.Localizable & Flags) == BrokerFieldFlag.Localizable;
+        public bool IsLocalizable => (SqlBrokerFieldFlag.Localizable & Flags) == SqlBrokerFieldFlag.Localizable;
     }
 }
 

@@ -14,9 +14,9 @@ namespace Tripous.Model2
     /// <summary>
     /// Describes a broker
     /// </summary>
-    public class BrokerDef
+    public class SqlBrokerDef
     {
-        static List<BrokerDef> Descriptors = new List<BrokerDef>();
+        static List<SqlBrokerDef> Descriptors = new List<SqlBrokerDef>();
 
         string fEntityName;
 
@@ -25,7 +25,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Constructor
         /// </summary>
-        public BrokerDef()
+        public SqlBrokerDef()
         {
         }
 
@@ -33,7 +33,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Returns a descriptor by a specified name if any, else, null
         /// </summary>
-        static public BrokerDef FindDescriptor(string Name)
+        static public SqlBrokerDef FindDescriptor(string Name)
         {
             return Descriptors.Find(item => item.Name.IsSameText(Name));
         }
@@ -45,16 +45,47 @@ namespace Tripous.Model2
             return FindDescriptor(Name) != null;
         }
         /// <summary>
-        /// Registers a descriptor.
+        /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
         /// </summary>
-        static public BrokerDef RegisterDescriptor(string Name, string Text)
+        static public SqlBrokerDef RegisterDescriptor(string Name, string Text)
         {
-            BrokerDef Result = FindDescriptor(Name);
+            SqlBrokerDef Result = FindDescriptor(Name);
             if (Result == null)
             {
-                Result = new BrokerDef() { Name = Name };
+                Result = new SqlBrokerDef() { Name = Name };
                 Descriptors.Add(Result);
             }
+
+            return Result;
+        }
+
+
+        /// <summary>
+        /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
+        /// </summary>
+        static public SqlBroker Create(string DescriptorName, bool Initialized, bool AsListBroker)
+        {
+            return Create(FindDescriptor(DescriptorName), Initialized, AsListBroker);
+        }
+        /// <summary>
+        /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
+        /// </summary>
+        static public SqlBroker Create(SqlBrokerDef Descriptor, bool Initialized, bool AsListBroker)
+        {
+            if (Descriptor == null)
+                Sys.Throw($"Cannot create a {nameof(SqlBroker)}. Descriptor is null.");
+
+            SqlBroker Result = TypeStore.Create(Descriptor.TypeClassName) as SqlBroker;
+            Result.Descriptor = Descriptor;
+
+            if ((Result.CodeProducer == null) && !string.IsNullOrWhiteSpace(Descriptor.CodeProducerName))
+            { 
+                CodeProvider CodeProvider = CodeProviderDef.Create(Descriptor.CodeProducerName, Descriptor.MainTableName); 
+                Result.CodeProducer = CodeProvider;
+            }
+
+            if (Initialized)
+                Result.Initialize(AsListBroker || Result.IsListBroker);
 
             return Result;
         }
@@ -74,22 +105,22 @@ namespace Tripous.Model2
         /// </summary>
         public void Clear()
         {
-            BrokerDef Empty = new BrokerDef();
+            SqlBrokerDef Empty = new SqlBrokerDef();
             Sys.AssignObject(Empty, this);
         }
         /// <summary>
         /// Assigns property values from a source instance.
         /// </summary>
-        public void Assign(BrokerDef Source)
+        public void Assign(SqlBrokerDef Source)
         {
             Sys.AssignObject(Source, this);
         }
         /// <summary>
         /// Returns a clone of this instance.
         /// </summary>
-        public BrokerDef Clone()
+        public SqlBrokerDef Clone()
         {
-            BrokerDef Result = new BrokerDef();
+            SqlBrokerDef Result = new SqlBrokerDef();
             Sys.AssignObject(this, Result);
             return Result;
         }
@@ -114,20 +145,7 @@ namespace Tripous.Model2
         /// Gets or sets the connection name (database)
         /// </summary>
         public string ConnectionName { get; set; } = SysConfig.DefaultConnection;
-        /// <summary>
-        /// Gets or sets the class name of the <see cref="System.Type"/> this descriptor describes.
-        /// <para>NOTE: The valus of this property may be a string returned by the <see cref="Type.AssemblyQualifiedName"/> property of the type. </para>
-        /// <para>In that case, it consists of the type name, including its namespace, followed by a comma, followed by the display name of the assembly
-        /// the type belongs to. It might looks like the following</para>
-        /// <para><c>Tripous.Forms.BaseDataEntryForm, Tripous, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</c></para>
-        /// <para></para>
-        /// <para>In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination
-        /// both, when registering and when retreiving a type.</para>
-        /// <para></para>
-        /// <para>Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
-        /// Most of the Tripous types are already registered to the TypeStore with just their TypeName.</para>
-        /// </summary>
-        public string TypeClassName { get; set; } = "SqlBroker";
+ 
 
         /// <summary>
         /// Gets or set the name of the main table
@@ -165,7 +183,7 @@ namespace Tripous.Model2
         /// if the MainTableName exists in Tables then this property returns a reference to it
         /// </summary>
         [JsonIgnore]
-        public BrokerTableDef MainTable { get { return Tables.Find(item => item.Name.IsSameText(MainTableName)); } }
+        public SqlBrokerTableDef MainTable { get { return Tables.Find(item => item.Name.IsSameText(MainTableName)); } }
         /// <summary>
         /// Returns the primary key field name of the <see cref="MainTable"/>
         /// <para>WARNING: It provides a setter for the json serializer only, it is read-only actually </para>
@@ -185,12 +203,12 @@ namespace Tripous.Model2
         /// <summary>
         /// Gets the table descriptors
         /// </summary>
-        public List<BrokerTableDef> Tables { get; set; } = new List<BrokerTableDef>();
+        public List<SqlBrokerTableDef> Tables { get; set; } = new List<SqlBrokerTableDef>();
         /// <summary>
         /// A list of SELECT Sql statements that executed once at the initialization of the broker and may be used
         /// in various situations, i.e. Locators
         /// </summary>
-        public List<BrokerQueryDef> Queries { get; set; } = new List<BrokerQueryDef>();
+        public List<SqlBrokerQueryDef> Queries { get; set; } = new List<SqlBrokerQueryDef>();
         /// <summary>
         /// When is true indicates that the OID is a Guid string.  
         /// </summary>
@@ -201,7 +219,22 @@ namespace Tripous.Model2
         /// </summary>
         public bool NoCascadeDeletes { get; set; }
 
- 
+        /// <summary>
+        /// Gets or sets the class name of the <see cref="System.Type"/> this descriptor describes.
+        /// <para>NOTE: The valus of this property may be a string returned by the <see cref="Type.AssemblyQualifiedName"/> property of the type. </para>
+        /// <para>In that case, it consists of the type name, including its namespace, followed by a comma, followed by the display name of the assembly
+        /// the type belongs to. It might looks like the following</para>
+        /// <para><c>Tripous.Forms.BaseDataEntryForm, Tripous, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</c></para>
+        /// <para></para>
+        /// <para>Otherwise it must be a type name registered to the <see cref="TypeStore"/> either directly or
+        /// just by using the <see cref="TypeStoreItemAttribute"/> attribute.</para>
+        /// <para>In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination
+        /// both, when registering and when retreiving a type.</para>
+        /// <para></para>
+        /// <para>Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
+        /// Most of the Tripous types are already registered to the TypeStore with just their TypeName.</para>
+        /// </summary>
+        public string TypeClassName { get; set; } = typeof(SqlBroker).Name;
 
     }
 }

@@ -6,6 +6,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Tripous.Data
 {
+#warning TODO: Rename it WhereSql
 
     /// <summary>
     /// Helper for constructing a WHERE clause when SELECTing an Entity.

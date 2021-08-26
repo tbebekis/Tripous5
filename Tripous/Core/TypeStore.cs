@@ -112,18 +112,18 @@ namespace Tripous
         /// Creates and returns an object of the Type specified by Name.
         /// <para>Name could be a name registered to the TypeStore or a valid <see cref="Type.AssemblyQualifiedName"/> of a Type </para>
         /// </summary>
-        static public object Create(string Name)
+        static public object Create(string Name, object[] Args = null)
         {
             Type Type = Find(Name);
 
             if (Type != null)
-                return Type.Create();
+                return Args == null? Type.Create(): Type.Create(Args);
 
             /* it could be a Type.AssemblyQualifiedName of a non-registered Type */
             try
             {
                 Type = Type.GetType(Name, true, true);
-                return Type.Create();
+                return Args == null ? Type.Create() : Type.Create(Args);
             }
             catch
             {

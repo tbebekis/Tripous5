@@ -12,12 +12,12 @@ using Tripous.Data;
 namespace Tripous.Model2
 {
 
-#warning TODO: LocatorDescriptor, SqlBrowser, SqBroker JSON
+#warning TODO: SqBroker JSON, Locator
 
     /// <summary>
     /// A broker table definition
     /// </summary>
-    public class BrokerTableDef
+    public class SqlBrokerTableDef
     {
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Constructor
         /// </summary>
-        public BrokerTableDef()
+        public SqlBrokerTableDef()
         {
 
         }
@@ -51,31 +51,131 @@ namespace Tripous.Model2
         {
             return Name;
         }
- 
 
         /// <summary>
         /// Clears the property values of this instance.
         /// </summary>
         public void Clear()
         {
-            BrokerTableDef Empty = new BrokerTableDef();
+            SqlBrokerTableDef Empty = new SqlBrokerTableDef();
             Sys.AssignObject(Empty, this);
         }
         /// <summary>
         /// Assigns property values from a source instance.
         /// </summary>
-        public void Assign(BrokerTableDef Source)
+        public void Assign(SqlBrokerTableDef Source)
         { 
             Sys.AssignObject(Source, this);
         }
         /// <summary>
         /// Returns a clone of this instance.
         /// </summary>
-        public BrokerTableDef Clone()
+        public SqlBrokerTableDef Clone()
         {
-            BrokerTableDef Result = new BrokerTableDef();
+            SqlBrokerTableDef Result = new SqlBrokerTableDef();
             Sys.AssignObject(this, Result);
             return Result;
+        }
+
+
+        /* find */
+        /// <summary>
+        /// Searces the whole joined tree for a table by a Name or Alias and returns
+        /// a JoinTableDescriptor, if any, else null.
+        /// </summary>
+        public SqlBrokerTableDef FindAnyJoinTable(string NameOrAlias)
+        {
+            var Result = this.JoinTables.Find(item => item.Name.IsSameText(NameOrAlias) || item.Alias.IsSameText(NameOrAlias)); // base.Find(NameOrAlias);
+            if (Result == null)
+            {
+                foreach (var JoinTable in this.JoinTables)
+                {
+                    Result = JoinTable.FindAnyJoinTable(NameOrAlias);
+                    if (Result != null)
+                        return Result;
+                }
+            }
+
+            return Result;
+        }
+        /// <summary>
+        /// Finds a join table descriptor by MasterKeyField, if any, else null.
+        /// </summary>
+        public SqlBrokerTableDef FindJoinTableByMasterKeyField(string MasterKeyField)
+        {
+            return this.JoinTables.Find(item => item.MasterKeyField.IsSameText(MasterKeyField));
+        }
+        /// <summary>
+        /// Searces the whole joined tree for a join table descriptor by MasterKeyField
+        /// and returns that table, if any, else null.
+        /// </summary>
+        public SqlBrokerTableDef FindAnyJoinTableByMasterKeyField(string MasterKeyField)
+        {
+            var Result = FindJoinTableByMasterKeyField(MasterKeyField);
+            if (Result == null)
+            {
+                foreach (var JoinTable in this.JoinTables)
+                {
+                    Result = JoinTable.FindAnyJoinTableByMasterKeyField(MasterKeyField);
+                    if (Result != null)
+                        return Result;
+                }
+            }
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Finds and returns, if exists, a field that has NameOrAlias Name or Alias. 
+        /// It searches this table descriptor and its joined tables in the full tree.
+        /// Returns null if a field not found.
+        /// </summary>
+        public Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> FindAnyField(string NameOrAlias)
+        {
+            SqlBrokerFieldDef FieldDef = Fields.Find(item => item.Name.IsSameText(NameOrAlias) || item.Alias.IsSameText(NameOrAlias));
+            if (FieldDef != null)
+                return Tuple.Create(this, FieldDef);
+            return FindAnyField(NameOrAlias, this.JoinTables);
+        }
+        /// <summary>
+        /// Finds a field by Name or Alias by searching the whole tree of JoinTables tables.
+        /// Returns null if a field not found.
+        /// </summary>
+        Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> FindAnyField(string NameOrAlias, List<SqlBrokerTableDef> JoinTables)
+        {
+
+            Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> Result = null;
+            SqlBrokerFieldDef FieldDef = null;
+
+            foreach (var JoinTable in JoinTables)
+            {
+                FieldDef = JoinTable.Fields.Find(item => item.Name.IsSameText(NameOrAlias) || item.Alias.IsSameText(NameOrAlias));
+                if (FieldDef != null)
+                {
+                    Result = Tuple.Create(JoinTable, FieldDef);
+                    break;
+                }
+
+                if (JoinTable.JoinTables != null)
+                {
+                    Result = FindAnyField(NameOrAlias, JoinTable.JoinTables);
+                    if (Result != null)
+                        break;
+                }
+
+            }
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Finds a field title by searching the whole tree of fields.
+        /// </summary>
+        public string FindAnyFieldTitle(string NameOrAlias)
+        {
+            Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> Pair = FindAnyField(NameOrAlias);
+            SqlBrokerFieldDef Field = Pair != null ? Pair.Item2 : null;
+            return (Field == null) ? NameOrAlias : Field.Title;
         }
 
         /* sql generation */
@@ -236,7 +336,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Called by BuildSql to handle join tables
         /// </summary>
-        void BuildSql_AddJoinTable(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, BrokerTableDef JoinTableDes)
+        void BuildSql_AddJoinTable(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, SqlBrokerTableDef JoinTableDes)
         {
 
             string JoinTableName = Sql.FormatTableNameAlias(JoinTableDes.Name, JoinTableDes.Alias);
@@ -272,7 +372,7 @@ namespace Tripous.Model2
         /// </summary>
         public void UpdateFrom(DataTable Table)
         {
-            BrokerFieldFlag Flags;
+            SqlBrokerFieldFlag Flags;
             string Title;
 
             foreach (DataColumn Field in Table.Columns)
@@ -281,15 +381,15 @@ namespace Tripous.Model2
 
                 if (FieldDes == null)
                 {
-                    Flags = BrokerFieldFlag.None;
+                    Flags = SqlBrokerFieldFlag.None;
                     Title = Res.GS(Field.ColumnName);
                     if (!Db.IsVisibleColumn(Field.ColumnName))
-                        Flags |= BrokerFieldFlag.Hidden;
+                        Flags |= SqlBrokerFieldFlag.Hidden;
 
                     if (Simple.IsString(Field.DataType) || Simple.IsDateTime(Field.DataType))
-                        Flags |= BrokerFieldFlag.Searchable;
+                        Flags |= SqlBrokerFieldFlag.Searchable;
 
-                    Fields.Add(new BrokerFieldDef()
+                    Fields.Add(new SqlBrokerFieldDef()
                     {
                         Name = Field.ColumnName,
                         DataType = DataFieldTypeHelper.DataFieldTypeOf(Field.DataType),
@@ -317,9 +417,9 @@ namespace Tripous.Model2
             }
         }
 
-
+        /* create DataTable */
         /// <summary>
-        /// Creates a DataTable based on a TableDescriptor.
+        /// Creates a DataTable based on a descriptor.
         /// </summary>
         public void CreateDescriptorTable(SqlStore Store, List<MemTable> TableList, bool CreateLookUpTables)
         {
@@ -356,7 +456,7 @@ namespace Tripous.Model2
                     CreateDescriptorTables_CreateLookUpTable(FieldDes, TableList);
 
                 // joined table to TableDescriptor on this FieldDes
-                BrokerTableDef JoinTableDes = this.FindAnyJoinTableByMasterKeyField(FieldDes.Name);
+                SqlBrokerTableDef JoinTableDes = this.FindAnyJoinTableByMasterKeyField(FieldDes.Name);
                 if (JoinTableDes != null)
                     CreateDescriptorTables_AddJoinTableFields(JoinTableDes, Table);
             }
@@ -365,7 +465,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Sets up the <see cref="DataColumn.DefaultValue"/> of a specified column based on a specified field descriptor settings.
         /// </summary>
-        void SetupDefaultValue(SqlStore Store, DataColumn Column, BrokerFieldDef FieldDes)
+        void SetupDefaultValue(SqlStore Store, DataColumn Column, SqlBrokerFieldDef FieldDes)
         {
             if ((FieldDes.DefaultValue != null) && !Sys.IsSameText(Sys.NULL, FieldDes.DefaultValue))
             {
@@ -400,7 +500,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Creates look up table for the browser table
         /// </summary>
-        void CreateDescriptorTables_CreateLookUpTable(BrokerFieldDef FieldDes, List<MemTable> TableList)
+        void CreateDescriptorTables_CreateLookUpTable(SqlBrokerFieldDef FieldDes, List<MemTable> TableList)
         { 
             MemTable Table = new MemTable() { TableName = FieldDes.ForeignTableAlias };
             TableList.Add(Table);
@@ -413,7 +513,7 @@ namespace Tripous.Model2
         /// <summary>
         /// Adds join fields to the Table
         /// </summary>
-        void CreateDescriptorTables_AddJoinTableFields(BrokerTableDef JoinTable, MemTable Table)
+        void CreateDescriptorTables_AddJoinTableFields(SqlBrokerTableDef JoinTable, MemTable Table)
         {
             DataColumn Column;
             foreach (var JoinFieldDes in JoinTable.Fields)
@@ -436,81 +536,107 @@ namespace Tripous.Model2
             }
         }
  
+        /* sql filters */
         /// <summary>
-        /// Searces the whole joined tree for a table by a Name or Alias and returns
-        /// a JoinTableDescriptor, if any, else null.
+        /// Creates <see cref="SqlFilter"/> items for each searchable <see cref="SqlBrokerFieldDef"/> item of a <see cref="SqlBrokerTableDef"/>.
         /// </summary>
-        public BrokerTableDef FindAnyJoinTable(string NameOrAlias)
+        public void CreateSqlFilters(DataTable Table, SqlFilters Filters)
         {
-            var Result = this.JoinTables.Find(item => item.Name.IsSameText(NameOrAlias) || item.Alias.IsSameText(NameOrAlias)); // base.Find(NameOrAlias);
-            if (Result == null)
+            SimpleType SimpleType;
+            SqlBrokerTableDef TableDef;
+            SqlBrokerFieldDef FieldDef;
+            SqlFilter Filter;
+            Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> Pair = null;
+
+            foreach (DataColumn Field in Table.Columns)
             {
-                foreach (var JoinTable in this.JoinTables)
+                SimpleType = Simple.SimpleTypeOf(Field.DataType);
+                if (SimpleType.IsString() || SimpleType.IsNumeric() || SimpleType.IsDateTime())
                 {
-                    Result = JoinTable.FindAnyJoinTable(NameOrAlias);
-                    if (Result != null)
-                        return Result;
+                    Pair = this.FindAnyField(Field.ColumnName);
+                    if (Pair != null)
+                    {
+                        TableDef = Pair.Item1;
+                        FieldDef = Pair.Item2;
+
+                        if ((FieldDef != null) && (FieldDef.IsSearchable))
+                        {
+                            if (SimpleType.IsString() && ((Field.MaxLength > 100) || (FieldDef.MaxLength > 100)))
+                                continue;
+
+                            Filter = Filters.Add(TableDef.Alias, FieldDef.Name, FieldDef.Title, Field.DataType);
+                            if (FieldDef.IsBoolean)
+                                Filter.DataType = SimpleType.Boolean;
+                        }
+                    }
                 }
             }
+        }
 
-            return Result;
+        /* display labels */
+        /// <summary>
+        /// Setups column titles for Table columns using the DisplayLabels string and the TableDes TableDescriptor.
+        /// </summary>
+        public void SetupFieldsDisplayLabelsFor(DataTable Table, string DisplayLabels)
+        {
+            SetupFieldsDisplayLabelsFor(Table, new NameValueStringList(DisplayLabels));
         }
         /// <summary>
-        /// Finds a join table descriptor by MasterKeyField, if any, else null.
+        /// Setups column titles for Table columns using the DisplayLabes dictionary and the TableDes TableDescriptor.
         /// </summary>
-        public BrokerTableDef FindJoinTableByMasterKeyField(string MasterKeyField)
+        public void SetupFieldsDisplayLabelsFor(DataTable Table, Dictionary<string, string> DisplayLabels)
         {
-            return this.JoinTables.Find(item => item.MasterKeyField.IsSameText(MasterKeyField));
-        }
-        /// <summary>
-        /// Searces the whole joined tree for a join table descriptor by MasterKeyField
-        /// and returns that table, if any, else null.
-        /// </summary>
-        public BrokerTableDef FindAnyJoinTableByMasterKeyField(string MasterKeyField)
-        {
-            var Result = FindJoinTableByMasterKeyField(MasterKeyField);
-            if (Result == null)
+            foreach (DataColumn Field in Table.Columns)
             {
-                foreach (var JoinTable in this.JoinTables)
+                // if Column.Caption is not defined in some way
+                if (string.IsNullOrWhiteSpace(Field.Caption) || Sys.IsSameText(Field.ColumnName, Field.Caption))
                 {
-                    Result = JoinTable.FindAnyJoinTableByMasterKeyField(MasterKeyField);
-                    if (Result != null)
-                        return Result;
+                    // first look to the DisplayLabels 
+                    if ((DisplayLabels.ContainsKey(Field.ColumnName)) && !string.IsNullOrWhiteSpace(DisplayLabels[Field.ColumnName]))
+                    {
+                        Field.Caption = DisplayLabels[Field.ColumnName];
+                    }
+                    // and then look to ANY field (joins included) of the TableDes
+                    else if (!string.IsNullOrWhiteSpace(this.FindAnyFieldTitle(Field.ColumnName)))
+                    {
+                        Field.Caption = this.FindAnyFieldTitle(Field.ColumnName);
+                    }
                 }
             }
-
-            return Result;
-        }
-
-        /// <summary>
-        /// Finds and returns, if exists, a TFieldDescriptorBase that has NameOrAlias
-        /// Name or Alias. It searches this TableDes and its joined tables in the full tree.
-        /// </summary>
-        public BrokerFieldDef FindAnyField(string NameOrAlias)
-        {
-            var Result = Fields.Find(item => item.Name.IsSameText(NameOrAlias) || item.Alias.IsSameText(NameOrAlias));
-            return Result != null? Result: FindAnyField(NameOrAlias, this.JoinTables);
         }
         /// <summary>
-        /// Finds a field by Name or Alias by searching the whole tree of JoinTables tables.
-        /// Returns null if a field not found.
+        /// Setups column titles for Table columns using the DisplayLabes dictionary and the TableDes TableDescriptor.
         /// </summary>
-        BrokerFieldDef FindAnyField(string NameOrAlias, List<BrokerTableDef> JoinTables)
+        public void SetupFieldsDisplayLabelsFor(DataTable Table, NameValueStringList DisplayLabels)
         {
-            BrokerFieldDef Result = null;
+            string Caption;
 
-            foreach (var JoinTable in JoinTables)
+            foreach (DataColumn Field in Table.Columns)
             {
-                Result = JoinTable.Fields.Find(item => item.Name.IsSameText(NameOrAlias) || item.Alias.IsSameText(NameOrAlias));
+                // if Column.Caption is not defined in some way
+                if (string.IsNullOrWhiteSpace(Field.Caption) || Sys.IsSameText(Field.ColumnName, Field.Caption))
+                {
+                    /* DataColumn.Caption property seems to be case-insensitive.   
+                       That is, assigning a "Phone" caption to an DataColumn.Caption 
+                       already captioned as "PHONE" 
+                       leaves the old "PHONE" intact. */
+                    Caption = Field.Caption;
+                    Field.Caption = "temp";
 
-                if (Result == null && JoinTable.JoinTables != null)
-                    Result = FindAnyField(NameOrAlias, JoinTable.JoinTables);
+                    // first look to the DisplayLabels 
+                    if ((DisplayLabels.ContainsName(Field.ColumnName)) && !string.IsNullOrWhiteSpace(DisplayLabels.Values[Field.ColumnName]))
+                    {
+                        Caption = DisplayLabels.Values[Field.ColumnName];
+                    }
+                    // and then look to ANY field (joins included) of the TableDes
+                    else if (!string.IsNullOrWhiteSpace(this.FindAnyFieldTitle(Field.ColumnName)))
+                    {
+                        Caption = this.FindAnyFieldTitle(Field.ColumnName);
+                    }
 
-                if (Result != null)
-                    break;
+                    Field.Caption = Caption;
+                }
             }
-
-            return Result;
         }
  
 
@@ -558,11 +684,11 @@ namespace Tripous.Model2
         /// <summary>
         /// The fields of this table
         /// </summary>
-        public List<BrokerFieldDef> Fields { get; set; } = new List<BrokerFieldDef>();
+        public List<SqlBrokerFieldDef> Fields { get; set; } = new List<SqlBrokerFieldDef>();
         /// <summary>
         /// The list of join tables. 
         /// </summary>
-        public List<BrokerTableDef> JoinTables { get; set; } = new List<BrokerTableDef>();
+        public List<SqlBrokerTableDef> JoinTables { get; set; } = new List<SqlBrokerTableDef>();
         /// <summary>
         /// The main table of a Broker (Item) is selected as 
         /// <para>  <c>select * from TABLE_NAME where ID = :ID</c></para>
@@ -577,7 +703,7 @@ namespace Tripous.Model2
         /// StockTables are used for that. They are selected each time after the select of the main broker table (Item)          
         /// </para>
         /// </summary>
-        public List<BrokerQueryDef> StockTables { get; set; } = new List<BrokerQueryDef>();
+        public List<SqlBrokerQueryDef> StockTables { get; set; } = new List<SqlBrokerQueryDef>();
 
     }
 

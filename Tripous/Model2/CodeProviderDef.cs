@@ -12,11 +12,47 @@ namespace Tripous.Model2
     /// Describes the production of a unique Code.
     /// <para>See the <see cref="CodeProviderPartType"/> enum for more information. </para>
     /// </summary>
+    [TypeStoreItem]
     public class CodeProviderDef
     {
+        /// <summary>
+        /// A code producer that produces a code of the form: XXXX
+        /// </summary>
+        public const string Simple4 = "SIMPLE XXXX";
+        /// <summary>
+        /// A code producer that produces a code of the form: XXXXXX
+        /// </summary>
+        public const string Simple6 = "SIMPLE XXXXXX";
+
+        /// <summary>
+        /// A code producer that produces a code of the form: XX-XX
+        /// </summary>
+        public const string Simple4_2 = "SIMPLE XX-XX";
+        /// <summary>
+        /// A code producer that produces a code of the form: XXX-XXX
+        /// </summary>
+        public const string Simple6_3 = "SIMPLE XXX-XXX";
+
+
         static List<CodeProviderDef> Descriptors = new List<CodeProviderDef>();
 
+        static void RegisterSysCodeProviders()
+        {
+            RegisterDescriptor(Simple4, "XXXX");
+            RegisterDescriptor(Simple6, "XXXXXX");
+
+            RegisterDescriptor(Simple4_2, "XX-XX");
+            RegisterDescriptor(Simple6_3, "XXX-XXX");
+        }
+
         /* construction */
+        /// <summary>
+        /// Static constructor
+        /// </summary>
+        static CodeProviderDef()
+        {
+
+        }
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -40,19 +76,40 @@ namespace Tripous.Model2
             return FindDescriptor(Name) != null;
         }
         /// <summary>
-        /// Registers a descriptor.
+        /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
         /// </summary>
-        static public void RegisterDescriptor(string Name, string Text)
+        static public CodeProviderDef RegisterDescriptor(string Name, string Text)
         {
-            CodeProviderDef Des = FindDescriptor(Name);
-            if (Des != null)
+            CodeProviderDef Result = FindDescriptor(Name);
+            
+            if (Result == null)
             {
-                Des.Text = Text;
+                Result = new CodeProviderDef() { Name = Name, Text = Text };
+                Descriptors.Add(Result);
             }
-            else
-            {
-                Descriptors.Add(new CodeProviderDef() { Name = Name, Text = Text });
-            }
+
+            return Result;
+        }
+
+        /// <summary>
+        /// Creates and returns an instance of a <see cref="CodeProvider"/> based on a specified descriptor.
+        /// </summary>
+        static public CodeProvider Create(string DescriptorName, string TableName)
+        {
+            return Create(FindDescriptor(DescriptorName), TableName);
+        }
+        /// <summary>
+        /// Creates and returns an instance of a <see cref="CodeProvider"/> based on a specified descriptor.
+        /// </summary>
+        static public CodeProvider Create(CodeProviderDef Descriptor, string TableName)
+        {
+            if (Descriptor == null)
+                Sys.Throw($"Cannot create a {nameof(CodeProvider)}. Descriptor is null.");
+
+            CodeProvider Result = TypeStore.Create(Descriptor.TypeClassName) as CodeProvider;
+            Result.Descriptor = Descriptor;
+            Result.TableName = TableName;
+            return Result;
         }
 
         /* properties */
@@ -73,6 +130,24 @@ namespace Tripous.Model2
         /// A character that used in separating the parts of the produced Code.
         /// </summary>
         public char PartSeparator { get; set; } = '-';
+
+        /// <summary>
+        /// Gets or sets the class name of the <see cref="System.Type"/> this descriptor describes.
+        /// <para>NOTE: The valus of this property may be a string returned by the <see cref="Type.AssemblyQualifiedName"/> property of the type. </para>
+        /// <para>In that case, it consists of the type name, including its namespace, followed by a comma, followed by the display name of the assembly
+        /// the type belongs to. It might looks like the following</para>
+        /// <para><c>Tripous.Forms.BaseDataEntryForm, Tripous, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</c></para>
+        /// <para></para>
+        /// <para>Otherwise it must be a type name registered to the <see cref="TypeStore"/> either directly or
+        /// just by using the <see cref="TypeStoreItemAttribute"/> attribute.</para>
+        /// <para>In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination
+        /// both, when registering and when retreiving a type.</para>
+        /// <para></para>
+        /// <para>Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
+        /// Most of the Tripous types are already registered to the TypeStore with just their TypeName.</para>
+        /// </summary>
+        public string TypeClassName { get; set; } = typeof(CodeProvider).Name;
+ 
     }
 
 

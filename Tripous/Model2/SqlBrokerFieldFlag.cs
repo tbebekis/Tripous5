@@ -10,7 +10,7 @@ namespace Tripous.Model2
     /// A list of possible field flags.
     /// </summary>
     [Flags]
-    public enum BrokerFieldFlag
+    public enum SqlBrokerFieldFlag
     {
         /// <summary>
         /// None

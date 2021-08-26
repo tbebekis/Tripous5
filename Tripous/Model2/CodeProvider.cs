@@ -17,6 +17,7 @@ namespace Tripous.Model2
     /// Produces unique Codes. The decriptor of this class describes the form of the Code.
     /// <para>See the <see cref="CodeProviderPartType"/> enum for more information. </para>
     /// </summary>
+    [TypeStoreItem]
     public class CodeProvider
     {
         /// <summary>
@@ -28,10 +29,8 @@ namespace Tripous.Model2
         /// </summary>
         static public readonly char[] ValidSeparatorsChars = ValidSeparators.ToCharArray();
 
-        
-
-        CodeProviderDef Descriptor;
-        string TableName;
+ 
+        CodeProviderDef fDescriptor;
         List<CodeProviderPart> Parts = new List<CodeProviderPart>();
         DataRow CurrentRow;
         SqlStore Store;
@@ -222,35 +221,15 @@ namespace Tripous.Model2
             return Result;
         }
 
+
         /* construction */
         /// <summary>
         /// Constructor.
         /// </summary>
-        private CodeProvider()
+        public CodeProvider()
         {
         }
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public CodeProvider(string DescriptorName, string TableName)
-            : this(CodeProviderDef.FindDescriptor(DescriptorName), TableName)
-        {
-        }
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public CodeProvider(CodeProviderDef Descriptor, string TableName)
-        {
-            if (Descriptor == null)
-                Sys.Throw($"{this.GetType().Name}: Descriptor is null");
-            this.TableName = TableName;
-            this.Descriptor = Descriptor;
-            ParseDescriptor();
-        }
-
-
-
-
+ 
 
         /* public */
         /// <summary>
@@ -290,13 +269,33 @@ namespace Tripous.Model2
 
         /* properties */
         /// <summary>
-        /// The field name of the field to put the produced Code.
-        /// </summary>
-        public string CodeFieldName => Descriptor.CodeFieldName;
-        /// <summary>
         /// The character used by code producers as placeholder for digits.
         /// </summary>
         static public char ValidCodeFormatDigit { get; set; } = 'X';
+
+        /// <summary>
+        /// The descriptor of this instance.
+        /// </summary>
+        public CodeProviderDef Descriptor
+        {
+            get { return fDescriptor; }
+            set
+            {
+                fDescriptor = value;
+                if (fDescriptor != null)
+                    ParseDescriptor();
+            }
+        }
+        /// <summary>
+        /// The table name is used in constructing SELECT statement for a Pivot part 
+        /// and replacing the @TABLE_NAME placeholder in the SELECT statement of a <see cref="CodeProviderPartType.NumericSelect"/> part.
+        /// </summary>
+        public string TableName { get; set; }
+        /// <summary>
+        /// The field name of the field to put the produced Code.
+        /// </summary>
+        public string CodeFieldName => Descriptor.CodeFieldName;
+
 
     }
 
