@@ -214,7 +214,7 @@ namespace Tripous.Data
                 )
             {
 
-                if (!string.IsNullOrEmpty(Keyword) && !Sys.IsSameText(Sys.NULL, Keyword))
+                if (!string.IsNullOrWhiteSpace(Keyword) && !Sys.IsSameText(Sys.NULL, Keyword))
                 {
                     if ((Sys.IsSameText(Keyword, "CompanyId")) || Sys.IsSameText(SysConfig.CompanyFieldName, Column.ColumnName))
                         Row[Column] = SysConfig.CompanyId;

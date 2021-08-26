@@ -68,7 +68,7 @@ namespace Tripous.Data
         /// </summary>
         protected virtual string GetDataType()
         {
-            return !string.IsNullOrEmpty(RigidDataType) ? RigidDataType : (!string.IsNullOrEmpty(fDataType) ? fDataType : Sys.None);
+            return !string.IsNullOrWhiteSpace(RigidDataType) ? RigidDataType : (!string.IsNullOrWhiteSpace(fDataType) ? fDataType : Sys.None);
         }
         /// <summary>
         /// Sets the data type 
@@ -348,7 +348,7 @@ namespace Tripous.Data
         /// </summary>
         public virtual string DataName
         {
-            get { return string.IsNullOrEmpty(fDataName) ? Sys.None : fDataName; }
+            get { return string.IsNullOrWhiteSpace(fDataName) ? Sys.None : fDataName; }
             set
             {
                 fDataName = Sys.IsSameText(value, Sys.None) ? string.Empty : value;
@@ -360,7 +360,7 @@ namespace Tripous.Data
         /// </summary>
         public virtual string Title
         {
-            get { return string.IsNullOrEmpty(fTitle) ? DataName : fTitle; }
+            get { return string.IsNullOrWhiteSpace(fTitle) ? DataName : fTitle; }
             set
             {
                 fTitle = value;
@@ -372,7 +372,7 @@ namespace Tripous.Data
         /// </summary>
         public virtual string StoreName
         {
-            get { return string.IsNullOrEmpty(fStoreName) ? SysConfig.DefaultConnection : fStoreName; }
+            get { return string.IsNullOrWhiteSpace(fStoreName) ? SysConfig.DefaultConnection : fStoreName; }
             set
             {
                 fStoreName = Sys.IsSameText(value, Sys.None) ? string.Empty : value;
@@ -384,7 +384,7 @@ namespace Tripous.Data
         /// </summary>
         public string Notes
         {
-            get { return string.IsNullOrEmpty(fNotes) ? string.Empty : fNotes; }
+            get { return string.IsNullOrWhiteSpace(fNotes) ? string.Empty : fNotes; }
             set
             {
                 fNotes = value;
@@ -397,7 +397,7 @@ namespace Tripous.Data
         /// </summary>
         public string Category1
         {
-            get { return string.IsNullOrEmpty(fCategory1) ? string.Empty : fCategory1; }
+            get { return string.IsNullOrWhiteSpace(fCategory1) ? string.Empty : fCategory1; }
             set
             {
                 fCategory1 = value;
@@ -409,7 +409,7 @@ namespace Tripous.Data
         /// </summary>
         public string Category2
         {
-            get { return string.IsNullOrEmpty(fCategory2) ? string.Empty : fCategory2; }
+            get { return string.IsNullOrWhiteSpace(fCategory2) ? string.Empty : fCategory2; }
             set
             {
                 fCategory2 = value;
@@ -449,7 +449,7 @@ namespace Tripous.Data
         /// Returns true if both DataType and DataName are not null or empty. 
         /// <para>Usefull for determining the validity of data after a load operation, because the Clear() is called before the operation.</para>
         /// </summary>
-        public virtual bool IsValidItem { get { return !string.IsNullOrEmpty(DataType) && !string.IsNullOrEmpty(DataName); } }
+        public virtual bool IsValidItem { get { return !string.IsNullOrWhiteSpace(DataType) && !string.IsNullOrWhiteSpace(DataName); } }
         /// <summary>
         /// True if this instance supports the descriptor methods
         /// that is it knows how to load/save itself to an IDescriptor

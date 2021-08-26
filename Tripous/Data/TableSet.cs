@@ -652,7 +652,7 @@ namespace Tripous.Data
 
             if (Table != null)
             {
-                if (string.IsNullOrEmpty(SqlText))
+                if (string.IsNullOrWhiteSpace(SqlText))
                     SqlText = Table.SqlStatements.SelectSql;
 
                 if (SqlText.Trim() != "")

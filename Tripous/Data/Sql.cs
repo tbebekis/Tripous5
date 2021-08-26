@@ -86,7 +86,7 @@ namespace Tripous.Data
         /// </summary>
         static public void Where(ref string sWhere, string FieldName, string Value)
         {
-            if (!string.IsNullOrEmpty(Value))
+            if (!string.IsNullOrWhiteSpace(Value))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " and ";
@@ -138,16 +138,16 @@ namespace Tripous.Data
         /// </summary>
         static public void Where(ref string sWhere, string FieldName, string FromValue, string ToValue)
         {
-            if (!string.IsNullOrEmpty(FromValue) || !string.IsNullOrEmpty(ToValue))
+            if (!string.IsNullOrWhiteSpace(FromValue) || !string.IsNullOrWhiteSpace(ToValue))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " and ";
 
-                if (!string.IsNullOrEmpty(FromValue) && !string.IsNullOrEmpty(ToValue))
+                if (!string.IsNullOrWhiteSpace(FromValue) && !string.IsNullOrWhiteSpace(ToValue))
                     sWhere = sWhere + string.Format(" ( {0} >= '{1}' and {0} <= '{2}') ", FieldName, FromValue, ToValue) + LB;
-                else if (!string.IsNullOrEmpty(FromValue))
+                else if (!string.IsNullOrWhiteSpace(FromValue))
                     sWhere = sWhere + string.Format("  {0} >= '{1}'  ", FieldName, FromValue) + LB;
-                else if (!string.IsNullOrEmpty(ToValue))
+                else if (!string.IsNullOrWhiteSpace(ToValue))
                     sWhere = sWhere + string.Format("  {0} <= '{1}'  ", FieldName, ToValue) + LB;
             }
         }
@@ -225,16 +225,16 @@ namespace Tripous.Data
                 sToDate = QSOracleDateTime(((DateTime)ToValue).EndOfDay());
 
 
-            if (!string.IsNullOrEmpty(sFromDate) || !string.IsNullOrEmpty(sToDate))
+            if (!string.IsNullOrWhiteSpace(sFromDate) || !string.IsNullOrWhiteSpace(sToDate))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " and ";
 
-                if (!string.IsNullOrEmpty(sFromDate) && !string.IsNullOrEmpty(sToDate))
+                if (!string.IsNullOrWhiteSpace(sFromDate) && !string.IsNullOrWhiteSpace(sToDate))
                     sWhere = sWhere + string.Format(" ( {0} >= {1} and {0} <= {2}) ", FieldName, sFromDate, sToDate) + LB;
-                else if (!string.IsNullOrEmpty(sFromDate))
+                else if (!string.IsNullOrWhiteSpace(sFromDate))
                     sWhere = sWhere + string.Format("  {0} >= {1}  ", FieldName, sFromDate) + LB;
-                else if (!string.IsNullOrEmpty(sToDate))
+                else if (!string.IsNullOrWhiteSpace(sToDate))
                     sWhere = sWhere + string.Format("  {0} <= {1}  ", FieldName, sToDate) + LB;
             }
 
@@ -249,7 +249,7 @@ namespace Tripous.Data
         /// </summary>
         static public void Like(ref string sWhere, string FieldName, string Value)
         {
-            if (!string.IsNullOrEmpty(Value))
+            if (!string.IsNullOrWhiteSpace(Value))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " and ";
@@ -265,7 +265,7 @@ namespace Tripous.Data
         /// </summary>
         static public void Like2(ref string sWhere, string FieldName, string Value)
         {
-            if (!string.IsNullOrEmpty(Value))
+            if (!string.IsNullOrWhiteSpace(Value))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " and ";
@@ -280,7 +280,7 @@ namespace Tripous.Data
         /// </summary>
         static public void LikeOr(ref string sWhere, string FieldName, string Value)
         {
-            if (!string.IsNullOrEmpty(Value))
+            if (!string.IsNullOrWhiteSpace(Value))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " or ";
@@ -296,7 +296,7 @@ namespace Tripous.Data
         /// </summary>
         static public void LikeOr2(ref string sWhere, string FieldName, string Value)
         {
-            if (!string.IsNullOrEmpty(Value))
+            if (!string.IsNullOrWhiteSpace(Value))
             {
                 if (sWhere.Length > 0)
                     sWhere = sWhere + " or ";
@@ -388,14 +388,14 @@ namespace Tripous.Data
 
                     if (Value.IndexOf('%') != -1)
                     {
-                        if (!string.IsNullOrEmpty(Value) && (Value[0] != '%'))
+                        if (!string.IsNullOrWhiteSpace(Value) && (Value[0] != '%'))
                             Value = "%" + Value;
 
                         return string.Format(" like '{0}' ", Value);
                     }
                     else
                     {
-                        if (!string.IsNullOrEmpty(Value) && (Value[0] != '%'))
+                        if (!string.IsNullOrWhiteSpace(Value) && (Value[0] != '%'))
                             Value = "%" + Value;
 
                         return string.Format(" like '{0}' ", Value + @"%");
@@ -418,14 +418,14 @@ namespace Tripous.Data
 
                             if (Result.IndexOf('%') != -1)
                             {
-                                if (!string.IsNullOrEmpty(Result) && (Result[0] != '%'))
+                                if (!string.IsNullOrWhiteSpace(Result) && (Result[0] != '%'))
                                     Result = "%" + Result;
 
                                 Result = string.Format(" like '{0}' ", Result);
                             }
                             else
                             {
-                                if (!string.IsNullOrEmpty(Result) && (Result[0] != '%'))
+                                if (!string.IsNullOrWhiteSpace(Result) && (Result[0] != '%'))
                                     Result = "%" + Result;
 
                                 Result = string.Format(" like '{0}' ", Result + @"%");
@@ -441,7 +441,7 @@ namespace Tripous.Data
         /// </summary>
         static public bool IsMasked(string Value)
         {
-            if (string.IsNullOrEmpty(Value))
+            if (string.IsNullOrWhiteSpace(Value))
                 return false;
 
             if (Value.IndexOf('*') != -1)
@@ -461,10 +461,10 @@ namespace Tripous.Data
         /// </summary>
         static public string FormatFieldNameAlias(string TableNameOrAlias, string FieldName, string Alias, int Spaces)
         {
-            if (string.IsNullOrEmpty(FieldName))
+            if (string.IsNullOrWhiteSpace(FieldName))
                 throw new ArgumentNullException("TableNameOrAlias");
 
-            if (string.IsNullOrEmpty(FieldName))
+            if (string.IsNullOrWhiteSpace(FieldName))
                 throw new ArgumentNullException("FieldName");
 
             return FormatFieldNameAlias(TableNameOrAlias + "." + FieldName, Alias, Spaces);
@@ -474,10 +474,10 @@ namespace Tripous.Data
         /// </summary>
         static public string FormatFieldNameAlias(string FieldName, string Alias, int Spaces)
         {
-            if (string.IsNullOrEmpty(FieldName))
+            if (string.IsNullOrWhiteSpace(FieldName))
                 throw new ArgumentNullException("FieldName");
 
-            if (string.IsNullOrEmpty(FieldName))
+            if (string.IsNullOrWhiteSpace(FieldName))
                 throw new ArgumentNullException("Alias");
 
             return FieldName.PadRight(Spaces, ' ') + " as " + Alias + ", " + LB;
@@ -487,10 +487,10 @@ namespace Tripous.Data
         /// </summary>
         static public string FormatTableNameAlias(string TableName, string Alias)
         {
-            if (string.IsNullOrEmpty(TableName))
+            if (string.IsNullOrWhiteSpace(TableName))
                 throw new ArgumentNullException("TableName");
 
-            if (string.IsNullOrEmpty(Alias) || Sys.IsSameText(TableName, Alias))
+            if (string.IsNullOrWhiteSpace(Alias) || Sys.IsSameText(TableName, Alias))
                 return TableName;
             else
                 return TableName + " " + Alias;
@@ -595,7 +595,7 @@ namespace Tripous.Data
         static public string ExtractTableName(string CreateTableSqlText)
         {
 
-            if (!string.IsNullOrEmpty(CreateTableSqlText))
+            if (!string.IsNullOrWhiteSpace(CreateTableSqlText))
             {
                 int Index = CreateTableSqlText.IndexOf('(');
 

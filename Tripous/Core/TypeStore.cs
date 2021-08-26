@@ -80,7 +80,7 @@ namespace Tripous
         /// </summary>
         static public Type Find(string Name)
         {
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrWhiteSpace(Name))
                 return null;
 
             /* try to find an exact match of the Name in the internal dictionary */

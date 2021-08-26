@@ -95,7 +95,7 @@ namespace Tripous
             StringBuilder SB = new StringBuilder();
             foreach (string S in List)
             {
-                if (!string.IsNullOrEmpty(S))
+                if (!string.IsNullOrWhiteSpace(S))
                 {
                     SB.Append(S);
                     SB.Append(',');

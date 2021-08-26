@@ -76,7 +76,7 @@ insert into {0} (
         /// </summary>
         public SqlStoreLogListener(string ConnectionName = "")
         {
-            this.ConnectionName = !string.IsNullOrEmpty(ConnectionName) ? ConnectionName : SysConfig.DefaultConnection;
+            this.ConnectionName = !string.IsNullOrWhiteSpace(ConnectionName) ? ConnectionName : SysConfig.DefaultConnection;
         }
 
         /* public */

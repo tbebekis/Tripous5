@@ -170,7 +170,7 @@ from
             Clause = Clause.Trim();
             Keyword = Keyword.Trim();
 
-            if (!string.IsNullOrEmpty(Clause) && !string.IsNullOrEmpty(Keyword))
+            if (!string.IsNullOrWhiteSpace(Clause) && !string.IsNullOrWhiteSpace(Keyword))
             {
                 if (!Clause.StartsWith(Keyword, StringComparison.InvariantCultureIgnoreCase))
                     return CR(Keyword) + SPACES + Clause;
@@ -345,7 +345,7 @@ from
             string sFrom = NormalizeClause(From, "from") + SPACES;
 
             // where
-            string sWhere = string.IsNullOrEmpty(Where) ? string.Empty : Where.Trim();
+            string sWhere = string.IsNullOrWhiteSpace(Where) ? string.Empty : Where.Trim();
 
             if (CompanyAware)
             {
@@ -456,7 +456,7 @@ from
             OrderBy = string.Empty;
 
 
-            if (!string.IsNullOrEmpty(StatementText))
+            if (!string.IsNullOrWhiteSpace(StatementText))
             {
                 SelectSqlParser parser = SelectSqlParser.Execute(StatementText);
 

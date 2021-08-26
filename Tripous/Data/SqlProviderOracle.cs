@@ -53,7 +53,7 @@ namespace Tripous.Data
             // S = string.Format(S, RowLimit);
 
             S = string.Format("ROWNUM <= {0}", RowLimit);
-            if (!string.IsNullOrEmpty(SelectSql.Where.Trim()))
+            if (!string.IsNullOrWhiteSpace(SelectSql.Where.Trim()))
                 S = S + Environment.NewLine + "     and " + SelectSql.Where;
 
             SelectSql.Where = S;

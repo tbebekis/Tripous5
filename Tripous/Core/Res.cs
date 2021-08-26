@@ -151,7 +151,7 @@ namespace Tripous
 
             string XmlText = GetObject(Key) as string;
 
-            if (!string.IsNullOrEmpty(XmlText))
+            if (!string.IsNullOrWhiteSpace(XmlText))
             {
                 XmlDocument Doc = new XmlDocument();
                 Doc.LoadXml(XmlText);        

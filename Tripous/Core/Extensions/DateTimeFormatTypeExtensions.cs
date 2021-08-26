@@ -20,7 +20,7 @@ namespace Tripous
         static public string GetFormatString(this DateTimeFormatType FormatType, CultureInfo CultureInfo)
         {
             DateTimeFormatInfo info = CultureInfo.DateTimeFormat;
-            string TimeSep = string.IsNullOrEmpty(info.TimeSeparator) || (info.TimeSeparator.Trim() == string.Empty) ? ":" : info.TimeSeparator.Trim();
+            string TimeSep = string.IsNullOrWhiteSpace(info.TimeSeparator) || (info.TimeSeparator.Trim() == string.Empty) ? ":" : info.TimeSeparator.Trim();
 
             switch (FormatType)
             {

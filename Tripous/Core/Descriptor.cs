@@ -32,7 +32,7 @@ namespace Tripous
         /// </summary>
         protected virtual string GetAlias()
         {
-            return string.IsNullOrEmpty(fAlias) ? Name : fAlias;
+            return string.IsNullOrWhiteSpace(fAlias) ? Name : fAlias;
         }
         /// <summary>
         /// Returns an error message
@@ -69,7 +69,7 @@ namespace Tripous
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrWhiteSpace(Name))
                 Sys.Throw(E_NotFullyDefined, this.GetType().Name + ".Name");
         }
         /// <summary>
@@ -82,7 +82,7 @@ namespace Tripous
             string Text = this.Collection is INamedItem ? (this.Collection as INamedItem).Name + "." + Name : Name;
 
 
-            if (!string.IsNullOrEmpty(PropName))
+            if (!string.IsNullOrWhiteSpace(PropName))
                 Text += " (" + PropName + ")";
 
             Text += Environment.NewLine + "Item Type: " + this.GetType().FullName;

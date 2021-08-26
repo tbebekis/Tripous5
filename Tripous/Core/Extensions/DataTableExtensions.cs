@@ -42,7 +42,7 @@ namespace Tripous
         /// </summary>
         static public int IndexOfColumn(this DataTable Table, string FieldName)
         {
-            if ((Table != null) && !string.IsNullOrEmpty(FieldName))
+            if ((Table != null) && !string.IsNullOrWhiteSpace(FieldName))
             {
                 for (int i = 0; i < Table.Columns.Count; i++)
                     if (FieldName.IsSameText(Table.Columns[i].ColumnName))
@@ -62,7 +62,7 @@ namespace Tripous
         /// </summary>
         static public DataColumn FindColumn(this DataTable Table, string FieldName)
         {
-            if ((Table != null) && !string.IsNullOrEmpty(FieldName))
+            if ((Table != null) && !string.IsNullOrWhiteSpace(FieldName))
             {
                 for (int i = 0; i < Table.Columns.Count; i++)
                     if (FieldName.IsSameText(Table.Columns[i].ColumnName))

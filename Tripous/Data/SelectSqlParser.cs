@@ -225,7 +225,7 @@ namespace Tripous.Data
         {
             Clear();
 
-            if (!string.IsNullOrEmpty(Text))
+            if (!string.IsNullOrWhiteSpace(Text))
             {
                 text = Text;
                 Parse();

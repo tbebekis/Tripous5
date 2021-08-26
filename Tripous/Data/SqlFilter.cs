@@ -87,10 +87,10 @@ namespace Tripous.Data
             string Format = Res.GS("E_EmptyField", "Field \"{0}\" can not be null or empty");
 
             /*  
-                        if (string.IsNullOrEmpty(TableName))
+                        if (string.IsNullOrWhiteSpace(TableName))
                             Sys.Error(Format, Res.GS("Criterion_TableName", "Criterion Table Name"));
 
-                        if (string.IsNullOrEmpty(Name))
+                        if (string.IsNullOrWhiteSpace(Name))
                             Sys.Error(Format, Res.GS("Criterion_FieldName", "Criterion Field Name")); 
              */
 
@@ -103,10 +103,10 @@ namespace Tripous.Data
             }
             else if (Mode == SqlFilterMode.EnumQuery)
             {
-                if (string.IsNullOrEmpty(Enum.ResultField))
+                if (string.IsNullOrWhiteSpace(Enum.ResultField))
                     Sys.Throw(Format, Res.GS("Criterion_Enum_ResultFieldName", "Criterion Enum Result Field Name"));
 
-                if (string.IsNullOrEmpty(Enum.Sql))
+                if (string.IsNullOrWhiteSpace(Enum.Sql))
                     Sys.Throw(Format, Res.GS("Criterion_Enum_Sql", "Criterion Enum Sql"));
 
                 Format = Res.GS("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");

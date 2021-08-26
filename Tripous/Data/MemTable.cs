@@ -458,7 +458,7 @@ namespace Tripous.Data
         /// </summary>
         static public MemTable Create(DataSet DS, string TableName)
         {
-            if (string.IsNullOrEmpty(TableName))
+            if (string.IsNullOrWhiteSpace(TableName))
                 TableName = NextTableName();
 
             MemTable Result = new MemTable(TableName);
@@ -502,7 +502,7 @@ namespace Tripous.Data
         /// </summary>
         static public void EnsureTableName(DataTable Table)
         {
-            if (string.IsNullOrEmpty(Table.TableName))
+            if (string.IsNullOrWhiteSpace(Table.TableName))
                 Table.TableName = NextTableName();
         }
         /// <summary>
@@ -595,7 +595,7 @@ namespace Tripous.Data
         /// </summary>
         public string Title
         {
-            get { return string.IsNullOrEmpty(fTitle) ? TableName : fTitle; }
+            get { return string.IsNullOrWhiteSpace(fTitle) ? TableName : fTitle; }
             set { fTitle = value; }
         }
         /// <summary>
@@ -603,7 +603,7 @@ namespace Tripous.Data
         /// </summary>
         public string PrimaryKeyField
         {
-            get { return string.IsNullOrEmpty(fPrimaryKeyField) ? "Id" : fPrimaryKeyField; }
+            get { return string.IsNullOrWhiteSpace(fPrimaryKeyField) ? "Id" : fPrimaryKeyField; }
             set
             {
                 fPrimaryKeyField = value;
@@ -617,7 +617,7 @@ namespace Tripous.Data
         /// </summary>
         public string MasterKeyField
         {
-            get { return string.IsNullOrEmpty(fMasterKeyField) ? "Id" : fMasterKeyField; }
+            get { return string.IsNullOrWhiteSpace(fMasterKeyField) ? "Id" : fMasterKeyField; }
             set { fMasterKeyField = value; }
         }
         /// <summary>
@@ -627,7 +627,7 @@ namespace Tripous.Data
         /// </summary>
         public string DetailKeyField
         {
-            get { return string.IsNullOrEmpty(fDetailKeyField) ? string.Empty : fDetailKeyField; }
+            get { return string.IsNullOrWhiteSpace(fDetailKeyField) ? string.Empty : fDetailKeyField; }
             set { fDetailKeyField = value; }
         }
         /// <summary>
@@ -735,7 +735,7 @@ namespace Tripous.Data
         /// </summary>
         public string Name
         {
-            get { return string.IsNullOrEmpty(TableName) ? string.Empty : TableName; }
+            get { return string.IsNullOrWhiteSpace(TableName) ? string.Empty : TableName; }
             set
             {
                 if (value != Name)

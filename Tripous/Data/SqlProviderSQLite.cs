@@ -81,13 +81,13 @@ namespace Tripous.Data
             S = $@" 
 limit {RowLimit}";
 
-            if (!string.IsNullOrEmpty(SelectSql.OrderBy.Trim()))
+            if (!string.IsNullOrWhiteSpace(SelectSql.OrderBy))
                 SelectSql.OrderBy += S;
-            else if (!string.IsNullOrEmpty(SelectSql.Having.Trim()))
+            else if (!string.IsNullOrWhiteSpace(SelectSql.Having))
                 SelectSql.Having += S;
-            else if (!string.IsNullOrEmpty(SelectSql.GroupBy.Trim()))
+            else if (!string.IsNullOrWhiteSpace(SelectSql.GroupBy))
                 SelectSql.GroupBy += S;
-            else if (!string.IsNullOrEmpty(SelectSql.Where.Trim()))
+            else if (!string.IsNullOrWhiteSpace(SelectSql.Where))
                 SelectSql.Where += S;
 
         }

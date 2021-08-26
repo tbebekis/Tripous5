@@ -55,7 +55,7 @@ namespace Tripous
         /// <summary>
         /// Returns the name of the property which has changed.
         /// </summary>
-        public string PropertyName { get { return !string.IsNullOrEmpty(propertyName) ? propertyName : string.Empty; } }
+        public string PropertyName { get { return !string.IsNullOrWhiteSpace(propertyName) ? propertyName : string.Empty; } }
     }
 
 
@@ -106,6 +106,6 @@ namespace Tripous
         /// <summary>
         /// Returns the name of the property which has changed.
         /// </summary>
-        public string PropertyName { get { return !string.IsNullOrEmpty(propertyName) ? propertyName : string.Empty; } }
+        public string PropertyName { get { return !string.IsNullOrWhiteSpace(propertyName) ? propertyName : string.Empty; } }
     }
 }

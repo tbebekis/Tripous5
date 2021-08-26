@@ -143,9 +143,9 @@ namespace Tripous
         { 
             if (Node != null)
             {
-                if ((Node is XmlElement) && (!string.IsNullOrEmpty(((XmlElement)Node).InnerText)))
+                if ((Node is XmlElement) && (!string.IsNullOrWhiteSpace(((XmlElement)Node).InnerText)))
                     return ((XmlElement)Node).InnerText;
-                else if ((Node is XmlAttribute) && (!string.IsNullOrEmpty(((XmlAttribute)Node).Value)))
+                else if ((Node is XmlAttribute) && (!string.IsNullOrWhiteSpace(((XmlAttribute)Node).Value)))
                     return ((XmlAttribute)Node).Value;
             }
 
@@ -379,7 +379,7 @@ namespace Tripous
                 if (Node.ChildNodes[0].NodeType != XmlNodeType.CDATA)
                     return Default;
 
-                if (string.IsNullOrEmpty(Node.ChildNodes[0].Value))
+                if (string.IsNullOrWhiteSpace(Node.ChildNodes[0].Value))
                     return Default;
 
                 string S = Node.ChildNodes[0].Value.Trim();
@@ -525,7 +525,7 @@ namespace Tripous
         /// </summary>
         static public object FromXml(Type ClassType, string XmlText)
         {
-            if (string.IsNullOrEmpty(XmlText))
+            if (string.IsNullOrWhiteSpace(XmlText))
                 return null;
 
             XmlSerializer serializer = new XmlSerializer(ClassType);

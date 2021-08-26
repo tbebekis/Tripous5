@@ -52,7 +52,7 @@ namespace Tripous
         /// </summary>
         static public string[] Split(this string Text, string Separator)
         {
-            if (string.IsNullOrEmpty(Text))
+            if (string.IsNullOrWhiteSpace(Text))
                 return new string[0];
 
             return Text.Split(new string[] { Separator }, StringSplitOptions.RemoveEmptyEntries);             
@@ -81,7 +81,7 @@ namespace Tripous
         /// </summary>
         static public string Dequote(this string S, char QuoteChar)
         {
-            if (String.IsNullOrEmpty(S))
+            if (string.IsNullOrWhiteSpace(S))
                 return string.Empty;
 
             int length = S.Length;
@@ -95,7 +95,7 @@ namespace Tripous
         /// </summary>
         static public string RemoveLastComma(this string S)
         {
-            if (string.IsNullOrEmpty(S))
+            if (string.IsNullOrWhiteSpace(S))
                 return string.Empty;
             else
             {
@@ -112,7 +112,7 @@ namespace Tripous
         /// </summary>
         static public bool ContainsText(this string Instance, string Value)
         {
-            if ((Instance != null) && !string.IsNullOrEmpty(Value))
+            if ((Instance != null) && !string.IsNullOrWhiteSpace(Value))
             {
                 return Instance.IndexOf(Value, StringComparison.InvariantCultureIgnoreCase) != -1;
             }
@@ -125,7 +125,7 @@ namespace Tripous
         /// </summary>
         static public bool StartsWithText(this string Instance, string Value)
         {
-            if ((Instance != null) && !string.IsNullOrEmpty(Value))
+            if ((Instance != null) && !string.IsNullOrWhiteSpace(Value))
             {
                 return Instance.StartsWith(Value, StringComparison.InvariantCultureIgnoreCase);
             }
@@ -137,7 +137,7 @@ namespace Tripous
         /// </summary>
         static public string[] ToLines(this string Text)
         {
-            if (string.IsNullOrEmpty(Text))
+            if (string.IsNullOrWhiteSpace(Text))
                 return new string[0];
 
             Regex rx = new Regex(Environment.NewLine);
@@ -163,7 +163,7 @@ namespace Tripous
                 return null;
             }
 
-            if (String.IsNullOrEmpty(oldValue))
+            if (string.IsNullOrWhiteSpace(oldValue))
             {
                 return original;
             }
@@ -193,7 +193,7 @@ namespace Tripous
         /// </summary>
         static public string MaxLen(this string Value, int Len)
         {
-            if (string.IsNullOrEmpty(Value))
+            if (string.IsNullOrWhiteSpace(Value))
                 return Value;
 
             if (Value.Length > Len)

@@ -39,7 +39,7 @@ namespace Tripous
         /// </summary>
         public ObjectStoreItemAttribute(string Code)
         {
-            if (string.IsNullOrEmpty(Code))
+            if (string.IsNullOrWhiteSpace(Code))
                 throw new ArgumentNullException("Code");
 
             code = Code;
@@ -49,7 +49,7 @@ namespace Tripous
         /// <summary>
         /// The unique "code name" of the method or constructor. 
         /// </summary>
-        public string Code { get { return !string.IsNullOrEmpty(code) ? code : string.Empty; } }
+        public string Code { get { return !string.IsNullOrWhiteSpace(code) ? code : string.Empty; } }
     }
 
 }

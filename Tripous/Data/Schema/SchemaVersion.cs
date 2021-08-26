@@ -29,7 +29,7 @@ namespace Tripous.Data
         /// </summary>
         public void AddTable(string SqlText)
         {
-            if (!string.IsNullOrEmpty(SqlText)) // because often we leave empty declarations in schema registration functions
+            if (!string.IsNullOrWhiteSpace(SqlText)) // because often we leave empty declarations in schema registration functions
             {
                 SchemaItem Item = new SchemaItem();
                 Item.Name = Sql.ExtractTableName(SqlText);

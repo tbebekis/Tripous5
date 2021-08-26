@@ -132,7 +132,7 @@ from
         /// </summary>
         public string DefaultValue
         {
-            get { return string.IsNullOrEmpty(fDefaultValue) ? Sys.NULL : fDefaultValue; }
+            get { return string.IsNullOrWhiteSpace(fDefaultValue) ? Sys.NULL : fDefaultValue; }
             set { fDefaultValue = value; }
         }
         /// <summary>

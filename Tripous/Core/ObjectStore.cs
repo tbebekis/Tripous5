@@ -318,7 +318,7 @@ namespace Tripous
         /// </summary>
         static public void Add(ICodeName Instance)
         {
-            if (string.IsNullOrEmpty(Instance.Code))
+            if (string.IsNullOrWhiteSpace(Instance.Code))
                 throw new ArgumentException("Illegal ICodeName Code");
 
             int Index = list.FindIndex(item => item.Code.IsSameText(Instance.Code));

@@ -129,7 +129,7 @@ namespace Tripous.Data
         }
         void DoStatement(string SqlText)
         {
-            if (!string.IsNullOrEmpty(SqlText))
+            if (!string.IsNullOrWhiteSpace(SqlText))
             {
                 SqlText = SqlText.Trim();
                 while (SqlText.Contains("  "))
@@ -140,7 +140,7 @@ namespace Tripous.Data
                 {
                     /* extract index name */
                     string IndexName = ExtractIndexName("create index ", SqlText);
-                    if (string.IsNullOrEmpty(IndexName))
+                    if (string.IsNullOrWhiteSpace(IndexName))
                         IndexName = ExtractIndexName("create unique index ", SqlText);
 
                     /* create only if not exists */

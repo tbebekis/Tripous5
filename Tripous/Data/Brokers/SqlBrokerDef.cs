@@ -125,6 +125,46 @@ namespace Tripous.Data
             return Result;
         }
 
+        /// <summary>
+        /// Finds a table descriptor by Name.
+        /// <para>A null or empty Name returns the MainTable. MainTable is also returned when Name is Item.</para>
+        /// <para>If Name is Lines the LinesTableName descriptor is returned.</para>
+        /// <para>If Name is SubLines the SubLinesTableName descriptor is returned.</para>
+        /// </summary>
+        public SqlBrokerTableDef FindTableDescriptor(string Name)
+        {
+
+            if (string.IsNullOrWhiteSpace(Name) || Sys.IsSameText(Name, "Item") || Sys.IsSameText(Name, SqlBrokerTableDef.ITEM))
+                Name = MainTableName;
+            else if (Sys.IsSameText(Name, "Lines") || Sys.IsSameText(Name, SqlBrokerTableDef.LINES))
+                Name = LinesTableName;
+            else if (Sys.IsSameText(Name, "SubLines") || Sys.IsSameText(Name, SqlBrokerTableDef.SUBLINES))
+                Name = SubLinesTableName;
+
+            return Tables.Find(item => item.Name.IsSameText(Name));
+
+        }
+
+        /// <summary>
+        /// Returns an array of SelectSql items, 
+        /// those added by the application and
+        /// those added by the user at runtime
+        /// </summary>
+        public SelectSql[] GetMergedSelectSqlList()
+        {
+            SelectSql[] statements = SelectList.ToArray();
+            List<SelectSql> List = new List<SelectSql>(statements);
+
+            /*
+                        // get any statements designed by the user
+                        statements = GetDesignedSelectSqlList();            
+                        if (statements.Length > 0)
+                            List.AddRange(statements); 
+             */
+
+            return List.ToArray();
+        }
+
         /* properties */
         /// <summary>
         /// The Name must be unique.

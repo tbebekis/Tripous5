@@ -81,7 +81,7 @@ namespace Tripous
         /// </summary>
         static public string ApplicationName
         {
-            get { return string.IsNullOrEmpty(fApplicationName) ? SysConfig.AppExeName : fApplicationName; }
+            get { return string.IsNullOrWhiteSpace(fApplicationName) ? SysConfig.AppExeName : fApplicationName; }
             set { fApplicationName = value; }
         }
         /// <summary>
@@ -90,7 +90,7 @@ namespace Tripous
         /// </summary>
         static public string ApplicationTitle
         {
-            get { return string.IsNullOrEmpty(fApplicationTitle) ? ApplicationName : fApplicationTitle; }
+            get { return string.IsNullOrWhiteSpace(fApplicationTitle) ? ApplicationName : fApplicationTitle; }
             set { fApplicationTitle = value; }
         }
 
@@ -145,7 +145,7 @@ namespace Tripous
                     if (S.IsSameText(AppExeFolder))
                         return AppExeFolder;
 
-                    if (string.IsNullOrEmpty(SysConfig.CompanyName))
+                    if (string.IsNullOrWhiteSpace(SysConfig.CompanyName))
                         return Path.Combine(MachineRootDataFolder, SysConfig.SolutionName);
                     else
                         return Path.Combine(MachineRootDataFolder, SysConfig.CompanyName, SysConfig.SolutionName);
@@ -214,10 +214,10 @@ namespace Tripous
             get
             {
                 string Result = fTempFolder;
-                if (string.IsNullOrEmpty(Result))
+                if (string.IsNullOrWhiteSpace(Result))
                 {
                     Result = Path.GetTempPath();
-                    if (!string.IsNullOrEmpty(SysConfig.CompanyName))
+                    if (!string.IsNullOrWhiteSpace(SysConfig.CompanyName))
                         Result = Path.Combine(Result, SysConfig.CompanyName);
                     Result = Path.Combine(Result, SysConfig.ApplicationName);
                 }

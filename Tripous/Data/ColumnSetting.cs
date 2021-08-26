@@ -19,7 +19,7 @@ namespace Tripous.Data
     /// <summary>
     /// Represents the settings of a column, resulting by user actions
     /// </summary>
-    public class ColumnSetting //: NamedItem
+    public class ColumnSetting 
     {
         string formatString;
         string aggregateFormat;
@@ -43,7 +43,7 @@ namespace Tripous.Data
         /// </summary>
         public string GetDisplayFormat()
         {
-            if (!string.IsNullOrEmpty(FormatString))
+            if (!string.IsNullOrWhiteSpace(FormatString))
                 return FormatString;
 
             if (Decimals != 0)
@@ -97,7 +97,7 @@ namespace Tripous.Data
         /// </summary>
         public string FormatString
         {
-            get { return !string.IsNullOrEmpty(formatString) ? formatString : string.Empty; }
+            get { return !string.IsNullOrWhiteSpace(formatString) ? formatString : string.Empty; }
             set { formatString = value; }
         }
         /// <summary>
@@ -109,7 +109,7 @@ namespace Tripous.Data
         /// </summary>
         public string AggregateFormat
         {
-            get { return !string.IsNullOrEmpty(aggregateFormat) ? aggregateFormat : string.Empty; }
+            get { return !string.IsNullOrWhiteSpace(aggregateFormat) ? aggregateFormat : string.Empty; }
             set { aggregateFormat = value; }
         }
     }

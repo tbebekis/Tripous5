@@ -308,7 +308,7 @@ namespace Tripous.Data
             SqlStatements.UpdateRowSql = string.Format(SQL, TableName, S3, PrimaryKeyField);
 
             // TopTable RowSelect  
-            if (IsTopTable && string.IsNullOrEmpty(SqlStatements.SelectRowSql))
+            if (IsTopTable && string.IsNullOrWhiteSpace(SqlStatements.SelectRowSql))
                 SqlStatements.SelectRowSql = string.Format("select * from {0} where {1} = :{1}", TableName, PrimaryKeyField);
 
             // All tables
@@ -354,7 +354,7 @@ namespace Tripous.Data
                 {
                     string SqlText = string.Format("select {0} from {1} where {0} = ", PrimaryKeyField, TableName);
 
-                    if (Sys.IsNull(Row[PrimaryKeyField]) || string.IsNullOrEmpty(Row[PrimaryKeyField].ToString()) || ((string)Store.SelectResult(SqlText + Row[PrimaryKeyField].ToString().QS(), string.Empty) == string.Empty))
+                    if (Sys.IsNull(Row[PrimaryKeyField]) || string.IsNullOrWhiteSpace(Row[PrimaryKeyField].ToString()) || ((string)Store.SelectResult(SqlText + Row[PrimaryKeyField].ToString().QS(), string.Empty) == string.Empty))
                     {
                         Row[PrimaryKeyField] = Sys.GenId();
                         Store.ExecSql(SqlStatements.InsertRowSql, Row);
@@ -401,7 +401,7 @@ namespace Tripous.Data
                         {
                             if (IsStringKey)
                             {
-                                if (Sys.IsNull(Row[PrimaryKeyField]) || string.IsNullOrEmpty(Row.AsString(PrimaryKeyField)) || ((string)Store.SelectResult(SqlText + Row[PrimaryKeyField].ToString().QS(), string.Empty) == string.Empty))
+                                if (Sys.IsNull(Row[PrimaryKeyField]) || string.IsNullOrWhiteSpace(Row.AsString(PrimaryKeyField)) || ((string)Store.SelectResult(SqlText + Row[PrimaryKeyField].ToString().QS(), string.Empty) == string.Empty))
                                 {
                                     Row[PrimaryKeyField] = Sys.GenId();
                                     Store.ExecSql(Transaction, SqlStatements.InsertRowSql, Row);
@@ -464,7 +464,7 @@ namespace Tripous.Data
         /// </summary>
         static public DataTable Base64ToTable(string Text)
         {
-            if (!string.IsNullOrEmpty(Text))
+            if (!string.IsNullOrWhiteSpace(Text))
             {
                 using (MemoryStream MS = new MemoryStream(Convert.FromBase64String(Text)))
                 {
@@ -499,7 +499,7 @@ namespace Tripous.Data
         /// </summary>
         static public DataSet Base64ToDataSet(string Text)
         {
-            if (!string.IsNullOrEmpty(Text))
+            if (!string.IsNullOrWhiteSpace(Text))
             {
                 using (MemoryStream MS = new MemoryStream(Convert.FromBase64String(Text)))
                 {
@@ -751,7 +751,7 @@ namespace Tripous.Data
         /// </summary>
         static public DataSet CreateDataset(string Name)
         {
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrWhiteSpace(Name))
             {
                 datasetCount++;
                 Name = "DataSet_" + datasetCount.ToString();
@@ -766,7 +766,7 @@ namespace Tripous.Data
         /// </summary>
         static public bool IsIdColumn(string ColumnName)
         {
-            return !string.IsNullOrEmpty(ColumnName) && ColumnName.EndsWith("Id", StringComparison.InvariantCultureIgnoreCase);
+            return !string.IsNullOrWhiteSpace(ColumnName) && ColumnName.EndsWith("Id", StringComparison.InvariantCultureIgnoreCase);
         }
         /// <summary>
         /// Returns true if ColumnName is not Id or ends with Id

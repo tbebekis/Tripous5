@@ -39,7 +39,7 @@ namespace Tripous.Data
         /// </summary>
         public void CopyBrokerStatements(string SqlBrokerName)
         {
-            if (string.IsNullOrEmpty(SqlBrokerName))
+            if (string.IsNullOrWhiteSpace(SqlBrokerName))
                 return;
 
             SqlBrokerDef BrokerDes = SqlBrokerDef.FindDescriptor(SqlBrokerName); 

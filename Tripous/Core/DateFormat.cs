@@ -259,7 +259,7 @@ namespace Tripous
                     break;
             }
 
-            if (string.IsNullOrEmpty(sDD + sMM + sYY))
+            if (string.IsNullOrWhiteSpace(sDD + sMM + sYY))
                 return Result;
 
             int Value = 0;

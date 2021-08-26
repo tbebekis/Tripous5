@@ -1168,7 +1168,7 @@ namespace Tripous
                 }
                 // lang:el-GR
                 // lang:en-US
-                if (!string.IsNullOrEmpty(CultureName))
+                if (!string.IsNullOrWhiteSpace(CultureName))
                 {
                     CultureInfo Culture = CultureInfo.GetCultureInfo(CultureName);
                     if ((Culture != null) && !Culture.IsNeutralCulture)
@@ -1253,7 +1253,7 @@ namespace Tripous
         /// </summary>
         static public Type GetType(string TypeName, bool CheckExists)
         {
-            if (string.IsNullOrEmpty(TypeName))
+            if (string.IsNullOrWhiteSpace(TypeName))
                 throw new ApplicationException("Can not get a type. TypeName is null or empty");
 
             Type Result = TypeStore.Find(TypeName);
@@ -1556,14 +1556,14 @@ namespace Tripous
         /// </summary>
         static public string FieldPath(string TableName, string FieldName)
         {
-            return (string.IsNullOrEmpty(TableName) ? string.Empty : TableName + ".") + FieldName;
+            return (string.IsNullOrWhiteSpace(TableName) ? string.Empty : TableName + ".") + FieldName;
         }
         /// <summary>
         /// Constructs a field at table string. By default is TableName__FieldName.
         /// </summary>
         static public string FieldAlias(string TableName, string FieldName)
         {
-            return (string.IsNullOrEmpty(TableName) ? string.Empty : TableName + Sys.FieldAliasSep) + FieldName;
+            return (string.IsNullOrWhiteSpace(TableName) ? string.Empty : TableName + Sys.FieldAliasSep) + FieldName;
         }
 
         /// <summary>

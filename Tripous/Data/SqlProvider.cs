@@ -732,7 +732,7 @@ namespace Tripous.Data
         public DbCommand CreateCommand(DbConnection Connection, string SqlText, params object[] Params)
         {
             DbCommand Result = Connection.CreateCommand();
-            if (!string.IsNullOrEmpty(SqlText))
+            if (!string.IsNullOrWhiteSpace(SqlText))
                 SetupCommand(Result, SqlText, Params);
             return Result;
         }
@@ -1022,7 +1022,7 @@ namespace Tripous.Data
         /// </summary>
         public virtual string DenormalizeFieldName(string FieldName)
         {
-            if (!string.IsNullOrEmpty(FieldName))
+            if (!string.IsNullOrWhiteSpace(FieldName))
             {
                 FieldName = FieldName.Trim();
 

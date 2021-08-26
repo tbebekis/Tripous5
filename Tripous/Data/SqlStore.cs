@@ -777,7 +777,7 @@ namespace Tripous.Data
             StringBuilder SB = new StringBuilder();
 
 
-            if (!string.IsNullOrEmpty(SchemaName) && SqlCache.Contains(this.ConnectionName, SchemaName))
+            if (!string.IsNullOrWhiteSpace(SchemaName) && SqlCache.Contains(this.ConnectionName, SchemaName))
             {
                 SchemaTable = SqlCache.Find(this.ConnectionName, SchemaName);  
             }
@@ -826,7 +826,7 @@ namespace Tripous.Data
             if (SchemaTable == null)
             {
                 string Message = "GetNativeSchema(): Can not get schema for: ";
-                Message = !string.IsNullOrEmpty(SqlText) ? Message + Environment.NewLine + SqlText : Message + TableName;
+                Message = !string.IsNullOrWhiteSpace(SqlText) ? Message + Environment.NewLine + SqlText : Message + TableName;
 
                 if (SB.Length > 0)
                     Message += Environment.NewLine + SB.ToString();
@@ -955,7 +955,7 @@ namespace Tripous.Data
         {
             string TableName = Sql.ExtractTableName(SqlText);
 
-            if (!string.IsNullOrEmpty(TableName) && !TableExists(TableName))
+            if (!string.IsNullOrWhiteSpace(TableName) && !TableExists(TableName))
             {
                 SqlText = Provider.ReplaceDataTypePlaceholders(SqlText);
 

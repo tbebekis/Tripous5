@@ -819,7 +819,7 @@ namespace Tripous.Data
         /// </summary>
         public virtual SqlBrokerTableDef TableDescriptorOf(string TableName)
         {
-            if (string.IsNullOrEmpty(TableName))
+            if (string.IsNullOrWhiteSpace(TableName))
                 return Descriptor.MainTable;
             return Descriptor.Tables.Find(item => item.Name.IsSameText(TableName));
         }
@@ -834,7 +834,95 @@ namespace Tripous.Data
                 return TableDes.Fields.Find(item => item.Name.IsSameText(FieldName));
             return null;
         }
- 
+
+        /* json */
+        /// <summary>
+        /// JsonBroker action
+        /// </summary>
+        public virtual JsonBroker JsonInitialize()
+        {
+            JsonBroker Result = new JsonBroker(this);
+            foreach (SelectSql SS in Result.SelectList)
+                SS.TranslateColumnCaptions();
+
+            return Result;
+        }
+        /// <summary>
+        /// JsonBroker action
+        /// </summary>
+        public virtual JsonBroker JsonInsert()
+        {
+            Insert();
+            JsonBroker Result = new JsonBroker(this);
+            return Result;
+        }
+        /// <summary>
+        /// JsonBroker action
+        /// </summary>
+        public virtual JsonBroker JsonEdit(string Id)
+        {
+            object oId = Id;
+            DataColumn Column = tblItem.Columns[tblItem.PrimaryKeyField];
+            if (Column.DataType == typeof(int))
+                oId = Convert.ToInt32(Id);
+            Edit(oId);
+            JsonBroker Result = new JsonBroker(this);
+            return Result;
+        }
+        /// <summary>
+        /// JsonBroker action
+        /// </summary>
+        public virtual void JsonDelete(string Id)
+        {
+            object oId = Id;
+            DataColumn Column = tblItem.Columns[tblItem.PrimaryKeyField];
+            if (Column.DataType == typeof(int))
+                oId = Convert.ToInt32(Id);
+            Delete(oId);
+        }
+        /// <summary>
+        /// JsonBroker action
+        /// </summary>
+        public virtual JsonBroker JsonCommit(JsonBroker JB)
+        {
+
+            this.State = JB.State;
+
+            Action<MemTable> ProcessTable = null;
+            ProcessTable = delegate (MemTable Table)
+            {
+                JsonDataTable JTable = JB.Tables.Find(item => Table.TableName.IsSameText(item.Name));
+                if (JTable != null)
+                {
+                    JTable.RowsTo(Table);
+                    foreach (MemTable DetailTable in Table.Details)
+                    {
+                        ProcessTable(DetailTable);
+                    }
+                }
+            };
+
+
+            ProcessTable(tblItem);
+
+            Commit(true);
+
+            JsonBroker Result = new JsonBroker(this);
+            return Result;
+        }
+
+        /// <summary>
+        /// SelectBrowser json counterpart
+        /// <para>SqlText could be the statement text or a SelectSql Name found in Descriptor.SelectList.</para>
+        /// <para>RowLimit greater than zero, is an instruction to apply a row limit to the SELECT statement</para>
+        /// </summary>
+        public virtual JsonDataTable JsonSelectBrowser(string SqlText, int RowLimit)
+        {
+            MemTable Table = new MemTable();
+            SelectBrowser(Table, SqlText, RowLimit);
+            JsonDataTable JTable = new JsonDataTable(Table, null);
+            return JTable;
+        }
 
         /* properties */
         /// <summary>
