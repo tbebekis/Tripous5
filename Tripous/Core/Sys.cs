@@ -1572,7 +1572,7 @@ namespace Tripous
         static public object SafeId(object Id)
         {
             if (Sys.IsNull(Id))
-                Id = SysConfig.OidDataType == SimpleType.String ? (object)Sys.InvalidId : (object)int.MinValue;
+                Id = SysConfig.OidDataType == DataFieldType.String ? (object)Sys.InvalidId : (object)int.MinValue;
             return Id;
         }
         /// <summary>
@@ -1581,7 +1581,7 @@ namespace Tripous
         /// </summary>
         static public string IdStr(object Id)
         {
-            return SysConfig.OidDataType.IsString() ? Id.ToString().QS() : Id.ToString();
+            return SysConfig.OidDataType == DataFieldType.String ? Id.ToString().QS() : Id.ToString();
         }
         /// <summary>
         ///  Used in constructing SQL statements that contain a WHERE clause of the type

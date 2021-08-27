@@ -370,6 +370,17 @@ namespace Tripous
             return Chunks;
         }
 
+
+        /// <summary>
+        /// Creates a new row, adds the row to rows, and returns the row.
+        /// </summary>
+        static public DataRow AddNewRow(this DataTable Table)
+        {
+            DataRow Result = Table.NewRow();
+            Table.Rows.Add(Result);
+            return Result;
+        }
+
         /// <summary>
         /// Sets Table column captions. Dictionary is a ColumnName=Caption list of pairs. If HideUntitle is true, 
         /// then any column not found in Dictionary is set to Visible = false in its ExtendedProperties.

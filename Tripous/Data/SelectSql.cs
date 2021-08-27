@@ -115,33 +115,33 @@ from
         /// </summary>
         static public void ReplaceLastComma(ref string S)
         {
-            if (string.IsNullOrWhiteSpace(S))
-                return;
-
-            StringBuilder SB = new StringBuilder(S);
-
-            int i = SB.Length;
-            char C;
-
-            while (true)
+            if (!string.IsNullOrWhiteSpace(S))
             {
-                i--;
-                if (i < 0)
-                    break;
+                StringBuilder SB = new StringBuilder(S);
 
-                C = SB[i];
+                int i = SB.Length;
+                char C;
 
-                if (C == ',')
+                while (true)
                 {
-                    SB[i] = ' ';
-                    break;
+                    i--;
+                    if (i < 0)
+                        break;
+
+                    C = SB[i];
+
+                    if (C == ',')
+                    {
+                        SB[i] = ' ';
+                        break;
+                    }
+                    else if (!Char.IsWhiteSpace(C))
+                        break;
+
                 }
-                else if (!Char.IsWhiteSpace(C))
-                    break;
 
+                S = SB.ToString();
             }
-
-            S = SB.ToString();
 
         }
         /// <summary>
@@ -149,34 +149,40 @@ from
         /// </summary>
         static public string AddTo(string Clause, string Delimiter, string Plus)
         {
-            if (Clause.Trim() == string.Empty)
-                return SPACES + Plus.Trim();
+            if (string.IsNullOrWhiteSpace(Plus))
+                Plus = string.Empty;
 
-            Clause = Clause.TrimEnd();
-            Delimiter = Delimiter.Trim();
-            Plus = Plus.Trim();
+            if (!string.IsNullOrWhiteSpace(Clause) && !string.IsNullOrWhiteSpace(Delimiter))
+            {
+                Clause = Clause.TrimEnd();
+                Delimiter = Delimiter.Trim();
+                Plus = Plus.Trim();
 
-            if (Clause.EndsWith(Delimiter, StringComparison.InvariantCultureIgnoreCase)
-                || Plus.StartsWith(Delimiter, StringComparison.InvariantCultureIgnoreCase))
-                return CR(Clause) + SPACES + Plus.Trim();
-            else
-                return CR(Clause) + SPACES + Delimiter + SPACE + Plus;
+                if (Clause.EndsWith(Delimiter, StringComparison.InvariantCultureIgnoreCase)
+                    || Plus.StartsWith(Delimiter, StringComparison.InvariantCultureIgnoreCase))
+                    return CR(Clause) + SPACES + Plus.Trim();
+                else
+                    return CR(Clause) + SPACES + Delimiter + SPACE + Plus;
+            }
+ 
+            return SPACES + Plus.Trim();
+
         }
         /// <summary>
         /// Concatenates Keyword + Clause
         /// </summary>
         static public string NormalizeClause(string Clause, string Keyword)
         {
-            Clause = Clause.Trim();
-            Keyword = Keyword.Trim();
-
             if (!string.IsNullOrWhiteSpace(Clause) && !string.IsNullOrWhiteSpace(Keyword))
             {
+                Clause = Clause.Trim();
+                Keyword = Keyword.Trim();
+
                 if (!Clause.StartsWith(Keyword, StringComparison.InvariantCultureIgnoreCase))
                     return CR(Keyword) + SPACES + Clause;
             }
 
-            return Clause;
+            return !string.IsNullOrWhiteSpace(Clause)? Clause: string.Empty;
         }
         /// <summary>
         /// Returns true if Value contains any of the mask characters (%, ?, *)
@@ -248,7 +254,6 @@ from
         /// </summary>
         public void Clear()
         {
-
             Select = string.Empty;
             From = string.Empty;
             Where = string.Empty;
@@ -363,7 +368,7 @@ from
                     sWhere = sWhere.Length == 0 ? Range : AddTo(sWhere, "and", Range);
             }
 
-            if (WhereUser.Trim().Length > 0)
+            if (!string.IsNullOrWhiteSpace(WhereUser) && WhereUser.Trim().Length > 0)
             {
                 if (!sWhere.Contains(WhereUser.Trim()))
                     sWhere = sWhere.Length == 0 ? WhereUser : AddTo(sWhere, "and", WhereUser);

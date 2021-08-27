@@ -192,11 +192,16 @@ namespace Tripous.Data
         /// </summary>
         private void Select_DoDetail(MemTable MasterTable, MemTable Detail)
         {
+            string SqlText;
+
             if (!string.IsNullOrWhiteSpace(Detail.SqlStatements.SelectSql))
             {
                 // 1. SqlText execution ===================================================
                 if ((MasterTable.Rows.Count > 0) && (MasterTable.Columns.Contains(Detail.MasterKeyField)))
                 {
+                    SelectSql SS = new SelectSql(Detail.SqlStatements.SelectSql);
+                    SS.Where = "";
+
                     /*  limit the number of elements inside the in (...),  in order
                         to avoid problems with database servers that have such a limit.    */
                     string[] KeyValuesList = MasterTable.GetKeyValuesList(Detail.MasterKeyField, 100, false);
@@ -205,11 +210,13 @@ namespace Tripous.Data
                     for (int i = 0; i < KeyValuesList.Length; i++)
                     {
                         SB.Clear();
-                        SB.AppendLine(Detail.SqlStatements.SelectSql);
+                        SB.AppendLine(SS.Text);
                         SB.AppendLine($"where ");
                         SB.AppendLine($"{Detail.TableName}.{Detail.DetailKeyField} in {KeyValuesList[i]}");
 
-                        Select_DoAddToDetail(SB.ToString(), Detail);
+                        SqlText = SB.ToString();
+
+                        Select_DoAddToDetail(SqlText, Detail);
                     }
                 }
 

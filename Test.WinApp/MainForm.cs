@@ -24,7 +24,7 @@ namespace Test.WinApp
 
 
         /* public */
-        public void Clear()
+        public void ClearLog()
         {
             edtLog.Clear();
             Application.DoEvents();
@@ -39,23 +39,32 @@ namespace Test.WinApp
         }
         public void AppendLine(string Text)
         {
-            if (!string.IsNullOrWhiteSpace(Text))
-            {
-                edtLog.AppendText(Text + Environment.NewLine);
-                Application.DoEvents();
-            }
+            if (string.IsNullOrWhiteSpace(Text))
+                Text = string.Empty;
+
+            edtLog.AppendText(Text + Environment.NewLine);
+            Application.DoEvents();
+        }
+        public void AppendLine()
+        {
+            AppendLine("-------------------------------------------------------------------");
+        }
+        public void AppendLineEmpty()
+        {
+            AppendLine(string.Empty);
         }
         public void Log(string Text = null)
         {
             if (string.IsNullOrWhiteSpace(Text))
             {
-                Clear();
+                ClearLog();
             }
             else
             {
                 AppendLine(Text);
             }
         }
+
 
         void Execute(Action Proc)
         {
@@ -85,7 +94,8 @@ namespace Test.WinApp
 
             SettingTest.LoadSettings();
 
-            Test();
+            //Test();
+            //BrokerTest.Test1();
         }
         void Test()
         {
@@ -101,7 +111,6 @@ namespace Test.WinApp
 
             CodeProvider CP = new CodeProvider() { Descriptor = Def, TableName = "Customer" };
             //string Result = CP.Execute(Table.Rows[0], null, null);
-
         }
  
         /* overrides */

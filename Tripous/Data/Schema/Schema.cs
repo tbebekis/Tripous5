@@ -32,23 +32,13 @@ namespace Tripous.Data
         }
 
         /* public */
-        /// <summary>
-        /// Finds or adds, if not exists, a <see cref="SchemaVersion"/>
-        /// </summary>
-        public SchemaVersion FindOrAdd(int Version)
-        {
-            SchemaVersion Result = Versions.FirstOrDefault(item => (Version == item.Version));
-            if (Result == null)
-                Result = Add(Version);
 
-            return Result;
-        }
         /// <summary>
         /// Returns the a schema version item with a specified version, if any else null
         /// </summary>
         public SchemaVersion Find(int Version)
         {
-            return Versions.FirstOrDefault(item => (Version == item.Version));
+            return Versions.Find(item => (Version == item.Version));
         }
         /// <summary>
         /// True if a schema version item with a specified version is already registered.
@@ -58,33 +48,20 @@ namespace Tripous.Data
             return Find(Version) != null;
         }
 
-        /// <summary>
-        /// Returns the first schema version items w having a version equal to or greater than the specified Version, if any, else null.
-        /// </summary>
-        public SchemaVersion FindGreaterOrEqual(int Version)
-        {
-            return Versions.FirstOrDefault(item => (item.Version >= Version));
-        }
-        /// <summary>
-        /// Checks to see if there is already a schema version with greater or equal Version. 
-        /// <para>Throws an exception if it finds one.</para>
-        /// </summary>
-        public void Check(int Version)
-        {
-            SchemaVersion Item = FindGreaterOrEqual(Version);
-            if (Item != null)
-                Sys.Throw($"Invalid database schema version: Domain: {Domain}, ConnectionName {ConnectionName}, Version {Version}");
-        }
+ 
 
         /// <summary>
-        /// Adds a new schema version
+        /// Adds a new schema version, if the specified version is not found. Else returns the found version.
         /// </summary>
         public SchemaVersion Add(int Version)
         {
-            Check(Version);
-            SchemaVersion Result = new SchemaVersion();
-            Result.Version = Version;
-            Versions.Add(Result);
+            var Result = Find(Version);
+            if (Result == null)
+            {
+                Result = new SchemaVersion() { Version = Version };
+                Versions.Add(Result);
+            }
+
             return Result;
         }
 

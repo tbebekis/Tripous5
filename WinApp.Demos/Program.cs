@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
+
+using Tripous;
+using Tripous.Logging;
+
 
 namespace WinApp.Demos
 {
@@ -20,4 +25,5 @@ namespace WinApp.Demos
             Application.Run(new MainForm());
         }
     }
+
 }

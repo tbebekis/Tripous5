@@ -11,6 +11,7 @@ namespace Tripous.Data
     /// <summary>
     /// Broker
     /// </summary>
+    [TypeStoreItem]
     public class Broker
     {
         /* operation flags */
@@ -30,6 +31,11 @@ namespace Tripous.Data
         /// Field
         /// </summary>
         protected int fCommiting;
+
+        /// <summary>
+        /// Field
+        /// </summary>
+        protected List<MemTable> fTableList = new List<MemTable>();
 
         /* initialization */
         /// <summary>
@@ -183,6 +189,23 @@ namespace Tripous.Data
                 tblItem.DataSet.RejectChanges();
         }
 
+        /* tables */
+        /// <summary>
+        /// Adds a table to the table list of the broker and the tables of the <see cref="DataSet"/> of the broker.
+        /// </summary>
+        /// <param name="Table"></param>
+        protected virtual void AddTable(MemTable Table)
+        {
+            DataSet.Tables.Add(Table);
+            fTableList.Add(Table);
+        }
+        /// <summary>
+        /// Finds and returns a table, if any, else null.
+        /// </summary>
+        protected virtual MemTable FindTable(Predicate<MemTable> match)
+        {
+            return fTableList.Find(match);
+        }
 
         /* construction */
         /// <summary>
@@ -414,16 +437,16 @@ namespace Tripous.Data
             
             if (!string.IsNullOrWhiteSpace(TableName))
             {
-                Tables.Find(item => TableName.IsSameText(item.TableName));
+                FindTable(item => TableName.IsSameText(item.TableName));
 
                 if (Result == null)
                 {
                     if (Sys.IsSameText(TableName, "Item") || Sys.IsSameText(TableName, SqlBrokerTableDef.ITEM))
-                        return Tables.Find(item => MainTableName.IsSameText(item.TableName));    
+                        return FindTable(item => MainTableName.IsSameText(item.TableName));    
                     else if (Sys.IsSameText(TableName, "Lines") || Sys.IsSameText(TableName, SqlBrokerTableDef.LINES))
-                        return Tables.Find(item => LinesTableName.IsSameText(item.TableName));     
+                        return FindTable(item => LinesTableName.IsSameText(item.TableName));     
                     else if (Sys.IsSameText(TableName, "SubLines") || Sys.IsSameText(TableName, SqlBrokerTableDef.SUBLINES))
-                        return Tables.Find(item => SubLinesTableName.IsSameText(item.TableName));   
+                        return FindTable(item => SubLinesTableName.IsSameText(item.TableName));   
                 }
             }
 
@@ -527,11 +550,11 @@ namespace Tripous.Data
         /// <summary>
         /// Gets the DataSet of the broker. All data tables of the broker belong to the same DataSet.
         /// </summary>
-        public DataSet DataSet { get; protected set; }
+        public DataSet DataSet { get; protected set; } = Db.CreateDataset("Broker");
         /// <summary>
         /// Gets the Tables list of tables. All data tables of the broker are included in that list.
         /// </summary>
-        public List<MemTable> Tables { get; protected set; } = new List<MemTable>();    //public Tables Tables { get; protected set; }
+        public MemTable[] Tables => fTableList.ToArray();
         /// <summary>
         /// Gets the item table which is the top in the tree of the correlated tables.
         /// </summary>

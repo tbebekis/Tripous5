@@ -12,7 +12,6 @@ using Tripous.Data;
 namespace Tripous.Data
 {
 
-#warning TODO: SqBroker JSON, Locator
 
     /// <summary>
     /// A broker table definition
@@ -419,12 +418,15 @@ namespace Tripous.Data
 
         /* create DataTable */
         /// <summary>
-        /// Creates a DataTable based on a descriptor.
+        /// Creates a DataTable based on a descriptor. 
+        /// <para>Creates the look-up tables too if a flag is specified.</para>
+        /// <para>The table may added to a list using a specified delegate.</para>
         /// </summary>
-        public void CreateDescriptorTable(SqlStore Store, List<MemTable> TableList, bool CreateLookUpTables)
+        public void CreateDescriptorTable(SqlStore Store, Action<MemTable> AddTableFunc, bool CreateLookUpTables)
         {
+ 
             MemTable Table = new MemTable() { TableName = this.Name };
-            TableList.Add(Table);
+            AddTableFunc(Table);
             Table.ExtendedProperties["Descriptor"] = this;
 
             Table.PrimaryKeyField = this.PrimaryKeyField;
@@ -453,7 +455,10 @@ namespace Tripous.Data
                 Table.Columns.Add(Column); 
 
                 if (CreateLookUpTables && FieldDes.IsForeignKeyField)
-                    CreateDescriptorTables_CreateLookUpTable(FieldDes, TableList);
+                {
+                    AddTableFunc(CreateDescriptorTables_CreateLookUpTable(FieldDes));
+                }
+     
 
                 // joined table to TableDescriptor on this FieldDes
                 SqlBrokerTableDef JoinTableDes = this.FindAnyJoinTableByMasterKeyField(FieldDes.Name);
@@ -461,6 +466,7 @@ namespace Tripous.Data
                     CreateDescriptorTables_AddJoinTableFields(JoinTableDes, Table);
             }
 
+            
         }
         /// <summary>
         /// Sets up the <see cref="DataColumn.DefaultValue"/> of a specified column based on a specified field descriptor settings.
@@ -500,15 +506,16 @@ namespace Tripous.Data
         /// <summary>
         /// Creates look up table for the browser table
         /// </summary>
-        void CreateDescriptorTables_CreateLookUpTable(SqlBrokerFieldDef FieldDes, List<MemTable> TableList)
+        MemTable CreateDescriptorTables_CreateLookUpTable(SqlBrokerFieldDef FieldDes)
         { 
-            MemTable Table = new MemTable() { TableName = FieldDes.ForeignTableAlias };
-            TableList.Add(Table);
+            MemTable Table = new MemTable() { TableName = FieldDes.ForeignTableAlias };            
  
             DataColumn Column = new DataColumn(FieldDes.ForeignKeyField);
             Column.DataType = FieldDes.DataType.GetNetType();
             Column.MaxLength = FieldDes.MaxLength;
-            Table.Columns.Add(Column); 
+            Table.Columns.Add(Column);
+
+            return Table;
         }
         /// <summary>
         /// Adds join fields to the Table
@@ -638,7 +645,136 @@ namespace Tripous.Data
                 }
             }
         }
- 
+
+        /* fields */
+        /// <summary>
+        /// Adds and returns a field.
+        /// </summary>
+        public SqlBrokerFieldDef AddField(string Name, DataFieldType DataType, string TitleKey, SqlBrokerFieldFlag Flags)
+        {
+            SqlBrokerFieldDef Result = Fields.Find(item => item.Name.IsSameText(Name));
+
+            if (Result == null)
+            {
+                Result = new SqlBrokerFieldDef() 
+                { 
+                    Name = Name,
+                    TitleKey = TitleKey,
+                    DataType = DataType, 
+                    Flags = Flags 
+                };
+
+                Fields.Add(Result);
+            }
+
+            return Result;
+        }
+
+
+        /// <summary>
+        /// Adds and returns an Id field.
+        /// </summary>
+        public SqlBrokerFieldDef AddId(string Name, DataFieldType DataType, int MaxLength)
+        {
+            var Result = AddField(Name, DataType, "", SqlBrokerFieldFlag.None);
+            if (DataType == DataFieldType.String)
+                Result.MaxLength = MaxLength;
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an Id field based on settings on <see cref="SysConfig.OidDataType"/> and <see cref="SysConfig.OidSize"/>.
+        /// </summary>
+        public SqlBrokerFieldDef AddId(string Name = "Id")
+        {
+            return AddId(Name, SysConfig.OidDataType, SysConfig.OidSize);
+        }
+
+        /// <summary>
+        /// Adds and returns a string field.
+        /// </summary>
+        public SqlBrokerFieldDef AddString(string Name, int MaxLength = 96, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.String, TitleKey, Flags);
+            Result.MaxLength = MaxLength;
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an integer field.
+        /// </summary>
+        public SqlBrokerFieldDef AddInteger(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Integer, TitleKey, Flags); 
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an double field.
+        /// </summary>
+        public SqlBrokerFieldDef AddDouble(string Name, int Decimals = 4, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Float, TitleKey, Flags);
+            Result.Decimals = Decimals;
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an decimal field.
+        /// </summary>
+        public SqlBrokerFieldDef AddDecimal(string Name, int Decimals = 4, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Decimal, TitleKey, Flags);
+            Result.Decimals = Decimals;
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an date field.
+        /// </summary>
+        public SqlBrokerFieldDef AddDate(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Date, TitleKey, Flags);
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an date-time field.
+        /// </summary>
+        public SqlBrokerFieldDef AddDateTime(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.DateTime, TitleKey, Flags);
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns an integer-boolean field.
+        /// </summary>
+        public SqlBrokerFieldDef AddBoolean(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Boolean, TitleKey, Flags | SqlBrokerFieldFlag.Boolean);
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a blob field.
+        /// </summary>
+        public SqlBrokerFieldDef AddBlob(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Blob, TitleKey, Flags);
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a text blob field.
+        /// </summary>
+        public SqlBrokerFieldDef AddTextBlob(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.TextBlob, TitleKey, Flags);
+            return Result;
+        }
+
+        /// <summary>
+        /// Sets the master table of this table.
+        /// </summary>
+        public SqlBrokerTableDef SetMaster(string MasterTableName, string MasterKeyField, string DetailKeyField)
+        {
+            this.MasterTableName = MasterTableName;
+            this.MasterKeyField = MasterKeyField;
+            this.DetailKeyField = DetailKeyField;
+            return this;
+        }
 
         /* properties */
         /// <summary>

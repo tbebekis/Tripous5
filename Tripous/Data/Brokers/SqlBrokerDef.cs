@@ -18,6 +18,7 @@ namespace Tripous.Data
     {
         static List<SqlBrokerDef> Descriptors = new List<SqlBrokerDef>();
 
+        string fMainTableName;
         string fEntityName;
 
 
@@ -47,7 +48,7 @@ namespace Tripous.Data
         /// <summary>
         /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
         /// </summary>
-        static public SqlBrokerDef RegisterDescriptor(string Name, string Text)
+        static public SqlBrokerDef RegisterDescriptor(string Name)
         {
             SqlBrokerDef Result = FindDescriptor(Name);
             if (Result == null)
@@ -165,6 +166,22 @@ namespace Tripous.Data
             return List.ToArray();
         }
 
+
+        /// <summary>
+        /// Creates and adds a table to tables.
+        /// </summary>
+        public SqlBrokerTableDef AddTable(string TableName)
+        {
+            SqlBrokerTableDef Result = FindTableDescriptor(TableName);
+            if (Result == null)
+            {
+                Result = new SqlBrokerTableDef() { Name = TableName };
+                Tables.Add(Result);
+            }
+
+            return Result;
+        }
+
         /* properties */
         /// <summary>
         /// The Name must be unique.
@@ -190,7 +207,11 @@ namespace Tripous.Data
         /// <summary>
         /// Gets or set the name of the main table
         /// </summary>
-        public string MainTableName { get; set; }
+        public string MainTableName
+        {
+            get { return !string.IsNullOrWhiteSpace(fMainTableName) ? fMainTableName : Name; }
+            set { fMainTableName = value; }
+        }
         /// <summary>
         /// Gets or sets the name of the detail table, if any
         /// </summary>

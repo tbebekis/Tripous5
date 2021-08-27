@@ -7,13 +7,10 @@ using System.Threading.Tasks;
 namespace Test.WinApp
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public class RegisterSchemaFuncAttribute: Attribute
+    public class RegisterBrokersFuncAttribute : Attribute
     {
-        public RegisterSchemaFuncAttribute(int Version)
+        public RegisterBrokersFuncAttribute()
         {
-            this.Version = Version;
         }
-
-        public int Version { get; set; } = 1;
     }
 }

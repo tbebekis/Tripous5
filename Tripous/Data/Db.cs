@@ -852,7 +852,9 @@ namespace Tripous.Data
         /// The default DbIni
         /// </summary>
         static public DbIni MainIni { get { return fMainIni ?? (fMainIni = new DbIni(DefaultConnectionInfo)); } }
- 
+
+
+
     }
 
 

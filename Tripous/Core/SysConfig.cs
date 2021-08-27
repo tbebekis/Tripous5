@@ -412,16 +412,14 @@ namespace Tripous
         /// </summary>
         static public string UrlSlash { get { return '/'.ToString(); } }
 
- 
-
         /// <summary>
         /// Gets the default SimpleType data type for Id fields, based on the GuidOids setting in the Variables
         /// </summary>
-        static public SimpleType OidDataType { get { return GuidOids ? SimpleType.String : SimpleType.Integer; } }
+        static public DataFieldType OidDataType { get { return SysConfig.GuidOids ? DataFieldType.String : DataFieldType.Integer; } }
         /// <summary>
         /// Gets the size of a field for  the default SimpleType data type for Id fields
         /// </summary>
-        static public int OidSize { get { return OidDataType == SimpleType.String ? 40 : 0; } }
+        static public int OidSize { get { return OidDataType == DataFieldType.String ? 40 : 0; } }
 
         /// <summary>
         /// A string to be used for primary keys when formating CREATE TABLE statements

@@ -124,7 +124,7 @@ namespace Test.WinApp
                     Attr = Attribute.GetCustomAttribute(Method, typeof(RegisterSchemaFuncAttribute)) as RegisterSchemaFuncAttribute;
                     if (Attr != null)
                     {
-                        Version = AppSchema.FindOrAdd(Attr.Version);
+                        Version = AppSchema.Add(Attr.Version);
 
                         // static void RegisterSchema(Schema Schema, SchemaVersion Version)
                         Method.Invoke(null, new object[] { AppSchema, Version });  
@@ -139,6 +139,29 @@ namespace Test.WinApp
         static void ExecuteSchemas()
         {
             Schemas.Execute();
+        }
+ 
+        static void RegisterBrokers()
+        {
+            Type[] Types = typeof(App).Assembly.GetTypesSafe();
+            MethodInfo[] Methods;
+            RegisterBrokersFuncAttribute Attr;
+
+            foreach (Type Type in Types)
+            {
+                Methods = Type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                foreach (MethodBase Method in Methods)
+                {
+                    Attr = Attribute.GetCustomAttribute(Method, typeof(RegisterBrokersFuncAttribute)) as RegisterBrokersFuncAttribute;
+                    if (Attr != null)
+                    {
+                        // static void RegisterBrokers()
+                        Method.Invoke(null, new object[] {  });
+                    }
+                }
+
+            }
         }
 
         /* public */
@@ -162,13 +185,14 @@ namespace Test.WinApp
             ExecuteSchemas();
 
             SqlStore = SqlStores.CreateDefaultSqlStore();
- 
+
+            RegisterBrokers();
         }
 
         /* log */
         static public void LogClear()
         {
-            MainForm.Clear();
+            MainForm.ClearLog();
         }
         static public void LogAppend(string Text)
         {

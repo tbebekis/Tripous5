@@ -97,12 +97,13 @@ namespace Tripous.Data
 
             // 1. create sql statements for all Tables of the BrokerDescriptor
             // 2. create DataTable objects for all Tables of the BrokerDescriptor    
-            TableSqls TempSqlStatements = new TableSqls();
+            TableSqls TempSqlStatements;
             foreach (var TableDes in Descriptor.Tables)
             {
+                TempSqlStatements = new TableSqls();
                 TableDes.BuildSql(TempSqlStatements, SqlFlags);
-                TableDes.CreateDescriptorTable(Store, Tables, false);
-                Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
+                TableDes.CreateDescriptorTable(Store, AddTable, false);
+                Table = FindTable(item => item.Name.IsSameText(TableDes.Name));
                 Table.SqlStatements = TempSqlStatements;
                 Table.PrimaryKeyField = TableDes.PrimaryKeyField;
                 Table.AutoGenerateGuidKeys = Descriptor.GuidOids;
@@ -110,9 +111,9 @@ namespace Tripous.Data
                 Table.ExtendedProperties["Descriptor"] = TableDes;
             }
 
-            tblItem = Tables.Find(item => item.Name.IsSameText(Descriptor.MainTableName));
-            tblLines = Tables.Find(item => item.Name.IsSameText(Descriptor.LinesTableName));
-            tblSubLines = Tables.Find(item => item.Name.IsSameText(Descriptor.SubLinesTableName));
+            tblItem = FindTable(item => item.Name.IsSameText(Descriptor.MainTableName));
+            tblLines = FindTable(item => item.Name.IsSameText(Descriptor.LinesTableName));
+            tblSubLines = FindTable(item => item.Name.IsSameText(Descriptor.SubLinesTableName));
 
  
             // Detail Tables    -  find the detail Tables of any table
@@ -123,7 +124,7 @@ namespace Tripous.Data
             DataColumn Field;
             foreach (var TableDes in Descriptor.Tables)
             {
-                Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
+                Table = FindTable(item => item.Name.IsSameText(TableDes.Name));
                 if (Table != null)
                 {
                     foreach (var FieldDes in TableDes.Fields)
@@ -159,7 +160,7 @@ namespace Tripous.Data
 
             foreach (var QueryDes in Descriptor.Queries)
             {
-                QueryTable = Tables.Find(item => item.Name.IsSameText(QueryDes.Name));
+                QueryTable = FindTable(item => item.Name.IsSameText(QueryDes.Name));
 
                 if (QueryTable != null)
                     QueryTables.Add(QueryTable);
@@ -201,11 +202,11 @@ namespace Tripous.Data
             MemTable Table;
             foreach (var QueryDes in Descriptor.Queries)
             {
-                Table = Tables.Find(item => item.Name.IsSameText(QueryDes.Name));
+                Table = FindTable(item => item.Name.IsSameText(QueryDes.Name));
                 if (Table == null)
                 {
                     Table = new MemTable(QueryDes.Name);
-                    Tables.Add(Table);
+                    AddTable(Table);
                     Table.SqlStatements.SelectSql = QueryDes.Sql;
                     if (QueryDes.FieldTitleKeys != null)
                         Table.SqlStatements.FieldTitleKeys = QueryDes.FieldTitleKeys;
@@ -230,7 +231,7 @@ namespace Tripous.Data
 
             foreach (var DetailDes in Descriptor.Tables)
             {
-                DetailTable = Tables.Find(item => item.Name.IsSameText(DetailDes.Name));
+                DetailTable = FindTable(item => item.Name.IsSameText(DetailDes.Name));
                 if ((DetailTable != null) && (DetailDes != MasterDes) && Sys.IsSameText(MasterDes.Name, DetailDes.MasterTableName))
                 {
                     MasterTable.Details.Add(DetailTable);
@@ -252,11 +253,11 @@ namespace Tripous.Data
             MemTable StockTable;
             foreach (var StockTableDes in Descriptor.MainTable.StockTables)
             {
-                StockTable = Tables.Find(item => item.Name.IsSameText(StockTableDes.Name));
+                StockTable = FindTable(item => item.Name.IsSameText(StockTableDes.Name));
                 if (StockTable == null)
                 {
                     StockTable = new MemTable(StockTableDes.Name);
-                    Tables.Add(StockTable);
+                    AddTable(StockTable);
                     StockTable.SqlStatements.SelectRowSql = StockTableDes.Sql;
                     tblItem.StockTables.Add(StockTable);
                 }
@@ -384,7 +385,7 @@ namespace Tripous.Data
                 MemTable Table;
                 foreach (var TableDes in Descriptor.Tables)
                 {
-                    Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
+                    Table = FindTable(item => item.Name.IsSameText(TableDes.Name));
                     if (Table != null)
                     {
                         SetDefaultValues(Table);
@@ -717,7 +718,7 @@ namespace Tripous.Data
         {
             foreach (var QueryDes in Descriptor.Queries)
             { 
-                MemTable Table = Tables.Find(item => item.Name.IsSameText(QueryDes.Name));
+                MemTable Table = FindTable(item => item.Name.IsSameText(QueryDes.Name));
                 if (Table != null)
                     Store.SelectTo(Table, QueryDes.Sql);
             }
@@ -727,7 +728,7 @@ namespace Tripous.Data
         /// </summary>
         public virtual void ReselectQuery(string QueryName)
         {
-            MemTable Table = Tables.Find(item => item.Name.IsSameText(QueryName));
+            MemTable Table = FindTable(item => item.Name.IsSameText(QueryName));
             SqlBrokerQueryDef QueryDes = Descriptor.Queries.Find(item => item.Name.IsSameText(QueryName));
             if (QueryDes != null && Table != null)
             {
@@ -744,7 +745,7 @@ namespace Tripous.Data
             MemTable Table;
             foreach (SqlBrokerTableDef TableDes in Descriptor.Tables)
             {
-                Table = Tables.Find(item => item.Name.IsSameText(TableDes.Name));
+                Table = FindTable(item => item.Name.IsSameText(TableDes.Name));
                 if (Table != null)
                 {
                     foreach (DataRow Row in Table.Rows)
