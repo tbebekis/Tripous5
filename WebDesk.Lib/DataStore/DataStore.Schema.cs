@@ -153,7 +153,7 @@ create table {SysTables.Data}  (
   ,@COMPANY_ID         {CompanyDataType}
 
   ,DataName            @NVARCHAR(96)   @NOT_NULL
-  ,Title               @NVARCHAR(128)  @NOT_NULL
+  ,Title               @NVARCHAR(96)   @NOT_NULL
   ,DataType            @NVARCHAR(96)   @NOT_NULL
   ,StoreName           @NVARCHAR(64)   @NOT_NULL
   ,Notes               @NVARCHAR(255)  @NULL

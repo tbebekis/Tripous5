@@ -18,8 +18,7 @@ namespace Test.WinApp
         bool Executing;
 
         void AnyClick(object sender, EventArgs ea)
-        {
- 
+        { 
         }
 
 

@@ -54,9 +54,9 @@ namespace Test.WinApp
             this.StatusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblStatus,
             this.ProgressBar});
-            this.StatusBar.Location = new System.Drawing.Point(0, 700);
+            this.StatusBar.Location = new System.Drawing.Point(0, 439);
             this.StatusBar.Name = "StatusBar";
-            this.StatusBar.Size = new System.Drawing.Size(990, 22);
+            this.StatusBar.Size = new System.Drawing.Size(784, 22);
             this.StatusBar.TabIndex = 2;
             this.StatusBar.Text = "statusStrip1";
             // 
@@ -79,7 +79,7 @@ namespace Test.WinApp
             this.toolStripButton1});
             this.ToolBar.Location = new System.Drawing.Point(0, 0);
             this.ToolBar.Name = "ToolBar";
-            this.ToolBar.Size = new System.Drawing.Size(990, 31);
+            this.ToolBar.Size = new System.Drawing.Size(784, 31);
             this.ToolBar.TabIndex = 3;
             this.ToolBar.Text = "toolStrip1";
             // 
@@ -107,8 +107,8 @@ namespace Test.WinApp
             // Splitter.Panel2
             // 
             this.Splitter.Panel2.Controls.Add(this.edtLog);
-            this.Splitter.Size = new System.Drawing.Size(990, 669);
-            this.Splitter.SplitterDistance = 461;
+            this.Splitter.Size = new System.Drawing.Size(784, 408);
+            this.Splitter.SplitterDistance = 281;
             this.Splitter.TabIndex = 4;
             // 
             // Pager
@@ -120,7 +120,7 @@ namespace Test.WinApp
             this.Pager.Location = new System.Drawing.Point(0, 0);
             this.Pager.Name = "Pager";
             this.Pager.SelectedIndex = 0;
-            this.Pager.Size = new System.Drawing.Size(990, 461);
+            this.Pager.Size = new System.Drawing.Size(784, 281);
             this.Pager.TabIndex = 0;
             // 
             // tabPage1
@@ -128,7 +128,7 @@ namespace Test.WinApp
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(982, 433);
+            this.tabPage1.Size = new System.Drawing.Size(776, 253);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -138,7 +138,7 @@ namespace Test.WinApp
             this.tabPage2.Location = new System.Drawing.Point(4, 24);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(857, 305);
+            this.tabPage2.Size = new System.Drawing.Size(982, 433);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -150,7 +150,7 @@ namespace Test.WinApp
             this.edtLog.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.edtLog.Location = new System.Drawing.Point(0, 0);
             this.edtLog.Name = "edtLog";
-            this.edtLog.Size = new System.Drawing.Size(990, 204);
+            this.edtLog.Size = new System.Drawing.Size(784, 123);
             this.edtLog.TabIndex = 0;
             this.edtLog.Text = "";
             // 
@@ -158,13 +158,14 @@ namespace Test.WinApp
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(990, 722);
+            this.ClientSize = new System.Drawing.Size(784, 461);
             this.Controls.Add(this.Splitter);
             this.Controls.Add(this.ToolBar);
             this.Controls.Add(this.StatusBar);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Test.WinApp";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.StatusBar.ResumeLayout(false);
             this.StatusBar.PerformLayout();
             this.ToolBar.ResumeLayout(false);
