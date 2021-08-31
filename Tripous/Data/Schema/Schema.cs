@@ -32,28 +32,10 @@ namespace Tripous.Data
         }
 
         /* public */
-
-        /// <summary>
-        /// Returns the a schema version item with a specified version, if any else null
-        /// </summary>
-        public SchemaVersion Find(int Version)
-        {
-            return Versions.Find(item => (Version == item.Version));
-        }
-        /// <summary>
-        /// True if a schema version item with a specified version is already registered.
-        /// </summary>
-        public bool Contains(int Version)
-        {
-            return Find(Version) != null;
-        }
-
- 
-
         /// <summary>
         /// Adds a new schema version, if the specified version is not found. Else returns the found version.
         /// </summary>
-        public SchemaVersion Add(int Version)
+        public SchemaVersion FindOrAdd(int Version)
         {
             var Result = Find(Version);
             if (Result == null)
@@ -64,6 +46,21 @@ namespace Tripous.Data
 
             return Result;
         }
+        /// <summary>
+        /// Returns the a schema version item with a specified version, if any else null
+        /// </summary>
+        public SchemaVersion Find(int Version)
+        {
+            return Versions.Find(item => (Version == item.Version));
+        }
+        /// <summary>
+        /// True if a schema version item with a specified version is already registered.
+        /// </summary>
+        public bool Exists(int Version)
+        {
+            return Find(Version) != null;
+        }
+
 
         /* execution methods */
         /// <summary>

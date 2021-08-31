@@ -124,7 +124,7 @@ namespace Test.WinApp
                     Attr = Attribute.GetCustomAttribute(Method, typeof(RegisterSchemaFuncAttribute)) as RegisterSchemaFuncAttribute;
                     if (Attr != null)
                     {
-                        Version = AppSchema.Add(Attr.Version);
+                        Version = AppSchema.FindOrAdd(Attr.Version);
 
                         // static void RegisterSchema(Schema Schema, SchemaVersion Version)
                         Method.Invoke(null, new object[] { AppSchema, Version });  

@@ -13,8 +13,7 @@ namespace WebDesk
 {
     static public partial class DataStore
     {
-        static string CompanyDataType = SysConfig.GuidOids ? "@NVARCHAR(40)    @NOT_NULL" : "integer default -1 @NOT_NULL";
-
+ 
         const string EnumLookUpSql = @"
 create table {0} (
    Id                     {1}                  @NOT_NULL primary key
@@ -24,33 +23,28 @@ create table {0} (
 )
 ";
 
-        const string EnumLookUpWithErpIdSql = @"
-create table {0} (
-   Id                     {1}                  @NOT_NULL primary key
-  ,Name                   @NVARCHAR(96)        @NOT_NULL     
-  ,ErpId                  @NVARCHAR(96)        @NULL  
-
-  ,constraint UK_{0}_00 unique (Name)           
-)
-";
-
+        /// <summary>
+        /// Creates look-up table
+        /// </summary>
+        static public void AddLookUp(SchemaVersion schema, string TableName)
+        {
+            string S = string.Format(EnumLookUpSql, TableName, "@NVARCHAR(40)");
+            schema.AddTable(S);
+        }
         /// <summary>
         /// Creates an "enum" (integer look-up) table
         /// </summary>
-        static public void AddEnum(SchemaVersion schema, string TableName, bool HasErpId = false)
+        static public void AddEnum(SchemaVersion schema, string TableName)
         {
-            string S = HasErpId ? EnumLookUpWithErpIdSql : EnumLookUpSql;
-
-            S = string.Format(S, TableName, "integer");
-
+            string S = string.Format(EnumLookUpSql, TableName, "integer");
             schema.AddTable(S);
         }
         /// <summary>
         /// Creates an "enum" (integer look-up) table and INSERTs the EnumType values to it.
         /// </summary>
-        static public void AddEnum(SchemaVersion schema, string TableName, Type EnumType, bool HasErpId = false)
+        static public void AddEnum(SchemaVersion schema, string TableName, Type EnumType)
         {
-            AddEnum(schema, TableName, HasErpId);
+            AddEnum(schema, TableName);
 
             string SqlText = "insert into {0} (Id, Name) values ({1}, '{2}')";
             string S2;
@@ -64,150 +58,10 @@ create table {0} (
             }
 
         }
-        /// <summary>
-        /// Creates look-up table
-        /// </summary>
-        static public void AddLookUp(SchemaVersion schema, string TableName, bool HasErpId = false)
-        {
-            string S = HasErpId ? EnumLookUpWithErpIdSql : EnumLookUpSql;
-
-            S = string.Format(S, TableName, "@NVARCHAR(40)");
-
-            schema.AddTable(S);
-        }
-
-
-        static void RegisterSystemSchema_01()
-        {
-            string SqlText;
-
-            Schema Schema = Schemas.GetSystemSchema();             
-            SchemaVersion schema = Schema.Add(Version: 1);
-
-            /* Company */
-            SqlText = $@"
-create table {SysTables.Company}  (
-   Id                   {SysConfig.PrimaryKeyStr()}    
-  ,Name                 @NVARCHAR(96)    @NOT_NULL
-
-  ,constraint UC_{SysTables.Company}_00 unique (Name)
-)
-";
-
-            schema.AddTable(SqlText);
-
-            if (SysConfig.GuidOids)
-            {
-                SqlText = $"insert into {SysTables.Company} (Id, Name) values ({SysConfig.CompanyIdSql}, 'Default') ";
-                schema.AddStatementAfter(SqlText);
-            }
-
-            /*  SYS_LANG  */
-            SqlText = $@"
-create table {SysTables.Lang} (
-    Id                      {SysConfig.PrimaryKeyStr()}
-   ,Name                    @NVARCHAR(40)        @NOT_NULL    
-   ,Code                    @NVARCHAR(40)        @NOT_NULL    
-   ,CultureCode             @NVARCHAR(40)        @NOT_NULL                  
-   ,FlagImage               @NVARCHAR(40)        @NULL
-   ,IsActive                integer default 1    @NOT_NULL
-   ,DisplayOrder            integer default 0    @NOT_NULL                     
- )
-";
-
-            schema.AddTable(SqlText);
-
-            SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.EnId}', 'English', 'en', 'en-US', 'gb.png') ";
-            schema.AddStatementAfter(SqlText);
-
-            SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.GrId}', 'Greek', 'gr', 'el-GR', 'gr.png') ";
-            schema.AddStatementAfter(SqlText);
-
-
-            /* SYS_LOG */
-            SqlText = $@" 
-create table {SysTables.Log}  (
-   Id                     {SysConfig.PrimaryKeyStr()}
-  ,LogDate                @DATE            @NULL
-  ,LogTime                @NVARCHAR(12)    @NULL
-  ,UserName               @NVARCHAR(96)    @NULL
-  ,Host                   @NVARCHAR(64)    @NULL
-  ,LogLevel               @NVARCHAR(24)    @NULL     
-  ,LogSource              @NVARCHAR(96)    @NULL
-  ,ScopeId                @NVARCHAR(96)    @NULL
-  ,EventId                @NVARCHAR(96)    @NULL
-  ,Data                   @NBLOB_TEXT      @NULL
-)
-";
-
-            schema.AddTable(SqlText);
-
-            SqlText = $"create index IDX_{SysTables.Log}_00 on {SysTables.Log}(LogDate) ";
-            schema.AddStatementAfter(SqlText);
-
-
-            /* SYS_DATA */
-            SqlText = $@"
-create table {SysTables.Data}  (                                                                                      
-   Id                  {SysConfig.PrimaryKeyStr()}
-  ,@COMPANY_ID         {CompanyDataType}
-
-  ,DataName            @NVARCHAR(96)   @NOT_NULL
-  ,Title               @NVARCHAR(96)   @NOT_NULL
-  ,DataType            @NVARCHAR(96)   @NOT_NULL
-  ,StoreName           @NVARCHAR(64)   @NOT_NULL
-  ,Notes               @NVARCHAR(255)  @NULL
-
-  ,Category1           @NVARCHAR(64)   @NULL
-  ,Category2           @NVARCHAR(64)   @NULL
-
-  ,Data1               @BLOB           @NULL
-  ,Data2               @BLOB           @NULL
-  ,Data3               @BLOB           @NULL
-  ,Data4               @BLOB           @NULL
-
-  ,constraint UC_{SysTables.Data}_00 unique (@COMPANY_ID, DataType, DataName)
-)
-";
-
-            schema.AddTable(SqlText);
-
-
-            /*  SYS_STR_RES  */
-            SqlText = $@"
-create table {SysTables.StrRes} (
-    Id                      {SysConfig.PrimaryKeyStr()} 
-   ,LanguageId              {SysConfig.ForeignKeyStr()} @NULL                 
-   ,TableName               @NVARCHAR(96)        @NULL           
-   ,TableId                 {SysConfig.ForeignKeyStr()} @NULL           
-   ,EntryKey                @NVARCHAR(96)        @NOT_NULL		 
-   ,EntryValue              @NBLOB_TEXT          @NOT_NULL                         
- )
-";
-
-            schema.AddTable(SqlText);
-
-
-            /* SYS_SMTP_PROVIDER */
-            SqlText = $@"
-create table {SysTables.SmtpProvider} (
-     Id						{SysConfig.PrimaryKeyStr()}
-    ,Host                   @NVARCHAR(96)        @NOT_NULL  
-    ,Port                   integer default 25   @NOT_NULL  
-    ,UserName               @NVARCHAR(96)        @NULL 
-    ,SenderAddress          @NVARCHAR(96)        @NULL 
-    ,Psw                    @NVARCHAR(255)       @NULL
-    ,EnableSsl              integer default 0    @NOT_NULL
-    ,MessagesPerMinute      integer default -1   @NOT_NULL                    
-    
-    ,constraint UK_{SysTables.SmtpProvider}_00 unique (Host)
-)
-";
-            schema.AddTable(SqlText);
 
 
 
-        }
+
         static void RegisterSchema_01()
         {
 
@@ -215,7 +69,7 @@ create table {SysTables.SmtpProvider} (
             string TableName; 
 
             Schema Schema = Schemas.GetApplicationSchema();
-            SchemaVersion schema = Schema.Add(Version: 1);
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
  
 
             /* AppUser */
@@ -351,9 +205,9 @@ create table {TableName} (
         /// </summary>
         static void RegisterSchemas()
         {
-            RegisterSystemSchema_01();
+            //RegisterSystemSchema_01();
 
-            RegisterSchema_01();
+            //RegisterSchema_01();
         }
     }
 }

@@ -23,8 +23,16 @@ namespace Tripous.Data
     public class SysData
     {
 
-        static SqlStore fStore;
-        static TableSqls fSqlStatements = new TableSqls();
+        static SqlStore Store;
+        static TableSqls Sqls = new TableSqls();
+
+        static string CompanyIdToSql(object oCompanyId)
+        {
+            if (SysConfig.GuidOids)
+                return oCompanyId == null ? string.Empty : oCompanyId.ToString().QS();
+            else
+                return oCompanyId == null ? "-1" : oCompanyId.ToString();
+        }
 
         /* construction */
         /// <summary>
@@ -32,8 +40,8 @@ namespace Tripous.Data
         /// </summary>
         static SysData()
         {
-            fStore = SqlStores.CreateDefaultSqlStore();
-            Db.BuildSql(SysTables.Data, "Id", false, fStore, fSqlStatements, true);
+            Store = SqlStores.CreateDefaultSqlStore();
+            Db.BuildSql(SysTables.Data, "Id", SysConfig.GuidOids, Store, Sqls, true);
         }
 
 
@@ -43,7 +51,7 @@ namespace Tripous.Data
         static public DataTable CreateDataTable()
         {
             DataTable Result = new DataTable(SysTables.Data);
-            fStore.GetNativeSchema(string.Empty, SysTables.Data, string.Empty, Result);
+            Store.GetNativeSchema(string.Empty, SysTables.Data, string.Empty, Result);
             return Result;
         }
         /// <summary>
@@ -51,9 +59,9 @@ namespace Tripous.Data
         /// </summary>
         static public string GetSelectListNoBlobs()
         {
-            string Result = @"
+            string Result = $@"
              Id            
-            ,{0}
+            ,{SysConfig.CompanyFieldName}
 
             ,DataName
             ,DataType 
@@ -65,12 +73,93 @@ namespace Tripous.Data
             ,Category2     
             ,Category3     
             ,Category4      
-";
-            Result = string.Format(Result, SysConfig.CompanyFieldName);
+";           
 
             return Result;
         }
 
+
+
+        /* select with Sql construction */
+        /// <summary>
+        /// Returns a table with all DataType and DataName system data of a company specified by a company Id.
+        /// <para>WARNING: Normally this should return a single row, 
+        /// since there is a unique contraint regarding DataType, DataName and Company</para>
+        /// </summary>
+        static public void Select(string DataType, string DataName, object oCompanyId, DataTable Table, bool NoBlobs)
+        {
+            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
+            string CompanyId = CompanyIdToSql(oCompanyId);
+
+            string SqlText = $@"
+select
+    {SelectList}
+from
+    {SysTables.Data}
+where
+        {SysConfig.CompanyFieldName} = {CompanyId} 
+";
+
+            StringBuilder SB = new StringBuilder(SqlText);
+            
+            if (!string.IsNullOrWhiteSpace(DataType))
+                SB.AppendLine($"    and DataType = '{DataType}'");
+
+            if (!string.IsNullOrWhiteSpace(DataName))
+                SB.AppendLine($"    and DataName = '{DataName}'");
+
+            SqlText = SB.ToString();
+
+            Store.SelectTo(Table, SqlText);
+        }
+        /// <summary>
+        /// Returns a table with all DataType and DataName system data of the current company.
+        /// <para>WARNING: Normally this returns a single row, 
+        /// since there is a unique contraint regarding DataType, DataName and Company</para>
+        /// </summary>
+        static public void Select(string DataType, string DataName, DataTable Table, bool NoBlobs)
+        {
+            Select(DataType, DataName, SysConfig.CompanyId, Table, NoBlobs);
+        }
+        /// <summary>
+        /// Returns a table with all DataType system data of the current company.
+        /// </summary>
+        static public void Select(string DataType, DataTable Table, bool NoBlobs)
+        { 
+            Select(DataType, DataName: "", SysConfig.CompanyId, Table, NoBlobs); 
+        }
+        /// <summary>
+        /// Returns a table with all system data of the current company.
+        /// </summary>
+        static public void Select(DataTable Table, bool NoBlobs)
+        {
+            Select(DataType: "", DataName: "", SysConfig.CompanyId, Table, NoBlobs); 
+        }
+
+        /// <summary>
+        /// Returns a table with all DataType system data of the current company.
+        /// <para>The passed DataType is used in the WHERE clause with a LIKE clause.</para>
+        /// </summary>
+        static public DataTable SelectLike(string DataType, bool NoBlobs)
+        {
+            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
+            string CompanyId = CompanyIdToSql(SysConfig.CompanyId);
+
+            if (DataType.IndexOf('%') == -1)
+                DataType = $"%{DataType}%";
+
+            string SqlText = $@"
+select
+    {SelectList}
+from
+    {SysTables.Data}
+where
+        {SysConfig.CompanyFieldName} = {CompanyId}
+    and DataType like '{DataType}'
+";
+
+            return Store.Select(SqlText);
+        }
 
         /* select, blob selection is controlled by the NoBlobs flag */
         /// <summary>
@@ -102,76 +191,11 @@ namespace Tripous.Data
             return Result;
         }
 
-        /* select with Sql construction */
-        /// <summary>
-        /// Returns a table with all DataType and DataName system data of the current company.
-        /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
-        /// regarding DataType, DataName and Company</para>
-        /// </summary>
-        static public void Select(string DataType, string DataName, DataTable Table, bool NoBlobs)
-        {
-            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
 
-            string SqlText = string.Format("select {0} from {1} where {2} = {3} and DataType = {4} and DataName = {5}",
-                SelectList, SysTables.Data, SysConfig.CompanyFieldName, SysConfig.CompanyIdSql, DataType.QS(), DataName.QS());
 
-            SqlSelect(SqlText, Table);
-        }
-        /// <summary>
-        /// Returns a table with all DataType system data of the current company.
-        /// </summary>
-        static public void Select(string DataType, DataTable Table, bool NoBlobs)
-        {
-            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
 
-            string SqlText = string.Format("select {0} from {1} where {2} = {3} and DataType = {4}",
-                SelectList, SysTables.Data, SysConfig.CompanyFieldName, SysConfig.CompanyIdSql, DataType.QS());
-
-            SqlSelect(SqlText, Table);
-        }
-        /// <summary>
-        /// Returns a table with all system data of the current company.
-        /// </summary>
-        static public void Select(DataTable Table, bool NoBlobs)
-        {
-            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
-
-            string SqlText = string.Format("select {0} from {1} where {2} = {3}",
-                SelectList, SysTables.Data, SysConfig.CompanyFieldName, SysConfig.CompanyIdSql);
-
-            SqlSelect(SqlText, Table);
-        }
-        /// <summary>
-        /// Returns a table with all DataType system data of the current company.
-        /// <para>The passed DataType is used in the WHERE clause with a LIKE statement.</para>
-        /// </summary>
-        static public DataTable SelectLike(string DataType, bool NoBlobs)
-        {
-            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
-
-            string SqlText = string.Format("select {0} from {1} where {2} = {3} and DataType like {4}",
-               SelectList, SysTables.Data, SysConfig.CompanyFieldName, SysConfig.CompanyIdSql, (DataType + "%").QS());
-
-            return SqlSelect(SqlText);
-        }
-
-        /* Sql select */
-        /// <summary>
-        /// Selects the SqlText and returns a table.
-        /// </summary>
-        static public DataTable SqlSelect(string SqlText)
-        {
-            DataTable Result = CreateDataTable();
-            SqlSelect(SqlText, Result);
-            return Result;
-        }
-        /// <summary>
-        /// Selects the SqlText and returns a table.
-        /// </summary>
-        static public void SqlSelect(string SqlText, DataTable Table)
-        {
-            fStore.SelectTo(Table, SqlText);
-        }
+ 
+ 
 
         /* misc select */
         /// <summary>
@@ -179,17 +203,14 @@ namespace Tripous.Data
         /// <para>Returns true if Id exists and a row is returned, else false.</para>
         /// </summary>
         static public bool Select(object Id, SysDataItem Item)
-        {
-            bool Result = false;
-            string SqlText = string.Format(@"select * from {0} where Id = {1}", SysTables.Data, Sys.IdStr(Id));
-            DataRow Row = fStore.SelectResults(SqlText);
+        { 
+            string SqlText = $@"select * from {SysTables.Data} where Id = {Sys.IdStr(Id)}";
+ 
+            DataRow Row = Store.SelectResults(SqlText);
             if (Row != null)
-            {
                 Item.LoadFromRow(Row);
-                Result = true;
-            }
 
-            return Result;
+            return Row != null;
         }
         /// <summary>
         /// Loads Item by selecting Item.DataType and Item.DataName from the system data table.
@@ -202,6 +223,7 @@ namespace Tripous.Data
         }
         /// <summary>
         /// Loads Item by selecting DataType and DataName from the system data table.
+        /// <para>On success returns the Id of the row, else returns null.</para>
         /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
         /// regarding DataType, DataName and Company</para>
         /// </summary>
@@ -215,19 +237,17 @@ namespace Tripous.Data
             }
 
             Item.Clear();
-            return DBNull.Value;
+            return null;
         }
         /// <summary>
-        /// Selects and returns the Id of the system data table under the DataType and DataName.
+        /// Selects and returns the Id of the system data table under the DataType and DataName, if any, else null.
         /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
         /// regarding DataType, DataName and Company</para>
         /// </summary>
         static public object SelectId(string DataType, string DataName)
         {
             DataRow Row = Select(DataType, DataName, false);
-            if (Row != null)
-                return Row["Id"];
-            return null;
+            return Row != null ? Row["Id"] : null;
         }
         /// <summary>
         /// Returns true if a row exists in the system data table under the DataType and DataName.
@@ -238,8 +258,9 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// "Corrects" Row by setting its Id to either -1 or an existing Id based
+        /// "Corrects" a data row by setting its Id to either -1 or an existing Id based
         /// on the DataType and DataName column values. It also sets the current company Id.
+        /// <para>NOTE: Used by the <see cref="Commit(DataRow)"/> method.</para>
         /// </summary>
         static public void Correct(DataRow Row)
         {
@@ -254,6 +275,7 @@ namespace Tripous.Data
         /// <summary>
         /// "Corrects" each DataRow of Table by setting its Id to either -1 or an existing Id based
         /// on the DataType and DataName column values. It also sets the current company Id.
+        /// <para>NOTE: Used by the <see cref="Commit(DataTable)"/> method.</para>
         /// </summary>
         static public void Correct(DataTable Table)
         {
@@ -273,7 +295,7 @@ namespace Tripous.Data
         static public object Commit(DataRow Row)
         {
             Correct(Row);
-            Db.Commit(Row, SysTables.Data, "Id", SysConfig.GuidOids, fStore, fSqlStatements);
+            Db.Commit(Row, SysTables.Data, "Id", SysConfig.GuidOids, Store, Sqls);
             return Row["Id"];
         }
         /// <summary>
@@ -284,7 +306,7 @@ namespace Tripous.Data
         static public void Commit(DataTable Table)
         {
             Correct(Table);
-            Db.Commit(Table, SysTables.Data, "Id", SysConfig.GuidOids, fStore, fSqlStatements);
+            Db.Commit(Table, SysTables.Data, "Id", SysConfig.GuidOids, Store, Sqls);
         }
         /// <summary>
         /// Commits Item to the system data table.
@@ -306,8 +328,8 @@ namespace Tripous.Data
         /// </summary>
         static public void Delete(object Id)
         {
-            string SqlText = string.Format("delete from {0} where Id = {1}", SysTables.Data, Sys.IdStr(Id));
-            fStore.ExecSql(SqlText);
+            string SqlText = $"delete from {SysTables.Data} where Id = {Sys.IdStr(Id)}";
+            Store.ExecSql(SqlText);
         }
         /// <summary>
         /// Deletes a record, under the DataType and DataName, from the system data table.
@@ -316,18 +338,29 @@ namespace Tripous.Data
         /// </summary>
         static public void Delete(string DataType, string DataName)
         {
-            string SqlText = string.Format("delete from {0} where {1} = {2} and DataType = {3} and DataName = {4}",
-                SysTables.Data, SysConfig.CompanyFieldName, SysConfig.CompanyIdSql, DataType.QS(), DataName.QS());
-            fStore.ExecSql(SqlText);
+            string SqlText = $@"
+delete from {SysTables.Data} 
+where 
+        {SysConfig.CompanyFieldName} = {SysConfig.CompanyIdSql} 
+    and DataType = '{DataType}' 
+    and DataName = '{DataName}'
+";
+
+            Store.ExecSql(SqlText);
         }
         /// <summary>
         /// Deletes all records from the system data table under the DataType and the current company.
         /// </summary>
         static public void Delete(string DataType)
         {
-            string SqlText = string.Format("delete from {0} where {1} = {2} and DataType = {3}",
-                SysTables.Data, SysConfig.CompanyFieldName, SysConfig.CompanyIdSql, DataType.QS());
-            fStore.ExecSql(SqlText);
+            string SqlText = $@"
+delete from {SysTables.Data} 
+where 
+        {SysConfig.CompanyFieldName} = {SysConfig.CompanyIdSql} 
+    and DataType = '{DataType}' 
+";
+
+            Store.ExecSql(SqlText);
         }
        
 
@@ -417,8 +450,9 @@ namespace Tripous.Data
         /// <summary>
         /// Imports from FilePath any row with DataType and DataName.
         /// <para>WARNING: The FilePath file must be created with the DataTable.WriteXml method.</para>
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ImportData(string FilePath, string DataType, string DataName)
+        static public void TableXmlImportData(string FilePath, string DataType, string DataName)
         {
             if (File.Exists(FilePath))
             {
@@ -438,14 +472,15 @@ namespace Tripous.Data
                     }
                 }
 
-                ImportData(DestTable);
+                TableXmlImportData(DestTable);
             }
         }
         /// <summary>
         /// Imports from FilePath any row with DataType.
         /// <para>WARNING: The FilePath file must be created with the DataTable.WriteXml method.</para>
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ImportData(string FilePath, string DataType)
+        static public void TableXmlImportData(string FilePath, string DataType)
         {
             if (File.Exists(FilePath))
             {
@@ -464,56 +499,62 @@ namespace Tripous.Data
                     }
                 }
 
-                ImportData(DestTable);
+                TableXmlImportData(DestTable);
             }
         }
         /// <summary>
         /// Imports all rows from FilePath  
         /// <para>WARNING: The FilePath file must be created with the DataTable.WriteXml method.</para>
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ImportData(string FilePath)
+        static public void TableXmlImportData(string FilePath)
         {
             if (File.Exists(FilePath))
             {
                 DataTable Table = new DataTable();
                 Table.ReadXml(FilePath);
-                ImportData(Table);
+                TableXmlImportData(Table);
             }
         }
         /// <summary>
         /// Imports Table.
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ImportData(DataTable Table)
+        static public void TableXmlImportData(DataTable Table)
         {
             Commit(Table);
         }
 
         /// <summary>
         /// Exports DataType and DataName rows of the current company from system data table to FilePath.
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ExportData(string FilePath, string DataType, string DataName)
+        static public void TableXmlExportData(string FilePath, string DataType, string DataName)
         {
             DataRow Row = Select(DataType, DataName, false);
-            ExportData(FilePath, Row.Table);
+            TableXmlExportData(FilePath, Row.Table);
         }
         /// <summary>
         /// Exports DataType rows of the current company from system data table to FilePath.
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ExportData(string FilePath, string DataType)
+        static public void TableXmlExportData(string FilePath, string DataType)
         {
-            ExportData(FilePath, Select(DataType, false));
+            TableXmlExportData(FilePath, Select(DataType, false));
         }
         /// <summary>
         /// Exports all rows of the current company from system data table to FilePath.
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ExportData(string FilePath)
+        static public void TableXmlExportData(string FilePath)
         {
-            ExportData(FilePath, Select(false));
+            TableXmlExportData(FilePath, Select(false));
         }
         /// <summary>
         /// Exports Table to FilePath
+        /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
-        static public void ExportData(string FilePath, DataTable Table)
+        static public void TableXmlExportData(string FilePath, DataTable Table)
         {
             if (Table != null)
             {

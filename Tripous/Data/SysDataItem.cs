@@ -20,94 +20,40 @@ namespace Tripous.Data
     /// <para>System data table is a database table which stores information
     /// regarding system data, such as reports, descriptors, resources etc.</para>
     /// </summary>
-    public class SysDataItem : Assignable
-    {
-        /// <summary>
-        /// Constant. The definition stream index in the dataStreams array
-        /// </summary>
-        public const int DEF_STREAM_INDEX = 2;
-
+    public class SysDataItem  
+    { 
         /// <summary>
         /// Field
         /// </summary>
-        protected string fDataType;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fDataName;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fTitle;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fStoreName;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fNotes;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fCategory1;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fCategory2;
+        protected string fTitleKey;
  
-
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected MemoryStream[] fStreams = new MemoryStream[6];
-
-        /* protected */
-        /// <summary>
-        /// Returns the data type 
-        /// </summary>
-        protected virtual string GetDataType()
-        {
-            return !string.IsNullOrWhiteSpace(RigidDataType) ? RigidDataType : (!string.IsNullOrWhiteSpace(fDataType) ? fDataType : Sys.None);
-        }
-        /// <summary>
-        /// Sets the data type 
-        /// </summary>
-        protected virtual void SetDataType(string Value)
-        {
-            fDataType = Sys.IsSameText(Value, Sys.None) ? string.Empty : Value;
-        }
-
         /* construction */
         /// <summary>
         /// Constructor.
         /// </summary>
         public SysDataItem()
         {
-            for (int i = 0; i < fStreams.Length; i++)
-                fStreams[i] = new MemoryStream();
         }
 
         /* methods */
         /// <summary>
         /// Clears the property values of this instance.
         /// </summary>
-        protected override void DoClear()
+        public void Clear()
         {
-            base.DoClear();
-
-            // DataType = string.Empty;     NO
+            DataType = string.Empty;    
             DataName = string.Empty;
-            Title = string.Empty;
-            // StoreName = string.Empty;    NO
+            TitleKey = string.Empty;
+            StoreName = string.Empty;  
             Notes = string.Empty;
 
             Category1 = string.Empty;
             Category2 = string.Empty;
- 
 
-            for (int i = 0; i < fStreams.Length; i++)
-                fStreams[i].SetLength(0);
+            Data1 = string.Empty;
+            Data2 = string.Empty;
+            Data3 = string.Empty;
+            Data4 = string.Empty;
         }
 
 
@@ -159,29 +105,20 @@ namespace Tripous.Data
         {
             if (Row != null)
             {
-                Clear();
-
-                /* all properties */
-                Row.BlobToStream("Data1", fStreams[0]);
-                fStreams[0].Position = 0;
-                Json.FromJsonStream(this, fStreams[0]);
-
                 /* maybe there are different values in the fields */
                 DataType = Sys.AsString(Row["DataType"], DataType);
                 DataName = Sys.AsString(Row["DataName"], DataName);
-                Title = Sys.AsString(Row["Title"], Title);
+                TitleKey = Sys.AsString(Row["TitleKey"], TitleKey);
                 StoreName = Sys.AsString(Row["StoreName"], StoreName);
                 Notes = Sys.AsString(Row["Notes"], Notes);
 
                 Category1 = Sys.AsString(Row["Category1"], Category1);
                 Category2 = Sys.AsString(Row["Category2"], Category2);
- 
 
-                /* the rest blobs */
-                Row.BlobToStream("Data2", fStreams[1]);
-                Row.BlobToStream("Data3", fStreams[2]);
-                Row.BlobToStream("Data4", fStreams[3]);
- 
+                Data1 = Row.BlobToString("Data1");
+                Data2 = Row.BlobToString("Data2");
+                Data3 = Row.BlobToString("Data3");
+                Data4 = Row.BlobToString("Data4"); 
             }
         }
         /// <summary>
@@ -197,24 +134,17 @@ namespace Tripous.Data
             {
                 Row["DataType"] = DataType;
                 Row["DataName"] = DataName;
-                Row["Title"] = Title;
+                Row["Title"] = TitleKey;
                 Row["StoreName"] = StoreName;
                 Row["Notes"] = Notes;
 
                 Row["Category1"] = Category1;
                 Row["Category2"] = Category2;
- 
 
-                /* all properties */
-                Json.ToJsonStream(this, fStreams[0]);
-                fStreams[0].Position = 0;
-                Row.StreamToBlob("Data1", fStreams[0]);
-
-                /* the rest blobs */
-                Row.StreamToBlob("Data2", fStreams[1]);
-                Row.StreamToBlob("Data3", fStreams[2]);
-                Row.StreamToBlob("Data4", fStreams[3]);
- 
+                Row.StringToBlob("Data1", Data1);
+                Row.StringToBlob("Data2", Data2);
+                Row.StringToBlob("Data3", Data3);
+                Row.StringToBlob("Data4", Data4); 
             }
         }
 
@@ -232,8 +162,8 @@ namespace Tripous.Data
                     Row["DataType"] = DataType;
                 if (Table.ContainsColumn("DataName"))
                     Row["DataName"] = DataName;
-                if (Table.ContainsColumn("Title"))
-                    Row["Title"] = Title;
+                if (Table.ContainsColumn("TitleKey"))
+                    Row["TitleKey"] = TitleKey;
                 if (Table.ContainsColumn("StoreName"))
                     Row["StoreName"] = StoreName;
                 if (Table.ContainsColumn("Notes"))
@@ -271,190 +201,65 @@ namespace Tripous.Data
             return this;
         }
 
-
-
-        /* data stream handling */
-        /// <summary>
-        /// Gets the data stream specified by Index
-        /// </summary>
-        public virtual Stream GetDataStream(int Index)
-        {
-            return fStreams[Index];
-        }
-        /// <summary>
-        /// Copies the content of the Source to the data stream specified by Index
-        /// </summary>
-        public virtual void SetDataStream(int Index, Stream Source)
-        {
-            fStreams[Index].SetLength(0);
-            if ((Source != null) && (Source.Length > 0))
-            {
-                Streams.Assign(Source, fStreams[Index]);
-            }
-        }
-
-        /// <summary>
-        /// Gets the data stream specified by Index as string.
-        /// <para>WARNIG: The stream must contain string data.</para>
-        /// </summary>
-        public virtual string GetStreamAsString(int Index)
-        {
-            return fStreams[Index].GetAsString();
-        }
-        /// <summary>
-        /// Sets the data stream specified by Index to Value.
-        /// </summary>
-        public virtual void SetStreamAsString(int Index, string Value)
-        {
-            fStreams[Index].SetAsString(Value);
-        }
-
-        /* when SupportsDescriptor is true */
-        /// <summary>
-        /// Loads this instance from the specified descriptor
-        /// </summary>
-        public virtual void AssignFrom(Descriptor Source)
-        {
-        }
-        /// <summary>
-        /// Saves this instance to the specified descriptor
-        /// </summary>
-        public virtual void AssignTo(Descriptor Dest)
-        {
-        }
-        /// <summary>
-        /// Returns the descriptor
-        /// </summary>
-        public virtual Descriptor GetDescriptor()
-        {
-            return null;
-        }
-
         /* properties */
         /// <summary>
         /// Gets or sets the data type
         /// </summary>
-        public virtual string DataType
-        {
-            get { return GetDataType(); }
-            set
-            {
-                SetDataType(value);
-                OnPropertyChanged("DataType");
-            }
-        }
+        public virtual string DataType { get; set; } = Sys.None;
         /// <summary>
         /// Gets or sets the data name
         /// </summary>
-        public virtual string DataName
-        {
-            get { return string.IsNullOrWhiteSpace(fDataName) ? Sys.None : fDataName; }
-            set
-            {
-                fDataName = Sys.IsSameText(value, Sys.None) ? string.Empty : value;
-                OnPropertyChanged("DataName");
-            }
-        }
+        public virtual string DataName { get; set; } = Sys.None;
         /// <summary>
         /// Gets or sets the title
         /// </summary>
-        public virtual string Title
+        public virtual string TitleKey
         {
-            get { return string.IsNullOrWhiteSpace(fTitle) ? DataName : fTitle; }
-            set
-            {
-                fTitle = value;
-                OnPropertyChanged("Title");
-            }
+            get { return string.IsNullOrWhiteSpace(fTitleKey) ? DataName : fTitleKey; }
+            set { fTitleKey = value; }
         }
         /// <summary>
         /// Gets or sets the database connection name
         /// </summary>
-        public virtual string StoreName
-        {
-            get { return string.IsNullOrWhiteSpace(fStoreName) ? SysConfig.DefaultConnection : fStoreName; }
-            set
-            {
-                fStoreName = Sys.IsSameText(value, Sys.None) ? string.Empty : value;
-                OnPropertyChanged("StoreName");
-            }
-        }
+        public virtual string StoreName { get; set; } = SysConfig.DefaultConnection;
         /// <summary>
         /// Gets or sets the notes
         /// </summary>
-        public string Notes
-        {
-            get { return string.IsNullOrWhiteSpace(fNotes) ? string.Empty : fNotes; }
-            set
-            {
-                fNotes = value;
-                OnPropertyChanged("Notes");
-            }
-        }
+        public string Notes { get; set; }
 
         /// <summary>
         /// Gets or sets a category
         /// </summary>
-        public string Category1
-        {
-            get { return string.IsNullOrWhiteSpace(fCategory1) ? string.Empty : fCategory1; }
-            set
-            {
-                fCategory1 = value;
-                OnPropertyChanged("Category1");
-            }
-        }
+        public string Category1 { get; set; }
         /// <summary>
         /// Gets or sets a category
         /// </summary>
-        public string Category2
-        {
-            get { return string.IsNullOrWhiteSpace(fCategory2) ? string.Empty : fCategory2; }
-            set
-            {
-                fCategory2 = value;
-                OnPropertyChanged("Category2");
-            }
-        }
+        public string Category2 { get; set; }
 
-        
- 
         /// <summary>
-        /// Gets or sets the definition text.
-        /// <para>NOTE: The definition text is a normal text. No from/to hexadecimal string convertion takes place.</para>
+        /// Text blob data
         /// </summary>
-        public virtual string Definition
-        {
-            get { return GetStreamAsString(DEF_STREAM_INDEX); }   // fStreams[DEF_STREAM_INDEX].GetAsString(); 
-            set { SetStreamAsString(DEF_STREAM_INDEX, value);  }  // fStreams[DEF_STREAM_INDEX].SetAsString(value);
-        }
+        public string Data1 { get; set; }
         /// <summary>
-        /// Gets or "sets" (assigns) the definition stream.
+        /// Text blob data
         /// </summary>
-        [JsonIgnore]
-        public virtual Stream DefStream
-        {
-            get { return GetDataStream(DEF_STREAM_INDEX); }
-            set { SetDataStream(DEF_STREAM_INDEX, value); }
-        }
+        public string Data2 { get; set; }
         /// <summary>
-        /// Gets or sets the RigidDataType text.
-        /// <para>WARNING: If RigidDataType is not null or empty then by default the 
-        /// DataType property returns that RigidDataType</para>
+        /// Text blob data
         /// </summary>
-        [JsonIgnore]
-        public virtual string RigidDataType { get; protected set; }
+        public string Data3 { get; set; }
+        /// <summary>
+        /// Text blob data
+        /// </summary>
+        public string Data4 { get; set; }
 
         /// <summary>
         /// Returns true if both DataType and DataName are not null or empty. 
         /// <para>Usefull for determining the validity of data after a load operation, because the Clear() is called before the operation.</para>
         /// </summary>
+        [JsonIgnore]
         public virtual bool IsValidItem { get { return !string.IsNullOrWhiteSpace(DataType) && !string.IsNullOrWhiteSpace(DataName); } }
-        /// <summary>
-        /// True if this instance supports the descriptor methods
-        /// that is it knows how to load/save itself to an IDescriptor
-        /// </summary>
-        public virtual bool SupportsDescriptor { get { return false; } }
+ 
 
 
 

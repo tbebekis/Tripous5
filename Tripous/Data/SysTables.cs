@@ -18,10 +18,10 @@ namespace Tripous.Data
     {
         const string SIni = "Ini";
         const string SLog = "Log";
-        const string SData = "Data";
-        const string SCompany = "Company";
         const string SLang = "Lang";
         const string SStrRes = "StrRes";
+        const string SCompany = "Company";
+        const string SData = "Data";
         const string SSmtpProvider = "SmtpProvider";
 
         /// <summary>
@@ -53,7 +53,194 @@ namespace Tripous.Data
             SmtpProvider = "SMTP_PROVIDER";
         }
 
-        /* system table names */ 
+        /* system schema */
+        /// <summary>
+        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaLog()
+        {
+
+            Schema Schema = Schemas.GetSystemSchema();
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
+
+            /* SYS_LOG */
+            string SqlText = $@" 
+create table {SysTables.Log}  (
+   Id                     {SysConfig.PrimaryKeyStr()}
+  ,LogDate                @DATE            @NULL
+  ,LogTime                @NVARCHAR(12)    @NULL
+  ,UserName               @NVARCHAR(96)    @NULL
+  ,Host                   @NVARCHAR(64)    @NULL
+  ,LogLevel               @NVARCHAR(24)    @NULL     
+  ,LogSource              @NVARCHAR(96)    @NULL
+  ,ScopeId                @NVARCHAR(96)    @NULL
+  ,EventId                @NVARCHAR(96)    @NULL
+  ,Data                   @NBLOB_TEXT      @NULL
+)
+";
+
+            schema.AddTable(SqlText);
+
+            SqlText = $"create index IDX_{SysTables.Log}_00 on {SysTables.Log}(LogDate) ";
+            schema.AddStatementAfter(SqlText);
+        }
+        /// <summary>
+        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaLang()
+        {
+
+            Schema Schema = Schemas.GetSystemSchema();
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
+
+            /*  SYS_LANG  */
+            string SqlText = $@"
+create table {SysTables.Lang} (
+    Id                      {SysConfig.PrimaryKeyStr()}
+   ,Name                    @NVARCHAR(40)        @NOT_NULL    
+   ,Code                    @NVARCHAR(40)        @NOT_NULL    
+   ,CultureCode             @NVARCHAR(40)        @NOT_NULL                  
+   ,FlagImage               @NVARCHAR(40)        @NULL
+   ,IsActive                integer default 1    @NOT_NULL
+   ,DisplayOrder            integer default 0    @NOT_NULL                     
+ )
+";
+
+            schema.AddTable(SqlText);
+
+            SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.EnId}', 'English', 'en', 'en-US', 'gb.png') ";
+            schema.AddStatementAfter(SqlText);
+
+            SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.GrId}', 'Greek', 'gr', 'el-GR', 'gr.png') ";
+            schema.AddStatementAfter(SqlText);
+        }
+        /// <summary>
+        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaStrRes()
+        {
+
+            Schema Schema = Schemas.GetSystemSchema();
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
+
+            /*  SYS_STR_RES  */
+            string SqlText = $@"
+create table {SysTables.StrRes} (
+    Id                      {SysConfig.PrimaryKeyStr()} 
+   ,LanguageId              {SysConfig.ForeignKeyStr()} @NULL                 
+   ,TableName               @NVARCHAR(96)        @NULL           
+   ,TableId                 {SysConfig.ForeignKeyStr()} @NULL           
+   ,EntryKey                @NVARCHAR(96)        @NOT_NULL		 
+   ,EntryValue              @NBLOB_TEXT          @NOT_NULL                         
+ )
+";
+
+            schema.AddTable(SqlText);
+        }
+        /// <summary>
+        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaCompany()
+        {
+
+            Schema Schema = Schemas.GetSystemSchema();
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
+
+            /* Company */
+            string SqlText = $@"
+create table {SysTables.Company}  (
+   Id                   {SysConfig.PrimaryKeyStr()}    
+  ,Name                 @NVARCHAR(96)    @NOT_NULL
+
+  ,constraint UC_{SysTables.Company}_00 unique (Name)
+)
+";
+
+            schema.AddTable(SqlText);
+
+            if (SysConfig.GuidOids)
+            {
+                SqlText = $"insert into {SysTables.Company} (Id, Name) values ({SysConfig.CompanyIdSql}, 'Default') ";
+                schema.AddStatementAfter(SqlText);
+            }
+        }
+        /// <summary>
+        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaData()
+        {
+
+            Schema Schema = Schemas.GetSystemSchema();
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
+
+            string CompanyDataType = SysConfig.GuidOids ? "@NVARCHAR(40) default '' " : "integer default -1 ";
+
+            /* SYS_DATA */
+            string SqlText = $@"
+create table {SysTables.Data}  (                                                                                      
+   Id                  {SysConfig.PrimaryKeyStr()}
+  ,@COMPANY_ID         {CompanyDataType}
+
+  ,DataName            @NVARCHAR(96)   @NOT_NULL
+  ,TitleKey            @NVARCHAR(96)   @NOT_NULL
+  ,DataType            @NVARCHAR(96)   @NOT_NULL
+  ,StoreName           @NVARCHAR(96)   @NOT_NULL
+  ,Notes               @NVARCHAR(255)  @NULL
+
+  ,Category1           @NVARCHAR(96)   @NULL
+  ,Category2           @NVARCHAR(96)   @NULL
+
+  ,Data1               @BLOB_TEXT      @NULL
+  ,Data2               @BLOB_TEXT      @NULL
+  ,Data3               @BLOB_TEXT      @NULL
+  ,Data4               @BLOB_TEXT      @NULL
+
+  ,constraint UC_{SysTables.Data}_00 unique (@COMPANY_ID, DataType, DataName)
+)
+";
+
+            schema.AddTable(SqlText);
+        }
+        /// <summary>
+        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaSmtpProvider()
+        {
+
+            Schema Schema = Schemas.GetSystemSchema();
+            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
+
+            /* SYS_SMTP_PROVIDER */
+            string SqlText = $@"
+create table {SysTables.SmtpProvider} (
+     Id						{SysConfig.PrimaryKeyStr()}
+    ,Host                   @NVARCHAR(96)        @NOT_NULL  
+    ,Port                   integer default 25   @NOT_NULL  
+    ,UserName               @NVARCHAR(96)        @NULL 
+    ,SenderAddress          @NVARCHAR(96)        @NULL 
+    ,Psw                    @NVARCHAR(255)       @NULL
+    ,EnableSsl              integer default 0    @NOT_NULL
+    ,MessagesPerMinute      integer default -1   @NOT_NULL                    
+    
+    ,constraint UK_{SysTables.SmtpProvider}_00 unique (Host)
+)
+";
+            schema.AddTable(SqlText);
+        }
+        /// <summary>
+        /// Adds the database schema of all system tables to version #1 of system <see cref="Schema"/>.
+        /// </summary>
+        static public void AddSchemaAll()
+        {
+            AddSchemaLog();
+            AddSchemaLang();
+            AddSchemaStrRes();
+            AddSchemaCompany();
+            AddSchemaData();
+            AddSchemaSmtpProvider();
+        }
+
+        /* system table names */
         /// <summary>
         /// Gets the name of SYS_INI system table
         /// <para>Defaults to SYS_INI</para>
@@ -64,13 +251,13 @@ namespace Tripous.Data
             set { Names[SIni] = RemovePrefix(value); }
         }
         /// <summary>
-        /// Gets the name of SYS_COMPANY system table
-        /// <para>Defaults to SYS_COMPANY</para>
+        /// Gets the name of SYS_LOG system table
+        /// <para>Defaults to SYS_LOG</para>
         /// </summary>
-        static public string Company
+        static public string Log
         {
-            get { return Prefix + Names[SCompany]; }
-            set { Names[SCompany] = RemovePrefix(value); }
+            get { return Prefix + Names[SLog]; }
+            set { Names[SLog] = RemovePrefix(value); }
         }
         /// <summary>
         /// Gets the name of SYS_LANG system table
@@ -82,14 +269,23 @@ namespace Tripous.Data
             set { Names[SLang] = RemovePrefix(value); }
         }
         /// <summary>
-        /// Gets the name of SYS_LOG system table
-        /// <para>Defaults to SYS_LOG</para>
+        /// Gets the name of SYS_STR_RES system table
+        /// <para>Defaults to SYS_STR_RES</para>
         /// </summary>
-        static public string Log
+        static public string StrRes
         {
-            get { return Prefix + Names[SLog]; }
-            set { Names[SLog] = RemovePrefix(value); }
-        } 
+            get { return Prefix + Names[SStrRes]; }
+            set { Names[SStrRes] = RemovePrefix(value); }
+        }
+        /// <summary>
+        /// Gets the name of SYS_COMPANY system table
+        /// <para>Defaults to SYS_COMPANY</para>
+        /// </summary>
+        static public string Company
+        {
+            get { return Prefix + Names[SCompany]; }
+            set { Names[SCompany] = RemovePrefix(value); }
+        }
         /// <summary>
         /// Gets the name of SYS_DATA system table
         /// <para>Defaults to SYS_DATA</para>
@@ -99,15 +295,6 @@ namespace Tripous.Data
             get { return Prefix + Names[SData]; }
             set { Names[SData] = RemovePrefix(value); }
         } 
-        /// <summary>
-        /// Gets the name of SYS_STR_RES system table
-        /// <para>Defaults to SYS_STR_RES</para>
-        /// </summary>
-        static public string StrRes
-        {
-            get { return Prefix + Names[SStrRes]; }
-            set { Names[SStrRes] = RemovePrefix(value); }
-        }
         /// <summary>
         /// Gets the name of SYS_SMTP_PROVIDER system table
         /// <para>Defaults to SYS_SMTP_PROVIDER</para>
