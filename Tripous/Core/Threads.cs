@@ -91,10 +91,7 @@ namespace Tripous
                 });
             }
         }
-        
  
-
-
         /// <summary>
         /// After a call to this method, the Start() method no longer accepts client calls.
         /// </summary>

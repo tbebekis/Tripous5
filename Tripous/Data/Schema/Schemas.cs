@@ -36,8 +36,8 @@ namespace Tripous.Data
         /// </summary>
         static public void Execute()
         {
-            foreach (var Item in List)
-                Item.Execute();
+            foreach (var Schema in List)
+                Schema.Execute();
         }
 
         /// <summary>

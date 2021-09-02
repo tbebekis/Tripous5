@@ -14,16 +14,14 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <OutputPath>..\bin\Debug\</OutputPath>
-        <DocumentationFile>..\bin\Debug\Tripous.xml</DocumentationFile>
+      <DocumentationFile>\Tripous5.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <OutputPath>..\bin\Release</OutputPath>
+      <DocumentationFile>\Tripous5.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\.editorconfig" Link=".editorconfig" />
         <None Include="..\_Files\Licence.txt">
             <Pack>True</Pack>
             <PackagePath></PackagePath>

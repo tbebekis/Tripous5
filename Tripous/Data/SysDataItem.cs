@@ -9,7 +9,7 @@ using System.Text;
 using System.IO;
 
 using Newtonsoft.Json;
- 
+using System.Buffers;
 
 namespace Tripous.Data
 {
@@ -44,11 +44,10 @@ namespace Tripous.Data
             DataType = string.Empty;    
             DataName = string.Empty;
             TitleKey = string.Empty;
-            StoreName = string.Empty;  
             Notes = string.Empty;
 
-            Category1 = string.Empty;
-            Category2 = string.Empty;
+            Tag1 = string.Empty;
+            Tag2 = string.Empty;
 
             Data1 = string.Empty;
             Data2 = string.Empty;
@@ -109,11 +108,15 @@ namespace Tripous.Data
                 DataType = Sys.AsString(Row["DataType"], DataType);
                 DataName = Sys.AsString(Row["DataName"], DataName);
                 TitleKey = Sys.AsString(Row["TitleKey"], TitleKey);
-                StoreName = Sys.AsString(Row["StoreName"], StoreName);
+
                 Notes = Sys.AsString(Row["Notes"], Notes);
 
-                Category1 = Sys.AsString(Row["Category1"], Category1);
-                Category2 = Sys.AsString(Row["Category2"], Category2);
+                Owner = Sys.AsString(Row["Owner"], Owner);
+
+                Tag1 = Sys.AsString(Row["Tag1"], Tag1);
+                Tag2 = Sys.AsString(Row["Tag2"], Tag2);
+                Tag3 = Sys.AsString(Row["Tag3"], Tag3);
+                Tag4 = Sys.AsString(Row["Tag4"], Tag4);
 
                 Data1 = Row.BlobToString("Data1");
                 Data2 = Row.BlobToString("Data2");
@@ -135,11 +138,15 @@ namespace Tripous.Data
                 Row["DataType"] = DataType;
                 Row["DataName"] = DataName;
                 Row["Title"] = TitleKey;
-                Row["StoreName"] = StoreName;
+
                 Row["Notes"] = Notes;
 
-                Row["Category1"] = Category1;
-                Row["Category2"] = Category2;
+                Row["Owner"] = Owner;
+
+                Row["Tag1"] = Tag1;
+                Row["Tag2"] = Tag2;
+                Row["Tag3"] = Tag3;
+                Row["Tag4"] = Tag4;
 
                 Row.StringToBlob("Data1", Data1);
                 Row.StringToBlob("Data2", Data2);
@@ -162,17 +169,23 @@ namespace Tripous.Data
                     Row["DataType"] = DataType;
                 if (Table.ContainsColumn("DataName"))
                     Row["DataName"] = DataName;
+
                 if (Table.ContainsColumn("TitleKey"))
                     Row["TitleKey"] = TitleKey;
-                if (Table.ContainsColumn("StoreName"))
-                    Row["StoreName"] = StoreName;
                 if (Table.ContainsColumn("Notes"))
                     Row["Notes"] = Notes;
 
-                if (Table.ContainsColumn("Category1"))
-                    Row["Category1"] = Category1;
-                if (Table.ContainsColumn("Category2"))
-                    Row["Category2"] = Category2;
+                if (Table.ContainsColumn("Owner"))
+                    Row["Owner"] = Owner;
+
+                if (Table.ContainsColumn("Tag1"))
+                    Row["Tag1"] = Tag1;
+                if (Table.ContainsColumn("Tag2"))
+                    Row["Tag2"] = Tag2;
+                if (Table.ContainsColumn("Tag3"))
+                    Row["Tag3"] = Tag3;
+                if (Table.ContainsColumn("Tag4"))
+                    Row["Tag4"] = Tag4;
 
             }
         }
@@ -219,22 +232,31 @@ namespace Tripous.Data
             set { fTitleKey = value; }
         }
         /// <summary>
-        /// Gets or sets the database connection name
-        /// </summary>
-        public virtual string StoreName { get; set; } = SysConfig.DefaultConnection;
-        /// <summary>
         /// Gets or sets the notes
         /// </summary>
         public string Notes { get; set; }
 
         /// <summary>
-        /// Gets or sets a category
+        /// A string indicating the owner of the entry in the table.
         /// </summary>
-        public string Category1 { get; set; }
+        public string Owner { get; set; }
+
         /// <summary>
-        /// Gets or sets a category
+        /// Gets or sets a user defined string tag.
         /// </summary>
-        public string Category2 { get; set; }
+        public string Tag1 { get; set; }
+        /// <summary>
+        /// Gets or sets a user defined string tag.
+        /// </summary>
+        public string Tag2 { get; set; }
+        /// <summary>
+        /// Gets or sets a user defined string tag.
+        /// </summary>
+        public string Tag3 { get; set; }
+        /// <summary>
+        /// Gets or sets a user defined string tag.
+        /// </summary>
+        public string Tag4 { get; set; }
 
         /// <summary>
         /// Text blob data

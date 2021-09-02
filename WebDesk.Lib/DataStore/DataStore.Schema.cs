@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 
 using Tripous;
 using Tripous.Data;
@@ -208,6 +209,94 @@ create table {TableName} (
             //RegisterSystemSchema_01();
 
             //RegisterSchema_01();
+        }
+
+        static void Execute_AppUser(DataView vTables)
+        { 
+            string TableName = "AppUser";
+            if (vTables.Find(TableName) != -1)
+                return;
+
+            DataTableDef Table = new DataTableDef() { Name = TableName };
+
+            Table.AddPrimaryKey();
+            Table.AddStringField("UserId", 96, true);
+            Table.AddStringField("Email", 96, true);
+            Table.AddStringField("Name", 96, false);
+            Table.AddIntegerField("Level", true, null, "0");
+            Table.AddIntegerField("IsBlocked", true, null, "0");
+
+            Table.AddDateTimeField("LastAccessDT");
+            Table.AddDateTimeField("LastLoginDT");
+            Table.AddDateTimeField("RegistrationDT");
+
+            Table.AddIntegerField("IsActivated", true, null, "0");
+            Table.AddStringField("ActivationToken", 96, false);
+
+            Table.AddStringField("Password", 96, false);
+            Table.AddStringField("PasswordSalt", 20, false);
+            Table.AddDateTimeField("PassRecoveryDT");
+            Table.AddStringField("PassRecoveryToken", 96, false);
+
+            string SqlText = Table.GetDefText();
+
+            SchemaVersion SV = new SchemaVersion();
+
+            SV.AddTable(SqlText);
+
+            string Id = Sys.GenId(true);
+            int UserLevel = (int)Tripous.UserLevel.Admin;
+            string PasswordSalt = GenerateRandomText(8);
+            string Password = "webdesk";
+            Password = GeneratePasswordHash(Password, PasswordSalt);
+
+            SqlText = $@"
+insert into {TableName} (
+    Id,
+    UserId,
+    Email,
+    Name, 
+    Level,
+    IsActivated, 
+    Password,
+    PasswordSalt
+) values (
+    '{Id}', 
+    'admin', 
+    'tbebekis@antyxsoft.com',
+    'WebDesk Admin',
+    {UserLevel},
+    1,
+    '{Password}',
+    '{PasswordSalt}'  
+ ) 
+";
+
+            SV.AddStatementAfter(SqlText);
+
+            SV.Execute();
+
+#warning TODO: Save Table to SysData
+        }
+
+        /// <summary>
+        /// Creates database tables etc. based on the registered schemas
+        /// </summary>
+        static void ExecuteSchemas()
+        {
+
+            string SqlText = SysTables.GetSystemDataSelectStatement(NoBlobs: true);
+            SqlText += $@"
+where
+    DataType = 'Table'
+    and Owner = 'App'
+";
+            DataTable Table = SqlStore.Select(SqlText);
+            Table.DefaultView.Sort = "DataName";
+            DataView vTables = Table.DefaultView;
+
+            Execute_AppUser(vTables);
+           // Schemas.Execute();
         }
     }
 }

@@ -127,13 +127,16 @@ namespace WebDesk
             }
 
         }
+      
         /// <summary>
-        /// Creates database tables etc. based on the registered schemas
+        /// Registers and executes the system schema tables.
         /// </summary>
-        static void ExecuteSchemas()
+        static void ExecuteSystemSchema()
         {
+            SysTables.AddSchemaAll();
             Schemas.Execute();
         }
+
 
         static void TestDefs()
         {
@@ -169,13 +172,13 @@ namespace WebDesk
                 Logger.Add(new DataLogListener());
 
                 RegisterDbProviderFactories();
-                RegisterSchemas();
-
                 ConnectDatabases();
                 CreateDatabases();
-                ExecuteSchemas();
 
                 SqlStore = SqlStores.CreateDefaultSqlStore();
+
+                ExecuteSystemSchema();
+                ExecuteSchemas();                
 
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
             }

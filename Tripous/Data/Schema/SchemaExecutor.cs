@@ -172,10 +172,13 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// Executes the schema
+        /// Executes the schema. If no connection info is specified then the default connection is used.
         /// </summary>
-        static internal void Execute(SqlConnectionInfo ConnectionInfo, SchemaVersion SchemaVersion)
+        static internal void Execute(SchemaVersion SchemaVersion, SqlConnectionInfo ConnectionInfo = null)
         {
+            if (ConnectionInfo == null)
+                ConnectionInfo = Db.DefaultConnectionInfo;
+
             new SchemaExecutor(ConnectionInfo, SchemaVersion).Execute();
         }
     }

@@ -178,24 +178,28 @@ create table {SysTables.Company}  (
             /* SYS_DATA */
             string SqlText = $@"
 create table {SysTables.Data}  (                                                                                      
-   Id                  {SysConfig.PrimaryKeyStr()}
-  ,@COMPANY_ID         {CompanyDataType}
+    Id                  {SysConfig.PrimaryKeyStr()}
+    ,@COMPANY_ID         {CompanyDataType}
 
-  ,DataName            @NVARCHAR(96)   @NOT_NULL
-  ,TitleKey            @NVARCHAR(96)   @NOT_NULL
-  ,DataType            @NVARCHAR(96)   @NOT_NULL
-  ,StoreName           @NVARCHAR(96)   @NOT_NULL
-  ,Notes               @NVARCHAR(255)  @NULL
+    ,DataName           @NVARCHAR(96)   @NOT_NULL    
+    ,DataType           @NVARCHAR(96)   @NOT_NULL
 
-  ,Category1           @NVARCHAR(96)   @NULL
-  ,Category2           @NVARCHAR(96)   @NULL
+    ,TitleKey           @NVARCHAR(96)   @NOT_NULL
+    ,Notes              @NVARCHAR(255)  @NULL
 
-  ,Data1               @BLOB_TEXT      @NULL
-  ,Data2               @BLOB_TEXT      @NULL
-  ,Data3               @BLOB_TEXT      @NULL
-  ,Data4               @BLOB_TEXT      @NULL
+    ,Owner              @NVARCHAR(96)   @NULL
 
-  ,constraint UC_{SysTables.Data}_00 unique (@COMPANY_ID, DataType, DataName)
+    ,Tag1               @NVARCHAR(96)   @NULL
+    ,Tag2               @NVARCHAR(96)   @NULL
+    ,Tag3               @NVARCHAR(96)   @NULL
+    ,Tag4               @NVARCHAR(96)   @NULL
+
+    ,Data1              @BLOB_TEXT      @NULL
+    ,Data2              @BLOB_TEXT      @NULL
+    ,Data3              @BLOB_TEXT      @NULL
+    ,Data4              @BLOB_TEXT      @NULL
+
+    ,constraint UC_{SysTables.Data}_00 unique (@COMPANY_ID, DataType, DataName)
 )
 ";
 
@@ -238,6 +242,47 @@ create table {SysTables.SmtpProvider} (
             AddSchemaCompany();
             AddSchemaData();
             AddSchemaSmtpProvider();
+        }
+
+        /// <summary>
+        /// Returns the full SELECT statement for the system Data table.
+        /// <para>Blob selection is controlled by the NoBlobs flag</para>
+        /// </summary>
+        static public string GetSystemDataSelectStatement(bool NoBlobs)
+        {
+            string NoBlobsSql = $@"
+select
+     Id            
+    ,{SysConfig.CompanyFieldName}
+
+    ,DataName
+    ,DataType 
+
+    ,TitleKey  
+    ,Notes    
+
+    ,Owner
+
+    ,Tag1             
+    ,Tag2             
+    ,Tag3             
+    ,Tag4        
+from
+    {SysTables.Data} 
+";
+
+
+
+            string FullSql = $@"
+select
+    * 
+from
+    {SysTables.Data} 
+";
+
+
+            return NoBlobs ? NoBlobsSql : FullSql;
+ 
         }
 
         /* system table names */

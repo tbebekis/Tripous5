@@ -23,6 +23,8 @@ namespace Tripous.Data
         { 
         }
 
+
+
         /* public */
         /// <summary>
         /// Adds a table
@@ -61,6 +63,19 @@ namespace Tripous.Data
         public void AddStatementAfter(string SqlText)
         {
             StatementsAfter.Add(SqlText);
+        }
+
+
+        /// <summary>
+        /// Executes the schema. If no connection info is specified then the default connection is used.
+        /// <para>CAUTION: This method does NOT record version number in the Db Ini.</para>
+        /// </summary>
+        public void Execute(SqlConnectionInfo ConnectionInfo = null)
+        {
+            if (ConnectionInfo == null)
+                ConnectionInfo = Db.DefaultConnectionInfo;
+
+            SchemaExecutor.Execute(this, ConnectionInfo);
         }
 
         /// <summary>

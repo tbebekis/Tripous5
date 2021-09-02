@@ -54,29 +54,7 @@ namespace Tripous.Data
             Store.GetNativeSchema(string.Empty, SysTables.Data, string.Empty, Result);
             return Result;
         }
-        /// <summary>
-        /// Returns the field list of the SysData table without the blob fields.
-        /// </summary>
-        static public string GetSelectListNoBlobs()
-        {
-            string Result = $@"
-             Id            
-            ,{SysConfig.CompanyFieldName}
-
-            ,DataName
-            ,DataType 
-            ,Title   
-            ,ConnectionName     
-            ,Notes         
-
-            ,Category1     
-            ,Category2     
-            ,Category3     
-            ,Category4      
-";           
-
-            return Result;
-        }
+ 
 
 
 
@@ -88,16 +66,14 @@ namespace Tripous.Data
         /// </summary>
         static public void Select(string DataType, string DataName, object oCompanyId, DataTable Table, bool NoBlobs)
         {
-            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
             string CompanyId = CompanyIdToSql(oCompanyId);
 
-            string SqlText = $@"
-select
-    {SelectList}
-from
-    {SysTables.Data}
+            string SqlText = SysTables.GetSystemDataSelectStatement(NoBlobs);
+
+            SqlText += 
+                $@"
 where
-        {SysConfig.CompanyFieldName} = {CompanyId} 
+     {SysConfig.CompanyFieldName} = {CompanyId} 
 ";
 
             StringBuilder SB = new StringBuilder(SqlText);
@@ -142,17 +118,14 @@ where
         /// </summary>
         static public DataTable SelectLike(string DataType, bool NoBlobs)
         {
-            string SelectList = NoBlobs ? GetSelectListNoBlobs() : " * ";
             string CompanyId = CompanyIdToSql(SysConfig.CompanyId);
 
             if (DataType.IndexOf('%') == -1)
                 DataType = $"%{DataType}%";
 
-            string SqlText = $@"
-select
-    {SelectList}
-from
-    {SysTables.Data}
+            string SqlText = SysTables.GetSystemDataSelectStatement(NoBlobs);
+
+            SqlText += $@" 
 where
         {SysConfig.CompanyFieldName} = {CompanyId}
     and DataType like '{DataType}'

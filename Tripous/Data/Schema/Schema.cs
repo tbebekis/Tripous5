@@ -75,16 +75,15 @@ namespace Tripous.Data
             string Entry = string.Format("Database.Version.{0}.{1}", Connection.Name, Domain);
             int Version = Ini.ReadInteger(Entry, -1);
 
-
-            foreach (SchemaVersion Item in VersionList)
+            foreach (SchemaVersion SV in VersionList)
             {
-                if (Item.Version > Version)
+                if (SV.Version > Version)
                 {
-                    SchemaExecutor.Execute(Connection, Item);
+                    SchemaExecutor.Execute(SV, Connection);
                     Db.Metastores.Find(Connection.Name).ReLoad();
 
                     /* write the version to the dbIni */
-                    Ini.WriteInteger(Entry, Item.Version);  
+                    Ini.WriteInteger(Entry, SV.Version);  
                 }
             }
         }
