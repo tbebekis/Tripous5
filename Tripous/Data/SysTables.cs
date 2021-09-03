@@ -20,7 +20,6 @@ namespace Tripous.Data
         const string SLog = "Log";
         const string SLang = "Lang";
         const string SStrRes = "StrRes";
-        const string SCompany = "Company";
         const string SData = "Data";
         const string SSmtpProvider = "SmtpProvider";
 
@@ -45,7 +44,6 @@ namespace Tripous.Data
         static SysTables()
         {
             Ini = "INI";
-            Company = "COMPANY";
             Lang = "LANG";
             Log = "LOG";
             Data = "DATA";            
@@ -140,49 +138,21 @@ create table {SysTables.StrRes} (
         /// <summary>
         /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
         /// </summary>
-        static public void AddSchemaCompany()
-        {
-
-            Schema Schema = Schemas.GetSystemSchema();
-            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
-
-            /* Company */
-            string SqlText = $@"
-create table {SysTables.Company}  (
-   Id                   {SysConfig.PrimaryKeyStr()}    
-  ,Name                 @NVARCHAR(96)    @NOT_NULL
-
-  ,constraint UC_{SysTables.Company}_00 unique (Name)
-)
-";
-
-            schema.AddTable(SqlText);
-
-            if (SysConfig.GuidOids)
-            {
-                SqlText = $"insert into {SysTables.Company} (Id, Name) values ({SysConfig.CompanyIdSql}, 'Default') ";
-                schema.AddStatementAfter(SqlText);
-            }
-        }
-        /// <summary>
-        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
-        /// </summary>
         static public void AddSchemaData()
         {
 
             Schema Schema = Schemas.GetSystemSchema();
             SchemaVersion schema = Schema.FindOrAdd(Version: 1);
 
-            string CompanyDataType = SysConfig.GuidOids ? "@NVARCHAR(40) default '' " : "integer default -1 ";
+            //string CompanyDataType = SysConfig.GuidOids ? "@NVARCHAR(40) default '' " : "integer default -1 ";
 
             /* SYS_DATA */
             string SqlText = $@"
 create table {SysTables.Data}  (                                                                                      
     Id                  {SysConfig.PrimaryKeyStr()}
-    ,@COMPANY_ID         {CompanyDataType}
-
-    ,DataName           @NVARCHAR(96)   @NOT_NULL    
+    
     ,DataType           @NVARCHAR(96)   @NOT_NULL
+    ,DataName           @NVARCHAR(96)   @NOT_NULL    
 
     ,TitleKey           @NVARCHAR(96)   @NOT_NULL
     ,Notes              @NVARCHAR(255)  @NULL
@@ -199,11 +169,50 @@ create table {SysTables.Data}  (
     ,Data3              @BLOB_TEXT      @NULL
     ,Data4              @BLOB_TEXT      @NULL
 
-    ,constraint UC_{SysTables.Data}_00 unique (@COMPANY_ID, DataType, DataName)
+    ,constraint UC_{SysTables.Data}_00 unique (DataType, DataName)
 )
 ";
 
             schema.AddTable(SqlText);
+        }
+        /// <summary>
+        /// Returns the full SELECT statement for the system Data table.
+        /// <para>Blob selection is controlled by the NoBlobs flag</para>
+        /// </summary>
+        static public string GetSystemDataSelectStatement(bool NoBlobs)
+        {
+            string NoBlobsSql = $@"
+select
+     Id            
+
+    ,DataType 
+    ,DataName
+
+    ,TitleKey  
+    ,Notes    
+
+    ,Owner
+
+    ,Tag1             
+    ,Tag2             
+    ,Tag3             
+    ,Tag4        
+from
+    {SysTables.Data} 
+";
+
+
+
+            string FullSql = $@"
+select
+    * 
+from
+    {SysTables.Data} 
+";
+
+
+            return NoBlobs ? NoBlobsSql : FullSql;
+
         }
         /// <summary>
         /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
@@ -239,51 +248,11 @@ create table {SysTables.SmtpProvider} (
             AddSchemaLog();
             AddSchemaLang();
             AddSchemaStrRes();
-            AddSchemaCompany();
             AddSchemaData();
             AddSchemaSmtpProvider();
         }
 
-        /// <summary>
-        /// Returns the full SELECT statement for the system Data table.
-        /// <para>Blob selection is controlled by the NoBlobs flag</para>
-        /// </summary>
-        static public string GetSystemDataSelectStatement(bool NoBlobs)
-        {
-            string NoBlobsSql = $@"
-select
-     Id            
-    ,{SysConfig.CompanyFieldName}
 
-    ,DataName
-    ,DataType 
-
-    ,TitleKey  
-    ,Notes    
-
-    ,Owner
-
-    ,Tag1             
-    ,Tag2             
-    ,Tag3             
-    ,Tag4        
-from
-    {SysTables.Data} 
-";
-
-
-
-            string FullSql = $@"
-select
-    * 
-from
-    {SysTables.Data} 
-";
-
-
-            return NoBlobs ? NoBlobsSql : FullSql;
- 
-        }
 
         /* system table names */
         /// <summary>
@@ -321,15 +290,6 @@ from
         {
             get { return Prefix + Names[SStrRes]; }
             set { Names[SStrRes] = RemovePrefix(value); }
-        }
-        /// <summary>
-        /// Gets the name of SYS_COMPANY system table
-        /// <para>Defaults to SYS_COMPANY</para>
-        /// </summary>
-        static public string Company
-        {
-            get { return Prefix + Names[SCompany]; }
-            set { Names[SCompany] = RemovePrefix(value); }
         }
         /// <summary>
         /// Gets the name of SYS_DATA system table

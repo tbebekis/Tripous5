@@ -35,7 +35,7 @@ namespace Tripous.Data
             if (string.IsNullOrWhiteSpace(Name))
                 Throw("Empty or null string");
  
-            if (!char.IsLetter(Name[0]) || Name[0] != '_')
+            if (!(char.IsLetter(Name[0]) || Name[0] == '_'))
                 Throw("First character should be a letter or _");
 
             if (Name.Contains(' '))
@@ -43,8 +43,8 @@ namespace Tripous.Data
 
             foreach (char C in Name)
             {
-                if (!(char.IsLetterOrDigit(C) || C == '$'))
-                    Throw("Special characters not allowed");
+                if (!(char.IsLetterOrDigit(C) || C == '$' || C == '_'))
+                    Throw("Special characters, except $ and _ are not allowed");
             }
 
             if (Name.Length > 32)
@@ -175,6 +175,31 @@ namespace Tripous.Data
  
             SB.AppendLine(")");
             return SB.ToString();
+        }
+        
+        /// <summary>
+        /// Saves this instance to a <see cref="SysDataItem"/>
+        /// </summary>
+        public SysDataItem ToSysDataItem(string Owner = "")
+        {
+            SysDataItem Result = new SysDataItem();
+            ToSysDataItem(Result, Owner);
+            return Result;
+        }
+        /// <summary>
+        /// Saves this instance to a <see cref="SysDataItem"/>
+        /// </summary>
+        public void ToSysDataItem(SysDataItem Dest, string Owner = "")
+        {
+            Check();
+
+            Dest.Clear();
+
+            Dest.DataType = "Table";
+            Dest.DataName = this.Name;
+            Dest.Owner = Owner;
+
+            Dest.Data1 = Json.Serialize(this);
         }
 
         /// <summary>

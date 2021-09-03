@@ -76,6 +76,9 @@ namespace Tripous.Data
                 ConnectionInfo = Db.DefaultConnectionInfo;
 
             SchemaExecutor.Execute(this, ConnectionInfo);
+
+            var Metastore = Db.Metastores.Find(ConnectionInfo.Name);
+            Metastore.ReLoad();
         }
 
         /// <summary>

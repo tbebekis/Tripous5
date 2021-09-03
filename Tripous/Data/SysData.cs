@@ -17,8 +17,7 @@ namespace Tripous.Data
     /// Handles access to system data table.
     /// <para>System data table is a database table which stores information
     /// regarding system data such as reports, descriptors, resources etc.</para>
-    /// <para>WARNING: All methods of the SystemData class act on the current company.</para>
-    /// <para>WARNING: There is unique contraint on DataType, DataName and Company.</para>
+    /// <para>WARNING: There is unique contraint on DataType and DataName</para>
     /// </summary>
     public class SysData
     {
@@ -55,71 +54,65 @@ namespace Tripous.Data
             return Result;
         }
  
-
-
-
+ 
         /* select with Sql construction */
         /// <summary>
-        /// Returns a table with all DataType and DataName system data of a company specified by a company Id.
+        /// Returns a table with all DataType and DataName system data.
         /// <para>WARNING: Normally this should return a single row, 
-        /// since there is a unique contraint regarding DataType, DataName and Company</para>
-        /// </summary>
-        static public void Select(string DataType, string DataName, object oCompanyId, DataTable Table, bool NoBlobs)
-        {
-            string CompanyId = CompanyIdToSql(oCompanyId);
-
-            string SqlText = SysTables.GetSystemDataSelectStatement(NoBlobs);
-
-            SqlText += 
-                $@"
-where
-     {SysConfig.CompanyFieldName} = {CompanyId} 
-";
-
-            StringBuilder SB = new StringBuilder(SqlText);
-            
-            if (!string.IsNullOrWhiteSpace(DataType))
-                SB.AppendLine($"    and DataType = '{DataType}'");
-
-            if (!string.IsNullOrWhiteSpace(DataName))
-                SB.AppendLine($"    and DataName = '{DataName}'");
-
-            SqlText = SB.ToString();
-
-            Store.SelectTo(Table, SqlText);
-        }
-        /// <summary>
-        /// Returns a table with all DataType and DataName system data of the current company.
-        /// <para>WARNING: Normally this returns a single row, 
-        /// since there is a unique contraint regarding DataType, DataName and Company</para>
+        /// since there is a unique contraint regarding DataType and DataName.</para>
         /// </summary>
         static public void Select(string DataType, string DataName, DataTable Table, bool NoBlobs)
         {
-            Select(DataType, DataName, SysConfig.CompanyId, Table, NoBlobs);
+
+            string SqlText = SysTables.GetSystemDataSelectStatement(NoBlobs); 
+
+            StringBuilder SB = new StringBuilder();
+            
+            if (!string.IsNullOrWhiteSpace(DataType))
+                SB.AppendLine($"    DataType = '{DataType}'");
+
+            if (!string.IsNullOrWhiteSpace(DataName))
+            {
+                if (SB.Length == 0)
+                    SB.AppendLine($"    DataName = '{DataName}'");
+                else
+                    SB.AppendLine($"    and DataName = '{DataName}'");
+            }
+                
+
+            if (SB.Length > 0)
+            {
+                SqlText += $@"
+where
+{SB.ToString()}
+";
+            }
+ 
+
+            Store.SelectTo(Table, SqlText);
         }
+ 
         /// <summary>
-        /// Returns a table with all DataType system data of the current company.
+        /// Returns a table with all DataType system data.
         /// </summary>
         static public void Select(string DataType, DataTable Table, bool NoBlobs)
         { 
-            Select(DataType, DataName: "", SysConfig.CompanyId, Table, NoBlobs); 
+            Select(DataType, DataName: "", Table, NoBlobs); 
         }
         /// <summary>
-        /// Returns a table with all system data of the current company.
+        /// Returns a table with all system data.
         /// </summary>
         static public void Select(DataTable Table, bool NoBlobs)
         {
-            Select(DataType: "", DataName: "", SysConfig.CompanyId, Table, NoBlobs); 
+            Select(DataType: "", DataName: "", Table, NoBlobs); 
         }
 
         /// <summary>
-        /// Returns a table with all DataType system data of the current company.
+        /// Returns a table with all DataType system data.
         /// <para>The passed DataType is used in the WHERE clause with a LIKE clause.</para>
         /// </summary>
         static public DataTable SelectLike(string DataType, bool NoBlobs)
         {
-            string CompanyId = CompanyIdToSql(SysConfig.CompanyId);
-
             if (DataType.IndexOf('%') == -1)
                 DataType = $"%{DataType}%";
 
@@ -127,8 +120,7 @@ where
 
             SqlText += $@" 
 where
-        {SysConfig.CompanyFieldName} = {CompanyId}
-    and DataType like '{DataType}'
+    DataType like '{DataType}'
 ";
 
             return Store.Select(SqlText);
@@ -136,7 +128,7 @@ where
 
         /* select, blob selection is controlled by the NoBlobs flag */
         /// <summary>
-        /// Returns a single data row of system data, according to the specified DataType and DataName of the current Company.
+        /// Returns a single data row of system data, according to the specified DataType and DataName.
         /// <para>It may return null if nothing found.</para>
         /// </summary>
         static public DataRow Select(string DataType, string DataName, bool NoBlobs)
@@ -146,7 +138,7 @@ where
             return Table.Rows.Count > 0 ? Table.Rows[0] : null;
         }
         /// <summary>
-        /// Returns a table with all DataType system data of the current company.
+        /// Returns a table with all DataType system data.
         /// </summary>
         static public DataTable Select(string DataType, bool NoBlobs)
         {
@@ -155,7 +147,7 @@ where
             return Result;
         }
         /// <summary>
-        /// Returns a table with all system data of the current company.
+        /// Returns a table with all system data.
         /// </summary>
         static public DataTable Select(bool NoBlobs)
         {
@@ -164,12 +156,7 @@ where
             return Result;
         }
 
-
-
-
  
- 
-
         /* misc select */
         /// <summary>
         /// Selects the row specified by Id and loads Item.
@@ -188,7 +175,7 @@ where
         /// <summary>
         /// Loads Item by selecting Item.DataType and Item.DataName from the system data table.
         /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
-        /// regarding DataType, DataName and Company</para>
+        /// regarding DataType and DataName.</para>
         /// </summary>
         static public object Select(SysDataItem Item)
         {
@@ -198,7 +185,7 @@ where
         /// Loads Item by selecting DataType and DataName from the system data table.
         /// <para>On success returns the Id of the row, else returns null.</para>
         /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
-        /// regarding DataType, DataName and Company</para>
+        /// regarding DataType and DataName.</para>
         /// </summary>
         static public object Select(string DataType, string DataName, SysDataItem Item)
         {
@@ -215,7 +202,7 @@ where
         /// <summary>
         /// Selects and returns the Id of the system data table under the DataType and DataName, if any, else null.
         /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
-        /// regarding DataType, DataName and Company</para>
+        /// regarding DataType and DataName.</para>
         /// </summary>
         static public object SelectId(string DataType, string DataName)
         {
@@ -232,8 +219,8 @@ where
 
         /// <summary>
         /// "Corrects" a data row by setting its Id to either -1 or an existing Id based
-        /// on the DataType and DataName column values. It also sets the current company Id.
-        /// <para>NOTE: Used by the <see cref="Commit(DataRow)"/> method.</para>
+        /// on the DataType and DataName column values.
+        /// <para>NOTE: Used by the <see cref="Save(DataRow)"/> method.</para>
         /// </summary>
         static public void Correct(DataRow Row)
         {
@@ -242,13 +229,12 @@ where
                 string DataType = Sys.AsString(Row["DataType"], string.Empty);
                 string DataName = Sys.AsString(Row["DataName"], string.Empty);
                 Row["Id"] = SelectId(DataType, DataName);
-                Row[SysConfig.CompanyFieldName] = SysConfig.CompanyId;
             }
         }
         /// <summary>
         /// "Corrects" each DataRow of Table by setting its Id to either -1 or an existing Id based
-        /// on the DataType and DataName column values. It also sets the current company Id.
-        /// <para>NOTE: Used by the <see cref="Commit(DataTable)"/> method.</para>
+        /// on the DataType and DataName column values. 
+        /// <para>NOTE: Used by the <see cref="Save(DataTable)"/> method.</para>
         /// </summary>
         static public void Correct(DataTable Table)
         {
@@ -259,40 +245,40 @@ where
             }
         }
 
-        /* commit (INSERT and UPDATE only) */
+        /* save to database (INSERT and UPDATE only) */
         /// <summary>
-        /// Commits Row to the system data table.
+        /// Saves a specified DataRow to the system data table.
         /// <para>NOTE: Returns the Id of the row in the database table</para>
         /// <para>WARNING: Performs INSERT and UPDATE only.</para>
         /// </summary>
-        static public object Commit(DataRow Row)
+        static public object Save(DataRow Row)
         {
             Correct(Row);
             Db.Commit(Row, SysTables.Data, "Id", SysConfig.GuidOids, Store, Sqls);
             return Row["Id"];
         }
         /// <summary>
-        /// Commits Table to the system data table.
+        /// Saves a specified DataTable to the system data table.
         /// <para>NOTE: On return the Table.Rows contain the Ids of the rows.</para>
         /// <para>WARNING: Performs INSERT and UPDATE only.</para>
         /// </summary>
-        static public void Commit(DataTable Table)
+        static public void Save(DataTable Table)
         {
             Correct(Table);
             Db.Commit(Table, SysTables.Data, "Id", SysConfig.GuidOids, Store, Sqls);
         }
         /// <summary>
-        /// Commits Item to the system data table.
+        /// Saves a specified <see cref="SysDataItem"/> to the system data table.
         /// <para>NOTE: Returns the Id of the row in the database table</para>
         /// <para>WARNING: Performs INSERT and UPDATE only.</para>
         /// </summary>
-        static public object Commit(SysDataItem Item)
+        static public object Save(SysDataItem Item)
         {
             DataTable Table = CreateDataTable();
             DataRow Row = Table.NewRow();
             Item.SaveToRow(Row);
             Table.Rows.Add(Row);
-            return Commit(Row);
+            return Save(Row);
         }
 
         /* delete */
@@ -307,30 +293,28 @@ where
         /// <summary>
         /// Deletes a record, under the DataType and DataName, from the system data table.
         /// <para>WARNING: Normally there is just a single row, since there is a unique contraint
-        /// regarding DataType, DataName and Company</para>
+        /// regarding DataType and DataName</para>
         /// </summary>
         static public void Delete(string DataType, string DataName)
         {
             string SqlText = $@"
 delete from {SysTables.Data} 
 where 
-        {SysConfig.CompanyFieldName} = {SysConfig.CompanyIdSql} 
-    and DataType = '{DataType}' 
+        DataType = '{DataType}' 
     and DataName = '{DataName}'
 ";
 
             Store.ExecSql(SqlText);
         }
         /// <summary>
-        /// Deletes all records from the system data table under the DataType and the current company.
+        /// Deletes all records from the system data table under the DataType.
         /// </summary>
         static public void Delete(string DataType)
         {
             string SqlText = $@"
 delete from {SysTables.Data} 
 where 
-        {SysConfig.CompanyFieldName} = {SysConfig.CompanyIdSql} 
-    and DataType = '{DataType}' 
+    DataType = '{DataType}' 
 ";
 
             Store.ExecSql(SqlText);
@@ -495,11 +479,11 @@ where
         /// </summary>
         static public void TableXmlImportData(DataTable Table)
         {
-            Commit(Table);
+            Save(Table);
         }
 
         /// <summary>
-        /// Exports DataType and DataName rows of the current company from system data table to FilePath.
+        /// Exports DataType and DataName rows from system data table to FilePath.
         /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
         static public void TableXmlExportData(string FilePath, string DataType, string DataName)
@@ -508,7 +492,7 @@ where
             TableXmlExportData(FilePath, Row.Table);
         }
         /// <summary>
-        /// Exports DataType rows of the current company from system data table to FilePath.
+        /// Exports DataType rows from system data table to FilePath.
         /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
         static public void TableXmlExportData(string FilePath, string DataType)
@@ -516,7 +500,7 @@ where
             TableXmlExportData(FilePath, Select(DataType, false));
         }
         /// <summary>
-        /// Exports all rows of the current company from system data table to FilePath.
+        /// Exports all rows from system data table to FilePath.
         /// <para>NOTE: Import and Export methods use the <see cref="DataTable"/> ReadXml() and WriteXml() methods. </para>
         /// </summary>
         static public void TableXmlExportData(string FilePath)

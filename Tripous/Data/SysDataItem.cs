@@ -137,7 +137,7 @@ namespace Tripous.Data
             {
                 Row["DataType"] = DataType;
                 Row["DataName"] = DataName;
-                Row["Title"] = TitleKey;
+                Row["TitleKey"] = TitleKey;
 
                 Row["Notes"] = Notes;
 
@@ -209,7 +209,7 @@ namespace Tripous.Data
             if (!IsValidItem)
                 Sys.Throw("Can not save SysDataItem. Invalid SysDataItem");
 
-            SysData.Commit(this);
+            SysData.Save(this);
 
             return this;
         }

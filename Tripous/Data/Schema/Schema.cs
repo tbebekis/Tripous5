@@ -66,21 +66,23 @@ namespace Tripous.Data
         /// <summary>
         /// Executes the versions of a schema against a database.
         /// </summary>
-        /// <param name="Connection">The database connection to execute against.</param>
+        /// <param name="ConnectionInfo">The database connection to execute against.</param>
         /// <param name="VersionList">VersionList is a by Version sorted list of schemas for that database</param>
-        void ExecuteSchema(SqlConnectionInfo Connection, List<SchemaVersion> VersionList)
+        void ExecuteSchema(SqlConnectionInfo ConnectionInfo, List<SchemaVersion> VersionList)
         {
             /* get the current version of the database  from the dbIni table */
             DbIni Ini = Db.MainIni;
-            string Entry = string.Format("Database.Version.{0}.{1}", Connection.Name, Domain);
+            string Entry = string.Format("Database.Version.{0}.{1}", ConnectionInfo.Name, Domain);
             int Version = Ini.ReadInteger(Entry, -1);
 
             foreach (SchemaVersion SV in VersionList)
             {
                 if (SV.Version > Version)
                 {
-                    SchemaExecutor.Execute(SV, Connection);
-                    Db.Metastores.Find(Connection.Name).ReLoad();
+                    SchemaExecutor.Execute(SV, ConnectionInfo);
+
+                    var Metastore = Db.Metastores.Find(ConnectionInfo.Name);
+                    Metastore.ReLoad();                    
 
                     /* write the version to the dbIni */
                     Ini.WriteInteger(Entry, SV.Version);  

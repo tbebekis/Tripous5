@@ -14,7 +14,9 @@ namespace WebDesk
 {
     static public partial class DataStore
     {
- 
+        static DataView vTables;
+
+
         const string EnumLookUpSql = @"
 create table {0} (
    Id                     {1}                  @NOT_NULL primary key
@@ -60,7 +62,10 @@ create table {0} (
 
         }
 
-
+        static bool TableExists(string TableName)
+        {
+            return vTables.Find(TableName) != -1;                
+        }
 
 
         static void RegisterSchema_01()
@@ -211,11 +216,11 @@ create table {TableName} (
             //RegisterSchema_01();
         }
 
-        static void Execute_AppUser(DataView vTables)
-        { 
+        static void Execute_AppUser()
+        {
             string TableName = "AppUser";
-            if (vTables.Find(TableName) != -1)
-                return;
+            if (TableExists(TableName))
+                return;       
 
             DataTableDef Table = new DataTableDef() { Name = TableName };
 
@@ -276,7 +281,8 @@ insert into {TableName} (
 
             SV.Execute();
 
-#warning TODO: Save Table to SysData
+            SysDataItem SDI = Table.ToSysDataItem(SSysDataOwnerName);
+            SysData.Save(SDI);
         }
 
         /// <summary>
@@ -293,9 +299,10 @@ where
 ";
             DataTable Table = SqlStore.Select(SqlText);
             Table.DefaultView.Sort = "DataName";
-            DataView vTables = Table.DefaultView;
+            
+            vTables = Table.DefaultView;
 
-            Execute_AppUser(vTables);
+            Execute_AppUser();
            // Schemas.Execute();
         }
     }

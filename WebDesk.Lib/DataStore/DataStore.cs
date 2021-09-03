@@ -177,7 +177,7 @@ namespace WebDesk
 
                 SqlStore = SqlStores.CreateDefaultSqlStore();
 
-                ExecuteSystemSchema();
+                ExecuteSystemSchema(); 
                 ExecuteSchemas();                
 
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
