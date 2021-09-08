@@ -13671,11 +13671,7 @@ tp.TreeNode = class extends tp.tpObject {
         return tp.IsEmpty(this.fParentTreeNode) ? -1 : this.fParentTreeNode.IndexOf(this);
     }
 
-    /**
-    Gets or sets a user defined value.
-    @type {any}
-    */
-    Tag;
+
 
     /* protected */
     /**
@@ -14028,6 +14024,12 @@ tp.TreeNode = class extends tp.tpObject {
             tv.OnExpanded(this);
     }
 };
+
+/**
+Field. A user defined value.
+@type {any}
+*/
+tp.TreeNode.Tag = null;
 
 /** Field. The expand symbol.
  * @static

@@ -1,0 +1,32 @@
+﻿@{
+    MenuItem[] BarItems = DataStore.GetMainMenu();
+}
+
+<div class="main-menu">
+    <div class="btn-to-left">◂</div>
+    <div class="menu-bar">
+    @foreach (var BarItem in BarItems)
+    {
+       <div class="bar-item">
+           <div class="tp-Text">@BarItem.Title</div>
+           <div class="tp-List">
+               @if (BarItem.Items != null && BarItem.Items.Count > 0)
+                {
+                    foreach (var Item in BarItem.Items)
+                    {
+                        <div class="menu-item" data-command="@Item.Command">@Item.Title</div>
+                    }
+                }
+           </div>
+       </div>     
+    }
+    </div>
+    <div class="btn-to-right">▸</div>
+</div> 
+
+<script>
+    tp.Ready(() => {
+        new app.MainMenu();
+    });
+
+</script>

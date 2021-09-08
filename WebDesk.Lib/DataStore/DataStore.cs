@@ -328,6 +328,47 @@ where
         }
 
 
+
+        static public MenuItem[] GetMainMenu()
+        {
+            List<MenuItem> Result = new List<MenuItem>();
+
+            MenuItem BarItem = new MenuItem() { Title = "File" };
+            Result.Add(BarItem);
+            BarItem.Add("New");
+            BarItem.Add("Open");
+            BarItem.Add("Exit");
+
+            BarItem = new MenuItem() { Title = "Edit" };
+            Result.Add(BarItem);
+            BarItem.Add("Cut");
+            BarItem.Add("Copy");
+            BarItem.Add("Paste");
+            BarItem.Add("Delete");
+
+            BarItem = new MenuItem() { Title = "View" };
+            Result.Add(BarItem);
+            BarItem.Add("Document");
+            BarItem.Add("Image");
+            BarItem.Add("Table");
+            BarItem.Add("Window");
+
+            BarItem = new MenuItem() { Title = "Project" };
+            Result.Add(BarItem);
+            BarItem.Add("Run");
+            BarItem.Add("Debug");
+
+            BarItem = new MenuItem() { Title = "Extensions" };
+            Result.Add(BarItem);
+            BarItem.Add("One");
+            BarItem.Add("Two");
+            BarItem.Add("Three");
+ 
+
+
+            return Result.ToArray();
+        }
+
         /* miscs */
         /// <summary>
         /// Returns a localized string based on a specified resource key, e.g. Customer, and the culture of the current request, e.g. el-GR

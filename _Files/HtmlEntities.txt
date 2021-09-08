@@ -1,0 +1,79 @@
+﻿ 
+
+⋮	vellip	022EE	8942
+…	hellip	02026	8230
+ 
+▪	blacksquare	025AA	9642  
+
+•	bullet	02022	8226
+↶	curvearrowleft	021B6	8630
+↷	curvearrowright	021B7	8631
+
+≡	equiv	02261	8801
+☰		&#9776; 		&#x2630;		trigram for heaven
+
+–	ndash	02013	8211
++	plus	0002B	43
+∘	SmallCircle	02218	8728
+
+➕		&#10133;	&#x2795;	 		HEAVY PLUS SIGN
+➖		&#10134;	&#x2796;	 		HEAVY MINUS SIGN
+✖		&#10006;	&#x2716;			heavy multiplication
+✱		&#10033;	&#x2731;			heavy asterisk
+
+📝		&#128221;		&#x1F4DD;		memo
+🔍		&#128269;		&#x1F50D;		left-pointing magnifying glass
+✎		&#9998;			&#x270E;		lower right pencil
+
+📅		&#128197;		&#x1F4C5;		calendar 
+📆		&#128198;		&#x1F4C6;		tear-off calendar
+⎙		&#9113;			&#x2399;		print screen
+⚐		&#9872;			&#x2690;		white flag
+⚑		&#9873;			&#x2691;		black flag
+⚒		&#9874;			&#x2692;		hammer and pick (tools)
+✉		&#9993;			&#x2709;		envelope (mail, post)
+🌆		&#127750;		&#x1F306;		cityscape at dusk (building, city)
+👤		&#128100;		&#x1F464;		bust in silhouette
+💻		&#128187;		&#x1F4BB;		personal computer
+💾		&#128190;		&#x1F4BE;		floppy disk
+✍
+
+▽	xdtri	025BD	9661
+△	xutri	025B3	9651
+◁	9665	25C1	 	WHITE LEFT-POINTING TRIANGLE
+ 
+◸	ultri	025F8	9720
+◹	urtri	025F9	9721
+◺	lltri	025FA	9722
+⊿	lrtri	022BF	8895
+
+⊲	vltri	022B2	8882
+⊳	vrtri	022B3	8883
+
+
+◃	ltri	025C3	9667
+▹	rtri	025B9	9657
+▿	dtri	025BF	9663
+▵	utri	025B5	9653 
+
+◂	ltrif	025C2	9666
+▸	rtrif	025B8	9656
+▾	dtrif	025BE	9662
+▴	utrif	025B4	9652
+
+▲	9650	25B2	 	BLACK UP-POINTING TRIANGLE
+►	9658	25BA	 	BLACK RIGHT-POINTING POINTER
+▼	9660	25BC	 	BLACK DOWN-POINTING TRIANGLE
+◄	9668	25C4	 	BLACK LEFT-POINTING POINTER
+
+◢	9698	25E2	 	BLACK LOWER RIGHT TRIANGLE
+◣	9699	25E3	 	BLACK LOWER LEFT TRIANGLE
+◤	9700	25E4	 	BLACK UPPER LEFT TRIANGLE
+◥	9701	25E5	 	BLACK UPPER RIGHT TRIANGLE
+
+◀	9664	25C0	 	BLACK LEFT-POINTING TRIANGLE
+
+‹	lsaquo	02039	8249
+
+
+

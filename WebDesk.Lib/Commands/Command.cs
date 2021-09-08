@@ -69,7 +69,7 @@ namespace WebDesk
         /// </summary>
         public CommandType Type { get; set; }
         /// <summary>
-        /// A name unique among all commands in command's group
+        /// A name unique among all commands.
         /// </summary>
         public string Name { get; set; }
         /// <summary>

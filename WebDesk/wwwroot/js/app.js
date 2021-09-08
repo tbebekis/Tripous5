@@ -123,7 +123,7 @@ app.GetContentElement = function (ElementOrSelectorOrHtmlText) {
         Result = ElementOrSelectorOrHtmlText;
     }
 
-    if (Result === null && tp.IsString(ElementOrSelectorOrHtmlText) && !tp.IsBlank(ElementOrSelectorOrHtmlText)) {
+    if (Result === null) {
         if (tp.ContainsText('<div', ElementOrSelectorOrHtmlText, true)) {
             // create a temp div
             let div = tp.Div(tp.Doc.body);
@@ -327,6 +327,7 @@ app.ModalDialog = async function (elContent, Options) {
         Box.ResolveFunc = Resolve;
     });
 };
+
 /** Internal property. A stack where all opened dialogs are placed.  */
 app.ModalDialog.Boxes = [];
 /**
@@ -631,4 +632,40 @@ app.Header.Instance = null;
 
 /** Handles controls and operations of the header */
 app.Footer = {
+};
+
+app.MainMenu = class {
+
+    constructor() {
+        const CssClass = 'tp-Visible';
+        let i, ln;
+
+        this.elMainMenu = tp('.main-menu');
+        this.elMenuBar = tp.Select(this.elMainMenu, '.menu-bar');
+
+        this.BarItems = tp.ChildHTMLElements(this.elMenuBar);
+
+        this.BarItems.forEach((elBarItem) => {
+            let elText, elList;
+
+            elText = tp.Select(elBarItem, '.tp-Text');
+            elList = tp.Select(elBarItem, '.tp-List');
+
+            elText.addEventListener('click', (ev) => {
+                elList.classList.toggle(CssClass);
+            });
+
+            window.addEventListener('click', (ev) => {
+                if (elList.classList.contains(CssClass) && !tp.ContainsEventTarget(elText, ev.target)) {
+                    elList.classList.remove(CssClass);
+                }
+            });
+
+        });
+
+    }
+
+    elMainMenu = null;
+    elMenuBar = null;
+    BarItems = [];
 };
