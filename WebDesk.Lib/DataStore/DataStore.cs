@@ -333,27 +333,27 @@ where
         {
             List<MenuItem> Result = new List<MenuItem>();
 
-            MenuItem BarItem = new MenuItem() { Title = "File" };
+            MenuItem BarItem = new MenuItem() { Title = "File Kai Ase Re File" };
             Result.Add(BarItem);
             BarItem.Add("New");
             BarItem.Add("Open");
             BarItem.Add("Exit");
 
-            BarItem = new MenuItem() { Title = "Edit" };
+            BarItem = new MenuItem() { Title = "Edit kai Edit" };
             Result.Add(BarItem);
             BarItem.Add("Cut");
             BarItem.Add("Copy");
             BarItem.Add("Paste");
             BarItem.Add("Delete");
 
-            BarItem = new MenuItem() { Title = "View" };
+            BarItem = new MenuItem() { Title = "View Ki Apanw Tourla" };
             Result.Add(BarItem);
             BarItem.Add("Document");
             BarItem.Add("Image");
             BarItem.Add("Table");
             BarItem.Add("Window");
 
-            BarItem = new MenuItem() { Title = "Project" };
+            BarItem = new MenuItem() { Title = "Project Apisteyto" };
             Result.Add(BarItem);
             BarItem.Add("Run");
             BarItem.Add("Debug");
@@ -363,8 +363,8 @@ where
             BarItem.Add("One");
             BarItem.Add("Two");
             BarItem.Add("Three");
- 
 
+#warning TODO: Next - add a menu command to display UI for designing database tables
 
             return Result.ToArray();
         }

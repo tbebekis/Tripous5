@@ -91,7 +91,8 @@ app.CreateOverlay = function () {
 };
 
 /**
- * Handles a drop-down operation by toggling the visibility of the drop-down list.
+ * Handles a drop-down operation by toggling the visibility and positioning of the drop-down list. <br />
+ * The list element could be in absolute or fixed position.
  * @param {string|Element} Button Selector or Element. The element which displays the drop-down when is clicked
  * @param {string|Element} List Selector or Element. The drop-down list
  * @param {string} CssClass The css class to toggle to the drop-down list
@@ -99,12 +100,33 @@ app.CreateOverlay = function () {
 app.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
     Button = tp(Button);
     List = tp(List);
-
+ 
     Button.addEventListener('click', (ev) => {
-        List.classList.toggle(CssClass);
+        let Position = tp.ComputedStyle(List).position;
+        let R = Button.getBoundingClientRect();
+        let P; // tp.Point
+
+        // toggle() returns true if adds the class
+        if (List.classList.toggle(CssClass)) {
+            if (tp.IsSameText('absolute', Position)) {
+                P = tp.ToParent(Button);
+                List.X = P.X;
+                List.Y = P.Y + R.height;
+            } else if (tp.IsSameText('fixed', Position)) {
+                P = tp.ToViewport(Button);
+                List.X = P.X;
+                List.Y = P.Y + R.height;
+            }
+        }
     });
 
     window.addEventListener('click', (ev) => {
+        if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
+            List.classList.remove(CssClass);
+        }
+    });
+
+    window.addEventListener('scroll', (ev) => {
         if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
             List.classList.remove(CssClass);
         }
@@ -634,38 +656,177 @@ app.Header.Instance = null;
 app.Footer = {
 };
 
-app.MainMenu = class {
+/** Handles the main menu bar 
+ * Example markup <br />
+ * <pre>
+ *    <div class="main-menu"> *
+ *        <div class="btn-to-left">◂</div>
+ *        <div class="menu-bar">
+ *
+ *           <div class="bar-item">
+ *               <div class="tp-Text">@BarItem.Title</div>
+ *               <div class="tp-List">...</div>
+ *           </div>
+ *
+ *           <div class="bar-item">
+ *               <div class="tp-Text">@BarItem.Title</div>
+ *               <div class="tp-List">...</div>
+ *           </div>
+ *        </div> *
+ *        <div class="btn-to-right">▸</div>
+ *    </div>
+ * </pre> 
+ */
+app.MainMenuHandler = function () {
+    const CssClass = 'tp-Visible';   
 
-    constructor() {
-        const CssClass = 'tp-Visible';
-        let i, ln;
+    let elMainMenu = tp('.main-menu');
+    let elMenuBar = tp.Select(elMainMenu, '.menu-bar');
+    let btnToLeft = tp.Select(elMainMenu, '.btn-to-left');
+    let btnToRight = tp.Select(elMainMenu, '.btn-to-right');
 
-        this.elMainMenu = tp('.main-menu');
-        this.elMenuBar = tp.Select(this.elMainMenu, '.menu-bar');
+    new app.BarHandler(elMenuBar, btnToLeft, btnToRight);
 
-        this.BarItems = tp.ChildHTMLElements(this.elMenuBar);
+    this.BarItems = tp.ChildHTMLElements(elMenuBar);
 
-        this.BarItems.forEach((elBarItem) => {
-            let elText, elList;
+    this.BarItems.forEach((elBarItem) => {
+        let Button = tp.Select(elBarItem, '.tp-Text');
+        let List = tp.Select(elBarItem, '.tp-List');
 
-            elText = tp.Select(elBarItem, '.tp-Text');
-            elList = tp.Select(elBarItem, '.tp-List');
+        app.DropDownHandler(Button, List, CssClass);
+    });
+};
 
-            elText.addEventListener('click', (ev) => {
-                elList.classList.toggle(CssClass);
-            });
 
-            window.addEventListener('click', (ev) => {
-                if (elList.classList.contains(CssClass) && !tp.ContainsEventTarget(elText, ev.target)) {
-                    elList.classList.remove(CssClass);
-                }
-            });
 
-        });
+/** Handles a bar of items, like a menu bar or a tab bar, and the left or right scrolling of bar items. <br />
+ * The bar provides a to-left and a to-right button in order to scroll the items. <br />
+ * Example markup <br />
+ * <pre>
+ *    <div class="container">
+ *        <div class="btn-to-left">◂</div>
+ *        <div class="bar">     
+ *           <div class="item"></div>          
+ *           <div class="item"></div>
+ *        </div>    
+ *        <div class="btn-to-right">▸</div>
+ *    </div>
+ * </pre>
+ * */
+app.BarHandler = class {
+    constructor(Bar, btnToLeft, btnToRight) {
+        this.Bar = tp(Bar);
+        this.btnToLeft = tp(btnToLeft);
+        this.btnToRight = tp(btnToRight);
+        this.BarItems = tp.ChildHTMLElements(this.Bar);
 
+        this.btnToLeft.addEventListener('click', this);
+        this.btnToRight.addEventListener('click', this);
+
+        this.Arrange();
+
+        tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
     }
 
-    elMainMenu = null;
-    elMenuBar = null;
+    Bar = null;
+    btnToLeft = null;
+    btnToRight = null;
     BarItems = [];
+
+    IsItemVisible(el) {
+        let display = tp.ComputedStyle(el).display;
+        return !tp.IsSameText('none', display);
+    }
+    GetBarWidth() {
+        let Parent, Result = 0;
+        Parent = this.Bar.parentNode;
+        Result = tp.BoundingRect(Parent).Width;
+        Result -= (tp.BoundingRect(this.btnToLeft).Width * 2);
+
+        return Result;
+    }
+    GetVisibleItemTotalWidth() {
+        let i, ln, el, R, Result = 0;
+        let Items = this.BarItems.slice().reverse();
+
+        for (i = 0, ln = Items.length; i < ln; i++) {
+            el = Items[i];
+            if (!this.IsItemVisible(el))
+                break;
+
+            R = tp.BoundingRect(el);
+
+            Result += R.Width;
+        }
+
+        return Result;
+    }
+    CanHideNext() {
+        let el = this.BarItems[this.BarItems.length - 2];
+        return this.IsItemVisible(el);
+    }
+    CanShowNext() {
+        let el = this.BarItems[0];
+        return !this.IsItemVisible(el);
+    }
+    HideNext() {
+        let i, ln, el;
+        for (i = 0, ln = this.BarItems.length; i < ln; i++) {
+            el = this.BarItems[i];
+            if (this.IsItemVisible(el)) {
+                el.style.display = 'none';
+                break;
+            }                 
+        }
+    }
+    ShowNext() {
+        let i, ln, el, Items = this.BarItems.slice().reverse();
+        for (i = 0, ln = Items.length; i < ln; i++) {
+            el = Items[i];
+            if (!this.IsItemVisible(el)) {
+                el.style.display = '';
+                break;
+            }
+        }
+    }
+    Arrange() {
+        let i, ln, el, BarWidth, ItemTotalWidth; 
+        BarWidth = this.GetBarWidth();
+
+        // show all
+        for (i = 0, ln = this.BarItems.length; i < ln; i++) {
+            el = this.BarItems[i];
+            el.style.display = '';
+        }
+
+        ItemTotalWidth = this.GetVisibleItemTotalWidth();
+        while (BarWidth < ItemTotalWidth) {
+            this.HideNext();
+            ItemTotalWidth = this.GetVisibleItemTotalWidth();
+        }
+    }
+    /**
+    Notification sent by tp.Viewport when the screen (viewport) size changes. 
+    This method is called only if this.IsScreenResizeListener is true.
+    @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
+    */
+    OnScreenSizeChanged(ScreenModeFlag) {
+        this.Arrange();
+    }
+    handleEvent(e) {
+        switch (e.type) {
+            case 'click':
+                if (tp.ContainsEventTarget(this.btnToLeft, e.target)) {
+                    if (this.CanHideNext())
+                        this.HideNext();
+                }
+                else if (tp.ContainsEventTarget(this.btnToRight, e.target)) {
+                    if (this.CanShowNext())
+                        this.ShowNext();
+                } 
+                
+                break;
+        }
+    }
+
 };

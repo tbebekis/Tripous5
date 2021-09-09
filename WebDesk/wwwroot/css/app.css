@@ -282,6 +282,7 @@ button:not(.btn-test),
     display: flex; 
     align-items: center; 
     flex-grow: 1;
+    overflow: hidden;
 }
 
 .header .main-menu .menu-bar > .bar-item {
@@ -298,7 +299,7 @@ button:not(.btn-test),
 
 .header .main-menu .menu-bar > .bar-item > .tp-List {
     display: none;
-    position: absolute;
+    position: fixed;
     z-index: 2;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     background-color: var(--GrayLight);
