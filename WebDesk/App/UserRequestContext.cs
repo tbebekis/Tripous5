@@ -23,6 +23,7 @@ namespace WebDesk
 
     /// <summary>
     /// Request context for browser clients (cookies)
+    /// <para>NOTE: This is a Scoped Service (i.e. one instance per HTTP Request) </para>
     /// </summary>
     internal class UserRequestContext: RequestContext, IUserRequestContext
     {
@@ -31,6 +32,7 @@ namespace WebDesk
         Requestor fRequestor;
         UserCookie Cookie;
         bool LoadingCookie;
+        Language fLanguage;
 
         /// <summary>
         /// Returns a user from database found under a specified Id, if any, else null.
@@ -218,25 +220,25 @@ namespace WebDesk
         {
             get
             {
-                Language Result = null;
-
-                if (Cookie != null && DataStore.Initialized)
+                if (fLanguage == null)
                 {
-                    string CultureCode = Cookie.CultureCode;
-                    Language[] Languages = DataStore.GetLanguages();
-                    Result =  Tripous.Languages.FindByCultureCode(CultureCode);
+                    if (Cookie != null && DataStore.Initialized)
+                    {
+                        string CultureCode = Cookie.CultureCode;
+                        Language[] Languages = DataStore.GetLanguages();
+                        fLanguage = Tripous.Languages.FindByCultureCode(CultureCode);
+                    }
                 }
 
-                if (Result == null)
-                    Result = DataStore.EnLanguage;
-
-                return Result;
+                return fLanguage != null ? fLanguage : DataStore.EnLanguage;
 
             }
             set
             {
-                if (Language != value)
+                if (fLanguage != value)
                 {
+                    fLanguage = value;
+
                     // CAUTION: Language setter is called from the inherited constructor too, when Cookie is still null.
                     if (Cookie != null)
                     {

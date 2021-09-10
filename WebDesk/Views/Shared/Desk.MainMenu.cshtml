@@ -1,5 +1,5 @@
 ﻿@{
-    MenuItem[] BarItems = DataStore.GetMainMenu();
+    Command[] BarItems = DataStore.GetMainMenu();
 }
 
 <div class="main-menu">
@@ -14,7 +14,7 @@
                 {
                     foreach (var Item in BarItem.Items)
                     {
-                        <div class="menu-item" data-command="@Item.Command">@Item.Title</div>
+                        <div class="menu-item" data-setup="@Item.SerializeSetup()">@Item.Title</div>
                     }
                 }
            </div>

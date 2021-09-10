@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json; 
+
 using Tripous;
 
 namespace WebDesk
@@ -23,6 +25,8 @@ namespace WebDesk
         public Command()
         {
         }
+
+
 
         /* static */
         /// <summary>
@@ -59,6 +63,42 @@ namespace WebDesk
             }
         }
 
+        /// <summary>
+        /// Serializes this instance in order to properly used as a data-* html attribute.
+        /// </summary>
+        public string SerializeSetup()
+        {
+            Dictionary<string, string> Setup = new Dictionary<string, string>();
+
+            Setup[nameof(Name)] = Name;
+            Setup[nameof(Type)] = Type.ToString();
+            Setup[nameof(Tag)] = Tag;
+
+            string JsonText = Json.Serialize(Setup);
+            return JsonText;
+        }
+        /// <summary>
+        /// Adds a child command
+        /// </summary>
+        public void Add(Command Cmd)
+        {
+            if (Items == null)
+                Items = new List<Command>();
+            Items.Add(Cmd);
+        }
+        /// <summary>
+        /// Adds a child command
+        /// </summary>
+        public Command Add(string Name, string TitleKey = "", CommandType Type = CommandType.Ui, string Tag = "")
+        {
+            if (string.IsNullOrWhiteSpace(TitleKey))
+                TitleKey = Name;
+
+            Command Result = new Command() { Name = Name, TitleKey = TitleKey, Type = Type, Tag = Tag};
+            Add(Result);
+            return Result;
+        }
+
         /* properties */
         /// <summary>
         /// Database Id
@@ -84,5 +124,16 @@ namespace WebDesk
         /// Gets meaning according to command's type
         /// </summary>
         public string Tag { get; set; }
+
+        /// <summary>
+        /// Returns the localized title.
+        /// </summary>
+        [JsonIgnore]
+        public string Title => DataStore.Localize(TitleKey);
+
+        /// <summary>
+        /// The list of child commands, if any, else null.
+        /// </summary>
+        public List<Command> Items { get; set; }
     }
 }

@@ -329,36 +329,36 @@ where
 
 
 
-        static public MenuItem[] GetMainMenu()
-        {
-            List<MenuItem> Result = new List<MenuItem>();
+        static public Command[] GetMainMenu()
+        { 
+            List<Command> Result = new List<Command>();
 
-            MenuItem BarItem = new MenuItem() { Title = "File Kai Ase Re File" };
+            Command BarItem = new Command() { TitleKey = "File Kai Ase Re File" };
             Result.Add(BarItem);
             BarItem.Add("New");
             BarItem.Add("Open");
             BarItem.Add("Exit");
 
-            BarItem = new MenuItem() { Title = "Edit kai Edit" };
+            BarItem = new Command() { TitleKey = "Edit kai Edit" };
             Result.Add(BarItem);
             BarItem.Add("Cut");
             BarItem.Add("Copy");
             BarItem.Add("Paste");
             BarItem.Add("Delete");
 
-            BarItem = new MenuItem() { Title = "View Ki Apanw Tourla" };
+            BarItem = new Command() { TitleKey = "View Ki Apanw Tourla" };
             Result.Add(BarItem);
             BarItem.Add("Document");
             BarItem.Add("Image");
             BarItem.Add("Table");
             BarItem.Add("Window");
 
-            BarItem = new MenuItem() { Title = "Project Apisteyto" };
+            BarItem = new Command() { TitleKey = "Project Apisteyto" };
             Result.Add(BarItem);
             BarItem.Add("Run");
             BarItem.Add("Debug");
 
-            BarItem = new MenuItem() { Title = "Extensions" };
+            BarItem = new Command() { TitleKey = "Extensions" };
             Result.Add(BarItem);
             BarItem.Add("One");
             BarItem.Add("Two");
@@ -375,7 +375,7 @@ where
         /// </summary>
         static public string Localize(string Key)
         {
-            return Localize(App.Culture.Name, Key);
+            return Localize(App.Language, Key);
         }
         /// <summary>
         /// Returns a localized string based on a specified resource key, e.g. Customer, and a culture code, e.g. el-GR
@@ -385,15 +385,21 @@ where
             if (StoreLanguages == null)
                 Lib.Error($"Cannot Localize(). No Languages");
 
-            Language Lang = StoreLanguages.FindByCultureCode(CultureCode);  
-            if (Lang == null)
+            Language Language = StoreLanguages.FindByCultureCode(CultureCode);  
+            if (Language == null)
                 Lib.Error($"Language not found: {CultureCode}");
 
-            string Result = Lang.Resources.Find(Key);
+            return Localize(Language, Key);
+        }
+        /// <summary>
+        /// Returns a localized string based on a specified resource key, e.g. Customer, and a culture code, e.g. el-GR
+        /// </summary>
+        static public string Localize(Language Language, string Key)
+        {
+            string Result = Language.Resources.Find(Key);
 
             return !string.IsNullOrWhiteSpace(Result) ? Result : Key;
         }
-
 
         /* properties */
         /// <summary>

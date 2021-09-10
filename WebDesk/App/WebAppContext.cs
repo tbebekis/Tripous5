@@ -126,12 +126,15 @@ namespace WebDesk
         {
             get
             {
-                Language Result = null;
-                Language[] Languages = DataStore.GetLanguages();
-                Result = Languages.FindByCultureCode(Culture.Name);                  
-                if (Result == null) 
-                    Result = DataStore.EnLanguage;
-                return Result;
+                return Lib.RequestContext.Language;
+                /*
+                                Language Result = null;
+                                Language[] Languages = DataStore.GetLanguages();
+                                Result = Languages.FindByCultureCode(Culture.Name);                  
+                                if (Result == null) 
+                                    Result = DataStore.EnLanguage;
+                                return Result; 
+                 */
             }
         }
 

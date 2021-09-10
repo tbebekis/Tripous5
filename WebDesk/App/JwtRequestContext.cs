@@ -13,10 +13,13 @@ namespace WebDesk
 {
 
     /// <summary>
-    /// Request context for JWT clients
+    /// Request context for JWT clients.
+    /// <para>NOTE: This is a Scoped Service (i.e. one instance per HTTP Request) </para>
     /// </summary>
     internal class JwtRequestContext : RequestContext, IJwtRequestContext
     {
+        Language fLanguage;
+
         /* construction */
         /// <summary>
         /// Constructor
@@ -33,22 +36,20 @@ namespace WebDesk
         {
             get
             {
-                Language Result = null;
-
-                // read the token from HTTP headers
-                JwtSecurityToken Token = JwtAuthHelper.ReadTokenFromRequestHeader(HttpContext);
-
-                if (Token != null && WSys.ContainsClaim(Token.Claims, Requestor.SCultureClaimType))
+                if (fLanguage == null)
                 {
-                    string CultureCode = WSys.GetClaimValue(Token.Claims, Requestor.SCultureClaimType);
-                    Language[] Languages = DataStore.GetLanguages();
-                    Result = Languages.FindByCultureCode(CultureCode);
-                } 
+                    // read the token from HTTP headers
+                    JwtSecurityToken Token = JwtAuthHelper.ReadTokenFromRequestHeader(HttpContext);
 
-                if (Result == null)
-                    Result = DataStore.EnLanguage;
+                    if (Token != null && WSys.ContainsClaim(Token.Claims, Requestor.SCultureClaimType))
+                    {
+                        string CultureCode = WSys.GetClaimValue(Token.Claims, Requestor.SCultureClaimType);
+                        Language[] Languages = DataStore.GetLanguages();
+                        fLanguage = Languages.FindByCultureCode(CultureCode);
+                    }
+                }
 
-                return Result;
+                return fLanguage != null? fLanguage: DataStore.EnLanguage;
             }
             set
             {

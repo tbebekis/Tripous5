@@ -53,7 +53,14 @@ namespace WebDesk.AspNet
         }
 
         /// <summary>
-        /// Returns the path url of an image of a theme, e.g. ~/themes/THEME/Content/images/IMAGE.png
+        /// Returns the path url of a 'system' image, e.g. ~/images/system/IMAGE.png
+        /// </summary>
+        public string SystemImageUrl(string FileName)
+        {
+            return Pictures.SystemImageUrlFunc(FileName);
+        }
+        /// <summary>
+        /// Returns the path url of an image, e.g. ~/images/IMAGE.png
         /// </summary>
         public string ImageUrl(string FileName)
         {

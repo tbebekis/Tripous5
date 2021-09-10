@@ -23,7 +23,7 @@ namespace WebDesk
         /// </summary>
         static Pictures()
         {
-            ImageUrlFunc = DefaultImageUrl;
+            //ImageUrlFunc = DefaultImageUrl;
         }
 
         /* public */
@@ -140,7 +140,16 @@ namespace WebDesk
         }
 
         /// <summary>
-        /// Returns the path url of an image, e.g. ~/themes/THEME/Content/images/IMAGE.png
+        /// Returns the path url of a 'system' image, e.g. ~/images/system/IMAGE.png
+        /// </summary>
+        static public string DefaultSystemImageUrl(string FileName)
+        {
+            string S = $"~/images/system";
+            S = Sys.UrlCombine(S, FileName);
+            return S;
+        }
+        /// <summary>
+        /// Returns the path url of an image, e.g. ~/images/IMAGE.png
         /// </summary>
         static public string DefaultImageUrl(string FileName)
         {
@@ -154,10 +163,15 @@ namespace WebDesk
         /// The full path where images are placed
         /// </summary>
         static public string ImagesPath { get; set; }
+
         /// <summary>
         /// The function to construct a url to an image. Defaults to DefaultImageUrl() method
         /// </summary>
-        static public Func<string, string> ImageUrlFunc { get; set; }
+        static public Func<string, string> ImageUrlFunc { get; set; } = DefaultImageUrl;
+        /// <summary>
+        /// The function to construct a url to a 'system' image. Defaults to DefaultSystemImageUrl() method
+        /// </summary>
+        static public Func<string, string> SystemImageUrlFunc { get; set; } = DefaultSystemImageUrl;
     }
 
 }
