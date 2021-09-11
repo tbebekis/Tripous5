@@ -8258,269 +8258,7 @@ tp.SafeId = function (Prefix = tp.Prefix) {
 tp.Environment = {
 
     Initialize: function () {
-        let env = tp.Environment;
-
-        env.fScrollbarSize = null;
-
-        env.ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-        var lua = env.ua.toLowerCase();
-
-        env.fname = '';
-        env.version = '';
-        var versionIdentifier = env.Match(/version\/(\d+(\.\d+)?)/i);
-        env.osversion = '';
-
-        env.iosdevice = env.Match(/(ipod|iphone|ipad)/i).toLowerCase();
-        env.likeAndroid = /like android/i.test(lua);
-        env.android = !env.likeAndroid && /android/i.test(lua);
-        env.ios = false;
-        env.firefoxos = false;
-        env.sailfish = false;
-        env.webos = false;
-        env.bada = false;
-        env.tizen = false;
-
-        env.tablet = /tablet/i.test(lua);
-        env.mobile = !env.tablet && /[^-]mobi/i.test(lua);
-        env.iphone = false;
-        env.ipad = false;
-        env.ipod = false;
-        env.windowsphone = false;
-        env.blackberry = false;
-        env.touchpad = false;
-
-        env.msie = false;
-        env.firefox = false;
-        env.chrome = false;
-        env.opera = false;
-        env.safari = false;
-        env.seamonkey = false;
-        env.silk = false;
-        env.phantom = false;
-
-        env.webkit = false;
-        env.gecko = false;
-
-        env.grade = 'X';
-
-        env.windows = /windows|win32|win64/.test(lua);// Match(/windows|Windows|win32|win64/);
-        env.mac = /macintosh|mac os x/.test(lua);
-        env.air = /adobeair/.test(lua);
-        env.linux = /linux/.test(lua);
-        env.secure = /^https/i.test(window.location.protocol);
-
-
-        if (/opera|opr/i.test(lua)) {
-            env.fname = 'Opera';
-            env.opera = true;
-            env.version = versionIdentifier || env.Match(/(?:opera|opr)[\s\/](\d+(\.\d+)?)/i);
-        }
-        else if (/windows phone/i.test(lua)) {
-            env.fname = 'Windows Phone';
-            env.windowsphone = true;
-            env.msie = true;
-            env.version = env.Match(/iemobile\/(\d+(\.\d+)?)/i);
-        }
-        else if (/msie|trident/i.test(lua)) {
-            env.fname = 'Internet Explorer';
-            env.msie = true;
-            env.version = env.Match(/(?:msie |rv:)(\d+(\.\d+)?)/i);
-        }
-        else if (/chrome|crios|crmo/i.test(lua)) {
-            env.fname = 'Chrome';
-            env.chrome = true;
-            env.version = env.Match(/(?:chrome|crios|crmo)\/(\d+(\.\d+)?)/i);
-        }
-        else if (env.iosdevice) {
-            env.fname = env.iosdevice === 'iphone' ? 'iPhone' : env.iosdevice === 'ipad' ? 'iPad' : 'iPod';
-            env.iphone = env.fname === 'iPhone';
-            env.ipad = env.fname === 'iPad';
-            env.ipod = env.fname === 'iPod';
-            // WTF: version is not part of user agent in web apps
-            if (versionIdentifier) {
-                env.version = versionIdentifier;
-            }
-        }
-        else if (/sailfish/i.test(lua)) {
-            env.fname = 'Sailfish';
-            env.sailfish = true;
-            env.version = env.Match(/sailfish\s?browser\/(\d+(\.\d+)?)/i);
-        }
-        else if (/seamonkey\//i.test(lua)) {
-            env.fname = 'SeaMonkey';
-            env.seamonkey = true;
-            env.version = env.Match(/seamonkey\/(\d+(\.\d+)?)/i);
-        }
-        else if (/firefox|iceweasel/i.test(lua)) {
-            env.fname = 'Firefox';
-            env.firefox = true;
-            env.version = env.Match(/(?:firefox|iceweasel)[ \/](\d+(\.\d+)?)/i);
-
-            if (/\((mobile|tablet);[^\)]*rv:[\d\.]+\)/i.test(lua)) {
-                env.firefoxos = true;
-            }
-        }
-        else if (/silk/i.test(lua)) {
-            env.fname = 'Amazon Silk';
-            env.silk = true;
-            env.version = env.Match(/silk\/(\d+(\.\d+)?)/i);
-        }
-        else if (env.android) {
-            env.fname = 'Android';
-            env.version = versionIdentifier;
-        }
-        else if (/phantom/i.test(lua)) {
-            env.fname = 'PhantomJS';
-            env.phantom = true;
-            env.version = env.Match(/phantomjs\/(\d+(\.\d+)?)/i);
-        }
-        else if (/blackberry|\bbb\d+/i.test(lua) || /rim\stablet/i.test(lua)) {
-            env.fname = 'BlackBerry';
-            env.blackberry = true;
-            env.version = versionIdentifier || env.Match(/blackberry[\d]+\/(\d+(\.\d+)?)/i);
-        }
-        else if (/(web|hpw)os/i.test(lua)) {
-            env.fname = 'WebOS';
-            env.webos = true;
-            env.version = versionIdentifier || env.Match(/w(?:eb)?osbrowser\/(\d+(\.\d+)?)/i);
-            /touchpad\//i.test(lua) && (env.touchpad = true);
-        }
-        else if (/bada/i.test(lua)) {
-            env.fname = 'Bada';
-            env.bada = true;
-            env.version = env.Match(/dolfin\/(\d+(\.\d+)?)/i);
-        }
-        else if (/tizen/i.test(lua)) {
-            env.fname = 'Tizen';
-            env.tizen = true;
-            env.version = env.Match(/(?:tizen\s?)?browser\/(\d+(\.\d+)?)/i) || versionIdentifier;
-        }
-        else if (/safari/i.test(lua)) {
-            env.fname = 'Safari';
-            env.safari = true;
-            env.version = versionIdentifier;
-        }
-
-
-        // set webkit or gecko flag for browsers based on these engines
-        if (/(apple)?webkit/i.test(lua)) {
-            env.fname = env.fname || "Webkit";
-            env.webkit = true;
-            if (!env.version && versionIdentifier) {
-                env.version = versionIdentifier;
-            }
-        } else if (!env.opera && /gecko\//i.test(lua)) {
-            env.fname = env.fname || "Gecko";
-            env.gecko = true;
-            env.version = env.version || env.Match(/gecko\/(\d+(\.\d+)?)/i);
-        }
-
-        // set OS flags for platforms that have multiple browsers
-        if (env.android || env.silk) {
-            env.android = true;
-        } else if (env.iosdevice) {
-            env.ios = true;
-        }
-
-        // OS version extraction
-        var osVersion = '';
-        if (env.iosdevice) {
-            osVersion = env.Match(/os (\d+([_\s]\d+)*) like mac os x/i);
-            osVersion = osVersion.replace(/[_\s]/g, '.');
-        } else if (env.android) {
-            osVersion = env.Match(/android[ \/-](\d+(\.\d+)*)/i);
-        } else if (env.windowsphone) {
-            osVersion = env.Match(/windows phone (?:os)?\s?(\d+(\.\d+)*)/i);
-        } else if (env.webos) {
-            osVersion = env.Match(/(?:web|hpw)os\/(\d+(\.\d+)*)/i);
-        } else if (env.blackberry) {
-            osVersion = env.Match(/rim\stablet\sos\s(\d+(\.\d+)*)/i);
-        } else if (env.bada) {
-            osVersion = env.Match(/bada\/(\d+(\.\d+)*)/i);
-        } else if (env.tizen) {
-            osVersion = env.Match(/tizen[\/\s](\d+(\.\d+)*)/i);
-        }
-        if (osVersion) {
-            env.osversion = osVersion;
-        }
-
-        // device type extraction
-        var osMajorVersion = env.osversion.split('.')[0];
-        if (env.tablet || env.iosdevice === 'ipad' || (env.android && (osMajorVersion === '3' || (osMajorVersion === '4' && !env.mobile))) || env.silk) {
-            env.tablet = true;
-        } else if (env.mobile || env.iosdevice === 'iphone' || env.iosdevice === 'ipod' || env.android || env.blackberry || env.webos || env.bada) {
-            env.mobile = true;
-        }
-
-        // Graded Browser Support
-        // http://developer.yahoo.com/yui/articles/gbs
-        if (env.msie && env.version >= 10 ||
-            env.chrome && env.version >= 20 ||
-            env.firefox && env.version >= 20.0 ||
-            env.safari && env.version >= 6 ||
-            env.opera && env.version >= 10.0 ||
-            env.ios && env.osversion && env.osversion.split(".")[0] >= '6'
-        ) {
-            env.grade = 'A';
-        }
-        else if (env.msie && env.version < 10 ||
-            env.chrome && env.version < 20 ||
-            env.firefox && env.version < 20.0 ||
-            env.safari && env.version < 6 ||
-            env.opera && env.version < 10.0 ||
-            env.ios && env.osversion && env.osversion.split(".")[0] < '6'
-        ) {
-            env.grade = 'C';
-        }
-    },
-
-    Match: function (regex) {
-        var m = tp.Environment.ua.match(regex);
-        return m && m.length > 1 && m[1] || '';
-    },
-
-    get Name() { return tp.Environment.fname; },
-    get Version() { return tp.Environment.version; },
-    get OSVersion() { return tp.Environment.osversion; },
-
-    get IE() { return tp.Environment.msie; },
-    get Firefox() { return tp.Environment.firefox; },
-    get Chrome() { return tp.Environment.chrome; },
-    get Opera() { return tp.Environment.opera; },
-    get Safari() { return tp.Environment.safari; },
-    get SeaMonkey() { return tp.Environment.seamonkey; },
-    get Silk() { return tp.Environment.silk; },
-    get Phantom() { return tp.Environment.phantom; },
-
-    get WebKit() { return tp.Environment.webkit; },
-    get Gecko() { return tp.Environment.gecko; },
-
-    get Windows() { return tp.Environment.windows; },
-    get Mac() { return tp.Environment.mac; },
-    get Linux() { return tp.Environment.linux; },
-
-    get Android() { return tp.Environment.android; },
-    get AndroidLike() { return tp.Environment.likeAndroid; },
-    get Ios() { return tp.Environment.ios; },
-    get FirefoxOs() { return tp.Environment.firefoxos; },
-    get Sailfish() { return tp.Environment.sailfish; },
-    get WebOs() { return tp.Environment.webos; },
-    get Air() { return tp.Environment.air; },
-    get Bada() { return tp.Environment.bada; },
-    get Tizen() { return tp.Environment.tizen; },
-
-
-    get IosDevice() { return tp.Environment.iosdevice; },
-    get Tablet() { return tp.Environment.tablet; },
-    get Mobile() { return tp.Environment.mobile; },
-    get iPhone() { return tp.Environment.iphone; },
-    get iPad() { return tp.Environment.ipad; },
-    get iPod() { return tp.Environment.ipod; },
-    get WindowsPhone() { return tp.Environment.windowsphone; },
-    get BlackBerry() { return tp.Environment.blackberry; },
-
-    get Grade() { return tp.Environment.grade; },
-    get Secure() { return tp.Environment.secure; },    // https
+    },         
 
     get ScrollbarSize() {
         if (!tp.Environment.fScrollbarSize) {
@@ -16390,9 +16128,18 @@ Executes a specified callback function when the document is loaded and ready.
 tp.Ready = function (Func) {
     tp.AddReadyListener(Func);
 };
-/** Just a placeholder. Client code may re-assign this property. */
-tp.Main = function () {
-};
+/** Just a placeholder. Client code may re-assign this property. 
+ * NOTE: It is executed before any ready listeners.
+ */
+tp.AppInitializeBefore = function () { };
+/** Just a placeholder. Client code may re-assign this property.
+ * NOTE: It is executed after any ready listeners.
+ * */
+tp.AppInitializeAfter = function () { };
+/** Just a placeholder. Client code may re-assign this property.
+ * NOTE: It is executed after the AppInitializeAfter()
+ * */
+tp.Main = function () { };
 
 /** Just a placeholder for a function that adds languages. */
 tp.AddLanguagesFunc = null;
@@ -16517,6 +16264,9 @@ tp.AddLanguagesFunc = null;
         tp.Environment.Initialize();
         tp.Viewport.Initialize();
 
+        if (tp.IsFunction(tp.AppInitializeBefore))
+            tp.Call(tp.AppInitializeBefore);
+
         if (tp.Page) {
             tp.Page.CreatePage();
         }
@@ -16529,10 +16279,13 @@ tp.AddLanguagesFunc = null;
             listener.Func.call(listener.Context);
         }
 
+        if (tp.IsFunction(tp.AppInitializeAfter))
+            tp.Call(tp.AppInitializeAfter);
+
         // call Main()
-        if (tp.IsFunction(tp.Main)) {
+        if (tp.IsFunction(tp.Main))  
             tp.Call(tp.Main);
-        }
+ 
 
     };
 

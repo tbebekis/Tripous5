@@ -4841,9 +4841,7 @@ tp.SiteMenu = class extends tp.tpElement {
         this.HookEvent(tp.Events.Click);
         tp.On(this.Document, tp.Events.Click, this, false);
 
-        if (!tp.Environment.Mobile) {
-            tp.On(this.Document, tp.Events.MouseEnter, this, false);
-        }
+        tp.On(this.Document, tp.Events.MouseEnter, this, false);
     }
     /**
     Initializes fields and properties just before applying the create params.   
@@ -12820,8 +12818,8 @@ tp.RadioGroup = class extends tp.Control {
         let o = {
             position: 'absolute',
             overflow: 'auto',
-            left: '6px',
-            top: tp.Environment.Gecko ? '2px' : '24px',
+            left: '6px',            
+            top: '10px',   
             right: '6px',
             bottom: '6px'
         };

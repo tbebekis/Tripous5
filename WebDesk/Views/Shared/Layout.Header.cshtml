@@ -5,18 +5,26 @@
 }
 
 <header class="header">
+    @if (Lib.IsCookieAuthenticated)
+    {
+        @await Html.PartialAsync("Desk.MainMenu")
+    }
 
-    @await Html.PartialAsync("Desk.MainMenu")
-
-    <div class="top-zone">
+    <div class="tool-bar-zone">
         <div class="inner">
             @* Logo *@
             <div class="logo">
 
             </div>
+
+            @if (Lib.IsCookieAuthenticated)
+            {
+                <div class="tool-bar">
+                    tool-bar
+                </div>
+            }
+
             <div class="tp-FlexFill"></div>
-
-
 
             @* Language *@
             <div class="language-selector-container">
@@ -63,9 +71,7 @@
         </div>
     </div>
 
-    <div class="tool-bar-zone">
-        tool-bar
-    </div>
+
 </header>
 
 

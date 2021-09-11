@@ -1,8 +1,10 @@
 ﻿@{
     Layout = "Layout";
 }
+
 <link href="~/css/desk.css" rel="stylesheet" />
+<script src="~/js/desk.js"></script>
+
 <main class="desk">
-    @await Html.PartialAsync("Desk.SideBar")
     @RenderBody()
 </main>

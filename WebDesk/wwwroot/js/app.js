@@ -656,46 +656,7 @@ app.Header.Instance = null;
 app.Footer = {
 };
 
-/** Handles the main menu bar 
- * Example markup <br />
- * <pre>
- *    <div class="main-menu"> *
- *        <div class="btn-to-left">◂</div>
- *        <div class="menu-bar">
- *
- *           <div class="bar-item">
- *               <div class="tp-Text">@BarItem.Title</div>
- *               <div class="tp-List">...</div>
- *           </div>
- *
- *           <div class="bar-item">
- *               <div class="tp-Text">@BarItem.Title</div>
- *               <div class="tp-List">...</div>
- *           </div>
- *        </div> *
- *        <div class="btn-to-right">▸</div>
- *    </div>
- * </pre> 
- */
-app.MainMenuHandler = function () {
-    const CssClass = 'tp-Visible';   
-
-    let elMainMenu = tp('.main-menu');
-    let elMenuBar = tp.Select(elMainMenu, '.menu-bar');
-    let btnToLeft = tp.Select(elMainMenu, '.btn-to-left');
-    let btnToRight = tp.Select(elMainMenu, '.btn-to-right');
-
-    new app.BarHandler(elMenuBar, btnToLeft, btnToRight);
-
-    this.BarItems = tp.ChildHTMLElements(elMenuBar);
-
-    this.BarItems.forEach((elBarItem) => {
-        let Button = tp.Select(elBarItem, '.tp-Text');
-        let List = tp.Select(elBarItem, '.tp-List');
-
-        app.DropDownHandler(Button, List, CssClass);
-    });
-};
+ 
 
 
 
@@ -830,3 +791,6 @@ app.BarHandler = class {
     }
 
 };
+
+
+ 

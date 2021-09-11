@@ -710,7 +710,7 @@ tp.GridColumn = class extends tp.tpObject {
     */
     DragStart(e) {
         this.Grid.DraggedColumn = this;
-        if (e.dataTransfer && tp.Environment.Firefox) {
+        if (e.dataTransfer) {
             e.dataTransfer.setData("text/plain", "just for the Firefox");
         }
         tp.AddClass(this.fTextContainer, tp.Classes.DragSource);
@@ -4649,22 +4649,15 @@ tp.Grid = class extends tp.Control  {
     PageScroll(Up) {
         Up = Up === true;
 
-        if (tp.Environment.IE) {
-            var Count = Math.floor(this.ViewportHeight / this.RowHeight);
-            for (var i = 0; i < Count; i++) {
-                this.RowScroll(Up);
-            }
-        } else {
-            this.pnlViewport.ScrollTop = Up ? this.pnlViewport.ScrollTop - this.ViewportHeight : this.pnlViewport.ScrollTop + this.ViewportHeight;
+        this.pnlViewport.ScrollTop = Up ? this.pnlViewport.ScrollTop - this.ViewportHeight : this.pnlViewport.ScrollTop + this.ViewportHeight;
 
-            var CacheIndex = Up ? this.VisibleRowIndexFirst + 1 : this.VisibleRowIndexLast - 1;
+        var CacheIndex = Up ? this.VisibleRowIndexFirst + 1 : this.VisibleRowIndexLast - 1;
 
-            var elNode = this.ByCacheIndex(CacheIndex);
-            if (elNode) {
-                elNode.focus();
-                if (elNode.children.length > 0) {
-                    //elNode.children[0].focus();
-                }
+        var elNode = this.ByCacheIndex(CacheIndex);
+        if (elNode) {
+            elNode.focus();
+            if (elNode.children.length > 0) {
+                //elNode.children[0].focus();
             }
         }
 

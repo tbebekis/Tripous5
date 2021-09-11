@@ -4,9 +4,4 @@
     flex-grow: 1;
 }
 
-.desk-sidebar {
-    position: relative;
-    display: flex; 
-    min-width: 120px;
-    background-color: var(--Light2);
-}
+ 
