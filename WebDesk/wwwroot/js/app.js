@@ -372,235 +372,8 @@ app.ModalDialog.Cancel = function () {
     }
 };
 
-/**
- * A Yes-No dialog box
- * @param {string} Title The dialog title
- * @param {string} MessageText The message text to display
- * @returns {Promise} Returns true/false as a Promise
- */
-app.YesNoBox = async function (Title, MessageText) {
-
-    let Result = false;
-
-    let elContainer = tp('.yes-no-box-content-template');
-    elContainer = elContainer.cloneNode(true);
-    elContainer.className = 'yes-no-box-content';
-
-    let elTextArea = tp.Select(elContainer, '.message-text-area');
-    elTextArea.innerHTML = MessageText;
-
-    let btnYes = tp.Select(elContainer, '.btn-yes');
-    btnYes.addEventListener('click', (e) => {
-        e.stopPropagation();
-        Result = true;
-        app.ModalDialog.Close(Result);
-    });
-
-    let btnNo = tp.Select(elContainer, '.btn-no');
-    btnNo.addEventListener('click', (e) => {
-        e.stopPropagation();
-        app.ModalDialog.Close(Result);
-    });
-
-    let Options = {
-        Text: Title
-    };
-
-    // return the promise
-    let P = await app.ModalDialog(elContainer, Options);
-    return P;
-};
-
-
-/** Implementation of Tripous Notification Box.
- * A notification box is displayed by calling tp.InfoNote(Message), tp.ErrorNote(Message), etc.
- * */
-app.NotificationBox = class extends tp.tpElement {
-    /**
-     * Constructor
-     * @param {string} Message The message
-     * @param {tp.NotificationType} Type The type
-     */
-    constructor(Message, Type) {
-
-        let el = tp('.notification-box-template');
-        el = el.cloneNode(true);
-        let S = el.className;
-        S = S.replace('-template', '');
-        el.className = S;
-
-        // append to the body
-        tp.Doc.body.appendChild(el);
-
-        // call the super constructor
-        super(el, null);
-
-        this.Type = Type;
-        if (this.Type === tp.NotificationType.Error)
-            this.AddClass('error');
-        else if (this.Type === tp.NotificationType.Success)
-            this.AddClass('success');
-        else
-            this.AddClass('info');
-
-        this.btnClose = tp.Select(this.Handle, '.close');
-        this.divCaption = tp.Select(this.Handle, '.caption');
-        this.divCaption.tabIndex = 0;
-
-        el = tp.Select(this.Handle, '.left');
-        el.tabIndex = 0;
-
-        el = tp.Select(this.Handle, '.right');
-        el.tabIndex = 0;
-
-        let sType = tp.EnumNameOf(tp.NotificationType, Type);
-        let Title = tp.NotificationBoxSetup.Titles[sType];
-
-        el = tp.Select(this.divCaption, '.title');
-        el.innerHTML = Title;
-
-        el = tp.Select(this.Handle, '.right .text');
-        el.innerHTML = Message;
-
-        // style
-        let CssStyle = {
-            'opacity': '0',
-            'transition': tp.Format('opacity {0}s ease-in 0s', tp.NotificationBoxSetup.DurationSecs),  // google : css transition fade out  
-        };
-
-        if (tp.Viewport.IsXSmall) {
-            CssStyle['left'] = '2px';
-            CssStyle['right'] = '2px';
-        } else {
-            CssStyle['width'] = tp.px(tp.NotificationBoxSetup.Width);
-        }
-        this.SetStyle(CssStyle);
-
-        tp.NotificationBoxes.Place(this.Handle);
-
-        // add to the notification boxes
-        tp.NotificationBoxes.Add(this.Handle);
-
-        // set a close timeout
-        setTimeout(function (box) {
-            if (!box.Clicked) {
-                box.Dispose();
-            }
-        }, tp.NotificationBoxSetup.DurationSecs * 1000, this);
-
-        // Dragger setup
-        this.Dragger = new tp.Dragger(tp.DraggerMode.Both, this.Handle, this.divCaption);
-        this.Dragger.On(tp.Events.DragStart, this.OnAnyEvent, this);
-
-        // events
-        this.HookEvent(tp.Events.Click);
-        this.HookEvent(tp.Events.KeyDown);
-        this.HookEvent(tp.Events.MouseDown);
-
-        this.BringToFront();
-    }
-
-    Type = tp.NotificationType.Information;
-    Clicked = false;
-    Dragger = null;       // tp.Dragger = null;
-
-    btnClose = null;      // HTMLImageElement    
-    divCaption = null;    // HTMLElement; 
-
-    /**
-     * Initializes the 'static' and 'read-only' class fields
-     * @protected 
-     * @override
-    */
-    InitClass() {
-        super.InitClass();
-        this.tpClass = 'app.NotificationBox';
-    }
-    /**
-    Handles any DOM event
-    @protected
-    @override
-    @param {Event}  e The Event object
-    */
-    OnAnyDOMEvent(e) {
-        let Type = tp.Events.ToTripous(e.type);
-
-        if (tp.IsSameText(tp.Events.Click, Type)) {
-            if (this.Clicked !== true) {
-                this.Clicked = true;
-                this.Handle.style.transition = 'none';
-                this.Handle.style.opacity = '1';
-            }
-
-            if (e.target === this.btnClose) {
-                this.Dispose();
-            }
-        } else if (e instanceof KeyboardEvent) {
-            if (tp.IsSameText(tp.Events.KeyDown, Type)) {
-                var Key = e.keyCode;
-                if (tp.Keys.Escape === Key) {
-                    this.Dispose();
-                }
-            }
-        } else if (tp.IsSameText(tp.Events.MouseDown, Type)) {
-            this.BringToFront();
-        }
-
-        if (!this.IsDisposed)
-            super.OnAnyDOMEvent(e);
-    }
-    /**
-    Handles any event. Even DOM events are send in this method.
-    @protected
-    @override
-    @param {tp.EventArgs} Args The tp.EventArgs object
-    */
-    OnAnyEvent(Args) {
-        if (tp.IsSameText(tp.Events.DragStart, Args.EventName)) {
-            if (this.Dragger) {
-                tp.NotificationBoxes.Remove(this.Handle);
-
-                let X = this.Handle.offsetLeft - 5;
-                let Y = this.Handle.offsetTop - 5;
-
-                requestAnimationFrame(() => {
-                    //this.Position = 'absolute';
-                    this.X = X;
-                    this.Y = Y;
-                });
-            }
-        }
-    }
-    /**        
-    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
-    @protected
-    @override
-    */
-    Dispose() {
-        tp.NotificationBoxes.Remove(this.Handle);
-        super.Dispose();
-    }
-
-};
-
-tp.NotificationBoxSetup.Titles = {
-    Information: 'Information',
-    Warning: 'Warning',
-    Error: 'Error',
-    Success: 'Success'
-};
-
-/** Replace the above tp.NotifyFunc <br />
-Displays a notification message to the user.
-@param {string} Message The notification message
-@param {NotificationType} Type The type of notification, i.e. Warning, Error, etc
- */
-tp.NotifyFunc = (Message, Type) => {
-    let Box = new app.NotificationBox(Message, Type);
-};
-
-
-
+ 
+ 
 /** Handles controls and operations of the header */
 app.Header = class {
     constructor(Options) {
@@ -666,7 +439,7 @@ app.Footer = {
  * <pre>
  *    <div class="container">
  *        <div class="btn-to-left">◂</div>
- *        <div class="bar">     
+ *        <div class="tab-bar">
  *           <div class="item"></div>          
  *           <div class="item"></div>
  *        </div>    
@@ -674,12 +447,13 @@ app.Footer = {
  *    </div>
  * </pre>
  * */
-app.BarHandler = class {
-    constructor(Bar, btnToLeft, btnToRight) {
-        this.Bar = tp(Bar);
-        this.btnToLeft = tp(btnToLeft);
-        this.btnToRight = tp(btnToRight);
-        this.BarItems = tp.ChildHTMLElements(this.Bar);
+app.TabBarHandler = class {
+    constructor(Container) {
+        this.elContainer = tp(Container);
+
+        this.btnToLeft = tp.Select(this.elContainer, '.btn-to-left');
+        this.TabBar = tp.Select(this.elContainer, '.tab-bar');
+        this.btnToRight = tp.Select(this.elContainer, '.btn-to-right');
 
         this.btnToLeft.addEventListener('click', this);
         this.btnToRight.addEventListener('click', this);
@@ -689,10 +463,11 @@ app.BarHandler = class {
         tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
     }
 
-    Bar = null;
+    elContainer = null;
+    TabBar = null;
     btnToLeft = null;
     btnToRight = null;
-    BarItems = [];
+    
 
     IsItemVisible(el) {
         let display = tp.ComputedStyle(el).display;
@@ -700,15 +475,19 @@ app.BarHandler = class {
     }
     GetBarWidth() {
         let Parent, Result = 0;
-        Parent = this.Bar.parentNode;
+        Parent = this.TabBar.parentNode;
         Result = tp.BoundingRect(Parent).Width;
         Result -= (tp.BoundingRect(this.btnToLeft).Width * 2);
 
         return Result;
     }
+    GetTabBarItems() {
+        return tp.ChildHTMLElements(this.TabBar);
+    }
     GetVisibleItemTotalWidth() {
+        let BarItems = this.GetTabBarItems();
         let i, ln, el, R, Result = 0;
-        let Items = this.BarItems.slice().reverse();
+        let Items = BarItems.slice().reverse();
 
         for (i = 0, ln = Items.length; i < ln; i++) {
             el = Items[i];
@@ -723,17 +502,20 @@ app.BarHandler = class {
         return Result;
     }
     CanHideNext() {
-        let el = this.BarItems[this.BarItems.length - 2];
+        let BarItems = this.GetTabBarItems();
+        let el = BarItems[BarItems.length - 2];
         return this.IsItemVisible(el);
     }
     CanShowNext() {
-        let el = this.BarItems[0];
+        let BarItems = this.GetTabBarItems();
+        let el = BarItems[0];
         return !this.IsItemVisible(el);
     }
     HideNext() {
+        let BarItems = this.GetTabBarItems();
         let i, ln, el;
-        for (i = 0, ln = this.BarItems.length; i < ln; i++) {
-            el = this.BarItems[i];
+        for (i = 0, ln = BarItems.length; i < ln; i++) {
+            el = BarItems[i];
             if (this.IsItemVisible(el)) {
                 el.style.display = 'none';
                 break;
@@ -741,7 +523,8 @@ app.BarHandler = class {
         }
     }
     ShowNext() {
-        let i, ln, el, Items = this.BarItems.slice().reverse();
+        let BarItems = this.GetTabBarItems();
+        let i, ln, el, Items = BarItems.slice().reverse();
         for (i = 0, ln = Items.length; i < ln; i++) {
             el = Items[i];
             if (!this.IsItemVisible(el)) {
@@ -751,12 +534,13 @@ app.BarHandler = class {
         }
     }
     Arrange() {
+        let BarItems = this.GetTabBarItems();
         let i, ln, el, BarWidth, ItemTotalWidth; 
         BarWidth = this.GetBarWidth();
 
         // show all
-        for (i = 0, ln = this.BarItems.length; i < ln; i++) {
-            el = this.BarItems[i];
+        for (i = 0, ln = BarItems.length; i < ln; i++) {
+            el = BarItems[i];
             el.style.display = '';
         }
 

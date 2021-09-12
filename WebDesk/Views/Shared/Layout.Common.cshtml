@@ -17,29 +17,9 @@
     </div>
 </div>
 
-<div class="yes-no-box-content-template">
-    <textarea class="message-text-area" rows="10" cols="60">
-        @*PLACE QUESTION TEXT HERE*@
-    </textarea>
-    <div class="buttons">
-        <button class="btn-yes">@L("Yes")</button>
-        <button class="btn-no">@L("No")</button>
-    </div>
-</div>
+ 
 
-<div class="notification-box-template">
-    <div class="left">
-        <div class="ico"></div>
-    </div>
-    <div class="right">
-        <div class="caption">
-            <div class="title">@*PLACE NOTIFICATION-BOX TITLE HERE*@</div>
-            <img class="close" src='@SystemImageUrl("CloseWindow.png")' asp-append-version="true" />
-        </div>
-        <div class="text">
-        </div>
-    </div>
-</div>
+ 
 
 
 
@@ -56,15 +36,13 @@
         tp.NotificationBoxSetup.ToTop = false;
         tp.NotificationBoxSetup.Height = 80;
 
-        tp.NotificationBoxSetup.Titles = {
-            Information: '@L("NotificationBox.Information")',
-            Warning: '@L("NotificationBox.Warning")',
-            Error: '@L("NotificationBox.Error")',
-            Success: '@L("NotificationBox.Success")'
-        };
+        tp.NotificationBoxSetup.Information.Title = '@L("Information")';
+        tp.NotificationBoxSetup.Warning.Title = '@L("Warning")';
+        tp.NotificationBoxSetup.Error.Title = '@L("Error")';
+        tp.NotificationBoxSetup.Success.Title = '@L("Success")';
 
         app.Config.EmptyValue = '@Lib.EmptyValue';
-        app.Config.CurrencySymbol = '@Settings.General.CurrencySymbol'; 
+        app.Config.CurrencySymbol = '@Settings.General.CurrencySymbol';
 
         // string resources
         app.Resources.SelectAnItem = '@L("SelectAnItem")';

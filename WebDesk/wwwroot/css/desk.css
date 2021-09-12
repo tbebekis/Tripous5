@@ -4,4 +4,12 @@
     flex-grow: 1;
 }
 
+.desk .pager-container.main-pager > .top-zone {
+    background-color: var(--Color4);
+    color: var(--White);  
+}
+
+ 
+ 
+
  

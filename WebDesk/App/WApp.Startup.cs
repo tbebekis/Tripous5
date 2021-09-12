@@ -363,12 +363,14 @@ namespace WebDesk
 
 
 
-            // ● Themes support
+            // ● MVC View location expander and Themes support
             // services.Configure<RazorViewEngineOptions>(options => { options.ViewLocationExpanders.Add(new ViewLocationExpander()); });
+ 
+            
 
             // ● MVC
             IMvcBuilder MvcBuilder = services.AddControllersWithViews(o => {
-
+                
                 o.ModelBinderProviders.Insert(0, new AppModelBinderProvider());
 
                 //if (!WApp.HostEnvironment.IsDevelopment())
@@ -383,9 +385,13 @@ namespace WebDesk
                 //o.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
             })
 
-            //   .ConfigureApplicationPartManager((AppManager) => { })
-            //   .AddApplicationPart(Assmply)
-            /*
+            // •    .AddViewOptions(o => { o.ViewEngines.Insert(0, new MyCustomViewEngine()); });
+
+            // •    .ConfigureApplicationPartManager((AppManager) => { })
+
+            // •    .AddApplicationPart(Assmply)
+
+            /* •  
             // the default case for serializing output to JSON is camelCase in Asp.Net Core, so we turn it off here.
             // https://stackoverflow.com/questions/38728200/how-to-turn-off-or-handle-camelcasing-in-json-response-asp-net-core
             // https://github.com/aspnet/Announcements/issues/194
@@ -396,7 +402,8 @@ namespace WebDesk
             //.AddNewtonsoftJson()
             //.AddJsonOptions(opt => { opt.JsonSerializerOptions.PropertyNamingPolicy = null; })
             ;
- 
+
+            
 
             // ● Razor Runtime Compilation
             // see: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation

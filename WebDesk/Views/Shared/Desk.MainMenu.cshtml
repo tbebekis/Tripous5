@@ -2,12 +2,12 @@
     Command[] BarItems = DataStore.GetMainMenu();
 }
 
-<div class="main-menu">
+<div class="tab-container main-menu" >
     <div class="btn-to-left">◂</div>
-    <div class="menu-bar">
+    <div class="tab-bar">
     @foreach (var BarItem in BarItems)
     {
-       <div class="bar-item">
+       <div class="tab-item">
            <div class="tp-Text">@BarItem.Title</div>
            <div class="tp-List">
                @if (BarItem.Items != null && BarItem.Items.Count > 0)
@@ -25,8 +25,17 @@
 </div> 
 
 <script>
-    tp.Ready(() => {
-        app.MainMenuHandler();
-    });
+    tp.Ready(() => {       
+        let TabBarHandler = new app.TabBarHandler('.main-menu');
+        let TabBarItems = TabBarHandler.GetTabBarItems();
 
+        const CssClass = 'tp-Visible';        
+ 
+        TabBarItems.forEach((elBarItem) => {
+            let Button = tp.Select(elBarItem, '.tp-Text');
+            let List = tp.Select(elBarItem, '.tp-List');
+
+            app.DropDownHandler(Button, List, CssClass);
+        });
+    });
 </script>

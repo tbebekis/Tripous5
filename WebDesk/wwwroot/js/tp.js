@@ -44,36 +44,38 @@ var tp = function (Selector) {
 
 //#region Errors
 
-/** A custom exception class */
-
-/** Returns an instance of the {@link Error} class <br />
- * Can be used with or without the new operator.
- * @param {string} Message The error message.
- * @param {string} [Name='Tripous-Error'] Optional. The error name
- * @returns {Error} Returns an instance of the {@link Error} class
- */
-tp.Error = function (Message, Name) {
-    let Result = new Error(Message);
-    Result.name = Name || "Tripous-Error";
-    return Result;
-};
-
-
 /**
- * Throws an exception
+ * Throws a tripous exception
  * @param {string} Message The exception message
  */
 tp.Throw = function (Message) {
-    throw new tp.Error(Message);
+    let Ex = new Error(Message);
+    Ex.name = 'Tripous Error';
+    throw Ex;
 };
+ 
+/** global error handling */
+window.addEventListener("error", function (e) {
+    tp.ForceHideSpinner();
+    tp.Logger.Error(e);
+    return false;
+});
+
+/** global error handling */
+window.addEventListener('unhandledrejection', function (e) {
+    tp.ForceHideSpinner();
+    e.preventDefault();
+    tp.Logger.Error(e);
+});
+
 /**
 Returns a text of an error for display purposes
 @param {any} e - An Error, or ErrorEvent, or a string value or any other object with error information
 @returns {string} Returns the error text
 */
 tp.ExceptionText = function (e) {
-    var SB = new tp.StringBuilder();
-    var S, o;
+    let SB = new tp.StringBuilder();
+    let S, o;
 
     //---------------------------
     function HandleEvent(e) {
@@ -104,11 +106,15 @@ tp.ExceptionText = function (e) {
             //
         }
 
-        for (var Prop in o) {
-            if (tp.IsSimple(o[Prop])) {
-                S = tp.Format('{0}: {1}', Prop, o[Prop]);
-                SB.AppendLine(S);
-            }
+        for (let Prop in o) {
+            let v = o[Prop];
+            if (v && tp.IsSimple(v)) {
+                v = v.toString();
+                if (!tp.IsBlank(v)) {
+                    S = tp.Format('{0}: {1}', Prop,v);
+                    SB.AppendLine(S);
+                }
+            } 
         }
     }
     //---------------------------
@@ -143,28 +149,6 @@ tp.ExceptionText = function (e) {
     return SB.ToString();
 };
 
-/**
- * Handles an error
- * @param {Error|ErrorEvent} e The error to handle
- */
-tp.HandleError = function (e) {
-    tp.Logger.Error(e);
-};
-
-/** global error handling */
-window.addEventListener("error", function (e) {
-    tp.ForceHideSpinner();
-    tp.HandleError(e);
-    return false;
-});
-
-/** global error handling */
-window.addEventListener('unhandledrejection', function (e) {
-    tp.ForceHideSpinner();
-    e.preventDefault();
-    tp.HandleError(e);
-});
-
 //#endregion
 
 //#region Notifications
@@ -185,24 +169,27 @@ Object.freeze(tp.NotificationType);
  @class
  */
 tp.NotificationBoxSetup = {
-    Colors: {
-        Information: {
-            BackColor: '#FFFFD7',
-            BorderColor: '#FFEB3B'
-        },
-        Warning: {
-            BackColor: '#E7FFE7',
-            BorderColor: '#4CAF50'
-        },
-        Error: {
-            BackColor: '#FFE7E7',
-            BorderColor: '#F44336'
-        },
-        Success: {
-            BackColor: '#E7FFFF',
-            BorderColor: '#2196F3'
-        }
+    Information: {
+        Title: 'Information2',
+        BackColor: '#FFFFD7',
+        BorderColor: '#FFEB3B'
     },
+    Warning: {
+        Title: 'Warning',
+        BackColor: '#E7FFE7',
+        BorderColor: '#4CAF50'
+    },
+    Error: {
+        Title: 'Error',
+        BackColor: '#FFE7E7',
+        BorderColor: '#F44336'
+    },
+    Success: {
+        Title: 'Success',
+        BackColor: '#E7FFFF',
+        BorderColor: '#2196F3'
+    },
+
     ToTop: false,
     DurationSecs: 10,
     Height: 110,
@@ -320,57 +307,14 @@ Displays a notification message to the user.
 @param {tp.NotificationType} Type The type of notification, i.e. Warning, Error, etc
 */
 tp.NotifyFunc = function (Message, Type) {
-    let Width = tp.Viewport.IsXSmall ? '100%' : tp.px(tp.NotificationBoxSetup.Width);
-    let Height = tp.px(tp.NotificationBoxSetup.Height);
-
-    let Title = tp.EnumNameOf(tp.NotificationType, Type);
-    let BackColor = tp.NotificationBoxSetup.Colors[Title].BackColor;
-    let BorderColor = tp.NotificationBoxSetup.Colors[Title].BorderColor;
-
-    let CssStyle = {
-        'display': 'flex',
-        'position': 'fixed',
-        'background-color': BackColor,
-        'width': Width,
-        'height': Height,
-        'margin': '4px 4px',
-        'right': '10px',
-        'border': '1px solid ' + BorderColor,
-        'border-left-width': '6px'
-        //'transition': tp.Format('opacity {0}s ease-in 0s', tp.NotificationBoxSetup.DurationSecs)  //   google : css transition fade out
-    };
-
-    let divNote = tp.Div(document.body);
-    tp.SetStyle(divNote, CssStyle);
-
-    let btnCloseNoteId = tp.SafeId('btnCloseNote');
-    let HtmlText = `
-        <div style="display:flex; flex-direction:column;  flex-grow: 1; padding:5px;">
-            <div style="font-size: 18px; font-weight: bold;">${Title}</div>
-            <div><hr style="border-top: 1px solid ${BorderColor};" /></div>
-            <div style="padding:5px; flex-grow: 1; overflow: auto; ">
-                ${Message}
-            </div>
-        </div>
-        <div style="background-color: ${BorderColor};"><span id="${btnCloseNoteId}" style="cursor:default; padding:3px;">✖</span></div>
-    `;
-
-    tp.Append(divNote, HtmlText);
-
-    tp.NotificationBoxes.Place(divNote);
-    tp.NotificationBoxes.Add(divNote);
-
-    function Remove() {
-        tp.NotificationBoxes.Remove(divNote);
-        tp.Remove(divNote);
-    }
-
-    let btnCloseNote = tp.Select('#' + btnCloseNoteId, divNote);
-    tp.On(btnCloseNote, tp.Events.Click, () => { Remove(); });
-
-    setTimeout(() => { Remove(); }, 1000 * tp.NotificationBoxSetup.DurationSecs);
-
-    //setTimeout(() => { tp.StyleProp(divNote, 'opacity', '0'); }, 1000);
+ 
+    let Setup = tp.NotificationBoxSetup[tp.EnumNameOf(tp.NotificationType, Type)];
+ 
+    let Text = `${Setup.Title}
+${Message}
+`;
+    alert(Text);
+     
 };
 /**
 Displays a notificaion message to the user.
@@ -14310,7 +14254,7 @@ height: 100%;
             CP.CssText = Style;
 
             // content
-            this.Content = new tp.tpElement(null, CP); // , CssClasses: tp.tpWindow.CSS_CLASS_WindowContent
+            this.Content = new tp.tpElement(null, CP); 
 
 
         }
@@ -14327,9 +14271,7 @@ height: 100%;
         let Style = `
 position: relative;
 display: flex;
-align-items: stretch;
-height: ${tp.WindowSettings.CaptionHeight};
-border-bottom: ${tp.WindowSettings.Border};
+align-items: center;
 user-select: none;
 `;
 
@@ -14343,7 +14285,7 @@ user-select: none;
         var Result = this.Document.createElement('span');
         this.HeaderButtonBar.appendChild(Result);
 
-        Result.style.cssText = Style;    // Result.className = tp.tpWindow.CSS_CLASS_WindowCaptionButton + ' tp-UnSelectable';
+        Result.style.cssText = Style;    
         Result.innerHTML = Type;
 
         Result['Command'] = Command;
@@ -14379,7 +14321,7 @@ border-bottom: ${tp.WindowSettings.Border};
 padding-right: 3px;
 user-select: none;
 `;
-        this.Header.style.cssText = Style;        //this.Header.className = tp.ConcatClasses(tp.tpWindow.CSS_CLASS_WindowCaption, 'tp-FlexPanel tp-UnSelectable');
+        this.Header.style.cssText = Style;        
 
         // header - text
         this.HeaderText = this.Document.createElement('span');
@@ -14394,7 +14336,7 @@ padding: ${tp.WindowSettings.TextPadding};
 font-weight: bold;
 user-select: none;
 `;
-        this.HeaderText.style.cssText = Style; //this.HeaderText.className = tp.ConcatClasses(tp.tpWindow.CSS_CLASS_WindowCaptionText, 'tp-UnSelectable');
+        this.HeaderText.style.cssText = Style;  
         this.HeaderText.innerHTML = this.Args.Text;
 
         tp.On(this.HeaderText, tp.Events.DoubleClick, this.FuncBind(this.WindowAnyClick), true);
@@ -14409,8 +14351,9 @@ display: flex;
 align-items: center;
 height: auto;
 user-select: none;
+gap: 4px;
 `;
-        this.HeaderButtonBar.style.cssText = Style; //this.HeaderButtonBar.className = tp.ConcatClasses(tp.tpWindow.CSS_CLASS_WindowCaptionButtonBar, 'tp-FlexPanel tp-UnSelectable');
+        this.HeaderButtonBar.style.cssText = Style; 
 
         if (!tp.Viewport.IsSmall && (this.Args.ResizeEdges !== tp.Edge.None)) {
             this.fMaximizeButton = this.AddHeaderButton('Maximize');
@@ -14435,14 +14378,13 @@ position: relative;
 display: block;
 flex-grow: 1;
 `;
-        this.ContentWrapper = new tp.tpElement(null, CP); // , CssClasses: tp.tpWindow.CSS_CLASS_WindowContentContainer
+        this.ContentWrapper = new tp.tpElement(null, CP);  
         this.ContentWrapper.IsElementResizeListener = true;
         this.ContentWrapper.On('Resized', this.ContentResized, this);
 
         // footer
         CP = new tp.CreateParams();
         CP.Parent = this;
-        //CP.CssClasses = tp.ConcatClasses(tp.tpWindow.CSS_CLASS_WindowFooter, 'tp-UnSelectable');
 
         this.Footer = this.Document.createElement('div');
         this.Footer.id = tp.SafeId('tp-Window-Footer');
@@ -14455,7 +14397,7 @@ height: ${tp.WindowSettings.CaptionHeight};
 border-top: ${tp.WindowSettings.Border};
 user-select: none;
 `;
-        this.Footer.style.cssText = Style; //this.Footer.className = tp.ConcatClasses(tp.tpWindow.CSS_CLASS_WindowFooter, 'tp-FlexPanel tp-UnSelectable');
+        this.Footer.style.cssText = Style;  
 
         // 
         let divElement = this.Document.createElement('div');
@@ -14741,9 +14683,6 @@ tp.ContentWindow = class extends tp.tpWindow {
             this.ContentWrapper.Handle.appendChild(Content);
         }
     }
-
-
-
 };
 /* static */
 /**
@@ -14784,12 +14723,22 @@ Displays a content window, either as modal or as non-modal, and returns a Promis
 @param {string|HTMLElement} Content - Element or selector with html content
 @returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
 */
-tp.ContentWindow.ShowPromise = function (Modal, Text, Content) {
+tp.ContentWindow.ShowAsync = function (Modal, Text, Content) {
     return new Promise((Resolve, Reject) => {
         tp.ContentWindow.Show(Modal, Text, Content, (Args) => {
             Resolve(Args);
         });
     });
+};
+/**
+Displays a content window, as modal, and returns a Promise.
+@static
+@param {string} Text - The caption title of the window
+@param {string|HTMLElement} Content - Element or selector with html content
+@returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
+*/
+tp.ContentWindow.ShowModalAsync = function (Text, Content) {
+    return tp.ContentWindow.ShowAsync(true, Text, Content);
 };
 //#endregion
 
@@ -15113,7 +15062,10 @@ NotificationBox = class extends tp.tpElement {
 
         // create the box and append it to body
 
-        let sType = tp.EnumNameOf(tp.NotificationType, Type);
+        let Setup = tp.NotificationBoxSetup[tp.EnumNameOf(tp.NotificationType, Type)];
+        let Title = Setup.Title;
+        let BackColor = Setup.BackColor;
+        let BorderColor = Setup.BorderColor;
 
         let elBox = tp.Doc.createElement('div');
         elBox.id = tp.SafeId('tp-NotificationBox');
@@ -15127,7 +15079,7 @@ NotificationBox = class extends tp.tpElement {
 
         let Html = `
         <div id='${CaptionId}'>
-            <div>${sType}</div>
+            <div>${Title}</div>
             <div style='flex-grow: 1;' ></div>
             <div id='${btnCloseId}' ">✖</div> 
         </div>
@@ -15148,9 +15100,6 @@ NotificationBox = class extends tp.tpElement {
 
 
         // further initialize the box
-
-        let BackColor = tp.NotificationBoxSetup.Colors[sType].BackColor;
-        let BorderColor = tp.NotificationBoxSetup.Colors[sType].BorderColor;
 
         let CssStyle = {
             'position': 'fixed',

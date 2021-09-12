@@ -1,0 +1,113 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using System.IO;
+using System.Text.Encodings.Web;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
+
+
+namespace WebDesk
+{
+
+    /// <summary>
+    /// Extensions
+    /// </summary>
+    static public class ControllerExtensions
+    {
+        /// <summary>
+        /// Renders a view to a string. View can be a main or a partial view.
+        /// <para>See AjaxController.MiniSearch() for an example.</para>
+        /// </summary>
+        static public string RenderViewToString(this ControllerBase Instance, string ViewName, object Model, bool IsMainView, IDictionary<string, object> PlusViewData = null)
+        {
+            IRazorViewEngine ViewEngine = Lib.GetService<IRazorViewEngine>();
+            ActionContext ActionContext = new ActionContext(Instance.HttpContext, Instance.RouteData, Instance.ControllerContext.ActionDescriptor, Instance.ModelState);
+
+            ViewDataDictionary ViewData = null;
+            ITempDataDictionary TempData = null;
+
+            if (Instance is Controller)
+            {
+                ViewData = (Instance as Controller).ViewData;
+                TempData = (Instance as Controller).TempData;
+            }
+            else
+            {
+                ViewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary());
+                TempData = new TempDataDictionary(ActionContext.HttpContext, Lib.GetService<ITempDataProvider>());
+            }
+
+            // assign ViewData's model
+            ViewData.Model = Model;
+
+            // plus view data
+            if (PlusViewData != null)
+            {
+                foreach (var Entry in PlusViewData)
+                    ViewData[Entry.Key] = Entry.Value;
+            }
+
+            // if ViewName is empty, set it to action name
+            if (string.IsNullOrWhiteSpace(ViewName))
+                ViewName = Instance.ControllerContext.ActionDescriptor.ActionName;
+
+            // is ViewName a view name?
+            ViewEngineResult ViewResult = ViewEngine.FindView(ActionContext, ViewName, IsMainView);
+
+            // is ViewName a path?
+            if (ViewResult.View == null)
+            {
+                ViewResult = ViewEngine.GetView(null, ViewName, false);
+                if (ViewResult.View == null)
+                    Lib.Error($"View not found: {ViewName}");
+            }
+
+            using (var SW = new StringWriter())
+            {
+                ViewContext ViewContext = new ViewContext(ActionContext, ViewResult.View, ViewData, TempData, SW, new HtmlHelperOptions());
+
+                Task T = ViewResult.View.RenderAsync(ViewContext);
+                T.Wait();
+
+                return SW.GetStringBuilder().ToString();
+            }
+        }
+        /// <summary>
+        /// Renders a partial view to a string.
+        /// <para>See AjaxController.MiniSearch() for an example.</para>
+        /// </summary>
+        static public string RenderPartialViewToString(this ControllerBase Instance, string ViewName, object Model, IDictionary<string, object> PlusViewData = null)
+        {
+            return RenderViewToString(Instance, ViewName, Model, false, PlusViewData);
+        }
+        /// <summary>
+        /// Renders a partial view to a string.
+        /// <para>See AjaxController.MiniSearch() for an example.</para>
+        /// </summary>
+        static public string RenderPartialViewToString(this ControllerBase Instance, string ViewName, IDictionary<string, object> PlusViewData = null)
+        {
+            return RenderViewToString(Instance, ViewName, null, false, PlusViewData);
+        }
+        /// <summary>
+        /// Renders a partial view to a string.
+        /// <para>See AjaxController.MiniSearch() for an example.</para>
+        /// </summary>
+        static public string RenderPartialViewToString(this ControllerBase Instance, IDictionary<string, object> PlusViewData = null)
+        {
+            return RenderViewToString(Instance, null, null, false, PlusViewData);
+        }
+    }
+
+}

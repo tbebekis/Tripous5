@@ -223,6 +223,79 @@ button:not(.btn-test),
 }
 
 /*---------------------------------------------------------------------------------------
+  tab bar
+---------------------------------------------------------------------------------------*/
+.tab-container {
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    flex-grow: 1;
+}
+
+.tab-container > .btn-to-left,
+.tab-container > .btn-to-right {
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 1.5em;
+    white-space: nowrap;
+    min-width: 40px;
+}
+
+.tab-container > .tab-bar {
+    position: relative;
+    display: flex; 
+    align-items: center; 
+    flex-grow: 1;
+    overflow: hidden;
+    min-height: 40px;
+}
+
+.tab-container > .tab-bar > .tab-item {
+    position: relative;
+    display: block; 
+    cursor: pointer;
+    padding: 0 1em 0 0;
+    white-space: nowrap;
+    height: 100%;
+}
+
+.tab-container > .tab-bar > .tab-item:hover {    
+    text-decoration: underline var(--HoverColor) solid; 
+    text-decoration-thickness: 3px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+}
+
+.tab-container > .tab-bar > .tab-item > .tp-Text {
+    position: relative;
+}
+/*---------------------------------------------------------------------------------------
+  tab pager
+---------------------------------------------------------------------------------------*/
+
+.pager-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.pager-container > .top-zone {
+    position: relative;
+    display: flex;
+    align-items: center; 
+}
+
+.pager-container > .page-list {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    width: 100%;
+}
+
+/*---------------------------------------------------------------------------------------
   header
 ---------------------------------------------------------------------------------------*/
 .header {
@@ -251,54 +324,8 @@ button:not(.btn-test),
 /*---------------------------------------------------------------------------------------
   main-menu
 ---------------------------------------------------------------------------------------*/
-.header .main-menu {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    
-}
-
-.header .main-menu .btn-to-left,
-.header .main-menu .btn-to-right {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    font-size: 1.5em;
-    white-space: nowrap;
-    min-width: 40px;
-}
-
-.header .main-menu .menu-bar {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    flex-grow: 1;
-    overflow: hidden;
-    min-height: 40px;
-}
-
-.header .main-menu .menu-bar > .bar-item {
-    position: relative;
-    display: block; 
-    cursor: pointer;
-    padding: 0 1em 0 0;
-    white-space: nowrap;
-    height: 100%;
-}
-
-.header .main-menu .menu-bar > .bar-item:hover {    
-    text-decoration: underline var(--HoverColor) solid; 
-    text-decoration-thickness: 3px;
-    text-decoration-skip-ink: none;
-    text-underline-offset: 3px;
-}
-
-.header .main-menu .menu-bar > .bar-item > .tp-Text {
-    position: relative;
-}
-
-.header .main-menu .menu-bar > .bar-item > .tp-List {
+ 
+.header .main-menu .tab-bar > .tab-item > .tp-List {
     display: none;
     position: fixed;
     z-index: 2;
@@ -307,18 +334,18 @@ button:not(.btn-test),
     color: var(--Black);
 }
 
-.header .main-menu .menu-bar > .bar-item > .tp-List.tp-Visible {
+.header .main-menu .tab-bar > .tab-item > .tp-List.tp-Visible {
     display: block;
 }
 
-.header .main-menu .menu-bar > .bar-item > .tp-List > * {
+.header .main-menu .tab-bar > .tab-item > .tp-List > * {
     display: flex;
     min-height: 2em;
     align-items: center;
     padding: 0 0.9em 0 0.6em;
 }
 
-.header .main-menu .menu-bar > .bar-item > .tp-List > *:hover {
+.header .main-menu .tab-bar > .bar-item > .tp-List > *:hover {
     border-left: 4px solid var(--HoverColor);
     padding-left: 6px;   
 }
@@ -399,6 +426,7 @@ button:not(.btn-test),
     flex-direction: column;
     padding: var(--Page-Padding);
     min-height: 800px;
+    flex-grow: 1;
 }
 
 .page .page-caption {
