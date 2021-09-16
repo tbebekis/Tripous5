@@ -108,12 +108,16 @@ namespace WebDesk
                 PluginLoader.Prefix = "ewm_";
 
                 IPlugin[] Plugins = PluginLoader.Execute();
-                PluginList.AddRange(Plugins);
-
-                foreach (var Item in PluginList)
-                    Item.Initialize(WApp.AppContext);
+                PluginList.AddRange(Plugins);                
             }
-
+        }
+        /// <summary>
+        /// Initializes loaded plugins.
+        /// </summary>
+        static void InitializePlugins()
+        {
+            foreach (var Item in PluginList)
+                Item.Initialize(WApp.AppContext);
         }
 
         /// <summary>
@@ -167,16 +171,21 @@ namespace WebDesk
                 Db.Initialize();
                 Lib.Initialize(WApp.AppContext);
 
-                // ● load the data store (ERP plugin) and any other plugins
+                // ● data store
                 InitializeDbProviderFactories();                
                 DataStore.Initialize(WApp.AppContext);
-                LoadPlugins();
 
-                // ● object maps
-                ObjectMapper.Configure(AddObjectMaps);
+                // ● plugins
+                LoadPlugins();
 
                 // ● languages
                 LoadLanguages();
+
+                // ● plugin initialization
+                InitializePlugins();
+
+                // ● object maps
+                ObjectMapper.Configure(AddObjectMaps);               
  
             }
             catch (Exception ex)
@@ -364,7 +373,8 @@ namespace WebDesk
 
 
             // ● MVC View location expander and Themes support
-            // services.Configure<RazorViewEngineOptions>(options => { options.ViewLocationExpanders.Add(new ViewLocationExpander()); });
+            ViewLocationExpander.AddLocation($"/Views/Ajax/{{0}}.cshtml");
+            services.Configure<RazorViewEngineOptions>(options => { options.ViewLocationExpanders.Add(new ViewLocationExpander()); });
  
             
 

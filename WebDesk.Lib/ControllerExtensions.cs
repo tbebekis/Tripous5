@@ -84,6 +84,7 @@ namespace WebDesk
                 return SW.GetStringBuilder().ToString();
             }
         }
+
         /// <summary>
         /// Renders a partial view to a string.
         /// <para>See AjaxController.MiniSearch() for an example.</para>
@@ -101,7 +102,8 @@ namespace WebDesk
             return RenderViewToString(Instance, ViewName, null, false, PlusViewData);
         }
         /// <summary>
-        /// Renders a partial view to a string.
+        /// Renders a partial view to a string. 
+        /// <para>NOTE: ViewName is set it to current action name.</para>
         /// <para>See AjaxController.MiniSearch() for an example.</para>
         /// </summary>
         static public string RenderPartialViewToString(this ControllerBase Instance, IDictionary<string, object> PlusViewData = null)

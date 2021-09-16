@@ -268,6 +268,13 @@ button:not(.btn-test),
     text-underline-offset: 3px;
 }
 
+.tab-container > .tab-bar > .tab-item.tp-Selected {    
+    text-decoration: underline var(--White) solid; 
+    text-decoration-thickness: 3px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+}
+
 .tab-container > .tab-bar > .tab-item > .tp-Text {
     position: relative;
 }

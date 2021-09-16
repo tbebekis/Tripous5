@@ -9,6 +9,9 @@ using Tripous;
 namespace WebDesk.AspNet
 {
 
+    /// <summary>
+    /// HTTP request information.
+    /// </summary>
     public class RequestInfo
     {
         /* construction */

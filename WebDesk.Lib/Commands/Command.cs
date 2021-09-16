@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Newtonsoft.Json; 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 using Tripous;
 
@@ -17,6 +18,35 @@ namespace WebDesk
     {
         static object syncLock = new LockObject();
         static List<ICommandExecutor> Executors = new List<ICommandExecutor>();
+
+        internal class Setup
+        {
+            Command Cmd;
+
+            public Setup(Command Cmd)
+            {
+                this.Cmd = Cmd;
+            }
+            /// <summary>
+            /// A name unique among all commands.
+            /// </summary>
+            public string Name => Cmd.Name;
+            /// <summary>
+            /// The command type. What a command does when it is called.
+            /// </summary>
+            public CommandType Type => Cmd.Type;
+            /// <summary>
+            /// True when this is a single instance Ui command.
+            /// </summary>
+            public bool IsSingleInstance => Cmd.IsSingleInstance;
+            /// <summary>
+            /// Gets meaning according to command's type
+            /// </summary>
+            public string Tag => Cmd.Tag;
+        }
+
+
+        Setup fSetup;
 
         /* construction */
         /// <summary>
@@ -68,13 +98,10 @@ namespace WebDesk
         /// </summary>
         public string SerializeSetup()
         {
-            Dictionary<string, string> Setup = new Dictionary<string, string>();
+            if (this.fSetup == null)
+                fSetup = new Setup(this);
 
-            Setup[nameof(Name)] = Name;
-            Setup[nameof(Type)] = Type.ToString();
-            Setup[nameof(Tag)] = Tag;
-
-            string JsonText = Json.Serialize(Setup);
+            string JsonText = Json.Serialize(fSetup);
             return JsonText;
         }
         /// <summary>
@@ -124,6 +151,11 @@ namespace WebDesk
         /// Gets meaning according to command's type
         /// </summary>
         public string Tag { get; set; }
+
+        /// <summary>
+        /// True when this is a single instance Ui command.
+        /// </summary>
+        public bool IsSingleInstance { get; set; }
 
         /// <summary>
         /// Returns the localized title.

@@ -18,6 +18,7 @@ namespace Tripous
     public class DateFormat
     {
         /* private */
+        
         DatePattern pattern;
         DateSeparator separator;
         bool twoDigitYear;
@@ -83,16 +84,9 @@ namespace Tripous
             string Year;
             string Month = "MM";
             string Day = "dd";
-            string Sep;
+            string Sep = GetSeparator(Separator);
 
-            Year = TwoDigitYear ? Year2 : Year4;
-
-            if (Separator == DateSeparator.Slash)
-                Sep = "/";
-            else if (Separator == DateSeparator.Dot)
-                Sep = ".";
-            else
-                Sep = "-";
+            Year = TwoDigitYear ? Year2 : Year4; 
 
             // 0 = Sep
             // 1 = Year
@@ -111,6 +105,23 @@ namespace Tripous
 
             return Result;
         }
+       
+        /// <summary>
+        /// Returns the separator as a string
+        /// </summary>
+        static public string GetSeparator(DateSeparator Value)
+        {
+            string Result;
+
+            if (Value == DateSeparator.Slash)
+                Result = "/";
+            else if (Value == DateSeparator.Dot)
+                Result = ".";
+            else
+                Result = "-";
+
+            return Result;
+        }
         /// <summary>
         /// Returns the date separator character of the Info culture
         /// CAUTION: Info should be a Specific culture, not a Neutral one
@@ -126,6 +137,9 @@ namespace Tripous
         {
             return GetDateSeparator(Sys.GetCurrentCulture());
         }
+       
+
+
         /// <summary>
         /// Returns the time separator character of the Info culture
         /// CAUTION: Info should be a Specific culture, not a Neutral one
@@ -323,6 +337,62 @@ namespace Tripous
 
         }
 
+        /* public */
+        /// <summary>
+        /// Parses a string, according to this instance property settings, and returns a <see cref="DateTime"/> value.
+        /// <para>NOTE: Parsing is based on <see cref="DatePattern"/> and <see cref="DateSeparator"/>. 
+        /// So is capable of parsing a string with either a 4 or 2-digit year and either a 2 or 1-digit month and day.
+        /// </para>
+        /// </summary>
+        public DateTime Parse(string S)
+        {
+            DateTime Result = DateTime.MinValue;
+            if (!string.IsNullOrWhiteSpace(S))
+            {
+                string sY, sM, sD;
+                string Sep = GetSeparator(Separator);
+
+                // get chars as long as are digits or separators
+                StringBuilder SB = new StringBuilder();
+                foreach (char C in S)
+                {
+                    if (char.IsDigit(C) || C.ToString() == Sep)
+                        SB.Append(C);
+                    else
+                        break;
+                }
+
+                S = SB.ToString();
+
+                string[] Parts = S.Split(Sep[0], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                if (Parts != null && Parts.Length >= 3)
+                {
+                    switch (Pattern)
+                    {
+                        case DatePattern.DMY:
+                            sY = Parts[2];
+                            sM = Parts[1];
+                            sD = Parts[0];
+                            break;
+                        case DatePattern.MDY:
+                            sY = Parts[2];
+                            sM = Parts[0];
+                            sD = Parts[1];
+                            break;
+                        default:    //case DatePattern.YMD:
+                            sY = Parts[0];
+                            sM = Parts[1];
+                            sD = Parts[2];
+                            break;
+                    }
+
+                    Result = new DateTime(int.Parse(sY), int.Parse(sM), int.Parse(sD));
+                }
+            }
+            return Result;
+        }
+
         /* properties */
         /// <summary>
         /// The pattern (or Endian) of the date format.
@@ -380,10 +450,15 @@ namespace Tripous
         public string Sample { get { return new DateTime(2012, 12, 21).ToString(Format); } }
 
 
+
         /* events */
         /// <summary>
         /// Occurs when any of the properties changes value
         /// </summary>
         public event EventHandler Changed;
     }
+
+
+
+
 }

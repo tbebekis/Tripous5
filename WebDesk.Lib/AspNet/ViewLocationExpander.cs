@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc.Razor;
+using Tripous;
 
 namespace WebDesk.AspNet
 {
@@ -17,6 +18,7 @@ namespace WebDesk.AspNet
     /// </summary>
     public class ViewLocationExpander : IViewLocationExpander
     {
+        static List<string> LocationList = new List<string>();
 
         /* public */
         /// <summary>
@@ -41,6 +43,9 @@ namespace WebDesk.AspNet
                         } 
              */
 
+            if (LocationList.Count > 0)
+                viewLocations = LocationList.Union(viewLocations);
+
             return viewLocations;
         }
         /// <summary>
@@ -56,6 +61,25 @@ namespace WebDesk.AspNet
                             context.Values[SThemeKey] = Theme;
                         } 
              */
+        }
+
+
+        /// <summary>
+        /// Adds a location to the internal list.
+        /// <para>Examples: 
+        /// <code>
+        ///     // 0 = view file name
+        ///     // 1 = controller name
+        ///     AddLocation($"/Views/{{1}}/{{0}}.cshtml");   
+        ///     AddLocation($"/Views/Shared/{{0}}.cshtml");
+        ///     AddLocation($"/Views/Ajax/{{0}}.cshtml");
+        /// </code>
+        /// </para>
+        /// </summary>
+        static public void AddLocation(string Location)
+        {
+            if (!LocationList.ContainsText(Location))
+                LocationList.Add(Location);
         }
 
     }

@@ -330,43 +330,16 @@ where
 
 
         static public Command[] GetMainMenu()
-        { 
+        {
             List<Command> Result = new List<Command>();
 
-            Command BarItem = new Command() { TitleKey = "File Kai Ase Re File" };
+            Command BarItem = new Command() { TitleKey = "System" };
             Result.Add(BarItem);
-            BarItem.Add("New");
-            BarItem.Add("Open");
-            BarItem.Add("Exit");
-
-            BarItem = new Command() { TitleKey = "Edit kai Edit" };
-            Result.Add(BarItem);
-            BarItem.Add("Cut");
-            BarItem.Add("Copy");
-            BarItem.Add("Paste");
-            BarItem.Add("Delete");
-
-            BarItem = new Command() { TitleKey = "View Ki Apanw Tourla" };
-            Result.Add(BarItem);
-            BarItem.Add("Document");
-            BarItem.Add("Image");
-            BarItem.Add("Table");
-            BarItem.Add("Window");
-
-            BarItem = new Command() { TitleKey = "Project Apisteyto" };
-            Result.Add(BarItem);
-            BarItem.Add("Run");
-            BarItem.Add("Debug");
-
-            BarItem = new Command() { TitleKey = "Extensions" };
-            Result.Add(BarItem);
-            BarItem.Add("One");
-            BarItem.Add("Two");
-            BarItem.Add("Three");
-
-#warning TODO: Next - add a menu command to display UI for designing database tables
+            BarItem.Add("AppTable.Ui.List").IsSingleInstance = true; 
 
             return Result.ToArray();
+
+            //return GetMainMenuDemo();
         }
 
         /* miscs */

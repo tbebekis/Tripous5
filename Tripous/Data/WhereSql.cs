@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -18,6 +19,7 @@ namespace Tripous.Data
         /// Boolean operators
         /// </summary>
         [Flags]
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Bool
         {
             /// <summary>
@@ -47,6 +49,7 @@ namespace Tripous.Data
         /// Conditions
         /// </summary>
         [Flags]
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Condition
         {
             /// <summary>
@@ -178,13 +181,11 @@ namespace Tripous.Data
         /* properties */
         /// <summary>
         /// The boolean operator to use
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
+        /// </summary>        
         public Bool BoolOp { get; set; }
         /// <summary>
         /// The conditional operator to use
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
         public Condition ConditionOp { get; set; }
         /// <summary>
         /// The field name

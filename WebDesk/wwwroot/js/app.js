@@ -149,7 +149,7 @@ app.GetContentElement = function (ElementOrSelectorOrHtmlText) {
         if (tp.ContainsText('<div', ElementOrSelectorOrHtmlText, true)) {
             // create a temp div
             let div = tp.Div(tp.Doc.body);
-            div.innerHTML = ElementOrSelectorOrHtmlText;
+            div.innerHTML = ElementOrSelectorOrHtmlText.trim();
             Result = div.firstChild;
             div.parentNode.removeChild(div);
         }
@@ -503,13 +503,19 @@ app.TabBarHandler = class {
     }
     CanHideNext() {
         let BarItems = this.GetTabBarItems();
-        let el = BarItems[BarItems.length - 2];
-        return this.IsItemVisible(el);
+        if (BarItems.length > 2) {
+            let el = BarItems[BarItems.length - 2];
+            return this.IsItemVisible(el);
+        }
+        return false;
     }
     CanShowNext() {
         let BarItems = this.GetTabBarItems();
-        let el = BarItems[0];
-        return !this.IsItemVisible(el);
+        if (BarItems.length > 0) {
+            let el = BarItems[0];
+            return !this.IsItemVisible(el);
+        }
+        return false;
     }
     HideNext() {
         let BarItems = this.GetTabBarItems();
