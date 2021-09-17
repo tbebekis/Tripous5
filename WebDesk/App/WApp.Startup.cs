@@ -489,9 +489,7 @@ namespace WebDesk
                 }
                 AppSettings = settings;
             });
-
-            // ● Application
-            //InitializeApplication();
+ 
 
             //----------------------------------------------------------------------------------------
             // Middlewares
@@ -536,6 +534,11 @@ namespace WebDesk
                 if (!string.IsNullOrEmpty(DataStoreSettings.Http.StaticFilesCacheControl))
                     context.Context.Response.Headers.Append(Microsoft.Net.Http.Headers.HeaderNames.CacheControl, DataStoreSettings.Http.StaticFilesCacheControl);
             }
+
+            // NOTE: We may have multiple calls to app.UseStaticFiles() in order to pass instances of PhysicalFileProvider serving files from other locations. 
+            // "You can provide additional instances of UseStaticFiles/UseFileServer with other file providers to serve files from other locations."
+            // SEE: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-5.0#serve-files-from-multiple-locations
+            // SEE: https://github.com/dotnet/AspNetCore.Docs/issues/15578#issuecomment-551238579
 
             // common static files 
             app.UseStaticFiles(new StaticFileOptions

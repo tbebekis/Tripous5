@@ -17,4 +17,11 @@
     text-underline-offset: 3px;
 }
 
+.desk-page {
+    position: relative;
+    display: flex; 
+    flex-direction: column;
+    padding: 4px 2%;
+}
+
  
