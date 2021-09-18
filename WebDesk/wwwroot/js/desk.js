@@ -190,10 +190,8 @@ app.Desk = class {
 
         Setup = tp.MergeQuick(Setup, Params || {});
 
-        let P = await import(ModulePath)
-            .then(module => {
-                module.StartPage(elPage);
-            });
+        let P = await import(ModulePath);
+        P.StartPage(elPage);
 
         return P;
     }
