@@ -12,7 +12,7 @@ namespace WebDesk.Models
         {
         }
 
-        public string Name { get; set; }
+        public string OperationName { get; set; }
         public Dictionary<string, object> Params { get; set; } = new Dictionary<string, object>();
     }
 

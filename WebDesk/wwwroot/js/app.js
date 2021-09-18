@@ -4,7 +4,11 @@ app.Config.CurrencySymbol = '€';
 
 app.Resources = app.Resources || {};
 
-
+app.PromiseStatus = async function (P) {
+    const o = {};
+    return Promise.race([P, o])
+        .then(v => (v === o) ? "pending" : "resolved", () => "rejected");
+};
 
 
 app.StrToFloat = function (v, Default = 0) {
@@ -40,6 +44,11 @@ app.WaitAsync = async function (MSecsToWait, FuncToCall = null) {
     })
 };
 
+app.LoadModule = async function (Url) {
+    let P = import(Url);
+    return P;
+};
+
 /**
  * Should be called after a tp ajax call having errors. Displays the errors using notification boxes.
  * @param {tp.AjaxArgs} Args An instance of tp ajax arguments
@@ -61,6 +70,24 @@ app.DisplayAjaxErrors = function (Args) {
             }
         }
     }
+};
+
+/**
+ * Gets or sets an key-value information object to a DOM element. <br />
+ * If the second parameter is not passed the it just gets and returns the information object.
+ * @param {HTMLElement} el The DOM element to get from or set the info to.
+ * @param {object} Info A key-value information object
+ */
+app.DeskInfo = function (el, Info = null) {
+    if (tp.IsValid(Info)) {
+        el.__DeskInfo = Info;
+    }
+    else {
+        if ('__DeskInfo' in el)
+            Info = el.__DeskInfo;
+    }
+
+    return Info;
 };
 
 /**

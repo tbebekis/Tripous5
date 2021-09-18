@@ -18,6 +18,28 @@ app.Command = class {
     Tag = '';
 };
 
+/** Represents an ajax request */
+app.AjaxRequest = class {
+
+    /**
+     * Constructor
+     * @param {string} OperationName The name of the request operation.
+     * @param {object} Params Optional. A user defined key-pair object with parameters.
+     */
+    constructor(OperationName, Params = null) {
+        this.OperationName = OperationName;
+        this.Params = Params || {};
+    }
+    /** The name of the request operation.
+     * @type {string}
+     */
+    OperationName = '';
+    /** A user defined key-pair object with parameters.
+     * @type {object}
+     */
+    Params = {};
+};
+
 /** A single instance class. It handles the desk. */
 app.Desk = class {
     constructor() {
@@ -119,7 +141,10 @@ app.Desk = class {
      */
     FindTab(ViewName) {
         let TabList = this.GetTabList();
-        let Tab = TabList.find(elTab => { return tp.IsValid(elTab.__PageInfo) ? ViewName === elTab.__PageInfo.Name : false; });
+        let Tab = TabList.find(elTab => {
+            let Info = app.DeskInfo(elTab);
+            return tp.IsValid(Info) ? ViewName === Info.Name : false;
+        });
         return Tab;
     }
     /**
@@ -145,36 +170,65 @@ app.Desk = class {
         let Result = tp.ChildHTMLElements(this.elPages)
         return Result;
     }
+
+
+
+    /**
+     * Executes an ajax request to the server and returns a possible result.
+     * @param {app.AjaxRequest} Request The request object.
+     */
+    async AjaxExecute(Request) {
+        let Result = null;
+        let Url = '/AjaxExecute'
+
+        let Args = await tp.Ajax.PostModelAsync(Url, Request);
+        if (Args.ResponseData.IsSuccess === true) {
+            let Packet = Args.ResponseData.Packet;
+            if (Request.OperationName === 'GetHtmlView') {
+                Result = await this.HandleGetHtmlViewResponse(Packet);
+            }
+            else {
+                Result = Packet;
+            }
+            //await this.CreateTab(Packet, Name, Params);
+        }
+        else {
+            app.DisplayAjaxErrors(Args);
+            return Result;
+        }
+    }
     /**
      * Creates a tab and a page and displays both in the Ui.
      * @param {object} Packet The packet as it comes from server
-     * @param {string} Name The page name
-     * @param {object} Params A key-pair object
      */
-    async CreateTab(Packet, Name, Params = null) {
-
+    async HandleGetHtmlViewResponse(Packet) {
         let TabHtmlText = `
        <div class="tab-item">
-           <div class="tp-Text">${Name}</div>
+           <div class="tp-Text">${Packet.ViewName}</div>
        </div>
 `;
-        let PageHtmlText = Packet.HtmlText.trim();
+      
+        let elPage = app.GetContentElement(Packet.HtmlText.trim());
+        let elTab = app.GetContentElement(TabHtmlText.trim());
 
-        let elPage = app.GetContentElement(PageHtmlText);
-        let elTab = app.GetContentElement(TabHtmlText);
+        let DeskInfo = {};
+        DeskInfo.Name = Packet.ViewName;
+        DeskInfo.elTab = elTab;
+        DeskInfo.elPage = elPage;
 
-        Params = Params || {};
-        Params.Name = Name;
-        Params.elTab = elTab;
-        Params.elPage = elPage;
-
-        elTab.__PageInfo = Params;
+        app.DeskInfo(elTab, DeskInfo);
+        app.DeskInfo(elPage, DeskInfo);
 
         this.elPages.appendChild(elPage);
         this.elTabs.appendChild(elTab);
 
-        await this.StartPage(elPage, Params);
- 
+        let CreateParams = {
+            Name: Packet.ViewName,
+            Packet: Packet
+        };
+
+        await this.StartPage(elPage, CreateParams);
+
         this.TabClicked(elTab);
     }
     /**
@@ -190,7 +244,8 @@ app.Desk = class {
 
         Setup = tp.MergeQuick(Setup, Params || {});
 
-        let P = await import(ModulePath);
+        let P = await app.LoadModule(ModulePath);
+        
         P.StartPage(elPage);
 
         return P;
@@ -205,7 +260,8 @@ app.Desk = class {
         let TabList = this.GetTabList();
         let PageList = this.GetPageList();
 
-        let elPage = elTab.__PageInfo.elPage;
+        let Info = app.DeskInfo(elTab);
+        let elPage = Info.elPage;
 
         for (i = 0, ln = TabList.length; i < ln; i++) {
             tp.RemoveClass(TabList[i], tp.Classes.Selected);
@@ -214,28 +270,6 @@ app.Desk = class {
 
         tp.AddClass(elTab, tp.Classes.Selected);
         elPage.style.display = '';
-    }
-    /**
-     * Gets a HTML view from server
-     * @param {string} Name Required. A name uniquely identifying the Ui request.
-     * @param {object} Params Optional. A key-value object.
-     */
-    async GetHtmlView(Name, Params = null) {
-        let Url = '/GetHtmlView'
-        let Model = {
-            Name: Name,
-            Params: Params
-        };
-        let Args = await tp.Ajax.PostModelAsync(Url, Model);
-        if (Args.ResponseData.IsSuccess === true) {
-            let Packet = Args.ResponseData.Packet;
-            await this.CreateTab(Packet, Name, Params);
-        }
-        else {
-            app.DisplayAjaxErrors(Args);
-            return;
-        }
-
     }
 };
 
@@ -270,12 +304,15 @@ app.MainMenuCommandExecutor = class {
      */
     async ExecuteCommand(Cmd) {
         let Result = null;
-        let Params = tp.MergeQuick({}, Cmd);
-        
-
+ 
         if (Cmd.Type === 'Ui') {
-            if ((Cmd.IsSingleInstance && !app.Desk.Instance.TabExists(Cmd.Name)) || !Cmd.IsSingleInstance)
-                Result = await app.Desk.Instance.GetHtmlView(Cmd.Name, Params);
+            if ((Cmd.IsSingleInstance && !app.Desk.Instance.TabExists(Cmd.Name)) || !Cmd.IsSingleInstance) {
+                let Params = {
+                    ViewName: Cmd.Name
+                };
+                let Request = new app.AjaxRequest("GetHtmlView", Params);
+                Result = await app.Desk.Instance.AjaxExecute(Request);
+            }                
         }
         else {
             tp.Throw('Command not found');
@@ -411,7 +448,8 @@ app.Desk.Page = class {
 };
 
 tp.AppInitializeBefore = function () {
-    new app.Desk();   
+    new app.Desk();
 };
+
 
 
