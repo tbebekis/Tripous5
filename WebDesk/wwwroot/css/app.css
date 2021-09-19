@@ -2,11 +2,14 @@
 
 /*---------------------------------------------------------------------------------------
   Global
+
+    'Segoe UI', Tahoma, Verdana, Arial, sans-serif;
+    Tahoma, Arial, 'Open Sans', 'Segoe UI',  Verdana, sans-serif;
 ---------------------------------------------------------------------------------------*/
 
 
 html {
-    font-family: Tahoma, Arial, 'Open Sans', 'Segoe UI',  Verdana, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Verdana, Arial, sans-serif;
     font-size: 14px;
 }
 

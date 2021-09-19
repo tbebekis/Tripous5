@@ -14723,7 +14723,7 @@ Displays a content window, either as modal or as non-modal, and returns a Promis
 @param {string|HTMLElement} Content - Element or selector with html content
 @returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
 */
-tp.ContentWindow.ShowAsync = function (Modal, Text, Content) {
+tp.ContentWindow.ShowAsync = async function (Modal, Text, Content) {
     return new Promise((Resolve, Reject) => {
         tp.ContentWindow.Show(Modal, Text, Content, (Args) => {
             Resolve(Args);
@@ -14737,7 +14737,7 @@ Displays a content window, as modal, and returns a Promise.
 @param {string|HTMLElement} Content - Element or selector with html content
 @returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
 */
-tp.ContentWindow.ShowModalAsync = function (Text, Content) {
+tp.ContentWindow.ShowModalAsync = async function (Text, Content) {
     return tp.ContentWindow.ShowAsync(true, Text, Content);
 };
 //#endregion

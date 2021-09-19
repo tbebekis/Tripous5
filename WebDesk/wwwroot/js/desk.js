@@ -3,6 +3,7 @@ app.Command = class {
 
     /** constructor */
     constructor() {
+        this.Params = {};
     }
 
     /** A name unique among all commands. */
@@ -11,8 +12,8 @@ app.Command = class {
     Type = 'Ui';
     /** True when this is a single instance Ui command. */
     IsSingleInstance = false;
-    /** Gets meaning according to command's type */
-    Tag = '';
+    /** User defined parameters */
+    Params = {};
 };
 
 /** Represents an ajax request */
@@ -54,7 +55,6 @@ app.Desk = class {
         this.elTabs = tp.Select(this.elPager, '.tab-bar'); 
         this.elPages = tp.Select(this.elPager, '.page-list');
  
-        this.Pages = [];
         this.CommandExecutors = [];
 
         this.CommandExecutors.push(new app.MainMenuCommandExecutor()); 
@@ -80,7 +80,7 @@ app.Desk = class {
     elPages = null;         // TabPages
 
     CommandExecutors = [];
-    Pages = [];
+ 
 
     /**
     Notification sent by tp.Viewport when the screen (viewport) size changes. 
@@ -171,8 +171,9 @@ app.Desk = class {
 
 
     /**
-     * Executes an ajax request to the server and returns a possible result.
+     * Executes an ajax request to the server and returns the Packet as it comes from server.
      * @param {app.AjaxRequest} Request The request object.
+     * @returns {object} Returns the Packet from the server.
      */
     async AjaxExecute(Request) {
         let Result = null;
@@ -181,24 +182,19 @@ app.Desk = class {
         let Args = await tp.Ajax.PostModelAsync(Url, Request);
         if (Args.ResponseData.IsSuccess === true) {
             let Packet = Args.ResponseData.Packet;
-            if (Request.OperationName === 'GetHtmlView') {
-                Result = await this.HandleGetHtmlViewResponse(Packet);
-            }
-            else {
-                Result = Packet;
-            }
-            //await this.CreateTab(Packet, Name, Params);
+            Result = Packet; 
         }
         else {
-            app.DisplayAjaxErrors(Args);
-            return Result;
+            app.DisplayAjaxErrors(Args);           
         }
+
+        return Result;
     }
     /**
-     * Creates a tab and a page and displays both in the Ui.
+     * Creates a tab element and a page element and adds both to the DOM.
      * @param {object} Packet The packet as it comes from server
      */
-    async HandleGetHtmlViewResponse(Packet) {
+    async CreatePageElement(Packet) {
         let TabHtmlText = `
        <div class="tab-item">
            <div class="tp-Text">${Packet.ViewName}</div>
@@ -225,18 +221,20 @@ app.Desk = class {
             elTab: elTab
         };
 
-        await this.StartPage(elPage, CreateParams);
+        await this.CreatePage(elPage, CreateParams);
 
         this.TabClicked(elTab);
     }
     /**
-     * "Starts" a specified page that is already added to DOM.. <br />
-     * This function dynamically imports a javascript module specified by the markup of the page and then calls the StartPage() of that module. <br />
-     * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_import|Dynamic Import}
+     * Creates a specified page object on an element that is already added to DOM and returns that page instance. <br />
+     * The created element provides a data-setup attribute specifying a javascript file, a css file and a page class.  <br />
+     * This function dynamically loads the specified files, if not already loaded, and then creates the instance of the page object. <br />
      * @param {HTMLElement} elPage
      * @param {object} Params A key-value object with initialization information.
+     * @returns {app.Desk.Page} Returns the page instance.
      */
-    async StartPage(elPage, Params) {
+    async CreatePage(elPage, Params) {
+        let Page = null;
         let Setup = app.GetDataObject(elPage, 'setup'); 
 
         if (!tp.IsBlank(Setup.PageCSS)) {
@@ -248,11 +246,11 @@ app.Desk = class {
         }
  
         if (!tp.IsBlank(Setup.PageClass)) {
-            //Setup = tp.MergeQuick(Setup, Params || {});
-
             let Code = `new ${Setup.PageClass}(elPage, Params)`;
-            let Page = eval(Code);
+            Page = eval(Code);
         }
+
+        return Page;
     }
     /**
      * Handles the click on a tab.
@@ -288,7 +286,7 @@ app.MainMenuCommandExecutor = class {
      * @type {string[]}
      */
     ValidCommands = [
-        'AppTable.Ui.List'
+        'Ui.SysData.List.Table'
     ];
 
     /**
@@ -302,7 +300,7 @@ app.MainMenuCommandExecutor = class {
     /**
      * Executes a specified command. The CanExecuteCommand() is called just before this call.
      * @param {app.Command} Cmd The command to execute.
-     * @returns {Promise} Returns whatever the specified command dictates to return.
+     * @returns {Promise} Returns whatever the specified command dictates to return. For a Ui command returns the Packet from the server.
      */
     async ExecuteCommand(Cmd) {
         let Result = null;
@@ -312,15 +310,16 @@ app.MainMenuCommandExecutor = class {
                 let Params = {
                     ViewName: Cmd.Name
                 };
+                Params = tp.MergeQuick(Params, Cmd.Params);
                 let Request = new app.AjaxRequest("GetHtmlView", Params);
-                Result = await app.Desk.Instance.AjaxExecute(Request);
+                let Packet = await app.Desk.Instance.AjaxExecute(Request);
+                if (tp.IsValid(Packet))
+                    Result = await app.Desk.Instance.CreatePageElement(Packet);
             }                
         }
         else {
-            tp.Throw('Command not found');
- 
+            tp.Throw('Command not found'); 
         }
-
 
         return Result;
     }
@@ -427,11 +426,17 @@ app.Desk.Page = class {
                 this.CreateParams.elTab = null;
             }            
 
-            let el = this.Handle;
-            tp.SetObject(this.Handle, null);
-            this.Handle = null;
-            if (tp.IsElement(el.parentNode)) {
-                el.parentNode.removeChild(el);
+            if (tp.IsValid(this.Handle)) {
+                try {
+                    let el = this.Handle;
+                    tp.SetObject(this.Handle, null);
+                    this.Handle = null;
+                    if (tp.IsElement(el.parentNode)) {
+                        el.parentNode.removeChild(el);
+                    }
+                } catch  {
+                    //
+                }
             }
 
             if (!tp.IsBlank(this.Setup.PageCSS)) {
@@ -498,6 +503,23 @@ app.Desk.Page = class {
 
     Close() {
         this.Dispose();
+    }
+
+    /**
+     * Executes a command that returns a Packet from server for creating a modal dialog.
+     * @param {app.Command} Cmd The command to execute.
+     * @returns {object} Returns the Packet from the server.
+     */
+    async AjaxExecuteDialog(Cmd) {
+ 
+        let Params = {
+            ViewName: Cmd.Name
+        };
+        Params = tp.MergeQuick(Params, Cmd.Params);
+        let Request = new app.AjaxRequest("GetHtmlView", Params);
+        let Packet = await app.Desk.Instance.AjaxExecute(Request);
+
+        return Packet;
     }
 };
 

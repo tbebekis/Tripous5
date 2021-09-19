@@ -335,7 +335,7 @@ where
 
             Command BarItem = new Command() { TitleKey = "System" };
             Result.Add(BarItem);
-            BarItem.Add("AppTable.Ui.List").IsSingleInstance = true; 
+            BarItem.Add("Ui.SysData.List.Table").IsSingleInstance = true; 
 
             return Result.ToArray();
 

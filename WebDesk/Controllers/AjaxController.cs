@@ -28,14 +28,12 @@ namespace WebDesk.Controllers
     /// </summary>
     public class AjaxController : ControllerMvc
     {
-
-
-
+ 
         HttpActionResult GetHtmlView(AjaxRequest R)
         {
             string ViewNameOrPath = string.Empty;
             object Model = null;
-            IDictionary<string, object> PlusViewData = null;
+            Dictionary<string, object> PlusViewData = new Dictionary<string, object>();
 
             string ViewName = R.Params["ViewName"].ToString();
 
@@ -46,11 +44,18 @@ namespace WebDesk.Controllers
             DataTable Table;
             switch (ViewName)
             {
-                case "AppTable.Ui.List":
-                    ViewNameOrPath = "SysData.ItemList";
+                case "Ui.SysData.List.Table":
+                    ViewNameOrPath = "SysData.List";
+                    PlusViewData["DataType"] = "Table";
                     Packet["DataType"] = "Table";
                     Table = SysData.Select("Table", NoBlobs: true);
                     Packet["Table"] = JsonDataTable.ToJObject(Table);
+                    break;
+                case "Ui.SysData.Insert.Table":
+                    ViewNameOrPath = "SysData.Insert.Table";
+                    PlusViewData["DataType"] = "Table";
+                    Packet["DataType"] = "Table";
+                    Packet["IsInsert"] = true;
                     break;
             }
 

@@ -40,9 +40,9 @@ namespace WebDesk
             /// </summary>
             public bool IsSingleInstance => Cmd.IsSingleInstance;
             /// <summary>
-            /// Gets meaning according to command's type
+            /// User defined parameters
             /// </summary>
-            public string Tag => Cmd.Tag;
+            public Dictionary<string, object> Params => Cmd.Params;
         }
 
 
@@ -114,16 +114,23 @@ namespace WebDesk
             Items.Add(Cmd);
         }
         /// <summary>
-        /// Adds a child command
+        /// Adds a Ui child command
         /// </summary>
-        public Command Add(string Name, string TitleKey = "", CommandType Type = CommandType.Ui, string Tag = "")
+        public Command Add(CommandType Type, string Name, string TitleKey = "")
         {
             if (string.IsNullOrWhiteSpace(TitleKey))
                 TitleKey = Name;
 
-            Command Result = new Command() { Name = Name, TitleKey = TitleKey, Type = Type, Tag = Tag};
+            Command Result = new Command() { Type = Type, Name = Name, TitleKey = TitleKey};
             Add(Result);
             return Result;
+        }
+        /// <summary>
+        /// Adds a Ui child command
+        /// </summary>
+        public Command Add(string Name, string TitleKey = "")
+        {
+            return Add(CommandType.Ui, Name, TitleKey);
         }
 
         /* properties */
@@ -148,9 +155,9 @@ namespace WebDesk
         /// </summary>
         public string IconKey { get; set; }
         /// <summary>
-        /// Gets meaning according to command's type
+        /// User defined parameters
         /// </summary>
-        public string Tag { get; set; }
+        public Dictionary<string, object> Params { get; set; } = new Dictionary<string, object>();
 
         /// <summary>
         /// True when this is a single instance Ui command.
