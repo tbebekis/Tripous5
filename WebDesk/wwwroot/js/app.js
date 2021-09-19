@@ -47,14 +47,17 @@ app.WaitAsync = async function (MSecsToWait, FuncToCall = null) {
 
 
 /** A list with the dynamically loaded modules (javascript files). */
-app.Modules = [];
+app.JavascriptFiles = [];
+/** A list with the dynamically loaded css files. */
+app.CssFiles = [];
 
 /**
- * Loads a module (javascript file) dynamically.
+ * Loads a javascript file dynamically.
+ * NOTE: Files loaded dynamically are referenced counted. When ref-counting drops to zero the element is deleted from DOM.
  * @param {string} Url The url path of the file.
  * @returns {Promise} Returns a promise.
  */
-app.LoadModule = async function (Url) {
+app.LoadJavascriptFile = async function (Url) {
     // NOTE: It seems there is a severe problem with the Visual Studio debugger 
     // and awaiting the Promise the import() function returns. 
     // It crashes Chrome making debugging impossible.
@@ -63,35 +66,121 @@ app.LoadModule = async function (Url) {
     // let P = import(Url);
     // return P;
 
-    let S = Url.toLowerCase();
-    if (app.Modules.indexOf(S) === -1) {
-        let script = tp.Doc.createElement("script");
-        script.src = Url;
+    let FileUrl = Url.toLowerCase();
+    let oFile = app.JavascriptFiles.find(item => { return item.FileUrl === FileUrl; });
 
+    if (!tp.IsValid(oFile)) {
         let ExecutorFunc = (Resolve, Reject) => {
             try {
-                script.onload = function () {
-                    app.Modules.push(S);
+                let el = tp.Doc.createElement("script");
+                el.src = Url;
+                el.onload = function () {
+                    oFile = {
+                        FileUrl: FileUrl,
+                        Counter: 1,
+                        Element: el
+                    };
+                    app.JavascriptFiles.push(oFile);
+
                     Resolve();
                 };
-                script.onerror = function (e) {
+                el.onerror = function (e) {
                     Reject(e);
                 };
                 let Head = tp('head');
-                Head.appendChild(script);
+                Head.appendChild(el);
             } catch (e) {
                 Reject(e);
             }
         };
 
         let Result = new Promise(ExecutorFunc);
-        
         return Result;
     }
-
-
+    else {
+        oFile.Counter += 1;
+    }
+ 
     return Promise.resolve(); 
 };
+app.UnLoadJavascriptFile = function (Url) {
+    let FileUrl = Url.toLowerCase();
+    let oFile = app.JavascriptFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (tp.IsValid(oFile)) {
+        oFile.Counter -= 1;
+
+        if (oFile.Counter <= 0) {
+            let Head = tp('head');
+            Head.removeChild(oFile.Element);
+            tp.ListRemove(app.JavascriptFiles, oFile);            
+        }
+    }
+};
+
+/**
+ * Loads a css file dynamically.
+ * NOTE: Files loaded dynamically are referenced counted. When ref-counting drops to zero the element is deleted from DOM.
+ * @param {string} Url The url path of the file.
+ * @returns {Promise} Returns a promise.
+ */
+app.LoadCssFile = async function (Url) {
+
+    let FileUrl = Url.toLowerCase();
+    let oFile = app.CssFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (!tp.IsValid(oFile)) {
+        let ExecutorFunc = (Resolve, Reject) => {
+            try {
+                let el = tp.Doc.createElement("link");
+                el.href = Url;
+                el.rel = 'stylesheet';
+                el.type = 'text/css';
+
+                el.onload = function () {
+                    oFile = {
+                        FileUrl: FileUrl,
+                        Counter: 1,
+                        Element: el
+                    };
+                    app.CssFiles.push(oFile);
+ 
+                    Resolve();
+                };
+                el.onerror = function (e) {
+                    Reject(e);
+                };
+                let Head = tp('head');
+                Head.appendChild(el);
+            } catch (e) {
+                Reject(e);
+            }
+        };
+
+        let Result = new Promise(ExecutorFunc);
+        return Result;
+    }
+    else {
+        oFile.Counter += 1;
+    }
+
+    return Promise.resolve();
+};
+app.UnLoadCssFile = function (Url) {
+    let FileUrl = Url.toLowerCase();
+    let oFile = app.CssFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (tp.IsValid(oFile)) {
+        oFile.Counter -= 1;
+
+        if (oFile.Counter <= 0) {
+            let Head = tp('head');
+            Head.removeChild(oFile.Element);
+            tp.ListRemove(app.CssFiles, oFile);
+        }
+    }
+};
+
 
 /**
  * Should be called after a tp ajax call having errors. Displays the errors using notification boxes.

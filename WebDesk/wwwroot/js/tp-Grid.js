@@ -3720,7 +3720,7 @@ tp.Grid = class extends tp.Control  {
         this.ColumnContentWidth = 0;
         this.GroupCellWidth = 0;
 
-        this.Handle.style.height = '400px';
+        this.Handle.style.minHeight = '200px';
 
         this.UpdateRowHeight();
 

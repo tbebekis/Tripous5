@@ -221,7 +221,8 @@ app.Desk = class {
 
         let CreateParams = {
             Name: Packet.ViewName,
-            Packet: Packet
+            Packet: Packet,
+            elTab: elTab
         };
 
         await this.StartPage(elPage, CreateParams);
@@ -236,14 +237,22 @@ app.Desk = class {
      * @param {object} Params A key-value object with initialization information.
      */
     async StartPage(elPage, Params) {
-        let Setup = app.GetDataObject(elPage, 'setup');
-        let ModulePath = Setup.PageModule;        
- 
-        let P = await app.LoadModule(ModulePath);
-        Setup = tp.MergeQuick(Setup, Params || {});
+        let Setup = app.GetDataObject(elPage, 'setup'); 
 
-        let Code = `new ${Setup.PageClass}(elPage, Params)`;       
-        let Page = eval(Code);
+        if (!tp.IsBlank(Setup.PageCSS)) {
+            let P = await app.LoadCssFile(Setup.PageCSS);
+        }
+
+        if (!tp.IsBlank(Setup.PageJS)) {
+            let P = await app.LoadJavascriptFile(Setup.PageJS);
+        }
+ 
+        if (!tp.IsBlank(Setup.PageClass)) {
+            //Setup = tp.MergeQuick(Setup, Params || {});
+
+            let Code = `new ${Setup.PageClass}(elPage, Params)`;
+            let Page = eval(Code);
+        }
     }
     /**
      * Handles the click on a tab.
@@ -328,6 +337,10 @@ app.Desk.Page = class {
     constructor(elPage, CreateParams = null) {
         this.Handle = elPage;
         this.CreateParams = CreateParams || {};
+        this.Setup = app.GetDataObject(elPage, 'setup') || {};
+
+        tp.Broadcaster.Add(this);
+        this.ScreenResizeListener = tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
 
         this.InitializeFields();
         this.OnFieldsInitialized();                         // notification
@@ -344,12 +357,25 @@ app.Desk.Page = class {
      * @type {HTMLElement}
      */
     Handle = null;
+    /** Listens for screen size and screen size mode (small, large, etc.) changes. <br />
+     * Screen size notifications handled by the OnScreenSizeChanged() method.
+     * @type{tp.Listener}
+     */
+    ScreenResizeListener = null;
+    /** True when this instance is disposed. 
+     * NOTE: Close() disposes this instance.
+     * @type {boolean}
+     * */
     IsDisposed = false;
-    /** A javascript object with initialization parameters.
+    /** A javascript object with initialization parameters. <br />
+     * Contains the ViewName property and the Packet property with the Packet as it came from server.
      * @type {object}
      */
     CreateParams = {};
-
+    /** A javascript object with initialization parameters passed to data-setup attribute of the element.
+     * @type {object}
+     */
+    Setup = {};
 
     /** Returns and array of property names the ProcessCreateParams() should NOT set 
      @returns {string[]} Returns and array of property names the ProcessCreateParams() should NOT set
@@ -388,14 +414,32 @@ app.Desk.Page = class {
     */
     Dispose() {
         if (this.IsDisposed === false && tp.IsElement(this.Handle)) {
-            //this.IsElementResizeListener = false;
-            //this.IsScreenResizeListener = false;
 
-            var el = this.Handle;
+            tp.Broadcaster.Remove(this);
+
+            if (this.ScreenResizeListener) {
+                tp.Viewport.RemoveListener(this.ScreenResizeListener);
+                this.ScreenResizeListener = null;
+            }
+
+            if (tp.IsElement(this.CreateParams.elTab)) {
+                tp.Remove(this.CreateParams.elTab);
+                this.CreateParams.elTab = null;
+            }            
+
+            let el = this.Handle;
             tp.SetObject(this.Handle, null);
             this.Handle = null;
             if (tp.IsElement(el.parentNode)) {
                 el.parentNode.removeChild(el);
+            }
+
+            if (!tp.IsBlank(this.Setup.PageCSS)) {
+                app.UnLoadCssFile(this.Setup.PageCSS);
+            }
+
+            if (!tp.IsBlank(this.Setup.PageJS)) {
+                app.UnLoadJavascriptFile(this.Setup.PageJS);
             }
 
             this.IsDisposed = true;
@@ -411,6 +455,19 @@ app.Desk.Page = class {
     }
 
     /* notifications */
+    /**
+    Notification sent by tp.Viewport when the screen (viewport) size changes.  
+    @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
+    */
+    OnScreenSizeChanged(ScreenModeFlag) { }
+    /** 
+     * This class is a {@link tp.Broadcaster}   listener.
+     * This method is called by tp.Broadcaster to notify a listener about an event.
+     * @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+     * @returns {any} Returns a value or null.
+     */
+    BroadcasterFunc(Args) { return null; }
+
     /**
     Notification. Called by CreateHandle() after handle creation and field initialization but BEFORE options (CreateParams) processing 
     Initialization steps:
@@ -438,6 +495,10 @@ app.Desk.Page = class {
     - Completed notification
     */
     OnInitializationCompleted() { }
+
+    Close() {
+        this.Dispose();
+    }
 };
 
 /** Tripous notification function. <br />

@@ -1269,7 +1269,7 @@ tp.IsBlank = function (v) {
         return true;
 
     if (!tp.IsString(v)) {
-        tp.Throw('Can not check for null or whitespace a non-string value');
+        tp.Throw('Can not check for null or whitespace a non-string value');        
     }
 
     return v.replace(/\s/g, '').length < 1;
