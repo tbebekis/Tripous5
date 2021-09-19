@@ -1,7 +1,4 @@
-﻿
-
-/** A command class. This is here mostly for reference only.
- * */
+﻿/** A command class. This is here mostly for reference only. */
 app.Command = class {
 
     /** constructor */
@@ -240,15 +237,13 @@ app.Desk = class {
      */
     async StartPage(elPage, Params) {
         let Setup = app.GetDataObject(elPage, 'setup');
-        let ModulePath = Setup.PageModule;
-
+        let ModulePath = Setup.PageModule;        
+ 
+        let P = await app.LoadModule(ModulePath);
         Setup = tp.MergeQuick(Setup, Params || {});
 
-        let P = await app.LoadModule(ModulePath);
-        
-        P.StartPage(elPage);
-
-        return P;
+        let Code = `new ${Setup.PageClass}(elPage, Params)`;       
+        let Page = eval(Code);
     }
     /**
      * Handles the click on a tab.
@@ -273,9 +268,7 @@ app.Desk = class {
     }
 };
 
- 
-
-/** A command executor class.
+/** A command executor class. <br />
  *  A command executor must provide two functions: CanExecuteCommand(Cmd) and async ExecuteCommand(Cmd).
  * */
 app.MainMenuCommandExecutor = class {
@@ -324,7 +317,7 @@ app.MainMenuCommandExecutor = class {
     }
 };
 
-/** Represents a desk page */
+/** Represents a desk page. Used as base page class. */
 app.Desk.Page = class {
 
     /**
@@ -447,6 +440,8 @@ app.Desk.Page = class {
     OnInitializationCompleted() { }
 };
 
+/** Tripous notification function. <br />
+ * NOTE: It is executed before any ready listeners. */
 tp.AppInitializeBefore = function () {
     new app.Desk();
 };

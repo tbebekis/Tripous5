@@ -1,16 +1,17 @@
 ﻿var app = app || {};
+
 app.Config = app.Config || {};
 app.Config.CurrencySymbol = '€';
 
-app.Resources = app.Resources || {};
+app.Resources = app.Resources || {}; 
 
-app.PromiseStatus = async function (P) {
-    const o = {};
-    return Promise.race([P, o])
-        .then(v => (v === o) ? "pending" : "resolved", () => "rejected");
-};
-
-
+/**
+ * Converts a string to float number. Returns a float number on success or a specified default value on failure. <br />
+ * The decimal separator could be point or comma. <br />
+ * @param {string} v The string to operate on.
+ * @param {number} Default Optional. The default value to return on failure.
+ * @returns {number} Returns a float number on success or a specified default value on failure.
+ */
 app.StrToFloat = function (v, Default = 0) {
     if (tp.IsString(v)) {
         v = v.replace(',', '.');
@@ -44,9 +45,52 @@ app.WaitAsync = async function (MSecsToWait, FuncToCall = null) {
     })
 };
 
+
+/** A list with the dynamically loaded modules (javascript files). */
+app.Modules = [];
+
+/**
+ * Loads a module (javascript file) dynamically.
+ * @param {string} Url The url path of the file.
+ * @returns {Promise} Returns a promise.
+ */
 app.LoadModule = async function (Url) {
-    let P = import(Url);
-    return P;
+    // NOTE: It seems there is a severe problem with the Visual Studio debugger 
+    // and awaiting the Promise the import() function returns. 
+    // It crashes Chrome making debugging impossible.
+    // So, no ES6 modules yet. At least dynamically loadable modules.
+
+    // let P = import(Url);
+    // return P;
+
+    let S = Url.toLowerCase();
+    if (app.Modules.indexOf(S) === -1) {
+        let script = tp.Doc.createElement("script");
+        script.src = Url;
+
+        let ExecutorFunc = (Resolve, Reject) => {
+            try {
+                script.onload = function () {
+                    app.Modules.push(S);
+                    Resolve();
+                };
+                script.onerror = function (e) {
+                    Reject(e);
+                };
+                let Head = tp('head');
+                Head.appendChild(script);
+            } catch (e) {
+                Reject(e);
+            }
+        };
+
+        let Result = new Promise(ExecutorFunc);
+        
+        return Result;
+    }
+
+
+    return Promise.resolve(); 
 };
 
 /**
@@ -108,13 +152,14 @@ app.GetDataObject = function (el, DataName = 'setup') {
     return A;
 };
 
-/** Creates and returns an overlay div */
+/** Creates and returns an overlay div.
+ * @returns {HTMLElement} Returns the overlay div. */
 app.CreateOverlay = function () {
-    let Overlay = tp.Div(tp.Doc.body);
-    Overlay.id = tp.SafeId('Overlay');
-    tp.AddClass(Overlay, 'overlay');
-    tp.BringToFront(Overlay);
-    return Overlay;
+    let Result = tp.Div(tp.Doc.body);
+    Result.id = tp.SafeId('Overlay');
+    tp.AddClass(Result, 'overlay');
+    tp.BringToFront(Result);
+    return Result;
 };
 
 /**
