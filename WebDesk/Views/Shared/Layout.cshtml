@@ -4,21 +4,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebDesk</title>
+    @* <link href="~/tp/css/font-awesome.css" rel="stylesheet" /> *@
+    @* <link href="~/tp/css/normalize.min.css" rel="stylesheet" /> *@
     <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
     <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet" />
-    <link href="~/css/tp.css" rel="stylesheet" />
-    <link href="~/css/tp-UI.css" rel="stylesheet" />
-    <link href="~/css/app.css" rel="stylesheet" />
     @if (WSys.IsDevelopment)
     {
-        <script src="~/js/tp.js"></script>
-        <script src="~/js/tp-Data.js"></script>
-        <script src="~/js/tp-UI.js"></script>
-        <script src="~/js/tp-Grid.js"></script>
-        <script src="~/js/tp-Model.js"></script>
+        <link href="~/tp/css/tp.css" rel="stylesheet" />
+        <link href="~/tp/css/tp-UI.css" rel="stylesheet" />
+
+        <link href="~/css/app.css" rel="stylesheet" />
+
+        <script src="~/tp/js/tp.js"></script>
+        <script src="~/tp/js/tp-Data.js"></script>
+        <script src="~/tp/js/tp-UI.js"></script>
+        <script src="~/tp/js/tp-Grid.js"></script>
+        <script src="~/tp/js/tp-Model.js"></script>
 
         <script src="~/js/app.js"></script>
-
     }
     else
     {
