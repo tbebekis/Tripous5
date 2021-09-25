@@ -148,6 +148,8 @@ namespace Tripous.Data
             // unique constraints
             string sName;
             int Index = 0;
+
+            // single-field unique constraints
             foreach (DataFieldDef Field in Fields)
             {
                 if (Field.Unique)
@@ -157,6 +159,14 @@ namespace Tripous.Data
                     SB.AppendLine("  " + sDef);
                     Index++;
                 }
+            }
+            // multi-field unique constraints
+            foreach (string UCFields in UniqueConstraints)
+            {
+                sName = EnsureValidLength($"UC{Index}_{Name}");
+                sDef = $",constraint {sName} unique ({UCFields})";
+                SB.AppendLine("  " + sDef);
+                Index++;
             }
 
             // foreign key constraints
@@ -203,19 +213,47 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        ///  Creates, adds and returns a primary key field.
+        ///  Creates, adds and returns a primary key field of a defined type.
+        ///  <para>NOTE: String and Integer are the only supported types.</para>
         /// </summary>
-        public DataFieldDef AddPrimaryKey(string FieldName = "Id", int Length = 40, string TitleKey = null)
+        public DataFieldDef AddPrimaryKey(string FieldName, DataFieldType DataType, int Length, string TitleKey = null)
         {
+            if (!Bf.In(DataType, DataFieldType.String | DataFieldType.Integer))
+                Sys.Throw($"DataType not supported for a table Primary Key. {DataType}");
+
             DataFieldDef Result = new DataFieldDef();
             Result.Name = FieldName;
             Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
             Result.IsPrimaryKey = true;
-            Result.DataType = SysConfig.GuidOids ? DataFieldType.String : DataFieldType.Integer;
-            Result.Length = Length;
+            Result.DataType = DataType;
+            if (DataType == DataFieldType.String)
+                Result.Length = Length;
             Result.Required = true;
             Fields.Add(Result);
             return Result;
+        }
+        /// <summary>
+        ///  Creates, adds and returns a primary key field.
+        ///  <para>NOTE: This version adds a data-type according to <see cref="SysConfig.GuidOids"/> flag.</para>
+        /// </summary>
+        public DataFieldDef AddPrimaryKey(string FieldName = "Id",  int Length = 40, string TitleKey = null)
+        {
+            DataFieldType DataType = SysConfig.GuidOids ? DataFieldType.String : DataFieldType.Integer;
+            return AddPrimaryKey(FieldName, DataType, Length, TitleKey);
+        }
+        /// <summary>
+        ///  Creates, adds and returns an integer primary key field.
+        /// </summary>
+        public DataFieldDef AddIntegerPrimaryKey(string FieldName = "Id", string TitleKey = null)
+        {
+            return AddPrimaryKey(FieldName, DataFieldType.Integer, 0, TitleKey);
+        }
+        /// <summary>
+        ///  Creates, adds and returns a string primary key field.
+        /// </summary>
+        public DataFieldDef AddStringPrimaryKey(string FieldName = "Id", int Length = 40, string TitleKey = null)
+        {
+            return AddPrimaryKey(FieldName, DataFieldType.String, 0, TitleKey);
         }
 
         /// <summary>
@@ -305,6 +343,15 @@ namespace Tripous.Data
             return AddField(FieldName, DataFieldType.TextBlob, Required, TitleKey, null);
         }
 
+
+        /// <summary>
+        /// Used when a unique constraint is required on more than a single field, by adding a proper string, e.g. Field1, Field2
+        /// </summary>
+        public void AddUniqueConstraint(string FieldNames)
+        {
+            if (!UniqueConstraints.Contains(FieldNames))
+                UniqueConstraints.Add(FieldNames);
+        }
         
         /* properties */
         /// <summary>
@@ -328,6 +375,11 @@ namespace Tripous.Data
         /// Fields
         /// </summary>
         public List<DataFieldDef> Fields { get; set; } = new List<DataFieldDef>();
+        /// <summary>
+        /// For multi-field unique constraints.
+        /// <para>Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2</para>
+        /// </summary>
+        public List<string> UniqueConstraints { get; set; } = new List<string>();
  
     }
 

@@ -90,10 +90,50 @@ namespace Tripous.Data
         /// <summary>
         /// Defines a foreign key upon this field. Returns this.
         /// </summary>
-        public DataFieldDef SetForeign(string TableName, string FieldName)
+        public DataFieldDef SetForeign(string TableName, string FieldName = "Id")
         {
             this.ForeignTableName = TableName;
             this.ForeignFieldName = FieldName;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property and returns this instance.
+        /// </summary>
+        public DataFieldDef SetUnique(bool Value = true)
+        {
+            this.Unique = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property and returns this instance.
+        /// </summary>
+        public DataFieldDef SetRequired(bool Value = true)
+        {
+            this.Required = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property and returns this instance.
+        /// </summary>
+        public DataFieldDef SetDefaultValue(string Value = null)
+        {
+            this.DefaultValue = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property and returns this instance.
+        /// </summary>
+        public DataFieldDef SetTitleKey(string Value = "")
+        {
+            this.TitleKey = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property and returns this instance.
+        /// </summary>
+        public DataFieldDef SetLength(int Value = 0)
+        {
+            this.Length = Value;
             return this;
         }
 
