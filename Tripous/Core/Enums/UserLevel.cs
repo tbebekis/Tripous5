@@ -13,19 +13,27 @@ namespace Tripous
     public enum UserLevel
     {
         /// <summary>
-        /// Guest
+        /// None
         /// </summary>
-        Guest = 0,
+        None = 0,
         /// <summary>
-        /// Admin
+        /// A guest user
         /// </summary>
-        Admin = 1,
+        Guest = 1,
         /// <summary>
-        /// User
+        /// A normal user
         /// </summary>
         User = 2,
         /// <summary>
-        /// Service
+        /// A system administrator
+        /// </summary>
+        Admin = 4,
+        /// <summary>
+        /// A client application making API calls
+        /// </summary>
+        ClientApp = 8,
+        /// <summary>
+        /// A service application
         /// </summary>
         Service = 0x100,
         
