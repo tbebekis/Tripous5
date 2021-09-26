@@ -4,12 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+
 namespace Tripous.Data
 {
     /// <summary>
     /// A list of possible field flags.
     /// </summary>
     [Flags]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum SqlBrokerFieldFlag
     {
         /// <summary>
@@ -77,8 +82,7 @@ namespace Tripous.Data
         /// <summary>
         /// Must be a string or memo field.
         /// </summary>
-        Localizable = 0x4000,
- 
+        Localizable = 0x4000, 
 
     }
 }

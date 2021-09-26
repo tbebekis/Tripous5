@@ -284,6 +284,27 @@ insert into {TableName} (
             SysDataItem SDI = Table.ToSysDataItem(SSysDataOwnerName);
             SysData.Save(SDI);
         }
+        static void Execute_Trader()
+        {
+            string TableName = "Trader";
+            if (TableExists(TableName))
+                return;
+
+            DataTableDef Table = new DataTableDef() { Name = TableName };
+
+            Table.AddPrimaryKey();
+            Table.AddStringField("Code", 40, true).SetUnique();
+            Table.AddStringField("Name", 96, true).SetUnique();
+
+            string SqlText = Table.GetDefText();
+            SchemaVersion SV = new SchemaVersion();
+            SV.AddTable(SqlText);
+
+            SV.Execute();
+
+            SysDataItem SDI = Table.ToSysDataItem(SSysDataOwnerName);
+            SysData.Save(SDI);
+        }
 
         /// <summary>
         /// Creates database tables etc. based on the registered schemas
@@ -303,6 +324,7 @@ where
             vTables = Table.DefaultView;
 
             Execute_AppUser();
+            Execute_Trader();
            // Schemas.Execute();
         }
     }
