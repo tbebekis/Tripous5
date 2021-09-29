@@ -8,7 +8,7 @@ namespace Tripous.Data
 {
  
     /// <summary>
-    /// Represents a row in a <see cref="UiColumnInfo"/>.
+    /// Represents a row in a column.
     /// <para>The row is the control container along with its caption text.</para>
     /// <para>The control may be data-bindable or not.</para>
     /// </summary>
@@ -51,6 +51,8 @@ namespace Tripous.Data
         /// </summary>
         public const string Grid = "Grid";
 
+        string fTitle;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -60,7 +62,15 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// The caption text of the control
+        /// Gets or sets tha Title of this descriptor, used for display purposes.
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None); }
+            set { fTitle = value; }
+        }
+        /// <summary>
+        /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
 

@@ -18,6 +18,7 @@ namespace Tripous.Data
     {
         static List<SqlBrokerDef> Descriptors = new List<SqlBrokerDef>();
 
+        string fTitle;
         string fMainTableName;
         string fEntityName;
 
@@ -188,11 +189,15 @@ namespace Tripous.Data
         /// </summary> 
         public string Name { get; set; }
 
+ 
         /// <summary>
         /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>
-        [JsonIgnore]
-        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name;
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name); }
+            set { fTitle = value; }
+        }
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>

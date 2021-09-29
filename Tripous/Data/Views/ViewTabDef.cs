@@ -12,6 +12,7 @@ namespace Tripous.Data
     /// </summary>
     public class ViewTabDef
     {
+        string fTitle;
 
         /// <summary>
         /// Constructor
@@ -21,9 +22,18 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// The caption text.
+        /// Gets or sets tha Title of this descriptor, used for display purposes.
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None); }
+            set { fTitle = value; }
+        }
+        /// <summary>
+        /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.
         /// </summary>

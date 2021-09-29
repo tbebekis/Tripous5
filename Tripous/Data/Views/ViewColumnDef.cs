@@ -27,10 +27,7 @@ namespace Tripous.Data
         /// </summary>
         public string SourceName { get; set; }
 
-        /// <summary>
-        /// Width percent of text in rows.
-        /// </summary>
-        public int TextSplit { get; set; } = 35;
+
 
         /// <summary>
         /// A list of control rows.  
