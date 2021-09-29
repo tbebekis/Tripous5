@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.IO;
 using System.Data;
@@ -291,6 +292,25 @@ namespace Tripous
             }
 
             return Dictionary;
+        }
+
+
+        /// <summary>
+        /// Splits a sequence into chunks of a defined size.
+        /// <example>
+        /// <code>
+        /// int[] numbers = { 1, 2, 3, 4, 5, 6, 7 };
+        /// var NumberLists = Split(numbers, 3);        // results in 3 lists as {1, 2, 3}, {4, 5, 6}, {7}
+        /// </code>
+        /// </example>
+        /// </summary>
+        static public List<List<T>> Split<T>(this IEnumerable<T> Source, int ChunkSize)
+        {
+            int i = 0;
+            IEnumerable<IGrouping<int, T>> Groups = Source.GroupBy(item => i++ / ChunkSize);
+            IEnumerable<List<T>> Lists = Groups.Select(group => group.ToList());
+            List<List<T>> Result = Lists.ToList();
+            return Result;
         }
     }
 }

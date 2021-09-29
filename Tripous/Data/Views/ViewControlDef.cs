@@ -58,7 +58,12 @@ namespace Tripous.Data
         /// </summary>
         public ViewControlDef()
         {
-
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ViewControlDef(SqlBrokerFieldDef Field)
+        {
         }
 
         /// <summary>

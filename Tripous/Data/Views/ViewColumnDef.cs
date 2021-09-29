@@ -19,7 +19,14 @@ namespace Tripous.Data
         /// </summary>
         public ViewColumnDef()
         {
-
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ViewColumnDef(IEnumerable<SqlBrokerFieldDef> Fields)
+        {
+            foreach (var Field in Fields)
+                Controls.Add(new ViewControlDef(Field));
         }
 
         /// <summary>

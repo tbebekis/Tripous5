@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,36 +23,42 @@ namespace Tripous.Data
         /// </summary>
         public ViewDef()
         {
-
         }
-
-
         /// <summary>
-        /// Creates a default view based on a broker descriptor.
+        /// Constructor. Creates a default view based on a broker descriptor.
         /// </summary>
-        static public ViewDef CreateViewDef(SqlBrokerDef Broker)
+        public ViewDef(SqlBrokerDef Broker, UiSplit Split = null)
         {
-            ViewDef View = new ViewDef() {
-                Title = Broker.Title,
-                SourceName = Broker.MainTableName
-            };
+            if (Split != null)
+                this.Split = Split;
+
+            Title = Broker.Title;
+            SourceName = Broker.MainTableName;
 
             // filters (search) tab
             ViewTabDef FilterTab = new ViewTabDef() { TitleKey = "Filters" };
-            View.Tabs.Add(FilterTab);
+            this.Tabs.Add(FilterTab);
 
             // list (browse) tab
             ViewTabDef ListTab = new ViewTabDef() { TitleKey = "List" };
-            View.Tabs.Add(ListTab);
+            this.Tabs.Add(ListTab);
 
             // data tab
             ViewTabDef DataTab = new ViewTabDef() { TitleKey = "Data" };
-            View.Tabs.Add(DataTab);
+            this.Tabs.Add(DataTab);
 
+            var MainTable = Broker.MainTable;
+            List<List<SqlBrokerFieldDef>> ColumnFieldLists = MainTable.Fields.Split(this.Split.Large);
 
-
-            return View;
+            ViewColumnDef Column;
+            foreach (var FieldList in ColumnFieldLists)
+            {
+                Column = new ViewColumnDef(FieldList);
+                this.Columns.Add(Column);
+            }
         }
+
+ 
 
 
         /// <summary>
