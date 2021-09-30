@@ -64,6 +64,43 @@ namespace Tripous.Data
         /// </summary>
         public ViewControlDef(SqlBrokerFieldDef Field)
         {
+            Title = Field.Title;
+            TitleKey = Field.TitleKey;
+
+            DataField = Field.Name;
+
+            ReadOnly = Bf.In(FieldFlags.ReadOnly, Field.Flags);
+            Required = Bf.In(FieldFlags.Required, Field.Flags);
+
+            switch (Field.DataType)
+            {
+                case DataFieldType.String:
+                    TypeName = Bf.In(FieldFlags.Memo, Field.Flags) ? Memo : TextBox;
+                    break;
+
+                case DataFieldType.Integer:
+                    TypeName = Bf.In(FieldFlags.Boolean, Field.Flags)? CheckBox:  NumberBox;
+                    break;
+
+                case DataFieldType.Float:
+                case DataFieldType.Decimal:
+                    TypeName = TextBox;
+                    break;
+
+                case DataFieldType.Date:
+                case DataFieldType.DateTime:
+                    TypeName = DateBox;
+                    break;
+
+                case DataFieldType.Boolean:
+                    TypeName = CheckBox;
+                    break;
+
+                case DataFieldType.TextBlob:
+                    TypeName = Memo;
+                    break;
+            }
+
         }
 
         /// <summary>

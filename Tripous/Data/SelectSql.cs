@@ -723,7 +723,7 @@ from
         /// <summary>
         /// The criterion field descriptors used to generate the "user where" clause of the SelectSql
         /// </summary>
-        public SqlFilters SqlFilters { get; set; } = new SqlFilters();
+        public SqlFilterDefs SqlFilters { get; set; } = new SqlFilterDefs();
 
 
 

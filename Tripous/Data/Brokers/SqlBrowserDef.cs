@@ -43,7 +43,7 @@ namespace Tripous.Data
             if (string.IsNullOrWhiteSpace(SqlBrokerName))
                 return;
 
-            SqlBrokerDef BrokerDes = SqlBrokerDef.FindDescriptor(SqlBrokerName); 
+            SqlBrokerDef BrokerDes = SqlBrokerDef.Find(SqlBrokerName); 
             if (BrokerDes == null)
                 return;
 

@@ -16,14 +16,14 @@ namespace Tripous.Data
     /// <summary>
     /// Describes a criterion item.
     /// </summary>
-    public class SqlFilter 
+    public class SqlFilterDef 
     {
         /// <summary>
         /// Field
         /// </summary>
         static public readonly List<string> ValidAggregateFunctions = new List<string>(new string[] { "", "count", "avg", "sum", "max", "min" });
         string fAggregateFunc;
- 
+        string fTitle;
 
         /// <summary>
         /// It is used when the data type of the criterion is either <see cref="SqlFilterMode.EnumConst"/> or <see cref="SqlFilterMode.EnumQuery"/>
@@ -72,7 +72,7 @@ namespace Tripous.Data
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SqlFilter()
+        public SqlFilterDef()
         {
         }
 
@@ -122,13 +122,17 @@ namespace Tripous.Data
         /* properties */
         /// <summary>
         /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>
-        [JsonIgnore]
-        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : FieldPath;
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None); }
+            set { fTitle = value; }
+        }
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+
 
         /// <summary>
         /// Indicates how the user enters of selects the criterion value

@@ -372,7 +372,7 @@ namespace Tripous.Data
         /// </summary>
         public void UpdateFrom(DataTable Table)
         {
-            SqlBrokerFieldFlag Flags;
+            FieldFlags Flags;
             string Title;
 
             foreach (DataColumn Field in Table.Columns)
@@ -381,13 +381,13 @@ namespace Tripous.Data
 
                 if (FieldDes == null)
                 {
-                    Flags = SqlBrokerFieldFlag.None;
+                    Flags = FieldFlags.None;
                     Title = Res.GS(Field.ColumnName);
                     if (!Db.IsVisibleColumn(Field.ColumnName))
-                        Flags |= SqlBrokerFieldFlag.Hidden;
+                        Flags |= FieldFlags.Hidden;
 
                     if (Simple.IsString(Field.DataType) || Simple.IsDateTime(Field.DataType))
-                        Flags |= SqlBrokerFieldFlag.Searchable;
+                        Flags |= FieldFlags.Searchable;
 
                     Fields.Add(new SqlBrokerFieldDef()
                     {
@@ -546,14 +546,14 @@ namespace Tripous.Data
  
         /* sql filters */
         /// <summary>
-        /// Creates <see cref="SqlFilter"/> items for each searchable <see cref="SqlBrokerFieldDef"/> item of a <see cref="SqlBrokerTableDef"/>.
+        /// Creates <see cref="SqlFilterDef"/> items for each searchable <see cref="SqlBrokerFieldDef"/> item of a <see cref="SqlBrokerTableDef"/>.
         /// </summary>
-        public void CreateSqlFilters(DataTable Table, SqlFilters Filters)
+        public void CreateSqlFilters(DataTable Table, SqlFilterDefs Filters)
         {
             SimpleType SimpleType;
             SqlBrokerTableDef TableDef;
             SqlBrokerFieldDef FieldDef;
-            SqlFilter Filter;
+            SqlFilterDef Filter;
             Tuple<SqlBrokerTableDef, SqlBrokerFieldDef> Pair = null;
 
             foreach (DataColumn Field in Table.Columns)
@@ -651,7 +651,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns a field.
         /// </summary>
-        public SqlBrokerFieldDef AddField(string Name, DataFieldType DataType, string TitleKey, SqlBrokerFieldFlag Flags)
+        public SqlBrokerFieldDef AddField(string Name, DataFieldType DataType, string TitleKey, FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = Fields.Find(item => item.Name.IsSameText(Name));
 
@@ -671,13 +671,15 @@ namespace Tripous.Data
             return Result;
         }
 
-
         /// <summary>
         /// Adds and returns an Id field.
         /// </summary>
-        public SqlBrokerFieldDef AddId(string Name, DataFieldType DataType, int MaxLength)
+        public SqlBrokerFieldDef AddId(string Name, DataFieldType DataType, int MaxLength = 40)
         {
-            var Result = AddField(Name, DataType, "", SqlBrokerFieldFlag.None);
+            if (!Bf.In(DataType, DataFieldType.String | DataFieldType.Integer))
+                Sys.Throw($"DataType not supported for a table Primary Key. {DataType}");
+
+            var Result = AddField(Name, DataType, "", FieldFlags.None);
             if (DataType == DataFieldType.String)
                 Result.MaxLength = MaxLength;
             return Result;
@@ -689,11 +691,35 @@ namespace Tripous.Data
         {
             return AddId(Name, SysConfig.OidDataType, SysConfig.OidSize);
         }
+        /// <summary>
+        /// Adds and returns a string Id field
+        /// </summary>
+        public SqlBrokerFieldDef AddStringId(string Name = "Id", int MaxLength = 40)
+        {
+            return AddId(Name, DataFieldType.String, MaxLength);
+        }
+        /// <summary>
+        /// Adds and returns an integer Id field
+        /// </summary>
+        public SqlBrokerFieldDef AddIntegerId(string Name = "Id")
+        {
+            return AddId(Name, DataFieldType.Integer, 0);
+        }
 
         /// <summary>
         /// Adds and returns a string field.
         /// </summary>
-        public SqlBrokerFieldDef AddString(string Name, int MaxLength = 96, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef Add(string Name, int MaxLength, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
+        {
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.String, TitleKey, Flags);
+            Result.MaxLength = MaxLength;
+            return Result;
+        }
+
+        /// <summary>
+        /// Adds and returns a string field.
+        /// </summary>
+        public SqlBrokerFieldDef AddString(string Name, int MaxLength = 96, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.String, TitleKey, Flags);
             Result.MaxLength = MaxLength;
@@ -702,7 +728,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns an integer field.
         /// </summary>
-        public SqlBrokerFieldDef AddInteger(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddInteger(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Integer, TitleKey, Flags); 
             return Result;
@@ -710,7 +736,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns an double field.
         /// </summary>
-        public SqlBrokerFieldDef AddDouble(string Name, int Decimals = 4, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddDouble(string Name, int Decimals = 4, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Float, TitleKey, Flags);
             Result.Decimals = Decimals;
@@ -719,7 +745,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns an decimal field.
         /// </summary>
-        public SqlBrokerFieldDef AddDecimal(string Name, int Decimals = 4, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddDecimal(string Name, int Decimals = 4, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Decimal, TitleKey, Flags);
             Result.Decimals = Decimals;
@@ -728,7 +754,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns an date field.
         /// </summary>
-        public SqlBrokerFieldDef AddDate(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddDate(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Date, TitleKey, Flags);
             return Result;
@@ -736,7 +762,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns an date-time field.
         /// </summary>
-        public SqlBrokerFieldDef AddDateTime(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddDateTime(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.DateTime, TitleKey, Flags);
             return Result;
@@ -744,15 +770,15 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns an integer-boolean field.
         /// </summary>
-        public SqlBrokerFieldDef AddBoolean(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddBoolean(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
-            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Boolean, TitleKey, Flags | SqlBrokerFieldFlag.Boolean);
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Boolean, TitleKey, Flags | FieldFlags.Boolean);
             return Result;
         }
         /// <summary>
         /// Adds and returns a blob field.
         /// </summary>
-        public SqlBrokerFieldDef AddBlob(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddBlob(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Blob, TitleKey, Flags);
             return Result;
@@ -760,7 +786,7 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns a text blob field.
         /// </summary>
-        public SqlBrokerFieldDef AddTextBlob(string Name, string TitleKey = "", SqlBrokerFieldFlag Flags = SqlBrokerFieldFlag.None)
+        public SqlBrokerFieldDef AddTextBlob(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.None)
         {
             SqlBrokerFieldDef Result = AddField(Name, DataFieldType.TextBlob, TitleKey, Flags);
             return Result;

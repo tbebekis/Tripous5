@@ -216,7 +216,7 @@ namespace Tripous.Data
         ///  Creates, adds and returns a primary key field of a defined type.
         ///  <para>NOTE: String and Integer are the only supported types.</para>
         /// </summary>
-        public DataFieldDef AddPrimaryKey(string FieldName, DataFieldType DataType, int Length, string TitleKey = null)
+        public DataFieldDef AddId(string FieldName, DataFieldType DataType, int Length, string TitleKey = null)
         {
             if (!Bf.In(DataType, DataFieldType.String | DataFieldType.Integer))
                 Sys.Throw($"DataType not supported for a table Primary Key. {DataType}");
@@ -236,24 +236,24 @@ namespace Tripous.Data
         ///  Creates, adds and returns a primary key field.
         ///  <para>NOTE: This version adds a data-type according to <see cref="SysConfig.GuidOids"/> flag.</para>
         /// </summary>
-        public DataFieldDef AddPrimaryKey(string FieldName = "Id",  int Length = 40, string TitleKey = null)
+        public DataFieldDef AddId(string FieldName = "Id",  int Length = 40, string TitleKey = null)
         {
             DataFieldType DataType = SysConfig.GuidOids ? DataFieldType.String : DataFieldType.Integer;
-            return AddPrimaryKey(FieldName, DataType, Length, TitleKey);
+            return AddId(FieldName, DataType, Length, TitleKey);
         }
         /// <summary>
         ///  Creates, adds and returns an integer primary key field.
         /// </summary>
-        public DataFieldDef AddIntegerPrimaryKey(string FieldName = "Id", string TitleKey = null)
+        public DataFieldDef AddIntegerId(string FieldName = "Id", string TitleKey = null)
         {
-            return AddPrimaryKey(FieldName, DataFieldType.Integer, 0, TitleKey);
+            return AddId(FieldName, DataFieldType.Integer, 0, TitleKey);
         }
         /// <summary>
         ///  Creates, adds and returns a string primary key field.
         /// </summary>
-        public DataFieldDef AddStringPrimaryKey(string FieldName = "Id", int Length = 40, string TitleKey = null)
+        public DataFieldDef AddStringId(string FieldName = "Id", int Length = 40, string TitleKey = null)
         {
-            return AddPrimaryKey(FieldName, DataFieldType.String, 0, TitleKey);
+            return AddId(FieldName, DataFieldType.String, 0, TitleKey);
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace Tripous.Data
         /// <summary>
         ///  Creates, adds and returns a string (nvarchar) field.
         /// </summary>
-        public DataFieldDef AddStringField(string FieldName, int Length = 96, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddString(string FieldName, int Length = 96, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             DataFieldDef Result = new DataFieldDef();
             Result.Name = FieldName;
@@ -289,56 +289,56 @@ namespace Tripous.Data
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddIntegerField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddInteger(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             return AddField(FieldName, DataFieldType.Integer, Required, TitleKey, DefaultValue);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddFloatField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddFloat(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             return AddField(FieldName, DataFieldType.Float, Required, TitleKey, DefaultValue);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddDecimalField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddDecimal(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             return AddField(FieldName, DataFieldType.Decimal, Required, TitleKey, DefaultValue);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddDateTimeField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddDateTime(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             return AddField(FieldName, DataFieldType.DateTime, Required, TitleKey, DefaultValue);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddDateField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddDate(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             return AddField(FieldName, DataFieldType.Date, Required, TitleKey, DefaultValue);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddBooleanField(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddBoolean(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
         {
             return AddField(FieldName, DataFieldType.Boolean, Required, TitleKey, DefaultValue);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddBlobField(string FieldName, bool Required = false, string TitleKey = null)
+        public DataFieldDef AddBlob(string FieldName, bool Required = false, string TitleKey = null)
         {
             return AddField(FieldName, DataFieldType.Blob, Required, TitleKey, null);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddTextBlobField(string FieldName, bool Required = false, string TitleKey = null)
+        public DataFieldDef AddTextBlob(string FieldName, bool Required = false, string TitleKey = null)
         {
             return AddField(FieldName, DataFieldType.TextBlob, Required, TitleKey, null);
         }

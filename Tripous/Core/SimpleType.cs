@@ -14,6 +14,8 @@ namespace Tripous
     /// <summary>
     /// Type code abstraction
     /// </summary>
+    [Flags]
+    [TypeStoreItem]
     [JsonConverter(typeof(SimpleTypeJsonConverter))]
     public enum SimpleType
     {

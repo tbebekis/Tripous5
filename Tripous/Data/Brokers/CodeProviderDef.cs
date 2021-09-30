@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace Tripous.Data
@@ -38,11 +39,11 @@ namespace Tripous.Data
 
         static void RegisterSysCodeProviders()
         {
-            RegisterDescriptor(Simple4, "XXXX");
-            RegisterDescriptor(Simple6, "XXXXXX");
+            Register(Simple4, "XXXX");
+            Register(Simple6, "XXXXXX");
 
-            RegisterDescriptor(Simple4_2, "XX-XX");
-            RegisterDescriptor(Simple6_3, "XXX-XXX");
+            Register(Simple4_2, "XX-XX");
+            Register(Simple6_3, "XXX-XXX");
         }
 
         /* construction */
@@ -64,23 +65,38 @@ namespace Tripous.Data
         /// <summary>
         /// Returns a descriptor by a specified name if any, else, null
         /// </summary>
-        static public CodeProviderDef FindDescriptor(string Name)
+        static public CodeProviderDef Find(string Name)
         {
             return Descriptors.Find(item => item.Name.IsSameText(Name));
         }
         /// <summary>
         /// Returns true if a descriptor is already registered under a specified name.
         /// </summary>
-        static public bool DescriptorExists(string Name)
+        static public bool Contains(string Name)
         {
-            return FindDescriptor(Name) != null;
+            return Find(Name) != null;
         }
+
         /// <summary>
         /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
+        /// <para>The <see cref="CodeProviderDef"/> decriptor provides information regarding the parts that make up a Code, passing a definition text to a <see cref="CodeProvider"/>.</para>
+        /// <para>The text that is passed to a <see cref="CodeProvider"/> by its <see cref="CodeProviderDef"/> descriptor comprises of parts, separated by the pipe | character.</para>     
+        /// <para>This <see cref="CodeProviderPartType"/> enum type indicates how to handle a part of that text.</para>
+        /// <para>CAUTION: The last part could be a <see cref="CodeProviderPartType.NumericSelect"/>, a <see cref="CodeProviderPartType.Sequencer"/> or a <see cref="CodeProviderPartType.Pivot"/> part. </para>
+        /// <para>CAUTION: The <see cref="CodeProviderPartType.Pivot"/> part value is incremented by the code producer. </para>
+        /// <para>CAUTION: No more than a single <see cref="CodeProviderPartType.Pivot"/> part is allowed. </para>
+        /// <para>Examples of text:</para>
+        /// <list type="bullet" >
+        /// <item><term>SO|XXX-XXX</term><description><see cref="CodeProviderPartType.Literal"/> (Sales Order) and <see cref="CodeProviderPartType.Pivot"/></description></item>
+        /// <item><term>SO|select Code from Country where Id = :CountryId|XXX-XXX</term><description><see cref="CodeProviderPartType.Literal"/>, with <see cref="CodeProviderPartType.NumericSelect"/> and <see cref="CodeProviderPartType.Pivot"/>. 
+        /// The <c>:CountryId</c> parameter comes from the <see cref="DataRow"/> passed to code producer.</description></item>
+        /// <item><term>SI|Sequencer;MySequencer;XXX-XXX-XXX</term><description><see cref="CodeProviderPartType.Literal"/> (Sales Invoice) and <see cref="CodeProviderPartType.Sequencer"/> with format.</description></item>
+        /// <item><term>PO|YYYY-MM-DD|XXX-XXX</term><description><see cref="CodeProviderPartType.Literal"/> (Purchases Order), <see cref="CodeProviderPartType.Date"/> and <see cref="CodeProviderPartType.Pivot"/></description></item>
+        /// </list>
         /// </summary>
-        static public CodeProviderDef RegisterDescriptor(string Name, string Text)
+        static public CodeProviderDef Register(string Name, string Text)
         {
-            CodeProviderDef Result = FindDescriptor(Name);
+            CodeProviderDef Result = Find(Name);
             
             if (Result == null)
             {
@@ -96,7 +112,7 @@ namespace Tripous.Data
         /// </summary>
         static public CodeProvider Create(string DescriptorName, string TableName)
         {
-            return Create(FindDescriptor(DescriptorName), TableName);
+            return Create(Find(DescriptorName), TableName);
         }
         /// <summary>
         /// Creates and returns an instance of a <see cref="CodeProvider"/> based on a specified descriptor.

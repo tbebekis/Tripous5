@@ -15,7 +15,7 @@ namespace Tripous.Data
     /// </summary>
     [Flags]
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum SqlBrokerFieldFlag
+    public enum FieldFlags
     {
         /// <summary>
         /// None

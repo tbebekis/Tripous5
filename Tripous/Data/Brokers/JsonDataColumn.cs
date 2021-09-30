@@ -59,7 +59,7 @@ namespace Tripous.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        public JsonDataColumn(DataColumn Source, int Decimals, SqlBrokerFieldFlag Flags)
+        public JsonDataColumn(DataColumn Source, int Decimals, FieldFlags Flags)
             : this(Source)
         {
             this.Decimals = Decimals;
@@ -133,6 +133,6 @@ namespace Tripous.Data
         /// <summary>
         /// FieldFlags
         /// </summary>
-        public SqlBrokerFieldFlag Flags { get; set; } 
+        public FieldFlags Flags { get; set; } 
     }
 }

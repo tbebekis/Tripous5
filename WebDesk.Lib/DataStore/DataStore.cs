@@ -142,10 +142,10 @@ namespace WebDesk
         {
             DataTableDef Table = new DataTableDef();
             Table.Name = "Country";
-            Table.AddPrimaryKey();
-            Table.AddStringField("Code", 40, true, null, "''");
-            Table.AddStringField("Name", 96, false).Unique = true;
-            Table.AddStringField("CustomerId", 40, true).SetForeign("Customer", "Id");
+            Table.AddId();
+            Table.AddString("Code", 40, true, null, "''");
+            Table.AddString("Name", 96, false).Unique = true;
+            Table.AddString("CustomerId", 40, true).SetForeign("Customer", "Id");
             Table.AddField("Date", DataFieldType.DateTime, false);
  
 
@@ -178,7 +178,9 @@ namespace WebDesk
                 SqlStore = SqlStores.CreateDefaultSqlStore();
 
                 ExecuteSystemSchema(); 
-                ExecuteSchemas();                
+                ExecuteSchemas();
+
+                RegisterBrokers();
 
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
             }

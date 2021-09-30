@@ -21,17 +21,17 @@ namespace Test.WinApp
             string SqlText;
 
             Table = new DataTableDef() { Name = "Customer" };
-            Table.AddPrimaryKey();
-            Table.AddStringField("Name", 96, true);
+            Table.AddId();
+            Table.AddString("Name", 96, true);
 
             SqlText = Table.GetDefText();
             Version.AddTable(SqlText);
 
             Table = new DataTableDef() { Name = "Address" };
-            Table.AddPrimaryKey();
-            Table.AddStringField("CustomerId", 40, true).SetForeign("Customer", "Id");
-            Table.AddStringField("StreetAddress", 96, true);
-            Table.AddStringField("City", 96, false);
+            Table.AddId();
+            Table.AddString("CustomerId", 40, true).SetForeign("Customer", "Id");
+            Table.AddString("StreetAddress", 96, true);
+            Table.AddString("City", 96, false);
 
             SqlText = Table.GetDefText();
             Version.AddTable(SqlText);
@@ -44,7 +44,7 @@ namespace Test.WinApp
             SqlBrokerTableDef TableDef;
             SqlBrokerFieldDef FieldDef;
 
-            BrokerDef = SqlBrokerDef.RegisterDescriptor("Customer");
+            BrokerDef = SqlBrokerDef.Register("Customer");
             BrokerDef.MainTableName = "Customer";
             BrokerDef.LinesTableName = "Address";
 
@@ -55,13 +55,13 @@ namespace Test.WinApp
             TableDef = BrokerDef.AddTable("Address").SetMaster("Customer", "Id", "CustomerId"); 
             FieldDef = TableDef.AddId();
             FieldDef = TableDef.AddId("CustomerId");
-            FieldDef = TableDef.AddString("StreetAddress", 96, "", SqlBrokerFieldFlag.Required);
-            FieldDef = TableDef.AddString("City", 96, "", SqlBrokerFieldFlag.Required);
+            FieldDef = TableDef.AddString("StreetAddress", 96, "", FieldFlags.Required);
+            FieldDef = TableDef.AddString("City", 96, "", FieldFlags.Required);
         }
 
         static public void Test1()
         {
-            SqlBroker Broker = SqlBrokerDef.Create("Customer", true, false);
+            SqlBroker Broker = SqlBroker.Create("Customer", true, false);
             
             Broker.Insert();
             DataRow Row = Broker.Row;

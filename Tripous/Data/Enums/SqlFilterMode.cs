@@ -4,7 +4,9 @@
 --------------------------------------------------------------------------------------*/
 
 using System;
- 
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Tripous.Data
 {
@@ -13,6 +15,8 @@ namespace Tripous.Data
     /// Indicates how the user enters of selects the criterion value
     /// </summary>
     [Flags]
+    [TypeStoreItem]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum SqlFilterMode
     {
         /// <summary>

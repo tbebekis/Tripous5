@@ -59,7 +59,7 @@ namespace Tripous.Data
             JsonDataTable Table;
             foreach (MemTable SourceTable in Source.Tables)
             {
-                TableDescriptor = Descriptor != null ? Descriptor.FindTableDescriptor(SourceTable.TableName) : null;
+                TableDescriptor = Descriptor != null ? Descriptor.FindTable(SourceTable.TableName) : null;
                 Table = new JsonDataTable(SourceTable, TableDescriptor);
                 Tables.Add(Table);
             }

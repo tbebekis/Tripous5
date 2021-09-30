@@ -16,7 +16,7 @@ namespace Tripous.Data
     /// </summary>
     public class SqlBrokerDef
     {
-        static List<SqlBrokerDef> Descriptors = new List<SqlBrokerDef>();
+        static List<SqlBrokerDef> RegistryList = new List<SqlBrokerDef>();
 
         string fTitle;
         string fMainTableName;
@@ -33,65 +33,133 @@ namespace Tripous.Data
 
         /* static */
         /// <summary>
-        /// Returns a descriptor by a specified name if any, else, null
+        /// Returns a registered item, if any, else null.
         /// </summary>
-        static public SqlBrokerDef FindDescriptor(string Name)
+        static public SqlBrokerDef Find(string Name)
         {
-            return Descriptors.Find(item => item.Name.IsSameText(Name));
+            return RegistryList.Find(item => Sys.IsSameText(item.Name, Name));
         }
         /// <summary>
-        /// Returns true if a descriptor is already registered under a specified name.
+        /// Returns true if an item is registered.
         /// </summary>
-        static public bool DescriptorExists(string Name)
+        static public bool Contains(string Name)
         {
-            return FindDescriptor(Name) != null;
+            return Find(Name) != null;
+        }
+
+        /// <summary>
+        /// Returns the index of an item in the internal registry list.
+        /// </summary>
+        static public int IndexOf(SqlBrokerDef Def)
+        {
+            return IndexOf(Def.Name);
         }
         /// <summary>
-        /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
+        /// Returns the index of an item in the internal registry list.
         /// </summary>
-        static public SqlBrokerDef RegisterDescriptor(string Name)
+        static public int IndexOf(string Name)
         {
-            SqlBrokerDef Result = FindDescriptor(Name);
-            if (Result == null)
+            for (int i = 0; i < RegistryList.Count; i++)
             {
-                Result = new SqlBrokerDef() { Name = Name };
-                Descriptors.Add(Result);
+                if (Sys.IsSameText(RegistryList[i].Name, Name))
+                    return i;
             }
 
-            return Result;
+            return -1;
         }
 
-
         /// <summary>
-        /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
+        /// Registers an item.
+        /// <para>NOTE: If an item with the same name is already registered, the specified item replaces the existing item.</para>
         /// </summary>
-        static public SqlBroker Create(string DescriptorName, bool Initialized, bool AsListBroker)
+        static public SqlBrokerDef Register(SqlBrokerDef Def)
         {
-            return Create(FindDescriptor(DescriptorName), Initialized, AsListBroker);
+            int Index = IndexOf(Def);
+            if (Index != -1)
+            {
+                RegistryList[Index] = Def;
+                return RegistryList[Index];
+            }
+            else
+            {
+                RegistryList.Add(Def);
+                return Def;
+            }
         }
         /// <summary>
-        /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
+        /// Adds a broker to the list
         /// </summary>
-        static public SqlBroker Create(SqlBrokerDef Descriptor, bool Initialized, bool AsListBroker)
+        static public SqlBrokerDef Register(string ConnectionName, string Name, string MainTableName, string TitleKey, string TypeClassName)
         {
-            if (Descriptor == null)
-                Sys.Throw($"Cannot create a {nameof(SqlBroker)}. Descriptor is null.");
+            SqlBrokerDef Def = new SqlBrokerDef();
 
-            SqlBroker Result = TypeStore.Create(Descriptor.TypeClassName) as SqlBroker;
-            Result.Descriptor = Descriptor;
+            Def.Name = Name;
+            Def.ConnectionName = ConnectionName;
+            Def.MainTableName = MainTableName;
+            Def.TitleKey = TitleKey;
+            Def.TypeClassName = TypeClassName;
 
-            if ((Result.CodeProducer == null) && !string.IsNullOrWhiteSpace(Descriptor.CodeProducerName))
-            { 
-                CodeProvider CodeProvider = CodeProviderDef.Create(Descriptor.CodeProducerName, Descriptor.MainTableName); 
-                Result.CodeProducer = CodeProvider;
+            return Register(Def);
+        }
+        /// <summary>
+        /// Adds a broker to the list.
+        /// <para><see cref="ConnectionName"/> becomes the <see cref="SysConfig.DefaultConnection"/> value. </para>
+        /// <para><see cref="TitleKey"/> becomes the specified name.</para>
+        /// </summary>
+        static public SqlBrokerDef Register(string Name, string MainTableName, string TypeClassName)
+        {
+            return Register(SysConfig.DefaultConnection, Name, MainTableName, Name, TypeClassName);
+        }
+        /// <summary>
+        /// Adds a broker to the list.
+        /// <para><see cref="ConnectionName"/> becomes the <see cref="SysConfig.DefaultConnection"/> value. </para>
+        /// <para>The <see cref="Name"/>, <see cref="MainTableName"/> and <see cref="TitleKey"/> are assigned by a single specified value.</para>
+        /// </summary>
+        static public SqlBrokerDef Register(string Name, string TypeClassName)
+        {
+            return Register(SysConfig.DefaultConnection, Name, Name, Name, TypeClassName);
+        }
+        /// <summary>
+        /// Adds a broker to the list.
+        /// <para><see cref="ConnectionName"/> becomes the <see cref="SysConfig.DefaultConnection"/> value. </para>
+        /// <para>The <see cref="Name"/>, <see cref="MainTableName"/> and <see cref="TitleKey"/> are assigned by a single specified value.</para>
+        /// <para><see cref="TypeClassName"/> becomes the <see cref="SqlBroker"/> class.</para>
+        /// </summary>
+        static public SqlBrokerDef Register(string Name)
+        {
+            return Register(SysConfig.DefaultConnection, Name, Name, Name, typeof(SqlBroker).FullName);
+        }
+
+        /// <summary>
+        /// Unregisters a specified item.
+        /// </summary>
+        static public void UnRegister(SqlBrokerDef Def)
+        {
+            RegistryList.Remove(Def);
+        }
+
+        /// <summary>
+        /// Returns a list of code fields. A code field is associated to a code provider. The code providers procudes the value of the field on INSERTs.
+        /// </summary>
+        static public SqlBrokerFieldDef[] GetCodeFields(SqlBrokerDef Def)
+        {
+            List<SqlBrokerFieldDef> Result = new List<SqlBrokerFieldDef>();
+
+            foreach (var Field in Def.MainTable.Fields)
+            {
+                if (!string.IsNullOrWhiteSpace(Field.CodeProviderName))
+                {
+                    if (!CodeProviderDef.Contains(Field.CodeProviderName))
+                        Sys.Throw($"No code provider found for a field: {Field.Name}");
+
+                    Result.Add(Field);
+                } 
             }
 
-            if (Initialized)
-                Result.Initialize(AsListBroker || Result.IsListBroker);
-
-            return Result;
+            return Result.ToArray();
         }
 
+        
 
         /* public */
         /// <summary>
@@ -127,13 +195,29 @@ namespace Tripous.Data
             return Result;
         }
 
+
+
+        /// <summary>
+        /// Creates and adds a table to tables.
+        /// </summary>
+        public SqlBrokerTableDef AddTable(string TableName, string TitleKey = "")
+        {
+            SqlBrokerTableDef Result = FindTable(TableName);
+            if (Result == null)
+            {
+                Result = new SqlBrokerTableDef() { Name = TableName, TitleKey = TitleKey };
+                Tables.Add(Result);
+            }
+
+            return Result;
+        }
         /// <summary>
         /// Finds a table descriptor by Name.
         /// <para>A null or empty Name returns the MainTable. MainTable is also returned when Name is Item.</para>
         /// <para>If Name is Lines the LinesTableName descriptor is returned.</para>
         /// <para>If Name is SubLines the SubLinesTableName descriptor is returned.</para>
         /// </summary>
-        public SqlBrokerTableDef FindTableDescriptor(string Name)
+        public SqlBrokerTableDef FindTable(string Name)
         {
 
             if (string.IsNullOrWhiteSpace(Name) || Sys.IsSameText(Name, "Item") || Sys.IsSameText(Name, SqlBrokerTableDef.ITEM))
@@ -168,20 +252,7 @@ namespace Tripous.Data
         }
 
 
-        /// <summary>
-        /// Creates and adds a table to tables.
-        /// </summary>
-        public SqlBrokerTableDef AddTable(string TableName)
-        {
-            SqlBrokerTableDef Result = FindTableDescriptor(TableName);
-            if (Result == null)
-            {
-                Result = new SqlBrokerTableDef() { Name = TableName };
-                Tables.Add(Result);
-            }
 
-            return Result;
-        }
 
         /* properties */
         /// <summary>
@@ -226,10 +297,7 @@ namespace Tripous.Data
         /// </summary>
         public string SubLinesTableName { get; set; }
 
-        /// <summary>
-        /// Gets or sets the Name of the code producer descriptor associated to this broker.
-        /// </summary>
-        public string CodeProducerName { get; set; }
+
         /// <summary>
         /// The name of the Entity this broker represents
         /// </summary>

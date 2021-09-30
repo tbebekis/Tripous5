@@ -19,10 +19,16 @@ namespace Tripous.Data
         /// </summary>
         public const string GENERIC_SQL_BROKER = "_GENERIC_SQL_BROKER_";
 
+        
+
         /// <summary>
         /// Field
         /// </summary>
         protected string fEntityName = string.Empty;
+        /// <summary>
+        /// A list of code providers.
+        /// </summary>
+        protected List<CodeProvider> fCodeProviders = new List<CodeProvider>();
 
         /* initialization */
         #region Initialization
@@ -47,7 +53,7 @@ namespace Tripous.Data
                 DefineDescriptor();
         }
         /// <summary>
-        /// Called if no Descriptor is passed as "BrokerDescriptor"
+        /// Called if no Descriptor is passed as "SqlBrokerDef"
         /// and we are going to have a "manully" defined Descriptor 
         /// </summary>
         protected virtual void DefineDescriptor()
@@ -95,8 +101,8 @@ namespace Tripous.Data
             // get the sql generation flags
             BuildSqlFlags SqlFlags = GetBuildSqlFlags();
 
-            // 1. create sql statements for all Tables of the BrokerDescriptor
-            // 2. create DataTable objects for all Tables of the BrokerDescriptor    
+            // 1. create sql statements for all Tables of the SqlBrokerDef
+            // 2. create DataTable objects for all Tables of the SqlBrokerDef    
             TableSqls TempSqlStatements;
             foreach (var TableDes in Descriptor.Tables)
             {
@@ -520,17 +526,16 @@ namespace Tripous.Data
         protected virtual void AssignCodeValue(SqlStore Store, DbTransaction Transaction)
         {
             // ** in web applications we do NOT have TableSet state
-            if /*(TableSet.IsInsert) && */(CodeProducer != null)
+            if (/*TableSet.IsInsert && */ fCodeProviders.Count > 0 && tblItem != null && tblItem.Rows.Count > 0)
             {
-                string CodeFieldName = CodeProducer.CodeFieldName;
-
-                if (tblItem != null && tblItem.Rows.Count > 0 && tblItem.Columns.Contains(CodeFieldName))
+                
+                foreach (DataRow Row in tblItem.Rows)
                 {
-                    foreach (DataRow Row in tblItem.Rows)
+                    foreach (CodeProvider CP in fCodeProviders)
                     {
-                        if (Sys.IsNull(Row[CodeFieldName]) || string.IsNullOrEmpty(Sys.AsString(Row[CodeFieldName], string.Empty).Trim()))
+                        if (Sys.IsNull(Row[CP.CodeFieldName]) || string.IsNullOrEmpty(Sys.AsString(Row[CP.CodeFieldName], string.Empty).Trim()))
                         {
-                            Row[CodeFieldName] = CodeProducer.Execute(Row, this.Store, Transaction);
+                            Row[CP.CodeFieldName] = CP.Execute(Row, this.Store, Transaction);
                         }
                     }
                 }
@@ -546,7 +551,51 @@ namespace Tripous.Data
         {
         }
 
- 
+
+        /* static */
+
+
+
+
+        /// <summary>
+        /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
+        /// </summary>
+        static public SqlBroker Create(string DescriptorName, bool Initialized, bool AsListBroker)
+        {
+            return Create(SqlBrokerDef.Find(DescriptorName), Initialized, AsListBroker);
+        }
+        /// <summary>
+        /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
+        /// </summary>
+        static public SqlBroker Create(SqlBrokerDef Descriptor, bool Initialized, bool AsListBroker)
+        {
+            if (Descriptor == null)
+                Sys.Throw($"Cannot create a {nameof(SqlBroker)}. Descriptor is null.");
+
+            SqlBroker Result = TypeStore.Create(Descriptor.TypeClassName) as SqlBroker;
+            Result.Descriptor = Descriptor;
+
+            // code providers for code fields
+            SqlBrokerFieldDef[] CodeFields = SqlBrokerDef.GetCodeFields(Descriptor);
+            if (CodeFields.Length > 0)
+            {
+                CodeProvider CodeProvider;
+                foreach (var CodeField in CodeFields)
+                {
+                    CodeProvider = CodeProviderDef.Create(CodeField.CodeProviderName, Descriptor.MainTableName);
+                    Result.fCodeProviders.Add(CodeProvider);
+                }
+            }
+
+            if (Initialized)
+                Result.Initialize(AsListBroker || Result.IsListBroker);
+
+            return Result;
+        }
+
+
+
+
         /* browser select */
         /// <summary>
         /// Executes a SELECT statements and puts the returned data rows to the Table.
@@ -761,7 +810,6 @@ namespace Tripous.Data
             if ((Row == null) || (TableDes == null) || Bf.Member(DataRowState.Deleted, Row.RowState))
                 return;
 
-
             SqlBrokerFieldDef FieldDes;
 
             if (TableDes != null)
@@ -769,16 +817,17 @@ namespace Tripous.Data
                 bool IsCodeColumn;
 
                 StringBuilder SB = new StringBuilder();
-
+                CodeProvider CP;
                 foreach (DataColumn Column in Row.Table.Columns)
                 {
                     FieldDes = TableDes.Fields.Find(item => item.Name.IsSameText(Column.ColumnName));
 
                     if ((!Column.AllowDBNull || ((FieldDes != null) && FieldDes.IsRequired)) && Db.IsNullOrEmpty(Row, Column))
                     {
-                        /* skip the column if it is the CodeProducer target column. That column 
-                           is assigned later from insided the TableSet commit transaction */
-                        IsCodeColumn = (State == DataMode.Insert) && Sys.IsSameText(CodeProducer.CodeFieldName, Column.ColumnName) && (Column.Table == tblItem) && (CodeProducer != null);
+                        /* skip the column if it is the CodeProducer target column. 
+                         * That column is assigned later from inside the TableSet commit transaction */
+                        CP = fCodeProviders.Find(item => Sys.IsSameText(item.CodeFieldName, Column.ColumnName));
+                        IsCodeColumn = Column.Table == tblItem && State == DataMode.Insert &&  CP != null ; 
                         if (!IsCodeColumn)
                             SB.AppendLine(string.Format("  {0} -> {1} ({2}.{3})", TableDes.Title, Column.Caption, TableDes.Name, Column.ColumnName));
                     }
@@ -945,10 +994,7 @@ namespace Tripous.Data
         /// </summary>
         public TableSet TableSet { get; protected set; }
 
-        /// <summary>
-        /// Gets the code producer of the broker.
-        /// </summary>
-        public CodeProvider CodeProducer { get; set; }
+
 
         /// <summary>
         /// Returns the table name of the main table

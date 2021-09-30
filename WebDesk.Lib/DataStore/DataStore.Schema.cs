@@ -224,24 +224,24 @@ create table {TableName} (
 
             DataTableDef Table = new DataTableDef() { Name = TableName };
 
-            Table.AddPrimaryKey();
-            Table.AddStringField("UserId", 96, true);
-            Table.AddStringField("Email", 96, true);
-            Table.AddStringField("Name", 96, false);
-            Table.AddIntegerField("Level", true, null, "0");
-            Table.AddIntegerField("IsBlocked", true, null, "0");
+            Table.AddId();
+            Table.AddString("UserId", 96, true);
+            Table.AddString("Email", 96, true);
+            Table.AddString("Name", 96, false);
+            Table.AddInteger("Level", true, null, "0");
+            Table.AddInteger("IsBlocked", true, null, "0");
 
-            Table.AddDateTimeField("LastAccessDT");
-            Table.AddDateTimeField("LastLoginDT");
-            Table.AddDateTimeField("RegistrationDT");
+            Table.AddDateTime("LastAccessDT");
+            Table.AddDateTime("LastLoginDT");
+            Table.AddDateTime("RegistrationDT");
 
-            Table.AddIntegerField("IsActivated", true, null, "0");
-            Table.AddStringField("ActivationToken", 96, false);
+            Table.AddInteger("IsActivated", true, null, "0");
+            Table.AddString("ActivationToken", 96, false);
 
-            Table.AddStringField("Password", 96, false);
-            Table.AddStringField("PasswordSalt", 20, false);
-            Table.AddDateTimeField("PassRecoveryDT");
-            Table.AddStringField("PassRecoveryToken", 96, false);
+            Table.AddString("Password", 96, false);
+            Table.AddString("PasswordSalt", 20, false);
+            Table.AddDateTime("PassRecoveryDT");
+            Table.AddString("PassRecoveryToken", 96, false);
 
             string SqlText = Table.GetDefText();
 
@@ -292,9 +292,9 @@ insert into {TableName} (
 
             DataTableDef Table = new DataTableDef() { Name = TableName };
 
-            Table.AddPrimaryKey();
-            Table.AddStringField("Code", 40, true).SetUnique();
-            Table.AddStringField("Name", 96, true).SetUnique();
+            Table.AddId();
+            Table.AddString("Code", 40, true).SetUnique();
+            Table.AddString("Name", 96, true).SetUnique();
 
             string SqlText = Table.GetDefText();
             SchemaVersion SV = new SchemaVersion();

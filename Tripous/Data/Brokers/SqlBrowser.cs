@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
-
+using System.Threading;
 
 namespace Tripous.Data
 {
@@ -18,6 +18,8 @@ namespace Tripous.Data
         /// Constant
         /// </summary>
         public const string GENERIC_SQL_BROKER = "_GENERIC_SQL_BROWSER_";
+
+        static List<SqlBrowserDef> RegistryList = new List<SqlBrowserDef>();
 
         /* overridables */
         /// <summary>
@@ -83,6 +85,107 @@ namespace Tripous.Data
         /// </summary>
         public SqlBrowser()
         {
+        }
+
+        /* static */
+        /// <summary>
+        /// Returns a registered item, if any, else null.
+        /// </summary>
+        static public SqlBrowserDef Find(string Name)
+        {
+            return RegistryList.Find(item => Sys.IsSameText(item.Name, Name));
+        }
+        /// <summary>
+        /// Returns true if an item is registered.
+        /// </summary>
+        static public bool Contains(string Name)
+        {
+            return Find(Name) != null;
+        }
+
+        /// <summary>
+        /// Returns the index of an item in the internal registry list.
+        /// </summary>
+        static public int IndexOf(SqlBrowserDef Def)
+        {
+            return IndexOf(Def.Name);
+        }
+        /// <summary>
+        /// Returns the index of an item in the internal registry list.
+        /// </summary>
+        static public int IndexOf(string Name)
+        {
+            for (int i = 0; i < RegistryList.Count; i++)
+            {
+                if (Sys.IsSameText(RegistryList[i].Name, Name))
+                    return i;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Registers an item.
+        /// <para>NOTE: If an item with the same name is already registered, the specified item replaces the existing item.</para>
+        /// </summary>
+        static public SqlBrowserDef Register(SqlBrowserDef Def)
+        {
+            int Index = IndexOf(Def);
+            if (Index != -1)
+            {
+                RegistryList[Index] = Def;
+                return RegistryList[Index];
+            }
+            else
+            {
+                RegistryList.Add(Def);
+                return Def;
+            }
+        }
+        /// <summary>
+        /// Adds a broker to the list
+        /// </summary>
+        static public SqlBrowserDef Register(string ConnectionName, string Name, string MainTableName, string TitleKey, string TypeClassName)
+        {
+            SqlBrowserDef Def = new SqlBrowserDef();
+
+            Def.Name = Name;
+            Def.ConnectionName = ConnectionName;
+            Def.MainTableName = MainTableName;
+            Def.TitleKey = TitleKey;
+            Def.TypeClassName = TypeClassName;
+
+            return Register(Def);
+        }
+        /// <summary>
+        /// Adds a broker to the list
+        /// </summary>
+        static public SqlBrowserDef Register(string Name, string MainTableName, string TypeClassName)
+        {
+            return Register(SysConfig.DefaultConnection, Name, MainTableName, Name, TypeClassName);
+        }
+        /// <summary>
+        /// Adds a broker to the list
+        /// </summary>
+        static public SqlBrowserDef Register(string Name, string TypeClassName)
+        {
+            return Register(SysConfig.DefaultConnection, Name, Name, Name, TypeClassName);
+        }
+        /// <summary>
+        /// Adds a broker to the list
+        /// </summary>
+        static public SqlBrowserDef Register(string Name)
+        {
+            return Register(SysConfig.DefaultConnection, Name, Name, Name, typeof(SqlBroker).FullName);
+        }
+
+
+        /// <summary>
+        /// Unregisters a specified item.
+        /// </summary>
+        static public void UnRegister(SqlBrowserDef Def)
+        {
+            RegistryList.Remove(Def);
         }
 
         /* public */
