@@ -328,7 +328,23 @@ namespace Tripous.Data
         /// The main select statement
         /// </summary>
         [JsonIgnore]
-        public SelectSql MainSelect => SelectList.Find(item => item.Name.IsSameText(Sys.MainSelect));
+        public SelectSql MainSelect
+        {
+            get
+            {
+                SelectSql Result = SelectList.Find(item => item.Name.IsSameText(Sys.MainSelect));
+                if (Result == null)
+                {
+                    Result = new SelectSql();
+                    Result.Name = Sys.MainSelect;
+                    if (!string.IsNullOrWhiteSpace(MainTableName))
+                        Result.Text = $"select * from {MainTableName}";  
+                    SelectList.Insert(0, Result);
+                }
+
+                return Result;
+            }
+        }
 
         /// <summary>
         /// The list of select statements

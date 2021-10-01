@@ -17194,20 +17194,15 @@ tp.View = class extends tp.tpElement {
         super(ElementOrSelector, CreateParams);
     }
 
-
+ 
 
     /* properties */
     /** 
     Gets or sets the name  
     @type {string}
     */
-    get Name() {
-        return this.fName;
-    }
-    set Name(v) {
-        this.fName = v;
-    }
-
+    Name = '';
+    AutocreateControls = true;
 
     /* overrides */
     /**
@@ -17228,7 +17223,7 @@ tp.View = class extends tp.tpElement {
     */
     InitializeFields() {
         super.InitializeFields();
-        this.fName = tp.NextName('View');
+        this.Name = tp.NextName('View');
     }
     /**
     Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
@@ -17249,16 +17244,20 @@ tp.View = class extends tp.tpElement {
         tp.Broadcaster.Add(this);
         this.HookEvent(tp.Events.Click);
 
-        this.CreateControls();
+        if (this.AutocreateControls === true) {
+            let List = this.GetControls();
+            if (List.length === 0)
+                tp.CreateContainerControls(this.Handle);
+        }
+        else {
+            this.CreateControls();
+        }        
     }
     /**
     Creates the controls of the view based on the provided markup.
     @protected
     */
-    CreateControls() {
-        let List = this.GetControls();
-        if (List.length === 0)
-            tp.CreateContainerControls(this.Handle);
+    CreateControls() {        
     }
     /**
     Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
@@ -17331,7 +17330,7 @@ tp.View = class extends tp.tpElement {
     @returns {tp.tpElement[]}  Returns an array with all {@link tp.tpElement} objects existing on direct or nested child DOM elements, of the handle of this instance.
     */
     GetControls() {
-        return tp.GetElements(this.Handle);
+        return tp.GetScriptObjects(this.Handle);
     }
 
 
@@ -17341,15 +17340,9 @@ tp.View = class extends tp.tpElement {
     Example markup
     @example
     <pre>
-        <div class="tp-View" data-setup="{ TypeName: 'View', .... }">
-            ...
-        </div>
-
+        <div class="tp-View" data-setup="{ TypeName: 'View', .... }"> ... </div>
         or
-
-        <div class="tp-View" data-setup="{ ClassType: tp.MyDataViewClass, .... }">
-            ...
-        </div>
+        <div class="tp-View" data-setup="{ ClassType: tp.MyDataViewClass, .... }"> ... </div>
     </pre>
     @param {string | HTMLElement} ElementOrSelector - The html element of the view
     @param {object} [CreateParams] Optional. The create params object
@@ -17386,8 +17379,16 @@ tp.View = class extends tp.tpElement {
                 Type = CP.ClassType;
             }
 
-            if (Type)
-                return new Type(el, CP);
+            if (Type) {
+                if (tp.IsString(Type)) {
+                    let Code = `new ${Type}(el, CP)`;
+                    return eval(Code);
+                }
+                else {
+                    return new Type(el, CP);
+                }                
+            }
+                
         }
 
         return null;
@@ -17395,11 +17396,7 @@ tp.View = class extends tp.tpElement {
 };
 
 
-/** Field
- * @protected
- * @type {string}
- */
-tp.View.prototype.fName;
+
 //#endregion
  
 tp.PageTypes = {
@@ -18841,8 +18838,8 @@ tp.Ui = class {
 
         if (!tp.IsEmpty(ElementOrSelector)) {
             el = tp.Select(ElementOrSelector);
-            if (tp.IsHTMLElement(el) && tp.HasElement(el)) {
-                return tp.GetElement(el);
+            if (tp.IsHTMLElement(el) && tp.HasScriptObject(el)) {
+                return tp.GetScriptObject(el);
             }
         }
 
@@ -18866,19 +18863,15 @@ tp.Ui = class {
         var Type, o, Result = null;
 
         if (tp.IsHTMLElement(el)) {
-            if (tp.HasElement(el)) {
-                Result = tp.GetElement(el);
+            if (tp.HasScriptObject(el)) {
+                Result = tp.GetScriptObject(el);
             } else {
-                o = tp.Data(el, 'setup');
-                if (!tp.IsBlank(o)) {
-                    o = eval("(" + o + ")");
-                    if ('ClassType' in o) {
-                        el['__tpCreateParams'] = o;                 // pass the compiled CreateParams
-                        Type = o.ClassType;
-                        Result = new Type(el, null);                // tp.tpElement (or descendant) constructor
-                        tp.RemoveClass(Result.Handle, 'tp-Class');
-                    }
-                }
+                o = tp.GetDataSetupObject(el);
+                if (tp.IsObject(o) && 'ClassType' in o) {
+                    Type = o.ClassType;
+                    Result = new Type(el, null);                // tp.tpElement (or descendant) constructor
+                    tp.RemoveClass(Result.Handle, 'tp-Class');
+                } 
             }
         }
 
@@ -19077,7 +19070,7 @@ tp.Ui = class {
     @returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
     */
     static GetContainerControls(ParentElementOrSelector) {
-        return tp.GetElements(ParentElementOrSelector);
+        return tp.GetScriptObjects(ParentElementOrSelector);
     }
 
     /* control creation */

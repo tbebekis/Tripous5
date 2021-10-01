@@ -47,13 +47,13 @@ app.Desk = class {
         app.Desk.Instance = this;
 
         this.elMainMenu = tp('.main-menu');
-        this.elPager = tp('.pager-container.main-pager');
+        this.elContainer = tp('.pager-container.main-pager-container');
 
-        this.elTabBarContainer = tp.Select(this.elPager, '.tab-container');
+        this.elTabBarContainer = tp.Select(this.elContainer, '.tab-container');
         new app.TabBarHandler(this.elTabBarContainer);
 
-        this.elTabs = tp.Select(this.elPager, '.tab-bar'); 
-        this.elPages = tp.Select(this.elPager, '.page-list');
+        this.elTabs = tp.Select(this.elContainer, '.tab-bar'); 
+        this.elViews = tp.Select(this.elContainer, '.view-list');
  
         this.CommandExecutors = [];
 
@@ -72,13 +72,31 @@ app.Desk = class {
      * @type {app.Desk}
      */
     static Instance = null;
-
+    /** The main menu container. Not contained by the elContainer of this instance.
+     * @type {HTMLDivElement}
+     */
     elMainMenu = null;
-    elPager = null;
+    /** The main container. 
+     * Contains everything except header and footer. 
+     * Header contains the  main-menu and main tool-bar.
+     * @type {HTMLDivElement} 
+     */
+    elContainer = null;
+    /** Contains the tab-bar and the left and right buttons.
+     * @type {HTMLDivElement}
+     */
     elTabBarContainer = null;
-    elTabs = null;          // TabBar
-    elPages = null;         // TabPages
-
+    /** The tab-bar. Contains the tabs (captions) of the pages (views)
+     * @type {HTMLDivElement}
+     */
+    elTabs = null;           
+    /** Contains the pages (views)
+     * @type {HTMLDivElement}
+     */
+    elViews = null;          
+    /** A list of registered command executors.
+     * @type {array}
+     */
     CommandExecutors = [];
  
 
@@ -101,7 +119,7 @@ app.Desk = class {
                     // tp.ChildHTMLElements(this.Handle)
                 }
                 else if (tp.HasClass(e.target, 'main-menu-command')) {
-                    Cmd = app.GetDataObject(e.target, 'setup');
+                    Cmd = tp.GetDataSetupObject(e.target);
                     await this.ExecuteCommand(Cmd);
                 }
                 break;
@@ -160,11 +178,11 @@ app.Desk = class {
         let Result = tp.ChildHTMLElements(this.elTabs)
         return Result;
     }
-    /** Returns the list of pages.
-     * @returns {HTMLElement[]} Returns the list of pages.
+    /** Returns the list of pages (views).
+     * @returns {HTMLElement[]} Returns the list of pages (views).
      * */
-    GetPageList() {
-        let Result = tp.ChildHTMLElements(this.elPages)
+    GetViewList() {
+        let Result = tp.ChildHTMLElements(this.elViews)
         return Result;
     }
 
@@ -191,28 +209,28 @@ app.Desk = class {
         return Result;
     }
     /**
-     * Creates a tab element and a page element and adds both to the DOM.
+     * Creates a tab element and a page (view) element and adds both to the DOM.
      * @param {object} Packet The packet as it comes from server
      */
-    async CreatePageElement(Packet) {
+    async CreateViewElement(Packet) {
         let TabHtmlText = `
        <div class="tab-item">
            <div class="tp-Text">${Packet.ViewName}</div>
        </div>
 `;
       
-        let elPage = app.GetContentElement(Packet.HtmlText.trim());
+        let elView = app.GetContentElement(Packet.HtmlText.trim());
         let elTab = app.GetContentElement(TabHtmlText.trim());
 
         let DeskInfo = {};
         DeskInfo.Name = Packet.ViewName;
         DeskInfo.elTab = elTab;
-        DeskInfo.elPage = elPage;
+        DeskInfo.elPage = elView;
 
         app.DeskInfo(elTab, DeskInfo);
-        app.DeskInfo(elPage, DeskInfo);
+        app.DeskInfo(elView, DeskInfo);
 
-        this.elPages.appendChild(elPage);
+        this.elViews.appendChild(elView);
         this.elTabs.appendChild(elTab);
 
         let CreateParams = {
@@ -221,36 +239,41 @@ app.Desk = class {
             elTab: elTab
         };
 
-        await this.CreatePage(elPage, CreateParams);
+        await this.CreateViewObject(elView, CreateParams);
 
         this.TabClicked(elTab);
     }
     /**
-     * Creates a specified page object on an element that is already added to DOM and returns that page instance. <br />
-     * The created element provides a data-setup attribute specifying a javascript file, a css file and a page class.  <br />
-     * This function dynamically loads the specified files, if not already loaded, and then creates the instance of the page object. <br />
-     * @param {HTMLElement} elPage
+     * Creates a specified view object on an element that is already added to DOM and returns that view instance. <br />
+     * The passed-in element provides a data-setup attribute specifying a javascript file array, a css file array and a view class.  <br />
+     * This function dynamically loads the specified files, if not already loaded, and then creates the instance of the view object. <br />
+     * @param {HTMLElement} elView The element to create the view object upon.
      * @param {object} Params A key-value object with initialization information.
-     * @returns {app.Desk.Page} Returns the page instance.
+     * @returns {app.Desk.View} Returns the view javascript object instance.
      */
-    async CreatePage(elPage, Params) {
-        let Page = null;
-        let Setup = app.GetDataObject(elPage, 'setup'); 
+    async CreateViewObject(elView, Params) {
+        let Result = null;
+        let DataSetup = tp.GetDataSetupObject(elView);
 
-        if (!tp.IsBlank(Setup.PageCSS)) {
-            let P = await app.LoadCssFile(Setup.PageCSS);
+        if (tp.IsArray(DataSetup.CSS)) {
+            await app.LoadCssFiles(DataSetup.CSS);
         }
 
-        if (!tp.IsBlank(Setup.PageJS)) {
-            let P = await app.LoadJavascriptFile(Setup.PageJS);
+        if (tp.IsArray(DataSetup.JS)) {
+            await app.LoadJavascriptFiles(DataSetup.JS);
         }
  
-        if (!tp.IsBlank(Setup.PageClass)) {
-            let Code = `new ${Setup.PageClass}(elPage, Params)`;
-            Page = eval(Code);
+        if (tp.IsString(DataSetup['ClassType'])) {
+            DataSetup.ClassType = eval(DataSetup.ClassType);
         }
 
-        return Page;
+        if (!tp.IsFunction(DataSetup.ClassType))
+            tp.Throw('No class to create a view');
+
+        Result = new DataSetup.ClassType(elView, Params);
+ 
+
+        return Result;
     }
     /**
      * Handles the click on a tab.
@@ -260,7 +283,7 @@ app.Desk = class {
         let i, ln;
 
         let TabList = this.GetTabList();
-        let PageList = this.GetPageList();
+        let PageList = this.GetViewList();
 
         let Info = app.DeskInfo(elTab);
         let elPage = Info.elPage;
@@ -314,7 +337,7 @@ app.MainMenuCommandExecutor = class {
                 let Request = new app.AjaxRequest("GetHtmlView", Params);
                 let Packet = await app.Desk.Instance.AjaxExecute(Request);
                 if (tp.IsValid(Packet))
-                    Result = await app.Desk.Instance.CreatePageElement(Packet);
+                    Result = await app.Desk.Instance.CreateViewElement(Packet);
             }                
         }
         else {
@@ -325,89 +348,14 @@ app.MainMenuCommandExecutor = class {
     }
 };
 
-/** Represents a desk page. Used as base page class. */
-app.Desk.Page = class {
 
-    /**
-     * Constructs the page
-     * @param {HTMLElement} elPage The page element.
-     * @param {object} [CreateParams=null] Optional. A javascript object with initialization parameters. 
-     */
-    constructor(elPage, CreateParams = null) {
-        this.Handle = elPage;
-        this.CreateParams = CreateParams || {};
-        this.Setup = app.GetDataObject(elPage, 'setup') || {};
+/** Represents a desk view. Used as base view class. */
+app.Desk.View = class extends tp.View {
 
-        tp.Broadcaster.Add(this);
-        this.ScreenResizeListener = tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
-
-        this.InitializeFields();
-        this.OnFieldsInitialized();                         // notification
-
-        this.ProcessCreateParams(this.CreateParams);
-        this.OnCreateParamsProcessed();                     // notification
-
-        this.OnInitializationCompleted();                   // notification
-
-        this.CreateControls();
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
     }
 
-    /** The page element.
-     * @type {HTMLElement}
-     */
-    Handle = null;
-    /** Listens for screen size and screen size mode (small, large, etc.) changes. <br />
-     * Screen size notifications handled by the OnScreenSizeChanged() method.
-     * @type{tp.Listener}
-     */
-    ScreenResizeListener = null;
-    /** True when this instance is disposed. 
-     * NOTE: Close() disposes this instance.
-     * @type {boolean}
-     * */
-    IsDisposed = false;
-    /** A javascript object with initialization parameters. <br />
-     * Contains the ViewName property and the Packet property with the Packet as it came from server.
-     * @type {object}
-     */
-    CreateParams = {};
-    /** A javascript object with initialization parameters passed to data-setup attribute of the element.
-     * @type {object}
-     */
-    Setup = {};
-
-    /** Returns and array of property names the ProcessCreateParams() should NOT set 
-     @returns {string[]} Returns and array of property names the ProcessCreateParams() should NOT set
-     */
-    GetAvoidParams() {
-        return ['Id', 'Name', 'Handle', 'Parent', 'Html', 'CssClasses', 'CssText'];
-    }
-    /**
-    Processes the this.CreateParams by applying its properties to the properties of this instance
-    @param {object} [o=null] - Optional. The create params object to processs.
-    */
-    ProcessCreateParams(o = null) {
-        o = o || {};
-
-        let AvoidParams = this.GetAvoidParams();
-
-
-        let Allowed = false;
-        let HasSetter = false;
-        let IsWritable = false;
-
-        for (var Prop in o) {
-            if (!tp.IsFunction(o[Prop])) {
-                Allowed = AvoidParams.indexOf(Prop) === -1;
-                HasSetter = tp.GetPropertyInfo(this, Prop).HasSetter;
-                IsWritable = tp.IsWritableProperty(this, Prop);
-
-                if (Allowed && (HasSetter || IsWritable)) {
-                    this[Prop] = o[Prop];
-                }
-            }
-        }
-    }
     /**
     Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
     */
@@ -415,16 +363,11 @@ app.Desk.Page = class {
         if (this.IsDisposed === false && tp.IsElement(this.Handle)) {
 
             tp.Broadcaster.Remove(this);
-
-            if (this.ScreenResizeListener) {
-                tp.Viewport.RemoveListener(this.ScreenResizeListener);
-                this.ScreenResizeListener = null;
-            }
-
+ 
             if (tp.IsElement(this.CreateParams.elTab)) {
                 tp.Remove(this.CreateParams.elTab);
                 this.CreateParams.elTab = null;
-            }            
+            }
 
             if (tp.IsValid(this.Handle)) {
                 try {
@@ -434,84 +377,47 @@ app.Desk.Page = class {
                     if (tp.IsElement(el.parentNode)) {
                         el.parentNode.removeChild(el);
                     }
-                } catch  {
+                } catch {
                     //
                 }
             }
 
-            if (!tp.IsBlank(this.Setup.PageCSS)) {
-                app.UnLoadCssFile(this.Setup.PageCSS);
+            if (tp.IsArray(this.CreateParams.CSS)) {
+                app.UnLoadCssFiles(this.CreateParams.CSS);
             }
 
-            if (!tp.IsBlank(this.Setup.PageJS)) {
-                app.UnLoadJavascriptFile(this.Setup.PageJS);
-            }
+            if (tp.IsArray(this.CreateParams.JS)) {
+                app.UnLoadJavascriptFiles(this.CreateParams.JS);
+            } 
 
-            this.IsDisposed = true;
+            super.Dispose();
         }
     }
-    /**
-    Initializes fields and properties just before applying the create params.        
-    */
-    InitializeFields() {
-    }
-    /** Creates page controls */
-    CreateControls() {
-    }
 
-    /* notifications */
-    /**
-    Notification sent by tp.Viewport when the screen (viewport) size changes.  
-    @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
-    */
-    OnScreenSizeChanged(ScreenModeFlag) { }
-    /** 
-     * This class is a {@link tp.Broadcaster}   listener.
-     * This method is called by tp.Broadcaster to notify a listener about an event.
-     * @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-     * @returns {any} Returns a value or null.
-     */
-    BroadcasterFunc(Args) { return null; }
 
     /**
-    Notification. Called by CreateHandle() after handle creation and field initialization but BEFORE options (CreateParams) processing 
+    Notification 
     Initialization steps:
     - Handle creation
     - Field initialization
     - Option processing
     - Completed notification
     */
-    OnFieldsInitialized() { }
-    /**
-    Notification. Called by CreateHandle() after handle creation and field initialization and options (CreateParams) processing  
-    Initialization steps:
-    - Handle creation
-    - Field initialization
-    - Option processing
-    - Completed notification
-    */
-    OnCreateParamsProcessed() { }
-    /**
-    Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
-    and AFTER options (CreateParams) processing 
-    - Handle creation
-    - Field initialization
-    - Option processing
-    - Completed notification
-    */
-    OnInitializationCompleted() { }
+    OnHandleCreated() {
+        super.OnHandleCreated();
+        this.IsScreenResizeListener = true;
+    }
 
     Close() {
         this.Dispose();
     }
-
     /**
      * Executes a command that returns a Packet from server for creating a modal dialog.
      * @param {app.Command} Cmd The command to execute.
      * @returns {object} Returns the Packet from the server.
      */
     async AjaxExecuteDialog(Cmd) {
- 
+
         let Params = {
             ViewName: Cmd.Name
         };
@@ -521,7 +427,10 @@ app.Desk.Page = class {
 
         return Packet;
     }
+
 };
+
+ 
 
 /** Tripous notification function. <br />
  * NOTE: It is executed before any ready listeners. */

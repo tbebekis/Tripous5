@@ -103,6 +103,10 @@ app.LoadJavascriptFile = async function (Url) {
  
     return Promise.resolve(); 
 };
+/**
+ * Unloads a dynamically loaded javascript file.
+ * @param {string} Url The url path of the file.
+ */
 app.UnLoadJavascriptFile = function (Url) {
     let FileUrl = Url.toLowerCase();
     let oFile = app.JavascriptFiles.find(item => { return item.FileUrl === FileUrl; });
@@ -114,6 +118,33 @@ app.UnLoadJavascriptFile = function (Url) {
             let Head = tp('head');
             Head.removeChild(oFile.Element);
             tp.ListRemove(app.JavascriptFiles, oFile);            
+        }
+    }
+};
+
+/**
+ * Loads a list of javascript files dynamically.
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+app.LoadJavascriptFiles = async function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            await app.LoadJavascriptFile(UrlList[i]);
+        }
+    }
+};
+/**
+ * Unloads a dynamically loaded list of javascript files 
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+app.UnLoadJavascriptFiles = function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            app.UnLoadJavascriptFile(UrlList[i]);
         }
     }
 };
@@ -166,6 +197,10 @@ app.LoadCssFile = async function (Url) {
 
     return Promise.resolve();
 };
+/**
+ * Unloads a dynamically loaded css file.
+ * @param {string} Url The url path of the file.
+ */
 app.UnLoadCssFile = function (Url) {
     let FileUrl = Url.toLowerCase();
     let oFile = app.CssFiles.find(item => { return item.FileUrl === FileUrl; });
@@ -181,6 +216,32 @@ app.UnLoadCssFile = function (Url) {
     }
 };
 
+/**
+ * Loads a list of css files dynamically.
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+app.LoadCssFiles = async function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            await app.LoadCssFile(UrlList[i]);
+        }
+    }
+};
+/**
+ * Unloads a dynamically loaded list of css files
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+app.UnLoadCssFiles = function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            app.UnLoadCssFile(UrlList[i]);
+        }
+    }
+};
 
 /**
  * Should be called after a tp ajax call having errors. Displays the errors using notification boxes.
@@ -223,23 +284,7 @@ app.DeskInfo = function (el, Info = null) {
     return Info;
 };
 
-/**
- * Returns the value of the data-XXXX custom attribute of a specified element as a javascript object, or an empty object.
- * @param {string|Element} el The element to operate on.
- * @param {string} [DataName='setup'] The name of the data-XXXX attribute (without the data- prefix)
- * @returns {object} Returns the value of the data-setup custom attribute of a specified element as a javascript object, or an empty object.
- */
-app.GetDataObject = function (el, DataName = 'setup') {
-    let A = tp.Data(el, DataName);
-    if (!tp.IsBlank(A)) {
-        A = eval("(" + A + ")");
-    }
-    else {
-        A = {};
-    }
-
-    return A;
-};
+ 
 
 /** Creates and returns an overlay div.
  * @returns {HTMLElement} Returns the overlay div. */

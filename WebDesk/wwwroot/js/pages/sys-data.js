@@ -1,7 +1,7 @@
 ﻿ 
 
-/** Represents a page. Displays a list of items of a certain DataType. */
-app.SysDataListPage = class extends app.Desk.Page {
+/** Represents a view. Displays a list of items of a certain DataType. */
+app.SysDataViewList = class extends app.Desk.View {
     /**
      * Constructs the page
      * @param {HTMLElement} elPage The page element.
@@ -81,7 +81,7 @@ app.SysDataListPage = class extends app.Desk.Page {
             Packet: Packet,
         };
 
-        let Page = await app.Desk.Instance.CreatePage(elPage, CreateParams);
+        let Page = await app.Desk.Instance.CreateViewObject(elPage, CreateParams);
 
         // display the dialog
         let WindowArgs = await tp.ContentWindow.ShowModalAsync(Packet.ViewName, elPage);
@@ -109,7 +109,7 @@ app.SysDataListPage = class extends app.Desk.Page {
 };
 
 /** Represents a page. Edit/Insert view of the Table DataType. */
-app.SysDataTablePage = class extends app.Desk.Page {
+app.SysDataViewEditTable = class extends app.Desk.View {
     /**
      * Constructs the page
      * @param {HTMLElement} elPage The page element.

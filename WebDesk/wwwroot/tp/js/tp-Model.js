@@ -1183,13 +1183,13 @@ tp.DataView = class extends tp.View {
 
         this.CreateBrowserGrid();
 
-        let o = tp.GetElement('#ViewToolBar');
+        let o = tp.GetScriptObject('#ViewToolBar');
         if (o instanceof tp.ToolBar) {
             this.ToolBar = o;
             this.ToolBar.On('ButtonClick', this.AnyClick, this);
         }
 
-        o = tp.GetElement('#ViewPanelList');
+        o = tp.GetScriptObject('#ViewPanelList');
         if (o instanceof tp.PanelList) {
             this.PanelList = o;
         }

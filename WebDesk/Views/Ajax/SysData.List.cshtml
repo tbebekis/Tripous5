@@ -1,10 +1,11 @@
 ﻿@* List view, used with all SysData DataTypes. *@
 @{
+    // The SysData.DataType 
     string DataType = ViewData.ContainsKey("DataType")? ViewData["DataType"].ToString(): string.Empty;
  
 }
 
-<div class="desk-page sys-data-list-page" data-setup="{PageJS: '/js/pages/sys-data.js', PageCSS: '/css/pages/sys-data.css', PageClass: 'app.SysDataListPage', DataType: '@DataType'}">
+<div class="desk-page sys-data-list-page" data-setup="{JS: ['/js/pages/sys-data.js'], CSS: ['/css/pages/sys-data.css'], ClassType: 'app.SysDataViewList', DataType: '@DataType'}">
     <div class="tp-ToolBar">
         <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , IcoClasses: 'fa fa-edit',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , IcoClasses: 'fa fa-plus',  NoText: true, Ico: 'Left'}"></a>

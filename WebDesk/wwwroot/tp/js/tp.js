@@ -445,96 +445,96 @@ tp.Logger.DisplayNotificationBoxes = true;
 //---------------------------------------------------------------------------------------
 
 //#region Type checking
-/** Type checking function
+/** Type checking function. Returns true if the specified value is null or undefined.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsEmpty = function (v) { return v === null || v === void 0; };               // null or undefined
-/** Type checking function
+/** Type checking function. Returns true if the specified value is not null nor undefined.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsValid = function (v) { return !(v === null || v === void 0); };
 
-/** Type checking function
+/** Type checking function. Returns true if the specified value is an object.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsObject = function (v) { return tp.IsValid(v) && typeof v === 'object'; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is an array.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsArray = function (v) { return v instanceof Array || Object.prototype.toString.call(v) === '[object Array]'; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is a function.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsFunction = function (v) { return typeof v === 'function'; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is an arguments object.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsArguments = function (v) { return Object.prototype.toString.call(v) === "[object Arguments]"; };
 
-/** Type checking function
+/** Type checking function. Returns true if the specified value is string.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsString = function (v) { return typeof v === 'string'; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is number.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsNumber = function (v) { return typeof v === 'number'; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is integer.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsInteger = function (v) { return typeof v === 'number' && v % 1 === 0; }
-/** Type checking function
+/** Type checking function. Returns true if the specified value is decimal number.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsFloat = function (v) { return typeof v === 'number' && n % 1 !== 0; }
-/** Type checking function
+/** Type checking function. . Returns true if the specified value is boolean.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsBoolean = function (v) { return typeof v === 'boolean'; };
-/** Type checking function
+/** Type checking function. . Returns true if the specified value is a date object.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsDate = function (v) { return !tp.IsEmpty(v) && Object.prototype.toString.call(v) === "[object Date]"; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is string, number or boolean.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsPrimitive = function (v) { return typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is string, number, boolean or date.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsSimple = function (v) { return tp.IsPrimitive(v) || tp.IsDate(v); };
 
-/** Type checking function
+/** Type checking function. Returns true if the specified value is a promise object.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsPromise = function (v) { return v instanceof Promise; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is a RegExp object.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsRegExp = function (v) { return Object.prototype.toString.call(v) === "[object RegExp]"; };
 
-/** Type checking function
+/** Type checking function. Returns true if the specified value is an object but NOT a DOM element.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsPlainObject = function (v) { return tp.IsObject(v) && !v.nodeType; };
-/** Type checking function
+/** Type checking function. Returns true if the specified value is a DOM {@link Node}.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
@@ -559,22 +559,22 @@ tp.IsJson = function (Text) {
 };
 
 
-/** Type checking function for a DOM Node
+/** Type checking function for a DOM Node. Returns true if the specified value is a DOM attribute Node.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsAttribute = function (v) { return !!(v && v.nodeType === Node.ATTRIBUTE_NODE); };
-/** Type checking function for a DOM Node
+/** Type checking function for a DOM Node. Returns true if the specified value is a DOM {@link Element}.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsElement = function (v) { return v instanceof Element; };
-/** Type checking function for a DOM Node
+/** Type checking function for a DOM Node. Returns true if the specified value is a DOM {@link HTMLElement}.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
 tp.IsHTMLElement = function (v) { return v instanceof HTMLElement; };
-/** Type checking function for a DOM Node
+/** Type checking function for a DOM Node. Returns true if the specified value is a DOM text node.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
@@ -1005,9 +1005,11 @@ Merges OWN properties ONLY of the Source object to the Dest object. Return the D
 @returns {object} - Returns the Dest object.
 */
 tp.MergeQuick = function (Dest, Source) {
-    for (var i in Source) {
-        if (Source.hasOwnProperty(i) && !tp.IsFunction(Source[i])) {
-            Dest[i] = Source[i];
+    if (!tp.IsEmpty(Dest) && !tp.IsEmpty(Source)) {
+        for (var i in Source) {
+            if (Source.hasOwnProperty(i) && !tp.IsFunction(Source[i])) {
+                Dest[i] = Source[i];
+            }
         }
     }
     return Dest;
@@ -3771,14 +3773,15 @@ tp.InsertNode = function (ParentOrSelector, Index, Node) {
 };
 
 /**
- * Adds a list of items as options to a list control (HTMLSelectElement)
+ * Adds a list of items as options to a list control (HTMLSelectElement).
+ * This function accepts an optional callback parameter to be called on every item as <code> function(Item) { Text: , Value: }</code> <br />
+ * When the callback returns an object of <pre>{ Text: , Value: }</pre> this function adds the option element to the list control. <br />
+ * When the callback returns null/undefined, then the callback should add the option element.
  * @param {string|HTMLSelectElement} ListControl Selector or HTMLSelectElement
  * @param {object[]} List The list of items to add as options. Could be a list of <code>{ Text: , Value: }</code> items. In such a case no call-back is needed.
  * @param {object} [FirstItem=null] Optional. Defaults to null. When not null then it is added as the first option to the element. Must be a  <pre>{ Text: , Value: }</pre> object.
  * @param {string} [SelectedValue=null] Optional. The combobox selected value.
  * @param {function} [ItemFunc=null] Optional. A callback to be called on every item of <code> function(Item) { Text: , Value: }</code> <br />
- * When the callback returns an object of <pre>{ Text: , Value: }</pre> this function adds the option element to the list control. <br />
- * When the callback returns null/undefined, then the callback should add the option element.
  */
 tp.AddOptionList = function (ListControl, List, FirstItem = null, SelectedValue = null, ItemFunc = null) {
 
@@ -3986,7 +3989,7 @@ tp.Data(el, 'field', 'UserName');
 // set multiple data-* attributes at once
 tp.Data(el, {'field': 'UserName', level: 'guest', points: '456', 'color', 'yellow', index: '0' });
  
-@param {string|Element} el Selector or element
+@param {HTMLElement|string} el Selector or element
 @param {string|object} o When string denotes the attribute name. Else it's an object with key/value pairs where key may be a string
 @param {object} [v=null] The value to set.
 @returns {string} When acts as a get then it returns the value of the data-* attribute. When acts as a set, it always returns empty string.
@@ -4013,6 +4016,61 @@ tp.Data = function (el, o, v = null) {
     return '';
 
 };
+
+/**
+ * Returns the value of the data-setup attribute of a specified element if any, else empty string.
+ * @param {HTMLElement|string} el The element to operate on.
+ */
+tp.GetDataSetup = function (el) { return tp.Data(el, 'setup'); };
+/**
+ * Returns the data setup script object associated to an element, if any, else null. <br />
+ * This function returns the __DataSetup script object, if already exists as a property to the specified element. <br />
+ * Else tries to get the value of the data-setup attribute, if exists, and creates the object.  <br /> 
+ * It also merges any properties found in the {@link tp.GlobalCreateParams} for that element with the object. <br />
+ * Finally associates the object to the element and returns the object.
+ * @param {HTMLElement|string} el The element to operate on.
+ */
+tp.GetDataSetupObject = function (el) {
+    el = tp(el);
+
+    // return the object if already there
+    if ('__DataSetup' in el)
+        return el['__DataSetup'];
+
+    // no object, so get the data-setup attribute, if exists, and create the object
+    let Result = null;
+    let S = tp.GetDataSetup(el);
+    if (tp.IsString(S) && !tp.IsBlank(S)) {
+        Result = eval("(" + S + ")");
+
+        if (tp.IsString(Result['ClassType'])) {
+
+            // here we convert a string to a class.
+            // for this to succeed the class should be exist in a javascript file, otherwise we get undefined.
+            let o = eval(Result.ClassType);
+
+            // if success assigne the constructor to the property, otherwise leave it a string (as it was)
+            if (tp.IsFunction(o))
+                Result.ClassType = o;
+        }
+
+        // options placed in tp.CreateParams for this element 
+        if (tp.IsString(el.id) && !tp.IsBlank(el.id)) {
+            if (el.id in tp.GlobalCreateParams) {
+                let o = tp.GlobalCreateParams[el.id];
+
+                tp.MergeQuick(Result, o);
+            }
+        }
+
+        el['__DataSetup'] = Result;
+    }
+
+    return Result;
+};
+
+
+
 /**
 Gets or sets the value of a data-role attribute of an element  
 NOTE: Passing both arguments, sets the value
@@ -10948,10 +11006,6 @@ tp.GetContainerByClass = function (el, ElementClass) {
 
 /**
 Represenst an initialization options list that is passed to a {@link tp.tpElement} constructor.
-
-xxxx
-
-eeee
 @class
 */
 tp.CreateParams = class {
@@ -11029,19 +11083,19 @@ tp.tpElement = class extends tp.tpObject {
     constructor(ElementOrSelector = null, CreateParams = null) {
         super();    // this calls the InitClass() method
 
-        if (CreateParams) {
-            this.fCreateParams = CreateParams;
+        if (tp.IsObject(CreateParams)) {
+            this.CreateParams = CreateParams;
 
             if (tp.IsEmpty(ElementOrSelector) && !tp.IsEmpty(CreateParams.ElementOrSelector)) {
                 let el = tp.Select(CreateParams.ElementOrSelector);
                 if (el instanceof HTMLElement)
                     ElementOrSelector = el;
 
-                delete this.fCreateParams.ElementOrSelector;
+                delete this.CreateParams.ElementOrSelector;
             }
         }
 
-        let Flag = this.fDeferHandleCreation || this.fCreateParams && Boolean(this.fCreateParams.DeferHandleCreation);
+        let Flag = this.fDeferHandleCreation || this.CreateParams && Boolean(this.CreateParams.DeferHandleCreation);
 
         if (!Flag) {
             this.CreateHandle(ElementOrSelector);
@@ -11049,7 +11103,16 @@ tp.tpElement = class extends tp.tpObject {
     }
 
     /* protected */
-    /* overridable getters and setters  */
+    /** The creation parameters.
+    CreateParams can be passed to the constructor, or defined in the html markup as
+        data-setup = "{ Prop0: Value, PropN: Value}"
+    or both.
+    Finally the two CreateParams are merged into one and the values are passed to the properties of this instance, as long as property names match.
+    @type {object|tp.CreateParams}
+    */
+    CreateParams = {};
+
+    /* protected - overridable getters and setters  */
 
     /** Returns the value of the Enabled property, true if this instance is enabled.
      * @returns {boolean} Returns true if this instance is enabled. 
@@ -11092,14 +11155,7 @@ tp.tpElement = class extends tp.tpObject {
      */
     get ElementSubType() { return this.fElementSubType; }
 
-    /** Returns the creation parameters.  
-    CreateParams can be passed to the constructor, or defined in the html markup as 
-        data-setup = "{ Prop0: Value, PropN: Value}"  
-    or both.
-    Finally the two CreateParams are merged into one and the values are passed to the properties of this instance, as long as property names match. 
-    @type {object|tp.CreateParams}
-    */
-    get CreateParams() { return this.fCreateParams; }
+ 
     /** Returns true when the handle of this instance comes from the html markup, i.e. the dom element exists in markup and it is not dynamically created by code. 
      * @type {boolean}
      */
@@ -11513,10 +11569,10 @@ tp.tpElement = class extends tp.tpObject {
     @type {CSSStyleDeclaration}
     */
     get ComputedStyle() {
-        if (!this.fComputedStyle && this.Handle) {
-            this.fComputedStyle = this.Handle.ownerDocument.defaultView.getComputedStyle(this.Handle, '');
-        }
-        return this.fComputedStyle;
+        if (!this.Handle)
+            tp.Throw('Cannot get computed css style. No handle yet.');
+ 
+        return this.Handle.ownerDocument.defaultView.getComputedStyle(this.Handle, '');
     }
     /**
     Gets the style that is applied to the element level (inline style)
@@ -11583,62 +11639,7 @@ tp.tpElement = class extends tp.tpObject {
         this.fAutoId = false;
         this.fEnabled = true;
     }
-    /**
-    Reads the create params from html markup and creates and returns a CreateParams-like object
-    @returns {object} Returns a CreateParams-like object
-    */
-    GetHtmlCreateParams() {
-        var Result = {};
-
-        var el = this.Handle;
-        if (tp.IsElement(el)) {
-
-            var CopyProps = function (Source, Dest) {
-                if (!tp.IsEmpty(Source) && !tp.IsEmpty(Dest)) {
-                    for (var Prop in Source) {
-                        Dest[Prop] = Source[Prop];
-                    }
-                }
-            };
-
-            var Id = null;
-            var A = null;
-            if ('__tpCreateParams' in el) {                             // it is already compiled
-                A = el['__tpCreateParams'];
-                Id = 'Id' in A ? A.Id : null;
-                delete el['__tpCreateParams'];
-            } else {
-                A = tp.Data(el, 'setup');
-                if (!tp.IsBlank(A)) {
-                    A = eval("(" + A + ")");                            // compile it
-                    Id = 'Id' in A ? A.Id : null;
-                    el.removeAttribute('data-setup');
-                } else {
-                    A = null;
-                }
-            }
-
-            // options placed in tp.CreateParams
-            Id = Id || el.id;
-            var B = null;
-            if (!tp.IsBlank(Id)) {
-                if (Id in tp.GlobalCreateParams) {
-                    B = tp.GlobalCreateParams[Id];
-                }
-            }
-
-
-            if (!tp.IsEmpty(A) || !tp.IsEmpty(B)) {
-                var CP = {};
-                CopyProps(A, CP);
-                CopyProps(B, CP);
-                Result = CP;
-            }
-        }
-
-        return Result;
-
-    }
+ 
 
     /**
     Returns a property value from this.CreateParams in a safe manner.
@@ -11648,8 +11649,8 @@ tp.tpElement = class extends tp.tpObject {
     */
     GetCreateParamsOption(PropName, Default = null) {
         Default = Default || null;
-        if (!tp.IsEmpty(this.fCreateParams) && PropName in this.fCreateParams) {
-            return this.fCreateParams[PropName];
+        if (!tp.IsEmpty(this.CreateParams) && PropName in this.CreateParams) {
+            return this.CreateParams[PropName];
         }
         return Default;
     }
@@ -11901,43 +11902,43 @@ tp.tpElement = class extends tp.tpObject {
                 this.fHandle = el;
 
                 // create params
-                this.fCreateParams = this.fCreateParams || {};                  // options passed in to the constructor
-                let MarkupCreateParams = this.GetHtmlCreateParams() || {};      // options defined in a data-* (data-setup) attribute
-                this.fCreateParams = tp.MergeQuick(this.fCreateParams, MarkupCreateParams);
+                this.CreateParams = this.CreateParams || {};                  // options passed in to the constructor
+                let DataSetup = tp.GetDataSetupObject(el);                    // options defined in a data-* (data-setup) attribute, as javascript object
+                this.CreateParams = tp.MergeQuick(this.CreateParams, DataSetup);
 
                 // css classes  
                 if (!tp.IsBlank(this.fDefaultCssClasses)) {
                     tp.AddClasses(el, this.fDefaultCssClasses);
                 }
 
-                if (!tp.IsEmpty(this.fCreateParams.CssClasses) && !tp.IsBlank(this.fCreateParams.CssClasses)) {
-                    this.fCreateParams.CssClasses = tp.IsBlank(el.className) ? this.fCreateParams.CssClasses : this.fCreateParams.CssClasses + ' ' + el.className;
+                if (!tp.IsEmpty(this.CreateParams.CssClasses) && !tp.IsBlank(this.CreateParams.CssClasses)) {
+                    this.CreateParams.CssClasses = tp.IsBlank(el.className) ? this.CreateParams.CssClasses : this.CreateParams.CssClasses + ' ' + el.className;
                     el.className = '';
-                    tp.AddClasses(el, this.fCreateParams.CssClasses);
+                    tp.AddClasses(el, this.CreateParams.CssClasses);
                 }
 
                 tp.AddClass(el, 'tp-Object');
 
                 // css text
-                if (!tp.IsEmpty(this.fCreateParams.CssText) && !tp.IsBlank(this.fCreateParams.CssText)) {
-                    el.style.cssText = this.fCreateParams.CssText;
+                if (!tp.IsEmpty(this.CreateParams.CssText) && !tp.IsBlank(this.CreateParams.CssText)) {
+                    el.style.cssText = this.CreateParams.CssText;
                 }
 
                 // id
                 if (tp.IsBlank(el.Id)) {
-                    if (!tp.IsBlank(this.fCreateParams.Id))
-                        el.id = this.fCreateParams.Id;
+                    if (!tp.IsBlank(this.CreateParams.Id))
+                        el.id = this.CreateParams.Id;
                     else if (this.fAutoId === true)
                         el.id = this.ConstructId(el);
                 }
 
                 // name
-                if (!tp.IsEmpty(this.fCreateParams.Name) && !tp.IsBlank(this.fCreateParams.Name) && 'name' in el && tp.IsBlank(el['name']))
-                    el['name'] = this.fCreateParams.Name;
+                if (!tp.IsEmpty(this.CreateParams.Name) && !tp.IsBlank(this.CreateParams.Name) && 'name' in el && tp.IsBlank(el['name']))
+                    el['name'] = this.CreateParams.Name;
 
                 // Html
-                if (!tp.IsEmpty(this.fCreateParams.Html) && !tp.IsBlank(this.fCreateParams.Html))
-                    el.innerHTML = this.fCreateParams.Html;
+                if (!tp.IsEmpty(this.CreateParams.Html) && !tp.IsBlank(this.CreateParams.Html))
+                    el.innerHTML = this.CreateParams.Html;
 
 
                 // link to tripous object
@@ -11945,10 +11946,10 @@ tp.tpElement = class extends tp.tpObject {
 
                 // Parent
                 if (tp.IsEmpty(el.parentNode)) {
-                    if (tp.IsElement(this.fCreateParams.Parent)) {
-                        this.fCreateParams.Parent.appendChild(el);
-                    } else if (this.fCreateParams.Parent instanceof tp.tpElement) {
-                        this.fCreateParams.Parent.Handle.appendChild(el);
+                    if (tp.IsElement(this.CreateParams.Parent)) {
+                        this.CreateParams.Parent.appendChild(el);
+                    } else if (this.CreateParams.Parent instanceof tp.tpElement) {
+                        this.CreateParams.Parent.Handle.appendChild(el);
                     }
                 }
 
@@ -11959,7 +11960,7 @@ tp.tpElement = class extends tp.tpObject {
                 this.InitializeFields();
                 this.OnFieldsInitialized();                         // notification
 
-                this.ProcessCreateParams(this.fCreateParams);
+                this.ProcessCreateParams(this.CreateParams);
                 this.OnCreateParamsProcessed();                     // notification
 
                 this.OnInitializationCompleted();                   // notification
@@ -12143,6 +12144,7 @@ tp.tpElement = class extends tp.tpObject {
     handleEvent(e) {
         this.OnAnyDOMEvent(e);
 
+ 
         if (this.EventsEnabled === true) {
             let EventName = tp.Events.ToTripous(e.type);
             EventName = tp.IsSameText(EventName, tp.Events.Unknown) ? e.type : EventName;
@@ -12396,7 +12398,7 @@ tp.tpElement = class extends tp.tpObject {
     @returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
     */
     GetControls() {
-        return this.Handle ? tp.GetElements(this.Handle) : [];
+        return this.Handle ? tp.GetScriptObjects(this.Handle) : [];
     }
     /**
     Returns a direct or nested child tp.tpElement having a specified css class, if any, else null
@@ -12678,32 +12680,86 @@ tp.tpElement = class extends tp.tpObject {
 
 };
 
+// ------------------------------------------------------------
 /* treat them as read-only  class fields (static) */
-tp.tpElement.prototype.fDisplayType = '';                   // by default, either the css defined or block
+
+/** The css display property. By default, either the css defined or block 
+ * @type {string}
+ * */
+tp.tpElement.prototype.fDisplayType = '';
+/** The element node type, e.g. div, etc.
+ * @type {string}
+ * */
 tp.tpElement.prototype.fElementType = '';
+/** The element node sub-type of input elements, e.g. text, date, etc.
+ * @type {string}
+ * */
 tp.tpElement.prototype.fElementSubType = '';
+/** Default css classes.
+ * @type {string}
+ * */
 tp.tpElement.prototype.fDefaultCssClasses = '';
-tp.tpElement.prototype.fDeferHandleCreation = '';           // when true the constructor does NOT create the handle (dom element)
+/** When true the constructor does NOT create the handle (dom element)
+ * @type {boolean}
+ * */
+tp.tpElement.prototype.fDeferHandleCreation = '';
+/** When true then the element gets an id attribute value automatically.
+ * @type {boolean}
+ * */
 tp.tpElement.prototype.fAutoId = false;
 
-/* fields */
-tp.tpElement.prototype.fHandle = null;                      // dom element - HTMLElement
-tp.tpElement.prototype.fEnabled = true;                     // true
-tp.tpElement.prototype.fFromMarkup = false;                 // true when an already existed element is passed as this handle
-tp.tpElement.prototype.fChildMarkupControls = [];           // any tp.Element instances created from markup and having this instance as container (e.g. when this is an accordion item or a tab page, panel etc.)
-tp.tpElement.prototype.fHookedEvents = null;                // string[]
-tp.tpElement.prototype.fElementResizeListener = null;       // tp.ElementResizeListener
-tp.tpElement.prototype.fScreenResizeListener = null;        // tp.Listener
+// ------------------------------------------------------------
+/* instance fields */
+/** The {@link HTMLElement} this instance represents. */
+tp.tpElement.prototype.fHandle = null;
+/** True when this element is enabled.
+ * @type {boolean}
+ * */
+tp.tpElement.prototype.fEnabled = true;                     
+/** True when the handle of this instance comes from the html markup, i.e. the dom element exists in markup and it is not dynamically created by code.
+ * @type {boolean}
+ * */
+tp.tpElement.prototype.fFromMarkup = false;
+/** Any tp.Element instances created from markup and having this instance as container (e.g. when this is an accordion item or a tab page, panel etc.)
+ * @type {array}
+ * */
+tp.tpElement.prototype.fChildMarkupControls = [];
+/** A list of DOM events this instance handles. 
+ * Could be DOM event names, e.g. click or keydown, or one of the tp.Events constants.
+ * @type {string[]|null}
+ * */
+tp.tpElement.prototype.fHookedEvents = null;
+/** The instance of a listener or null.
+ * @type {tp.ElementResizeListener}
+ * */
+tp.tpElement.prototype.fElementResizeListener = null;
+/** The instance of a listener or null.
+ * @type {tp.Listener}
+ * */
+tp.tpElement.prototype.fScreenResizeListener = null;         
 
 /* fields */
+/** The {@link Document} this element is part of.
+ * @type {Document}
+ */
 tp.tpElement.prototype.fDocument = tp.Doc;
-tp.tpElement.prototype.InformSiblings = false;              // inform siblings when this instance size changes
-tp.tpElement.prototype.fCreateParams = null;                // {} | tp.CreateParams
-tp.tpElement.prototype.fComputedStyle = null;               // CSSStyleDeclaration
+/** When true then this instance informs siblings when its size changes 
+ * @type {boolean}
+ * */
+tp.tpElement.prototype.InformSiblings = false;               
+/** True after the Dispose() is called.
+* @type {boolean}
+* */
 tp.tpElement.prototype.fIsDisposed = false;
 
-tp.tpElement.prototype.spanText = null;                     // HTMLElement - span element, just before a control, with label text
-tp.tpElement.prototype.spanRequiredMark = null;             // HTMLElement - span element, right after a control, with a required mark
+/** HTMLSpanElement - span element, just before a control, with label text
+ * @type {HTMLSpanElement}
+ * */
+tp.tpElement.prototype.spanText = null;                      
+/** HTMLSpanElement - span element, right after a control, with a required mark
+ * @type {HTMLSpanElement}
+ * */
+tp.tpElement.prototype.spanRequiredMark = null;            
 
 /** Node type names array, used internally */
 tp.tpElement.StandardNodeTypes = [
@@ -12779,7 +12835,7 @@ Also a new property, named tpObject, is created and attached to the DOM element 
 @param {string|Node} el - The element to get the associated tripous script object from.
 @returns {tp.tpElement} Returns the Tripous script object associated to a DOM element, if any or null.
 */
-tp.GetElement = function (el) {
+tp.GetScriptObject = function (el) {
     let o = tp.GetObject(el);
     return o instanceof tp.tpElement ? o : null;
 };
@@ -12790,7 +12846,7 @@ Also a new property, named tpObject, is created and attached to the DOM element 
 @param {string|Node} el The element to check
 @returns {boolean} Returns true if a specified DOM element is associated to a tp.tpElement
 */
-tp.HasElement = function (el) { return tp.GetElement(el) !== null; };
+tp.HasScriptObject = function (el) { return tp.GetScriptObject(el) !== null; };
 /**
 Returns an array with all tp.Element objects constructed/existing up on child DOM elements of a specified parent element or the entire document.  
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
@@ -12798,7 +12854,7 @@ Also a new property, named tpObject, is created and attached to the DOM element 
 @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
 @returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
 */
-tp.GetElements = function (ParentElementOrSelector) {
+tp.GetScriptObjects = function (ParentElementOrSelector) {
     let List = tp.GetObjects(ParentElementOrSelector);
     let Result = [];        // tp.tpElement[]
 
@@ -12819,7 +12875,7 @@ tp.GetElements = function (ParentElementOrSelector) {
  */
 tp.FindControlById = function (Id, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
-    var List = tp.GetElements(ParentElementOrSelector);
+    var List = tp.GetScriptObjects(ParentElementOrSelector);
 
     for (var i = 0, ln = List.length; i < ln; i++) {
         if (tp.IsSameText(List[i].Id, Id))
@@ -12836,7 +12892,7 @@ tp.FindControlById = function (Id, ParentElementOrSelector = null) {
  */
 tp.FindControlByProp = function (PropName, PropValue, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
-    var List = tp.GetElements(ParentElementOrSelector);
+    var List = tp.GetScriptObjects(ParentElementOrSelector);
 
     for (var i = 0, ln = List.length; i < ln; i++) {
         if (List[i][PropName] === PropValue)
@@ -12851,15 +12907,16 @@ tp.FindControlByProp = function (PropName, PropValue, ParentElementOrSelector = 
 In some cases Tripous script defines a __tpInfo property to some DOM elements and stores some additional information to it.
 This function returns that associated property.
 @param {string|Node} el - The element to get the associated __tpInfo object from.
+@param {string} [InfoName='__tpInfo'] Optional. The name of the property to operate on. By default is '__tpInfo'
 @returns {object} Returns the associated __tpInfo object from a DOM element, if any or null.
 */
-tp.GetElementInfo = function (el) {
+tp.GetElementInfo = function (el, InfoName = '__tpInfo') {
     if (tp.IsString(el))
         el = tp.Select(el);
 
     if (tp.IsElement(el)) {
-        if ('__tpInfo' in el)
-            return el['__tpInfo'];
+        if (InfoName in el)
+            return el[InfoName];
     }
 
     return null;
@@ -12869,21 +12926,23 @@ In some cases Tripous script defines a __tpInfo property to some DOM elements an
 This function creates a __tpInfo property to a DOM element, if not already there, and assigns the specified information to it.
 @param {string|Node} el - The element to create/assign the __tpInfo object to.
 @param {object}  v - The __tpInfo data.
+@param {string} [InfoName='__tpInfo'] Optional. The name of the property to operate on. By default is '__tpInfo'
 */
-tp.SetElementInfo = function (el, v) {
+tp.SetElementInfo = function (el, v, InfoName = '__tpInfo') {
     if (tp.IsString(el))
         el = tp.Select(el);
 
     if (tp.IsElement(el))
-        el['__tpInfo'] = v;
+        el[InfoName] = v;
 };
 /**
 In some cases Tripous script defines a __tpInfo property to some DOM elements and stores some additional information to it.
 This function returns true if a specified DOM element has defined a __tpInfo property.
 @param {string|Node} el - The element to create/assign the __tpInfo object to.
+@param {string} [InfoName='__tpInfo'] Optional. The name of the property to operate on. By default is '__tpInfo'
 @returns {boolean} Returns true if a specified DOM element has defined a __tpInfo property..
 */
-tp.HasElementInfo = function (el) { return tp.GetElementInfo(el) !== null; };
+tp.HasElementInfo = function (el, InfoName = '__tpInfo') { return tp.GetElementInfo(el, InfoName) !== null; };
 
 
 
