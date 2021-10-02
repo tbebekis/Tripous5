@@ -13,7 +13,8 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Caching.Memory;
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

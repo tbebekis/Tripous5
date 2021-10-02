@@ -14,9 +14,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Tripous;
-using WebDesk.AspNet;
-
-using WebDesk.Models;
+using WebLib;
+using WebLib.Models;
+using WebLib.AspNet;
+ 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Tripous.Data;
 
@@ -24,70 +25,38 @@ namespace WebDesk.Controllers
 {
     /// <summary>
     /// Ajax controller.
-    /// <para>NOTE: All AJAX calls should be handled by this controller.</para>
+    /// <para>NOTE: All AJAX calls, except of <see cref="BrokerController"/> calls, should be handled by this controller.</para>
     /// </summary>
-    public class AjaxController : ControllerMvc
+    public class AjaxController : ControllerMvc, IAjaxController
     {
- 
-        HttpActionResult GetHtmlView(AjaxRequest R)
+
+        #region IAjaxController
+        /// <summary>
+        /// Renders a partial view to a string.
+        /// <para>See AjaxController.MiniSearch() for an example.</para>
+        /// </summary>
+        string IAjaxController.ViewToString(string ViewName, object Model, IDictionary<string, object> PlusViewData)
         {
-            string ViewNameOrPath = string.Empty;
-            object Model = null;
-            Dictionary<string, object> PlusViewData = new Dictionary<string, object>();
-
-            string ViewName = R.Params["ViewName"].ToString();
-
-            JObject Packet = new JObject();
-            Packet["OperationName"] = R.OperationName;
-            Packet["ViewName"] = ViewName;
-
-            DataTable Table;
-            switch (ViewName)
-            {
-                case "Ui.SysData.List.Table":
-                    ViewNameOrPath = "SysData.List";
-                    PlusViewData["DataType"] = "Table";
-                    Packet["DataType"] = "Table";
-                    Table = SysData.Select("Table", NoBlobs: true);
-                    Packet["Table"] = JsonDataTable.ToJObject(Table);
-                    break;
-                case "Ui.SysData.Insert.Table":
-                    ViewNameOrPath = "SysData.Insert.Table";
-                    PlusViewData["DataType"] = "Table";
-                    Packet["DataType"] = "Table";
-                    Packet["IsInsert"] = true;
-                    break;
-            }
-
-            string HtmlText = string.Empty;
-            if (!string.IsNullOrWhiteSpace(ViewNameOrPath))
-                HtmlText = this.RenderPartialViewToString(ViewNameOrPath, Model, PlusViewData);
-            
-            Packet["HtmlText"] = HtmlText;
-
-            HttpActionResult Result = HttpActionResult.SetPacket(Packet, true);
-            return Result;
+            return this.RenderPartialViewToString(ViewName, Model, PlusViewData);
         }
+        /// <summary>
+        /// Renders a partial view to a string.
+        /// <para>See AjaxController.MiniSearch() for an example.</para>
+        /// </summary>
+        string IAjaxController.ViewToString(string ViewName, IDictionary<string, object> PlusViewData)
+        {
+            return this.RenderPartialViewToString(ViewName, PlusViewData);
+        }
+        #endregion
 
         [Route("/AjaxExecute", Name = "AjaxExecute")]
         public async Task<JsonResult> AjaxExecute([FromBody] AjaxRequest R)
         {
             await Task.CompletedTask;
-            HttpActionResult Result = null;
-
-            switch (R.OperationName)
-            {
-                case "GetHtmlView": 
-                    Result = GetHtmlView(R);
-                    break;
-                default:
-                    Sys.Throw($"Ajax Operation not supported: {R.OperationName}");
-                    break;
-            }
- 
+            HttpActionResult Result = DataStore.AjaxExecute(this, R);
             return Json(Result);
         }
 
- 
+
     }
 }

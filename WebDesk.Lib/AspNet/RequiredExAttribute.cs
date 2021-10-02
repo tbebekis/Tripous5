@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
  
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// Extension for the Required attribute

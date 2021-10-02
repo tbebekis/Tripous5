@@ -8,9 +8,9 @@ using System.Data;
 using Tripous;
 using Tripous.Data;
 
-using WebDesk.Models;
+using WebLib.Models;
 
-namespace WebDesk
+namespace WebLib
 {
     static public partial class DataStore
     {

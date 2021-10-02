@@ -14,7 +14,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

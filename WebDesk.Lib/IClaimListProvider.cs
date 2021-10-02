@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Claims;
 
-namespace WebDesk
+namespace WebLib
 {
 
     /// <summary>

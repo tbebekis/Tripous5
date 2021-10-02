@@ -17201,7 +17201,7 @@ tp.View = class extends tp.tpElement {
     Gets or sets the name  
     @type {string}
     */
-    Name = '';
+    Name = '[no view name]';
     AutocreateControls = true;
 
     /* overrides */

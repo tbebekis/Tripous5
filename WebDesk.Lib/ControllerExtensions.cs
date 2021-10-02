@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 
 
-namespace WebDesk
+namespace WebLib
 {
 
     /// <summary>

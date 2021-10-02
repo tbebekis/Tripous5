@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

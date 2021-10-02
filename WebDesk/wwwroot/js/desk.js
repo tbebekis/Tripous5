@@ -2,8 +2,11 @@
 app.Command = class {
 
     /** constructor */
-    constructor() {
+    constructor(Source) {
         this.Params = {};
+
+        if (tp.IsValid(Source))
+            tp.MergeQuick(this, Source);
     }
 
     /** A name unique among all commands. */
@@ -14,6 +17,10 @@ app.Command = class {
     IsSingleInstance = false;
     /** User defined parameters */
     Params = {};
+
+    IsUiCommand() {
+        return this.Type === 'Ui' || tp.StartsWith(this.Name, 'Ui.', true);
+    }
 };
 
 /** Represents an ajax request */
@@ -119,7 +126,7 @@ app.Desk = class {
                     // tp.ChildHTMLElements(this.Handle)
                 }
                 else if (tp.HasClass(e.target, 'main-menu-command')) {
-                    Cmd = tp.GetDataSetupObject(e.target);
+                    Cmd = new app.Command(tp.GetDataSetupObject(e.target));
                     await this.ExecuteCommand(Cmd);
                 }
                 break;
@@ -309,7 +316,8 @@ app.MainMenuCommandExecutor = class {
      * @type {string[]}
      */
     ValidCommands = [
-        'Ui.SysData.List.Table'
+        'Ui.SysData.Tables',
+        'Ui.Traders'
     ];
 
     /**
@@ -327,14 +335,15 @@ app.MainMenuCommandExecutor = class {
      */
     async ExecuteCommand(Cmd) {
         let Result = null;
- 
-        if (Cmd.Type === 'Ui') {
+
+        if (Cmd.IsUiCommand()) {
             if ((Cmd.IsSingleInstance && !app.Desk.Instance.TabExists(Cmd.Name)) || !Cmd.IsSingleInstance) {
                 let Params = {
-                    ViewName: Cmd.Name
+                    Type: Cmd.Type,
+                    IsSingleInstance: Cmd.IsSingleInstance
                 };
                 Params = tp.MergeQuick(Params, Cmd.Params);
-                let Request = new app.AjaxRequest("GetHtmlView", Params);
+                let Request = new app.AjaxRequest(Cmd.Name, Params);
                 let Packet = await app.Desk.Instance.AjaxExecute(Request);
                 if (tp.IsValid(Packet))
                     Result = await app.Desk.Instance.CreateViewElement(Packet);

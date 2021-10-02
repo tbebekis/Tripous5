@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Web;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
  
     /// <summary>

@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 using Tripous;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// Provides access to session variables (entries)

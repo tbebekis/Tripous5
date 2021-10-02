@@ -21,7 +21,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

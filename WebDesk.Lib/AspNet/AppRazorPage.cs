@@ -13,7 +13,7 @@ using Tripous;
  
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
 
     /// <summary>

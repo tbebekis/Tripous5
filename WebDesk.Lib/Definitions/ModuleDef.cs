@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Tripous;
 using Tripous.Data;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// A module definition

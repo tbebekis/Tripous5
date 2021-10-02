@@ -24,7 +24,7 @@ using Microsoft.Extensions.Logging;
 
  
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
 
     /// <summary>

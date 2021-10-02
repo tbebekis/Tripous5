@@ -39,7 +39,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Caching.Memory; 
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

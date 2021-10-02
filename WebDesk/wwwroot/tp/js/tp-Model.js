@@ -1021,15 +1021,11 @@ A data view represents a control container that automatically can create its con
 and bind to data provided by data-tables of a broker. <br />
 Example markup
 <pre>
-    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Customer' }">
-        ...
-    </div>
-
+    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Customer' }"> ... </div>
     or
-
-    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerClass: tp.App.CustomerBroker }">
-        ...
-    </div>
+    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerClass: tp.App.CustomerBroker }"> ... </div>
+    or
+    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Customer', BrokerClass: tp.App.CustomerBroker }"> ... </div>
 </pre>
 */
 tp.DataView = class extends tp.View {
@@ -1201,21 +1197,26 @@ tp.DataView = class extends tp.View {
     @protected
     */
     CreateBroker() {
-        let BrokerName;
+        let BrokerName = '';
 
-        if (tp.IsEmpty(this.Broker) && !tp.IsEmpty(this.CreateParams)) {
+        if (!tp.IsBlank(this.BrokerName))
+            BrokerName = this.BrokerName;
+        else if ('BrokerName' in this.CreateParams && tp.IsString(this.CreateParams.BrokerName))
+            BrokerName = this.CreateParams.BrokerName;
+
+        if (tp.IsEmpty(this.Broker)) {
             if ('BrokerClass' in this.CreateParams) {
-                this.Broker = new this.CreateParams.BrokerClass();
-            } else {
-                if (!tp.IsBlank(this.BrokerName))
-                    BrokerName = this.BrokerName;
-                else if ('BrokerName' in this.CreateParams)
-                    BrokerName = this.CreateParams.BrokerName;
 
-                if (!tp.IsBlank(BrokerName)) {
-                    this.Broker = new tp.Broker(BrokerName);
-                    this.BrokerName = BrokerName;
-                }
+                if (tp.IsString(this.CreateParams.BrokerClass) && !tp.IsBlank(this.CreateParams.BrokerClass))
+                    this.CreateParams.BrokerClass = tp.StrToClass(this.CreateParams.BrokerClass, true);
+
+                if (!tp.IsFunction(this.CreateParams.BrokerClass))
+                    tp.Throw(`Cannot create broker. No broker class for a view: ${this.Name}`);
+                    
+                this.Broker = new this.CreateParams.BrokerClass(BrokerName);
+            } else if (!tp.IsBlank(BrokerName)) {
+                this.Broker = new tp.Broker(BrokerName);
+                this.BrokerName = BrokerName; 
             }
         }
     }

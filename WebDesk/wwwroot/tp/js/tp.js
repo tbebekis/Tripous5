@@ -4018,6 +4018,33 @@ tp.Data = function (el, o, v = null) {
 };
 
 /**
+ * Converts a string into a class (i.e. function), e.g. 'tp.DataView'. <br />
+ * Returns the class on success. Returns the passed in string on failure. <br />
+ * A flag controls whether to throw an exception on failure.
+ * @param {string} S The string to operate on
+ * @param {boolean} [ThrowIfNot=false] Optional. Defaults to false. If true then it throws an exception on failure.
+ */
+tp.StrToClass = function (S, ThrowIfNot = false) {
+    let Result = S;
+
+    if (tp.IsString(S)) {
+
+        // here we convert a string to a class.
+        // for this to succeed the class should be exist in a javascript file, otherwise we get undefined.
+        let o = eval(S);
+
+        // on success assign the constructor to result, otherwise leave it a string (as it was)
+        if (tp.IsFunction(o))
+            Result = o;
+    }
+
+    if (!tp.IsFunction(Result) && ThrowIfNot === true)
+        tp.Throw(`Cannot create a class out of ${S}`);
+
+    return Result;
+};
+
+/**
  * Returns the value of the data-setup attribute of a specified element if any, else empty string.
  * @param {HTMLElement|string} el The element to operate on.
  */
@@ -4043,16 +4070,8 @@ tp.GetDataSetupObject = function (el) {
     if (tp.IsString(S) && !tp.IsBlank(S)) {
         Result = eval("(" + S + ")");
 
-        if (tp.IsString(Result['ClassType'])) {
-
-            // here we convert a string to a class.
-            // for this to succeed the class should be exist in a javascript file, otherwise we get undefined.
-            let o = eval(Result.ClassType);
-
-            // if success assigne the constructor to the property, otherwise leave it a string (as it was)
-            if (tp.IsFunction(o))
-                Result.ClassType = o;
-        }
+        if ('ClassType' in Result)
+            Result.ClassType = tp.StrToClass(Result['ClassType']); 
 
         // options placed in tp.CreateParams for this element 
         if (tp.IsString(el.id) && !tp.IsBlank(el.id)) {

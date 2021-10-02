@@ -8,7 +8,7 @@ using Tripous;
 using Tripous.Logging;
 using Tripous.Data;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// LogListener, saves log information to database

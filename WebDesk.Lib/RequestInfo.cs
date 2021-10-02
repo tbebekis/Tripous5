@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 using Tripous;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
 
     /// <summary>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebDesk.Models
+namespace WebLib.Models
 {
     /// <summary>
     /// Indicates the type of a trade

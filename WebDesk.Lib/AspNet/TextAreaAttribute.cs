@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// Marks a model property as disable. Results in a disabled html attribute

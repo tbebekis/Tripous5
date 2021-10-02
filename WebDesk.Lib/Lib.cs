@@ -21,10 +21,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Newtonsoft.Json;
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 using Tripous.Logging;
 
-namespace WebDesk 
+namespace WebLib 
 {
 
     /// <summary>

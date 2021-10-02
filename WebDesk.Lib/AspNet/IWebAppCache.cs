@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// Represents an application memory cache.

@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 using Tripous;
 
-namespace WebDesk
+namespace WebLib
 {
 
     /// <summary>

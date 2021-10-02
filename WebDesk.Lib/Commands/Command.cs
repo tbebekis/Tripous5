@@ -9,7 +9,7 @@ using Newtonsoft.Json.Converters;
 
 using Tripous;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// A command or action

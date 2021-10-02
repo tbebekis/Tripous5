@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 using Tripous;
-using WebDesk.AspNet;
 
-using WebDesk.Models;
+using WebLib;
+using WebLib.Models;
+using WebLib.AspNet;
+ 
 
 namespace WebDesk.Controllers
 {

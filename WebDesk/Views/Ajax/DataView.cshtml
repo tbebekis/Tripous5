@@ -1,0 +1,13 @@
+﻿@* This is the default DataView. To be used with trivial brokers *@
+@{
+    string Setup = ViewData.ContainsKey("Setup") ? ViewData["Setup"].ToString(): string.Empty;
+}
+
+<div class="desk-page tp-DataView" data-setup='@Html.Raw(Setup)'>
+    @await Html.PartialAsync("DataView.ToolBar")
+
+    <div class="Grid tp-BrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+
+
+</div>
+

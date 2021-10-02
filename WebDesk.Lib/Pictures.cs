@@ -9,7 +9,7 @@ using System.Globalization;
 
 using Tripous;
 
-namespace WebDesk
+namespace WebLib
 {
 
     /// <summary>

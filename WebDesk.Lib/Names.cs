@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using Tripous;
 
-namespace WebLib.AspNet
+namespace WebLib
 {
+
     /// <summary>
-    /// Generates unique Ids for HTML elements.
-    /// <para>WARNING: HTML element id is case-sensitive.</para>
+    /// Generates unique names
     /// </summary>
-    static internal class ElementIdGenerator
+    static public class Names
     {
         static object syncLock = new LockObject();
 
         static Dictionary<string, int> Dic = new Dictionary<string, int>();
 
         /// <summary>
-        /// Generates and returns a unique id for an HTML Element.
+        /// Generates and returns a unique name
         /// </summary>
-        static public string Next(string Prefix = "")
+        static public string Next(string Prefix)
         {
-            lock(syncLock)
+            lock (syncLock)
             {
                 if (string.IsNullOrWhiteSpace(Prefix))
-                    Prefix = "el";
+                    Sys.Throw("Cannot generate a unique name. No prefix is defined.");
 
                 int Index;
 

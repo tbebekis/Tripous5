@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// Exception class to be used by this application

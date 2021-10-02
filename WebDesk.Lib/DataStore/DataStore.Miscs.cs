@@ -9,7 +9,7 @@ using Tripous.Data;
  
 using System.Security.Cryptography;
 
-namespace WebDesk
+namespace WebLib
 {
 
     /// <summary>

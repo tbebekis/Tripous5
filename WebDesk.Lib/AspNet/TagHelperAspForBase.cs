@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// A <see cref="TagHelperBase"/> descendant class.

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// Represents this library

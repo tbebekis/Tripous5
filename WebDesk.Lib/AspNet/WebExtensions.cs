@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Html;
 
 
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// Extensions
@@ -213,16 +213,7 @@ namespace WebDesk.AspNet
         /// </summary>
         static public string NextId(this HttpContext Context, string Prefix = "")
         {
-            Type T = typeof(ElementIdGenerator);
-            ElementIdGenerator Gen = Context.Items[T] as ElementIdGenerator;
-
-            if (Gen == null)
-            {
-                Gen = new ElementIdGenerator();
-                Context.Items[T] = Gen;
-            }
-
-            return Gen.GetNextId(Prefix);
+            return ElementIdGenerator.Next(Prefix);
         }
 
         /// <summary>

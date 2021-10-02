@@ -47,7 +47,9 @@ using Newtonsoft.Json.Serialization;
 using Tripous;
 using Tripous.Logging;
 using Tripous.Data;
-using WebDesk.AspNet;
+
+using WebLib;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

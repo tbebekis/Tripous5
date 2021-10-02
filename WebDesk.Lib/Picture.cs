@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// A picture of an item, i.e. product, etc.

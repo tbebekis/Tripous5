@@ -32,7 +32,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tripous;
 using Tripous.Data;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
 
     /// <summary>

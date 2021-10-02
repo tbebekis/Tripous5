@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Http;
 using System.IdentityModel.Tokens.Jwt;
 
 using Tripous;
-using WebDesk.AspNet;
+
+using WebLib;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

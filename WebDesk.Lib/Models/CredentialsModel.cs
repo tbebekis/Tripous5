@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.ComponentModel.DataAnnotations;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 
-namespace WebDesk.Models
+namespace WebLib.Models
 {
     public class CredentialsModel
     {

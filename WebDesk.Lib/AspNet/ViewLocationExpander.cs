@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Tripous;
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
 
 

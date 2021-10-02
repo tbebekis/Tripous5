@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Tripous;
 using Tripous.Data;
 
-namespace WebDesk
+namespace WebLib
 {
     static public partial class DataStore
     {

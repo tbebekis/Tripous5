@@ -13,9 +13,9 @@ using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 
-namespace WebDesk
+namespace WebLib
 {
 
 

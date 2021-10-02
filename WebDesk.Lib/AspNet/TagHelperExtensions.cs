@@ -8,7 +8,7 @@ using System.Text.Encodings.Web;
  
 using Microsoft.AspNetCore.Mvc.Rendering; 
 
-namespace WebDesk.AspNet
+namespace WebLib.AspNet
 {
     /// <summary>
     /// Extensions

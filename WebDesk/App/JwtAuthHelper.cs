@@ -17,7 +17,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
-using WebDesk.AspNet;
+using WebLib;
+using WebLib.Models;
+using WebLib.AspNet;
 
 namespace WebDesk
 {

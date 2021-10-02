@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 
 using Tripous;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// Represents a context regarding the current HTTP request.

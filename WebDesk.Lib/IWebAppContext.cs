@@ -4,9 +4,9 @@ using System.Globalization;
 using Microsoft.AspNetCore.Http; 
 
 using Tripous;
-using WebDesk.AspNet;
+using WebLib.AspNet;
 
-namespace WebDesk
+namespace WebLib
 {
     /// <summary>
     /// Represents the web application

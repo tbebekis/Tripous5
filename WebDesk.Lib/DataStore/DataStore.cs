@@ -18,9 +18,12 @@ using Newtonsoft.Json.Linq;
 using Tripous;
 using Tripous.Logging;
 using Tripous.Data;
-using WebDesk.AspNet;
 
-namespace WebDesk
+
+using WebLib.AspNet;
+using WebLib.Models;
+
+namespace WebLib
 {
 
     /// <summary>
@@ -331,13 +334,18 @@ where
 
 
 
+
         static public Command[] GetMainMenu()
         {
             List<Command> Result = new List<Command>();
 
             Command BarItem = new Command() { TitleKey = "System" };
             Result.Add(BarItem);
-            BarItem.Add("Ui.SysData.List.Table").IsSingleInstance = true; 
+            BarItem.Add("Ui.SysData.Tables").IsSingleInstance = true;
+
+            BarItem = new Command() { TitleKey = "Admin" };
+            Result.Add(BarItem);
+            BarItem.Add("Ui.Traders").IsSingleInstance = true;
 
             return Result.ToArray();
 
