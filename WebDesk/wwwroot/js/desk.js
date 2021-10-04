@@ -59,8 +59,8 @@ app.Desk = class {
         this.elTabBarContainer = tp.Select(this.elContainer, '.tab-container');
         new app.TabBarHandler(this.elTabBarContainer);
 
-        this.elTabs = tp.Select(this.elContainer, '.tab-bar'); 
-        this.elViews = tp.Select(this.elContainer, '.view-list');
+        this.elTabBar = tp.Select(this.elContainer, '.tab-bar'); 
+        this.elViewList = tp.Select(this.elContainer, '.view-list');
  
         this.CommandExecutors = [];
 
@@ -69,8 +69,8 @@ app.Desk = class {
         if (this.elMainMenu)
             this.elMainMenu.addEventListener('click', this);
 
-        if (this.elTabBarContainer)
-            this.elTabBarContainer.addEventListener('click', this);
+        if (this.elTabBar)
+            this.elTabBar.addEventListener('click', this);
 
         tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
     }
@@ -96,11 +96,11 @@ app.Desk = class {
     /** The tab-bar. Contains the tabs (captions) of the pages (views)
      * @type {HTMLDivElement}
      */
-    elTabs = null;           
+    elTabBar = null;           
     /** Contains the pages (views)
      * @type {HTMLDivElement}
      */
-    elViews = null;          
+    elViewList = null;          
     /** A list of registered command executors.
      * @type {array}
      */
@@ -119,11 +119,15 @@ app.Desk = class {
      * @param {Event} e The event.
      */
     async handleEvent(e) {
-        let Cmd;
+        let Cmd, A, el;
         switch (e.type) {
             case 'click':
-                if (tp.ContainsEventTarget(this.elTabs, e.target)) {
-                    // tp.ChildHTMLElements(this.Handle)
+                if (tp.ContainsEventTarget(this.elTabBar, e.target)) {
+                    A = this.GetTabList();
+                    el = A.find(item => { return tp.ContainsEventTarget(item, e.target); });
+                    if (tp.IsHTMLElement(el)) {
+                        this.TabClicked(el);
+                    }
                 }
                 else if (tp.HasClass(e.target, 'main-menu-command')) {
                     Cmd = new app.Command(tp.GetDataSetupObject(e.target));
@@ -182,14 +186,14 @@ app.Desk = class {
      * @returns {HTMLElement[]} Returns the list of tabs.
      * */
     GetTabList() {
-        let Result = tp.ChildHTMLElements(this.elTabs)
+        let Result = tp.ChildHTMLElements(this.elTabBar)
         return Result;
     }
     /** Returns the list of pages (views).
      * @returns {HTMLElement[]} Returns the list of pages (views).
      * */
     GetViewList() {
-        let Result = tp.ChildHTMLElements(this.elViews)
+        let Result = tp.ChildHTMLElements(this.elViewList)
         return Result;
     }
 
@@ -237,8 +241,8 @@ app.Desk = class {
         app.DeskInfo(elTab, DeskInfo);
         app.DeskInfo(elView, DeskInfo);
 
-        this.elViews.appendChild(elView);
-        this.elTabs.appendChild(elTab);
+        this.elViewList.appendChild(elView);
+        this.elTabBar.appendChild(elTab);
 
         let CreateParams = {
             Name: Packet.ViewName,

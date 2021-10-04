@@ -104,6 +104,14 @@ namespace Tripous.Data
         }
 
         /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        public override string ToString()
+        {
+            return Title;
+        }
+
+        /// <summary>
         /// Gets or sets tha Title of this descriptor, used for display purposes.
         /// </summary>    
         public string Title

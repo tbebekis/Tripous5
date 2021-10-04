@@ -323,7 +323,7 @@ tp.Classes = {
 
     CellTube: 'tp-Cell-Tube',
 
-    BrowserGrid: 'tp-BrowserGrid',
+    ViewBrowserGrid: 'ViewBrowserGrid',
 
 
     /* icons                ----------------------------------------------------------------- */
@@ -17202,7 +17202,6 @@ tp.View = class extends tp.tpElement {
     @type {string}
     */
     Name = '[no view name]';
-    AutocreateControls = true;
 
     /* overrides */
     /**
@@ -17244,14 +17243,17 @@ tp.View = class extends tp.tpElement {
         tp.Broadcaster.Add(this);
         this.HookEvent(tp.Events.Click);
 
-        if (this.AutocreateControls === true) {
+        this.AutocreateControls();
+    }
+    AutocreateControls() {
+        if (this.CreateParams.AutocreateControls === true) {
             let List = this.GetControls();
             if (List.length === 0)
                 tp.CreateContainerControls(this.Handle);
         }
         else {
             this.CreateControls();
-        }        
+        }
     }
     /**
     Creates the controls of the view based on the provided markup.

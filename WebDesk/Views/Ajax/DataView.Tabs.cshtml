@@ -1,0 +1,28 @@
+﻿@{
+    List<ViewTabDef> TabList = ViewData["TabList"] as List<ViewTabDef>;
+    string CssClasses = ViewData.ContainsKey("CssClasses")? ViewData["CssClasses"].ToString(): string.Empty;
+    string DataSetupText = ViewData.ContainsKey("DataSetupText") ? ViewData["DataSetupText"].ToString(): "{ }";
+}
+
+<div class='@Html.Raw(CssClasses)' data-setup='@Html.Raw(DataSetupText)'>
+    <div>
+        @foreach (var Tab in TabList)
+        {
+            <div>@Tab.Title</div>
+        }
+    </div>
+    <div>
+        @foreach (var Tab in TabList)
+        {
+            if (Tab.Columns.Count > 0)
+            {
+
+            }
+
+            if (Tab.Groups.Count > 0)
+            {
+
+            }
+        }
+    </div>
+</div>

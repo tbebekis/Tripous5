@@ -52,9 +52,10 @@ namespace WebLib
         public string BrokerName { get; set; }
 
         /// <summary>
-        /// When true, the default, controls are auto-created.
+        /// When true, controls are auto-created.
+        /// <para>Defaults to false.</para>
         /// </summary>
-        public bool AutocreateControls { get; set; } = true;
+        public bool AutocreateControls { get; set; } = false;
 
         /// <summary>
         /// A list of javascript files this view needs in order to function properly.

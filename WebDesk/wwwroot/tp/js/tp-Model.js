@@ -599,6 +599,15 @@ tp.Broker = class extends tp.tpObject {
     async Action(Action) {
 
         let Args = await tp.Ajax.Async(Action.Args);
+
+        if (Args.ResponseData.IsSuccess === false) {
+            let ErrorText = 'Action failed. Unknown error.';
+            if (tp.IsString(Args.ResponseData.ErrorText) && !tp.IsBlank(Args.ResponseData.ErrorText)) {
+                ErrorText = Args.ResponseData.ErrorText;
+            }
+            tp.Throw(ErrorText);
+        }
+
         Action.Args = Args; 
 
         if (Action.AssignFlag === true) {
@@ -1175,15 +1184,15 @@ tp.DataView = class extends tp.View {
             //this.Broker.On('Action', this.Action, this);
         }
 
-        super.CreateControls();
+        super.CreateControls();        
 
-        this.CreateBrowserGrid();
-
-        let o = tp.GetScriptObject('#ViewToolBar');
+        let o = tp.GetScriptObject('.ViewToolBar');
         if (o instanceof tp.ToolBar) {
             this.ToolBar = o;
             this.ToolBar.On('ButtonClick', this.AnyClick, this);
         }
+
+        this.CreateBrowserGrid();
 
         o = tp.GetScriptObject('#ViewPanelList');
         if (o instanceof tp.PanelList) {
@@ -1222,11 +1231,11 @@ tp.DataView = class extends tp.View {
     }
     /**
     Creates the browser grid. <br />
-    NOTE: For the browser grid to be created automatically by this method, a div marked with the tp-BrowserGrid is required.
+    NOTE: For the browser grid to be created automatically by this method, a div marked with the ViewBrowserGrid is required.
     @protected
     */
     CreateBrowserGrid() {
-        let o = this.FindControlByCssClass(tp.Classes.BrowserGrid);
+        let o = this.FindControlByCssClass(tp.Classes.ViewBrowserGrid);
         this.gridBrowser = o instanceof tp.Grid ? o : null;
 
         if (this.gridBrowser) {
@@ -1323,7 +1332,7 @@ tp.DataView = class extends tp.View {
                 case tp.ControlBindMode.List:
                     return !tp.IsBlank(Control.DataField);
                 case tp.ControlBindMode.Grid:
-                    return !tp.IsBlank(Control.SourceName) && !tp.HasClass(Control.Handle, tp.Classes.BrowserGrid);
+                    return !tp.IsBlank(Control.SourceName) && !tp.HasClass(Control.Handle, tp.Classes.ViewBrowserGrid);
             }
         }
 

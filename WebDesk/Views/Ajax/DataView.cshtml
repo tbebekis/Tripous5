@@ -1,12 +1,31 @@
 ﻿@* This is the default DataView. To be used with trivial brokers *@
+ 
 @{
-    string Setup = ViewData.ContainsKey("Setup") ? ViewData["Setup"].ToString(): string.Empty;
+    DataViewSetup Setup = ViewData["DataViewSetup"] as DataViewSetup;
+    string SetupText = Model.Serialize();
+
+    ViewDef Def = ViewData["ViewDef"] as ViewDef;
+
+    // we always expect that the Edit tab represents a TabControl with tab pages.
+    ViewTabDef EditTab = Def.Tabs.Find(item => Sys.IsSameText(item.Id, "Edit"));
+
 }
 
-<div class="desk-page tp-DataView" data-setup='@Html.Raw(Setup)'>
+<div class="desk-page tp-DataView" data-setup='@Html.Raw(SetupText)'>
     @await Html.PartialAsync("DataView.ToolBar")
 
-    <div class="Grid tp-BrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+    <div class="ViewFilterPanel"></div>
+
+    <div class="Grid ViewBrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+ 
+    @{
+        List<ViewTabDef> TabList = EditTab.Tabs;
+        ViewDataDictionary TabListViewData = new ViewDataDictionary(ViewData);
+        TabListViewData["TabList"] = TabList;
+        TabListViewData["CssClasses"] = "TabControl ViewDataPager";
+        TabListViewData["DataSetupText"] = "{ SelectedIndex: 0 }";
+        @await Html.PartialAsync("DataView.Tabs", TabListViewData)
+    }
 
 
 </div>

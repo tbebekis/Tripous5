@@ -150,7 +150,7 @@ namespace Tripous.Data
                 if (!string.IsNullOrWhiteSpace(Field.CodeProviderName))
                 {
                     if (!CodeProviderDef.Contains(Field.CodeProviderName))
-                        Sys.Throw($"No code provider found for a field: {Field.Name}");
+                        Sys.Throw($"No code provider found for a field. Broker: {Def.Name}, CodeProvider: {Field.CodeProviderName}, Field: {Field.Name}");
 
                     Result.Add(Field);
                 } 

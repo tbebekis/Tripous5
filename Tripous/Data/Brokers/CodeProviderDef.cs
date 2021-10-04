@@ -35,7 +35,7 @@ namespace Tripous.Data
         public const string Simple6_3 = "SIMPLE XXX-XXX";
 
 
-        static List<CodeProviderDef> Descriptors = new List<CodeProviderDef>();
+        static List<CodeProviderDef> RegistryList = new List<CodeProviderDef>();
 
         static void RegisterSysCodeProviders()
         {
@@ -52,7 +52,7 @@ namespace Tripous.Data
         /// </summary>
         static CodeProviderDef()
         {
-
+            RegisterSysCodeProviders();
         }
         /// <summary>
         /// Constructor.
@@ -67,7 +67,7 @@ namespace Tripous.Data
         /// </summary>
         static public CodeProviderDef Find(string Name)
         {
-            return Descriptors.Find(item => item.Name.IsSameText(Name));
+            return RegistryList.Find(item => item.Name.IsSameText(Name));
         }
         /// <summary>
         /// Returns true if a descriptor is already registered under a specified name.
@@ -101,7 +101,7 @@ namespace Tripous.Data
             if (Result == null)
             {
                 Result = new CodeProviderDef() { Name = Name, Text = Text };
-                Descriptors.Add(Result);
+                RegistryList.Add(Result);
             }
 
             return Result;

@@ -15,7 +15,9 @@ namespace Tripous.Data
     /// </summary>
     public class ViewDef
     {
-        string fSourceName;
+        static List<ViewDef> RegistryList = new List<ViewDef>();
+
+ 
         string fTitle;
 
         /// <summary>
@@ -32,20 +34,23 @@ namespace Tripous.Data
             if (Split != null)
                 this.Split = Split;
 
-            Title = Broker.Title;
-            SourceName = Broker.MainTableName;
+            Title = Broker.Title; 
 
             // filters (search) tab
-            ViewTabDef FilterTab = new ViewTabDef() { TitleKey = "Filters" };
+            ViewTabDef FilterTab = new ViewTabDef("Filters") { TitleKey = "Filters" };
             this.Tabs.Add(FilterTab);
 
             // list (browse) tab
-            ViewTabDef ListTab = new ViewTabDef() { TitleKey = "List" };
+            ViewTabDef ListTab = new ViewTabDef("List") { TitleKey = "List" };
             this.Tabs.Add(ListTab);
 
-            // data tab
-            ViewTabDef DataTab = new ViewTabDef() { TitleKey = "Data" };
-            this.Tabs.Add(DataTab);
+            // edit tab
+            ViewTabDef EditTab = new ViewTabDef("Edit") { TitleKey = "Edit" };
+            this.Tabs.Add(EditTab);
+
+            ViewTabDef DataTab = new ViewTabDef("Data") { TitleKey = "Data" };
+            EditTab.Tabs.Add(DataTab);
+            DataTab.SourceName = Broker.MainTableName;
 
             var MainTable = Broker.MainTable;
             List<List<SqlBrokerFieldDef>> ColumnFieldLists = MainTable.Fields.Split(this.Split.Large);
@@ -54,15 +59,81 @@ namespace Tripous.Data
             foreach (var FieldList in ColumnFieldLists)
             {
                 Column = new ViewColumnDef(FieldList);
-                this.Columns.Add(Column);
+                DataTab.Columns.Add(Column);
             }
         }
-
  
+        /* static */
+        /// <summary>
+        /// Returns a registered item, if any, else null.
+        /// </summary>
+        static public ViewDef Find(string Name)
+        {
+            return RegistryList.Find(item => Sys.IsSameText(item.Name, Name));
+        }
+        /// <summary>
+        /// Returns true if an item is registered.
+        /// </summary>
+        static public bool Contains(string Name)
+        {
+            return Find(Name) != null;
+        }
+
+        /// <summary>
+        /// Returns the index of an item in the internal registry list.
+        /// </summary>
+        static public int IndexOf(ViewDef Def)
+        {
+            return IndexOf(Def.Name);
+        }
+        /// <summary>
+        /// Returns the index of an item in the internal registry list.
+        /// </summary>
+        static public int IndexOf(string Name)
+        {
+            for (int i = 0; i < RegistryList.Count; i++)
+            {
+                if (Sys.IsSameText(RegistryList[i].Name, Name))
+                    return i;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Registers an item.
+        /// <para>NOTE: If an item with the same name is already registered, the specified item replaces the existing item.</para>
+        /// </summary>
+        static public ViewDef Register(ViewDef Def)
+        {
+            int Index = IndexOf(Def);
+            if (Index != -1)
+            {
+                RegistryList[Index] = Def;
+                return RegistryList[Index];
+            }
+            else
+            {
+                RegistryList.Add(Def);
+                return Def;
+            }
+        }
+        /// <summary>
+        /// Adds a broker to the list
+        /// </summary>
+        static public ViewDef Register(string Name, string TitleKey)
+        {
+            ViewDef Def = new ViewDef();
+            Def.Name = Name; 
+            Def.TitleKey = TitleKey;
+            return Register(Def);
+        }
+
 
 
         /// <summary>
-        /// A unique name among all view containers.
+        /// A unique name among all view containers. 
+        /// <para>NOTE: For DataViews this is the BrokerName.</para>
         /// </summary>
         public string Name { get; set; }
 
@@ -78,14 +149,7 @@ namespace Tripous.Data
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
-        /// <summary>
-        /// The data source name
-        /// </summary>
-        public string SourceName
-        {
-            get { return !string.IsNullOrWhiteSpace(fSourceName) ? fSourceName : Name; }
-            set { fSourceName = value; }
-        }
+ 
 
         /// <summary>
         /// Width percent of text in rows.

@@ -54,8 +54,20 @@ namespace WebLib
             void PrepareDefaultDataView(string BrokerName)
             {
                 RazorViewNameOrPath = "DataView";
-                DataViewSetup = new DataViewSetup() { BrokerName = "Trader" };
-                ViewData["Setup"] = DataViewSetup.Serialize();
+
+                DataViewSetup = new DataViewSetup() { BrokerName = BrokerName };
+                ViewData["DataViewSetup"] = DataViewSetup;
+
+                ViewDef ViewDef = ViewDef.Find(BrokerName);
+
+                // no view definition, construct a default one.
+                if (ViewDef == null)
+                {
+                    SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
+                    ViewDef = new ViewDef(BrokerDef);
+                }
+
+                ViewData["ViewDef"] = ViewDef;
             }
 
             switch (R.OperationName)
