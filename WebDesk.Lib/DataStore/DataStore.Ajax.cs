@@ -54,18 +54,17 @@ namespace WebLib
             {
                 RazorViewNameOrPath = "DataView";
 
-                DataViewModel DVM = new DataViewModel();
-                DVM.Setup = new DataViewSetup() { BrokerName = BrokerName };
-
-                DVM.ViewDef = ViewDef.Find(BrokerName);
- 
+                ViewDef ViewDef = ViewDef.Find(BrokerName);
                 // no view definition, construct a default one.
-                if (DVM.ViewDef == null)
+                if (ViewDef == null)
                 {
                     SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
-                    DVM.ViewDef = new ViewDef(BrokerDef);
+                    ViewDef = new ViewDef(BrokerDef);
                 }
 
+                DataViewModel DVM = new DataViewModel(ViewDef);
+                DVM.Setup.BrokerName = BrokerName;  
+ 
                 Model = DVM;
             }
 

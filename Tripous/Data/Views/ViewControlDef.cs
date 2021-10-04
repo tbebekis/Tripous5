@@ -76,6 +76,9 @@ namespace Tripous.Data
         }
 
         /* static */
+        /// <summary>
+        /// Returns the 'TypeName' of a field definition, e.g. 'TextBox', 'CheckBox', etc.
+        /// </summary>
         static public string GetTypeName(SqlBrokerFieldDef Field)
         {
             switch (Field.DataType)

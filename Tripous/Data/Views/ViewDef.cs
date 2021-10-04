@@ -8,10 +8,7 @@ using System.Threading.Tasks;
 namespace Tripous.Data
 {
 
-    public interface IViewRowContainer
-    {
-        ViewDef ViewDef { get; }
-    }
+ 
 
     /// <summary>
     /// Top level container. Represents a desktop form or a html page.
