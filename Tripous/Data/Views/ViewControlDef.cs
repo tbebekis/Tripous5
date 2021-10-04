@@ -53,6 +53,7 @@ namespace Tripous.Data
 
         string fTitle;
 
+        /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
@@ -69,40 +70,42 @@ namespace Tripous.Data
 
             DataField = Field.Name;
 
-            ReadOnly = Bf.In(FieldFlags.ReadOnly, Field.Flags);
-            Required = Bf.In(FieldFlags.Required, Field.Flags);
+            ReadOnly = Field.IsReadOnly;
+            Required = Field.IsRequired;
+            TypeName = GetTypeName(Field);
+        }
 
+        /* static */
+        static public string GetTypeName(SqlBrokerFieldDef Field)
+        {
             switch (Field.DataType)
             {
                 case DataFieldType.String:
-                    TypeName = Bf.In(FieldFlags.Memo, Field.Flags) ? Memo : TextBox;
-                    break;
+                    return Bf.In(FieldFlags.Memo, Field.Flags) ? Memo : TextBox;
+  
 
                 case DataFieldType.Integer:
-                    TypeName = Bf.In(FieldFlags.Boolean, Field.Flags)? CheckBox:  NumberBox;
-                    break;
-
+                    return Bf.In(FieldFlags.Boolean, Field.Flags) ? CheckBox : NumberBox;
+ 
                 case DataFieldType.Float:
                 case DataFieldType.Decimal:
-                    TypeName = TextBox;
-                    break;
-
+                    return TextBox;
+ 
                 case DataFieldType.Date:
                 case DataFieldType.DateTime:
-                    TypeName = DateBox;
-                    break;
-
+                    return DateBox;  
                 case DataFieldType.Boolean:
-                    TypeName = CheckBox;
-                    break;
-
+                    return CheckBox;
+ 
                 case DataFieldType.TextBlob:
-                    TypeName = Memo;
-                    break;
+                    return Memo;
+
             }
 
+            return TextBox;
         }
 
+        /* public */
         /// <summary>
         /// Returns a string representation of this instance.
         /// </summary>
@@ -111,6 +114,7 @@ namespace Tripous.Data
             return Title;
         }
 
+        /* properties */
         /// <summary>
         /// Gets or sets tha Title of this descriptor, used for display purposes.
         /// </summary>    
@@ -128,11 +132,11 @@ namespace Tripous.Data
         /// The HTML Id and HTML Name of the control.
         /// <para>The name of a desktop control.</para>
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; set; } = "";
         /// <summary>
         /// Indicates the control type, such as TextBox
         /// </summary>
-        public string TypeName { get; set; }
+        public string TypeName { get; set; } = TextBox;
         /// <summary>
         /// When true the control is readonly
         /// </summary>
@@ -142,13 +146,14 @@ namespace Tripous.Data
         /// </summary>
         public bool Required { get; set; }
 
+ 
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.
         /// </summary>
-        public string SourceName { get; set; }
+        public string TableName { get; set; } = "";
         /// <summary>
         /// The data field to bind
         /// </summary>
-        public string DataField { get; set; }
+        public string DataField { get; set; } = "";
     }
 }

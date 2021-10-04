@@ -1,28 +1,38 @@
-﻿@{
-    List<ViewTabDef> TabList = ViewData["TabList"] as List<ViewTabDef>;
-    string CssClasses = ViewData.ContainsKey("CssClasses")? ViewData["CssClasses"].ToString(): string.Empty;
-    string DataSetupText = ViewData.ContainsKey("DataSetupText") ? ViewData["DataSetupText"].ToString(): "{ }";
-}
+﻿@model DataViewPagerModel
 
-<div class='@Html.Raw(CssClasses)' data-setup='@Html.Raw(DataSetupText)'>
+<div class='@Html.Raw(Model.CssClasses)' data-setup='@Html.Raw(Model.DataSetupText)'>
     <div>
-        @foreach (var Tab in TabList)
+        @foreach (var Tab in Model.Pager.Tabs)
         {
             <div>@Tab.Title</div>
         }
     </div>
     <div>
-        @foreach (var Tab in TabList)
+        @foreach (var Tab in Model.Pager.Tabs)
         {
-            if (Tab.Columns.Count > 0)
-            {
+            <div>
+                @if (Tab.Tabs.Count > 0)
+                {
+                    // it's a TabControl
+                    DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef, Tab);
+                    @await Html.PartialAsync("DataView.Tabs", PagerModel)
+                }
+                else if (Tab.Groups.Count > 0)
+                {
+                    // TODO: Accordion
+                    // it's an Accordion
+                }
+                else if (Tab.Rows.Count > 0)
+                {
+                    foreach (var Row in Tab.Rows)
+                    {
+                        DataViewRowModel RowModel = new DataViewRowModel(Model.ViewDef, Row);
+                        @await Html.PartialAsync("DataView.Row", RowModel)
+                    }
+                }
 
-            }
+            </div>
 
-            if (Tab.Groups.Count > 0)
-            {
-
-            }
         }
     </div>
 </div>

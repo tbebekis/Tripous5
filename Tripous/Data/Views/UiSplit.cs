@@ -46,6 +46,30 @@ namespace Tripous.Data
         }
 
         /// <summary>
+        /// Returns a string with css classes that control column widths in a row. Example 
+        /// <para><c>tp-Col l-33 m-50 s-50 xs-100</c></para>
+        /// </summary>
+        public string GetColumnCssClasses()
+        {
+            int GetPercent(int Count)
+            {
+                switch (Count)
+                {
+                    case 1: return 100;
+                    case 2: return 50;
+                    case 3: return 33;
+                    case 4: return 25;
+                    case 5: return 20;
+                }
+
+                return 100;
+            }
+
+
+            return $"tp-Col l-{GetPercent(Large)} m-{GetPercent(Medium)} s-{GetPercent(Small)} xs-{GetPercent(XSmall)} ";
+        }
+
+        /// <summary>
         /// How many columns to have in a certain screen size.
         /// </summary>
         public int XSmall { get; set; } = 1;

@@ -8,35 +8,45 @@ namespace Tripous.Data
 {
 
     /// <summary>
-    /// Represents a tab page or a TabControl (Pager) with child tab pages
+    /// Represents a tab page or a TabControl (Pager) with child tab pages.
+    /// <para><see cref="Tabs"/>, <see cref="Groups"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
+    /// <para>Contains a single Pager (TabControl) when the <see cref="Tabs"/> are not empty. </para>
+    /// <para>Contains a single Accordeon when the <see cref="Groups"/> is not empty. </para>
+    /// <para>Contains a signle Panel (DIV) with one or more rows when the <see cref="Rows"/> is not empty. </para>
     /// </summary>
-    public class ViewTabDef
+    public class ViewTabDef  
     {
         string fTitle;
 
+        /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
         public ViewTabDef()
         {
         }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public ViewTabDef(string Id)
-        {
-            this.Id = Id;
-        }
+ 
 
-
+        /* public */
         /// <summary>
         /// Returns a string representation of this instance.
         /// </summary>
         public override string ToString()
         {
             return Title;
+        }        
+        /// <summary>
+        /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
+        /// </summary>
+        public ViewTabDef GetTabById(string Id)
+        {
+            return Tabs.Find(item => Sys.IsSameText(item.Id, Id));
         }
 
+
+
+
+        /* properties */
         /// <summary>
         /// A unique Id among sibling tabs, e.g. Filters, List, Edit, etc
         /// </summary>
@@ -58,7 +68,7 @@ namespace Tripous.Data
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.
         /// </summary>
-        public string SourceName { get; set; }
+        public string TableName { get; set; }
 
         /// <summary>
         /// A list of tabs. Could be empty. When not empty then this describes a TabControl (Pager) with child tab pages
@@ -69,14 +79,9 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewGroupDef> Groups { get; } = new List<ViewGroupDef>();
         /// <summary>
-        /// A list of columns. Could be empty.
+        /// A list of rows. Could be empty.
         /// </summary>
-        public List<ViewColumnDef> Columns { get; } = new List<ViewColumnDef>();
-
-        /// <summary>
-        /// Columns per screen size
-        /// </summary>
-        public UiSplit Split { get; set; } = new UiSplit();
-
+        public List<ViewRowDef> Rows { get; } = new List<ViewRowDef>();
+ 
     }
 }

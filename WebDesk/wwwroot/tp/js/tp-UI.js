@@ -6556,7 +6556,7 @@ tp.Control = class extends tp.tpElement  {
     Get or sets the DataSource name, a string value used for declarative data-binding.
     @type {string}
     */
-    SourceName;
+    SourceName = "";
 
     /**
     Returns true if this instance is bound to a DataSource

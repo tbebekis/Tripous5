@@ -7,33 +7,36 @@ using System.Threading.Tasks;
 namespace Tripous.Data
 {
 
-
     /// <summary>
-    /// Represents a column in any ui container.
+    /// Represents a panel. It may contain a grid or rows with controls.
     /// </summary>
-    public class ViewColumnDef  
+    public class ViewRowDef
     {
+
 
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewColumnDef()
+        public ViewRowDef()
         {
         }
+
  
+
         /* properties */ 
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.
         /// </summary>
         public string TableName { get; set; }
- 
+
         /// <summary>
-        /// A list of control rows.  
+        /// The whole row is occupied by a grid controls.
         /// </summary>
-        public List<ViewControlDef> Controls { get; } = new List<ViewControlDef>();
+        public ViewControlDef Grid { get; set; }
+        /// <summary>
+        /// A list of columns. Could be empty.
+        /// </summary>
+        public List<ViewColumnDef> Columns { get; set; } = new List<ViewColumnDef>();
     }
-
-
- 
 }

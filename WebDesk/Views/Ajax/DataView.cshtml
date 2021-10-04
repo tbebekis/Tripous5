@@ -1,32 +1,20 @@
 ﻿@* This is the default DataView. To be used with trivial brokers *@
- 
-@{
-    DataViewSetup Setup = ViewData["DataViewSetup"] as DataViewSetup;
-    string SetupText = Model.Serialize();
+@model DataViewModel
 
-    ViewDef Def = ViewData["ViewDef"] as ViewDef;
-
-    // we always expect that the Edit tab represents a TabControl with tab pages.
-    ViewTabDef EditTab = Def.Tabs.Find(item => Sys.IsSameText(item.Id, "Edit"));
-
+@{ 
+    string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.ViewDef.TextTop, Model.ViewDef.TextSplitPercent);
 }
 
-<div class="desk-page tp-DataView" data-setup='@Html.Raw(SetupText)'>
+<div class="desk-page tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Setup.Serialize())'>
     @await Html.PartialAsync("DataView.ToolBar")
-
     <div class="ViewFilterPanel"></div>
-
-    <div class="Grid ViewBrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
- 
+    <div class="Grid ViewBrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div> 
     @{
-        List<ViewTabDef> TabList = EditTab.Tabs;
-        ViewDataDictionary TabListViewData = new ViewDataDictionary(ViewData);
-        TabListViewData["TabList"] = TabList;
-        TabListViewData["CssClasses"] = "TabControl ViewDataPager";
-        TabListViewData["DataSetupText"] = "{ SelectedIndex: 0 }";
-        @await Html.PartialAsync("DataView.Tabs", TabListViewData)
+        DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef);
+        PagerModel.CssClasses = "TabControl ViewDataPager";
+        PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
+
+        @await Html.PartialAsync("DataView.Tabs", PagerModel)
     }
-
-
 </div>
 

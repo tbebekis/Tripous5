@@ -158,9 +158,9 @@ html {
 /* a row that wraps its children */
 .tp-Row {
     position: relative;
-    display: flex;
-    padding-bottom: 8px;
+    display: flex;    
     flex-wrap: wrap;
+    /* padding-bottom: 8px; */
     /* margin: 0 -8px; */
 }
 
@@ -185,7 +185,7 @@ html {
 
 .tp-Col {
     position: relative;
-    width: 100%;
+    /* width: 100%; */
     height: auto;
     padding: 0 10px;    
 }
@@ -548,7 +548,8 @@ max-width 	Rules applied for any browser width less than the value defined in th
     position: relative;
     display: flex;
     margin-top: 4px;
-    padding: 0 10px 0 15px
+    padding: 0 10px 0 15px;
+    width: 100%;
 }
 
 /* the text container */ 

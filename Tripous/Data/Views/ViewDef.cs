@@ -7,19 +7,28 @@ using System.Threading.Tasks;
 
 namespace Tripous.Data
 {
- 
 
+    public interface IViewRowContainer
+    {
+        ViewDef ViewDef { get; }
+    }
 
     /// <summary>
-    /// Top level container. Represents a desktop form or a html page
+    /// Top level container. Represents a desktop form or a html page.
+    /// <para><see cref="Tabs"/>, <see cref="Groups"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
+    /// <para>Contains a single Pager (TabControl) when the <see cref="Tabs"/> are not empty. </para>
+    /// <para>Contains a single Accordeon when the <see cref="Groups"/> is not empty. </para>
+    /// <para>Contains a signle Panel (DIV) with one or more rows when the <see cref="Rows"/> is not empty. </para>
     /// </summary>
-    public class ViewDef
+    public class ViewDef 
     {
         static List<ViewDef> RegistryList = new List<ViewDef>();
 
  
         string fTitle;
+        string fBrokerName;
 
+        /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
@@ -32,34 +41,58 @@ namespace Tripous.Data
         public ViewDef(SqlBrokerDef Broker, UiSplit Split = null)
         {
             if (Split != null)
-                this.Split = Split;
+                this.ColumnSplit = Split;
 
-            Title = Broker.Title; 
+            Title = Broker.Title;
 
             // filters (search) tab
-            ViewTabDef FilterTab = new ViewTabDef("Filters") { TitleKey = "Filters" };
-            this.Tabs.Add(FilterTab);
+            ViewTabDef FilterTab = new ViewTabDef();
+            Tabs.Add(FilterTab);
+            FilterTab.Id = "Filters";
+            FilterTab.TitleKey = "Filters";
 
             // list (browse) tab
-            ViewTabDef ListTab = new ViewTabDef("List") { TitleKey = "List" };
-            this.Tabs.Add(ListTab);
+            ViewTabDef ListTab = new ViewTabDef();
+            Tabs.Add(ListTab);
+            ListTab.Id = "List";
+            ListTab.TitleKey = "List";
 
-            // edit tab
-            ViewTabDef EditTab = new ViewTabDef("Edit") { TitleKey = "Edit" };
-            this.Tabs.Add(EditTab);
+            // Edit tab (contains a tab pager, i.e. its tabs is not empty)
+            ViewTabDef EditTab = new ViewTabDef();
+            Tabs.Add(EditTab);
+            EditTab.Id = "Edit";
+            EditTab.TitleKey = "Edit";
 
-            ViewTabDef DataTab = new ViewTabDef("Data") { TitleKey = "Data" };
+            // the single tab page of the Edit pager
+            ViewTabDef DataTab = new ViewTabDef(); // new ViewTabDef("Data") { TitleKey = "Data" };
             EditTab.Tabs.Add(DataTab);
-            DataTab.SourceName = Broker.MainTableName;
+            DataTab.Id = "Data";
+            DataTab.TitleKey = "Data";
+            DataTab.TableName = Broker.MainTableName;
+ 
+            // the single row of the Data tab-page
+            ViewRowDef Row = new ViewRowDef(); // new ViewRowDef();
+            DataTab.Rows.Add(Row);
+            Row.TableName = DataTab.TableName;
 
+            // columns in the row
             var MainTable = Broker.MainTable;
-            List<List<SqlBrokerFieldDef>> ColumnFieldLists = MainTable.Fields.Split(this.Split.Large);
-
+            List<List<SqlBrokerFieldDef>> ColumnFieldLists = MainTable.Fields.Split(this.ColumnSplit.Large);
+ 
             ViewColumnDef Column;
+            ViewControlDef Control;
             foreach (var FieldList in ColumnFieldLists)
             {
-                Column = new ViewColumnDef(FieldList);
-                DataTab.Columns.Add(Column);
+                Column = new ViewColumnDef();
+                Row.Columns.Add(Column);
+                Column.TableName = Row.TableName;
+
+                foreach (var BrokerFieldDef in FieldList)
+                {
+                    Control = new ViewControlDef(BrokerFieldDef);
+                    Column.Controls.Add(Control);
+                    Control.TableName = Column.TableName;
+                }
             }
         }
  
@@ -130,12 +163,72 @@ namespace Tripous.Data
         }
 
 
+        /// <summary>
+        /// Returns a string with css classes that control the widths of controls/titles in control rows. Examples
+        /// <para><c>tp-Ctrls lc-75 mc-70 sc-70</c></para>
+        /// <para><c>tp-Ctrls tp-TextTop</c></para>
+        /// </summary>
+        static public string GetCssClassesForControlWidths(bool TextTop, int TextSplitPercent)
+        {
+            // tp-Ctrls tp-TextTop
+            // tp-Ctrls lc-75 mc-70 sc-70
+            StringBuilder SB = new StringBuilder();
+            SB.Append("tp-Ctrls ");
+            if (TextTop)
+            {
+                SB.Append("tp-TextTop ");
+            }
+            else
+            {
+                // control widths in control rows
+                int LargePercent = 100 - TextSplitPercent;
+                int MediumPercent = LargePercent - 5;
+                int SmallPercent = MediumPercent - 3;
 
+                SB.Append($"lc-{LargePercent} mc-{MediumPercent} sc-{SmallPercent} ");
+            }
+
+            return SB.ToString();
+        }
+
+
+        /* public */
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        public override string ToString()
+        {
+            return Title;
+        }
+        /// <summary>
+        /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
+        /// </summary>
+        public ViewTabDef GetTabById(string Id)
+        {
+           return Tabs.Find(item => Sys.IsSameText(item.Id, Id));
+        }
+
+ 
+
+
+        /* properties */
         /// <summary>
         /// A unique name among all view containers. 
         /// <para>NOTE: For DataViews this is the BrokerName.</para>
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// The broker name. When not set then it returns the <see cref="Name"/>.
+        /// </summary>
+        public string BrokerName
+        {
+            get { return !string.IsNullOrWhiteSpace(fBrokerName) ? fBrokerName : Name; }
+            set { fBrokerName = value; }
+        }
+        /// <summary>
+        /// The table name. Used only when there are no Tabs or Groups in this instance.
+        /// </summary>
+        public string TableName { get; set; }
 
         /// <summary>
         /// Gets or sets tha Title of this descriptor, used for display purposes.
@@ -150,11 +243,18 @@ namespace Tripous.Data
         /// </summary>
         public string TitleKey { get; set; }
  
-
+        /// <summary>
+        /// When true, then <see cref="TextSplitPercent"/> is not applied. Control labels go on top of each control.
+        /// </summary>
+        public bool TextTop { get; set; }
         /// <summary>
         /// Width percent of text in rows.
         /// </summary>
-        public int TextSplit { get; set; } = 35;
+        public int TextSplitPercent { get; set; } = 35;
+        /// <summary>
+        /// Columns per screen size
+        /// </summary>
+        public UiSplit ColumnSplit { get; set; } = new UiSplit();
 
         /// <summary>
         /// A list of tabs. Could be empty.
@@ -165,14 +265,11 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewGroupDef> Groups { get; } = new List<ViewGroupDef>();
         /// <summary>
-        /// A list of columns. Could be empty.
+        /// A list of rows. Could be empty.
         /// </summary>
-        public List<ViewColumnDef> Columns { get; } = new List<ViewColumnDef>();
+        public List<ViewRowDef> Rows { get; } = new List<ViewRowDef>();
 
-        /// <summary>
-        /// Columns per screen size
-        /// </summary>
-        public UiSplit Split { get; set; } = new UiSplit();
+         
     } 
 
 }
