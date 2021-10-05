@@ -1177,30 +1177,20 @@ tp.DataView = class extends tp.View {
     @override
     */
     CreateControls() {
+        let o;
         this.CreateBroker();
 
         if (!tp.IsEmpty(this.Broker)) {
             this.Broker.fView = this;
-            //this.Broker.On('Action', this.Action, this);
         }
-
-        super.CreateControls();        
-
-        let o = tp.GetScriptObject('.ViewToolBar');
-        if (o instanceof tp.ToolBar) {
-            this.ToolBar = o;
-            this.ToolBar.On('ButtonClick', this.AnyClick, this);
-        }
-
-        this.CreateBrowserGrid();
-
-        o = tp.GetScriptObject('#ViewPanelList');
-        if (o instanceof tp.PanelList) {
-            this.PanelList = o;
-        }
+    
+        this.CreateToolBar();
+        this.CreatePanelList(); 
+        this.CreateBrowserGrid(); 
     }
 
     /* overridables */
+
     /**
     Creates the broker based on CreateParams settings
     @protected
@@ -1229,12 +1219,36 @@ tp.DataView = class extends tp.View {
             }
         }
     }
+    /** Creates the toolbar of the view 
+     @protected
+     */
+    CreateToolBar() {
+        if (tp.IsEmpty(this.ToolBar)) {
+            let el = tp.Select(this.Handle, '.ViewToolBar');
+            this.ToolBar = new tp.ToolBar(el);
+            this.ToolBar.On('ButtonClick', this.AnyClick, this);
+        }
+    }
+    /** Creates the panel-list of the view, the one with the 3 panels: Filters, Browser and Edit panels.
+     @protected
+     */
+    CreatePanelList() {
+        if (tp.IsEmpty(this.PanelList)) {
+            let el = tp.Select(this.Handle, '.ViewPanelList');
+            this.PanelList = new tp.PanelList(el);
+        }        
+    }
     /**
     Creates the browser grid. <br />
     NOTE: For the browser grid to be created automatically by this method, a div marked with the ViewBrowserGrid is required.
     @protected
     */
     CreateBrowserGrid() {
+        if (tp.IsEmpty(this.gridBrowser)) {
+            let el = tp.Select(this.Handle, '.ViewBrowserGrid');
+            this.gridBrowser = new tp.Grid(el);
+        }
+
         let o = this.FindControlByCssClass(tp.Classes.ViewBrowserGrid);
         this.gridBrowser = o instanceof tp.Grid ? o : null;
 
@@ -1247,7 +1261,23 @@ tp.DataView = class extends tp.View {
             this.gridBrowser.On(tp.Events.DoubleClick, this.BrowserGrid_DoubleClick, this);
         }
     }
+    /** Creates the controls of the edit part, if not already created. */
+    CreateEditControls() {
+        if (!this.EditControlsCreated) {
+            let el = tp.Select(this.Handle, '.ViewEditPanel');
 
+            tp.Ui.CreateControls(el);
+
+            this.EditControlsCreated = true;
+        }
+    }
+    /** Creates the controls of the filter part, if not already created. */
+    CreateFilterControls() {
+        if (!this.FilterControlsCreated) {
+            // TODO: create filter controls
+            this.FilterControlsCreated = true;
+        }
+    }
 
     /**
     Returns a control belonging to this instance and bound to a specified field, if any, else null
@@ -1788,6 +1818,8 @@ tp.DataView = class extends tp.View {
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
     async Insert() {
+        this.CreateEditControls();
+
         let Action = null;
 
         if (!tp.IsEmpty(this.Broker)) {
@@ -1819,6 +1851,8 @@ tp.DataView = class extends tp.View {
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
     async Edit(Id = null) {
+        this.CreateEditControls();
+
         let Action = null;
 
         Id = Id || this.GetBrowserSelectedId();
@@ -2183,6 +2217,18 @@ tp.DataView.prototype.ValidCommands;
  @type {boolean}
  */
 tp.DataView.prototype.ForceSelect;
+
+/** Field
+ @protected
+ @type {boolean}
+ */
+tp.DataView.prototype.EditControlsCreated = false;
+/** Field
+ @protected
+ @type {boolean}
+ */
+tp.DataView.prototype.FilterControlsCreated = false;
+
 
 /* properties */
 /**

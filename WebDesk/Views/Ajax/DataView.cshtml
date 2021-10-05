@@ -1,20 +1,41 @@
 ﻿@* This is the default DataView. To be used with trivial brokers *@
 @model DataViewModel
 
-@{ 
+@{
+    // The standard DataView contains 3 panels in a tp.PanelList with the following indexes:
+    // 0 - Browser
+    // 1 - Edit (which is a TabPager)
+    // 2 - Filter
     string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.ViewDef.TextTop, Model.ViewDef.TextSplitPercent);
 }
 
-<div class="desk-page tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Setup.Serialize())'>
-    @await Html.PartialAsync("DataView.ToolBar")
-    <div class="ViewFilterPanel"></div>
-    <div class="Grid ViewBrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div> 
-    @{
-        DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef);
-        PagerModel.CssClasses = "TabControl ViewDataPager";
-        PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
+@if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
+{
+    <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Setup.Serialize())'>
+        @await Html.PartialAsync("DataView.ToolBar")
+ 
+        <div class="PanelList ViewPanelList tp-PanelList" data-setup="{ SelectedIndex: 0 }">
 
-        @await Html.PartialAsync("DataView.Tabs", PagerModel)
-    }
-</div>
+            <div class="ViewBrowserPanel">
+                <div class="ViewBrowserGrid tp-Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+            </div>    
+
+            <div class="ViewEditPanel">
+                @{ // this creates the 2nd panel, the Edit panel.
+                    DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef);
+                    PagerModel.CssClasses = "TabControl ViewDataPager";
+                    PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
+
+                    @await Html.PartialAsync("DataView.Tabs", PagerModel)
+                }
+            </div>            
+
+            <div class="ViewFilterPanel">
+            </div>
+        </div>
+
+
+    </div>
+}
+
 

@@ -1,7 +1,7 @@
 ﻿ 
 
 /** Represents a view. Displays a list of items of a certain DataType. */
-app.SysDataViewList = class extends app.Desk.View {
+app.SysDataViewList = class extends app.DeskView {
     /**
      * Constructs the page
      * @param {HTMLElement} elPage The page element.
@@ -109,7 +109,7 @@ app.SysDataViewList = class extends app.Desk.View {
 };
 
 /** Represents a page. Edit/Insert view of the Table DataType. */
-app.SysDataViewEditTable = class extends app.Desk.View {
+app.SysDataViewEditTable = class extends app.DeskView {
     /**
      * Constructs the page
      * @param {HTMLElement} elPage The page element.

@@ -40,6 +40,9 @@ namespace Tripous.Data
             if (Split != null)
                 this.ColumnSplit = Split;
 
+            this.Name = Broker.Name;
+            this.BrokerName = Broker.Name;
+
             Title = Broker.Title;
 
             // filters (search) tab

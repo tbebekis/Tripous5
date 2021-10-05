@@ -1,10 +1,10 @@
 ﻿@model DataViewRowModel
-@{ 
+@{
     string ColumnCssClasses = !string.IsNullOrWhiteSpace(Model.ColumnCssClasses) ? Model.ColumnCssClasses : DataViewRowModel.DefaultColumnCssClasses;
     string CtrlRowCssClass;
 
     SqlBrokerDef BrokerDef = SqlBrokerDef.Find(Model.ViewDef.BrokerName);
-    SqlBrokerTableDef TableDef = BrokerDef.FindTable(Model.RowDef.TableName);
+    SqlBrokerTableDef TableDef = BrokerDef != null && Model.RowDef != null && !string.IsNullOrWhiteSpace(Model.RowDef.TableName) ? BrokerDef.FindTable(Model.RowDef.TableName) : null;
     SqlBrokerFieldDef FieldDef;
 
     string ControlDataSetupText;
@@ -15,26 +15,29 @@
 
 }
 
-<div class="tp-Row">
-    @if (Model.RowDef.Grid != null)
-    {
-        // TODO: Grid
-    }
-    else if (Model.RowDef.Columns.Count > 0)
-    {
-        // columns
-        foreach (var Col in Model.RowDef.Columns)
+@if (TableDef != null)
+{
+    <div class="tp-Row">
+        @if (Model.RowDef.Grid != null)
         {
-            <div class='@Html.Raw(ColumnCssClasses)'>
-                @foreach (var Ctrl in Col.Controls)
-                {
-                    CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
-                    FieldDef = TableDef.FindAnyField(Ctrl.DataField).Item2;
-                    ControlDataSetupText = DataViewControlDataSetup.GetSetupText(Ctrl, FieldDef);
-                    <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
-                }
-            </div>
+            // TODO: Grid
         }
-    }
+        else if (Model.RowDef.Columns.Count > 0)
+        {
+            // columns
+            foreach (var Col in Model.RowDef.Columns)
+            {
+                <div class='@Html.Raw(ColumnCssClasses)'>
+                    @foreach (var Ctrl in Col.Controls)
+                    {
+                        CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
+                        FieldDef = TableDef.FindAnyField(Ctrl.DataField).Item2;
+                        ControlDataSetupText = DataViewControlDataSetup.GetSetupText(Ctrl, FieldDef);
+                        <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
+                    }
+                </div>
+            }
+        }
 
-</div>
+    </div>
+}

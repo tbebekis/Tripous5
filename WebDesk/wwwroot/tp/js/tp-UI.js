@@ -18898,6 +18898,20 @@ tp.Ui = class {
     @returns {tp.tpElement} Returns the {@link tp.Control} of a control-row
     */
     static CreateCtrlRow(el) {
+
+/* NEW MARKUP
+<div class="tp-CtrlRow tp-Row" id="control_row_Name-2001">
+   <div class="tp-CText">
+	<label for="Name">Όνομα</label>
+	<span class="tp-RequiredMark">*</span>
+   </div>
+   <div class="tp-Ctrl">
+	<input class="tp-TextBox" id="Name" name="Name" type="text" value="">
+   </div>
+</div>
+ 
+ */
+
         let Type,
             TypeName,
             CP,

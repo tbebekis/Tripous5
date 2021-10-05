@@ -1500,6 +1500,7 @@ If separator is an empty string, then the string is converted to an array of cha
 @returns  {string[]}  Returns an array of strings.
 */
 tp.Split = function (v, Separator = ' ', RemoveEmptyEntries = true) {
+    v = v || '';
     RemoveEmptyEntries = RemoveEmptyEntries === true;
 
     if (RemoveEmptyEntries) {
@@ -11021,7 +11022,7 @@ tp.GetContainerByClass = function (el, ElementClass) {
 
 //#endregion
 
-//#region tpElement
+//#region CreateParams
 
 /**
 Represenst an initialization options list that is passed to a {@link tp.tpElement} constructor.
@@ -11080,7 +11081,9 @@ When this property is set to true, then the constructor does NOT call the <code>
  @default false
  */
 tp.CreateParams.prototype.DeferHandleCreation = false;
+//#endregion
 
+//#region tpElement
 
 //---------------------------------------------------------------------------------------
 // tp.tpElement
@@ -12001,20 +12004,17 @@ tp.tpElement = class extends tp.tpObject {
 
         let AvoidParams = this.GetAvoidParams();
 
-
-        let Allowed = false;
-        let HasSetter = false;
-        let IsWritable = false;
+        let Allowed = false; 
+        let PropInfo;
 
         for (var Prop in o) {
-            if (!tp.IsFunction(o[Prop])) {
+            if (Prop in this && !tp.IsFunction(o[Prop])) {
                 Allowed = AvoidParams.indexOf(Prop) === -1;
-                HasSetter = tp.GetPropertyInfo(this, Prop).HasSetter;
-                IsWritable = tp.IsWritableProperty(this, Prop);
-
-                if (Allowed && (HasSetter || IsWritable)) {
-                    this[Prop] = o[Prop];
-                }
+                if (Allowed) {
+                    PropInfo = tp.GetPropertyInfo(this, Prop);
+                    if (PropInfo.IsProperty && (PropInfo.HasSetter || PropInfo.IsWritable))
+                        this[Prop] = o[Prop];
+                } 
             }
         }
     }
@@ -13052,7 +13052,7 @@ tp.GetCommand = function (v) {
         }
     }
 
-    return Result;
+    return Result || '';
 };
 
 

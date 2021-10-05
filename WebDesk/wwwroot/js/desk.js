@@ -260,7 +260,7 @@ app.Desk = class {
      * This function dynamically loads the specified files, if not already loaded, and then creates the instance of the view object. <br />
      * @param {HTMLElement} elView The element to create the view object upon.
      * @param {object} Params A key-value object with initialization information.
-     * @returns {app.Desk.View} Returns the view javascript object instance.
+     * @returns {app.DeskView} Returns the view javascript object instance.
      */
     async CreateViewObject(elView, Params) {
         let Result = null;
@@ -363,51 +363,12 @@ app.MainMenuCommandExecutor = class {
 
 
 /** Represents a desk view. Used as base view class. */
-app.Desk.View = class extends tp.View {
+app.DeskView = class extends tp.View {
 
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-    /**
-    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
-    */
-    Dispose() {
-        if (this.IsDisposed === false && tp.IsElement(this.Handle)) {
-
-            tp.Broadcaster.Remove(this);
  
-            if (tp.IsElement(this.CreateParams.elTab)) {
-                tp.Remove(this.CreateParams.elTab);
-                this.CreateParams.elTab = null;
-            }
-
-            if (tp.IsValid(this.Handle)) {
-                try {
-                    let el = this.Handle;
-                    tp.SetObject(this.Handle, null);
-                    this.Handle = null;
-                    if (tp.IsElement(el.parentNode)) {
-                        el.parentNode.removeChild(el);
-                    }
-                } catch {
-                    //
-                }
-            }
-
-            if (tp.IsArray(this.CreateParams.CSS)) {
-                app.UnLoadCssFiles(this.CreateParams.CSS);
-            }
-
-            if (tp.IsArray(this.CreateParams.JS)) {
-                app.UnLoadJavascriptFiles(this.CreateParams.JS);
-            } 
-
-            super.Dispose();
-        }
-    }
-
-
     /**
     Notification 
     Initialization steps:
@@ -424,6 +385,31 @@ app.Desk.View = class extends tp.View {
     Close() {
         this.Dispose();
     }
+
+    /**
+    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+    */
+    Dispose() {
+        if (this.IsDisposed === false && tp.IsElement(this.Handle)) {
+
+            if (tp.IsElement(this.CreateParams.elTab)) {
+                tp.Remove(this.CreateParams.elTab);
+                this.CreateParams.elTab = null;
+            } 
+
+            if (tp.IsArray(this.CreateParams.CSS)) {
+                app.UnLoadCssFiles(this.CreateParams.CSS);
+            }
+
+            if (tp.IsArray(this.CreateParams.JS)) {
+                app.UnLoadJavascriptFiles(this.CreateParams.JS);
+            }
+
+            super.Dispose();
+        }
+    }
+
+
     /**
      * Executes a command that returns a Packet from server for creating a modal dialog.
      * @param {app.Command} Cmd The command to execute.
@@ -443,7 +429,57 @@ app.Desk.View = class extends tp.View {
 
 };
 
- 
+app.DeskDataView = class extends tp.DataView {
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    /**
+    Notification 
+    Initialization steps:
+    - Handle creation
+    - Field initialization
+    - Option processing
+    - Completed notification
+    */
+    OnHandleCreated() {
+        super.OnHandleCreated();
+        this.IsScreenResizeListener = true;
+    }
+
+    /**
+    Closes the view and removes the view from the DOM.
+    @protected
+    */
+    CloseView() {
+        this.Dispose();
+    }
+
+    /**
+    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+    */
+    Dispose() {
+        if (this.IsDisposed === false && tp.IsElement(this.Handle)) {
+
+            if (tp.IsElement(this.CreateParams.elTab)) {
+                tp.Remove(this.CreateParams.elTab);
+                this.CreateParams.elTab = null;
+            } 
+
+            if (tp.IsArray(this.CreateParams.CSS)) {
+                app.UnLoadCssFiles(this.CreateParams.CSS);
+            }
+
+            if (tp.IsArray(this.CreateParams.JS)) {
+                app.UnLoadJavascriptFiles(this.CreateParams.JS);
+            }
+
+            super.Dispose();
+        }
+    }
+
+
+};
 
 /** Tripous notification function. <br />
  * NOTE: It is executed before any ready listeners. */

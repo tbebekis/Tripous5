@@ -296,6 +296,9 @@ button:not(.btn-test),
     position: relative;
     display: flex;
     align-items: center; 
+
+    background-color: var(--Black);
+    color: var(--White);
 }
 
 .pager-container > .page-list {

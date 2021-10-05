@@ -41,7 +41,7 @@ namespace WebLib
         /// <summary>
         /// The javascript class of the view object.
         /// </summary>
-        public string ClassType { get; set; } = "tp.DataView";
+        public string ClassType { get; set; } = "app.DeskDataView";
         /// <summary>
         /// The javascript class of the broker object.
         /// </summary>
