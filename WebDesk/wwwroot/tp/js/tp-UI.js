@@ -169,6 +169,7 @@ tp.Classes = {
     ControlLabel: 'tp-Col tp-ControlLabel',
 
     CtrlRow: 'tp-CtrlRow',
+    CheckBoxRow: 'tp-CheckBoxRow',
 
     /* containers       ----------------------------------------------------------------- */
     Block: 'tp-Block',
@@ -19170,6 +19171,11 @@ tp.Ui = class {
             Result = this.CreateElement(TypeName, el);  // TypeName, ElementOrSelector
         }
 
+        if (Result) {
+            if (tp.IsFunction(Result.OnAfterConstruction))
+                Result.OnAfterConstruction();
+        }
+
         return Result;
     }
 
@@ -19180,6 +19186,17 @@ tp.Ui = class {
     */
     static FixupControls(List) {
         // not yet
+    }
+
+    /**
+     * Returns the {@link HTMLElement} DIV marked with a control row css class (Control row or CheckBox row) that contains a specified element
+     * @param {HTMLElement} el The element to find the parent control row of.
+     */
+    static GetCtrlRow(el) {
+        let elResult = tp.Closest(el, '.' + tp.Classes.CtrlRow);
+        if (!tp.IsHTMLElement(elResult))
+            elResult = tp.Closest(el, '.' + tp.Classes.CheckBoxRow);
+        return elResult;
     }
 };
 

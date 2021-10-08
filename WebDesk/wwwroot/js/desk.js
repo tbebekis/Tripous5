@@ -282,7 +282,7 @@ app.Desk = class {
             tp.Throw('No class to create a view');
 
         Result = new DataSetup.ClassType(elView, Params);
- 
+        Result.OnAfterConstruction();
 
         return Result;
     }

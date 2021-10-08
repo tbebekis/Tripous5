@@ -3310,8 +3310,7 @@ tp.SelectAll = function (ParentElementOrSelector, Selectors) {
     return [];
 };
 /**
-Returns the closest ancestor (parent node) of a specified element (or the specified element itself) 
-which matches a specified selector. 
+Returns the closest ancestor (parent node) of a specified element which matches a specified selector. 
 If there isn't such an ancestor, it returns null.
 @param {Element} el - The element the closest ancestor is to be found.
 @param {string} Selector - A selector for the closest ancestor
@@ -11105,6 +11104,8 @@ tp.tpElement = class extends tp.tpObject {
     constructor(ElementOrSelector = null, CreateParams = null) {
         super();    // this calls the InitClass() method
 
+        this.CreateParams = {};
+
         if (tp.IsObject(CreateParams)) {
             this.CreateParams = CreateParams;
 
@@ -11124,16 +11125,7 @@ tp.tpElement = class extends tp.tpObject {
         }
     }
 
-    /* protected */
-    /** The creation parameters.
-    CreateParams can be passed to the constructor, or defined in the html markup as
-        data-setup = "{ Prop0: Value, PropN: Value}"
-    or both.
-    Finally the two CreateParams are merged into one and the values are passed to the properties of this instance, as long as property names match.
-    @type {object|tp.CreateParams}
-    */
-    CreateParams = {};
-
+    
     /* protected - overridable getters and setters  */
 
     /** Returns the value of the Enabled property, true if this instance is enabled.
@@ -11742,6 +11734,48 @@ tp.tpElement = class extends tp.tpObject {
     - Completed notification
     */
     OnInitializationCompleted() { }
+
+
+    /**
+     * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
+     * 
+     * WARNING
+     * 
+     * In javascript fields contained in a derived class declaration, are initialized after the base constructor finishes.
+     * So, if the base constructor calls a virtual method where the derived class initializes a field,
+     * when the constructor finishes, the field is assigned again whatever value the class declaration dictates.
+     *
+     * A = class {
+     *     constructor() {
+     *         this.SetFields();
+     *     }
+     *
+     *     SetFields() { }
+     * }
+     *
+     * B = class extends A {
+     *     constructor() {
+     *         super();
+     *         this.Display();
+     *     }
+     *
+     *     Field2 = 123;	// this is assigned again after the SetFields() call, when the constructor completes.
+     *
+     *     SetFields() {
+     *         super.SetFields();
+     *         this.Field2 = 987;
+     *     }
+     *     Display() {
+     *         alert(this.Field2);
+     *     }
+     * }
+     *
+     * The result is that the field retains the value it had in the class declaration, the null value.
+     *
+     * 
+     * */
+    OnAfterConstruction() {
+    }
 
     /* event triggers */
     /**
@@ -12701,6 +12735,16 @@ tp.tpElement = class extends tp.tpObject {
 
 // ------------------------------------------------------------
 /* treat them as read-only  class fields (static) */
+
+/* protected */
+/** The creation parameters.
+CreateParams can be passed to the constructor, or defined in the html markup as
+    data-setup = "{ Prop0: Value, PropN: Value}"
+or both.
+Finally the two CreateParams are merged into one and the values are passed to the properties of this instance, as long as property names match.
+@type {object|tp.CreateParams}
+*/
+tp.tpElement.prototype.CreateParams = {};
 
 /** The css display property. By default, either the css defined or block 
  * @type {string}

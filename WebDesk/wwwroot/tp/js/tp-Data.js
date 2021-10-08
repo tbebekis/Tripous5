@@ -1673,21 +1673,23 @@ tp.DataSourceEventArgs.Create = function (Source) {
  */
 tp.FieldFlags = {
     None: 0,
-    Visible: 1,
+    Hidden: 1,
     ReadOnly: 2,
     ReadOnlyUI: 4,
     ReadOnlyEdit: 8,
-    Required: 16,
-    Boolean: 32,
-    Memo: 64,
-    Image: 128,
-    ImagePath: 256,
-    Searchable: 512,
-    ExtraField: 1024,
-    LookUpField: 2048,
-    NoInsertUpdate: 4096,
-    Localizable: 8192
+    Required: 0x10,
+    Boolean: 0x20,
+    Memo: 0x40,
+    HtmlMemo: 0x80,
+    Image: 0x100,
+    ImagePath: 0x200,
+    Searchable: 0x400,
+    Extra: 0x800,
+    ForeignKey: 0x1000,
+    NoInsertUpdate: 0x2000,
+    Localizable: 0x4000,
 };
+ 
 Object.freeze(tp.FieldFlags);
 //#endregion
 
@@ -3254,7 +3256,7 @@ tp.DataColumn = class extends tp.tpObject {
     Returns a boolean value indicating whether the corresponding flag is set in the Flags property.
     @type {boolean}
     */
-    get IsVisible() { return tp.Bf.In(tp.FieldFlags.Visible, this.Flags); }
+    get IsVisible() { return !tp.Bf.In(tp.FieldFlags.Hidden, this.Flags); }
     /**
    Returns a boolean value indicating whether the corresponding flag is set in the Flags property.
    @type {boolean}
@@ -3280,11 +3282,7 @@ tp.DataColumn = class extends tp.tpObject {
    @type {boolean}
    */
     get IsBoolean() { return tp.Bf.In(tp.FieldFlags.Boolean, this.Flags); }
-    /**
-   Returns a boolean value indicating whether the corresponding flag is set in the Flags property.
-   @type {boolean}
-   */
-    get IsLookUpField() { return tp.Bf.In(tp.FieldFlags.LookUpField, this.Flags); }
+ 
 
 
     /* methods */

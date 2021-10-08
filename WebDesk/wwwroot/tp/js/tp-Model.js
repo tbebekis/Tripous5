@@ -1061,6 +1061,99 @@ tp.DataView = class extends tp.View {
         super(ElementOrSelector, CreateParams);
     }
 
+    /* fields */
+    /** Field
+     @protected
+     @type {tp.DataSource[]}
+     */
+    DataSources = [];
+    /** Field
+     @protected
+     @type {tp.Broker}
+     */
+    Broker = null;
+    /** Field
+     @protected
+     @type {tp.DataSource}
+     */
+    dsBrowser = null;
+    /** Field
+     @protected
+     @type {tp.Grid}
+     */
+    gridBrowser = null;
+    /** Field
+     @protected
+     @type {string}
+     */
+    BrokerName = '';
+    /** Field
+     @protected
+     @type {tp.DataTable}
+     */
+    ftblItem = null;
+    /** Field
+     @protected
+     @type {tp.DataTable}
+     */
+    ftblLines = null;
+    /** Field
+     @protected
+     @type {tp.DataTable}
+     */
+    ftblSubLines = null;
+    /** Field
+     @protected
+     @type {tp.DataMode}
+     */
+    fDataMode = tp.DataMode.None;
+    /** Field
+     @protected
+     @type {tp.DataMode}
+     */
+    fLastDataMode = tp.DataMode.None;
+    /** Field
+     @protected
+     @type {tp.ToolBar}
+     */
+    ToolBar = null;
+    /** Field
+     @protected
+     @type {tp.PanelList}
+     */
+    PanelList = null;
+    /** Field
+     @protected
+     @type {string[]}
+     */
+    ValidCommands = [];
+    /** Field
+     @protected
+     @type {boolean}
+     */
+    ForceSelect = false;
+
+    /** Field
+     @protected
+     @type {boolean}
+     */
+    EditControlsCreated = false;
+    /** Field
+     @protected
+     @type {boolean}
+     */
+    FilterControlsCreated = false;
+
+
+    /* properties */
+    /**
+    The primary key field name. Defaults to Id
+    @public
+    @type {string}
+     */
+    PrimaryKeyField = '';
+
+
 
     /**
     Gets or sets the data mode. One of the {@link tp.DataMode} constants.
@@ -1121,6 +1214,7 @@ tp.DataView = class extends tp.View {
         return null;
     }
 
+
     /* overrides */
     /**
     Initializes the 'static' and 'read-only' class fields
@@ -1151,46 +1245,137 @@ tp.DataView = class extends tp.View {
         this.PrimaryKeyField = 'Id';
         this.ForceSelect = false;
     }
+ 
     /**
-    Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
-    and AFTER options (CreateParams) processing <br />
-    Initialization steps:
-    <ul>
-        <li>Handle creation</li>
-        <li>Field initialization</li>
-        <li>Option processing</li>
-        <li>Completed notification</li>
-    </ul>
-    @protected
-    @override
-    */
-    OnInitializationCompleted() {
-        super.OnInitializationCompleted();
-
-        if (!tp.IsEmpty(this.Broker)) {
-            this.BrokerInitialize();
-        }
-    }
-    /**
-    Creates the controls of the view based on the provided markup.
-    @protected
-    @override
-    */
-    CreateControls() {
-        let o;
-        this.CreateBroker();
-
-        if (!tp.IsEmpty(this.Broker)) {
-            this.Broker.fView = this;
-        }
-    
-        this.CreateToolBar();
-        this.CreatePanelList(); 
-        this.CreateBrowserGrid(); 
+    * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
+    * 
+    * WARNING
+    * 
+    * In javascript fields contained in a derived class declaration, are initialized after the base constructor finishes.
+    * So, if the base constructor calls a virtual method where the derived class initializes a field,
+    * when the constructor finishes, the field is assigned again whatever value the class declaration dictates.
+    *
+    * A = class {
+    *     constructor() {
+    *         this.SetFields();
+    *     }
+    *
+    *     SetFields() { }
+    * }
+    *
+    * B = class extends A {
+    *     constructor() {
+    *         super();
+    *         this.Display();
+    *     }
+    *
+    *     Field2 = 123;	// this is assigned again after the SetFields() call, when the constructor completes.
+    *
+    *     SetFields() {
+    *         super.SetFields();
+    *         this.Field2 = 987;
+    *     }
+    *     Display() {
+    *         alert(this.Field2);
+    *     }
+    * }
+    *
+    * The result is that the field retains the value it had in the class declaration, the null value.
+    *
+    * 
+    * */
+    OnAfterConstruction() {
+        this.InitializeView();
     }
 
     /* overridables */
 
+    /** This is called after the base class initialization completes and creates just the tool-bar, the main panel-list and the browser grid. <br />
+     * It also creates the broker. <br /> 
+     * NOTE: Controls of the edit part are created and bound the first time an insert or edit is requested.
+     * @protected
+     * @override
+    */
+    InitializeView() {
+        this.CreateToolBar();
+        this.CreatePanelList();
+        this.CreateBrowserGrid();
+
+        this.CreateBroker();
+
+        if (!tp.IsEmpty(this.Broker)) {
+            this.Broker.fView = this;
+            this.BrokerInitialize();
+        }
+    }
+    /** Returns a DOM Element contained by this view.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewToolBarElement() { return tp.Select(this.Handle, '.ViewToolBar'); }
+    /** Returns a DOM Element contained by this view. Returns the main panel-list which in turn contains the three part panels: Brower, Edit and Filters.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewPanelListElement() { return tp.Select(this.Handle, '.ViewPanelList'); }
+    /** Returns a DOM Element contained by this view. Returns the Browser Panel, the container of the browser grid, which displays the results of the various SELECTs of the broker.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewBrowserPanelElement() { return tp.Select(this.Handle, '.ViewBrowserPanel'); }
+    /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewEditPanelElement() { return tp.Select(this.Handle, '.ViewEditPanel'); }
+    /** Returns a DOM Element contained by this view. Returns the Filters panel, the container of the filter controls.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewFilterPanelElement() { return tp.Select(this.Handle, '.ViewFilterPanel'); }
+
+    /** Returns a DOM Element contained by this view. Returns the element upon to create the browser grid.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewBrowserGridElement() { return tp.Select(this.Handle, '.ViewBrowserGrid'); }
+
+    /** Creates the toolbar of the view 
+     @protected
+     */
+    CreateToolBar() {
+        if (tp.IsEmpty(this.ToolBar)) {
+            let el = this.GetViewToolBarElement();
+            this.ToolBar = new tp.ToolBar(el);
+            this.ToolBar.On('ButtonClick', this.AnyClick, this);
+        }
+    }
+    /** Creates the panel-list of the view, the one with the 3 panels: Browser, Edit and Filters panels.
+     @protected
+     */
+    CreatePanelList() {
+        if (tp.IsEmpty(this.PanelList)) {
+            let el = this.GetViewPanelListElement();
+            this.PanelList = new tp.PanelList(el);
+        }        
+    }
+    /**
+    Creates the browser grid. <br />
+    NOTE: For the browser grid to be created automatically by this method, a div marked with the ViewBrowserGrid is required.
+    @protected
+    */
+    CreateBrowserGrid() {
+        if (tp.IsEmpty(this.gridBrowser)) {
+            let el = this.GetViewBrowserGridElement();
+            this.gridBrowser = new tp.Grid(el);
+        }
+
+        let o = this.FindControlByCssClass(tp.Classes.ViewBrowserGrid);
+        this.gridBrowser = o instanceof tp.Grid ? o : null;
+
+        if (this.gridBrowser) {
+            this.gridBrowser.ReadOnly = true;
+            this.gridBrowser.AllowUserToAddRows = false;
+            this.gridBrowser.AllowUserToDeleteRows = false;
+            this.gridBrowser.ToolBarVisible = false;
+
+            this.gridBrowser.On(tp.Events.DoubleClick, this.BrowserGrid_DoubleClick, this);
+        }
+    }
     /**
     Creates the broker based on CreateParams settings
     @protected
@@ -1211,67 +1396,27 @@ tp.DataView = class extends tp.View {
 
                 if (!tp.IsFunction(this.CreateParams.BrokerClass))
                     tp.Throw(`Cannot create broker. No broker class for a view: ${this.Name}`);
-                    
+
                 this.Broker = new this.CreateParams.BrokerClass(BrokerName);
             } else if (!tp.IsBlank(BrokerName)) {
                 this.Broker = new tp.Broker(BrokerName);
-                this.BrokerName = BrokerName; 
+                this.BrokerName = BrokerName;
             }
         }
     }
-    /** Creates the toolbar of the view 
-     @protected
-     */
-    CreateToolBar() {
-        if (tp.IsEmpty(this.ToolBar)) {
-            let el = tp.Select(this.Handle, '.ViewToolBar');
-            this.ToolBar = new tp.ToolBar(el);
-            this.ToolBar.On('ButtonClick', this.AnyClick, this);
-        }
-    }
-    /** Creates the panel-list of the view, the one with the 3 panels: Filters, Browser and Edit panels.
-     @protected
-     */
-    CreatePanelList() {
-        if (tp.IsEmpty(this.PanelList)) {
-            let el = tp.Select(this.Handle, '.ViewPanelList');
-            this.PanelList = new tp.PanelList(el);
-        }        
-    }
-    /**
-    Creates the browser grid. <br />
-    NOTE: For the browser grid to be created automatically by this method, a div marked with the ViewBrowserGrid is required.
-    @protected
-    */
-    CreateBrowserGrid() {
-        if (tp.IsEmpty(this.gridBrowser)) {
-            let el = tp.Select(this.Handle, '.ViewBrowserGrid');
-            this.gridBrowser = new tp.Grid(el);
-        }
 
-        let o = this.FindControlByCssClass(tp.Classes.ViewBrowserGrid);
-        this.gridBrowser = o instanceof tp.Grid ? o : null;
-
-        if (this.gridBrowser) {
-            this.gridBrowser.ReadOnly = true;
-            this.gridBrowser.AllowUserToAddRows = false;
-            this.gridBrowser.AllowUserToDeleteRows = false;
-            this.gridBrowser.ToolBarVisible = false;
-
-            this.gridBrowser.On(tp.Events.DoubleClick, this.BrowserGrid_DoubleClick, this);
-        }
-    }
-    /** Creates the controls of the edit part, if not already created. */
+    /** Creates and binds the controls of the edit part, if not already created.
+     * */
     CreateEditControls() {
         if (!this.EditControlsCreated) {
-            let el = tp.Select(this.Handle, '.ViewEditPanel');
-
-            tp.Ui.CreateControls(el);
-
+            let el = this.GetViewEditPanelElement();
+            let ControlList = tp.Ui.CreateControls(el);
+            this.BindControls(ControlList);
             this.EditControlsCreated = true;
         }
     }
-    /** Creates the controls of the filter part, if not already created. */
+    /** Creates the controls of the filter part, if not already created. 
+     * */
     CreateFilterControls() {
         if (!this.FilterControlsCreated) {
             // TODO: create filter controls
@@ -1348,6 +1493,25 @@ tp.DataView = class extends tp.View {
         return -1;
     }
 
+ 
+
+    /**
+     * Binds controls of the Edit part. <br />
+     * NOTE:  Do NOT call this method directly. <br />
+     * This method is called automatically the first time an an Insert() or Edit() is requested.
+     * @param {tp.tpElement[]} ControlList The list of controls to bind
+     * @protected
+     */
+    BindControls(ControlList) {
+
+        var i, ln, Control;
+ 
+        for (i = 0, ln = ControlList.length; i < ln; i++) {
+            Control = ControlList[i];
+            if (this.CanBindControl(Control))
+                this.BindControl(Control);
+        }
+    }
     /**
     Returns true if a specified control can be bound to data
     @protected
@@ -1369,31 +1533,15 @@ tp.DataView = class extends tp.View {
         return false;
     }
     /**
-    Binds controls. Do NOT call this method directly. It is called by the Initialized event of the broker
-    the first time the broker gets data and schema information from the server after an Insert() or Edit() call.
-    That is, controls are NOT bound until the first Insert()/Edit() call.
-    @protected
-    */
-    BindControls() {
-
-        var i, ln, Control;
-        var List = this.GetControls();
-        for (i = 0, ln = List.length; i < ln; i++) {
-            Control = List[i];
-            if (this.CanBindControl(Control))
-                this.BindControl(Control);
-        }
-    }
-    /**
     Binds a specified control to data
     @protected
     @param {tp.Control} Control A {@link tp.Control}
     */
-    BindControl(Control) {
+    BindControl(Control) { 
         Control.DataSource = this.GetDataSource(Control.SourceName);
  
         if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
-            Column = Control.DataColumn;
+            let Column = Control.DataColumn;
             if (!tp.IsBlank(Control['ListSourceName'])) {
                 var ListSource = this.GetDataSource(Control['ListSourceName']);
                 Control['ListSource'] = ListSource;
@@ -1409,6 +1557,7 @@ tp.DataView = class extends tp.View {
     */
     SetupControl(Control) {
         var i, ln,
+            CtrlRow,            // HTMLElement
             Column,             // tp.DataColumn,
             Grid,               // tp.Grid,
             Table,              // tp.DataTable,
@@ -1437,7 +1586,11 @@ tp.DataView = class extends tp.View {
                     tp.val(Control.spanText, Column.Title);
                 }
 
-
+                if (!Column.IsVisible) {
+                    CtrlRow = tp.Ui.GetCtrlRow(Control.Handle);
+                    if (tp.IsHTMLElement(CtrlRow))
+                        tp.Visible(CtrlRow, false);
+                }
             }
         } else if (Control.DataBindMode === tp.ControlBindMode.Grid) {
             Grid = Control;
@@ -1497,6 +1650,8 @@ tp.DataView = class extends tp.View {
             this.gridBrowser.DataSource = this.dsBrowser;
         }
     }
+
+
     /**
     Returns the Id (value of the primary key field) of the selected data-row of the browser grid, if any, else null.
     @protected
@@ -1796,8 +1951,6 @@ tp.DataView = class extends tp.View {
 
             if (Action instanceof tp.BrokerAction) {
                 if (Action.Succeeded === true) {
-                    this.BindControls();
-
                     this.DoInitializeAfter(Action);
 
                     this.DataMode = tp.DataMode.Browse;
@@ -2146,96 +2299,6 @@ tp.DataView = class extends tp.View {
     }
 };
 
-/* fields */
-/** Field
- @protected
- @type {tp.DataSource[]}
- */
-tp.DataView.prototype.DataSources;
-/** Field
- @protected
- @type {tp.Broker}
- */
-tp.DataView.prototype.Broker = new tp.Broker();
-/** Field
- @protected
- @type {tp.DataSource}
- */
-tp.DataView.prototype.dsBrowser;
-/** Field
- @protected
- @type {tp.Grid}
- */
-tp.DataView.prototype.gridBrowser;
-/** Field
- @protected
- @type {string}
- */
-tp.DataView.prototype.BrokerName;
-/** Field
- @protected
- @type {tp.DataTable}
- */
-tp.DataView.prototype.ftblItem;
-/** Field
- @protected
- @type {tp.DataTable}
- */
-tp.DataView.prototype.ftblLines;
-/** Field
- @protected
- @type {tp.DataTable}
- */
-tp.DataView.prototype.ftblSubLines;
-/** Field
- @protected
- @type {tp.DataMode}
- */
-tp.DataView.prototype.fDataMode;
-/** Field
- @protected
- @type {tp.DataMode}
- */
-tp.DataView.prototype.fLastDataMode;
-/** Field
- @protected
- @type {tp.ToolBar}
- */
-tp.DataView.prototype.ToolBar;
-/** Field
- @protected
- @type {tp.PanelList}
- */
-tp.DataView.prototype.PanelList;
-/** Field
- @protected
- @type {string[]}
- */
-tp.DataView.prototype.ValidCommands;
-/** Field
- @protected
- @type {boolean}
- */
-tp.DataView.prototype.ForceSelect;
-
-/** Field
- @protected
- @type {boolean}
- */
-tp.DataView.prototype.EditControlsCreated = false;
-/** Field
- @protected
- @type {boolean}
- */
-tp.DataView.prototype.FilterControlsCreated = false;
-
-
-/* properties */
-/**
-The primary key field name. Defaults to Id
-@type {string}
- */
-tp.DataView.prototype.PrimaryKeyField;
 
 
 //#endregion

@@ -679,7 +679,7 @@ namespace Tripous.Data
             if (!Bf.In(DataType, DataFieldType.String | DataFieldType.Integer))
                 Sys.Throw($"DataType not supported for a table Primary Key. {DataType}");
 
-            var Result = AddField(Name, DataType, "", FieldFlags.None);
+            var Result = AddField(Name, DataType, "", FieldFlags.Hidden);
             if (DataType == DataFieldType.String)
                 Result.MaxLength = MaxLength;
             return Result;

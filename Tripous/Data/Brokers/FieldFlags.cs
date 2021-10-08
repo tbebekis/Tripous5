@@ -14,7 +14,7 @@ namespace Tripous.Data
     /// A list of possible field flags.
     /// </summary>
     [Flags]
-    [JsonConverter(typeof(StringEnumConverter))]
+    //[JsonConverter(typeof(StringEnumConverter))] // NOTE: Do NOT convert to strings. Javacript expects a bit-field
     public enum FieldFlags
     {
         /// <summary>
