@@ -6684,26 +6684,35 @@ tp.Control = class extends tp.tpElement  {
     /**
     Displays or hides the required mark when the required property changes.
     @protected
-    @param {Element} el The element to set the mark    
+    @param {Element} el The element whose value is required (or not) 
     */
     SetRequiredMark(el) {
         if (tp.IsFormElement(el)) {
 
-            if (tp.IsEmpty(this.fRequiredMark)) {
-                this.fRequiredMark = tp.Control.AddRequiredMark(this, this.fRequiredMark);
+            if (tp.IsEmpty(this.elRequiredMark)) {
+                let CtrlRow = tp.Ui.GetCtrlRow(this.Handle);
+                if (tp.IsHTMLElement(CtrlRow)) {
+                    this.elRequiredMark = tp.Select(CtrlRow, '.' + tp.Classes.RequiredMark);
+                }
             }
 
-            if (this.Required === true) {
-                if (el)
-                    el.required = true;
+            //if (tp.IsEmpty(this.elRequiredMark)) {
+            //    this.elRequiredMark = tp.Control.AddRequiredMark(this, this.elRequiredMark);
+            //}
 
-                this.fRequiredMark.style.display = '';
+            if (!tp.IsEmpty(this.elRequiredMark)) {
+                if (this.Required === true) {
+                    if (el)
+                        el.required = true;
 
-            } else {
-                if (el)
-                    el.required = false;
+                    this.elRequiredMark.style.display = '';
 
-                this.fRequiredMark.style.display = 'none';
+                } else {
+                    if (el)
+                        el.required = false;
+
+                    this.elRequiredMark.style.display = 'none';
+                }
             }
 
         }
@@ -6944,11 +6953,7 @@ tp.Control.prototype.fRequired; // = false;
 @type {boolean}
 */
 tp.Control.prototype.fReadOnly; // = false;
-/** Field. A span element, just after this, with a required mark
-@protected
-@type {HTMLElement}
-*/
-tp.Control.prototype.fRequiredMark;   
+   
 
 
 //#endregion  
@@ -7318,24 +7323,20 @@ tp.TextBox = class extends tp.InputControl {
         this.HookEventGroups(tp.EventGroup.Keyboard);
         super.OnHandleCreated();
     }
+ 
     /**
-    Processes the this.CreateParams by applying its properties to the properties of this instance
-    @protected
-    @override
-    @param {object} [o=null] - Optional. The create params object to processs.
-    */
-    ProcessCreateParams(o = null) {
-        o = o || {};
-
-        for (var Prop in o) {
-            if (!tp.IsFunction(o[Prop])) {
-                if (tp.IsSameText('AutocompleteList', Prop)) {
-                    this.AutocompleteList.DataList = o[Prop];
-                    this.AutocompleteList.Active = true;
-                } else {
-                    this[Prop] = o[Prop];
-                }
-            }
+     * Processes an entry of the this.CreateParams.
+     * @param {string} Name The name of the property in this.CreateParams
+     * @param {any} Value The value of the property in this.CreateParams
+     * @param {string[]} AvoidParams A string array of property names the ProcessCreateParam() should NOT set
+     */
+    ProcessCreateParam(Name, Value, AvoidParams) {
+        if (tp.IsSameText('AutocompleteList', Name)) {
+            this.AutocompleteList.DataList = Value;
+            this.AutocompleteList.Active = true;
+        }
+        else {
+            super.ProcessCreateParam(Name, Value, AvoidParams);
         }
     }
     /**
@@ -18895,10 +18896,10 @@ tp.Ui = class {
         </div>
     </pre>
     @private
-    @param {HTMLElement}  el - The DOM element upon to create the control-row.
+    @param {HTMLElement}  elRow - The DOM element upon to create the control-row.
     @returns {tp.tpElement} Returns the {@link tp.Control} of a control-row
     */
-    static CreateCtrlRow(el) {
+    static CreateCtrlRow(elRow) {
 
 /* NEW MARKUP
 <div class="tp-CtrlRow tp-Row" id="control_row_Name-2001">
@@ -18913,26 +18914,78 @@ tp.Ui = class {
  
  */
 
+
+
         let Type,
             TypeName,
+            DataField,
             CP,
             CP2,
+            Prefix,
             Id,
             divText,            // HTMLElement
-            spanText,           // HTMLElement
-            spanRequiredMark,   // HTMLElement
+            lblText,            // HTMLElement
+            elRequiredMark,     // HTMLSpanElement
             divCtrl,            // HTMLElement
             Result = null;      // tp.tpElement
 
-        tp.AddClass(el, tp.Classes.Row);
+        tp.AddClass(elRow, tp.Classes.Row);
 
-        if (el.children.length === 0) {
-            CP = tp.Data(el, 'setup');
+        if (elRow.children.length === 0) {
+            CP = tp.GetDataSetupObject(elRow);
+            CP.Text = tp.IsString(CP.Text) ? CP.Text.trim() : '';
+            CP.Control = tp.IsObject(CP.Control) ? CP.Control : {};
+
+            // get the constructor
+            TypeName = CP.Control.TypeName;
+            Type = this.Types[TypeName];
+            if (tp.IsEmpty(Type)) {
+                tp.Throw('Control type name not registered in tp.Ui.Types: ' + TypeName);
+            }
+
+            // prepare formatting
+            DataField = tp.IsString(CP.Control.DataField) ? CP.Control.DataField.trim() : '';
+            Prefix = !tp.IsBlank(DataField) ? `${tp.Prefix}CtrlRow-${DataField}-` : `${tp.Prefix}CtrlRow-`;
+            elRow.id = tp.SafeId(Prefix);
+            CP.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
+
+            // Markup similar to following goes to the last div
+            // <input class="tp-TextBox" id="Name" name="Name" type="text" value="">
+            let InnerHTML =
+`<div class="${tp.Classes.CText}">
+  <label for="${CP.Control.Id}">${CP.Text}</label>
+  <span class="${tp.Classes.RequiredMark}" style='display: none;'>*</span>
+</div>
+<div class="${tp.Classes.Ctrl}"></div>`;
+
+            tp.Html(elRow, InnerHTML);
+
+            divCtrl = tp.Select(elRow, '.' + tp.Classes.Ctrl);
+            divText = tp.Select(elRow, '.' + tp.Classes.CText);
+            lblText = tp.Select(divText, 'label');
+            elRequiredMark = tp.Select(divText, '.' + tp.Classes.RequiredMark);
+
+            CP = CP.Control;
+            CP.Parent = divCtrl;
+            CP.lblText = lblText;
+            CP.elRequiredMark = elRequiredMark;
+
+            // call the constructor
+            Result = new Type(null, CP);
+
+            // further adjustments
+            Result.Id = CP.Id;
+ 
+
+            ////////////////////////////////////////////////////////////
+
+            /*
+            CP = tp.Data(elRow, 'setup');
             if (!tp.IsBlank(CP)) {
                 CP = eval("(" + CP + ")");
 
                 // text
-                divText = tp.Div(el);
+                divText = tp.Div(elRow);
                 divText.className = tp.Classes.CText;
 
                 spanText = tp.Div(divText);
@@ -18941,7 +18994,7 @@ tp.Ui = class {
                 }
 
                 // control
-                divCtrl = tp.Div(el);
+                divCtrl = tp.Div(elRow);
                 divCtrl.className = tp.Classes.Ctrl;
                 if (('Control' in CP) && ('TypeName' in CP.Control)) {
 
@@ -18966,18 +19019,20 @@ tp.Ui = class {
                     Result = new Type(null, CP);
 
                     // required mark
-                    spanRequiredMark = tp.Span(divCtrl);
-                    spanRequiredMark.className = tp.Classes.RequiredMark;
-                    spanRequiredMark.style.display = 'none';
-                    spanRequiredMark.innerHTML = '*';
+                    elRequiredMark = tp.Span(divCtrl);
+                    elRequiredMark.className = tp.Classes.RequiredMark;
+                    elRequiredMark.style.display = 'none';
+                    elRequiredMark.innerHTML = '*';
 
                     //Result.Width = '100%';
                     Result.spanText = spanText;
-                    Result.spanRequiredMark = spanRequiredMark;
+                    Result.elRequiredMark = elRequiredMark;
                 }
             }
 
-            el.removeAttribute('data-setup');
+            elRow.removeAttribute('data-setup');
+            // */
+            ////////////////////////////////////////////////////////////
         }
 
         return Result;
@@ -19006,7 +19061,7 @@ tp.Ui = class {
             CP2,
             Id,
             Text = '',
-            spanRequiredMark,   // HTMLElement 
+            elRequiredMark,     // HTMLSpanElement 
             Result = null;      // tp.tpElement  
 
         tp.AddClass(el, tp.Classes.Row);
@@ -19048,13 +19103,13 @@ tp.Ui = class {
                     Result.Text = Text;
 
                     // required mark
-                    spanRequiredMark = tp.Span(el);
-                    spanRequiredMark.className = tp.Classes.RequiredMark;
-                    spanRequiredMark.style.display = 'none';
-                    spanRequiredMark.innerHTML = '*';
+                    elRequiredMark = tp.Span(el);
+                    elRequiredMark.className = tp.Classes.RequiredMark;
+                    elRequiredMark.style.display = 'none';
+                    elRequiredMark.innerHTML = '*';
 
                     //Result.Width = '100%';
-                    Result.spanRequiredMark = spanRequiredMark;
+                    Result.elRequiredMark = elRequiredMark;
 
                 }
             }

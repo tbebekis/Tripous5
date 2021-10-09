@@ -1582,8 +1582,8 @@ tp.DataView = class extends tp.View {
 
                 if (Control instanceof tp.CheckBox) {
                     Control.Text = Column.Title;
-                } else if (tp.IsElement(Control.spanText)) {
-                    tp.val(Control.spanText, Column.Title);
+                } else if (tp.IsElement(Control.lblText)) {
+                    tp.val(Control.lblText, Column.Title);
                 }
 
                 if (!Column.IsVisible) {

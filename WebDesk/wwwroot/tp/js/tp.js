@@ -4056,6 +4056,7 @@ tp.GetDataSetup = function (el) { return tp.Data(el, 'setup'); };
  * It also merges any properties found in the {@link tp.GlobalCreateParams} for that element with the object. <br />
  * Finally associates the object to the element and returns the object.
  * @param {HTMLElement|string} el The element to operate on.
+ * @returns {object} Returns the javascript object created using the data-setup attribute, or null, if no attribute exists on element.
  */
 tp.GetDataSetupObject = function (el) {
     el = tp(el);
@@ -4087,7 +4088,7 @@ tp.GetDataSetupObject = function (el) {
 
     return Result;
 };
-
+ 
 
 
 /**
@@ -8217,7 +8218,7 @@ tp.Size = class {
  */
 tp.Names = (function () {
     let items = {};
-    let counter = 0;
+    let counter = 2000; // do not collide with Asp.Net Core auto Ids
 
     return {
         /**
@@ -8235,7 +8236,7 @@ tp.Names = (function () {
             if (!tp.IsNullOrWhitespace(Prefix)) {
                 var ucPrefix = Prefix.toUpperCase();
                 if (!(ucPrefix in items)) {
-                    items[ucPrefix] = 0;
+                    items[ucPrefix] = 2000; // do not collide with Asp.Net Core auto Ids
                 }
                 var V = items[ucPrefix]++;
                 return Prefix + V.toString();
@@ -12034,21 +12035,29 @@ tp.tpElement = class extends tp.tpObject {
     @param {object} [o=null] - Optional. The create params object to processs.
     */
     ProcessCreateParams(o = null) {
-        o = o || {};
+        this.CreateParams = o || {};
 
         let AvoidParams = this.GetAvoidParams();
+        let Value; 
 
-        let Allowed = false; 
-        let PropInfo;
-
-        for (var Prop in o) {
-            if (Prop in this && !tp.IsFunction(o[Prop])) {
-                Allowed = AvoidParams.indexOf(Prop) === -1;
-                if (Allowed) {
-                    PropInfo = tp.GetPropertyInfo(this, Prop);
-                    if (PropInfo.IsProperty && (PropInfo.HasSetter || PropInfo.IsWritable))
-                        this[Prop] = o[Prop];
-                } 
+        for (var Prop in this.CreateParams) {
+            Value = this.CreateParams[Prop];
+            this.ProcessCreateParam(Prop, Value, AvoidParams);
+        }
+    }
+    /**
+     * Processes an entry of the this.CreateParams.
+     * @param {string} Name The name of the property in this.CreateParams
+     * @param {any} Value The value of the property in this.CreateParams
+     * @param {string[]} AvoidParams A string array of property names the ProcessCreateParam() should NOT set
+     */
+    ProcessCreateParam(Name, Value, AvoidParams) {
+        if (Name in this && !tp.IsFunction(Value)) {
+            let Allowed = AvoidParams.indexOf(Name) === -1;
+            if (Allowed) {
+                let PropInfo = tp.GetPropertyInfo(this, Name);
+                if (PropInfo.IsProperty && (PropInfo.HasSetter || PropInfo.IsWritable))
+                    this[Name] = Value;
             }
         }
     }
@@ -12815,14 +12824,14 @@ tp.tpElement.prototype.InformSiblings = false;
 * */
 tp.tpElement.prototype.fIsDisposed = false;
 
-/** HTMLSpanElement - span element, just before a control, with label text
- * @type {HTMLSpanElement}
+/** HTMLLabelElement - label element, just before a control, with label text
+ * @type {HTMLLabelElement}
  * */
-tp.tpElement.prototype.spanText = null;                      
+tp.tpElement.prototype.lblText = null;                      
 /** HTMLSpanElement - span element, right after a control, with a required mark
  * @type {HTMLSpanElement}
  * */
-tp.tpElement.prototype.spanRequiredMark = null;            
+tp.tpElement.prototype.elRequiredMark = null;            
 
 /** Node type names array, used internally */
 tp.tpElement.StandardNodeTypes = [
