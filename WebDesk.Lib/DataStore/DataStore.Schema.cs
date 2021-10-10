@@ -295,6 +295,11 @@ insert into {TableName} (
             Table.AddId();
             Table.AddString("Code", 40, true).SetUnique();
             Table.AddString("Name", 96, true).SetUnique();
+            Table.AddBoolean("Married", true).SetDefaultValue("0");
+            Table.AddDate("BirthDate", false);
+            Table.AddDecimal("Salary", true).SetDefaultValue("0");
+            Table.AddTextBlob("Notes", false);
+            
 
             string SqlText = Table.GetDefText();
             SchemaVersion SV = new SchemaVersion();

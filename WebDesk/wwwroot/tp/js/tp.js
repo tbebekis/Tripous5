@@ -11657,20 +11657,6 @@ tp.tpElement = class extends tp.tpObject {
  
 
     /**
-    Returns a property value from this.CreateParams in a safe manner.
-    @param {string} PropName The name of the property in this.CreateParams.
-    @param {any} [Default=null] - Optional. The default value to return if the property does not exist
-    @returns {any} Returns a property value from this.CreateParams in a safe manner.
-    */
-    GetCreateParamsOption(PropName, Default = null) {
-        Default = Default || null;
-        if (!tp.IsEmpty(this.CreateParams) && PropName in this.CreateParams) {
-            return this.CreateParams[PropName];
-        }
-        return Default;
-    }
-
-    /**
     Notification sent by tp.Viewport when the screen (viewport) size changes. 
     This method is called only if this.IsScreenResizeListener is true.
     @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
@@ -11740,43 +11726,59 @@ tp.tpElement = class extends tp.tpObject {
     /**
      * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
      * 
+     * 
      * WARNING
+     * 
      * 
      * In javascript fields contained in a derived class declaration, are initialized after the base constructor finishes.
      * So, if the base constructor calls a virtual method where the derived class initializes a field,
      * when the constructor finishes, the field is assigned again whatever value the class declaration dictates.
+     * 
+     * NOTE 1: In javascript the function and the class object provide a prototype property.
+     * Fields belonging to class (or function) prototype are initialized as in any other OOP language.
+     * 
+     * NOTE 2: In javascript fields contained in a derived class declaration are NOT part of its prototype.
+     * 
+     * see: https://stackoverflow.com/questions/58141967/field-initialization-in-a-sub-class-happens-after-constructor-finishes-in-the-pa
      *
-     * A = class {
-     *     constructor() {
-     *         this.SetFields();
-     *     }
-     *
-     *     SetFields() { }
-     * }
-     *
-     * B = class extends A {
-     *     constructor() {
-     *         super();
-     *         this.Display();
-     *     }
-     *
-     *     Field2 = 123;	// this is assigned again after the SetFields() call, when the constructor completes.
-     *
-     *     SetFields() {
-     *         super.SetFields();
-     *         this.Field2 = 987;
-     *     }
-     *     Display() {
-     *         alert(this.Field2);
-     *     }
-     * }
-     *
+     *  A = class {
+     *      constructor() {
+     *          this.SetFields();
+     *      }
+     *  
+     *      Field1 = 789;
+     *  
+     *      SetFields() { }
+     *  }
+     *  
+     *  B = class extends A {
+     *      constructor() {
+     *          super();
+     *          this.Display();
+     *      }
+     *  
+     *      Field1 = 123;	// this is assigned again after the SetFields() call, when the constructor completes.
+     *  
+     *      SetFields() {
+     *          super.SetFields();
+     *          this.Field1 = 987;
+     *          this.Field2 = 'AAA';
+     *      }
+     *      Display() {
+     *          alert(this.Field1);
+     *          alert(this.Field2);
+     *      }
+     *  };
+     *  B.prototype.Field2 = 'xxx';
+     * 
+     * 
      * The result is that the field retains the value it had in the class declaration, the null value.
      *
      * 
      * */
     OnAfterConstruction() {
     }
+
 
     /* event triggers */
     /**
@@ -11829,7 +11831,6 @@ tp.tpElement = class extends tp.tpObject {
     }
 
     /* self handling */
-
     /**
     Sets the parent of this instance.
     @param {tp.tpElement|HTMLElement} Parent - The parent
@@ -12024,6 +12025,25 @@ tp.tpElement = class extends tp.tpObject {
             }
         }
     }
+    /**
+    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+    */
+    Dispose() {
+        if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
+            this.IsElementResizeListener = false;
+            this.IsScreenResizeListener = false;
+
+            var el = this.fHandle;
+            tp.SetObject(this.Handle, null);
+            this.fHandle = null;
+            if (tp.IsElement(el.parentNode)) {
+                el.parentNode.removeChild(el);
+            }
+
+            this.fIsDisposed = true;
+        }
+    }
+
     /** Returns and array of property names the ProcessCreateParams() should NOT set 
      @returns {string[]} Returns and array of property names the ProcessCreateParams() should NOT set
      */
@@ -12062,23 +12082,19 @@ tp.tpElement = class extends tp.tpObject {
         }
     }
     /**
-    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+    Returns a property value from this.CreateParams in a safe manner.
+    @param {string} PropName The name of the property in this.CreateParams.
+    @param {any} [Default=null] - Optional. The default value to return if the property does not exist
+    @returns {any} Returns a property value from this.CreateParams in a safe manner.
     */
-    Dispose() {
-        if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
-            this.IsElementResizeListener = false;
-            this.IsScreenResizeListener = false;
-
-            var el = this.fHandle;
-            tp.SetObject(this.Handle, null);
-            this.fHandle = null;
-            if (tp.IsElement(el.parentNode)) {
-                el.parentNode.removeChild(el);
-            }
-
-            this.fIsDisposed = true;
+    GetCreateParamsOption(PropName, Default = null) {
+        Default = Default || null;
+        if (!tp.IsEmpty(this.CreateParams) && PropName in this.CreateParams) {
+            return this.CreateParams[PropName];
         }
+        return Default;
     }
+ 
 
     /**
     Adds a listener to an event of this instance and returns the listener object. 
@@ -12824,10 +12840,11 @@ tp.tpElement.prototype.InformSiblings = false;
 * */
 tp.tpElement.prototype.fIsDisposed = false;
 
-/** HTMLLabelElement - label element, just before a control, with label text
- * @type {HTMLLabelElement}
+/** HTMLElement - label element, just before a control, with label text.
+ * NOTE: It is an HTMLSpanElement in checkbox
+ * @type {HTMLElement}
  * */
-tp.tpElement.prototype.lblText = null;                      
+tp.tpElement.prototype.elText = null;                      
 /** HTMLSpanElement - span element, right after a control, with a required mark
  * @type {HTMLSpanElement}
  * */

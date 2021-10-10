@@ -76,7 +76,7 @@ namespace Tripous.Data
         /// <summary>
         /// How many columns to have in a certain screen size.
         /// </summary>
-        public int Small { get; set; } = 2;
+        public int Small { get; set; } = 1;
         /// <summary>
         /// How many columns to have in a certain screen size.
         /// </summary>

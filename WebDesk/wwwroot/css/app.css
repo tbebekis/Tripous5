@@ -82,9 +82,7 @@ script {
     margin: 12px 0 ;
 }
 
-.tp-CheckBoxRow {
-    margin: 18px 0 ;
-}
+ 
 
 .tp-CtrlRow input[type=text], 
 .tp-CtrlRow input[type=email], 
@@ -104,37 +102,21 @@ script {
 .tp-CtrlRow input[type=number]:focus,
 .tp-CtrlRow input[type=date]:focus,
 .tp-CtrlRow input[type=tel]:focus,
+.tp-CtrlRow textarea:focus,
 .tp-CtrlRow select:focus {
     border: 1px solid var(--GrayDarkDeep);
 } 
 
+/*
 .tp-CtrlRow textarea {
     border: 1px solid var(--Gray);
     padding: 4px;
 }
+*/
+ 
+ 
 
-.tp-CtrlRow textarea:focus {
-    border: 1px solid var(--GrayDarkDeep);
-}
-
-.tp-CtrlRow > .tp-CText > label {
-    font-weight: bold;
-}
-
-.tp-CheckBoxRow > label {
-    display: flex;
-}
-
-.tp-CheckBoxRow input[type=checkbox] {
-    margin: 5px 0 0 0;
-}
-
-.tp-CheckBoxRow .tp-Text {
-    padding: 0 2px 0 4px;
-}
-
-
-
+ 
 /* background color on hover */
 .tp-CheckBox:hover input ~ .checkmark {
     background-color: var(--GrayLight);
@@ -297,7 +279,7 @@ button:not(.btn-test),
     display: flex;
     align-items: center; 
 
-    background-color: var(--Black);
+    background-color: var(--Color1);
     color: var(--White);
 }
 
@@ -315,7 +297,7 @@ button:not(.btn-test),
     position: relative;
     display: flex; 
     flex-direction:column;
-    background-color: var(--Dark2);
+    background-color: var(--Color2);
     color: var(--White);   
 }
 
@@ -425,7 +407,7 @@ button:not(.btn-test),
     position: relative;
     display: flex; 
     min-height: 2.5em;
-    background-color: var(--Dark2);
+    background-color: var(--Color2);
     color: var(--White);    
 } 
 

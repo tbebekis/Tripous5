@@ -546,10 +546,16 @@ max-width 	Rules applied for any browser width less than the value defined in th
 .tp-CtrlRow,
 .tp-CheckBoxRow {
     position: relative;
-    display: flex;
+    display: flex;    
+    padding: 0 10px 0 15px;    
+}
+
+.tp-CtrlRow {
     margin-top: 4px;
-    padding: 0 10px 0 15px;
-    width: 100%;
+}
+
+.tp-CheckBoxRow {
+    /* margin: 18px 0; */
 }
 
 /* the text container */ 
@@ -572,29 +578,31 @@ max-width 	Rules applied for any browser width less than the value defined in th
     width: 100%;
 }
 
-/* check-box */
+/* check-box - it is a label */
 .tp-CheckBox {
 	display: flex;
 	position: relative;  
 	cursor: pointer;  
 	user-select: none;  
-	padding-left: 28px;	
     min-height: 32px; /* to fit the check-box */
+    margin: 5px 0 0 0;
+    align-items: baseline;
 }
+
+ /*   checkbox */
+ .tp-CheckBox [type=checkbox] {
+   position: relative; 
+   cursor: pointer;
+   margin: 0 4px 0 4px;
+ }
 
 .tp-CheckBox > .tp-Text {
 	font-size: 14px;	
 	padding: 4px;
+    user-select: text;
  }
  
- /* hide checkbox */
- .tp-CheckBox input {
-   position: absolute;
-   opacity: 0;
-   cursor: pointer;
-   height: 0;
-   width: 0;
- }
+
  
  /* custom checkbox */
  .tp-CheckBox .checkmark {

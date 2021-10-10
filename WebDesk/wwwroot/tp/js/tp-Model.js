@@ -1577,13 +1577,14 @@ tp.DataView = class extends tp.View {
                     }
                 }
                 if ((Column.IsRequired === true) && ('Required' in Control)) {
+                    Control.Required = false;
                     Control.Required = true;
                 }
 
                 if (Control instanceof tp.CheckBox) {
                     Control.Text = Column.Title;
-                } else if (tp.IsElement(Control.lblText)) {
-                    tp.val(Control.lblText, Column.Title);
+                } else if (tp.IsElement(Control.elText)) {
+                    tp.val(Control.elText, Column.Title);
                 }
 
                 if (!Column.IsVisible) {

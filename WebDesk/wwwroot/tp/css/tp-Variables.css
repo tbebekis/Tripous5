@@ -67,7 +67,7 @@
     --GridDropTargetOutline: var(--SelectedColor) double thick;
     --Border: 1px solid var(--BorderColor);
     --ButtonPadding: 0 5px;
-    --TextPadding: 2px 4px;
+    --TextPadding: 0 4px;
     --WindowCaptionHeight: var(--Font) * 2.4;
     
     

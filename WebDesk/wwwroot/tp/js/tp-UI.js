@@ -225,6 +225,7 @@ tp.Classes = {
     HtmlComboBox: 'tp-HtmlComboBox',
     HtmlListBox: 'tp-HtmlListBox',
     HtmlNumberBox: 'tp-HtmlNumberBox',
+    HtmlDateBox: 'tp-HtmlDateBox',
 
 
     /* controls             ----------------------------------------------------------------- */
@@ -6687,7 +6688,7 @@ tp.Control = class extends tp.tpElement  {
     @param {Element} el The element whose value is required (or not) 
     */
     SetRequiredMark(el) {
-        if (tp.IsFormElement(el)) {
+        if (tp.IsFormElement(el) || !tp.IsEmpty(this.elRequiredMark)) {
 
             if (tp.IsEmpty(this.elRequiredMark)) {
                 let CtrlRow = tp.Ui.GetCtrlRow(this.Handle);
@@ -6872,22 +6873,37 @@ tp.Control = class extends tp.tpElement  {
     Reads the value from data-source and assigns the control's data value property
     */
     ReadDataValue() {
-        if (this.IsDataBound && this.DataSource.Position >= 0) {
-            let v = this.DataSource.Get(this.DataField);
-            this[this.DataValueProperty] = this.Format(v);
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
 
+        if (this.IsDataBound && this.DataSource.Position >= 0) {
+            this.ReadingDataValue = true;
+            try {
+                let v = this.DataSource.Get(this.DataField);
+                this[this.DataValueProperty] = this.Format(v);
+            } finally {
+                this.ReadingDataValue = false;
+            }
         }
     }
     /**
     Writes the value from the control's data value property to the data-source.
     */
     WriteDataValue() {
-        if (this.IsDataBound && this.DataSource.Position >= 0) {
-            var v = this[this.DataValueProperty];
-            if (tp.IsString(v))
-                v = this.Parse(v);
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
 
-            this.DataSource.Set(this.DataField, v);
+        if (this.IsDataBound && this.DataSource.Position >= 0) {
+            this.WritingDataValue = true;
+            try {
+                var v = this[this.DataValueProperty];
+                if (tp.IsString(v))
+                    v = this.Parse(v);
+
+                this.DataSource.Set(this.DataField, v);
+            } finally {
+                this.WritingDataValue = false;
+            }
         }
     }
 
@@ -6953,7 +6969,17 @@ tp.Control.prototype.fRequired; // = false;
 @type {boolean}
 */
 tp.Control.prototype.fReadOnly; // = false;
-   
+
+/** True while reading from datasource and writing to control DataValue Property
+@protected
+@type {boolean}
+*/
+tp.Control.prototype.ReadingDataValue = false;
+/** True while reading from control DataValue Property and writing to datasource
+@protected
+@type {boolean}
+*/
+tp.Control.prototype.WritingDataValue = false;
 
 
 //#endregion  
@@ -7168,7 +7194,9 @@ tp.InputControl = class extends tp.Control {
     Called on any value change
     */
     OnValueChanged() {
-        this.Trigger('ValueChanged', {});
+        if (!this.ReadingDataValue) {
+            this.Trigger('ValueChanged', {});
+        }
     }
 };
 //#endregion
@@ -7658,7 +7686,9 @@ tp.Memo = class extends tp.Control {
     @override
     */
     OnValueChanged() {
-        this.Trigger('ValueChanged', {});        
+        if (!this.ReadingDataValue) {
+            this.Trigger('ValueChanged', {});
+        }
     }
     /**
     Event trigger
@@ -7677,7 +7707,7 @@ tp.Memo = class extends tp.Control {
 A check-box control. Is actually a label element surrounding a input[type=checkbox] element. <br />
 Example markup
 <pre>
-    <label><input type="checkbox" />This is the text of the checkbox</label>
+    <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
 </pre>
 */
 tp.CheckBox = class extends tp.Control {
@@ -7686,7 +7716,7 @@ tp.CheckBox = class extends tp.Control {
     Constructor <br />
     Example markup
     <pre>
-        <label><input type="checkbox" />This is the text of the checkbox</label>
+        <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
     </pre>
     @param {string|HTMLElement} [ElementOrSelector] - Optional.
     @param {Object} [CreateParams] - Optional.
@@ -7697,39 +7727,43 @@ tp.CheckBox = class extends tp.Control {
 
 
     /*
-    <label class="tp-CheckBox"><input type="checkbox" />This is the text of the checkbox</label>
+    <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
     */
 
     /** Field
      @private
      @type {HTMLInputElement}
      */
-    fCheckBox;
+    fCheckBox = null;
 
-    /* properties */
-    /**
-    Returns the FIRST text node of this control, if any, else null.
-    @type {Text}
-    */
-    get TextNode() {
-        return tp.FindTextNode(this.Handle);
-    }
+
+    /* properties */ 
     /**
     Gets or sets the text of this instance
     @type {string}
     */
     get Text() {
-        var t = this.TextNode;
+        if (tp.IsHTMLElement(this.elText))
+            return this.elText.innerHTML;
+
+        // Returns the FIRST text node of this control, if any, else null.
+        var t = tp.FindTextNode(this.Handle);
         return t ? t.nodeValue : '';
     }
     set Text(v) {
-        var t = this.TextNode;
-        if (!t) {
-            t = this.Document.createTextNode(v);
-            this.Handle.appendChild(t);
+        if (tp.IsHTMLElement(this.elText)) {
+            this.elText.innerHTML = v;
         }
-        if (t) {
-            t.nodeValue = v;
+        else {
+            // Returns the FIRST text node of this control, if any, else null.
+            let t = tp.FindTextNode(this.Handle);
+            if (!t) {
+                t = this.Document.createTextNode(v);
+                this.Handle.appendChild(t);
+            }
+            if (t) {
+                t.nodeValue = v;
+            }
         }
     }
     /**
@@ -7775,12 +7809,26 @@ tp.CheckBox = class extends tp.Control {
     @override
     */
     OnHandleCreated() {
-        let el = tp.Select(this.Handle, 'input[type="checkbox"]');
+        // check-box
+        let el = tp.Select(this.Handle, 'input[type=checkbox]');
 
         if (!tp.IsHTMLElement(el)) {
             this.Handle.innerHTML = "<input type='checkbox' />" + (this.Handle.innerHTML || '');
         }
 
+        this.fCheckBox = tp.Select(this.Handle, 'input[type="checkbox"]');
+
+        // text
+        if (!tp.IsHTMLElement(this.elText)) {
+            this.elText = tp.Select(this.Handle, '.' + tp.Classes.Text);
+        }
+
+        if (!tp.IsHTMLElement(this.elText)) {
+            this.elText = this.Document.createElement('span');
+            tp.AddClass(this.elText, tp.Classes.Text);
+            this.Handle.appendChild(this.elText);
+        }
+ 
         super.OnHandleCreated();
     }
     /**
@@ -7796,8 +7844,7 @@ tp.CheckBox = class extends tp.Control {
     @protected
     @override
     */
-    OnInitializationCompleted() {
-        this.fCheckBox = tp.Select(this.Handle, 'input[type="checkbox"]');
+    OnInitializationCompleted() {        
         if (this.fCheckBox instanceof HTMLInputElement) {
             tp.On(this.fCheckBox, tp.Events.Change, this);
         }
@@ -7833,19 +7880,46 @@ tp.CheckBox = class extends tp.Control {
     Reads the value from data-source and assigns the control's data value property
     */
     ReadDataValue() {
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
+
         if (this.IsDataBound && this.DataSource.Position >= 0) {
-            let v = this.DataSource.Get(this.DataField);
-            this[this.DataValueProperty] = v === true || v === 1;
+            this.ReadingDataValue = true;
+            try {
+                let v = this.DataSource.Get(this.DataField);
+                this[this.DataValueProperty] = v === true || v === 1;
+            } finally {
+                this.ReadingDataValue = false;
+            }
         }
     }
     /**
     Writes the value from the control's data value property to the data-source.
     */
     WriteDataValue() {
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
+
         if (this.IsDataBound && this.DataSource.Position >= 0) {
-            var v = this[this.DataValueProperty];
-            this.DataSource.Set(this.DataField, v === true);
+            this.WritingDataValue = true;
+            try {
+                var v = this[this.DataValueProperty];
+                this.DataSource.Set(this.DataField, v === true);
+            } finally {
+                this.WritingDataValue = false;
+            }
         }
+    }
+
+    /* validation */
+    /**
+    Event trigger
+    @protected
+    @override
+    */
+    OnRequiredChanged() {
+        this.SetRequiredMark(this.Handle);
+        super.OnRequiredChanged();
     }
 
     /** Makes the control the focused control */
@@ -7860,7 +7934,9 @@ tp.CheckBox = class extends tp.Control {
     @override
     */
     OnValueChanged() {
-        this.Trigger('ValueChanged', {});
+        if (!this.ReadingDataValue) {
+            this.Trigger('ValueChanged', {});
+        }
     }
 };
 //#endregion
@@ -8024,34 +8100,13 @@ tp.NumberBox = class extends tp.Control {
     StepDown() {
         this.fTextBox.stepDown();
     }
-
-    /** Formats the value according to decimals in the step property 
-     @private
-     
-    FormatValue() {
-        this.Formatting = true;
-        try {
-            let Parts = this.Step.toString().split(".");
-            let Decimals = Parts.length === 2 ? Parts[1].length : 0;
-            if (Decimals > 0 && !tp.IsBlank(this.fTextBox.value)) {
-                let v = parseFloat(this.fTextBox.value).toFixed(Decimals);
-                this.fTextBox.value = v;
-            }
-        } catch (e) {
-            //
-        } finally {
-            this.Formatting = false;
-        }
-    }
-*/
  
-
     /* Event triggers */
     /**
     Called on any value change
     */
     OnValueChanged() {
-        if (!this.Formatting) {
+        if (!this.ReadingDataValue) {
             this.Trigger('ValueChanged', {});
         }
     }
@@ -8908,11 +8963,19 @@ tp.ListControl = class extends tp.Control {
     @protected
     */
     ReadDataValue() {
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
+
         this.fCanPostDataValue = false;
         try {
             if (this.IsDataBound && this.DataSource.Position >= 0) {
-                var v = this.DataSource.Get(this.DataField);
-                this[this.DataValueProperty] = v;
+                this.ReadingDataValue = true;
+                try {
+                    var v = this.DataSource.Get(this.DataField);
+                    this[this.DataValueProperty] = v;
+                } finally {
+                    this.ReadingDataValue = false;
+                }
             }
         } finally {
             this.fCanPostDataValue = true;
@@ -10272,11 +10335,19 @@ tp.CheckListControl = class extends tp.Control {
     Reads the value from data-source and assigns the control's data value property
     */
     ReadDataValue() {
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
+
         this.fCanPostDataValue = false;
         try {
             if (this.IsDataBound && this.DataSource.Position >= 0) {
-                var v = this.DataSource.Get(this.DataField);
-                this[this.DataValueProperty] = v;
+                this.ReadingDataValue = true;
+                try {
+                    var v = this.DataSource.Get(this.DataField);
+                    this[this.DataValueProperty] = v;
+                } finally {
+                    this.ReadingDataValue = false;
+                }
             }
         } finally {
             this.fCanPostDataValue = true;
@@ -11569,7 +11640,7 @@ A number box control built on top of a input type="number" element.
 @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/number|mdn}
 Example markup:
 <pre>
-    <input type="number" id="HtmlNumberBox"  step="0.100" , value='50' />
+    <input type="number" id="HtmlNumberBox"  step="0.100"  value='50' />
 </pre>
 */
 tp.HtmlNumberBox = class extends tp.InputControl {
@@ -11644,43 +11715,11 @@ tp.HtmlNumberBox = class extends tp.InputControl {
         }
     }
 
-    /** Formats the value according to decimals in the step property 
-     @private
-     
-    FormatValue() {
-        this.Formatting = true;
-        try {
-            let Parts = this.Step.toString().split(".");
-            let Decimals = Parts.length === 2 ? Parts[1].length : 0;
-            if (Decimals > 0 && !tp.IsBlank(this.Handle.value)) {
-                let v = parseFloat(this.Handle.value).toFixed(Decimals);
-                this.Handle.value = v;
-            }
-        } catch (e) {
-            //
-        } finally {
-            this.Formatting = false;
-        }
-    }
-*/
+ 
 
 
-    /* overrides */
-
-    /* notifications */
-    /**
-    Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
-    and AFTER options (CreateParams) processing 
-    - Handle creation
-    - Field initialization
-    - Option processing
-    - Completed notification
-    @protected
-    @override
-    */
-    OnInitializationCompleted() {
-        super.OnInitializationCompleted();
-    }
+ 
+ 
 
     /**
     Initializes the 'static' and 'read-only' class fields
@@ -11722,16 +11761,7 @@ tp.HtmlNumberBox = class extends tp.InputControl {
         this.ReadDataValue();
     }
 
-    /* Event triggers */
-    /**
-    Called on any value change
-    @override
-    */
-    OnValueChanged() {
-        if (!this.Formatting) {
-            this.Trigger('ValueChanged', {});
-        }  
-    }
+ 
 };
 
 /** Field
@@ -11740,6 +11770,92 @@ tp.HtmlNumberBox = class extends tp.InputControl {
  */
 tp.HtmlNumberBox.prototype.fValueList;
 
+//#endregion
+
+//#region tp.HtmlDateBox
+tp.HtmlDateBox = class extends tp.InputControl {
+
+    /**
+    Constructor <br />
+    SEE: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/date#browser_compatibility
+    Example markup:
+    <pre>
+        <input type="date" value='2021-12-25'  />
+    </pre>
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+
+    /**
+    Gets or sets the value of the control.  
+    @type {Date}
+    */
+    get Value() {
+        if (this.Handle instanceof HTMLInputElement) {
+            return tp.IsBlank(this.Handle.value) ? null : Date(this.Handle.value);
+        }
+        return null;
+    }
+    set Value(v) {
+        if (this.Handle instanceof HTMLInputElement && tp.IsValid(v)) {
+            let dValue = null;
+            if (tp.IsString(v) && !tp.IsBlank(v)) {
+                let ParseResult = tp.TryParseDateTime(v);
+                if (ParseResult.Result === true)
+                    dValue = ParseResult.Value;
+            }
+            else if (tp.IsDate(v)) {
+                dValue = v;
+            }
+
+            if (tp.IsValid(dValue)) {
+                let S = dValue.toLocaleDateString(); // dValue.toISOString().substring(0, 10);
+                this.Handle.value = S;
+                this.OnValueChanged();
+            }
+
+        }
+    }
+
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.HtmlDateBox';
+        this.fElementSubType = 'date';
+        this.fDefaultCssClasses = tp.Classes.HtmlDateBox;
+
+        // data-bind
+        this.fDataValueProperty = 'Value';
+    }
+    /**
+    Binds the control to its DataSource. It is called after the DataSource property is assigned.
+    @protected
+    @override
+    */
+    Bind() {
+        super.Bind();
+        this.ReadDataValue();
+    }
+
+
+
+    OnHandleCreated() {
+        super.OnHandleCreated();
+        //this.Handle.value = '0001-01-01';
+        //this.Handle.pattern = 'YYYY-MM-DD';
+    }
+
+
+};
 //#endregion
 
 
@@ -12199,8 +12315,6 @@ tp.DateBox = class extends tp.Control {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-
 
     /**
     Gets or sets the text of the control. 
@@ -16669,9 +16783,23 @@ tp.LocatorBox = class extends tp.Control {
     Reads the value from data-source and assigns the control's data value property
     */
     ReadDataValue() {
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
+
         if (this.IsDataBound && this.DataSource.Position >= 0) {
-            let v = this.DataSource.Get(this.DataField);
-            this[this.DataValueProperty] = v;
+            this.ReadingDataValue = true;
+            try {
+                this.ReadingDataValue = true;
+                try {
+                    let v = this.DataSource.Get(this.DataField);
+                    this[this.DataValueProperty] = v;
+                } finally {
+                    this.ReadingDataValue = false;
+                }
+            } finally {
+                this.ReadingDataValue = false;
+            }
+
         }
     }
 
@@ -18821,9 +18949,6 @@ tp.Ui = class {
         throw 'Can not create an instance of a full static class';
     }
 
- 
-
-    
 
     /* private */
     /**
@@ -18890,9 +19015,14 @@ tp.Ui = class {
     </pre>
     Produced markup
     <pre>
-        <div class="tp-Row tp-CtrlRow">
-            <div class="tp-CText"><span>User Name</span></div>
-            <div class="tp-Ctrl"><input type="text" class="TextBox" data-setup="{DataField:'UserName', Width:'100%'}" /></div>
+        <div class="tp-CtrlRow tp-Row" id="control_row_Name-2001">
+           <div class="tp-CText">
+	        <label for="Name">Όνομα</label>
+	        <span class="tp-RequiredMark">*</span>
+           </div>
+           <div class="tp-Ctrl">
+	        <input class="tp-TextBox" id="Name" name="Name" type="text" value="">
+           </div>
         </div>
     </pre>
     @private
@@ -18901,31 +19031,14 @@ tp.Ui = class {
     */
     static CreateCtrlRow(elRow) {
 
-/* NEW MARKUP
-<div class="tp-CtrlRow tp-Row" id="control_row_Name-2001">
-   <div class="tp-CText">
-	<label for="Name">Όνομα</label>
-	<span class="tp-RequiredMark">*</span>
-   </div>
-   <div class="tp-Ctrl">
-	<input class="tp-TextBox" id="Name" name="Name" type="text" value="">
-   </div>
-</div>
- 
- */
-
-
-
         let Type,
             TypeName,
             DataField,
             CP,
-            CP2,
             Prefix,
-            Id,
             divText,            // HTMLElement
-            lblText,            // HTMLElement
-            elRequiredMark,     // HTMLSpanElement
+            //elText,            // HTMLElement
+            //elRequiredMark,     // HTMLSpanElement
             divCtrl,            // HTMLElement
             Result = null;      // tp.tpElement
 
@@ -18962,77 +19075,18 @@ tp.Ui = class {
 
             divCtrl = tp.Select(elRow, '.' + tp.Classes.Ctrl);
             divText = tp.Select(elRow, '.' + tp.Classes.CText);
-            lblText = tp.Select(divText, 'label');
-            elRequiredMark = tp.Select(divText, '.' + tp.Classes.RequiredMark);
+ 
 
             CP = CP.Control;
             CP.Parent = divCtrl;
-            CP.lblText = lblText;
-            CP.elRequiredMark = elRequiredMark;
+            CP.elText = tp.Select(divText, 'label');
+            CP.elRequiredMark = tp.Select(divText, '.' + tp.Classes.RequiredMark);
 
             // call the constructor
             Result = new Type(null, CP);
 
             // further adjustments
             Result.Id = CP.Id;
- 
-
-            ////////////////////////////////////////////////////////////
-
-            /*
-            CP = tp.Data(elRow, 'setup');
-            if (!tp.IsBlank(CP)) {
-                CP = eval("(" + CP + ")");
-
-                // text
-                divText = tp.Div(elRow);
-                divText.className = tp.Classes.CText;
-
-                spanText = tp.Div(divText);
-                if (('Text' in CP) && !tp.IsBlank(CP.Text)) {
-                    spanText.innerHTML = CP.Text;
-                }
-
-                // control
-                divCtrl = tp.Div(elRow);
-                divCtrl.className = tp.Classes.Ctrl;
-                if (('Control' in CP) && ('TypeName' in CP.Control)) {
-
-                    // get the constructor
-                    TypeName = CP.Control.TypeName;
-                    Type = this.Types[TypeName];
-                    if (tp.IsEmpty(Type)) {
-                        tp.Throw('Control type name not registered in tp.Ui.Types: ' + TypeName);
-                    }
-
-                    // setup options
-                    CP = CP.Control;
-                    Id = CP.Id;
-                    if (!tp.IsBlank(Id) && Id in tp.GlobalCreateParams) {
-                        CP2 = tp.GlobalCreateParams[Id];
-                        tp.MergeQuick(CP, CP2);
-                    }
-
-                    CP.Parent = divCtrl;
-
-                    // call the constructor
-                    Result = new Type(null, CP);
-
-                    // required mark
-                    elRequiredMark = tp.Span(divCtrl);
-                    elRequiredMark.className = tp.Classes.RequiredMark;
-                    elRequiredMark.style.display = 'none';
-                    elRequiredMark.innerHTML = '*';
-
-                    //Result.Width = '100%';
-                    Result.spanText = spanText;
-                    Result.elRequiredMark = elRequiredMark;
-                }
-            }
-
-            elRow.removeAttribute('data-setup');
-            // */
-            ////////////////////////////////////////////////////////////
         }
 
         return Result;
@@ -19045,77 +19099,70 @@ tp.Ui = class {
     </pre>
     Produced markup
     <pre>
-        <div class="tp-Row tp-CheckBoxRow">
-             <label><input type='checkbox'>Here goes the check-box label text</label>
+        <div class="tp-CheckBoxRow tp-Row" id="control_row_IsCool-2001">
+          <label class="tp-CheckBox">
+            <input checked="checked" type="checkbox" >
+            <span class="tp-RequiredMark">*</span>
+            <span class="tp-Text">Yes, this is by design</span>
+          </label>
         </div>
     </pre>
     @private
-    @param  {HTMLElement} el - The DOM element upon to create the control-row.
+    @param  {HTMLElement} elRow - The DOM element upon to create the control-row.
     @returns {tp.tpElement} Returns the {@link tp.Control} of a check-box control-row
     */
-    static CreateCheckBoxRow(el) {
+    static CreateCheckBoxRow(elRow) { 
 
         let Type = tp.CheckBox,
             TypeName = 'CheckBox',
+            DataField,
             CP,
-            CP2,
-            Id,
-            Text = '',
-            elRequiredMark,     // HTMLSpanElement 
+            Prefix, 
             Result = null;      // tp.tpElement  
 
-        tp.AddClass(el, tp.Classes.Row);
+        tp.AddClass(elRow, tp.Classes.Row);
 
-        if (el.children.length === 0) {
-            CP = tp.Data(el, 'setup');
-            if (!tp.IsBlank(CP)) {
-                CP = eval("(" + CP + ")");
+        if (elRow.children.length === 0) {
+            CP = tp.GetDataSetupObject(elRow);
+            CP.Text = tp.IsString(CP.Text) ? CP.Text.trim() : '';
+            CP.Control = tp.IsObject(CP.Control) ? CP.Control : {};
 
-                if (('Text' in CP) && !tp.IsBlank(CP.Text)) {
-                    Text = CP.Text;
-                }
-
-                // control 
-                if ('Control' in CP) {
-
-                    // get the constructor
-                    if ('TypeName' in CP.Control) {
-                        TypeName = CP.Control.TypeName;
-                        Type = this.Types[TypeName];
-                    }
-
-                    if (tp.IsEmpty(Type)) {
-                        Type = tp.CheckBox;
-                    }
-
-                    // setup options
-                    CP = CP.Control;
-                    Id = CP.Id;
-                    if (!tp.IsBlank(Id) && Id in tp.GlobalCreateParams) {
-                        CP2 = tp.GlobalCreateParams[Id];
-                        tp.MergeQuick(CP, CP2);
-                    }
-
-                    CP.Parent = el;
-
-                    // call the constructor
-                    Result = new Type(null, CP);
-                    Result.Text = Text;
-
-                    // required mark
-                    elRequiredMark = tp.Span(el);
-                    elRequiredMark.className = tp.Classes.RequiredMark;
-                    elRequiredMark.style.display = 'none';
-                    elRequiredMark.innerHTML = '*';
-
-                    //Result.Width = '100%';
-                    Result.elRequiredMark = elRequiredMark;
-
-                }
+            // get the constructor
+            TypeName = CP.Control.TypeName;
+            Type = this.Types[TypeName];
+            if (tp.IsEmpty(Type)) {
+                Type = tp.CheckBox;
             }
 
-            el.removeAttribute('data-setup');
-        }
+            // prepare formatting
+            DataField = tp.IsString(CP.Control.DataField) ? CP.Control.DataField.trim() : '';
+            Prefix = !tp.IsBlank(DataField) ? `${tp.Prefix}CheckBoxRow-${DataField}-` : `${tp.Prefix}CheckBoxRow-`;
+            elRow.id = tp.SafeId(Prefix);
+            CP.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
+
+            // <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
+            let InnerHTML =
+` <label class="${tp.Classes.CheckBox}">
+    <input type="checkbox" />
+    <span class="${tp.Classes.RequiredMark}" style='display: none;'>*</span>
+    <span class="${tp.Classes.Text}">${CP.Text}</span>
+  </label>`;
+
+            tp.Html(elRow, InnerHTML);
+ 
+            CP = CP.Control;
+            CP.Parent = elRow;
+            CP.elText = tp.Select(elRow, '.' + tp.Classes.Text);
+            CP.elRequiredMark = tp.Select(elRow, '.' + tp.Classes.RequiredMark);
+
+            // call the constructor
+            let el = tp.Select(elRow, `label.${tp.Classes.CheckBox}`);
+            Result = new Type(el, CP);
+
+            // further adjustments
+            Result.Id = CP.Id;
+            Result.Text = CP.Text;
+        }         
 
         return Result;
     }
@@ -19309,9 +19356,10 @@ tp.Ui.Types = {
     HtmlComboBox: tp.HtmlComboBox,
     HtmlListBox: tp.HtmlListBox,
     HtmlNumberBox: tp.HtmlNumberBox,
+    HtmlDateBox: tp.HtmlDateBox,
 
     Calendar: tp.Calendar,
-    DateBox: tp.DateBox,
+    DateBox: tp.HtmlDateBox,
     ImageBox: tp.ImageBox,
 
     LocatorBox: tp.LocatorBox,

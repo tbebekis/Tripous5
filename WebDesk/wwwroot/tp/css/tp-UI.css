@@ -770,6 +770,7 @@ label {
     /* line-height: var(--LineHeight); */
     height: var(--ControlHeight);
     padding: var(--TextPadding);
+    user-select: text;
 }
 
 /*---------------------------------------------------------------------------------------
@@ -799,23 +800,15 @@ textarea.tp-Memo {
     /* white-space: pre; disable this because we want just the vertical scroll bar*/
     overflow: auto;
     resize: none;
-    padding: 4px;
     box-sizing: border-box;
+    min-height: 6em;
 }
 
 /*---------------------------------------------------------------------------------------
  check-box - a label element sourrounding a input[type=checkbox] element
 ---------------------------------------------------------------------------------------*/
  
-label.tp-CheckBox {
-    display: inline-flex;
-    outline: none;
-    height: auto;
-}
 
-label.tp-CheckBox input[type=checkbox] {
-    margin: 0 4px;
-}
 
 
 /*---------------------------------------------------------------------------------------
