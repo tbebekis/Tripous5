@@ -157,7 +157,7 @@ tp.GridColumn = class extends tp.tpObject {
     @type {string}
     */
     get DataType() {
-        return this.DataColumn instanceof tp.DataColumn ? this.DataColumn.DataType : tp.DataType.None; // this.fDataType;
+        return this.DataColumn instanceof tp.DataColumn ? this.DataColumn.DataType : tp.DataType.Unknown; // this.fDataType;
     }
     /**
     Gets or sets the number of decimal digits of this column
@@ -949,6 +949,7 @@ tp.GridColumn = class extends tp.tpObject {
 
                     break;
                 case tp.DataType.Float:
+                case tp.DataType.Decimal:
                     Info = GetStartFilterOp(S, tp.FilterOp.GreaterOrEqual);
                     Res = tp.TryStrToFloat(Info.Text);
                     if (Res.Result) {
@@ -970,7 +971,6 @@ tp.GridColumn = class extends tp.tpObject {
                     }
                     break;
                 case tp.DataType.Date:
-                case tp.DataType.Time:
                 case tp.DataType.DateTime:
                     Info = GetStartFilterOp(S, tp.FilterOp.GreaterOrEqual);
                     if ((Info.Operator !== tp.FilterOp.None) && (Info.Text.length > 4)) {
@@ -1565,9 +1565,8 @@ tp.GridInplaceEditor = class extends tp.tpObject {
     @param {HTMLElement} Cell - The container cell for the editor
     */
     Show(Cell) {
-        if (this.Column.DataType === tp.DataType.None
+        if (this.Column.DataType === tp.DataType.Unknown
             || this.Column.DataType === tp.DataType.Memo
-            || this.Column.DataType === tp.DataType.Graphic
             || this.Column.DataType === tp.DataType.Blob) {
             return;
         }

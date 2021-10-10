@@ -57,7 +57,7 @@ namespace Tripous
         /// <summary>
         /// Text Blob
         /// </summary>
-        TextBlob = 0x100,
+        Memo = 0x100,
     }
 
 
@@ -133,7 +133,7 @@ namespace Tripous
         /// </summary>
         static public bool IsBlob(this DataFieldType Value)
         {
-            return Value == DataFieldType.Blob || Value == DataFieldType.TextBlob;  
+            return Value == DataFieldType.Blob || Value == DataFieldType.Memo;  
         }
 
         /// <summary>
@@ -149,13 +149,12 @@ namespace Tripous
                 case DataFieldType.Decimal: return typeof(System.Decimal);
                 case DataFieldType.Date: return typeof(System.DateTime);
                 case DataFieldType.DateTime: return typeof(System.DateTime);
-                case DataFieldType.Boolean: return typeof(System.Boolean);
-                case DataFieldType.Blob: return typeof(System.Object);
-                case DataFieldType.TextBlob: return typeof(System.Object);
+                case DataFieldType.Boolean: return typeof(System.Int32);
+                case DataFieldType.Blob: return typeof(byte[]);
+                case DataFieldType.Memo: return typeof(System.String);
             }
 
             return null; 
-
 
         }
 

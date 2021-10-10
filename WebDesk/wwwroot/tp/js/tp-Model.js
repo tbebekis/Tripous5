@@ -2142,6 +2142,7 @@ tp.DataView = class extends tp.View {
             } else {
                 this.DoSelectBrowserBefore();
 
+                // TODO: EDW - Πρέπει να περνάμε στο Grid τις κολώνες που θα δείξουμε, με ρυθμίσεις, π.χ. Boolean, Decimals, κλπ.
                 Action = await this.Broker.SelectBrowser(SelectSql, RowLimit);
 
                 if (Action instanceof tp.BrokerAction) {

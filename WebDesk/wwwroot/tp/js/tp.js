@@ -1767,7 +1767,7 @@ tp.NumberConvertionResult.prototype.Value;
 tp.NumberConvertionResult.prototype.Result;
 
 /**
-Tries to convert a string into an integer.   
+Tries to convert a string into an integer.   <br />
 Returns a {@link tp.NumberConvertionResult} object as <code>{Value: v, Result: true}</code> where Value is the convertion result, if successful, and Result indicates success or failure.
 @param  {string} v - The string to operate on.
 @returns {tp.NumberConvertionResult} Returns an {@link tp.NumberConvertionResult} object as <code> {Value: v, Result: true}</code>
@@ -1777,15 +1777,22 @@ tp.TryStrToInt = function (v) {
     return new tp.NumberConvertionResult(n, isNaN(n) ? false : true);
 };
 /**
-Tries to convert a string into a float.   
+Tries to convert a string into a float.  <br />
+NOTE: The decimal separator could be point or comma. <br />
 Returns a {@link tp.NumberConvertionResult} object as <code>{Value: v, Result: true}</code>  where Value is the convertion result, if successful, and Result indicates success or failure.
 @param  {string} v - The string to operate on.
 @returns {tp.NumberConvertionResult} Returns a {@link tp.NumberConvertionResult} object as <code> {Value: v, Result: true}</code>
  */
 tp.TryStrToFloat = function (v) {
+    if (tp.IsString(v)) {
+        v = v.replace(',', '.');
+    };
+
     var n = parseFloat(v);
     return new tp.NumberConvertionResult(n, isNaN(n) || !isFinite(n) ? false : true);
-};
+}; 
+
+
 /**
 Converts an integer value into a hexadecimal string, and returns that string   
 @param  {number} v - The value to operate on.

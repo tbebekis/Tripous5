@@ -100,7 +100,7 @@ namespace Tripous.Data
                 case DataFieldType.Boolean:
                     return CheckBox;
  
-                case DataFieldType.TextBlob:
+                case DataFieldType.Memo:
                     return Memo;
 
             }

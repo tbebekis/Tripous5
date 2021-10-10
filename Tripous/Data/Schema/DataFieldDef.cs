@@ -42,7 +42,7 @@ namespace Tripous.Data
                 case DataFieldType.DateTime: return SqlProvider.CDATE_TIME;
                 case DataFieldType.Boolean: return "integer";
                 case DataFieldType.Blob: return SqlProvider.CBLOB;
-                case DataFieldType.TextBlob: return SqlProvider.CBLOB_TEXT;
+                case DataFieldType.Memo: return SqlProvider.CBLOB_TEXT;
             }
 
             throw new ApplicationException($"DataType not supported in Field definition: {Type}");

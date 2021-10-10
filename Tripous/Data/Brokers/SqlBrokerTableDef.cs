@@ -405,6 +405,10 @@ namespace Tripous.Data
                     {
                         // let FieldDes.DataType keep its original value
                     }
+                    else if (FieldDes.DataType == DataFieldType.Boolean && (Field.DataType == typeof(int) || Field.DataType == typeof(System.Int64)))
+                    {
+                        // let FieldDes.DataType keep its original value
+                    }
                     else if (FieldDes.DataType != DataFieldTypeHelper.DataFieldTypeOf(Field.DataType))
                     {
                         FieldDes.DataType = DataFieldTypeHelper.DataFieldTypeOf(Field.DataType);
@@ -788,7 +792,7 @@ namespace Tripous.Data
         /// </summary>
         public SqlBrokerFieldDef AddTextBlob(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.Memo)
         {
-            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.TextBlob, TitleKey, Flags);
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Memo, TitleKey, Flags);
             return Result;
         }
 

@@ -57,8 +57,52 @@ A static enum-like class to be used for database types
 */
 tp.DataType = {
 
+    /**
+     * Unknown, none.
+     */
+    get Unknown() { return "Unknown"; },          
+    /**
+     *"string", "nvarchar", "nchar", "varchar", "char"
+     */
+    get String() { return "String"; },         
+    /**
+     * "integer", "int", "larginteger", "largint", "smallint", "autoinc", "autoincrement", "identity", "counter"
+     */
+    get Integer() { return "Integer"; },          
+    /**
+     * "float", "double", "extended", "real", "BCD", "FBCD", "currency", "money"
+     */
+    get Float() { return "Float"; },         
+    /**
+     * decimal(18, 4)
+     */
+    get Decimal() { return "Decimal"; },           
+    /**
+     * Date (date)
+     */
+    get Date() { return "Date"; },          
+    /**
+     * "moment", "datetime", "timestamp"
+     */
+    get DateTime() { return "DateTime"; },       
+    /**
+     * Boolean (integer always, 1 = true, else false)
+     */
+    get Boolean() { return "Boolean"; },         
+    /**
+     * "blob", "graphic", "image", "bin", "binary"
+     */
+    get Blob() { return "Blob"; },            
+    /**
+     * "memo", "text", "clob"
+     */
+    get Memo() { return "Memo"; },            
+ 
+    
+
+/*
     get None() { return "N"; }, // = "N";          // none
-    get String() { return "S"; }, //= "S";        // {"string", "nvarchar", "nchar", "varchar", "char"}
+    get String() { return "S"; }, //= "S";         // {"string", "nvarchar", "nchar", "varchar", "char"}
     get Integer() { return "I"; }, // = "I";       // {"integer", "int", "larginteger", "largint", "smallint", "autoinc", "autoincrement", "identity", "counter"}
     get Boolean() { return "L"; }, // = "L";       // {"boolean", "bit", "logical"}
     get Float() { return "F"; }, // = "F";         // {"float", "double", "extended", "real", "BCD", "FBCD", "currency", "money"}
@@ -67,19 +111,19 @@ tp.DataType = {
     get DateTime() { return "M"; }, // = "M";      // {"moment", "datetime", "timestamp"}
     get Memo() { return "X"; }, // = "X";          // {"memo", "text", "clob"}
     get Graphic() { return "G"; }, // = "G";       // {"graphic", "image"}
-    get Blob() { return "B"; }, // = "B";          // {"blob", "bin", "binary"} 
-
+    get Blob() { return "B"; }, // = "B";          // {"blob", "bin", "binary"}
+ */
 
     /** Converts a DataType value to json string
     @param {string} v - One of the DataType string constants
     @returns {string} Returns a json equivalent
     */
     TypeToJson(v) {
-        if (v === tp.DataType.String)
+        if (v === tp.DataType.String || v === tp.DataType.Memo)
             return "string";
-        if ((v === tp.DataType.Integer) || (v === tp.DataType.Float))
+        if (v === tp.DataType.Integer || v === tp.DataType.Float || v === tp.DataType.Decimal)
             return "number";
-        if ((v === tp.DataType.DateTime) || (v === tp.DataType.Date) || (v === tp.DataType.Time))
+        if (v === tp.DataType.DateTime || v === tp.DataType.Date)
             return "date";
         if (v === tp.DataType.Boolean)
             return "boolean";
@@ -95,7 +139,7 @@ tp.DataType = {
             if (tp.DataType[Prop] === v)
                 return Prop;
         }
-        return 'None';
+        return 'Unknown';
     },
     /**
     True if the specified data type is one of the constants of this class
@@ -105,14 +149,13 @@ tp.DataType = {
     IsValid(v)  {
         return v === tp.DataType.String
             || v === tp.DataType.Integer
-            || v === tp.DataType.Boolean
             || v === tp.DataType.Float
+            || v === tp.DataType.Decimal
             || v === tp.DataType.Date
-            || v === tp.DataType.Time
             || v === tp.DataType.DateTime
-            || v === tp.DataType.Memo
-            || v === tp.DataType.Graphic
+            || v === tp.DataType.Boolean
             || v === tp.DataType.Blob
+            || v === tp.DataType.Memo
             ;
 
     },
@@ -127,6 +170,7 @@ tp.DataType = {
 
             case tp.DataType.Integer:
             case tp.DataType.Float:
+            case tp.DataType.Decimal:
                 return tp.AggregateType.Count
                     | tp.AggregateType.Avg
                     | tp.AggregateType.Sum
@@ -135,7 +179,6 @@ tp.DataType = {
                     ;
 
             case tp.DataType.Date:
-            case tp.DataType.Time:
             case tp.DataType.DateTime:
                 return tp.AggregateType.Count
                     | tp.AggregateType.Max
@@ -155,8 +198,8 @@ tp.DataType = {
             case tp.DataType.String: return tp.Alignment.Left;
             case tp.DataType.Integer:
             case tp.DataType.Float:
-            case tp.DataType.Date:
-            case tp.DataType.Time:
+            case tp.DataType.Decimal:
+            case tp.DataType.Date: 
             case tp.DataType.DateTime: return tp.Alignment.Right;
             default: return tp.Alignment.Mid;
         }
@@ -171,8 +214,8 @@ tp.DataType = {
             || v === tp.DataType.Integer
             || v === tp.DataType.Boolean
             || v === tp.DataType.Float
+            || v === tp.DataType.Decimal
             || v === tp.DataType.Date
-            || v === tp.DataType.Time
             || v === tp.DataType.DateTime
             ;
     },
@@ -188,10 +231,10 @@ tp.DataType = {
     /**
     Returns true if a specified data type is date-time, date or time.
     @param {string} v - One of the DataType string constants
-    @returns {boolean} Returns true if a specified data type is date-time, date or time.
+    @returns {boolean} Returns true if a specified data type is date-time, date.
     */
     IsDateTime(v) {
-        return v === this.DateTime || v === this.Date || v === this.Time;
+        return v === this.DateTime || v === this.Date;
     }
      
 };
@@ -1761,16 +1804,16 @@ tp.Db = class {
             return '';
         } else {
             switch (DataType) {
-                case tp.DataType.None: return '';
+                case tp.DataType.Unknown: return '';
                 case tp.DataType.String: return v.toString();
                 case tp.DataType.Integer: return v.toString();
                 case tp.DataType.Boolean: return (v === true) || (v === 1) ? 'x' : '';
                 case tp.DataType.Float: return tp.FormatNumber2(v, Decimals);
+                case tp.DataType.Decimal: return tp.FormatNumber2(v, Decimals);
                 case tp.DataType.Date: return tp.ToDateString(v, LocalDate === true? '': 'ISO');
-                case tp.DataType.Time: return tp.ToTimeString(v, DisplaySeconds);
+                //case tp.DataType.Time: return tp.ToTimeString(v, DisplaySeconds);
                 case tp.DataType.DateTime: return tp.ToDateTimeString(v, LocalDate === true ? '' : 'ISO');
                 case tp.DataType.Memo: return Boolean(ForList) === true ? '[memo]' : v; // '[memo]';
-                case tp.DataType.Graphic: return Boolean(ForList) === true ? '[graphic]' : v; //  '[graphic]';
                 case tp.DataType.Blob: return Boolean(ForList) === true ? '[blob]' : v; //  '[blob]';
             }
         }
@@ -1808,6 +1851,7 @@ tp.Db = class {
                     return false;
 
                 case tp.DataType.Float:
+                case tp.DataType.Decimal:
                     Info = tp.TryStrToFloat(S);
                     if (!Info.Result) {
                         tp.Throw('Not a float number: ' + S);
@@ -1820,14 +1864,7 @@ tp.Db = class {
                         tp.Throw('Not a date: ' + S);
                     }
                     return tp.ClearTime(Info.Value);
-
-                case tp.DataType.Time:
-                    Info = tp.TryParseDateTime(S);
-                    if (!Info.Result) {
-                        tp.Throw('Not a time: ' + S);
-                    }
-                    return tp.ClearDate(Info.Value);
-
+ 
                 case tp.DataType.DateTime:
                     Info = tp.TryParseDateTime(S);
                     if (!Info.Result) {
@@ -3106,7 +3143,7 @@ tp.DataColumn = class extends tp.tpObject {
         this.Expression = null;
         this.DefaultValue = null;
         this.MaxLength = this.DataType === tp.DataType.String ? MaxLength : 0;
-        this.Decimals = this.DataType === tp.DataType.Float ? 2 : 0;
+        this.Decimals = this.DataType === tp.DataType.Float || this.DataType === tp.DataType.Decimal ? 2 : 0;
         this.ReadOnly = false;
         this.Visible = true;
         this.Required = false;
@@ -3966,9 +4003,10 @@ tp.FilterInfoList = class extends tp.DataSourceInfoList {
 
             if (Info.DataType === tp.DataType.Date) {
                 Value = tp.ClearTime(Value);
-            } else if (Info.DataType === tp.DataType.Time) {
-                Value = tp.ClearDate(Value);
             }
+            //else if (Info.DataType === tp.DataType.Time)  
+            //    Value = tp.ClearDate(Value);
+         
 
             // look-up
             if (Info.LookUpTable) {

@@ -52,6 +52,16 @@ namespace Tripous.Data
         {
             if (Descriptor != null)
             {
+                this.Title = Descriptor.Title;
+                this.TitleKey = Descriptor.TitleKey;
+                this.DataType = Descriptor.DataType.ToString();
+                this.Expression = Descriptor.Expression;
+                this.DefaultValue = Descriptor.DefaultValue;
+                this.MaxLength = Descriptor.MaxLength;
+                this.ReadOnly = Descriptor.IsReadOnly;
+                this.Visible = !Descriptor.IsHidden;
+                this.Required = Descriptor.IsRequired;
+
                 this.Decimals = Descriptor.Decimals;
                 this.Flags = Descriptor.Flags;
             }

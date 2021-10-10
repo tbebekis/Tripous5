@@ -245,7 +245,7 @@ namespace Tripous
         /// </summary>
         static public void SetAsAutoInc(this DataColumn Column)
         {
-            if ((Column != null) && Simple.SimpleTypeOf(Column.DataType).IsInteger())
+            if ((Column != null) && (Column.DataType == typeof(int) || Column.DataType == typeof(System.Int64)))  
             {
                 Column.AutoIncrement = true;
                 Column.AutoIncrementSeed = -1;
@@ -258,44 +258,64 @@ namespace Tripous
         /// </summary>
         static public string DataTypeToJson(this DataColumn Column)
         {
-            SimpleType T = Simple.SimpleTypeOf(Column.DataType);
+            if (Column.IsMemo())
+                return "Memo";
 
-            if (T.IsInteger() && Column.IsCheckBox())
-            {
-                T = Tripous.SimpleType.Boolean;
-            }
-            else if (T.IsDateTime())
-            {
-                if (Column.IsDate())
-                    T = SimpleType.Date;
-                else if (Column.IsTime())
-                    T = SimpleType.Time;
-                else
-                    T = SimpleType.DateTime;
-            }
-            else if (Column.IsMemo())
-            {
-                T = SimpleType.Memo;
-            }
-            else if (Column.IsImage())
-            {
-                T = SimpleType.Graphic;
-            }
-            else if ((Column.DataType == typeof(byte[]) || (Column.DataType == typeof(object))))
-            {
-                T = SimpleType.Boolean;
-            }
+            if (Column.IsImage())
+                return "Blob";
 
-            return T.ToChar().ToString();
+            if (Column.DataType == typeof(string))
+                return "String";
+ 
+            if (Column.DataType == typeof(int) || Column.DataType == typeof(System.Int64))
+                return Column.IsCheckBox()? "Boolean": "Integer";
+
+            if (Column.DataType == typeof(float) || Column.DataType == typeof(double))
+                return "Float";
+
+            if (Column.DataType == typeof(decimal))
+                return "Decimal";
+
+            if (Column.DataType == typeof(DateTime))
+                return Column.IsDate() ? "Date" : "DateTime";
+
+            if (Column.DataType == typeof(byte[]) || Column.DataType == typeof(object))
+                return "Blob";
+
+            return "Unknown";
         }
         /// <summary>
         /// Converts a json datatype to column datatype
         /// </summary>
         static public void JsonToDataType(this DataColumn Column, string Json)
         {
-            SimpleType T = Simple.SimpleTypeOf(Json[0]);
-            Column.DataType = T.GetNetType();
-
+            switch (Json)
+            {
+                case "String":
+                    Column.DataType = typeof(string);
+                    break;
+                case "Integer":
+                case "Boolean":
+                    Column.DataType = typeof(int);
+                    break;
+                case "Float":
+                    Column.DataType = typeof(double);
+                    break;
+                case "Decimal":
+                    Column.DataType = typeof(decimal);
+                    break;
+                case "Date":
+                case "DateTime":
+                    Column.DataType = typeof(DateTime);
+                    break;
+                case "Blob":
+                    Column.DataType = typeof(byte[]);
+                    break;
+                case "Memo":
+                    Column.DataType = typeof(string);
+                    break;
+            }
+ 
         }
     }
 }

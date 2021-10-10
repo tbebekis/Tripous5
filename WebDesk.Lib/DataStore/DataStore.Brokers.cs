@@ -23,6 +23,9 @@ select
    Trader.Id            as Id
   ,Trader.Code          as Code
   ,Trader.Name          as Name
+  ,Trader.Married       as Married
+  ,Trader.BirthDate     as BirthDate
+  ,Trader.Salary        as Salary
 from 
   Trader
 ";
