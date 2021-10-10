@@ -78,9 +78,7 @@ script {
     padding-right: 0;
 }
 
-.tp-CtrlRow {
-    margin: 12px 0 ;
-}
+ 
 
  
 
@@ -91,9 +89,7 @@ script {
 .tp-CtrlRow input[type=date], 
 .tp-CtrlRow input[type=tel], 
 .tp-CtrlRow select {
-    height: 36px;
     border: 1px solid var(--Gray);
-    padding: 0 0 0 4px;
 }
 
 .tp-CtrlRow input[type=text]:focus,

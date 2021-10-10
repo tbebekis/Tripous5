@@ -92,7 +92,7 @@ namespace Tripous.Data
  
                 case DataFieldType.Float:
                 case DataFieldType.Decimal:
-                    return TextBox;
+                    return NumberBox;
  
                 case DataFieldType.Date:
                 case DataFieldType.DateTime:

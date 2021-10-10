@@ -168,7 +168,7 @@ tab control
 
 /* tab pages */ 
 .tp-TabControl > :nth-child(2) {
-    padding: 6px 4px;
+    /* padding: 6px 4px; */
 }
 
 /*---------------------------------------------------------------------------------------
@@ -830,6 +830,7 @@ number box - tp-NumberBox
 .tp-NumberBox > .tp-Minus {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 2.2em;
     font-weight: bold;
     cursor: pointer;
@@ -843,6 +844,7 @@ number box - tp-NumberBox
     -moz-appearance: textfield;
     margin: 0;
     text-align: right;
+    padding-right: 0.4em;
 }
 
 .tp-NumberBox input[type=number]::-webkit-inner-spin-button,
@@ -1078,10 +1080,12 @@ table.tp-Calendar td.tp-Marked {
 .tp-DateBox .tp-Strip .tp-Btn {
     position: relative;
     display: flex;
-    padding: 0 5px;
+    align-items: center;
+    justify-content: center;
+    width: 2.2em;
     background-color: var(--BackColor);
     border-left: var(--Border);
-    cursor: default;
+    cursor: default;    
 }
 
 .tp-DateBox .tp-DropDownBox {

@@ -1659,6 +1659,12 @@ tp.DataView = class extends tp.View {
     @returns {any} Returns the Id (value of the primary key field) of the selected data-row of the browser grid, if any, else null.
     */
     GetBrowserSelectedId() {
+        if (tp.IsBlank(this.PrimaryKeyField)) {
+            if (this.tblItem instanceof tp.DataTable) {
+                this.PrimaryKeyField = this.tblItem.PrimaryKeyField;
+            }
+        }
+
         if (!tp.IsBlank(this.PrimaryKeyField) && !tp.IsEmpty(this.gridBrowser)) {
             var Row = this.gridBrowser.FocusedRow;
             if (!tp.IsEmpty(Row) && Row.Table.ContainsColumn(this.PrimaryKeyField)) {

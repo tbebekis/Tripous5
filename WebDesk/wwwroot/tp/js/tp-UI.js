@@ -12450,7 +12450,7 @@ tp.DateBox = class extends tp.Control {
         this.fDropDownBox = new tp.DropDownBox(null, {
             Associate: ControlContainer,
             Owner: this,
-            Parent: this.Handle
+            Parent: this.Handle.parentElement
         });
 
         //this.fDropDownBox.StyleProp('border', 'none');
@@ -19042,7 +19042,7 @@ tp.Ui = class {
             divCtrl,            // HTMLElement
             Result = null;      // tp.tpElement
 
-        tp.AddClass(elRow, tp.Classes.Row);
+        //tp.AddClass(elRow, tp.Classes.Row);
 
         if (elRow.children.length === 0) {
             CP = tp.GetDataSetupObject(elRow);
@@ -19120,7 +19120,7 @@ tp.Ui = class {
             Prefix, 
             Result = null;      // tp.tpElement  
 
-        tp.AddClass(elRow, tp.Classes.Row);
+        //tp.AddClass(elRow, tp.Classes.Row);
 
         if (elRow.children.length === 0) {
             CP = tp.GetDataSetupObject(elRow);
@@ -19359,7 +19359,7 @@ tp.Ui.Types = {
     HtmlDateBox: tp.HtmlDateBox,
 
     Calendar: tp.Calendar,
-    DateBox: tp.HtmlDateBox,
+    DateBox: tp.DateBox,
     ImageBox: tp.ImageBox,
 
     LocatorBox: tp.LocatorBox,

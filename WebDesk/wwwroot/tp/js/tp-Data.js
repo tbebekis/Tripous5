@@ -3548,11 +3548,11 @@ tp.DataRow = class {
         var Index = this.Table.IndexOfColumn(Column);
         var v = this.GetByIndex(Index);
 
-        if (this.Table.Columns[Index].DataType === tp.DataType.String)
-            return tp.IsBlank(v);
-
         if (tp.IsEmpty(v))
             return true;
+
+        if (this.Table.Columns[Index].DataType === tp.DataType.String && tp.IsString(v))
+            return tp.IsBlank(v);
 
         return false;
     }

@@ -185,9 +185,7 @@ html {
 
 .tp-Col {
     position: relative;
-    /* width: 100%; */
     height: auto;
-    padding: 0 10px;    
 }
 
 /*---------------------------------------------------------------------------------------
@@ -543,15 +541,27 @@ max-width 	Rules applied for any browser width less than the value defined in th
     padding: 0 3px;
 }
 
+.tp-CtrlRow input[type=text], 
+.tp-CtrlRow input[type=email], 
+.tp-CtrlRow input[type=password], 
+.tp-CtrlRow input[type=number], 
+.tp-CtrlRow input[type=date], 
+.tp-CtrlRow input[type=tel], 
+.tp-CtrlRow select {
+     height: 2.4em;
+}
+
 .tp-CtrlRow,
 .tp-CheckBoxRow {
     position: relative;
-    display: flex;    
-    padding: 0 10px 0 15px;    
+    display: flex;   
+    padding-right: 6px;
 }
 
 .tp-CtrlRow {
-    margin-top: 4px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    align-items: baseline;    
 }
 
 .tp-CheckBoxRow {
@@ -562,7 +572,7 @@ max-width 	Rules applied for any browser width less than the value defined in th
 .tp-CtrlRow > .tp-CText {
     position: relative;
     display: inline-flex;
-    padding: 3px 4px 0 0;
+    /* padding: 3px 4px 0 0; */
     /* color: @FontColor2; */
 }
 
