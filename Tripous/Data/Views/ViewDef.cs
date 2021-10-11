@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tripous.Data
 {
-
  
-
     /// <summary>
     /// Top level container. Represents a desktop form or a html page.
     /// <para><see cref="Tabs"/>, <see cref="Groups"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
@@ -207,10 +205,7 @@ namespace Tripous.Data
         {
            return Tabs.Find(item => Sys.IsSameText(item.Id, Id));
         }
-
  
-
-
         /* properties */
         /// <summary>
         /// A unique name among all view containers. 
@@ -255,6 +250,11 @@ namespace Tripous.Data
         /// Columns per screen size
         /// </summary>
         public UiSplit ColumnSplit { get; set; } = new UiSplit();
+
+        /// <summary>
+        /// Tool-bar flags. Indicates what buttons to display.
+        /// </summary>
+        public ViewToolBarFlags ToolBarFlags { get; set; } = ViewToolBarFlags.Cancel | ViewToolBarFlags.Close;
 
         /// <summary>
         /// A list of tabs. Could be empty.

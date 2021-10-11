@@ -20,7 +20,7 @@ namespace Tripous.Data
         string fDefaultValue = Sys.NULL;
         string fTitle;
 
-        DataFieldType fDataType;
+        //DataFieldType fDataType;
 
         /* construction */
         /// <summary>
@@ -241,22 +241,7 @@ from
         /// <summary>
         /// The data-type of the field
         /// </summary>
-        public DataFieldType DataType
-        {
-            get { return fDataType; }
-            set
-            {
-                if (fDataType == DataFieldType.Boolean)
-                {
-                    if (value == DataFieldType.Integer)
-                    {
-
-                    }                    
-                }
-
-                fDataType = value;
-            }
-        }
+        public DataFieldType DataType { get; set; }
         /// <summary>
         /// The max length of a string field
         /// </summary>

@@ -60,11 +60,13 @@ namespace WebLib
                 {
                     SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
                     ViewDef = new ViewDef(BrokerDef);
+                    ViewDef.ToolBarFlags = ViewToolBarFlags.List | ViewToolBarFlags.Filter | ViewToolBarFlags.AllEdits | ViewToolBarFlags.Cancel | ViewToolBarFlags.Close;
                 }
 
                 DataViewModel DVM = new DataViewModel(ViewDef);
                 DVM.Setup.BrokerName = BrokerName;  
- 
+               
+
                 Model = DVM;
             }
 

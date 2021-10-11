@@ -12,7 +12,7 @@
 @if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
 {
     <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Setup.Serialize())'>
-        @await Html.PartialAsync("DataView.ToolBar")
+        @await Html.PartialAsync("DataView.ToolBar", Model.ViewDef.ToolBarFlags)
  
         <div class="PanelList ViewPanelList tp-PanelList" data-setup="{ SelectedIndex: 0 }">
 

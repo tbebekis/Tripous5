@@ -276,7 +276,7 @@ from
             DateRange = Tripous.DateRange.Custom;
 
             DisplayLabels = string.Empty;
-            ColumnSettings.Clear();
+            //ColumnSettings.Clear();
             SqlFilters.Clear();
 
         }
@@ -318,7 +318,7 @@ from
                 DateRange = Src.DateRange;
 
                 DisplayLabels = Src.DisplayLabels;
-                ColumnSettings = Src.ColumnSettings;
+                //ColumnSettings = Src.ColumnSettings;
                 SqlFilters = Src.SqlFilters;
  
 
@@ -551,26 +551,31 @@ from
                     }
                 }
             }
-            else if (HasColumnSettings)
-            {
-                ColumnSetting Setting;
-                foreach (DataColumn Column in Table.Columns)
-                {
-                    Setting =   ColumnSettings.Find(item => item.Name == Column.ColumnName);
-                    if (Setting == null)
-                    {
-                        Column.IsVisible(false);
-                    }
-                    else
-                    {
-                        Column.IsVisible(Setting.Visible);
-                        Column.Caption = Setting.Title;
-                    }
-                }
-            }
+
+            return HasDisplayLabels;
+
+            /*
+                        else if (HasColumnSettings)
+                        {
+                            ColumnSetting Setting;
+                            foreach (DataColumn Column in Table.Columns)
+                            {
+                                Setting =   ColumnSettings.Find(item => item.Name == Column.ColumnName);
+                                if (Setting == null)
+                                {
+                                    Column.IsVisible(false);
+                                }
+                                else
+                                {
+                                    Column.IsVisible(Setting.Visible);
+                                    Column.Caption = Setting.Title;
+                                }
+                            }
+                        }
 
 
-            return HasDisplayLabels || HasColumnSettings;
+                        return HasDisplayLabels || HasColumnSettings; 
+             */
 
         }
         /// <summary>
@@ -719,7 +724,7 @@ from
         /// <summary>
         /// A collection of column settings elements
         /// </summary>
-        public List<ColumnSetting> ColumnSettings { get; set; } = new List<ColumnSetting>();
+        //public List<ColumnSetting> ColumnSettings { get; set; } = new List<ColumnSetting>();
         /// <summary>
         /// The criterion field descriptors used to generate the "user where" clause of the SelectSql
         /// </summary>
@@ -735,8 +740,8 @@ from
         /// <summary>
         /// True if ColumnSettings is NOT null and contains items
         /// </summary>
-        [JsonIgnore]
-        public bool HasColumnSettings { get { return (ColumnSettings != null) && (ColumnSettings.Count > 0); } }
+        //[JsonIgnore]
+        //public bool HasColumnSettings { get { return (ColumnSettings != null) && (ColumnSettings.Count > 0); } }
         /// <summary>
         /// True if CriterionDescriptors is NOT null and contains items
         /// </summary>
