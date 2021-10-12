@@ -20,6 +20,10 @@ namespace Tripous.Data
     public enum SqlFilterMode
     {
         /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// Indicates that the user enters the criterion value into an input control.
         /// </summary>
         Simple = 1,

@@ -241,23 +241,7 @@ tp.DataType = {
 Object.freeze(tp.DataType);
 //#endregion  
 
-//#region tp.ColumnType 
-/**
-A static enum-like class. Indicates data type of a Column
-@class
-@enum {number}
-*/
-tp.ColumnType = {
-    Default: 0,
-    DateTime: 1,
-    Date: 2,
-    Time: 3,
-    CheckBox: 4,
-    Memo: 5,
-    Image: 6
-};
-Object.freeze(tp.ColumnType);
-//#endregion 
+
 
 //#region tp.DataRowState
 /**
@@ -307,14 +291,14 @@ tp.DateRange = {
     Today: 1,
     Yesterday: 2,
     Tomorrow: 3,
-    PreviousWeek: 4,
-    PreviousTwoWeeks: 5,
-    PreviousMonth: 6,
-    PreviousTwoMonths: 7,
-    PreviousThreeMonths: 8,
-    PreviousSemester: 9,
-    PreviousYear: 10,
-    PreviousTwoYears: 11,
+    LastWeek: 4,
+    LastTwoWeeks: 5,
+    LastMonth: 6,
+    LastTwoMonths: 7,
+    LastThreeMonths: 8,
+    LastSemester: 9,
+    LastYear: 10,
+    LastTwoYears: 11,
     NextWeek: 12,
     NextTwoWeeks: 13,
     NextMonth: 14,
@@ -353,14 +337,14 @@ tp.DateRanges = {
         switch (Range) {
             case tp.DateRange.Today:
             case tp.DateRange.Yesterday:
-            case tp.DateRange.PreviousWeek:
-            case tp.DateRange.PreviousTwoWeeks:
-            case tp.DateRange.PreviousMonth:
-            case tp.DateRange.PreviousTwoMonths:
-            case tp.DateRange.PreviousThreeMonths:
-            case tp.DateRange.PreviousSemester:
-            case tp.DateRange.PreviousYear:
-            case tp.DateRange.PreviousTwoYears:
+            case tp.DateRange.LastWeek:
+            case tp.DateRange.LastTwoWeeks:
+            case tp.DateRange.LastMonth:
+            case tp.DateRange.LastTwoMonths:
+            case tp.DateRange.LastThreeMonths:
+            case tp.DateRange.LastSemester:
+            case tp.DateRange.LastYear:
+            case tp.DateRange.LastTwoYears:
                 return true;
         }
 
@@ -369,38 +353,46 @@ tp.DateRanges = {
 };
 //#endregion  
 
-//#region tp.ColumnSetting
+
+//#region tp.ColumnDisplayType
+/**
+A static enum-like class. The display type of a column. Used with grids.
+@class
+@enum {number}
+*/
+tp.ColumnDisplayType = {
+    Default: 0,
+    DateTime: 1,
+    Date: 2,
+    Time: 3,
+    CheckBox: 4,
+    Memo: 5,
+    Image: 6
+};
+Object.freeze(tp.ColumnDisplayType);
+//#endregion
+
+
+//#region tp.SelectSqlColumn
 /**
 Settings for a grid column
 */
-tp.ColumnSetting = class extends tp.NamedItem {
+tp.SelectSqlColumn = class {
     /**
     Constructor
     @param {string} [Name] Column name
     */
-    constructor(Name) {
-        super(Name);
+    constructor() {       
     }
-
- 
-    /**
-     Gets or sets the Title of the column
-     @type {string}
-     */
-    get Title() {
-        return !tp.IsBlank(this.fTitle) ? this.fTitle : this.Name;
-    }
-    set Title(v) {
-        this.fTitle = v;
-    }
-
 
     /**
     Assigns a source item to this instance
-    @param {tp.ColumnSetting} Source The source to copy values from
+    @param {tp.SelectSqlColumn} Source The source to copy values from
     */
     Assign(Source) {
-        super.Assign(Source);
+        this.Name = Source.Name;
+        this.DisplayType = Source.DisplayType;
+        this.Title = Source.Title;
 
         this.Visible = Source.Visible;
         this.Width = Source.Width;
@@ -410,84 +402,61 @@ tp.ColumnSetting = class extends tp.NamedItem {
         this.Decimals = Source.Decimals;
         this.FormatString = Source.FormatString;
         this.Aggregate = Source.Aggregate;
-        this.AggregateFormat = Source.AggregateFormat;
-
-        this.Title = Source.Title;
+        this.AggregateFormat = Source.AggregateFormat;        
     }
 };
-/** Title
- @private
+/** Name
  @type {string}
  * */
-tp.ColumnSetting.prototype.fTitle = '';
+tp.SelectSqlColumn.prototype.Name = '';
+/** The display type of a column. Used with grids.
+ @type {tp.ColumnDisplayType.Default}
+ * */
+tp.SelectSqlColumn.prototype.DisplayType = tp.ColumnDisplayType.Default;
+/** Title
+ @type {string}
+ * */
+tp.SelectSqlColumn.prototype.Title = '';
 
-/* properties */
 /** Controls the visibility of the column
  @type {boolean}
  */
-tp.ColumnSetting.prototype.Visible = true;
+tp.SelectSqlColumn.prototype.Visible = true;
 /** Width of the column
  @type {number}
  */
-tp.ColumnSetting.prototype.Width = 90;
+tp.SelectSqlColumn.prototype.Width = 90;
 /** When true the column is read-only
  @type {boolean}
  */
-tp.ColumnSetting.prototype.ReadOnly = false;
+tp.SelectSqlColumn.prototype.ReadOnly = true;
 /** Display index
  @type {number}
  */
-tp.ColumnSetting.prototype.DisplayIndex = 0;
-/** Group index
+tp.SelectSqlColumn.prototype.DisplayIndex = 0;
+/** Group index. -1 means not defined
  @type {number}
  */
-tp.ColumnSetting.prototype.GroupIndex = -1;
-/** Decimal places to use when displaying float numbers
+tp.SelectSqlColumn.prototype.GroupIndex = -1;    
+/** Decimal places to use when displaying float numbers. -1 means not defined
  @type {number}
  */
-tp.ColumnSetting.prototype.Decimals = 0;
+tp.SelectSqlColumn.prototype.Decimals = -1;      
 /** Format string of the value
  @type {string}
  */
-tp.ColumnSetting.prototype.FormatString = '';
+tp.SelectSqlColumn.prototype.FormatString = '';
 /** The aggregate function to use
  @type {tp.AggregateType}
  */
-tp.ColumnSetting.prototype.Aggregate = tp.AggregateType.None;
+tp.SelectSqlColumn.prototype.Aggregate = tp.AggregateType.None;
 /** The aggregate format to use
  @type {number}
  */
-tp.ColumnSetting.prototype.AggregateFormat = '';
+tp.SelectSqlColumn.prototype.AggregateFormat = '';
 //#endregion  
 
-//#region tp.ColumnSettingList
-/**
-A list of grid column setting items
-*/
-tp.ColumnSettingList = class extends tp.NamedItems {
-
-    /**
-    Constructor
-    */
-    constructor() {
-        super(tp.ColumnSetting);
-    }
-
-    /* public */
-    /**
-    Constructs and returns a string with a line for each item as Name=Title
-    @returns {string} Returns a string with a line for each item as Name=Title
-    */
-    AsDisplayLabelsText() {
-        var Result = '';
-        for (var i = 0, ln = this.length; i < ln; i++) {
-            Result += tp.Format('{0}={1}\n', this[i].Name, this[i].Title);
-        }
-        return Result;
-    }
-
-};
-//#endregion  
+ 
 
 
 
@@ -759,9 +728,10 @@ tp.ParseSelectSql = function (Text) {
  * @enum {number}
  * */
 tp.SqlFilterMode = {
+    None: 0,
     Simple: 1,
     EnumQuery: 2,
-    EnumConst: 3,
+    EnumConst: 4,
     Locator: 8
 };
 Object.freeze(tp.SqlFilterMode);
@@ -821,91 +791,77 @@ tp.SqlFilterEnum.prototype.DisplayLabels = '';
 /**
 Describes a single entry of a WHERE clause of a SELECT sql statement.
 */
-tp.SqlFilter = class extends tp.Descriptor {
+tp.SqlFilter = class   {
     /**
     Constructor
     @param {string} [FieldPath] The field path, i.e. TableName.FieldName or just FieldName
     */
     constructor(FieldPath) {
-        super(FieldPath);
+        this.Enum = new tp.SqlFilterEnum();
     }
  
-    /**
-    Gets or sets the field path, i.e. TableName.FieldName or just FieldName
-    @type {string}
-    */
-    get FieldPath() {
-        return this.Name;
-    }
-    set FieldPath(v) {
-        this.Name = v;
-    }
-    /**
-    Gets or sets the aggregation function to use, if applicable
-    @type {string}
-    */
-    get AggregateFunc() {
-        return tp.ValidAggregateFunctions.indexOf(this.fAggregateFunc) !== -1 ? this.fAggregateFunc : '';
-    }
-    set AggregateFunc(v) {
-        this.fAggregateFunc = v;
-    }
-    /**
-    Returns the filter enum settings, that is special settings object when Mode is EnumQuery or EnumConst
-    @type {tp.SqlFilterEnum}
-    */
-    get Enum() {
-        if (!this.fEnum) {
-            this.fEnum = new tp.SqlFilterEnum();
-        }
-        return this.fEnum;
-    }
-
 
     /**
     Assigns a source item to this instance
     @param {tp.SqlFilter} Source The source to copy from
     */
     Assign(Source) {
-        super.Assign(Source);
 
-        this.Mode = Source.Mode;
+        this.FieldPath = Source.FieldPath;
+        this.Title = Source.Title;
+        this.TitleKey = Source.TitleKey;
+
         this.DataType = Source.DataType;
+        this.Mode = Source.Mode;
+        
         this.UseRange = Source.UseRange;
         this.Locator = Source.Locator;
         this.PutInHaving = Source.PutInHaving;
-        this.FieldPath = Source.FieldPath;
         this.AggregateFunc = Source.AggregateFunc;
 
-        if (Source.fEnum) {
+        this.InitialValue = Source.InitialValue;
+
+        if (tp.IsValid(Source.Enum)) {
             this.Enum.Assign(Source.Enum);
         }
     }
 
+    ValidateAggregateFunc() {
+        this.AggregateFunc = tp.ValidAggregateFunctions.indexOf(this.AggregateFunc) === -1? '': this.AggregateFunc;
+    }
 };
 
 
-/** The aggregate function name
- * @private
- * @type {string}
- * */
-tp.SqlFilter.prototype.fAggregateFunc = '';
-/** The filter enum settings, that is special settings object when Mode is EnumQuery or EnumConst
- * @private
- * @type {tp.SqlFilterEnum}
- * */
-tp.SqlFilter.prototype.fEnum = null;
+ 
 
+ 
 /**
-The mode of this instance. One of the {@link tp.SqlFilterMode} constants.
-@type {tp.SqlFilterMode}
+The full path to the field, i.e. TableAlias.FieldName
+@type {string}
 */
-tp.SqlFilter.prototype.Mode = tp.SqlFilterMode.Simple;
+tp.SqlFilter.prototype.FieldPath = '';
+/**
+The Title of this instance, used for display purposes
+@type {string}
+*/
+tp.SqlFilter.prototype.Title = '';
+/**
+TitleKey. Used when inserting a new instance or altering an existend.
+@type {string}
+*/
+tp.SqlFilter.prototype.TitleKey = '';
+
 /**
 Datatype
 @type {tp.DataType}
 */
 tp.SqlFilter.prototype.DataType = tp.DataType.String;
+/**
+Indicates how the user enters of selects the filter value. One of the {@link tp.SqlFilterMode} constants.
+@type {tp.SqlFilterMode}
+*/
+tp.SqlFilter.prototype.Mode = tp.SqlFilterMode.Simple;
+
 /**
 If true then range is used. Ranges is used with dates, strings, etc.
 @type {boolean}
@@ -921,84 +877,40 @@ If true then the result string of this criterion goes to the HAVING clause of a 
 @type {boolean}
 */
 tp.SqlFilter.prototype.PutInHaving = false;
-//#endregion  
-
-//#region tp.SqlFilters
 /**
-A list of sql filter descriptor items
+the aggregation function (sum, count, avg, min, max) to use, PutInHaving is true. It could be an empty string.
+@type {string}
 */
-tp.SqlFilters = class extends tp.NamedItems {
-    /**
-    Constructor
-    */
-    constructor() {
-        super(tp.SqlFilter);
-    }
+tp.SqlFilter.prototype.AggregateFunc = '';
+/**
+Returns the filter enum settings, that is special settings object when Mode is EnumQuery or EnumConst
+@type {tp.SqlFilterEnum}
+*/
+tp.SqlFilter.prototype.Enum = new tp.SqlFilterEnum();
 
+/**
+ 
+@type {string}
+*/
+tp.SqlFilter.prototype.InitialValue = '';
 
-    /** Adds a new item in this collection
-     * @param {string} FieldPath The field path, i.e. TableName.FieldName or just FieldName
-     * @param {string} TitleKey The display title
-     * @param {string} DataType One of the {@link tp.DataType} string constants.
-     * @param {tp.SqlFilterMode} Mode The mode of the filter item. One of the {@link tp.SqlFilterMode} constants.
-     * @returns {tp.SqlFilter} A {@link tp.SqlFilter} instance
-     */
-    Add2(FieldPath, TitleKey, DataType, Mode) {
-
-        TitleKey = TitleKey || FieldPath;
-        DataType = DataType || tp.DataType.String;
-        Mode = Mode || tp.CriterionMode.Simple;
-
-        var Result = new tp.SqlFilter();
-        Result.FieldPath = FieldPath;
-        Result.TitleKey = TitleKey;
-        Result.Mode = Mode;
-        Result.DataType = DataType;
-
-        super.Add(Result);
-
-        return Result;
-    }
-    /**
-     * Adds a new item in this collection
-     * @param {string} TableName The table name
-     * @param {string} FieldName The field name
-     * @param {string} TitleKey The display title
-     * @param {string} DataType One of the {@link tp.DataType} string constants.
-     * @param {tp.SqlFilterMode} Mode The mode of the filter item. One of the {@link tp.SqlFilterMode} constants.
-     * @returns {tp.SqlFilter} A {@link tp.SqlFilter} instance
-     */
-    Add3(TableName, FieldName, TitleKey, DataType, Mode) {
-        return this.Add2(tp.FieldPath(TableName, FieldName), TitleKey, DataType, Mode);
-    }
-    /**
-     * Adds a new item in this collection of the Locator mode.
-     * @param {string} FieldPath The field path, i.e. TableName.FieldName or just FieldName
-     * @param {string} TitleKey The display title
-     * @param {string} Locator The locator name
-     * @param {string} DataType One of the {@link tp.DataType} string constants.
-     * @returns {tp.SqlFilter} A {@link tp.SqlFilter} instance
-     */
-    AddLocator(FieldPath, TitleKey, Locator, DataType) {
-        var Result = this.Add2(FieldPath, TitleKey, DataType, tp.SqlFilterMode.Locator);
-        Result.Locator = Locator;
-        return Result;
-    }
-
-};
 //#endregion  
+
+ 
 
 //#region tp.SelectSql
 /**
 Represents a SELECT statement
 */
-tp.SelectSql = class extends tp.NamedItem {
+tp.SelectSql = class {
     /**
     Constructor
     @param {string} [StatementText] The SELECT Sql statement text
     */
     constructor(StatementText) {
-        super(tp.Names.Next('SelectSql'));
+        this.Name = tp.Names.Next('SelectSql');
+        this.Columns = [];
+        this.Filters = [];
         this.Text = StatementText || '';        
     }
 
@@ -1019,24 +931,6 @@ tp.SelectSql = class extends tp.NamedItem {
     */
     get IsEmpty() {
         return tp.IsBlank(this.Text);
-    }
-    /**
-    ColumnSettings
-    @type {tp.ColumnSettingList}
-    */
-    get ColumnSettings() {
-        if (!tp.IsValid(this.fColumnSettings))
-            this.fColumnSettings = new tp.ColumnSettingList();
-        return this.fColumnSettings;
-    }
-    /**
-    SqlFilters
-    @type {tp.SqlFilters}
-    */
-    get SqlFilters() {
-        if (!tp.IsValid(this.fSqlFilters))
-            this.fSqlFilters = new tp.SqlFilters();
-        return this.fSqlFilters;
     }
     /**
     True when the DisplayLabels is not empty
@@ -1137,39 +1031,36 @@ tp.SelectSql = class extends tp.NamedItem {
     @param {tp.SelectSql} Source The source object to copy from
     */
     Assign(Source) {
-
-        super.Assign(Source);
-
-        this.fColumnSettings = null;
-        this.fSqlFilters = null;
-
+        this.Name = Source.Name;
         this.Title = Source.Title;
         this.TitleKey = Source.TitleKey;
-        this.Text = Source.Text;
 
-        this.DateRange = Source.DateRange;
-        this.DateRangeColumn = Source.DateRangeColumn;
         this.CompanyAware = Source.CompanyAware;
         this.ConnectionName = Source.ConnectionName;
 
-        this.DisplayLabels = Source.DisplayLabels;
+        this.DateRange = Source.DateRange;
+        this.DateRangeColumn = Source.DateRangeColumn;
 
-        this.CheckBoxColumns = Source.CheckBoxColumns;
-        this.DateTimeColumns = Source.DateTimeColumns;
-        this.DateColumns = Source.DateColumns;
-        this.TimeColumns = Source.TimeColumns;
-        this.MemoColumns = Source.MemoColumns;
-        this.ImageColumns = Source.ImageColumns;
-
-        if (!tp.IsEmpty(Source.ColumnSettings) && (Source.ColumnSettings.length > 0)) {
-            this.fColumnSettings = new tp.ColumnSettingList();
-            this.fColumnSettings.Assign(Source.ColumnSettings);
+        this.Columns = [];
+        if (!tp.IsEmpty(Source.Columns) && (Source.Columns.length > 0)) {
+            Source.Columns.forEach(item => {
+                let Item = new tp.SelectSqlColumn();
+                this.Columns.push(Item);
+                Item.Assign(item);
+            });
         }
 
-        if (!tp.IsEmpty(Source.SqlFilters) && (Source.SqlFilters.length > 0)) {
-            this.fSqlFilters = new tp.SqlFilters();
-            this.SqlFilters.Assign(Source.SqlFilters);
+        this.Filters = [];
+        if (!tp.IsEmpty(Source.Filters) && (Source.Filters.length > 0)) {
+            Source.Filters.forEach(item => {
+                let Item = new tp.SqlFilter();
+                this.Filters.push(Item);
+                Item.Assign(item);
+            });
         }
+
+        this.Text = Source.Text;
+
     }
     /**
     Clones this instance
@@ -1330,73 +1221,29 @@ tp.SelectSql = class extends tp.NamedItem {
         return '';
     }
     /**
-    Sets the column data-types of a {@link tp.DataTable} according to column names of this instance
-    @param {tp.DataTable} Table The table to operate on
-    */
-    SetColumnTypes(Table) {
-
-        var DateTimeList = tp.Split(this.DateTimeColumns, ';');
-        var DateList = tp.Split(this.DateColumns, ';');
-        var TimeList = tp.Split(this.TimeColumns, ';');
-        var CheckBoxList = tp.Split(this.CheckBoxColumns, ';');
-        var MemoList = tp.Split(this.MemoColumns, ';');
-        var ImageList = tp.Split(this.ImageColumns, ';');
-
-        var Column;
-        for (var i = 0, ln = Table.ColumnCount; i < ln; i++) {
-            Column = Table.Columns[i];
-
-            if (tp.ListContainsText(DateTimeList, Column.Name)) Column.ColumnType = tp.ColumnType.DateTime;
-            else if (tp.ListContainsText(DateList, Column.Name)) Column.ColumnType = tp.ColumnType.Date;
-            else if (tp.ListContainsText(TimeList, Column.Name)) Column.ColumnType = tp.ColumnType.Time;
-            else if (tp.ListContainsText(CheckBoxList, Column.Name)) Column.ColumnType = tp.ColumnType.CheckBox;
-            else if (tp.ListContainsText(MemoList, Column.Name)) Column.ColumnType = tp.ColumnType.Memo;
-            else if (tp.ListContainsText(ImageList, Column.Name)) Column.ColumnType = tp.ColumnType.Image;
-        }
-    }
-    /**
     Sets-up the column types, the captions and the visibility of Table.Columns.
-    Returns true if has DisplayLabels or ColumnSettings in order to setup the Table.
-    @param {tp.DataTable} Table The table to operate on
-    @returns {boolean} Returns true if has DisplayLabels or ColumnSettings in order to setup the Table.
+    @param {tp.DataTable} Table The table to operate on 
     */
     SetupTable(Table) {
+        let i, ln, SqlColumn;
+        if (tp.IsArray(this.Columns) && this.Columns.length > 0) {
 
-
-        this.SetColumnTypes(Table);
-
-        var i, ln;
-
-        // column titles and visibility
-        if (this.HasDisplayLabels) {
-
-            var List = new tp.NameValueStringList(this.DisplayLabels);
-            //List.LocalizeValues();
-            for (i = 0, ln = Table.ColumnCount; i < ln; i++) {
-                if (!List.Contains(Table.Columns[i].Name)) {
-                    Table.Columns[i].Visible = false;
-                } else {
-                    Table.Columns[i].Visible = true;
-                    Table.Columns[i].Title = List.GetValue(Table.Columns[i].Name);
+            Table.Columns.forEach((TableColumn) => {
+                SqlColumn = this.Columns.find((item) => { return tp.IsSameText(item.Name, TableColumn.Name); });
+                if (!tp.IsValid(SqlColumn)) {
+                    TableColumn.Visible = false;
                 }
-            }
-
-        } else if (this.HasColumnSettings) {
-            var Setting;
-            for (i = 0, ln = Table.ColumnCount; i < ln; i++) {
-                Setting = tp.FirstOrDefault(this.ColumnSettings, Table.Columns[i].Name);
-                if (tp.IsEmpty(Setting)) {
-                    Table.Columns[i].Visible = false;
-                } else {
-                    Table.Columns[i].Visible = Setting.Visible;
-                    Table.Columns[i].Title = Setting.Title;
+                else {
+                    TableColumn.Visible = true;
+                    TableColumn.Title = SqlColumn.Title;
+                    TableColumn.DisplayType = SqlColumn.DisplayType; 
                 }
-            }
+
+            });
         }
-
-        return this.HasDisplayLabels || this.HasColumnSettings;
     }
 
+ 
 };
 /** Spaces 
  @constant
@@ -1404,16 +1251,68 @@ tp.SelectSql = class extends tp.NamedItem {
  */
 tp.SelectSql.prototype.SPACES = '  ';
 
-/**
- * @private
- * @type {tp.ColumnSettingList} */
-tp.SelectSql.prototype.fColumnSettings = null;
-/**
- * @private
- * @type {tp.SqlFilters} */
-tp.SelectSql.prototype.fSqlFilters = null;
 
 /* properties */
+
+
+
+/**
+Name
+@type {string}
+*/
+tp.SelectSql.prototype.Name = '';
+/**
+Title
+@type {string}
+*/
+tp.SelectSql.prototype.Title = '';
+/**
+TitleKey. Used when inserting a new instance or altering an existend.
+@type {string}
+*/
+tp.SelectSql.prototype.TitleKey = '';
+
+
+/**
+When true then adds a company related part in the WHERE statement, i.e. CompanyFieldName = :CompanyFieldName
+@type {boolean}
+*/
+tp.SelectSql.prototype.CompanyAware = false;
+/**
+The connection name 
+@type {string}
+*/
+tp.SelectSql.prototype.ConnectionName = tp.SysConfig.DefaultConnection;
+
+/**
+It works in conjuction with DateRangeColumn property in order to produce a fixed part in the WHERE clause of this select statement.
+@type {tp.DateRange}
+*/
+tp.SelectSql.prototype.DateRange = tp.DateRange.LastWeek;
+/**
+A fully qualified (i.e. TABLE_NAME.FIELD_NAME) column of type date or datetime
+@type {string}
+*/
+tp.SelectSql.prototype.DateRangeColumn = '';
+
+
+/**
+ * @private
+ * @type {tp.SelectSqlColumn[]} */
+tp.SelectSql.prototype.Columns = [];
+/**
+ * @private
+ * @type {tp.SqlFilter[]} */
+tp.SelectSql.prototype.Filters = [];
+
+
+
+
+
+
+
+
+
 /**
 Ges or sets a statement part
 @type {string}
@@ -1450,80 +1349,17 @@ Ges or sets a statement part
 */
 tp.SelectSql.prototype.OrderBy = '';
 
-/**
-It works in conjuction with DateRangeColumn property in order to produce a fixed part in the WHERE clause of this select statement.
-@type {tp.DateRange}
-*/
-tp.SelectSql.prototype.DateRange = tp.DateRange.Custom;
-/**
-A fully qualified (i.e. TABLE_NAME.FIELD_NAME) column of type date or datetime
-@type {string}
-*/
-tp.SelectSql.prototype.DateRangeColumn = '';
-/**
-When true then adds a company related part in the WHERE statement, i.e. CompanyFieldName = :CompanyFieldName
-@type {boolean}
-*/
-tp.SelectSql.prototype.CompanyAware = false;
-/**
-The connection name 
-@type {string}
-*/
-tp.SelectSql.prototype.ConnectionName = tp.SysConfig.DefaultConnection;
 
-/**
-A list where each line is FIELD_NAME=Title
-@type {string}
-*/
-tp.SelectSql.prototype.DisplayLabels = '';
 
-/**
-Column names separated by semicolon ;
-@type {string}
-*/
-tp.SelectSql.prototype.CheckBoxColumns = '';
-/**
-Column names separated by semicolon ;
-@type {string}
-*/
-tp.SelectSql.prototype.DateTimeColumns = '';
-/**
-Column names separated by semicolon ;
-@type {string}
-*/
-tp.SelectSql.prototype.DateColumns = '';
-/**
-Column names separated by semicolon ;
-@type {string}
-*/
-tp.SelectSql.prototype.TimeColumns = '';
-/**
-Column names separated by semicolon ;
-@type {string}
-*/
-tp.SelectSql.prototype.MemoColumns = '';
-/**
-Column names separated by semicolon ;
-@type {string}
-*/
-tp.SelectSql.prototype.ImageColumns = '';
-
+ 
 /**
 The DataTable that results after the select execution
 @type {tp.DataTable}
 */
 tp.SelectSql.prototype.Table = null;
 
-/**
-Title
-@type {string}
-*/
-tp.SelectSql.prototype.Title = '';
-/**
-Resource key for the Title
-@type {string}
-*/
-tp.SelectSql.prototype.TitleKey = '';
+
+ 
 //#endregion  
 
 //#region tp.SqlTextItem
@@ -1793,26 +1629,35 @@ tp.Db = class {
     Returns a specified value formatted as text
     @param {any} v - The value to convert to string.
     @param {tp.DataType} DataType - The datatype of the specified value. One of the {@link tp.DataType} constants.
+    @param {tp.ColumnDisplayType} DisplayType - The display type. One of the {@link tp.ColumnDisplayType} constants.
     @param {boolean} ForList - If true then the value is formatted for grids and lists
     @param {number} [Decimals=2] - Optional. Defaults to 2. The number of decimal places into string (when float value).
     @param {boolean} [LocalDate=false] - Optional. Defaults to false. When true a local date string is returned, else an ISO date string (when date-time).
     @param {boolean} [DisplaySeconds=false] - Optional. Defaults to false. When true, then seconds are included in the returned string (when date-time).
     @returns {string} Returns the specified value as a string.
     */
-    static Format(v, DataType, ForList, Decimals, LocalDate, DisplaySeconds) {
+    static Format(v, DataType, DisplayType, ForList, Decimals, LocalDate, DisplaySeconds) {
         if (tp.IsEmpty(v)) {
             return '';
         } else {
             switch (DataType) {
                 case tp.DataType.Unknown: return '';
                 case tp.DataType.String: return v.toString();
-                case tp.DataType.Integer: return v.toString();
+                case tp.DataType.Integer: return DisplayType === tp.ColumnDisplayType.CheckBox ? (v === 1 ? 'x' : '') : v.toString();
                 case tp.DataType.Boolean: return (v === true) || (v === 1) ? 'x' : '';
                 case tp.DataType.Float: return tp.FormatNumber2(v, Decimals);
                 case tp.DataType.Decimal: return tp.FormatNumber2(v, Decimals);
                 case tp.DataType.Date: return tp.ToDateString(v, LocalDate === true? '': 'ISO');
                 //case tp.DataType.Time: return tp.ToTimeString(v, DisplaySeconds);
-                case tp.DataType.DateTime: return tp.ToDateTimeString(v, LocalDate === true ? '' : 'ISO');
+                case tp.DataType.DateTime:
+                    if (DisplayType === tp.ColumnDisplayType.Time)
+                        return tp.ToTimeString(v, DisplaySeconds);
+
+                    if (DisplayType === tp.ColumnDisplayType.Date)
+                        return tp.ToDateString(v, LocalDate === true ? '' : 'ISO');
+
+                    return tp.ToDateTimeString(v, LocalDate === true ? '' : 'ISO');
+                    break;
                 case tp.DataType.Memo: return Boolean(ForList) === true ? '[memo]' : v; // '[memo]';
                 case tp.DataType.Blob: return Boolean(ForList) === true ? '[blob]' : v; //  '[blob]';
             }
@@ -3154,6 +2999,12 @@ tp.DataColumn = class extends tp.tpObject {
     fTitle = '';
     fDataType = tp.DataType.String;
     fMaxLength = -1;
+    /**
+    Decimals. -1 means not defined
+    @default  0
+    @type {number}
+    */
+    fDecimals = -1;
 
     /* properties */
     /**
@@ -3180,11 +3031,33 @@ tp.DataColumn = class extends tp.tpObject {
     DefaultValue = null;
 
     /**
-    Decimals
-    @default  0
-    @type {number}
+    Gets the decimals. 
+    @returns {number} Returns the decimals.
     */
-    Decimals = 0;
+    get Decimals() {
+        let Result = tp.IsInteger(this.fDecimals) ? this.fDecimals: -1;
+
+        if (this.DataType === tp.DataType.Float || this.DataType === tp.DataType.Decimal) {
+            if (Result < 0) {
+                let Culture = tp.Cultures.Find(tp.CultureCode);
+                if (tp.IsValid(Culture)) {
+                    Result = Culture.CurrencyDecimals;
+                }
+
+                if (Result < 0)
+                    Result = 2;
+            }
+        }
+
+        return Result;
+    }
+    /** Sets the decimals
+     * @param {number} v An integer indicating the decimals.
+     */
+    set Decimals(v) {
+        if (tp.IsInteger(v))
+            this.fDecimals = v;
+    }
     /**
     ReadOnly
     @default false
@@ -3230,11 +3103,11 @@ tp.DataColumn = class extends tp.tpObject {
     DisplaySeconds = false;
 
     /**
-    The column type to use in a grid
-    @default tp.ColumnType.Default
-    @type {tp.ColumnType}
+    The display type of a column. Used with grids.
+    @default tp.ColumnDisplayType.Default
+    @type {tp.ColumnDisplayType}
     */
-    ColumnType = tp.ColumnType.Default;
+    DisplayType = tp.ColumnDisplayType.Default;
 
     /**
     The name (field name) of the column
@@ -3404,7 +3277,8 @@ tp.DataColumn = class extends tp.tpObject {
     @returns {string} Returns a specified value of this column, formatted as text
     */
     Format(v, ForList) {
-        return tp.Db.Format(v, this.DataType, ForList, this.Decimals, this.LocalDate, this.DisplaySeconds);
+        let DataType = this.DisplayType === tp.ColumnDisplayType.CheckBox ? tp.DataType.Boolean : this.DataType;
+        return tp.Db.Format(v, DataType, this.DisplayType, ForList, this.Decimals, this.LocalDate, this.DisplaySeconds);
     }
     /**
     Converts a specified string into a primitive value (or a date-time) suitable for this column
@@ -3415,6 +3289,7 @@ tp.DataColumn = class extends tp.tpObject {
         return tp.Db.Parse(S, this.DataType);
     }
 
+ 
 };
 //#endregion  
 

@@ -19,6 +19,7 @@ namespace Tripous.Data
     /// </summary>
     public class LocatorFieldDef
     {
+ 
 
         /* construction */
         /// <summary>
@@ -56,13 +57,17 @@ namespace Tripous.Data
         public bool IsIntegerBoolean { get; set; }
 
         /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>
-        [JsonIgnore]
-        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name;
-        /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
+        }
     }
 }

@@ -31,14 +31,14 @@ namespace Tripous
                                                         DateRange.Custom,
                                                         DateRange.Today,
                                                         DateRange.Yesterday,
-                                                        DateRange.PreviousWeek,
-                                                        DateRange.PreviousTwoWeeks,
-                                                        DateRange.PreviousMonth,
-                                                        DateRange.PreviousTwoMonths,
-                                                        DateRange.PreviousThreeMonths,
-                                                        DateRange.PreviousSemester,
-                                                        DateRange.PreviousYear,
-                                                        DateRange.PreviousTwoYears,
+                                                        DateRange.LastWeek,
+                                                        DateRange.LastTwoWeeks,
+                                                        DateRange.LastMonth,
+                                                        DateRange.LastTwoMonths,
+                                                        DateRange.LastThreeMonths,
+                                                        DateRange.LastSemester,
+                                                        DateRange.LastYear,
+                                                        DateRange.LastTwoYears,
                                                     };
 
         /// <summary>
@@ -57,14 +57,14 @@ namespace Tripous
                 case DateRange.Yesterday: { FromDate = FromDate.AddDays(-1); ToDate = ToDate.AddDays(-1); } break;
                 case DateRange.Tomorrow: { FromDate = FromDate.AddDays(1); ToDate = ToDate.AddDays(1); } break;
 
-                case DateRange.PreviousWeek: FromDate = FromDate.AddDays(-7); break;
-                case DateRange.PreviousTwoWeeks: FromDate = FromDate.AddDays(-14); break;
-                case DateRange.PreviousMonth: FromDate = FromDate.AddDays(-30); break;
-                case DateRange.PreviousTwoMonths: FromDate = FromDate.AddDays(-60); break;
-                case DateRange.PreviousThreeMonths: FromDate = FromDate.AddDays(-90); break;
-                case DateRange.PreviousSemester: FromDate = FromDate.AddDays(-180); break;
-                case DateRange.PreviousYear: FromDate = FromDate.AddDays(-365); break;
-                case DateRange.PreviousTwoYears: FromDate = FromDate.AddDays(-730); break;
+                case DateRange.LastWeek: FromDate = FromDate.AddDays(-7); break;
+                case DateRange.LastTwoWeeks: FromDate = FromDate.AddDays(-14); break;
+                case DateRange.LastMonth: FromDate = FromDate.AddDays(-30); break;
+                case DateRange.LastTwoMonths: FromDate = FromDate.AddDays(-60); break;
+                case DateRange.LastThreeMonths: FromDate = FromDate.AddDays(-90); break;
+                case DateRange.LastSemester: FromDate = FromDate.AddDays(-180); break;
+                case DateRange.LastYear: FromDate = FromDate.AddDays(-365); break;
+                case DateRange.LastTwoYears: FromDate = FromDate.AddDays(-730); break;
 
                 case DateRange.NextWeek: ToDate = ToDate.AddDays(7); break;
                 case DateRange.NextTwoWeeks: ToDate = ToDate.AddDays(14); break;
@@ -90,14 +90,14 @@ namespace Tripous
                 case DateRange.Today:
                 case DateRange.Yesterday:
 
-                case DateRange.PreviousWeek:
-                case DateRange.PreviousTwoWeeks:
-                case DateRange.PreviousMonth:
-                case DateRange.PreviousTwoMonths:
-                case DateRange.PreviousThreeMonths:
-                case DateRange.PreviousSemester:
-                case DateRange.PreviousYear:
-                case DateRange.PreviousTwoYears:
+                case DateRange.LastWeek:
+                case DateRange.LastTwoWeeks:
+                case DateRange.LastMonth:
+                case DateRange.LastTwoMonths:
+                case DateRange.LastThreeMonths:
+                case DateRange.LastSemester:
+                case DateRange.LastYear:
+                case DateRange.LastTwoYears:
                     return true;
             }
 

@@ -33,7 +33,7 @@ namespace Tripous.Data
         {
             this.Name = Source.ColumnName;
             this.Title = Source.Caption;
-            this.TitleKey = Source.TitleKey();
+            //this.TitleKey = Source.TitleKey();
             this.DataType = Source.DataTypeToJson();
             this.Expression = string.IsNullOrWhiteSpace(Source.Expression) ? null : Source.Expression;
             this.DefaultValue = Sys.IsNull(Source.DefaultValue) ? null : Source.DefaultValue.ToString();
@@ -53,7 +53,7 @@ namespace Tripous.Data
             if (Descriptor != null)
             {
                 this.Title = Descriptor.Title;
-                this.TitleKey = Descriptor.TitleKey;
+                //this.TitleKey = Descriptor.TitleKey;
                 this.DataType = Descriptor.DataType.ToString();
                 this.Expression = Descriptor.Expression;
                 this.DefaultValue = Descriptor.DefaultValue;
@@ -101,10 +101,6 @@ namespace Tripous.Data
         /// </summary>
         public string Title { get; set; }
         /// <summary>
-        /// TitleKey
-        /// </summary>
-        public string TitleKey { get; set; }
-        /// <summary>
         /// DataType (see DataColumn extension method DataTypeToJson() )
         /// </summary>
         public string DataType { get; set; }
@@ -121,9 +117,9 @@ namespace Tripous.Data
         /// </summary>
         public int MaxLength { get; set; }
         /// <summary>
-        /// Decimals
+        /// Decimals. -1 means is not set.
         /// </summary>
-        public int Decimals { get; set; }
+        public int Decimals { get; set; } = -1;
         /// <summary>
         /// ReadOnly
         /// </summary>

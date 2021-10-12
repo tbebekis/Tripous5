@@ -11,7 +11,7 @@ namespace Tripous.Data
     /// </summary>
     public class DataTableDef
     {
-        string fTitleKey;
+ 
 
         /* construction */
         /// <summary>
@@ -363,12 +363,17 @@ namespace Tripous.Data
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Resource string key
+        /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public string TitleKey
+        public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
         {
-            get { return !string.IsNullOrWhiteSpace(fTitleKey) ? fTitleKey : Name; }
-            set { fTitleKey = value; }
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
         }
 
         /// <summary>

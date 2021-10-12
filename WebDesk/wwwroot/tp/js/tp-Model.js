@@ -971,9 +971,7 @@ tp.Broker = class extends tp.tpObject {
                 let Packet = Action.Args.ResponseData.Packet;
                 this.CreateBrowserTable(Packet);
 
-                this.LastSelectSql = Action.SelectSql;
-                this.LastSelectSql.SetupTable(this.tblBrowser);
-
+                this.LastSelectSql = Action.SelectSql;             
                 Action.SelectSql.Table = this.tblBrowser;
             }
         }
@@ -1372,6 +1370,7 @@ tp.DataView = class extends tp.View {
             this.gridBrowser.AllowUserToAddRows = false;
             this.gridBrowser.AllowUserToDeleteRows = false;
             this.gridBrowser.ToolBarVisible = false;
+            
 
             this.gridBrowser.On(tp.Events.DoubleClick, this.BrowserGrid_DoubleClick, this);
         }
@@ -1638,19 +1637,7 @@ tp.DataView = class extends tp.View {
         for (var i = 0, ln = this.DataSources.length; i < ln; i++)
             this.DataSources[i].Update();
     }
-    /**
-    Sets the data-source of the browser grid
-    @protected
-    */
-    UpdateBrowserDataSource() {
-        if (!tp.IsEmpty(this.Broker)) {
-            this.dsBrowser = new tp.DataSource(this.Broker.tblBrowser);
-        }
 
-        if (!tp.IsEmpty(this.dsBrowser) && !tp.IsEmpty(this.gridBrowser)) {
-            this.gridBrowser.DataSource = this.dsBrowser;
-        }
-    }
 
 
     /**
@@ -2118,6 +2105,37 @@ tp.DataView = class extends tp.View {
 
         return Action;
     }
+
+
+    /**
+    Sets the data-source of the browser grid
+    @param {tp.SelectSql} SelectSql - The SelectSql instance containing the DataTable.
+    @protected
+    */
+    UpdateBrowserDataSource(SelectSql) {
+        this.gridBrowser.DataSource = null;        
+
+        if (tp.IsValid(this.Broker) && (SelectSql instanceof tp.SelectSql)) {
+            let Table = this.Broker.tblBrowser;
+
+            SelectSql.SetupTable(Table);
+
+            this.gridBrowser.AutoGenerateColumns = !tp.IsValid(SelectSql.Columns) || SelectSql.Columns.length === 0;
+            this.gridBrowser.ClearColumns();
+
+            this.dsBrowser = new tp.DataSource(Table);
+
+            // grid columns should be defined before binding
+            if (!this.gridBrowser.AutoGenerateColumns)
+                this.gridBrowser.AddSelectSqlColumns(Table, SelectSql.Columns);
+
+
+            this.gridBrowser.DataSource = this.dsBrowser;
+        } 
+    }
+
+ 
+
     /**
     Executes a SELECT for the browser grid. Retuns a {@link tp.BrokerAction} {@link Promise}.
     @param {string | tp.SelectSql} [SelectSql] - Optional. The SELECT statement to execute
@@ -2135,39 +2153,35 @@ tp.DataView = class extends tp.View {
                 SelectSql = this.Broker.SelectList[0];
             }
 
-            if (tp.IsEmpty(SelectSql) && !tp.IsEmpty(this.gridBrowser) && !tp.IsEmpty(this.gridBrowser.DataSource)) {
-                this.DataMode = tp.DataMode.Browse;
-                this.ValidateCommands();
-                this.EnableCommands();
-            } else {
-                this.DoSelectBrowserBefore();
+            this.DoSelectBrowserBefore();
 
-                // TODO: EDW - Πρέπει να περνάμε στο Grid τις κολώνες που θα δείξουμε, με ρυθμίσεις, π.χ. Boolean, Decimals, κλπ.
-                Action = await this.Broker.SelectBrowser(SelectSql, RowLimit);
+            // TODO: EDW - Πρέπει να περνάμε στο Grid τις κολώνες που θα δείξουμε, με ρυθμίσεις, π.χ. Boolean, Decimals, κλπ.
+            Action = await this.Broker.SelectBrowser(SelectSql, RowLimit);
 
-                if (Action instanceof tp.BrokerAction) {
-                    if (Action.Succeeded === true) {
-                        this.UpdateBrowserDataSource();
+            if (Action instanceof tp.BrokerAction) {
+                if (Action.Succeeded === true) {
 
-                        if (this.dsBrowser) {
-                            if (this.dsBrowser.CanFirst())
-                                this.dsBrowser.First();
-                            if (this.dsBrowser.Rows.length > 0 && this.gridBrowser) {
-                                this.gridBrowser.FocusedRow = this.dsBrowser.Rows[0];
-                            }
+                    this.UpdateBrowserDataSource(SelectSql);
+
+                    if (this.dsBrowser) {
+                        if (this.dsBrowser.CanFirst())
+                            this.dsBrowser.First();
+                        if (this.dsBrowser.Rows.length > 0 && this.gridBrowser) {
+                            this.gridBrowser.FocusedRow = this.dsBrowser.Rows[0];
                         }
-
-                        this.DoSelectBrowserAfter(Action);
-                        this.ForceSelect = false;
-
-                        this.DataMode = tp.DataMode.Browse;
-                        this.ValidateCommands();
-                        this.EnableCommands();
-                    } else {
-                        this.DisplayActionError(Action);
                     }
+
+                    this.DoSelectBrowserAfter(Action);
+                    this.ForceSelect = false;
+
+                    this.DataMode = tp.DataMode.Browse;
+                    this.ValidateCommands();
+                    this.EnableCommands();
+                } else {
+                    this.DisplayActionError(Action);
                 }
             }
+
         } 
 
         return Action;

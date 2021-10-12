@@ -28,14 +28,14 @@ namespace Tripous.Data
         /// <summary>
         /// Adds a new criterion descriptor to the list
         /// </summary>
-        public SqlFilterDef Add(string TableName, string FieldName, string TitleKey, SimpleType DataType, SqlFilterMode Mode = SqlFilterMode.Simple)
+        public SqlFilterDef Add(string TableName, string FieldName, string TitleKey, DataFieldType DataType, SqlFilterMode Mode = SqlFilterMode.Simple)
         {
             return Add(Sys.FieldPath(TableName, FieldName), TitleKey, DataType, Mode);
         }
         /// <summary>
         /// Adds a new criterion descriptor to the list
         /// </summary>
-        public SqlFilterDef Add(string FieldPath, string TitleKey, SimpleType DataType, SqlFilterMode Mode = SqlFilterMode.Simple)
+        public SqlFilterDef Add(string FieldPath, string TitleKey, DataFieldType DataType, SqlFilterMode Mode = SqlFilterMode.Simple)
         {
             SqlFilterDef Result = new SqlFilterDef();
             Result.FieldPath = FieldPath;
@@ -48,21 +48,14 @@ namespace Tripous.Data
         /// <summary>
         /// Adds a new criterion descriptor to the list
         /// </summary>
-        public SqlFilterDef Add(string TableName, string FieldName, string TitleKey, SimpleType DataType)
+        public SqlFilterDef Add(string TableName, string FieldName, string TitleKey, DataFieldType DataType)
         {
             return Add(Sys.FieldPath(TableName, FieldName), TitleKey, DataType);
         }
         /// <summary>
         /// Adds a new criterion descriptor to the list
         /// </summary>
-        public SqlFilterDef Add(string TableName, string FieldName, string TitleKey, Type DataType)
-        {
-            return Add(Sys.FieldPath(TableName, FieldName), TitleKey, Simple.SimpleTypeOf(DataType));
-        }
-        /// <summary>
-        /// Adds a new criterion descriptor to the list
-        /// </summary>
-        public SqlFilterDef AddLocator(string FieldPath, string TitleKey, string Locator, SimpleType DataType)
+        public SqlFilterDef AddLocator(string FieldPath, string TitleKey, string Locator, DataFieldType DataType)
         {
             SqlFilterDef Result = Add(FieldPath, TitleKey, DataType, SqlFilterMode.Locator);
             Result.Locator = Locator;

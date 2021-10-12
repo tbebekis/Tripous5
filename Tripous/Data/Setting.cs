@@ -18,8 +18,7 @@ namespace Tripous.Data
     /// </summary>
     public class Setting
     {
-        /* private */
-        string fTitleKey;
+
 
         /// <summary>
         /// Returns the value as a specific type, according to <see cref="DataType"/>.
@@ -375,15 +374,22 @@ where
         /// <summary>
         /// The data-type
         /// </summary>
-        public SettingDataType DataType { get; set; }
+        public SettingDataType DataType { get; set; } 
+
         /// <summary>
-        /// The title label or a resource string key
+        /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public string TitleKey
+        public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
         {
-            get { return !string.IsNullOrWhiteSpace(fTitleKey) ? fTitleKey : Id; }
-            set { fTitleKey = value; }
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Id; }
+            set { }
         }
+
         /// <summary>
         /// The setting value as it comes from the storage medium, i.e. database.
         /// <para>When the data-type is String, Integer, Float, Decimal, Date, DateTime and Boolean: Value contains the actual typed value.</para>

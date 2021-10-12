@@ -2064,6 +2064,9 @@ tp.ToISODateString = function (v) {
  * @returns  {string} The formatted string
  */
 tp.ToDateString = function (v, CultureCode = null) {
+    if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+        CultureCode = tp.CultureCode;
+
     if (CultureCode === 'ISO')
         return tp.ToISODateString(v);
 

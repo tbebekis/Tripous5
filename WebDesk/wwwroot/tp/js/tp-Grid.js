@@ -157,7 +157,7 @@ tp.GridColumn = class extends tp.tpObject {
     @type {string}
     */
     get DataType() {
-        return this.DataColumn instanceof tp.DataColumn ? this.DataColumn.DataType : tp.DataType.Unknown; // this.fDataType;
+        return this.DataColumn instanceof tp.DataColumn ? this.DataColumn.DataType : tp.DataType.Unknown;  
     }
     /**
     Gets or sets the number of decimal digits of this column
@@ -183,7 +183,8 @@ tp.GridColumn = class extends tp.tpObject {
                 if (!tp.IsEmpty(DisplayDataColumn))
                     return tp.DataType.DefaultAlignment(DisplayDataColumn.DataType);
             } else if (this.DataColumn instanceof tp.DataColumn) {
-                return tp.DataType.DefaultAlignment(this.DataColumn.DataType);
+                let AlignmentDataType = this.DataColumn.DisplayType === tp.ColumnDisplayType.CheckBox ? tp.DataType.Boolean: this.DataColumn.DataType
+                return tp.DataType.DefaultAlignment(AlignmentDataType);
             }
         }
 
@@ -680,7 +681,7 @@ tp.GridColumn = class extends tp.tpObject {
     @returns {tp.GridInplaceEditor} Returns the {@link tp.GridInplaceEditor} inplace editor of this column
     */
     CreateEditor() {
-        if (this.DataType === tp.DataType.Boolean)
+        if (this.DataType === tp.DataType.Boolean || this.DataColumn.DisplayType === tp.ColumnDisplayType.CheckBox)
             return new tp.GridInplaceEditorCheckBox(this);
 
         return new tp.GridInplaceEditorTextBox(this);
@@ -1184,7 +1185,7 @@ tp.GridColumn = class extends tp.tpObject {
             return this.DataColumn.Format(v, true);
         }
 
-        return tp.Db.Format(v, this.DataType, true, this.Decimals, this.LocalDate, this.DisplaySeconds);
+        return tp.Db.Format(v, this.DataType, this.DataColumn.DisplayType, true, this.Decimals, this.LocalDate, this.DisplaySeconds);
     }
     /**
     Converts a specified string into a primitive value (or a date-time)
@@ -5269,6 +5270,24 @@ tp.Grid = class extends tp.Control  {
             }
         }
     }
+    /**
+     * Adds grid columns based on a specified data-table and a list of {@link tp.SelectSqlColumn} columns.
+     * @param {tp.DataTable} Table The {@link tp.DataTable} table
+     * @param {tp.SelectSqlColumn[]} SelectSqlColumns The list of {@link tp.SelectSqlColumn} columns.
+     */
+    AddSelectSqlColumns(Table, SelectSqlColumns) {
+        let TableColumn, GridColumn;
+        SelectSqlColumns.forEach(SqlColumn => {
+            TableColumn = Table.FindColumn(SqlColumn.Name);
+            if (tp.IsValid(TableColumn)) {
+                GridColumn = this.AddColumn(TableColumn.Name, SqlColumn.Title);
+                GridColumn.Visible = SqlColumn.Visible;
+
+                // TODO: further adjust tp.GridColumn based on tp.SelectSqlColumn
+            }
+        });
+    }
+
     /**
     Adds and returns a new {@link tp.GridColumn} grid column. If a grid column is passed the Text parameters are ignored.
     @param {string} Name - The name of the column

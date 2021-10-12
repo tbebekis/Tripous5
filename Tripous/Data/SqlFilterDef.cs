@@ -23,7 +23,7 @@ namespace Tripous.Data
         /// </summary>
         static public readonly List<string> ValidAggregateFunctions = new List<string>(new string[] { "", "count", "avg", "sum", "max", "min" });
         string fAggregateFunc;
-        string fTitle;
+ 
 
         /// <summary>
         /// It is used when the data type of the criterion is either <see cref="SqlFilterMode.EnumConst"/> or <see cref="SqlFilterMode.EnumQuery"/>
@@ -76,7 +76,6 @@ namespace Tripous.Data
         {
         }
 
-
         /* public */
         /// <summary>
         /// Throws exception if this instance is not a valid one.
@@ -121,31 +120,31 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>    
-        public string Title
-        {
-            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None); }
-            set { fTitle = value; }
-        }
+        /// The full path to the field, i.e. TableAlias.FieldName
+        /// </summary>
+        public string FieldPath { get; set; }
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None; }
+            set { }
+        }
 
-
         /// <summary>
-        /// Indicates how the user enters of selects the criterion value
+        /// Gets or sets the "data type" of the filter.
         /// </summary>
-        public SqlFilterMode Mode { get; set; }
+        public DataFieldType DataType { get; set; } = DataFieldType.String;
         /// <summary>
-        /// Gets or sets the "data type" of the criterion.
+        /// Indicates how the user enters of selects the filter value
         /// </summary>
-        public SimpleType DataType { get; set; }
-        /// <summary>
-        /// The full path to the field, i.e. TableAlias.FieldName
-        /// </summary>
-        public string FieldPath { get; set; }
+        public SqlFilterMode Mode { get; set; } = SqlFilterMode.Simple;
  
         /// <summary>
         /// Valid ONLY when Mode is Simple and DataType String, Float or Integer.
@@ -158,6 +157,10 @@ namespace Tripous.Data
         /// </summary>
         public string Locator { get; set; }
         /// <summary>
+        /// When true then the produced CommandText goes to the HAVING clause, instead of the WHERE clause
+        /// </summary>
+        public bool PutInHaving { get; set; }
+        /// <summary>
         /// Gets or sets the aggregation function (sum, count, avg, min, max) to use, when <see cref="PutInHaving"/> is true.
         /// It could be an empty string.
         /// </summary>
@@ -166,10 +169,7 @@ namespace Tripous.Data
             get { return ValidAggregateFunctions.IndexOf(fAggregateFunc) != -1 ? fAggregateFunc : string.Empty; }
             set { fAggregateFunc = value; }
         }
-        /// <summary>
-        /// When true then the produced CommandText goes to the HAVING clause, instead of the WHERE clause
-        /// </summary>
-        public bool PutInHaving { get; set; }
+
         /// <summary>
         /// Gets the Enum.
         /// <para>Valid ONLY when DataType is String or Integer</para>

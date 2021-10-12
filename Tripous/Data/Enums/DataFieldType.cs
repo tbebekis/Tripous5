@@ -70,7 +70,7 @@ namespace Tripous
         /// <summary>
         /// Returns the <see cref="DataFieldType"/> corresponding to a <see cref="Type"/>.
         /// </summary>
-        static public DataFieldType DataFieldTypeOf(Type T)
+        static public DataFieldType DataFieldTypeOf(this Type T)
         {
             if (T != null)
             {

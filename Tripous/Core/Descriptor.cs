@@ -18,14 +18,7 @@ namespace Tripous
         /// Field
         /// </summary>
         protected string fAlias;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fTitle;
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fTitleKey;
+
 
         /// <summary>
         /// Returns the Alias.
@@ -103,44 +96,23 @@ namespace Tripous
             set
             {
                 fAlias = value;
-                OnPropertyChanged("Alias");
             }
         }
-        /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>
-        [DefaultValue(""), Localizable(true)]
-        public virtual string Title
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(fTitle))
-                    return fTitle;
 
-                if (!string.IsNullOrWhiteSpace(TitleKey))
-                    return Res.GS(TitleKey, TitleKey);
-
-                return Name;
-            }
-            set
-            {
-                fTitle = value;
-                OnPropertyChanged("Title");
-            }
-        }
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         [DefaultValue(""), Localizable(false)]
-        public virtual string TitleKey
+        public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        [DefaultValue(""), Localizable(true)]
+        public string Title
         {
-            get { return string.IsNullOrWhiteSpace(fTitleKey) ? Name : fTitleKey; }
-            set
-            {
-                fTitleKey = value;
-                OnPropertyChanged("TitleKey");
-            }
-
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
         }
 
         /// <summary>

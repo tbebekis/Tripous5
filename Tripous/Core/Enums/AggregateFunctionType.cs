@@ -8,8 +8,6 @@ using System;
 
 namespace Tripous
 {
-
-
     /// <summary>
     /// Indicates the kind of the aggregate function to be used 
     /// </summary>

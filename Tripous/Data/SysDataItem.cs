@@ -22,10 +22,7 @@ namespace Tripous.Data
     /// </summary>
     public class SysDataItem  
     { 
-        /// <summary>
-        /// Field
-        /// </summary>
-        protected string fTitleKey;
+ 
  
         /* construction */
         /// <summary>
@@ -224,12 +221,17 @@ namespace Tripous.Data
         /// </summary>
         public virtual string DataName { get; set; } = Sys.None;
         /// <summary>
-        /// Gets or sets the title
+        /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public virtual string TitleKey
+        public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
         {
-            get { return string.IsNullOrWhiteSpace(fTitleKey) ? DataName : fTitleKey; }
-            set { fTitleKey = value; }
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : DataName; }
+            set { }
         }
         /// <summary>
         /// Gets or sets the notes

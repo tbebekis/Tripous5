@@ -32,7 +32,7 @@ namespace Tripous.Data
         /// </summary>
         public const string SUBLINES = "_SUBLINES_";
 
-        string fTitle;
+ 
 
         /* construction */
         /// <summary>
@@ -576,9 +576,9 @@ namespace Tripous.Data
                             if (SimpleType.IsString() && ((Field.MaxLength > 100) || (FieldDef.MaxLength > 100)))
                                 continue;
 
-                            Filter = Filters.Add(TableDef.Alias, FieldDef.Name, FieldDef.Title, Field.DataType);
+                            Filter = Filters.Add(TableDef.Alias, FieldDef.Name, FieldDef.Title, Field.DataType.DataFieldTypeOf());
                             if (FieldDef.IsBoolean)
-                                Filter.DataType = SimpleType.Boolean;
+                                Filter.DataType = DataFieldType.Boolean;
                         }
                     }
                 }
@@ -818,17 +818,18 @@ namespace Tripous.Data
         public string Alias { get; set; }
 
         /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>    
-        public string Title
-        {
-            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name); }
-            set { fTitle = value; }
-        }
-        /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
+        }
 
         /// <summary>
         /// Gets or sets the name of the primary key field of this table.

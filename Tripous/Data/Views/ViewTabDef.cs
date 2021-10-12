@@ -16,7 +16,7 @@ namespace Tripous.Data
     /// </summary>
     public class ViewTabDef  
     {
-        string fTitle;
+
 
         /* construction */
         /// <summary>
@@ -53,17 +53,18 @@ namespace Tripous.Data
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>    
-        public string Title
-        {
-            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : (!string.IsNullOrWhiteSpace(Id)? Id: Sys.None)); }
-            set { fTitle = value; }
-        }
-        /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Id; }
+            set { }
+        }
 
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.

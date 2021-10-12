@@ -51,7 +51,7 @@ namespace Tripous.Data
         /// </summary>
         public const string Grid = "Grid";
 
-        string fTitle;
+ 
 
         /* construction */
         /// <summary>
@@ -119,17 +119,18 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>    
-        public string Title
-        {
-            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None); }
-            set { fTitle = value; }
-        }
-        /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None; }
+            set { }
+        }
 
         /// <summary>
         /// The HTML Id and HTML Name of the control.

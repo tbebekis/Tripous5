@@ -17,8 +17,7 @@ namespace Tripous.Data
     public class SqlBrokerDef
     {
         static List<SqlBrokerDef> RegistryList = new List<SqlBrokerDef>();
-
-        string fTitle;
+ 
         string fMainTableName;
         string fEntityName;
 
@@ -260,19 +259,20 @@ namespace Tripous.Data
         /// </summary> 
         public string Name { get; set; }
 
- 
-        /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>    
-        public string Title
-        {
-            get { return !string.IsNullOrWhiteSpace(fTitle) ? fTitle : (!string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name); }
-            set { fTitle = value; }
-        }
+
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
+        }
 
         /// <summary>
         /// Gets or sets the connection name (database)

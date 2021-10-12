@@ -97,8 +97,6 @@ from
             this.Text = StatementText;
         }
 
-
-
         /* static */
         /// <summary>
         /// Adds a Carriage Return (LineBreak) after S
@@ -265,19 +263,19 @@ from
             CompanyAware = false;
             ConnectionName = string.Empty;
 
-            CheckBoxColumns = string.Empty;
-            MemoColumns = string.Empty;
-            DateTimeColumns = string.Empty;
-            DateColumns = string.Empty;
-            TimeColumns = string.Empty;
-            ImageColumns = string.Empty; 
+            //CheckBoxColumns = string.Empty;
+            //MemoColumns = string.Empty;
+            //DateTimeColumns = string.Empty;
+            //DateColumns = string.Empty;
+            //TimeColumns = string.Empty;
+            //ImageColumns = string.Empty; 
 
             DateRangeColumn = string.Empty;
             DateRange = Tripous.DateRange.Custom;
 
-            DisplayLabels = string.Empty;
-            //ColumnSettings.Clear();
-            SqlFilters.Clear();
+            //DisplayLabels = string.Empty;
+            Columns.Clear();
+            Filters.Clear();
 
         }
         /// <summary>
@@ -307,19 +305,19 @@ from
                 CompanyAware = Src.CompanyAware;
                 ConnectionName = Src.ConnectionName;
 
-                CheckBoxColumns = Src.CheckBoxColumns;
-                MemoColumns = Src.MemoColumns;
-                DateTimeColumns = Src.DateTimeColumns;
-                DateColumns = Src.DateColumns;
-                TimeColumns = Src.TimeColumns;
-                ImageColumns = Src.ImageColumns;
+                //CheckBoxColumns = Src.CheckBoxColumns;
+                //MemoColumns = Src.MemoColumns;
+                //DateTimeColumns = Src.DateTimeColumns;
+                //DateColumns = Src.DateColumns;
+                //TimeColumns = Src.TimeColumns;
+                //ImageColumns = Src.ImageColumns;
 
                 DateRangeColumn = Src.DateRangeColumn;
                 DateRange = Src.DateRange;
 
-                DisplayLabels = Src.DisplayLabels;
-                //ColumnSettings = Src.ColumnSettings;
-                SqlFilters = Src.SqlFilters;
+                //DisplayLabels = Src.DisplayLabels;
+                Columns = Src.Columns;
+                Filters = Src.Filters;
  
 
             }
@@ -501,26 +499,9 @@ from
             return string.Empty;
         }
         /// <summary>
-        /// Sets a condition (pseudo-property) for each Table Column to a value (i.e. IsDateTime, IsCheckBox, etc).
-        /// <para>NOTE: The condition is a pseudo-property defined in Table.ExtendedProperties.</para>
-        /// </summary>
-        public void SetColumnTypes(DataTable Table)
-        {
-            foreach (DataColumn Column in Table.Columns)
-            {
-                Column.IsDateTime(this.DateTimeColumns.ContainsText(Column.ColumnName) ? true : false);
-                Column.IsDate(this.DateColumns.ContainsText(Column.ColumnName) ? true : false);
-                Column.IsTime(this.TimeColumns.ContainsText(Column.ColumnName) ? true : false);
-                Column.IsCheckBox(this.CheckBoxColumns.ContainsText(Column.ColumnName) ? true : false);
-                Column.IsMemo(this.MemoColumns.ContainsText(Column.ColumnName) ? true : false);
-                Column.IsImage(this.ImageColumns.ContainsText(Column.ColumnName) ? true : false);
-            }
-        }
-        /// <summary>
         /// Sets-up the column types, the captions and the visibility of Table.Columns.
-        /// <para>Returns true if has DisplayLabels or ColumnSettings in order to setup the Table.</para>
         /// </summary>
-        public bool SetupTable(DataTable Table)
+        public void SetupTable(DataTable Table)
         {
             // table name
             if (string.IsNullOrWhiteSpace(Table.TableName) || Table.TableName.StartsWithText("Table_"))
@@ -530,66 +511,33 @@ from
                                     MemTable.NextTableName();
             }
 
-            // column types in Table.ExtendedProperties (pseudo-properties)
-            SetColumnTypes(Table);
 
-
-            // column titles and visibility
-            if (HasDisplayLabels)
+            if (Columns != null && Columns.Count > 0)
             {
-                NameValueStringList List = new NameValueStringList(DisplayLabels, true);
-                foreach (DataColumn Column in Table.Columns)
+                SelectSqlColumn SqlColumn;
+                foreach (DataColumn TableColumn in Table.Columns)
                 {
-                    if (!List.ContainsName(Column.ColumnName))
+                    SqlColumn = Columns.Find(item => Sys.IsSameText(item.Name, TableColumn.ColumnName));
+                    if (SqlColumn == null)
                     {
-                        Column.IsVisible(false);
+                        TableColumn.IsVisible(false);
                     }
                     else
                     {
-                        Column.IsVisible(true);
-                        Column.Caption = List.Values[Column.ColumnName];
+                        TableColumn.IsVisible(SqlColumn.Visible);
+                        TableColumn.Caption = SqlColumn.Title;
+
+                        TableColumn.IsDateTime(SqlColumn.DisplayType == ColumnDisplayType.DateTime);
+                        TableColumn.IsDate(SqlColumn.DisplayType == ColumnDisplayType.Date);
+                        TableColumn.IsTime(SqlColumn.DisplayType == ColumnDisplayType.Time);
+                        TableColumn.IsCheckBox(SqlColumn.DisplayType == ColumnDisplayType.CheckBox);
+                        TableColumn.IsMemo(SqlColumn.DisplayType == ColumnDisplayType.Memo);
+                        TableColumn.IsImage(SqlColumn.DisplayType == ColumnDisplayType.Image);
                     }
                 }
-            }
-
-            return HasDisplayLabels;
-
-            /*
-                        else if (HasColumnSettings)
-                        {
-                            ColumnSetting Setting;
-                            foreach (DataColumn Column in Table.Columns)
-                            {
-                                Setting =   ColumnSettings.Find(item => item.Name == Column.ColumnName);
-                                if (Setting == null)
-                                {
-                                    Column.IsVisible(false);
-                                }
-                                else
-                                {
-                                    Column.IsVisible(Setting.Visible);
-                                    Column.Caption = Setting.Title;
-                                }
-                            }
-                        }
-
-
-                        return HasDisplayLabels || HasColumnSettings; 
-             */
+            } 
 
         }
-        /// <summary>
-        /// Translates (localizes) the column captions in DisplayLabels
-        /// </summary>
-        public void TranslateColumnCaptions()
-        {
-            if (HasDisplayLabels)
-            {
-                NameValueStringList List = new NameValueStringList(DisplayLabels, true);
-                this.DisplayLabels = List.Text;
-            }
-        }
-
 
         /* properties */
         /// <summary>
@@ -597,14 +545,18 @@ from
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Gets or sets tha Title of this descriptor, used for display purposes.
-        /// </summary>
-        [JsonIgnore]
-        public string Title => !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name;
-        /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
+        }
 
         /// <summary>
         /// Gets the statement as a whole. 
@@ -615,7 +567,63 @@ from
             get { return string.IsNullOrWhiteSpace(Select) ? string.Empty : GetSqlText(); }
             set { Parse(value); }
         }
-       
+        /// <summary>
+        /// Gets or sets a value indicating whether this object
+        /// <para>uses the CompanyFieldName when preparing the statement as a whole</para>
+        /// </summary>
+        public bool CompanyAware { get; set; }
+        /// <summary>
+        /// Gets or sets the database connection name
+        /// </summary>
+        public string ConnectionName
+        {
+            get { return string.IsNullOrWhiteSpace(fConnectionName) ? SysConfig.DefaultConnection : fConnectionName; }
+            set { fConnectionName = value; }
+        }
+
+        /// <summary>
+        /// A fully qualified (i.e. TABLE_NAME.FIELD_NAME) column of type date or datetime.
+        /// <para>It works in conjuction with DateRange property in order to produce
+        /// a fixed part in the WHERE clause of this select statement.</para>
+        /// </summary>
+        public string DateRangeColumn { get; set; } = "";
+        /// <summary>
+        /// A DateRange.
+        /// <para>It works in conjuction with DateRangeColumn property in order to produce
+        /// a fixed part in the WHERE clause of this select statement.</para>
+        /// </summary>
+        public DateRange DateRange { get; set; } = DateRange.LastWeek;
+
+        /// <summary>
+        /// The list of columns to display. If null or empty, then all columns are displayed. Else only the columns defined in this list are displayed.
+        /// </summary>
+        public List<SelectSqlColumn> Columns { get; set; } = new List<SelectSqlColumn>();
+        /// <summary>
+        /// The filters used to generate the "user where" clause. User's where is appended to the WHERE clause.
+        /// </summary>
+        public SqlFilterDefs Filters { get; set; } = new SqlFilterDefs();
+
+        /// <summary>
+        /// Adds a column in the list of columns and returns the newly added column.
+        /// </summary>
+        public SelectSqlColumn AddColumn(string Name, string TitleKey = "", ColumnDisplayType Type = ColumnDisplayType.Default)
+        {
+            SelectSqlColumn Result = Columns.Find(item => Sys.IsSameText(item.Name, Name));
+            if (Result == null)
+            {
+                Result = new SelectSqlColumn()
+                {
+                    Name = Name,
+                    TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : Name,
+                    DisplayType = Type
+                };
+
+                Columns.Add(Result);
+            }
+
+            return Result;
+        }
+
         /// <summary>
         /// Gets or sets the SELECT clause.
         /// </summary>
@@ -657,97 +665,6 @@ from
         /// </summary>
         [JsonIgnore]
         public bool IsEmpty { get { return string.IsNullOrWhiteSpace(Text); } }
-        /// <summary>
-        /// Gets or sets a value indicating whether this object
-        /// <para>uses the CompanyFieldName when preparing the statement as a whole</para>
-        /// </summary>
-        public bool CompanyAware { get; set; }
- 
-        /// <summary>
-        /// Gets or sets the database connection name
-        /// </summary>
-        public string ConnectionName
-        {
-            get { return string.IsNullOrWhiteSpace(fConnectionName) ? SysConfig.DefaultConnection : fConnectionName; }
-            set { fConnectionName = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the names of the check box columns (integer columns as boolean columns)
-        /// as a list of strings separated by the character ;
-        /// </summary>
-        public string CheckBoxColumns { get; set; }
-        /// <summary>
-        /// Gets or sets the names of the DateTime columns  
-        /// as a list of strings separated by the character ;
-        /// </summary>
-        public string DateTimeColumns { get; set; }
-        /// <summary>
-        /// Gets or sets the names of the Date columns (date ONLY, not date and time)
-        /// as a list of strings separated by the character ;
-        /// </summary>
-        public string DateColumns { get; set; }
-        /// <summary>
-        /// Gets or sets the names of the Time columns (Time ONLY, not date and time)
-        /// as a list of strings separated by the character ;
-        /// </summary>
-        public string TimeColumns { get; set; }
-        /// <summary>
-        /// Gets or sets the names of the Image columns 
-        /// as a list of strings separated by the character ;
-        /// </summary>
-        public string ImageColumns { get; set; }
-        /// <summary>
-        /// Gets or sets the names of the memo columns (text blob columns)
-        /// as a list of strings separated by the character ;
-        /// </summary>
-        public string MemoColumns { get; set; }
-
-        /// <summary>
-        /// A fully qualified (i.e. TABLE_NAME.FIELD_NAME) column of type date or datetime.
-        /// <para>It works in conjuction with DateRange property in order to produce
-        /// a fixed part in the WHERE clause of this select statement.</para>
-        /// </summary>
-        public string DateRangeColumn { get; set; }
-        /// <summary>
-        /// A DateRange.
-        /// <para>It works in conjuction with DateRangeColumn property in order to produce
-        /// a fixed part in the WHERE clause of this select statement.</para>
-        /// </summary>
-        public DateRange DateRange { get; set; }
-
-        /* properties */
-        /// <summary>
-        /// A dictionary where Keys = FieldNames and Values = User Friendly Titles.
-        /// </summary>
-        public string DisplayLabels { get; set; }
-        /// <summary>
-        /// A collection of column settings elements
-        /// </summary>
-        //public List<ColumnSetting> ColumnSettings { get; set; } = new List<ColumnSetting>();
-        /// <summary>
-        /// The criterion field descriptors used to generate the "user where" clause of the SelectSql
-        /// </summary>
-        public SqlFilterDefs SqlFilters { get; set; } = new SqlFilterDefs();
-
-
-
-        /// <summary>
-        /// True if DisplayLabels is not null or empty
-        /// </summary>
-        [JsonIgnore]
-        public bool HasDisplayLabels { get { return !string.IsNullOrWhiteSpace(this.DisplayLabels); } }
-        /// <summary>
-        /// True if ColumnSettings is NOT null and contains items
-        /// </summary>
-        //[JsonIgnore]
-        //public bool HasColumnSettings { get { return (ColumnSettings != null) && (ColumnSettings.Count > 0); } }
-        /// <summary>
-        /// True if CriterionDescriptors is NOT null and contains items
-        /// </summary>
-        [JsonIgnore]
-        public bool HasSqlFilters { get { return (SqlFilters != null) && (SqlFilters.Count > 0); } }
-
 
         /// <summary>
         /// The DataTable that results after the select execution

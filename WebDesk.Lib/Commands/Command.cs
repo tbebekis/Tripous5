@@ -47,6 +47,7 @@ namespace WebLib
 
 
         Setup fSetup;
+ 
 
         /* construction */
         /// <summary>
@@ -146,10 +147,23 @@ namespace WebLib
         /// A name unique among all commands.
         /// </summary>
         public string Name { get; set; }
+
+ 
         /// <summary>
-        /// Resource string key
+        /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
         public string TitleKey { get; set; }
+        /// <summary>
+        /// Gets the Title of this instance, used for display purposes. 
+        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
+        /// </summary>    
+        public string Title
+        {
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
+            set { }
+        }
+
+
         /// <summary>
         /// Icon key
         /// </summary>
@@ -164,11 +178,7 @@ namespace WebLib
         /// </summary>
         public bool IsSingleInstance { get; set; }
 
-        /// <summary>
-        /// Returns the localized title.
-        /// </summary>
-        [JsonIgnore]
-        public string Title => DataStore.Localize(TitleKey);
+ 
 
         /// <summary>
         /// The list of child commands, if any, else null.

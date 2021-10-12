@@ -35,35 +35,35 @@ namespace Tripous
         /// <summary>
         /// From 7 days before To today
         /// </summary>
-        PreviousWeek,
+        LastWeek,
         /// <summary>
         /// From 14 days before To today
         /// </summary>
-        PreviousTwoWeeks,
+        LastTwoWeeks,
         /// <summary>
         /// From 30 before To today
         /// </summary>
-        PreviousMonth,
+        LastMonth,
         /// <summary>
         /// From 60 before To today
         /// </summary>
-        PreviousTwoMonths,
+        LastTwoMonths,
         /// <summary>
         /// From 90 before To today
         /// </summary>
-        PreviousThreeMonths,
+        LastThreeMonths,
         /// <summary>
         /// From 180 before To today
         /// </summary>
-        PreviousSemester,
+        LastSemester,
         /// <summary>
         /// From 365 before To today
         /// </summary>
-        PreviousYear,
+        LastYear,
         /// <summary>
         /// From 730 before To today
         /// </summary>
-        PreviousTwoYears,
+        LastTwoYears,
 
         /* From ... To Today */
 

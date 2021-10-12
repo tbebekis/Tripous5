@@ -892,8 +892,8 @@ namespace Tripous.Data
         public virtual JsonBroker JsonInitialize()
         {
             JsonBroker Result = new JsonBroker(this);
-            foreach (SelectSql SS in Result.SelectList)
-                SS.TranslateColumnCaptions();
+            //foreach (SelectSql SS in Result.SelectList)
+            //    SS.TranslateColumnCaptions();
 
             return Result;
         }

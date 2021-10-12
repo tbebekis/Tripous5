@@ -18,7 +18,8 @@ namespace WebLib
         { 
             SqlBrokerDef Broker = SqlBrokerDef.Register("Trader");
             //Broker.CodeProducerName = SysCodeProducers.Simple6_3;
-            Broker.MainSelect.Text = @"
+            SelectSql MainSelect = Broker.MainSelect;
+            MainSelect.Text = @"
 select 
    Trader.Id            as Id
   ,Trader.Code          as Code
@@ -30,11 +31,12 @@ from
   Trader
 ";
 
-            NameValueStringList DisplayLabels = new NameValueStringList();
-            DisplayLabels.Clear();
-            DisplayLabels.Values["Code"] = "Code";
-            DisplayLabels.Values["Name"] = "Name";
-            Broker.MainSelect.DisplayLabels = DisplayLabels.Text;
+            MainSelect.AddColumn("Id", "Id").SetVisible(false);
+            MainSelect.AddColumn("Code", "Code");
+            MainSelect.AddColumn("Name", "Name");
+            MainSelect.AddColumn("Married", "Married", ColumnDisplayType.CheckBox);
+            MainSelect.AddColumn("BirthDate", "BirthDate", ColumnDisplayType.Date);
+            MainSelect.AddColumn("Salary", "Salary").SetDecimals(2); 
 
             SqlBrokerTableDef Table = Broker.AddTable(Broker.MainTableName, Broker.Title);
             Table.AddId();

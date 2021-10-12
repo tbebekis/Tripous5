@@ -230,7 +230,7 @@ namespace Tripous.Data
 
                 Column.Name = C.Name;
                 Column.Title = C.Title;
-                Column.TitleKey = C.TitleKey;
+                //Column.TitleKey = C.TitleKey;
                 Column.DataType = C.DataType;
                 Column.Expression = C.Expression;
                 Column.DefaultValue = C.DefaultValue;
