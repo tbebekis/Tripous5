@@ -12,9 +12,9 @@
         <a class="ButtonEx" data-setup="{ Command: 'List', Text: 'List', ToolTip: 'List' , IcoClasses: 'fa fa-list-alt',  NoText: true, Ico: 'Left'}"></a>
     }
 
-    @if (Bf.In(ViewToolBarFlags.Filter, Model))
+    @if (Bf.In(ViewToolBarFlags.Filters, Model))
     {
-        <a class="ButtonEx" data-setup="{ Command: 'Filter', Text: 'Filter', ToolTip: 'Filter' , IcoClasses: 'fa fa-search',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Filters', Text: 'Filters', ToolTip: 'Filters' , IcoClasses: 'fa fa-search',  NoText: true, Ico: 'Left'}"></a>
     }
 
     @if (Bf.In(ViewToolBarFlags.Navigation, Model))
@@ -27,8 +27,8 @@
 
     @if (Bf.In(ViewToolBarFlags.AllEdits, Model))
     {
-        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , IcoClasses: 'fa fa-edit',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , IcoClasses: 'fa fa-plus',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , IcoClasses: 'fa fa-edit',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , IcoClasses: 'fa fa-minus',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'Save', Text: 'Save', ToolTip: 'Save' , IcoClasses: 'fa fa-floppy-o',  NoText: true, Ico: 'Left'}"></a>
     }
@@ -58,5 +58,5 @@
     {
         <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , IcoClasses: 'fa fa-sign-out',  NoText: true, Ico: 'Left'}"></a>
     }
- 
+
 </div>

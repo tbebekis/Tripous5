@@ -4064,7 +4064,8 @@ tp.GetDataSetup = function (el) { return tp.Data(el, 'setup'); };
  * This function returns the __DataSetup script object, if already exists as a property to the specified element. <br />
  * Else tries to get the value of the data-setup attribute, if exists, and creates the object.  <br /> 
  * It also merges any properties found in the {@link tp.GlobalCreateParams} for that element with the object. <br />
- * Finally associates the object to the element and returns the object.
+ * Finally associates the object to the element and returns the object. <br />
+ * Returns null if no attribute exists on element.
  * @param {HTMLElement|string} el The element to operate on.
  * @returns {object} Returns the javascript object created using the data-setup attribute, or null, if no attribute exists on element.
  */

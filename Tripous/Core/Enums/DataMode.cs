@@ -17,10 +17,12 @@ namespace Tripous
         /// None
         /// </summary>
         None = 0,
+
         /// <summary>
         /// Browse
         /// </summary>
         Browse = 1,
+
         /// <summary>
         /// Insert
         /// </summary>
@@ -33,6 +35,7 @@ namespace Tripous
         /// Delete
         /// </summary>
         Delete = 8,
+
         /// <summary>
         /// Commit
         /// </summary>

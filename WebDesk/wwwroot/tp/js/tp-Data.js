@@ -1580,17 +1580,13 @@ Object.freeze(tp.FieldFlags);
 tp.DataMode = {
     None: 0,
     Browse: 1,
+
     Insert: 2,
     Edit: 4,
     Delete: 8,
+
     Commit: 0x10,
-    Cancel: 0x20,
-    Criteria: 0x40,
-    Reports: 0x80,
-    Menu: 0x100,
-    Backup: 0x200,
-    Lines: 0x400,
-    LineItem: 0x800
+    Cancel: 0x20 
 };
 Object.freeze(tp.DataMode);
 //#endregion

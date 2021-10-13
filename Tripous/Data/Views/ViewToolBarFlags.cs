@@ -31,9 +31,9 @@ namespace Tripous.Data
         /// </summary>
         List = 2,
         /// <summary>
-        /// Filter
+        /// Filters
         /// </summary>
-        Filter = 4,
+        Filters = 4,
 
         /// <summary>
         /// First

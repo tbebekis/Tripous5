@@ -16,11 +16,11 @@
  
         <div class="PanelList ViewPanelList tp-PanelList" data-setup="{ SelectedIndex: 0 }">
 
-            <div class="ViewBrowserPanel">
+            <div class="ViewBrowserPanel" data-setup="{ PanelMode: 'List' }">
                 <div class="ViewBrowserGrid tp-Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
             </div>    
 
-            <div class="ViewEditPanel">
+            <div class="ViewEditPanel" data-setup="{ PanelMode: 'Edit' }">
                 @{ // this creates the Edit panel, the container of the edit part of the view.
                     DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef);
                     PagerModel.CssClasses = "TabControl ViewDataPager";
@@ -30,7 +30,7 @@
                 }
             </div>            
 
-            <div class="ViewFilterPanel">
+            <div class="ViewFilterPanel" data-setup="{ PanelMode: 'Filters' }">
             </div>
         </div>
 

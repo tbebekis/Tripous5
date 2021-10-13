@@ -228,90 +228,6 @@ tp.Broker = class extends tp.tpObject {
         this.Name = Name || this.Name;
     }
 
-    /* fields */
-
-    /** Field
-    @private
-    @type {boolean}
-    */
-    fInitialized;
-    /** Field
-    @private
-    @type {tp.DataView}
-    */
-    fView;
-    /** Field
-    @type {tp.DataSet}
-    */
-    DataSet;
-    /** Field
-    @type {tp.DataTable}
-    */
-    tblBrowser;
-    /** Field
-    @type {string[]}
-    */ 
-    QueryNames;
-    /** Field
-    @type {tp.SelectSql[]}
-    */
-    SelectList;
-    /** Field. The last SelectSql statement executed for the browser
-    @type {tp.SelectSql}
-    */
-    LastSelectSql;   
-    /** Field
-    @type {tp.BrokerAction}
-    */
-    LastAction;
-    /** Field
-    @type {string}
-    */
-    Name;
-    /** Field
-    @type {boolean}
-    */
-    IsListBroker;
-    /** Field
-    @type {boolean}
-    */
-    IsMasterBroker;
-    /** Field
-    @type {tp.DataMode}
-    */
-    State;
-    /** Field
-    @type {string}
-    */
-    ConnectionName;
-    /** Field
-    @type {string}
-    */
-    MainTableName;
-    /** Field
-    @type {string}
-    */
-    LinesTableName;
-    /** Field
-    @type {string}
-    */
-    SubLinesTableName;
-    /** Field
-    @type {number}
-    */
-    EntityId;
-    /** Field
-    @type {string}
-    */
-    EntityName;
-    /** Field
-    @type {string}
-    */
-    PrimaryKeyField;
-    /** Field
-    @type {boolean}
-    */
-    GuidOids;
 
     /**
     Returns true if this instance is initialized.
@@ -993,33 +909,131 @@ tp.Broker = class extends tp.tpObject {
 
 };
 
+
+/* fields */
+
+/** Field
+@private
+@type {boolean}
+*/
+tp.Broker.prototype.fInitialized = false;
+/** Field
+@private
+@type {tp.DataView}
+*/
+tp.Broker.prototype.fView = null;
+/** Field
+@type {tp.DataSet}
+*/
+tp.Broker.prototype.DataSet = null;
+/** Field
+@type {tp.DataTable}
+*/
+tp.Broker.prototype.tblBrowser = null;
+/** Field
+@type {string[]}
+*/
+tp.Broker.prototype.QueryNames = [];
+/** Field
+@type {tp.SelectSql[]}
+*/
+tp.Broker.prototype.SelectList = [];
+/** Field. The last SelectSql statement executed for the browser
+@type {tp.SelectSql}
+*/
+tp.Broker.prototype.LastSelectSql = null;
+/** Field
+@type {tp.BrokerAction}
+*/
+tp.Broker.prototype.LastAction = tp.BrokerAction.None;
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.Name = '';
+/** Field
+@type {boolean}
+*/
+tp.Broker.prototype.IsListBroker = false;
+/** Field
+@type {boolean}
+*/
+tp.Broker.prototype.IsMasterBroker = false;
+/** Field
+@type {tp.DataMode}
+*/
+tp.Broker.prototype.State = tp.DataMode.None;
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.ConnectionName = '';
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.MainTableName = '';
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.LinesTableName = '';
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.SubLinesTableName = '';
+/** Field
+@type {number}
+*/
+tp.Broker.prototype.EntityId;
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.EntityName = '';
+/** Field
+@type {string}
+*/
+tp.Broker.prototype.PrimaryKeyField = '';
+/** Field
+@type {boolean}
+*/
+tp.Broker.prototype.GuidOids = true;
+
 //#endregion
 
-//#region tp.DataViewCommands
+//#region tp.DataViewMode
 
 /**
-Standard commands
+Standard data-view modes/commands
 */
-tp.DataViewCommands = {
-    Home: 'Home',
+tp.DataViewMode = {
+    None: 0,
+    Home: 1,
 
-    List: 'List',
-    Filter: 'Filter',
+    List: 2,
+    Filters: 4,
+    Reports: 8,
 
-    First: 'First',
-    Prior: 'Prior',
-    Next: 'Next',
-    Last: 'Last',
+    First: 0x10,
+    Prior: 0x20,
+    Next: 0x40,
+    Last: 0x80,
 
-    Edit: 'Edit',
-    Insert: 'Insert',
-    Delete: 'Delete',
-    Save: 'Save',
-    Cancel: 'Cancel',
+    Insert: 0x100,
+    Edit: 0x200,
+    Delete: 0x400,
 
-    Close: 'Close' 
+    Save: 0x800,
+    Cancel: 0x1000,
+
+    Close: 0x2000 
 };
-Object.freeze(tp.DataViewCommands);
+Object.freeze(tp.DataViewMode);
+
+tp.DataViewCommandNames = [];
+(function () {
+    for (var PropName in tp.DataViewMode) {
+        if (tp.IsInteger(tp.DataViewMode[PropName])) {
+            tp.DataViewCommandNames.push(PropName);
+        }
+    }
+})();
 //#endregion
 
 //#region tp.DataView
@@ -1059,112 +1073,23 @@ tp.DataView = class extends tp.View {
         super(ElementOrSelector, CreateParams);
     }
 
-    /* fields */
-    /** Field
-     @protected
-     @type {tp.DataSource[]}
-     */
-    DataSources = [];
-    /** Field
-     @protected
-     @type {tp.Broker}
-     */
-    Broker = null;
-    /** Field
-     @protected
-     @type {tp.DataSource}
-     */
-    dsBrowser = null;
-    /** Field
-     @protected
-     @type {tp.Grid}
-     */
-    gridBrowser = null;
-    /** Field
-     @protected
-     @type {string}
-     */
-    BrokerName = '';
-    /** Field
-     @protected
-     @type {tp.DataTable}
-     */
-    ftblItem = null;
-    /** Field
-     @protected
-     @type {tp.DataTable}
-     */
-    ftblLines = null;
-    /** Field
-     @protected
-     @type {tp.DataTable}
-     */
-    ftblSubLines = null;
-    /** Field
-     @protected
-     @type {tp.DataMode}
-     */
-    fDataMode = tp.DataMode.None;
-    /** Field
-     @protected
-     @type {tp.DataMode}
-     */
-    fLastDataMode = tp.DataMode.None;
-    /** Field
-     @protected
-     @type {tp.ToolBar}
-     */
-    ToolBar = null;
-    /** Field
-     @protected
-     @type {tp.PanelList}
-     */
-    PanelList = null;
-    /** Field
-     @protected
-     @type {string[]}
-     */
-    ValidCommands = [];
-    /** Field
-     @protected
-     @type {boolean}
-     */
-    ForceSelect = false;
-
-    /** Field
-     @protected
-     @type {boolean}
-     */
-    EditControlsCreated = false;
-    /** Field
-     @protected
-     @type {boolean}
-     */
-    FilterControlsCreated = false;
-
-
-    /* properties */
-    /**
-    The primary key field name. Defaults to Id
-    @public
-    @type {string}
-     */
-    PrimaryKeyField = '';
-
-
 
     /**
     Gets or sets the data mode. One of the {@link tp.DataMode} constants.
-    @type {tp.DataMode}
+    @type {tp.DataViewMode}
     */
-    get DataMode() {
-        return this.fDataMode;
+    get ViewMode() {
+        return this.fViewMode;
     }
-    set DataMode(v) {
-        if (this.fDataMode !== v) {
-            this.fLastDataMode = this.fDataMode;
-            this.fDataMode = v;
-            this.OnDataModeChanged();
+    /**
+    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
+    @type {tp.DataViewMode}
+    */
+    set ViewMode(v) {
+        if (this.fViewMode !== v) {
+            this.fLastViewMode = this.fViewMode;
+            this.fViewMode = v;
+            this.OnViewModeChanged();
         }
     }
     /**
@@ -1237,8 +1162,8 @@ tp.DataView = class extends tp.View {
         this.DataSources = [];
         this.Broker = null;
 
-        this.fDataMode = tp.DataMode.None;
-        this.fLastDataMode = tp.DataMode.None;
+        this.fViewMode = tp.DataViewMode.None;
+        this.fLastViewMode = tp.DataViewMode.None;
 
         this.PrimaryKeyField = 'Id';
         this.ForceSelect = false;
@@ -1417,10 +1342,17 @@ tp.DataView = class extends tp.View {
     /** Creates the controls of the filter part, if not already created. 
      * */
     CreateFilterControls() {
-        if (!this.FilterControlsCreated) {
-            // TODO: create filter controls
-            this.FilterControlsCreated = true;
+ 
+        if (!tp.IsValid(this.SqlFiltersPanel)) {
+            let elParent = this.FindPanelByPanelMode('Filters');
+            if (elParent) {
+                let el = tp.Div(elParent);
+                let CP = {};
+                CP.SelectList = this.Broker.SelectList;
+                this.SqlFiltersPanel = new tp.DataViewSqlFiltersPanel(el, CP);
+            }
         }
+ 
     }
 
     /**
@@ -1491,7 +1423,6 @@ tp.DataView = class extends tp.View {
 
         return -1;
     }
-
  
 
     /**
@@ -1661,124 +1592,8 @@ tp.DataView = class extends tp.View {
 
         return null;
     }
-    /**
-    Executes the start command. Called by the DoInitializeAfter(). <br />
-    Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if broker is already initialized. <br />
-    @protected
-    @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if broker is already initialized. <br />
-    */
-    async ExecuteStartCmd() {
-        if (!tp.IsEmpty(this.gridBrowser) && !tp.IsEmpty(this.Broker) && this.Broker.Initialized)
-            await this.BrowserSelect();
-        return null;
-    }
-    /**
-    Returns a string array with all standard commands
-    @protected
-    @returns {string[]} Returns a string array with all standard commands
-    */
-    GetStandardCommandList() {
-        let List = [];
-        for (let Prop in tp.DataViewCommands) {
-            if (tp.IsString(tp.DataViewCommands[Prop])) {
-                List.push(tp.DataViewCommands[Prop]);
-            }
-        }
-        return List;
-    }
-    /**
-    Validates standard commands, that is decides which is or not valid at the moment of the call.
-    @protected
-    */
-    ValidateCommands() {
-
-        let DisableList = [];  // string[]
-
-        switch (this.DataMode) {
-            case tp.DataMode.Browse:
-                DisableList = [
-                    tp.DataViewCommands.List,
-                    tp.DataViewCommands.First,
-                    tp.DataViewCommands.Prior,
-                    tp.DataViewCommands.Next,
-                    tp.DataViewCommands.Last,
-                    tp.DataViewCommands.Save,
-                    tp.DataViewCommands.Cancel];
-                break;
-
-            case tp.DataMode.Insert:
-                DisableList = [
-                    tp.DataViewCommands.Filter,
-                    tp.DataViewCommands.Insert,
-                    tp.DataViewCommands.Edit,
-                    tp.DataViewCommands.Delete                    
-                ];
-                break;
-            case tp.DataMode.Edit:
-                DisableList = [
-                    tp.DataViewCommands.Filter,
-                    tp.DataViewCommands.Edit
-                ];
-                break;
-            case tp.DataMode.Delete:
-                //
-                break;
-
-            case tp.DataMode.Cancel:
-
-                break;
-
-            case tp.DataMode.Commit:
-                //
-                break;
-        }
 
 
-
-        this.ValidCommands = this.GetStandardCommandList();
-
-        for (let i = 0, ln = DisableList.length; i < ln; i++) {
-            tp.ListRemove(this.ValidCommands, DisableList[i]);
-        }
-
-
-        if (this.dsBrowser) {
-            if (!this.dsBrowser.CanFirst())
-                tp.ListRemove(this.ValidCommands, tp.DataViewCommands.First);
-            if (!this.dsBrowser.CanPrior())
-                tp.ListRemove(this.ValidCommands, tp.DataViewCommands.Prior);
-            if (!this.dsBrowser.CanNext())
-                tp.ListRemove(this.ValidCommands, tp.DataViewCommands.Next);
-            if (!this.dsBrowser.CanLast())
-                tp.ListRemove(this.ValidCommands, tp.DataViewCommands.Last);
-        }
-    }
-    /**
-    Enables/disables buttons and menu items.
-    @protected
-    */
-    EnableCommands() {
-        if (tp.IsArray(this.ValidCommands)) {
-            if (this.ToolBar) {
-
-                let ControlList = this.ToolBar.GetControls(),
-                    c,          // tp.tpElement,
-                    Command     // string
-                    ;
-
-                for (let i = 0, ln = ControlList.length; i < ln; i++) {
-                    c = ControlList[i];
-                    if (tp.HasCommandProperty(c)) {
-                        Command = c.Command;
-                        if (!tp.IsBlank(Command)) {
-                            c.Enabled = tp.ListContainsText(this.ValidCommands, Command);
-                        }
-                    }
-                }
-            }
-        }
-
-    }
     /**
     Sets the visible panel index in the panel list.
     @protected
@@ -1790,6 +1605,49 @@ tp.DataView = class extends tp.View {
         }
     }
     /**
+     * Sets the visible panel of the main pager (a PanelList) by its 'PanelMode'.
+     * NOTE: Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * @param {string} PanelMode The panel mode to check for.
+     */
+    SetVisiblePanelByPanelMode(PanelMode) {
+        let elPanel = this.FindPanelByPanelMode(PanelMode);
+        let Index = -1;
+        if (elPanel) {
+            let Panels = this.PanelList.GetPanels();
+            Index = Panels.indexOf(elPanel);
+        }
+
+        if (Index >= 0) {
+            this.SetVisiblePanel(Index);
+        } 
+    }
+    /**
+     * Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * This function returns a panel found having a specified PanelMode, or null if not found.
+     * @param {string} PanelMode The panel mode to check for.
+     * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.
+     */
+    FindPanelByPanelMode(PanelMode) {
+        if (tp.IsValid(this.PanelList)) {
+            let Panels = this.PanelList.GetPanels();
+ 
+            let i, ln, elPanel, Setup;
+
+            for (i = 0, ln = Panels.length; i < ln; i++) {
+                elPanel = Panels[i];
+                Setup = tp.GetDataSetupObject(elPanel);
+                if (tp.IsValid(Setup)) {
+                    if (PanelMode === Setup.PanelMode) {
+                        return elPanel;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
     Displays the main local menu
     @protected
     */
@@ -1800,6 +1658,8 @@ tp.DataView = class extends tp.View {
     @protected
     */
     DisplayFilterPanel() {
+        this.CreateFilterControls();
+        this.ViewMode = tp.DataViewMode.Filters;
     }
     /**
     Closes the view and removes the view from the DOM.
@@ -1947,9 +1807,7 @@ tp.DataView = class extends tp.View {
                 if (Action.Succeeded === true) {
                     this.DoInitializeAfter(Action);
 
-                    this.DataMode = tp.DataMode.Browse;
-                    this.ValidateCommands();
-                    this.EnableCommands();
+                    this.ViewMode = tp.DataViewMode.List;
 
                     await this.ExecuteStartCmd();
                 } else {
@@ -1979,11 +1837,9 @@ tp.DataView = class extends tp.View {
                     this.UpdateDataSources();
                     this.ApplyReadOnlyEditToControls(false);
 
-                    this.DataMode = tp.DataMode.Insert;
+                    this.ViewMode = tp.DataViewMode.Insert;
                     this.DoInsertAfter(Action);
-
-                    this.ValidateCommands();
-                    this.EnableCommands();
+ 
                 } else {
                     this.DisplayActionError(Action);
                 }
@@ -2018,9 +1874,8 @@ tp.DataView = class extends tp.View {
 
                     this.DoEditAfter(Action);
 
-                    this.DataMode = tp.DataMode.Edit;
-                    this.ValidateCommands();
-                    this.EnableCommands();
+                    this.ViewMode = tp.DataViewMode.Edit;
+ 
                 } else {
                     this.DisplayActionError(Action);
                 }
@@ -2057,9 +1912,8 @@ tp.DataView = class extends tp.View {
  
                         this.DoDeleteAfter(Action);
 
-                        this.DataMode = tp.DataMode.Browse;
-                        this.ValidateCommands();
-                        this.EnableCommands();
+                        this.ViewMode = tp.DataViewMode.List;
+ 
                     } else {
                         this.DisplayActionError(Action);
                     }
@@ -2094,9 +1948,8 @@ tp.DataView = class extends tp.View {
                     this.DoCommitAfter(Action);
                     this.ForceSelect = true;
 
-                    this.DataMode = tp.DataMode.Edit;
-                    this.ValidateCommands();
-                    this.EnableCommands();
+                    this.ViewMode = tp.DataViewMode.Edit;
+ 
                 } else {
                     this.DisplayActionError(Action);
                 }
@@ -2174,9 +2027,8 @@ tp.DataView = class extends tp.View {
                     this.DoSelectBrowserAfter(Action);
                     this.ForceSelect = false;
 
-                    this.DataMode = tp.DataMode.Browse;
-                    this.ValidateCommands();
-                    this.EnableCommands();
+                    this.ViewMode = tp.DataViewMode.List;
+ 
                 } else {
                     this.DisplayActionError(Action);
                 }
@@ -2187,46 +2039,172 @@ tp.DataView = class extends tp.View {
         return Action;
     }
 
-    /* miscs */
+    /* commands/modes */
+    /**
+Executes the start command. Called by the DoInitializeAfter(). <br />
+Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if broker is already initialized. <br />
+@protected
+@returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if broker is already initialized. <br />
+*/
+    async ExecuteStartCmd() {
+        if (!tp.IsEmpty(this.gridBrowser) && !tp.IsEmpty(this.Broker) && this.Broker.Initialized)
+            await this.BrowserSelect();
+        return null;
+    }
+
+    /**
+    Returns the bit-field (set) of the valid commands for this view. <br />
+    @protected
+    @returns {number} Returns the bit-field (set) of the valid commands for this view. <br />
+    */
+    GetValidCommands() {
+        let Result = tp.DataViewMode.None;
+
+        for (var PropName in tp.DataViewMode) {
+            if (tp.IsInteger(tp.DataViewMode[PropName])) {
+                Result |= tp.DataViewMode[PropName];
+            }
+        }
+
+        return Result;
+    }
+    /**
+    Validates standard commands, that is decides which is or not valid at the moment of the call.
+    @protected
+    */
+    ValidateCommands() {
+
+        let Navigation = tp.DataViewMode.First |
+            tp.DataViewMode.Prior |
+            tp.DataViewMode.Next |
+            tp.DataViewMode.Last;
+
+        this.ValidCommands = this.GetValidCommands();
+        this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, Navigation);
+
+        switch (this.ViewMode) {
+            case tp.DataViewMode.List:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.List |                    
+                    tp.DataViewMode.Save |
+                    tp.DataViewMode.Cancel
+                );
+                break;
+            case tp.DataViewMode.Insert:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.Filters |
+                    tp.DataViewMode.Insert |
+                    tp.DataViewMode.Edit |
+                    tp.DataViewMode.Delete
+                );
+                break;
+            case tp.DataViewMode.Edit:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.Filters |
+                    tp.DataViewMode.Edit
+                );
+                break;
+            case tp.DataViewMode.Delete:
+                break;
+            case tp.DataViewMode.Cancel:
+                break;
+            case tp.DataViewMode.Save:
+                break;
+
+            case tp.DataViewMode.Filters:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.Filters |
+                    tp.DataViewMode.Insert |
+                    tp.DataViewMode.Edit |
+                    tp.DataViewMode.Delete |
+                    tp.DataViewMode.Save |
+                    tp.DataViewMode.Cancel
+                );
+                break;
+        }
+ 
+
+        if (this.dsBrowser) {
+            if (!this.dsBrowser.CanFirst())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.First);
+            if (!this.dsBrowser.CanPrior())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Prior);
+            if (!this.dsBrowser.CanNext())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Next);
+            if (!this.dsBrowser.CanLast())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Last);
+        }
+    }
+    /**
+    Enables/disables buttons and menu items.
+    @protected
+    */
+    EnableCommands() {
+        if (tp.IsNumber(this.ValidCommands)) {
+            if (this.ToolBar) {
+
+                let ControlList = this.ToolBar.GetControls(),
+                    c,          // tp.tpElement,
+                    Command,    // string
+                    ViewMode    // integer
+                    ;
+
+                for (let i = 0, ln = ControlList.length; i < ln; i++) {
+                    c = ControlList[i];
+                    if (tp.HasCommandProperty(c)) {
+                        Command = c.Command;
+
+                        if (!tp.IsBlank(Command) && Command in tp.DataViewMode) {
+                            ViewMode = tp.DataViewMode[Command];
+                            c.Enabled = tp.Bf.In(ViewMode, this.ValidCommands);   
+                        }
+                    }
+                }
+            }
+        }
+
+    }
     /**
     Executes a standard command by name
-    @param {string} Command - One of the {@link tp.DataViewCommands} constants
+    @param {string} Command - One of the {@link tp.DataViewMode} constants
     */
     ExecuteCommand(Command) {
         if (tp.IsBlank(Command))
             return;
 
-        switch (Command) {
-            case tp.DataViewCommands.Home:
+        let ViewMode = Command in tp.DataViewMode ? tp.DataViewMode[Command] : tp.DataViewMode.None;
+
+        switch (ViewMode) {
+            case tp.DataViewMode.Home:
                 this.DisplayHomeLocalMenu();
                 break;
 
-            case tp.DataViewCommands.List:
+            case tp.DataViewMode.List:
                 this.BrowserSelect();
                 break;
-            case tp.DataViewCommands.Filter:
+            case tp.DataViewMode.Filters:
                 this.DisplayFilterPanel();
                 break;
 
-            case tp.DataViewCommands.First:
+            case tp.DataViewMode.First:
                 if (this.dsBrowser && this.dsBrowser.CanFirst()) {
                     this.dsBrowser.First();
                     this.Edit();
                 }
                 break;
-            case tp.DataViewCommands.Prior:
+            case tp.DataViewMode.Prior:
                 if (this.dsBrowser && this.dsBrowser.CanPrior()) {
                     this.dsBrowser.Prior();
                     this.Edit();
                 }
                 break;
-            case tp.DataViewCommands.Next:
+            case tp.DataViewMode.Next:
                 if (this.dsBrowser && this.dsBrowser.CanNext()) {
                     this.dsBrowser.Next();
                     this.Edit();
                 }
                 break;
-            case tp.DataViewCommands.Last:
+            case tp.DataViewMode.Last:
                 if (this.dsBrowser && this.dsBrowser.CanLast()) {
                     this.dsBrowser.Last();
                     this.Edit();
@@ -2234,67 +2212,58 @@ tp.DataView = class extends tp.View {
                 break;
 
 
-            case tp.DataViewCommands.Edit:
+            case tp.DataViewMode.Edit:
                 this.Edit();
                 break;
-            case tp.DataViewCommands.Insert:
+            case tp.DataViewMode.Insert:
                 this.Insert();
                 break;
-            case tp.DataViewCommands.Delete:
+            case tp.DataViewMode.Delete:
                 this.Delete();
                 break;
-            case tp.DataViewCommands.Save:
+            case tp.DataViewMode.Save:
                 this.Commit();
                 break;
-            case tp.DataViewCommands.Cancel:
+            case tp.DataViewMode.Cancel:
                 if (this.ForceSelect !== true) {
-                    this.DataMode = tp.DataMode.Cancel;
-                    this.DataMode = tp.DataMode.Browse;
+                    this.ViewMode = tp.DataViewMode.Cancel;
+                    this.ViewMode = tp.DataViewMode.List;
                 } else {
                     this.BrowserSelect();
                 }
 
                 break;
 
-            case tp.DataViewCommands.Close:
+            case tp.DataViewMode.Close:
                 this.CloseView();
                 break;
         }
     }
 
+
+
     /* Event triggers */
     /**
     Event trigger
     */
-    OnDataModeChanged() {
-        switch (this.DataMode) {
-            case tp.DataMode.Browse:
-                this.SetVisiblePanel(0);
+    OnViewModeChanged() {
+        switch (this.ViewMode) {
+            case tp.DataViewMode.List:
+            case tp.DataViewMode.Cancel:
+                this.SetVisiblePanelByPanelMode('List');
                 break;
 
-            case tp.DataMode.Insert:
-                this.SetVisiblePanel(1);
-                break;
-            case tp.DataMode.Edit:
-                this.SetVisiblePanel(1);
-                break;
-            case tp.DataMode.Delete:
-                //
+            case tp.DataViewMode.Insert:
+            case tp.DataViewMode.Edit:
+                this.SetVisiblePanelByPanelMode('Edit');
                 break;
 
-            case tp.DataMode.Cancel:
-                this.SetVisiblePanel(0);
-                break;
-
-            case tp.DataMode.Commit:
-                //
-                break;
+            case tp.DataViewMode.Filters:
+                this.SetVisiblePanelByPanelMode('Filters');
+                break; 
         }
 
-        this.ValidateCommands();
-        this.EnableCommands();
-
-        this.Trigger('DataModeChanged', {});
+        this.Trigger('OnViewModeChanged', {});
     }
  
     /**
@@ -2317,10 +2286,103 @@ tp.DataView = class extends tp.View {
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
     BrowserGrid_DoubleClick(Args) {
-        this.ExecuteCommand(tp.DataViewCommands.Edit);
+        this.ExecuteCommand(tp.DataViewMode.Edit);
     }
 };
 
+/* fields */
+/** Field
+ @protected
+ @type {tp.DataSource[]}
+ */
+tp.DataView.prototype.DataSources = [];
+/** Field
+ @protected
+ @type {tp.Broker}
+ */
+tp.DataView.prototype.Broker = null;
+/** Field
+ @protected
+ @type {tp.DataSource}
+ */
+tp.DataView.prototype.dsBrowser = null;
+/** Field
+ @protected
+ @type {tp.Grid}
+ */
+tp.DataView.prototype.gridBrowser = null;
+/** Field
+ @protected
+ @type {string}
+ */
+tp.DataView.prototype.BrokerName = '';
+/** Field
+ @protected
+ @type {tp.DataTable}
+ */
+tp.DataView.prototype.ftblItem = null;
+/** Field
+ @protected
+ @type {tp.DataTable}
+ */
+tp.DataView.prototype.ftblLines = null;
+/** Field
+ @protected
+ @type {tp.DataTable}
+ */
+tp.DataView.prototype.ftblSubLines = null;
+/** Field. One of the  {@link tp.DataViewMode} constants
+ @protected
+ @type {number}
+ */
+tp.DataView.fViewMode = tp.DataViewMode.None;
+/** Field. One of the  {@link tp.DataViewMode} constants
+ @protected
+ @type {number}
+ */
+tp.DataView.prototype.fLastViewMode = tp.DataViewMode.None;
+/** Field
+ @protected
+ @type {tp.ToolBar}
+ */
+tp.DataView.prototype.ToolBar = null;
+/** Field
+ @protected
+ @type {tp.PanelList}
+ */
+tp.DataView.prototype.PanelList = null;
+/** Field. 
+ @protected
+ @type {tp.DataViewSqlFiltersPanel}
+ */
+tp.DataView.prototype.SqlFiltersPanel = null;
 
+ 
+/** Field. A bit-field (set) build using the {@link tp.DataViewMode} constants
+ @protected
+ @type {number}
+ */
+tp.DataView.prototype.ValidCommands = tp.DataViewMode.None;
+/** Field
+ @protected
+ @type {boolean}
+ */
+tp.DataView.prototype.ForceSelect = false;
+
+/** Field
+ @protected
+ @type {boolean}
+ */
+tp.DataView.prototype.EditControlsCreated = false;
+ 
+
+
+/* properties */
+/**
+The primary key field name. Defaults to Id
+@public
+@type {string}
+ */
+tp.DataView.prototype.PrimaryKeyField = '';
 
 //#endregion

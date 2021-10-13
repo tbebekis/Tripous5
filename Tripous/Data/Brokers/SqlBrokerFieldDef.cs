@@ -139,7 +139,10 @@ from
         /// </summary>
         public SqlBrokerFieldDef SetFlags(FieldFlags Value)
         {
+            bool IsBoolean = Bf.In(FieldFlags.Boolean, this.Flags);
             this.Flags = Value;
+            if (IsBoolean)
+                this.Flags |= FieldFlags.Boolean;
             return this;
         }
         /// <summary>
