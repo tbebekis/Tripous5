@@ -1306,13 +1306,6 @@ tp.SelectSql.prototype.Columns = [];
 tp.SelectSql.prototype.Filters = [];
 
 
-
-
-
-
-
-
-
 /**
 Ges or sets a statement part
 @type {string}

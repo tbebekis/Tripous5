@@ -178,6 +178,9 @@ tp.Classes = {
     View: 'tp-View',
     DataView: 'tp-DataView',
 
+    SqlFilterListUi: 'tp-SqlFilterListUi',
+    SqlFilterPanel: 'tp-SqlFilterPanel',
+
     Window: 'tp-Window',
     WindowCaption: 'tp-WindowCaption',
     WindowCaptionText: 'tp-WindowCaptionText',
@@ -1031,9 +1034,30 @@ tp.PanelList = class extends tp.tpElement {
             this.SetSelectedIndex(v);
         }
     }
+    /**
+    Gets or sets the selected panel
+    @type {HTMLElement}
+    */
+    get SelectedPanel() {
+        let Index = this.SelectedIndex;
+        if (Index >= 0) {
+            let Panels = this.GetPanels();
+            return Panels[Index];
+        }
+
+        return null;
+    }
+    set SelectedPanel(v) {
+        if (tp.IsElement(v)) {
+            let Panels = this.GetPanels();
+            let Index = Panels.indexOf(v);
+            if (Index >= 0) {
+                this.SelectedIndex = Index;
+            }
+        }
+    }
 
     /* protected */
-
     /**
      * Sets the selected index. 
      * @protected

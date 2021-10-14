@@ -1090,6 +1090,7 @@ tp.DataView = class extends tp.View {
             this.fLastViewMode = this.fViewMode;
             this.fViewMode = v;
             this.OnViewModeChanged();
+            this.EnableCommands();
         }
     }
     /**
@@ -1343,13 +1344,13 @@ tp.DataView = class extends tp.View {
      * */
     CreateFilterControls() {
  
-        if (!tp.IsValid(this.SqlFiltersPanel)) {
+        if (!tp.IsValid(this.SqlFilterListUi)) {
             let elParent = this.FindPanelByPanelMode('Filters');
             if (elParent) {
                 let el = tp.Div(elParent);
                 let CP = {};
                 CP.SelectList = this.Broker.SelectList;
-                this.SqlFiltersPanel = new tp.DataViewSqlFiltersPanel(el, CP);
+                this.SqlFilterListUi = new tp.SqlFilterListUi(el, CP);
             }
         }
  
@@ -2007,8 +2008,7 @@ tp.DataView = class extends tp.View {
             }
 
             this.DoSelectBrowserBefore();
-
-            // TODO: EDW - Πρέπει να περνάμε στο Grid τις κολώνες που θα δείξουμε, με ρυθμίσεις, π.χ. Boolean, Decimals, κλπ.
+ 
             Action = await this.Broker.SelectBrowser(SelectSql, RowLimit);
 
             if (Action instanceof tp.BrokerAction) {
@@ -2092,7 +2092,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 break;
             case tp.DataViewMode.Insert:
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.Filters |
+                    //tp.DataViewMode.Filters |
                     tp.DataViewMode.Insert |
                     tp.DataViewMode.Edit |
                     tp.DataViewMode.Delete
@@ -2100,7 +2100,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 break;
             case tp.DataViewMode.Edit:
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.Filters |
+                    //tp.DataViewMode.Filters |
                     tp.DataViewMode.Edit
                 );
                 break;
@@ -2140,6 +2140,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
     @protected
     */
     EnableCommands() {
+        this.ValidateCommands();
         if (tp.IsNumber(this.ValidCommands)) {
             if (this.ToolBar) {
 
@@ -2166,13 +2167,19 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
     }
     /**
     Executes a standard command by name
-    @param {string} Command - One of the {@link tp.DataViewMode} constants
+    @param {number | string} Command - One of the {@link tp.DataViewMode} constants, either the name or the value.
     */
     ExecuteCommand(Command) {
-        if (tp.IsBlank(Command))
-            return;
+        let ViewMode = tp.DataViewMode.None;
 
-        let ViewMode = Command in tp.DataViewMode ? tp.DataViewMode[Command] : tp.DataViewMode.None;
+        if (tp.IsString(Command)) {
+            if (tp.IsBlank(Command))
+                return;
+            ViewMode = Command in tp.DataViewMode ? tp.DataViewMode[Command] : tp.DataViewMode.None;
+        }
+        else if (tp.IsInteger(Command)) {
+            ViewMode = Command;
+        } 
 
         switch (ViewMode) {
             case tp.DataViewMode.Home:
@@ -2272,13 +2279,11 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
     AnyClick(Args) {
-
         if (Args.Handled !== true) {
             var Command = tp.GetCommand(Args);
             if (!tp.IsBlank(Command))
                 this.ExecuteCommand(Command);
         }
-
     }
     /**
     Event handler
@@ -2353,9 +2358,9 @@ tp.DataView.prototype.ToolBar = null;
 tp.DataView.prototype.PanelList = null;
 /** Field. 
  @protected
- @type {tp.DataViewSqlFiltersPanel}
+ @type {tp.SqlFilterListUi}
  */
-tp.DataView.prototype.SqlFiltersPanel = null;
+tp.DataView.prototype.SqlFilterListUi = null;
 
  
 /** Field. A bit-field (set) build using the {@link tp.DataViewMode} constants

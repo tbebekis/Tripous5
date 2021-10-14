@@ -1275,6 +1275,25 @@ table.tp-Calendar td.tp-Marked {
 }
 
 /*---------------------------------------------------------------------------------------
+tp-SqlFilterListUi
+---------------------------------------------------------------------------------------*/
+.tp-SqlFilterListUi {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.tp-SqlFilterListUi > .top-zone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+
+/*---------------------------------------------------------------------------------------
  grid
 ---------------------------------------------------------------------------------------*/
  
