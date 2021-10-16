@@ -16,7 +16,6 @@ namespace Tripous.Data
     /// </summary>
     [Flags]
     [TypeStoreItem]
-    [JsonConverter(typeof(StringEnumConverter))]
     public enum SqlFilterMode
     {
         /// <summary>

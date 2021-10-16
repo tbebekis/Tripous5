@@ -1344,13 +1344,13 @@ tp.DataView = class extends tp.View {
      * */
     CreateFilterControls() {
  
-        if (!tp.IsValid(this.SqlFilterListUi)) {
+        if (!tp.IsValid(this.SelectSqlListUi)) {
             let elParent = this.FindPanelByPanelMode('Filters');
             if (elParent) {
                 let el = tp.Div(elParent);
                 let CP = {};
                 CP.SelectList = this.Broker.SelectList;
-                this.SqlFilterListUi = new tp.SqlFilterListUi(el, CP);
+                this.SelectSqlListUi = new tp.SelectSqlListUi(el, CP);
             }
         }
  
@@ -2358,9 +2358,9 @@ tp.DataView.prototype.ToolBar = null;
 tp.DataView.prototype.PanelList = null;
 /** Field. 
  @protected
- @type {tp.SqlFilterListUi}
+ @type {tp.SelectSqlListUi}
  */
-tp.DataView.prototype.SqlFilterListUi = null;
+tp.DataView.prototype.SelectSqlListUi = null;
 
  
 /** Field. A bit-field (set) build using the {@link tp.DataViewMode} constants

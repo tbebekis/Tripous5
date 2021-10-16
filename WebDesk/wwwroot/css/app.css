@@ -80,7 +80,10 @@ script {
 
  
 
- 
+.tp-SqlFilter-Ctrl input[type=text], 
+.tp-SqlFilter-Ctrl input[type=number], 
+.tp-SqlFilter-Ctrl input[type=date], 
+.tp-SqlFilter-Ctrl select,
 
 .tp-CtrlRow input[type=text], 
 .tp-CtrlRow input[type=email], 
@@ -91,6 +94,12 @@ script {
 .tp-CtrlRow select {
     border: 1px solid var(--Gray);
 }
+
+
+.tp-SqlFilter-Ctrl input[type=text]:focus, 
+.tp-SqlFilter-Ctrl input[type=number]:focus, 
+.tp-SqlFilter-Ctrl input[type=date]:focus, 
+.tp-SqlFilter-Ctrl select,
 
 .tp-CtrlRow input[type=text]:focus,
 .tp-CtrlRow input[type=email]:focus,

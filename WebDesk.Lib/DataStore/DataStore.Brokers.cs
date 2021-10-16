@@ -36,7 +36,10 @@ from
             MainSelect.AddColumn("Name", "Name");
             MainSelect.AddColumn("Married", "Married", ColumnDisplayType.CheckBox);
             MainSelect.AddColumn("BirthDate", "BirthDate", ColumnDisplayType.Date);
-            MainSelect.AddColumn("Salary", "Salary").SetDecimals(2); 
+            MainSelect.AddColumn("Salary", "Salary").SetDecimals(2);
+ 
+            MainSelect.Filters.Add("Trader.Name", "Trader", DataFieldType.String);
+            MainSelect.Filters.Add("Trader.Salary", "Salary", DataFieldType.Decimal);
 
             SqlBrokerTableDef Table = Broker.AddTable(Broker.MainTableName, Broker.Title);
             Table.AddId();

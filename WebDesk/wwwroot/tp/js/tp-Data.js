@@ -353,6 +353,14 @@ tp.DateRanges = {
 };
 //#endregion  
 
+//#region  tp.WhereOperator
+tp.WhereOperator = {
+    And: 1,
+    Not: 2,
+    Or: 4
+};
+Object.freeze(tp.WhereOperator);
+//#endregion 
 
 //#region tp.ColumnDisplayType
 /**
@@ -787,11 +795,11 @@ tp.SqlFilterEnum.prototype.IncludeAll = true;
 tp.SqlFilterEnum.prototype.DisplayLabels = '';
 //#endregion  
 
-//#region tp.SqlFilter
+//#region tp.SqlFilterDef
 /**
 Describes a single entry of a WHERE clause of a SELECT sql statement.
 */
-tp.SqlFilter = class   {
+tp.SqlFilterDef = class   {
     /**
     Constructor
     @param {string} [FieldPath] The field path, i.e. TableName.FieldName or just FieldName
@@ -803,7 +811,7 @@ tp.SqlFilter = class   {
 
     /**
     Assigns a source item to this instance
-    @param {tp.SqlFilter} Source The source to copy from
+    @param {tp.SqlFilterDef} Source The source to copy from
     */
     Assign(Source) {
 
@@ -839,60 +847,62 @@ tp.SqlFilter = class   {
 The full path to the field, i.e. TableAlias.FieldName
 @type {string}
 */
-tp.SqlFilter.prototype.FieldPath = '';
+tp.SqlFilterDef.prototype.FieldPath = '';
 /**
 The Title of this instance, used for display purposes
 @type {string}
 */
-tp.SqlFilter.prototype.Title = '';
+tp.SqlFilterDef.prototype.Title = '';
 /**
 TitleKey. Used when inserting a new instance or altering an existend.
 @type {string}
 */
-tp.SqlFilter.prototype.TitleKey = '';
+tp.SqlFilterDef.prototype.TitleKey = '';
 
 /**
 Datatype
 @type {tp.DataType}
 */
-tp.SqlFilter.prototype.DataType = tp.DataType.String;
+tp.SqlFilterDef.prototype.DataType = tp.DataType.String;
 /**
 Indicates how the user enters of selects the filter value. One of the {@link tp.SqlFilterMode} constants.
 @type {tp.SqlFilterMode}
 */
-tp.SqlFilter.prototype.Mode = tp.SqlFilterMode.Simple;
+tp.SqlFilterDef.prototype.Mode = tp.SqlFilterMode.Simple;
 
 /**
-If true then range is used. Ranges is used with dates, strings, etc.
+If true then range is used. Valid ONLY when Mode is Simple and DataType String, Integer, Float or Decimal. <br />
+Date and Time are ALWAYS used as a range from-to. <br />
+Defaults to false. <br />
 @type {boolean}
 */
-tp.SqlFilter.prototype.UseRange = false;
+tp.SqlFilterDef.prototype.UseRange = false;
 /**
 The locator name, when mode Locator
 @type {string}
 */
-tp.SqlFilter.prototype.Locator = '';
+tp.SqlFilterDef.prototype.Locator = '';
 /**
 If true then the result string of this criterion goes to the HAVING clause of a SELECT statement.
 @type {boolean}
 */
-tp.SqlFilter.prototype.PutInHaving = false;
+tp.SqlFilterDef.prototype.PutInHaving = false;
 /**
 the aggregation function (sum, count, avg, min, max) to use, PutInHaving is true. It could be an empty string.
 @type {string}
 */
-tp.SqlFilter.prototype.AggregateFunc = '';
+tp.SqlFilterDef.prototype.AggregateFunc = '';
 /**
 Returns the filter enum settings, that is special settings object when Mode is EnumQuery or EnumConst
 @type {tp.SqlFilterEnum}
 */
-tp.SqlFilter.prototype.Enum = new tp.SqlFilterEnum();
+tp.SqlFilterDef.prototype.Enum = new tp.SqlFilterEnum();
 
 /**
  
 @type {string}
 */
-tp.SqlFilter.prototype.InitialValue = '';
+tp.SqlFilterDef.prototype.InitialValue = '';
 
 //#endregion  
 
@@ -1053,7 +1063,7 @@ tp.SelectSql = class {
         this.Filters = [];
         if (!tp.IsEmpty(Source.Filters) && (Source.Filters.length > 0)) {
             Source.Filters.forEach(item => {
-                let Item = new tp.SqlFilter();
+                let Item = new tp.SqlFilterDef();
                 this.Filters.push(Item);
                 Item.Assign(item);
             });
@@ -1251,11 +1261,7 @@ tp.SelectSql = class {
  */
 tp.SelectSql.prototype.SPACES = '  ';
 
-
 /* properties */
-
-
-
 /**
 Name
 @type {string}
@@ -1296,13 +1302,13 @@ A fully qualified (i.e. TABLE_NAME.FIELD_NAME) column of type date or datetime
 tp.SelectSql.prototype.DateRangeColumn = '';
 
 
-/**
+/** The list of column descriptors of columns to display. If null or empty, then all columns are displayed. Else only the columns defined in this list are displayed.
  * @private
  * @type {tp.SelectSqlColumn[]} */
 tp.SelectSql.prototype.Columns = [];
-/**
+/** The filter descriptors used to generate the "user where" clause. User's where is appended to the WHERE clause.
  * @private
- * @type {tp.SqlFilter[]} */
+ * @type {tp.SqlFilterDef[]} */
 tp.SelectSql.prototype.Filters = [];
 
 

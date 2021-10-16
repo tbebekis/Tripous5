@@ -595,11 +595,11 @@ from
         public DateRange DateRange { get; set; } = DateRange.LastWeek;
 
         /// <summary>
-        /// The list of columns to display. If null or empty, then all columns are displayed. Else only the columns defined in this list are displayed.
+        /// The list of column descriptors of columns to display. If null or empty, then all columns are displayed. Else only the columns defined in this list are displayed.
         /// </summary>
         public List<SelectSqlColumn> Columns { get; set; } = new List<SelectSqlColumn>();
         /// <summary>
-        /// The filters used to generate the "user where" clause. User's where is appended to the WHERE clause.
+        /// The filter descriptors used to generate the "user where" clause. User's where is appended to the WHERE clause.
         /// </summary>
         public SqlFilterDefs Filters { get; set; } = new SqlFilterDefs();
 

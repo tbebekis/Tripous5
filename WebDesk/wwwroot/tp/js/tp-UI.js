@@ -178,9 +178,6 @@ tp.Classes = {
     View: 'tp-View',
     DataView: 'tp-DataView',
 
-    SqlFilterListUi: 'tp-SqlFilterListUi',
-    SqlFilterPanel: 'tp-SqlFilterPanel',
-
     Window: 'tp-Window',
     WindowCaption: 'tp-WindowCaption',
     WindowCaptionText: 'tp-WindowCaptionText',
@@ -208,9 +205,26 @@ tp.Classes = {
     Node: 'tp-Node',
     Leaf: 'tp-Leaf',
 
+    /* Sql Filters          ----------------------------------------------------------------- */
+    SelectSqlListUi: 'tp-SelectSqlListUi',
+    SelectSqlFilterListUi: 'tp-SelectSqlFilterListUi',
+
+    SqlFilterRow: 'tp-SqlFilterRow',
+    SqlFilterCtrl: 'tp-SqlFilter-Ctrl',
+    SqlFilterRange: 'tp-SqlFilter-Range', 
+
+    SqlFilterString: 'tp-SqlFilter-String',
+    SqlFilterInteger: 'tp-SqlFilter-Integer',
+    SqlFilterFloat: 'tp-SqlFilter-Float',
+    SqlFilterDecimal: 'tp-SqlFilter-Decimal',
+    SqlFilterDate: 'tp-SqlFilter-Date',
+    SqlFilterBoolean: 'tp-SqlFilter-Boolean',
+    SqlFilterEnumQuery: 'tp-SqlFilter-EnumQuery',
+    SqlFilterEnumConst: 'tp-SqlFilter-EnumConst',
+    SqlFilterLocator: 'tp-SqlFilter-Locator',
 
 
-
+ 
     /* menus                ----------------------------------------------------------------- */
     Menu: 'tp-Menu',
     ContextMenu: 'tp-ContextMenu',
@@ -19486,7 +19500,6 @@ tp.Ui.Types = {
 
     Element: tp.tpElement,
 
-    FlexPanel: tp.FlexPanel,
     IFrame: tp.IFrame,
     Splitter: tp.Splitter,
     GroupBox: tp.GroupBox,

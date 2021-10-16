@@ -541,6 +541,11 @@ max-width 	Rules applied for any browser width less than the value defined in th
     padding: 0 3px;
 }
 
+.tp-SqlFilter-Ctrl input[type=text], 
+.tp-SqlFilter-Ctrl input[type=number], 
+.tp-SqlFilter-Ctrl input[type=date], 
+.tp-SqlFilter-Ctrl select,
+
 .tp-CtrlRow input[type=text], 
 .tp-CtrlRow input[type=email], 
 .tp-CtrlRow input[type=password], 
@@ -548,7 +553,7 @@ max-width 	Rules applied for any browser width less than the value defined in th
 .tp-CtrlRow input[type=date], 
 .tp-CtrlRow input[type=tel], 
 .tp-CtrlRow select {
-     height: 2.4em;
+     height: 2.2em;
 }
 
 .tp-CtrlRow,
