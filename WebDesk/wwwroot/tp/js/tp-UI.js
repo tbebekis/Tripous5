@@ -2449,8 +2449,8 @@ Object.freeze(tp.DropDownBoxStage);
 
 /**
 A resizable dropdown box that can serve any block, inline-block or flex element (Associate) and is controlled by an owner (Owner) object. <br />
-When the dropdown box and its Associate are siblings the dropdown box gets absolute position. <br />
-When the dropdown box and its Associate are NOT siblings the dropdown box gets fixed position. <br />
+The dropdown box it always gets 'fixed' position. <br />
+It also recalculates its location in order to be inside the boundaries of the viewport.
 The initialization can be done by passing an object to the CreateParams parameter of the constructor as
 <pre>
     var Owner = {
@@ -2656,19 +2656,17 @@ tp.DropDownBox = class extends tp.tpElement {
     Open() {
         if (!this.IsOpen && tp.IsHTMLElement(this.Associate)) {
 
-            if (!this.ParentHandle) {
-                this.AppendTo(this.Associate.parentNode);
+            if (tp.IsEmpty(this.ParentHandle)) {
+                tp.Doc.body.appendChild(this.Handle);                
             }
-
-            let IsSibling = this.ParentHandle === this.Associate.parentNode;
+            this.ZIndex = tp.MaxZIndexOf(tp.Doc.body);
 
             let Style = tp.ComputedStyle(this.Associate);
             this.Handle.style.fontFamily = Style.fontFamily;
             this.Handle.style.fontSize = Style.fontSize;
             this.Handle.style.fontWeight = Style.fontWeight;
-
-            this.Position = IsSibling ? 'absolute' : 'fixed';
-            this.UpdateTop();
+ 
+            this.Position = 'fixed';            
 
             if (this.fIsFirstOpen === true) {
                 this.Width = this.Associate.getBoundingClientRect().width;
@@ -2676,9 +2674,26 @@ tp.DropDownBox = class extends tp.tpElement {
             }
 
             this.OnOwnerEvent(tp.DropDownBoxStage.Opening);
-            this.ZIndex = tp.ZIndex(this.Associate) + 1;
+            //this.ZIndex = tp.ZIndex(this.Associate) + 1;
             this.AddClass(tp.Classes.Visible);
+
+            this.UpdateTop();
+
             this.OnOwnerEvent(tp.DropDownBoxStage.Opened);
+
+            // reposition if outside of viewport
+            if (tp.IsSameText('fixed', this.Position)) {
+                let Size = tp.Viewport.GetSize();
+                let Rect = tp.BoundingRect(this.Handle);      // location (relative to viewport) and size of this instance
+ 
+                if (Rect.Bottom > Size.Height) {
+                    this.Y = Rect.Y - Rect.Height;
+                }
+
+                if (Rect.Right > Size.Width) {
+                    this.X = Size.Width - Rect.Width;
+                }
+            }              
 
             setTimeout(() => {
                 window.addEventListener('scroll', this.FuncBind(this.Window_Scroll));
@@ -4645,19 +4660,36 @@ tp.ContextMenu = class extends tp.MenuBase {
         this.ShowAt(X, Y);
     }
     /**
-    Shows the context menu at viewport coordinates
+    Shows the context menu at viewport coordinates. <br />
+    It also recalculates the location in order to be inside the boundaries of the viewport.
     @param {number} X The x coordination
     @param {number} Y The y coordination
     */
     ShowAt(X, Y) {
-        this.ZIndex = tp.MaxZIndexOf(this.Document.body);
-        this.Document.body.appendChild(this.Handle);
-        this.Position = 'fixed';
+        if (tp.IsEmpty(this.ParentHandle)) {
+            this.Document.body.appendChild(this.Handle);
+            this.Position = 'fixed';
+        }
+        this.ZIndex = tp.MaxZIndexOf(this.Document.body);        
+        
         this.X = X;
         this.Y = Y;
         this.Visible = true;
+
+        // reposition if outside of viewport
+        let Size = tp.Viewport.GetSize();
+        let Rect = tp.BoundingRect(this.Handle);      // location (relative to viewport) and size of this instance
+ 
+        if (Rect.Bottom > Size.Height) {
+            this.Y = Y - Rect.Height;
+        }
+
+        if (Rect.Right > Size.Width) {
+            this.X = Size.Width - Rect.Width;
+        }        
+
         this.Focus();
-        //tp.On(this.Document, tp.Events.Click, this);
+ 
 
     }
 };

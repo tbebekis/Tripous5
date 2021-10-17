@@ -39,7 +39,8 @@ from
             MainSelect.AddColumn("Salary", "Salary").SetDecimals(2);
  
             MainSelect.Filters.Add("Trader.Name", "Trader", DataFieldType.String);
-            MainSelect.Filters.Add("Trader.Salary", "Salary", DataFieldType.Decimal);
+            MainSelect.Filters.Add("Trader.Salary", "Salary", DataFieldType.Decimal).SetUseRange(true);
+            MainSelect.Filters.Add("Trader.BirthDate", "BirthDate", DataFieldType.Date);
 
             SqlBrokerTableDef Table = Broker.AddTable(Broker.MainTableName, Broker.Title);
             Table.AddId();

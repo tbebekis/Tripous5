@@ -118,6 +118,39 @@ namespace Tripous.Data
         }
 
 
+        /// <summary>
+        /// Sets the value of a property of this instance. Returns this instance.
+        /// </summary>
+        public SqlFilterDef SetUseRange(bool Value = true)
+        {
+            this.UseRange = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property of this instance. Returns this instance.
+        /// </summary>
+        public SqlFilterDef SetPutInHaving(bool Value = true)
+        {
+            this.PutInHaving = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property of this instance. Returns this instance.
+        /// </summary>
+        public SqlFilterDef SetAggregateFunc(string Value = "count")
+        {
+            this.AggregateFunc = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets the value of a property of this instance. Returns this instance.
+        /// </summary>
+        public SqlFilterDef SetInitialValue(string Value)
+        {
+            this.InitialValue = Value;
+            return this;
+        }
+
         /* properties */
         /// <summary>
         /// The full path to the field, i.e. TableAlias.FieldName

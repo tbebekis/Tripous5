@@ -1059,7 +1059,6 @@ table.tp-Calendar td.tp-Marked {
 .tp-DateBox {
     position: relative;
     display: inline-block;
-    width: 140px;
     border: var(--Border);
 }
 
@@ -1319,7 +1318,27 @@ tp-SelectSqlListUi
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
+    gap: 0.2em;
 }
+
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > * {
+    width: 50%;
+}
+
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-From,
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-To {
+    position: relative;
+    display: flex;
+    flex-direction: column;    
+}
+
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-From > :first-child,
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-To > :first-child {
+    font-size: 0.8em;  
+}
+
+
+ 
 
 /*---------------------------------------------------------------------------------------
  grid

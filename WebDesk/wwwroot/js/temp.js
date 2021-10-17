@@ -388,6 +388,9 @@ tp.SqlFilterControlLink = class {
      */
     SqlFilter = null;
 
+
+    ControlClassType = null;
+
     /** The DOM element of the whole filter row
      * @type {HTMLElement}
      * */
@@ -396,6 +399,9 @@ tp.SqlFilterControlLink = class {
      * @type {HTMLElement}
      * */
     elControlContainer = null;
+
+    elFromControlContainer = null;
+    elToControlContainer = null;
 
 
     /** Label displaying the title of the filter, i.e. the field name.  
@@ -423,19 +429,25 @@ tp.SqlFilterControlLink = class {
             case tp.SqlFilterMode.Simple:
                 switch (this.FilterDef.DataType) {
                     case tp.DataType.String:
+                        this.ControlClassType = tp.Ui.Types.TextBox
+                        break;
                     case tp.DataType.Integer:
                     case tp.DataType.Float:
                     case tp.DataType.Decimal:
-                        this.CreateControl_Text();
+                        this.ControlClassType = tp.Ui.Types.NumberBox
+                        //this.CreateControl_Text();
                         break;
                     case tp.DataType.Date:
                     case tp.DataType.DateTime:
-                        this.CreateControl_Date();
+                        this.ControlClassType = tp.Ui.Types.DateBox;
+                        //this.CreateControl_Date();
                         break;
                     case tp.DataType.Boolean:
-                        this.CreateControl_Boolean();
+                        this.ControlClassType = tp.Ui.Types.CheckBox;
+                        //this.CreateControl_Boolean();
                         break;
                 }
+                this.CreateControl_Simple();
                 break;
             case tp.SqlFilterMode.EnumQuery:
                 break;
@@ -475,22 +487,26 @@ tp.SqlFilterControlLink = class {
         this.lblTitle =  tp.Select(this.elFilterRow, '.' + tp.Classes.Text);
         this.elControlContainer = tp.Select(this.elFilterRow, '.' + tp.Classes.SqlFilterCtrl);
     }
-    CreateControl_Text() {
-        let UseRange = this.FilterDef.UseRange === true;
+    CreateControl_Simple() {
+        let UseRange = this.FilterDef.UseRange === true || this.FilterDef.DataType === tp.DataType.DateTime || this.FilterDef.DataType === tp.DataType.Date;
         if (UseRange)
-            tp.AddClass(this.elControlContainer, tp.SqlFilterRange);
-
-        let ClassType = this.FilterDef.DataType === tp.DataType.String ? tp.Ui.Types.TextBox : tp.Ui.Types.NumberBox;
+            tp.AddClass(this.elControlContainer, tp.Classes.SqlFilterRange);
 
         if (!UseRange) {
-            this.edtBox = new ClassType(null, { Parent: this.elControlContainer });
+            this.edtBox = new this.ControlClassType(null, { Parent: this.elControlContainer });
         }
         else {
-            this.lblFrom = tp.Append(this.elControlContainer, `<div>From</div>`);
-            this.edtFrom = new ClassType(null, { Parent: this.elControlContainer });
-            this.lblTo = tp.Append(this.elControlContainer, `<div>To</div>`);
-            this.edtTo = new ClassType(null, { Parent: this.elControlContainer });
+            this.elFromControlContainer = tp.Append(this.elControlContainer, `<div class="${tp.Classes.From}"></div>`);
+            this.lblFrom = tp.Append(this.elFromControlContainer, `<div>From</div>`);
+            this.edtFrom = new this.ControlClassType(null, { Parent: this.elFromControlContainer });
+
+            this.elToControlContainer = tp.Append(this.elControlContainer, `<div class="${tp.Classes.To}"></div>`);
+            this.lblTo = tp.Append(this.elToControlContainer, `<div>To</div>`);
+            this.edtTo = new this.ControlClassType(null, { Parent: this.elToControlContainer });
         }
+    }
+    CreateControl_Text() {
+
 
 /*
         switch (this.FilterDef.DataType) {
