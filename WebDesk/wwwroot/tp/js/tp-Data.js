@@ -2611,7 +2611,9 @@ tp.DataTable = class extends tp.tpObject {
         if (this.Rows.length > 0) {
             this.OnRowsClearing();
 
-            this.Batch = true;
+            let BatchFlag = this.Rows.length > 1;
+            if (BatchFlag)
+                this.Batch = true;
             try {
                 var List = this.RowsToList();
                 for (i = 0, ln = List.length; i < ln; i++) {
@@ -2620,7 +2622,8 @@ tp.DataTable = class extends tp.tpObject {
                 this.Deleted = this.Deleted.concat(List);
                 this.Rows.length = 0;
             } finally {
-                this.Batch = false;
+                if (BatchFlag)
+                    this.Batch = false;
             }
 
             this.OnRowsCleared();

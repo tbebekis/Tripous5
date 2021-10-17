@@ -6541,6 +6541,16 @@ tp.Control = class extends tp.tpElement  {
         return this.DataBindMode === tp.ControlBindMode.Grid;
     }
 
+    /**
+    Gets or sets the value or textContent or innerHTML, depending on the node type
+    @type {string}
+    */
+    get Text() { return super.Text; }
+    set Text(v) {
+        tp.val(this.Handle, '');
+        super.Text = v;
+    }
+
     /* properties */
     /**
     Gets or sets the DataSource, if any, this control is bound to.
@@ -7995,7 +8005,7 @@ tp.CheckBox = class extends tp.Control {
 tp.CheckBox.fCheckBox = null;
 //#endregion
 
-
+//#region tp.NumberBox
 /**
 A custom number box control. Contains a styled input type="text" element (NOT type="number").    <br />
 NOTE: decimal places may be set using the relevant property or the DataColumn of this control.
@@ -8066,10 +8076,9 @@ tp.NumberBox = class extends tp.InputControl {
      * @param {number} v The value to set.
      */
     set Value(v) {
-        if (tp.IsNumber(v) && v !== this.Value) {
-            this.Text = this.Format(v);
-            this.OnValueChanged();
-        }
+        if (v !== this.Value) {
+            this.Text = tp.IsNumber(v) ? this.Format(v) : '';
+        } 
     }
 
 
@@ -8120,7 +8129,7 @@ tp.NumberBox = class extends tp.InputControl {
  
 };
 tp.NumberBox.prototype.fDecimals = 0;
-
+//#endregion
 
 //#region  tp.ListControl
 /**
