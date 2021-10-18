@@ -1348,7 +1348,7 @@ tp.DataView = class extends tp.View {
             let elParent = this.FindPanelByPanelMode('Filters');
             if (elParent) {
                 let el = tp.Div(elParent);
-                let CP = {};
+                let CP = { };
                 CP.SelectList = this.Broker.SelectList;
                 this.SelectSqlListUi = new tp.SelectSqlListUi(el, CP);
             }
@@ -1988,7 +1988,22 @@ tp.DataView = class extends tp.View {
         } 
     }
 
- 
+    GetBrowserSelectSql() {
+        let Result = {
+            SelectSql: null,
+            RowLimit: null
+        };
+
+        if (tp.IsValid(this.SelectSqlListUi)) {
+            Result = this.SelectSqlListUi.GetSelectedSelectSqlInfo();
+        }
+
+        if (tp.IsEmpty(Result.SelectSql) && this.Broker.SelectList.length > 0) {
+            SelectSql = this.Broker.SelectList[0];
+        }
+
+        return Result;
+    }
 
     /**
     Executes a SELECT for the browser grid. Retuns a {@link tp.BrokerAction} {@link Promise}.
@@ -1996,16 +2011,14 @@ tp.DataView = class extends tp.View {
     @param {number} [RowLimit] - Optional. The row limit
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
-    async BrowserSelect(SelectSql = null, RowLimit = null) {
+    async BrowserSelect() {
         let Action = null;
 
         if (!tp.IsEmpty(this.Broker)) {
 
-            if (tp.IsString(SelectSql)) {
-                SelectSql = new tp.SelectSql(SelectSql);
-            } else if (tp.IsEmpty(SelectSql) && this.Broker.SelectList.length > 0) {
-                SelectSql = this.Broker.SelectList[0];
-            }
+            let SelectSqlInfo = this.GetBrowserSelectSql();
+            let SelectSql = SelectSqlInfo.SelectSql;
+            let RowLimit = SelectSqlInfo.RowLimit; 
 
             this.DoSelectBrowserBefore();
  

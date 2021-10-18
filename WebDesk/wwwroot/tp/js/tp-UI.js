@@ -207,7 +207,7 @@ tp.Classes = {
 
     /* Sql Filters          ----------------------------------------------------------------- */
     SelectSqlListUi: 'tp-SelectSqlListUi',
-    SelectSqlFilterListUi: 'tp-SelectSqlFilterListUi',
+    SelectSqlUi: 'tp-SelectSqlUi',
 
     SqlFilterRow: 'tp-SqlFilterRow',
     SqlFilterCtrl: 'tp-SqlFilter-Ctrl',

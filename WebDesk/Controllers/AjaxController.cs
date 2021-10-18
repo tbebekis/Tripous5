@@ -29,6 +29,14 @@ namespace WebDesk.Controllers
     /// </summary>
     public class AjaxController : ControllerMvc, IAjaxController
     {
+        DataTable SelectTable(string SqlText, string ConnectionName)
+        {
+            SqlStore Store = SqlStores.CreateSqlStore(ConnectionName);
+
+            DataTable Table = Store.Select(SqlText);
+            return Table;
+        }
+
 
         #region IAjaxController
         /// <summary>
@@ -49,7 +57,7 @@ namespace WebDesk.Controllers
         }
         #endregion
 
-        [Route("/AjaxExecute", Name = "AjaxExecute")]
+        [Route("/AjaxExecute")]
         public async Task<JsonResult> AjaxExecute([FromBody] AjaxRequest R)
         {
             await Task.CompletedTask;
@@ -57,6 +65,27 @@ namespace WebDesk.Controllers
             return Json(Result);
         }
 
+        [Route("/SqlSelect")]
+        public async Task<JsonResult> SqlSelect([FromBody] SqlTextItem SqlTextItem)
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                DataTable Table = SelectTable(SqlTextItem.SqlText, SqlTextItem.ConnectionName);
+                JsonDataTable JTable = new JsonDataTable(Table);
+
+                Result.SerializePacket(JTable);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
+
+            return Json(Result);
+        }
 
     }
 }

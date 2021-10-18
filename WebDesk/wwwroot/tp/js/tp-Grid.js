@@ -4499,6 +4499,13 @@ tp.Grid = class extends tp.Control  {
         this.RenderFooterAggregates();
     }
 
+    /** Forces a repaint of groups, data-rows and aggregates */
+    RepaintRows() {
+        setTimeout(() => {
+            this.BuildGroups();
+        }, 700);
+    }
+
     /* cache (internal methods) */
     /** Clear cache
      * @protected
@@ -5039,7 +5046,7 @@ tp.Grid = class extends tp.Control  {
     */
     UpdateRowHeight() {
         this.RowHeight = tp.GetLineHeight(this.Handle, 1.8);
-        this.ColumnHeight = Math.ceil(this.RowHeight * 1.3);
+        this.ColumnHeight = Math.ceil(this.RowHeight * 1.15);
         this.GroupPanelHeight = Math.ceil(this.ColumnHeight * 1.2);
 
         this.GroupCellWidth = this.RowHeight;

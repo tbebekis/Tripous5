@@ -112,6 +112,12 @@ tp.SelectSqlListUi = class extends tp.tpElement {
             var Command = tp.GetCommand(Args);
             if (!tp.IsBlank(Command)) {
                 //this.ExecuteCommand(Command);
+                switch (Command) {
+                    case 'Execute':
+
+                        break;
+                }
+                //alert(Command);
             }                
         }
     }
@@ -123,17 +129,30 @@ tp.SelectSqlListUi = class extends tp.tpElement {
     cboSelectList_SelectedIndexChanged(Args) {
         Args.Handled = true;
         let elOption = Args.Sender.SelectedItem;
+
+        // create panels on-demand only
         let PanelInfo = elOption.PanelInfo;
         if (!tp.IsValid(PanelInfo.Panel)) {
             let el = this.PanelList.AddChild();
             let CP = {
                 SelectSql: PanelInfo.SelectSql 
             }
-            PanelInfo.Panel = new tp.SelectSqlFilterListUi(el, CP);
+            PanelInfo.Panel = new tp.SelectSqlUi(el, CP);
         }
 
+        this.CurrentSelectSqlUi = PanelInfo.Panel;             // set the selected panel object
         this.PanelList.SelectedPanel = PanelInfo.Panel.Handle;
     }
+
+
+    GetSelectedSelectSqlInfo() {
+        let Result = {
+            SelectSql: this.CurrentSelectSqlUi.GenerateSql(),
+            RowLimit: this.RowLimit
+        };
+        return Result;
+    }
+
 };
 
 /** The DIV where to build the Filters panel Ui.
@@ -157,14 +176,22 @@ tp.SelectSqlListUi.prototype.cboSelectList = null;
  * @type {tp.PanelList}
  */
 tp.SelectSqlListUi.prototype.PanelList = null;
+/** The currently selected {@link tp.SelectSqlUi} panel object.
+ * @type {tp.SelectSqlUi}
+ */
+tp.SelectSqlListUi.prototype.CurrentSelectSqlUi = null;
+/** When true a row limit is applied to the current Sql statement.
+ * @type {boolean}
+ */
+tp.SelectSqlListUi.prototype.RowLimit = false;
 //#endregion
 
 
-//#region tp.SelectSqlFilterListUi
+//#region tp.SelectSqlUi
 /** The Ui built upon a single {@link tp.SelectSql} item and its filters list.
  * Actually this is a DIV displaying a control for each filter item defined in a {@link tp.SelectSql} instance.
  * */
-tp.SelectSqlFilterListUi = class extends tp.tpElement {
+tp.SelectSqlUi = class extends tp.tpElement {
     /**
     Constructor <br />
     The passed-in element is a DIV where to build the controls of the filter list. <br />
@@ -185,8 +212,8 @@ tp.SelectSqlFilterListUi = class extends tp.tpElement {
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.SelectSqlFilterListUi';
-        this.fDefaultCssClasses = tp.Classes.SelectSqlFilterListUi;
+        this.tpClass = 'tp.SelectSqlUi';
+        this.fDefaultCssClasses = tp.Classes.SelectSqlUi;
     }
 
     /**
@@ -198,7 +225,8 @@ tp.SelectSqlFilterListUi = class extends tp.tpElement {
     - Completed notification
     */
     OnInitializationCompleted() {
-        this.CreateControls();    }
+        this.CreateControls();
+    }
 
     CreateControls() {
         if (!tp.IsValid(this.Filters)) {
@@ -213,17 +241,23 @@ tp.SelectSqlFilterListUi = class extends tp.tpElement {
             }
         } 
     }
+
+    GenerateSql() {
+        return this.Filters.GenerateSql();
+    }
+ 
 };
 
 /** A {@link tp.SelectSql} this panel represents. Contains the list for SqlFilter items.
  * NOTE: Comes from CreateParams.
  * @type {tp.SelectSql}
  */
-tp.SelectSqlFilterListUi.prototype.SelectSql = null;
+tp.SelectSqlUi.prototype.SelectSql = null;
 /** A {@link tp.SqlFilters} 
  * @type {tp.SqlFilters}
  */
-tp.SelectSqlFilterListUi.prototype.Filters = null;
+tp.SelectSqlUi.prototype.Filters = null;
+
 //#endregion
 
 
@@ -265,6 +299,45 @@ tp.SqlFilters = class {
      * @type {tp.SqlFilter[]}
      */
     List = [];
+
+    InfoText = '';
+
+ 
+    GenerateSql() {
+        this.List.forEach(item => {
+            item.ControlLink.InputFromControls();
+        });
+
+        let Ref = {
+            sWhere: '',
+            sHaving: ''
+        };
+
+        let Result = this.GenerateSqlWhereAndHaving(Ref);
+        return Result;
+    }
+
+    GenerateSqlWhereAndHaving(Ref) {
+        this.InfoText = '';
+
+        Ref.sWhere = tp.TrimEnd(Ref.sWhere);
+        Ref.sHaving = tp.TrimEnd(Ref.sHaving); 
+
+        let SS = new tp.SelectSql(this.SelectSql.Text);
+
+        DoGenerateSql(SS, Ref, true);
+        DoGenerateSql(SS, Ref, false);
+
+        SS.WhereUser = Ref.sWhere;
+        SS.Having = Ref.sHaving;
+
+        return SS;
+ 
+    }
+    //DoGenerateSql(SelectSql SelectSql, ref string sClause, bool IsWhere)
+    DoGenerateSql(SelectSql, Ref, IsWhere) {
+        // EDW
+    }
 };
 //#endregion
 
@@ -274,6 +347,7 @@ tp.SqlFilters = class {
  * Represents a single data column that participates in a WHERE clause. <br />
  * It is actually an Sql generator, regarding that data column.  <br />
  * The data column can be of a string, integer, float, datetime or boolean-integer type.
+ * An instance of this class uses a {@link tp.SqlFilterControlLink} instance to get control values.
  * */
 tp.SqlFilter = class {
     /**
@@ -367,12 +441,13 @@ tp.SqlFilterControlLink = class {
     constructor(ParentObject, SqlFilter) {
         this.ParentObject = ParentObject;
         this.SelectSql = this.ParentObject.SelectSql;
-        this.SqlFilter = SqlFilter;
         this.FilterDef = SqlFilter.FilterDef;
+        this.SqlFilter = SqlFilter;
+        this.SqlFilter.ControlLink = this;
     }
 
-    /** A {@link tp.SelectSqlFilterListUi} instance. Provides the parent DOM element of the control of this instance.
-     * @type {tp.SelectSqlFilterListUi}
+    /** A {@link tp.SelectSqlUi} instance. Provides the parent DOM element of the control of this instance.
+     * @type {tp.SelectSqlUi}
      */
     ParentObject = null;
     /** A {@link tp.SelectSql} the filter of this link belongs to. 
@@ -384,11 +459,14 @@ tp.SqlFilterControlLink = class {
      */
     FilterDef = null;
     /** The {@link tp.SqlFilter} filter item, representing a single data column that participates in a WHERE clause. 
+     * This is where values of a control link are placed.
      * @type {tp.SqlFilter}
      */
     SqlFilter = null;
 
-
+    /** The tripous script class type used in creating the filter controls (edtBox, edtFrom and edtTo) of this filter
+     * @type {object}
+     */
     ControlClassType = null;
 
     /** The DOM element of the whole filter row
@@ -400,7 +478,13 @@ tp.SqlFilterControlLink = class {
      * */
     elControlContainer = null;
 
+    /** Container of the 'from' control
+     * @type {HTMLDivElement}
+     */
     elFromControlContainer = null;
+    /** Container of the 'to' control
+     * @type {HTMLDivElement}
+     */
     elToControlContainer = null;
 
 
@@ -417,15 +501,43 @@ tp.SqlFilterControlLink = class {
      */
     lblTo = null;
 
+    /** The main input control of this filter. Used when UseRange of the filter def is false. 
+     * @type {tp.tpElement}
+     */
     edtBox = null;
+    /** The 'from' input control of this filter. Used when UseRange of the filter def is true.
+     * @type {tp.tpElement}
+     */
     edtFrom = null;
+    /** The 'to' input control of this filter. Used when UseRange of the filter def is true.
+     * @type {tp.tpElement}
+     */
     edtTo = null;
+
+    /** The data-table of an enum filter
+     * @type {tp.DataTable}
+     */
+    tblEnum = null;
+    /** A {@link tp.Grid} used with filters of type enum
+     * @type {tp.Grid}
+     */
+    gridEnum = null;
+    /** Internal. Used when this is an single-choise enum filter, in order to get notified when a row is selected and act accordingly.
+     * @type {tp.DataSourceListener}
+     */
+    gridEnumDatasourceListener = null;
+    /** Internal flag. Used when this is an single-choise enum filter, in order to prevent multiple choises
+     * @type {boolean}
+     */
+    SettingSingleChoise = false;
+
 
     CreateControls() {
 
         this.CreateFilterRow();
 
         switch (this.FilterDef.Mode) {
+
             case tp.SqlFilterMode.Simple:
                 switch (this.FilterDef.DataType) {
                     case tp.DataType.String:
@@ -435,25 +547,23 @@ tp.SqlFilterControlLink = class {
                     case tp.DataType.Float:
                     case tp.DataType.Decimal:
                         this.ControlClassType = tp.Ui.Types.NumberBox
-                        //this.CreateControl_Text();
                         break;
                     case tp.DataType.Date:
                     case tp.DataType.DateTime:
                         this.ControlClassType = tp.Ui.Types.DateBox;
-                        //this.CreateControl_Date();
-                        break;
+                              break;
                     case tp.DataType.Boolean:
-                        this.ControlClassType = tp.Ui.Types.CheckBox;
-                        //this.CreateControl_Boolean();
+                        tp.Throw("Boolean filters not yet ready");
+                        //this.ControlClassType = tp.Ui.Types.CheckBox;
+                        // TODO: we need a combo-box here with 3 states: all, true, false
                         break;
                 }
                 this.CreateControl_Simple();
                 break;
+
             case tp.SqlFilterMode.EnumQuery:
-                break;
             case tp.SqlFilterMode.EnumConst:
-                break;
-            case tp.SqlFilterMode.Locator:
+                this.CreateControl_Enum();
                 break;
         }
     }
@@ -488,6 +598,7 @@ tp.SqlFilterControlLink = class {
         this.elControlContainer = tp.Select(this.elFilterRow, '.' + tp.Classes.SqlFilterCtrl);
     }
     CreateControl_Simple() {
+ 
         let UseRange = this.FilterDef.UseRange === true || this.FilterDef.DataType === tp.DataType.DateTime || this.FilterDef.DataType === tp.DataType.Date;
         if (UseRange)
             tp.AddClass(this.elControlContainer, tp.Classes.SqlFilterRange);
@@ -505,52 +616,180 @@ tp.SqlFilterControlLink = class {
             this.edtTo = new this.ControlClassType(null, { Parent: this.elToControlContainer });
         }
     }
-    CreateControl_Text() {
+    async CreateControl_Enum() {
+
+        let TableColumn, GridColumn;
+        if (this.FilterDef.Mode === tp.SqlFilterMode.EnumQuery) {
+            this.tblEnum = await tp.Db.SelectAsync(this.FilterDef.Enum.Sql);
+        }
+        else {
+            this.FilterDef.Enum.ResultField = this.FilterDef.Enum.ResultField || 'Result';
+
+            this.tblEnum = new tp.DataTable('tblEnum');
+            this.tblEnum.AddColumn(this.FilterDef.Enum.ResultField, this.FilterDef.Enum.DataType, 140);
+
+            this.FilterDef.Enum.OptionList.forEach(item => {
+                this.tblEnum.AddRow([item]);
+            });
+        }
+
+        if (!this.tblEnum.ContainsColumn('Include')) {
+            TableColumn = this.tblEnum.AddColumn('Include', tp.DataType.Boolean, 0, 0);
+            TableColumn.Title = '+/-';
+        }
+
+        if (this.FilterDef.Enum.IsMultiChoise === true && this.FilterDef.Enum.IncludeAll === true) {
+            this.tblEnum.Rows.forEach(Row => {
+                Row.Set('Include', true);
+            });
+        }
+
+        this.gridEnum = new tp.Grid(null, { Parent: this.elControlContainer });
+        this.gridEnum.ReadOnly = false;
+        this.gridEnum.ToolBarVisible = false;
+        this.gridEnum.GroupsVisible = false;
+        this.gridEnum.FilterVisible = false;
+        this.gridEnum.FooterVisible = false;
+        this.gridEnum.ButtonInsertVisible = false;
+        this.gridEnum.ButtonDeleteVisible = false;
+
+        this.gridEnum.DataSource = this.tblEnum;
+
+        GridColumn = this.gridEnum.GetColumn('Include');
+        GridColumn.Width = 36;
+        GridColumn.Text = '+/-';
+        GridColumn.ToolTip = 'Include';
+
+        this.gridEnum.SetColumnListWritable(['Include']);
+
+        // when not multi-choise, ensure only a single row is selected
+        if (this.FilterDef.Enum.IsMultiChoise !== true) {
+            this.gridEnumDatasourceListener = new tp.DataSourceListener();            
+            this.gridEnum.DataSource.AddDataListener(this.gridEnumDatasourceListener);
+            this.gridEnumDatasourceListener.DataSourceRowModified = (Table, Row, Column, OldValue, NewValue) => { this.gridEnum_DataSourceRowModified(Table, Row, Column, OldValue, NewValue); };
+        }
+    }
 
 
-/*
-        switch (this.FilterDef.DataType) {
-            case tp.DataType.String:
+    /**
+    Notification
+    @param {tp.DataTable} Table The table
+    @param {tp.DataRow} Row The row
+    @param {tp.DataColumn} Column The column
+    @param {any} OldValue The old value
+    @param {any} NewValue The new value
+    */
+    gridEnum_DataSourceRowModified(Table, Row, Column, OldValue, NewValue) {
+        let Flag = false;
+        if (tp.IsSameText('Include', Column.Name)) {
+
+            // when not multi-choise, ensure only a single row is selected
+            if (this.SettingSingleChoise === false) {
+                this.SettingSingleChoise = true;
+                try {
+                    let Index = Row.Table.IndexOfColumn(Column);
+                    let v = Row.Get(Index);
+                    let v2;
+                    if (v === true) {
+                        this.tblEnum.Rows.forEach((Row2) => {
+                            if (Row !== Row2) {
+                                v2 = Row2.Get(Index);
+                                if (v2 === true) {
+                                    Row2.Set(Index, false);
+                                    Flag = true;
+                                }
+                            }
+                        });
+                    }
+                } finally {
+                    this.SettingSingleChoise = false;
+                }
+            }
+
+        }
+
+        if (Flag)
+            this.gridEnum.RepaintRows();
+    }
+
+    GetControlValue(Control) {
+        let Result = '';
+
+        if (this.FilterDef.Mode === tp.SqlFilterMode.Simple) {
+
+            if (this.FilterDef.DataType !== tp.DataType.Boolean) {
+                Result = Control.Text;
+                Result = tp.IsString(Result) ? Result.trim() : '';
+                if (Result !== '') {
+                    if (Bf.In(this.FilterDef.DataType, tp.DataType.Float | tp.DataType.Decimal)) {
+                        Result = Result.replace(',', '.');
+                    }
+                }
+            }
+            else {
+                // TODO: Boolean
+            }
+        }
+        else {
+
+        }
+
+ 
+
+        return Result;
+    }
+    InputFromControls() {
+
+        switch (this.FilterDef.Mode) {
+
+            case tp.SqlFilterMode.Simple:
+                switch (this.FilterDef.DataType) {
+                    case tp.DataType.String:
+                    case tp.DataType.Integer:
+                    case tp.DataType.Float:
+                    case tp.DataType.Decimal:
+                        if (this.FilterDef.UseRange !== true) {
+                            this.SqlFilter.Value = this.GetControlValue(this.edtBox);
+                        }
+                        else {
+                            this.SqlFilter.Greater = this.GetControlValue(this.edtFrom);
+                            this.SqlFilter.Less = this.GetControlValue(this.edtTo);
+                        }
+                        break;
+
+                    case tp.DataType.Date:
+                    case tp.DataType.DateTime:
+                        this.SqlFilter.Greater = this.GetControlValue(this.edtFrom);
+                        this.SqlFilter.Less = this.GetControlValue(this.edtTo);
+                        break;
+
+                    case tp.DataType.Boolean:
+                        break;
+                }
                 break;
-            case tp.DataType.Integer:
-                break;
-            case tp.DataType.Float:
-                break;
-            case tp.DataType.Decimal:
+
+            case tp.SqlFilterMode.EnumQuery:
+            case tp.SqlFilterMode.EnumConst:
+
                 break;
         }
- */
-      
     }
-    CreateControl_Date() {
-        if (this.FilterDef.UseRange === true)
-            tp.AddClass(this.elControlContainer, tp.SqlFilterRange);
-    }
-    CreateControl_Boolean() {
+    CleanControls() {
+        if (tp.IsValid(this.edtBox)) {
+            this.edtBox.Text = '';
+        }
 
+        if (tp.IsValid(this.tblEnum)) {
+            let Flag = this.FilterDef.Enum.IsMultiChoise === true && this.FilterDef.Enum.IncludeAll === true;
+            this.tblEnum.Rows.forEach(Row => {
+                Row.Set('Include', Flag);
+            });
+        }
     }
-
-    /* event handler */
-    /**
-    Implementation of the DOM EventListener interface. 
-    For handling all DOM element events. Either when this is a DOM element and the sender (target) of the event is this.Handle
-    or when the sender (target) of the event is any other object and listener is this instance.
-    @see {@link http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventListener|specification}
-    @see {@link https://medium.com/@WebReflection/dom-handleevent-a-cross-platform-standard-since-year-2000-5bf17287fd38|handleEvent}
-    @param {Event} e The event to handle
-     */
-    handleEvent(e) {
-    }
+ 
 };
 
 
 
 //#endregion
-/*
-        SelectSqlBrowserUi Statement;
-        Criterion Criterion;
-        CriterionDescriptor Descriptor;
-        bool controlsCreated;
-
-        Control Parent;
- */
+ 

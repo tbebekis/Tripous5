@@ -777,14 +777,14 @@ tp.SqlFilterEnum.prototype.Sql = '';
  * @type {string}
  */
 tp.SqlFilterEnum.prototype.ResultField = 'Id';           
-/** For EnumConst and EnumQuery only items. When true the user interface presents a multi choise control, otherwise a combo box is presented.
+/** For EnumConst and EnumQuery only items. When true the user may select multiple items.
  * @type {boolean}
  */
 tp.SqlFilterEnum.prototype.IsMultiChoise = false;         
 /** list of constant options. Used only when the is an EnumConst filter.
- * @type {string}
+ * @type {string[]}
  */
-tp.SqlFilterEnum.prototype.ConstantOptionsList = '';     
+tp.SqlFilterEnum.prototype.OptionList = [];
 /** When true, constant options are displayed initially to the user as checked.
  * @type {boolean}
  */
@@ -817,7 +817,7 @@ tp.SqlFilterDef = class   {
 
         this.FieldPath = Source.FieldPath;
         this.Title = Source.Title;
-        this.TitleKey = Source.TitleKey;
+ 
 
         this.DataType = Source.DataType;
         this.Mode = Source.Mode;
@@ -837,6 +837,7 @@ tp.SqlFilterDef = class   {
     ValidateAggregateFunc() {
         this.AggregateFunc = tp.ValidAggregateFunctions.indexOf(this.AggregateFunc) === -1? '': this.AggregateFunc;
     }
+    
 };
 
 
@@ -853,11 +854,7 @@ The Title of this instance, used for display purposes
 @type {string}
 */
 tp.SqlFilterDef.prototype.Title = '';
-/**
-TitleKey. Used when inserting a new instance or altering an existend.
-@type {string}
-*/
-tp.SqlFilterDef.prototype.TitleKey = '';
+ 
 
 /**
 Datatype
@@ -1368,18 +1365,16 @@ Represents a named sql statement
 tp.SqlTextItem = class {
 
     /**
-     * Constructor
-     * @param {string} Name A name for this statement
+     * Constructor     
      * @param {string} SqlText The statement text
-    * @param {string}[ConnectionName='DEFAULT'] Optional.Defaults to DEFAULT.The name of the connection (database)
+     * @param {string}[ConnectionName='DEFAULT'] Optional. Defaults to DEFAULT.The name of the connection (database)
+     * @param {string} Name Optional. A name for this statement
      */
-    constructor(Name, SqlText, ConnectionName) {
+    constructor(SqlText, ConnectionName = null, Name = null) {
         this.Name = Name || tp.NextName('SqlTextItem');
         this.SqlText = SqlText;
         this.ConnectionName = ConnectionName || tp.SysConfig.DefaultConnection;
     }
-
-
 
     /**
      * Creates a new {@link tp.DataRow} based on this instance property values and adds the row to a specified {@link tp.DataTable}
@@ -1595,9 +1590,9 @@ Object.freeze(tp.DataMode);
 // tp.Db
 //---------------------------------------------------------------------------------------
 
-tp.Urls.DbSelect = '/Db/Select';
-tp.Urls.DbSelectAll = '/Db/SelectAll';
-tp.Urls.DbExec = '/Db/Exec';
+tp.Urls.SqlSelect = '/SqlSelect';
+tp.Urls.SqlSelectAll = '/SqlSelectAll';
+ 
 
 //#region tp.Db
 /** Helper static class 
@@ -1736,17 +1731,10 @@ tp.Db = class {
     */
     static async SelectAsync(SqlText, ConnectionName) {
 
-        let Url = tp.Urls.DbSelect;
+        let Url = tp.Urls.SqlSelect;
+        let Model = new tp.SqlTextItem(SqlText, ConnectionName); 
 
-        if (tp.IsBlank(Url))
-            tp.Throw('No Url for the tp.Urls.DbSelect');
-
-        let Data = {
-            SqlText: SqlText,
-            ConnectionName: ConnectionName || tp.SysConfig.DefaultConnection
-        };
-
-        let Args = tp.Ajax.PostArgs(Url, Data); 
+        let Args = tp.Ajax.ModelArgs(Url, Model);
         Args = await tp.Ajax.Async(Args);
  
         var Table = new tp.DataTable();
@@ -1762,10 +1750,8 @@ tp.Db = class {
     */
     static async SelectAllAsync(SqlTextItemList) {
 
-        let Url = tp.Urls.DbSelectAll;
-
-        if (tp.IsBlank(Url))
-            tp.Throw('No Url for the tp.Urls.DbSelectAll');
+        let Url = tp.Urls.SqlSelectAll;
+ 
 
         let Table = new tp.DataTable('SqlTextList');
 
@@ -2485,14 +2471,15 @@ tp.DataTable = class extends tp.tpObject {
     }
 
     /**
-    Adds a new column to table's Columns. <br />
+    Adds (or inserts at a specified index) a new column to table's Columns. <br />
     NOTE: A new column can be added even if the table is NOT empty and already contains rows.
     @param {string | tp.DataColumn} NameOrColumn - A column name or a data column
     @param {string} [DataType] - Optional. Defaults to tp.DataType.String. The data type of the new column
     @param {number} [MaxLength] - Optional. Defautls to 96 if applicable. The max length for a string column.
+    @param {number} [ColumnIndex] - Optional. The index of the new column in the array of columns. If is < 0 the column is added at the end of the columns.
     @returns {tp.DataColumn} Returns the newly added data column
     */
-    AddColumn(NameOrColumn , DataType, MaxLength) {
+    AddColumn(NameOrColumn, DataType, MaxLength, ColumnIndex = -1) {
         let Column = this.FindColumn(NameOrColumn);
         if (Column) {
             return Column;
@@ -2506,13 +2493,25 @@ tp.DataTable = class extends tp.tpObject {
 
         if (Column) {
             Column.Table = this;
-            this.Columns.push(Column);
+
+            if (tp.IsNumber(ColumnIndex)) {
+                if (ColumnIndex < 0) {
+                    this.Columns.push(Column);
+                }
+                else {
+                    if (tp.InRange(this.Columns, ColumnIndex))
+                        tp.ListInsert(this.Columns, ColumnIndex, Column);
+                    else
+                        tp.Throw(`Cannot insert table column. Invalid column index: ${ColumnIndex}`);
+                }
+            }
+            
 
             // Update Rows
             if (this.Rows.length > 0) {
                 let Index = this.Columns.indexOf(Column);
                 for (var i = 0, ln = this.Rows.length; i < ln; i++) {
-                    this.Rows[i].Data.splice(Index, 0, Column.DefaultValue);
+                    this.Rows[i].Data.splice(Index, 0, null);
                 }
             }
 

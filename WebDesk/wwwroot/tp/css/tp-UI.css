@@ -1338,7 +1338,10 @@ tp-SelectSqlListUi
 }
 
 
- 
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl.tp-SqlFilter-EnumQuery > *:first-child,
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl.tp-SqlFilter-EnumConst > *:first-child {
+    width: 100%;
+}
 
 /*---------------------------------------------------------------------------------------
  grid
