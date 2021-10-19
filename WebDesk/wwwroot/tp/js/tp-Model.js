@@ -1999,7 +1999,7 @@ tp.DataView = class extends tp.View {
         }
 
         if (tp.IsEmpty(Result.SelectSql) && this.Broker.SelectList.length > 0) {
-            SelectSql = this.Broker.SelectList[0];
+            Result.SelectSql = this.Broker.SelectList[0];
         }
 
         return Result;

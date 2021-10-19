@@ -1,4 +1,6 @@
-﻿//#region tp.SelectSqlListUi
+﻿
+
+//#region tp.SelectSqlListUi
 /** Handles the combo-box with the available {@link tp.SelectSql} items for the user to choose one, define filters and execute it. <br />
  * Displays a panel list where each {@link tp.SelectSql} item has its own panel displaying its filter controls. <br />
  * A {@link tp.SelectSql} contains a list of {@link tp.SqlFilterDef} descriptor items. <br />
@@ -229,12 +231,12 @@ tp.SelectSqlUi = class extends tp.tpElement {
     }
 
     CreateControls() {
-        if (!tp.IsValid(this.Filters)) {
+        if (!tp.IsValid(this.FilterValueList)) {
 
-            this.Filters = new tp.SqlFilters(this.SelectSql);
+            this.FilterValueList = new tp.SqlFilterValueList(this.SelectSql);
 
-            if (tp.IsArray(this.Filters.List)) {
-                this.Filters.List.forEach(item => {
+            if (tp.IsArray(this.FilterValueList.Items)) {
+                this.FilterValueList.Items.forEach(item => {
                     let Link = new tp.SqlFilterControlLink(this, item);
                     Link.CreateControls();
                 });
@@ -243,7 +245,7 @@ tp.SelectSqlUi = class extends tp.tpElement {
     }
 
     GenerateSql() {
-        return this.Filters.GenerateSql();
+        return this.FilterValueList.GenerateSql();
     }
  
 };
@@ -253,35 +255,35 @@ tp.SelectSqlUi = class extends tp.tpElement {
  * @type {tp.SelectSql}
  */
 tp.SelectSqlUi.prototype.SelectSql = null;
-/** A {@link tp.SqlFilters} 
- * @type {tp.SqlFilters}
+/** A {@link tp.SqlFilterValueList} 
+ * @type {tp.SqlFilterValueList}
  */
-tp.SelectSqlUi.prototype.Filters = null;
+tp.SelectSqlUi.prototype.FilterValueList = null;
 
 //#endregion
 
 
 
-//#region tp.SqlFilters
+//#region tp.SqlFilterValueList
 
 /**
- * A list of {@link tp.SqlFilter} items. <br />
+ * A list of {@link tp.SqlFilterValue} items. <br />
  * A filter item is created based upon a {@link tp.SqlFilterDef} descriptor.
  * */
-tp.SqlFilters = class {
+tp.SqlFilterValueList = class {
     /**
      * Constructor
      * @param {tp.SelectSql} SelectSql  A {@tp.SelectSql} instance with a  list of {@link tp.SqlFilterDef} items. A filter item is created based upon a {@link tp.SqlFilterDef} descriptor.
      */
     constructor(SelectSql) {
-        this.List = [];
+        this.Items = [];
         this.SelectSql = SelectSql;
         this.FilterDefs = SelectSql.Filters;
 
         if (tp.IsArray(this.FilterDefs)) {
             this.FilterDefs.forEach(item => {
-                let Filter = new tp.SqlFilter(this.SelectSql, item);
-                this.List.push(Filter);
+                let Filter = new tp.SqlFilterValue(this.SelectSql, item);
+                this.Items.push(Filter);
             });
         }
     }
@@ -295,16 +297,16 @@ tp.SqlFilters = class {
      * @type {tp.SqlFilterDef[]}
      */
     FilterDefs = null;
-    /** A list of {@link tp.SqlFilter} items.
-     * @type {tp.SqlFilter[]}
+    /** A list of {@link tp.SqlFilterValue} items.
+     * @type {tp.SqlFilterValue[]}
      */
-    List = [];
+    Items = [];
 
     InfoText = '';
 
  
     GenerateSql() {
-        this.List.forEach(item => {
+        this.Items.forEach(item => {
             item.ControlLink.InputFromControls();
         });
 
@@ -331,25 +333,101 @@ tp.SqlFilters = class {
         SS.WhereUser = Ref.sWhere;
         SS.Having = Ref.sHaving;
 
-        return SS;
- 
+        return SS; 
     }
-    //DoGenerateSql(SelectSql SelectSql, ref string sClause, bool IsWhere)
+
+    /**
+     * Private method. Prepares a clause (UserWhere or Having).
+     * @param {tp.SelectSql} SelectSql A {@tp.SelectSql} to operate on
+     * @param {object} Ref An object of type { sWhere: '', sHaving: '' }
+     * @param {boolean} IsWhere A boolean value indicating what property of the 'Ref' value to use as clause.
+     */
     DoGenerateSql(SelectSql, Ref, IsWhere) {
-        // EDW
+
+        let sClause = IsWhere === true ? Ref.sWhere : Ref.sHaving;
+
+        /** @type {tp.SqlFilterValue[]} */
+        let List = [];
+
+        // get the right items
+        this.Items.forEach(item => {
+            if (IsWhere === true) {
+                if (item.FilterDef.PutInHaving !== true)
+                    List.push(item);
+            }
+            else {
+                if (item.FilterDef.PutInHaving == true)
+                    List.push(item);
+            }
+        });
+
+        let sInfoText, S, PrefixConcat;
+        List.forEach(item => {
+            sInfoText = '';
+            S = item.GenerateSql();
+
+            PrefixConcat = sClause.length > 0
+                || (sClause.length === 0 && List.indexOf(item) === 0 && IsWhere === true && !tp.IsBlank(SelectSql.Where));
+
+
+            if (S.length > 0) {
+
+                switch (item.WhereOperator) {
+                    case tp.WhereOperator.And:
+                        if (PrefixConcat) {
+                            sClause = sClause.length == 0 ? ` and ${S} ` : `${sClause} ${tp.LB}  and ${S} `;  
+                            sInfoText += `and ${S}`;
+                        }
+                        else {
+                            sClause = `      ${S}  `; 
+                            sInfoText += S ; 
+                        }
+                        break;
+
+                    case tp.WhereOperator.Not:
+                        if (PrefixConcat) {
+                            sClause = sClause.length == 0 ? ` and not ${S} ` : `${sClause} ${tp.LB}  and not ${S} `; 
+                            sInfoText += `and not ${S}`;  
+                        }
+                        else {
+                            sClause =  `      not ${S}  ` ;  
+                            sInfoText += `not ${S}`; 
+                        }
+                        break;
+
+                    case tp.WhereOperator.Or:
+                        if (PrefixConcat) {
+                            sClause = sClause.length == 0 ? ` or ${S} ` : `${sClause} ${tp.LB}  or ${S} `;
+                            sInfoText += `or ${S}`;
+                        }
+                        else {
+                            sClause = `      ${S}  `; 
+                            sInfoText += S;
+                        }
+                        break;
+                }
+
+                if (sInfoText.length > 0)
+                    this.InfoText += `${item.FilterDef.Title} : ${sInfoText}  ${tp.LB}`;   
+
+            }
+
+
+        }); 
+
     }
 };
 //#endregion
 
 
-//#region tp.SqlFilter
+//#region tp.SqlFilterValue
 /** A Sql Filter item. <br />
  * Represents a single data column that participates in a WHERE clause. <br />
  * It is actually an Sql generator, regarding that data column.  <br />
  * The data column can be of a string, integer, float, datetime or boolean-integer type.
  * An instance of this class uses a {@link tp.SqlFilterControlLink} instance to get control values.
  * */
-tp.SqlFilter = class {
+tp.SqlFilterValue = class {
     /**
      * Constructor
      * @param {tp.SelectSql} SelectSql A {@link tp.SelectSql} instance this filter is part of.
@@ -420,7 +498,79 @@ tp.SqlFilter = class {
      * @returns {string} Returns the sql text for the data column this instance represents.
      * */
     GenerateSql() {
-        return ''; // TODO: GenerateSql
+        if (tp.IsEmpty(this.FilterDef))
+            return '';
+
+        let Result = '';
+        let DataType = this.FilterDef.DataType;
+        let QuotedDateTimes = true;
+
+        let FullName = this.FilterDef.FieldPath;
+        let FromName = FullName + tp.FromField;
+        let ToName = FullName + tp.ToField;
+
+        if (this.FilterDef.PutInHaving === true && !tp.IsBlank(this.FilterDef.AggregateFunc))
+            FullName = ` ${this.FilterDef.AggregateFunc}(${FullName}) `;
+
+
+        // WHERE clause generation
+
+        if (this.FilterDef.Mode == tp.SqlFilterMode.Simple) {
+
+            if (DataType === tp.DataType.String && !tp.IsBlank(this.Value) && this.FilterDef.UseRange !== true) {
+                S = tp.NormalizeMaskForce(Value);
+                Result = ` (${FullName} ${S}) `;
+            }
+            else if (tp.DataType.IsNumber(DataType) && !tp.IsBlank(this.Value) && this.FilterDef.UseRange !== true) {
+                S = ' = ' + this.Value.trim();
+                Result = ` (${FullName}${S}) `;
+            }
+            else if (DataType === tp.DataType.Boolean) {
+                if (this.BoolValue !== tp.TriState.Default) {                    
+                    S = this.BoolValue == tp.TriState.True ? '= 1' : '<> 1';        // assumes that boolean values are actually integer values  
+                    Result = ` (${FullName} ${S}) `;
+                }
+            }
+            else if (tp.DataType.IsDateTime(DataType)
+                || (this.FilterDef.UseRange === true && (DataType === tp.DataType.String || tp.DataType.IsNumber(DataType)))) {
+
+            }
+
+            let sG = '';
+            let sL = '';
+            let FromDate = tp.Today();
+            let ToDate = tp.Today();
+
+            if (tp.DataType.IsDateTime(DataType) && this.DateRange !== tp.DateRange.Custom && tp.IsBlank(this.Greater) && tp.IsBlank(this.Less)) {
+                let o = tp.DateRanges(this.DateRange, tp.Today());
+                if (o.Result === true) {
+                    // EDW
+
+                }
+            }
+            /*
+                    string sG = string.Empty;
+                    string sL = string.Empty;
+                    DateTime FromDate = Sys.Today;
+                    DateTime ToDate = Sys.Today;
+
+                    if ((DataType == SimpleType.Date) && (DateRange != DateRange.Custom) && string.IsNullOrWhiteSpace(Greater) && string.IsNullOrWhiteSpace(Less))
+                    {
+                        if (DateRange.ToDates(Sys.Today, ref FromDate, ref ToDate))
+                        {
+                            Greater = FromDate.ToString();
+                            Less = ToDate.ToString();
+                        }
+                    }
+             */
+        }
+        else {
+
+        }
+
+
+
+        return Result; 
     }
 
 };
@@ -430,20 +580,20 @@ tp.SqlFilter = class {
 
 //#region tp.SqlFilterControlLink
 
-/** Represents a link between a {@link tp.SqlFilter} and a control on a Ui.
+/** Represents a link between a {@link tp.SqlFilterValue} and a control on a Ui.
  * */
 tp.SqlFilterControlLink = class {
     /**
      * 
      * @param {tp.SelectSql} SelectSql  A {@link tp.SelectSql} the filter of this link belongs to.
-     * @param {tp.SqlFilter} SqlFilter A {@link tp.SqlFilter} filter item, representing a single data column that participates in a WHERE clause.
+     * @param {tp.SqlFilterValue} SqlFilterValue A {@link tp.SqlFilterValue} filter item, representing a single data column that participates in a WHERE clause.
      */
-    constructor(ParentObject, SqlFilter) {
+    constructor(ParentObject, SqlFilterValue) {
         this.ParentObject = ParentObject;
         this.SelectSql = this.ParentObject.SelectSql;
-        this.FilterDef = SqlFilter.FilterDef;
-        this.SqlFilter = SqlFilter;
-        this.SqlFilter.ControlLink = this;
+        this.FilterDef = SqlFilterValue.FilterDef;
+        this.FilterValue = SqlFilterValue;
+        this.FilterValue.ControlLink = this;
     }
 
     /** A {@link tp.SelectSqlUi} instance. Provides the parent DOM element of the control of this instance.
@@ -458,11 +608,11 @@ tp.SqlFilterControlLink = class {
      * @type {tp.SqlFilterDef}
      */
     FilterDef = null;
-    /** The {@link tp.SqlFilter} filter item, representing a single data column that participates in a WHERE clause. 
+    /** The {@link tp.SqlFilterValue} filter item, representing a single data column that participates in a WHERE clause. 
      * This is where values of a control link are placed.
-     * @type {tp.SqlFilter}
+     * @type {tp.SqlFilterValue}
      */
-    SqlFilter = null;
+    FilterValue = null;
 
     /** The tripous script class type used in creating the filter controls (edtBox, edtFrom and edtTo) of this filter
      * @type {object}
@@ -749,18 +899,18 @@ tp.SqlFilterControlLink = class {
                     case tp.DataType.Float:
                     case tp.DataType.Decimal:
                         if (this.FilterDef.UseRange !== true) {
-                            this.SqlFilter.Value = this.GetControlValue(this.edtBox);
+                            this.FilterValue.Value = this.GetControlValue(this.edtBox);
                         }
                         else {
-                            this.SqlFilter.Greater = this.GetControlValue(this.edtFrom);
-                            this.SqlFilter.Less = this.GetControlValue(this.edtTo);
+                            this.FilterValue.Greater = this.GetControlValue(this.edtFrom);
+                            this.FilterValue.Less = this.GetControlValue(this.edtTo);
                         }
                         break;
 
                     case tp.DataType.Date:
                     case tp.DataType.DateTime:
-                        this.SqlFilter.Greater = this.GetControlValue(this.edtFrom);
-                        this.SqlFilter.Less = this.GetControlValue(this.edtTo);
+                        this.FilterValue.Greater = this.GetControlValue(this.edtFrom);
+                        this.FilterValue.Less = this.GetControlValue(this.edtTo);
                         break;
 
                     case tp.DataType.Boolean:

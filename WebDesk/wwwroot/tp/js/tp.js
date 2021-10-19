@@ -15520,8 +15520,12 @@ tp.NotifyFunc = (Message, Type) => {
 tp.LB = '\n';
 tp.SPACE = ' ';
 tp.NO_NAME = 'no-name';
+tp.NONE = "[none]";
 
 tp.NULL = "___null___";
+
+tp.FromField = "_FROM";
+tp.ToField = "_TO";
 
 
 /** The undefined constant as a tp constant.

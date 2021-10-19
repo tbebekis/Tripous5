@@ -34,6 +34,63 @@ tp.Sql = class {
 
         return false;
     }
+
+    /**
+     * Normalizes a string value for use in a LIKE clause. It returns a string as <code>LIKE 'VALUE%'</code>
+     * The specified value may or may not contain mask characters (%, ?, *) <br />
+     * @param {string} Value The string value to operate on.
+     */
+    static NormalizeMaskForce(Value) {
+        if (tp.IsString(Value)) {
+            Value = Value.trim();
+
+            if (Value.length > 0) {
+                let SB = new tp.StringBuilder();
+                SB.Append(Value);
+                SB.Replace('*', '%');
+                SB.Replace('?', '%');
+                Value = SB.ToString();
+
+                if (Value.indexOf('%') === -1)
+                    Value = Value + '%';
+
+                return ` like '${Value}' `;
+            }
+        }
+
+        return ` like '__not__existed__' `;  
+    }
+
+
+/*
+        /// <summary>
+        /// Normalizes Value for use in a LIKE clause. It returns a string as <code>LIKE 'VALUE%'</code>
+        /// <para>Value may or may not contain mask characters (%, ?, *)</para>
+        /// </summary>
+        static public string NormalizeMaskForce(string Value)
+        {
+            if (Value != null)
+            {
+                Value = Value.Trim();
+
+                if (Value.Length > 0)
+                {
+                    StringBuilder SB = new StringBuilder(Value);
+                    SB.Replace('*', '%');
+                    SB.Replace('?', '%');
+                    Value = SB.ToString();
+
+                    if (Value.IndexOf('%') != -1)
+                        return string.Format(" like '{0}' ", Value);
+                    else
+                        return string.Format(" like '{0}' ", Value + @"%");
+
+                }
+            }
+
+            return " like '__not__existed__' ";
+        }
+ */
 };
 //#endregion  
 
@@ -59,42 +116,52 @@ tp.DataType = {
 
     /**
      * Unknown, none.
+     * @type {string}
      */
     get Unknown() { return "Unknown"; },          
     /**
      *"string", "nvarchar", "nchar", "varchar", "char"
+     * @type {string}
      */
     get String() { return "String"; },         
     /**
      * "integer", "int", "larginteger", "largint", "smallint", "autoinc", "autoincrement", "identity", "counter"
+     * @type {string}
      */
     get Integer() { return "Integer"; },          
     /**
      * "float", "double", "extended", "real", "BCD", "FBCD", "currency", "money"
+     * @type {string}
      */
     get Float() { return "Float"; },         
     /**
      * decimal(18, 4)
+     * @type {string}
      */
     get Decimal() { return "Decimal"; },           
     /**
      * Date (date)
+     * @type {string}
      */
     get Date() { return "Date"; },          
     /**
      * "moment", "datetime", "timestamp"
+     * @type {string}
      */
     get DateTime() { return "DateTime"; },       
     /**
      * Boolean (integer always, 1 = true, else false)
+     * @type {string}
      */
     get Boolean() { return "Boolean"; },         
     /**
      * "blob", "graphic", "image", "bin", "binary"
+     * @type {string}
      */
     get Blob() { return "Blob"; },            
     /**
      * "memo", "text", "clob"
+     * @type {string}
      */
     get Memo() { return "Memo"; },            
  
@@ -229,6 +296,14 @@ tp.DataType = {
         return v === this.String;
     },
     /**
+    Returns true if a specified data type is a number (Integer, Float or Decimal)
+    @param {string} v - One of the DataType string constants
+    @returns {boolean} Returns true if a specified data type is a number (Integer, Float or Decimal)
+    */
+    IsNumber(v) {
+        return v === this.Integer || v === this.Float || v === this.Decimal;
+    },
+    /**
     Returns true if a specified data type is date-time, date or time.
     @param {string} v - One of the DataType string constants
     @returns {boolean} Returns true if a specified data type is date-time, date.
@@ -349,7 +424,61 @@ tp.DateRanges = {
         }
 
         return false;
+    },
+    /**
+     * Converts a {@link tp.DateRange} value to two DateTime values.
+     * @param {number} Range One of the {@link tp.DateRange} constants.
+     * @param {Date} [Today=null] Optional. The date to be used as the 'today' date.
+     * @returns {object} Returns an object with 3 properties FromDate, ToDate and Result. Result indicates the success or the failure.
+     */
+    ToDates(Range, Today = null) {
+        if (!tp.IsValid(Today))
+            Today = tp.Today();
+
+        let Result = true;
+        let FromDate = Today;
+        let ToDate = Today;
+
+        if (tp.IsInteger(Range)) {
+            switch (Range) {
+                case tp.DateRange.Today: break;
+                case tp.DateRange.Yesterday: { FromDate = tp.AddDays(FromDate, -1); ToDate = tp.AddDays(ToDate, -1); } break;
+                case tp.DateRange.Tomorrow: { FromDate = tp.AddDays(FromDate, 1); ToDate = tp.AddDays(ToDate, 1); } break;
+
+                case tp.DateRange.LastWeek: FromDate = tp.AddDays(FromDate, -7); break;
+                case tp.DateRange.LastTwoWeeks: FromDate = tp.AddDays(FromDate, -14); break;
+                case tp.DateRange.LastMonth: FromDate = tp.AddDays(FromDate, -30); break;
+                case tp.DateRange.LastTwoMonths: FromDate = tp.AddDays(FromDate, -60); break;
+                case tp.DateRange.LastThreeMonths: FromDate = tp.AddDays(FromDate, -90); break;
+                case tp.DateRange.LastSemester: FromDate = tp.AddDays(FromDate, -180); break;
+                case tp.DateRange.LastYear: FromDate = tp.AddDays(FromDate, -365); break;
+                case tp.DateRange.LastTwoYears: FromDate = tp.AddDays(FromDate, -730); break;
+
+                case tp.DateRange.NextWeek: ToDate = tp.AddDays(ToDate, 7); break;
+                case tp.DateRange.NextTwoWeeks: ToDate = tp.AddDays(ToDate, 14); break;
+                case tp.DateRange.NextMonth: ToDate = tp.AddDays(ToDate, 30); break;
+                case tp.DateRange.NextTwoMonths: ToDate = tp.AddDays(ToDate, 60); break;
+                case tp.DateRange.NextThreeMonths: ToDate = tp.AddDays(ToDate, 90); break;
+                case tp.DateRange.NextSemester: ToDate = tp.AddDays(ToDate, 180); break;
+                case tp.DateRange.NextYear: ToDate = tp.AddDays(ToDate, 365); break;
+                case tp.DateRange.NextTwoYears: ToDate = tp.AddDays(ToDate, 730); break;
+
+                default: Result = false; break;
+            }
+        } else {
+            Result = false;
+        }
+
+
+        return {
+            FromDate: FromDate,
+            ToDate: ToDate,
+            Result: Result
+        };
     }
+
+ 
+
 };
 //#endregion  
 
@@ -857,13 +986,13 @@ tp.SqlFilterDef.prototype.Title = '';
  
 
 /**
-Datatype
-@type {tp.DataType}
+* Datatype. One of the values of the properties of the {@link tp.DataType}
+* @type {string}
 */
 tp.SqlFilterDef.prototype.DataType = tp.DataType.String;
 /**
 Indicates how the user enters of selects the filter value. One of the {@link tp.SqlFilterMode} constants.
-@type {tp.SqlFilterMode}
+@type {number}
 */
 tp.SqlFilterDef.prototype.Mode = tp.SqlFilterMode.Simple;
 
