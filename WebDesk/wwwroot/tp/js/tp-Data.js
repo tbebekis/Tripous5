@@ -401,6 +401,32 @@ tp.DateRanges = {
      */
     PrefixTo: "TO_DATE_RANGE_",
 
+    WhereRanges: [
+        tp.DateRange.Custom,
+        tp.DateRange.Today,
+        tp.DateRange.Yesterday,
+        tp.DateRange.LastWeek,
+        tp.DateRange.LastTwoWeeks,
+        tp.DateRange.LastMonth,
+        tp.DateRange.LastTwoMonths,
+        tp.DateRange.LastThreeMonths,
+        tp.DateRange.LastSemester,
+        tp.DateRange.LastYear,
+        tp.DateRange.LastTwoYears
+    ],
+    WhereRangesTexts: [
+        'Custom',         
+        'Today',          
+        'Yesterday',      
+        'LastWeek',       
+        'LastTwoWeeks',   
+        'LastMonth',      
+        'LastTwoMonths',  
+        'LastThreeMonths',
+        'LastSemester',   
+        'LastYear',       
+        'LastTwoYears'
+    ],
 
     /**
     Returns true if a specified {@link tp.DateRange} value denotes a period in the past.
@@ -426,7 +452,8 @@ tp.DateRanges = {
         return false;
     },
     /**
-     * Converts a {@link tp.DateRange} value to two DateTime values.
+     * Converts a {@link tp.DateRange} value to two DateTime values. <br />
+     * Returns an object with 3 properties FromDate, ToDate and Result. Result indicates the success or the failure.
      * @param {number} Range One of the {@link tp.DateRange} constants.
      * @param {Date} [Today=null] Optional. The date to be used as the 'today' date.
      * @returns {object} Returns an object with 3 properties FromDate, ToDate and Result. Result indicates the success or the failure.
@@ -478,7 +505,7 @@ tp.DateRanges = {
     }
 
  
-
+ 
 };
 //#endregion  
 
@@ -1032,7 +1059,6 @@ tp.SqlFilterDef.prototype.InitialValue = '';
 
 //#endregion  
 
- 
 
 //#region tp.SelectSql
 /**
@@ -1254,7 +1280,7 @@ tp.SelectSql = class {
         var sOrderBy = this.NormalizeClause(this.OrderBy, "order by");
 
         var Result = tp.TrimEnd(sSelect) + tp.LB + tp.TrimEnd(sFrom);
-        if (tp.Trim(sWhere).length > 0) Result += tp.LB + tp.TrimEnd(sWhere) + this.SPACES;
+        if (tp.Trim(sWhere).length > 0) Result += tp.LB + tp.TrimEnd(sWhere) + this.SPACES;  // tp.LB +
         if (tp.Trim(sGroupBy).length > 0) Result += tp.LB + tp.TrimEnd(sGroupBy) + this.SPACES;
         if (tp.Trim(sHaving).length > 0) Result += tp.LB + tp.TrimEnd(sHaving) + this.SPACES;
         if (tp.Trim(sOrderBy).length > 0) Result += tp.LB + tp.TrimEnd(sOrderBy) + this.SPACES;

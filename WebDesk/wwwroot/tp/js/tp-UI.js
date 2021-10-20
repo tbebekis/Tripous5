@@ -211,7 +211,8 @@ tp.Classes = {
 
     SqlFilterRow: 'tp-SqlFilterRow',
     SqlFilterCtrl: 'tp-SqlFilter-Ctrl',
-    SqlFilterRange: 'tp-SqlFilter-Range', 
+    SqlFilterDateRangeSelector: 'tp-SqlFilter-DateRangeSelector',
+
 
     SqlFilterString: 'tp-SqlFilter-String',
     SqlFilterInteger: 'tp-SqlFilter-Integer',
@@ -223,6 +224,8 @@ tp.Classes = {
     SqlFilterEnumConst: 'tp-SqlFilter-EnumConst',
     SqlFilterLocator: 'tp-SqlFilter-Locator',
 
+    
+    
 
  
     /* menus                ----------------------------------------------------------------- */
@@ -6452,7 +6455,7 @@ tp.AutocompleteList = class extends tp.DropDownBox {
 
         let self = this;
         this.fDisplayList = [];
-        let o, i, ln, Item, S, FilterFunc;
+        let o, i, ln, Item, ItemText, FilterFunc;
 
 
         if (!tp.IsBlank(this.ServerFunc)) {                     // user server data
@@ -6480,8 +6483,8 @@ tp.AutocompleteList = class extends tp.DropDownBox {
 
                 for (i = 0, ln = this.DataList.length; i < ln; i++) {
                     Item = this.DataList[i];
-                    S = this.GetItemText(Item);
-                    if (FilterFunc(S, Text, true)) {
+                    ItemText = this.GetItemText(Item);
+                    if (FilterFunc(ItemText, Text, true)) {
                         this.fDisplayList.push(Item);
                     }
                 }
@@ -7652,6 +7655,8 @@ tp.Memo = class extends tp.Control {
         this.StyleProp('resize', v === true ? 'both' : 'none');
     }
 
+
+
     /* overrides */
     /**
     Initializes the 'static' and 'read-only' class fields
@@ -7684,7 +7689,7 @@ tp.Memo = class extends tp.Control {
     */
     OnHandleCreated() {
         super.OnHandleCreated();
-
+        this.SpellCheck = false;
         this.HookEvent(tp.Events.Change);
     }
     /**

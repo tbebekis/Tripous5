@@ -43,19 +43,22 @@ from
             MainSelect.Filters.Add("Trader.Salary", "Salary", DataFieldType.Decimal).SetUseRange(true);
             MainSelect.Filters.Add("Trader.BirthDate", "BirthDate", DataFieldType.Date);
 
-            SqlFilterDef FilterDef;
+            /*
+                        SqlFilterDef FilterDef;
 
-            FilterDef = MainSelect.Filters.Add("Trader.X1", "X1", DataFieldType.String, SqlFilterMode.EnumQuery);
-            FilterDef.Enum.Sql = "select * from Trader";
-            FilterDef.Enum.IsMultiChoise = false;
+                        FilterDef = MainSelect.Filters.Add("Trader.X1", "X1", DataFieldType.String, SqlFilterMode.EnumQuery);
+                        FilterDef.Enum.Sql = "select * from Trader";
+                        FilterDef.Enum.IsMultiChoise = false;
 
-            FilterDef = MainSelect.Filters.Add("Trader.X2", "X2", DataFieldType.String, SqlFilterMode.EnumConst);
-            FilterDef.Enum.ResultField = "Id";
-            FilterDef.Enum.IsMultiChoise = true;
-            FilterDef.Enum.IncludeAll = true;
-            FilterDef.Enum.OptionList.AddRange(new string[] { "one", "two", "three"});
+                        FilterDef = MainSelect.Filters.Add("Trader.X2", "X2", DataFieldType.String, SqlFilterMode.EnumConst);
+                        FilterDef.Enum.ResultField = "Id";
+                        FilterDef.Enum.IsMultiChoise = true;
+                        FilterDef.Enum.IncludeAll = true;
+                        FilterDef.Enum.OptionList.AddRange(new string[] { "one", "two", "three"}); 
+             */
 
-            FilterDef.CheckDescriptor();
+
+            MainSelect.Filters.CheckDescriptors();
 
             SqlBrokerTableDef Table = Broker.AddTable(Broker.MainTableName, Broker.Title);
             Table.AddId();

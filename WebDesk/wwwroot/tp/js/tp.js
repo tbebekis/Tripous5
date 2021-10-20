@@ -1274,7 +1274,7 @@ tp.IsBlank = function (v) {
         tp.Throw('Can not check for null or whitespace a non-string value');        
     }
 
-    return v.replace(/\s/g, '').length < 1;
+    return v.trim().length === 0; //v.replace(/\s/g, '').length < 1;
 };
 /**
  Returns true if a specified string is null, undefined or it just contains white space chars
@@ -1287,7 +1287,7 @@ tp.IsNullOrWhitespace = function (v) { return tp.IsBlank(v); };
 @param {character} c - A character value. 
 @returns {boolean} Returns True if a specified character is a white space char (space, tab, etc)
 */
-tp.IsWhitespaceChar = function (c) { return ' \t\n\r\v'.indexOf(c) === 0; };
+tp.IsWhitespaceChar = function (c) { return c.charCodeAt(0) <= 32; }; // return ' \t\n\r\v'.indexOf(c) === 0;
 /**
 Returns true if a specified text looks like html markup.
 @see {@link https://stackoverflow.com/questions/15458876/check-if-a-string-is-html-or-not|stackoverflow}
@@ -1308,15 +1308,15 @@ tp.IsSameText = function (A, B) {
 };
 /**
  True if a  sub-string is contained by another string
-@param {string} SubString - The sub-string, the string to search for.
 @param {string} Text - The string
+@param {string} SubText - The sub-string, the string to search for.
 @param {boolean} [CI=true] - CI (Case-Insensitive) can be true (the default) or false 
 @returns {boolean} Returns true if a substring is contained in the other string.
 */
-tp.ContainsText = function (SubString, Text, CI = true) {
+tp.ContainsText = function (Text, SubText, CI = true) {
     CI = CI === true;
     if (tp.IsString(Text) && !tp.IsBlank(Text)) {
-        return CI ? Text.toLowerCase().includes(SubString.toLowerCase()) : Text.includes(SubString);
+        return CI ? Text.toLowerCase().includes(SubText.toLowerCase()) : Text.includes(SubText);
     }
 
     return false;
@@ -1331,13 +1331,33 @@ Inserts a sub-string in another string at a specified index and returns the new 
 tp.InsertText = function (SubString, Text, Index) {
     return [Text.slice(0, Index), SubString, Text.slice(Index)].join('');
 };
+
+/** FROM: https://vanillajstoolkit.com/polyfills/stringtrim/ */
+if (!String.prototype.trim) {
+    String.prototype.trim = function () {
+        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
+}
+/** FROM: https://vanillajstoolkit.com/polyfills/stringtrimstart/ */
+if (!String.prototype.trimStart) {
+    String.prototype.trimStart = function () {
+        return this.replace(new RegExp('^' + /[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+/.source, 'g'), '');
+    };
+}
+/** FROM: https://vanillajstoolkit.com/polyfills/stringtrimend/ */
+if (!String.prototype.trimEnd) {
+    String.prototype.trimEnd = function () {
+        return this.replace(new RegExp(/[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+/.source + '$', 'g'), '');
+    };
+}
+
 /**
 Trims a string (removes blank characters from start and end) and returns the new string.
 @param {string} v - The string .
 @returns {string} Returns the new string.
 */
 tp.Trim = function (v) {
-    return tp.IsBlank(v) ? "" : v.replace(/^\s+|\s+$/g, "");
+    return tp.IsBlank(v) ? "" : v.trim(); //v.replace(/^\s+|\s+$/g, "");
 };
 /**
 Trims a string by removing blank characters from the start of the string and returns the new string.
@@ -1345,7 +1365,7 @@ Trims a string by removing blank characters from the start of the string and ret
 @returns {string} Returns the new string.
 */
 tp.TrimStart = function (v) {
-    return tp.IsBlank(v) ? "" : v.replace(/^\s+/, "");
+    return tp.IsBlank(v) ? "" : v.trimStart(); //v.replace(/^\s+/, "");
 };
 /**
 Trims a string by removing blank characters from the end of the string and returns the new string.
@@ -1353,43 +1373,47 @@ Trims a string by removing blank characters from the end of the string and retur
 @returns {string}  Returns the new string.
 */
 tp.TrimEnd = function (v) {
-    return tp.IsBlank(v) ? "" : v.replace(/\s+$/, "");
+    return tp.IsBlank(v) ? "" : v.trimEnd(); //v.replace(/\s+$/, "");
 };
 
 /**
   True if a string starts with a sub-string.
- @param {string} v - The sub-string, the string to search for.
- @param {string} Text - The string
+ @param {string} Text - The string to check.
+ @param {string} SubText - The sub-string, the string to search for.
  @param {boolean} [CI=true] - CI (Case-Insensitive) can be true (the default) or false 
  @returns {boolean} Returns true if a string starts with a sub-string.
  */
-tp.StartsWith = function (v, Text, CI = true) {
-    if (tp.IsBlank(v) || tp.IsBlank(Text))
+tp.StartsWith = function (Text, SubText, CI = true) {
+    if (tp.IsBlank(SubText) || tp.IsBlank(Text))
         return false;
 
     if (tp.IsEmpty(CI)) {
         CI = true;
-    }
+    }   
 
-    return CI === true ? v.substring(0, Text.length).toUpperCase() === Text.toUpperCase() : v.substring(0, Text.length) === Text;
+    let S = Text.substring(0, SubText.length);
+
+    return CI === true ? S.toUpperCase() === SubText.toUpperCase() : S === SubText;
+
 };
 /**
  True if a string ends with a sub-string.
-@param {string} v - The sub-string, the string to search for.
 @param {string} Text - The string
+@param {string} SubText - The sub-string, the string to search for.
 @param {boolean} [CI=true] - CI (Case-Insensitive) can be true (the default) or false
 @returns {boolean} Returns true if a string ends with a sub-string.
 */
-tp.EndsWith = function (v, Text, CI = true) {
-    if (tp.IsBlank(v) || tp.IsBlank(Text))
+tp.EndsWith = function (Text, SubText, CI = true) {
+    if (tp.IsBlank(SubText) || tp.IsBlank(Text))
         return false;
 
     if (tp.IsEmpty(CI)) {
         CI = true;
     }
 
-    return CI === true ? v.substring(v.length - Text.length, v.length).toUpperCase() === Text.toUpperCase() : v.substring(v.length - Text.length, v.length) === Text;
+    let S = Text.substring(Text.length - SubText.length, Text.length);
 
+    return CI === true ? S.toUpperCase() === SubText.toUpperCase() : S === SubText;
 };
 /**
 Replaces a sub-string by another sub-string, inside a string, and returns the new string.
@@ -1515,6 +1539,17 @@ tp.Split = function (v, Separator = ' ', RemoveEmptyEntries = true) {
         return v.split(Separator);
     }
 
+};
+/**
+ * Splits a string like "ThisIsAString" into a string like "This Is A String".
+ * @param {string} v The string to split.
+ */
+tp.SplitOnUpperCase = function (v) {
+    let Result = '';
+    if (tp.IsString(v)) {
+        Result = v.match(/[A-Z][a-z]+/g).join(' ');
+    }
+    return Result;
 };
 /**
 Splits a string of a certain format and creates and returns a javascript object.  
@@ -2299,6 +2334,27 @@ tp.DateClone = function (v) {
     return new Date(v.getTime());
 };
 
+/**
+Returns the start date-time of a specified Date value, i.e. yyyy-MM-dd 00:00:00
+@param {Date} v - The date to clone
+@returns {Date} Returns the start date-time of a specified Date value, i.e. yyyy-MM-dd 00:00:00
+*/
+tp.StartOfDay = function (v) {
+    return tp.ClearDate(v);
+};
+/**
+Returns the end date-time of a specified Date value, i.e yyyy-MM-dd 23:59:59
+@param {Date} v - The date to clone
+@returns {Date} Returns the end date-time of a specified Date value, i.e yyyy-MM-dd 23:59:59
+*/
+tp.EndOfDay = function (v) {
+    v = tp.ClearDate(v);
+    v = tp.AddDays(v, 1);
+    v = tp.AddSeconds(v, -1);
+    return v;
+};
+
+ 
 
 //#endregion
 
@@ -11300,6 +11356,12 @@ tp.tpElement = class extends tp.tpObject {
             this.Handle.title = v;
     }
     /**
+    Gets or sets a boolean value indicating whether the element may be checked for spelling errors.
+    @type {boolean}
+    */
+    get SpellCheck() { return this.Handle ? this.Handle.spellcheck : false; }
+    set SpellCheck(v) { this.Handle.spellcheck = v === true; }
+    /**
     Gets or sets the defaultValue attribute if applicable
     @type {string}
     */
@@ -11475,6 +11537,8 @@ tp.tpElement = class extends tp.tpObject {
         if (this.Handle)
             this.Style.cssText = v;
     }
+
+
 
     /**
     Gets or sets the contentEditable attribute which controls whether the contents of the object are editable
@@ -14979,7 +15043,7 @@ outline: none;
 resize: none;
 padding: 4px;
 `;
-
+        CP.SpellCheck = false;
         this.edtMemo = new tp.tpElement('textarea', CP);
 
         this.edtMemo.SetAttributes({

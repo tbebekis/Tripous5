@@ -73,5 +73,14 @@ namespace Tripous.Data
                     Item.Enum.IsMultiChoise = Value;
             }
         }
+
+        /// <summary>
+        /// Throws exception if any of the items of this instance is not valid
+        /// </summary>
+        public void CheckDescriptors()
+        {
+            foreach (var Item in this)
+                Item.CheckDescriptor();
+        }
     }
 }

@@ -352,7 +352,7 @@ app.GetContentElement = function (ElementOrSelectorOrHtmlText) {
     }
 
     if (Result === null) {
-        if (tp.ContainsText('<div', ElementOrSelectorOrHtmlText, true)) {
+        if (tp.ContainsText(ElementOrSelectorOrHtmlText, '<div',  true)) {
             // create a temp div
             let div = tp.Div(tp.Doc.body);
             div.innerHTML = ElementOrSelectorOrHtmlText.trim();

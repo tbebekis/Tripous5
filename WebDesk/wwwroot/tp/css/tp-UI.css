@@ -1291,7 +1291,7 @@ tp-SelectSqlListUi
     gap: 0.4em;
 }
 
-.tp-SelectSqlFilterListUi {
+.tp-SelectSqlListUi .tp-SelectSqlUi {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1305,13 +1305,22 @@ tp-SelectSqlListUi
     flex-direction: column;
     max-width: 300px;
     min-width: 300px;
+    gap: 0.2em;
 }
 
 .tp-SqlFilterRow > .tp-Text {
     position: relative;
     display: flex;
     padding-bottom: 0.15em;
+    font-size: 0.85em;
+    font-weight: 700;
 }
+
+.tp-SqlFilterRow > .tp-SqlFilter-DateRangeSelector {
+    position: relative;
+    display: flex;
+    flex-direction: column; 
+} 
 
 .tp-SqlFilterRow > .tp-SqlFilter-Ctrl {
     position: relative;
@@ -1321,6 +1330,7 @@ tp-SelectSqlListUi
     gap: 0.2em;
 }
 
+ 
 .tp-SqlFilterRow > .tp-SqlFilter-Ctrl > * {
     width: 50%;
 }
@@ -1333,7 +1343,8 @@ tp-SelectSqlListUi
 }
 
 .tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-From > :first-child,
-.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-To > :first-child {
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-To > :first-child,
+.tp-SqlFilterRow > .tp-SqlFilter-DateRangeSelector > .tp-Text {
     font-size: 0.8em;  
 }
 

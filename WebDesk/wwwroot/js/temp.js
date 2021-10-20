@@ -116,7 +116,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
                 //this.ExecuteCommand(Command);
                 switch (Command) {
                     case 'Execute':
-
+                        this.Execute();
                         break;
                 }
                 //alert(Command);
@@ -155,6 +155,17 @@ tp.SelectSqlListUi = class extends tp.tpElement {
         return Result;
     }
 
+    Execute() {
+        /** @type {tp.SelectSql} */
+        let SelectSql = this.CurrentSelectSqlUi.GenerateSql();
+        let SqlText = SelectSql.Text;
+
+        tp.InfoBox(SqlText);
+    }
+    /**
+    Event trigger
+    */
+    OnExecute() { this.Trigger('Execute', {}); }
 };
 
 /** The DIV where to build the Filters panel Ui.
@@ -187,7 +198,6 @@ tp.SelectSqlListUi.prototype.CurrentSelectSqlUi = null;
  */
 tp.SelectSqlListUi.prototype.RowLimit = false;
 //#endregion
-
 
 //#region tp.SelectSqlUi
 /** The Ui built upon a single {@link tp.SelectSql} item and its filters list.
@@ -262,8 +272,6 @@ tp.SelectSqlUi.prototype.FilterValueList = null;
 
 //#endregion
 
-
-
 //#region tp.SqlFilterValueList
 
 /**
@@ -315,6 +323,7 @@ tp.SqlFilterValueList = class {
             sHaving: ''
         };
 
+        /** @type {tp.SelectSql} */
         let Result = this.GenerateSqlWhereAndHaving(Ref);
         return Result;
     }
@@ -327,8 +336,8 @@ tp.SqlFilterValueList = class {
 
         let SS = new tp.SelectSql(this.SelectSql.Text);
 
-        DoGenerateSql(SS, Ref, true);
-        DoGenerateSql(SS, Ref, false);
+        this.DoGenerateSql(SS, Ref, true);
+        this.DoGenerateSql(SS, Ref, false);
 
         SS.WhereUser = Ref.sWhere;
         SS.Having = Ref.sHaving;
@@ -407,6 +416,11 @@ tp.SqlFilterValueList = class {
                         break;
                 }
 
+                if (IsWhere === true)
+                    Ref.sWhere = sClause;
+                else
+                    Ref.sHaving = sClause;
+
                 if (sInfoText.length > 0)
                     this.InfoText += `${item.FilterDef.Title} : ${sInfoText}  ${tp.LB}`;   
 
@@ -418,7 +432,6 @@ tp.SqlFilterValueList = class {
     }
 };
 //#endregion
-
 
 //#region tp.SqlFilterValue
 /** A Sql Filter item. <br />
@@ -503,69 +516,144 @@ tp.SqlFilterValue = class {
 
         let Result = '';
         let DataType = this.FilterDef.DataType;
-        let QuotedDateTimes = true;
+        //let QuotedDateTimes = true;
 
         let FullName = this.FilterDef.FieldPath;
-        let FromName = FullName + tp.FromField;
-        let ToName = FullName + tp.ToField;
+        //let FromName = FullName + tp.FromField;
+        //let ToName = FullName + tp.ToField;
 
         if (this.FilterDef.PutInHaving === true && !tp.IsBlank(this.FilterDef.AggregateFunc))
             FullName = ` ${this.FilterDef.AggregateFunc}(${FullName}) `;
 
 
         // WHERE clause generation
-
+        let S = '';
         if (this.FilterDef.Mode == tp.SqlFilterMode.Simple) {
+            
+            // no range
+            if (this.FilterDef.UseRange !== true && (DataType === tp.DataType.String || tp.DataType.IsNumber(DataType))) {
 
-            if (DataType === tp.DataType.String && !tp.IsBlank(this.Value) && this.FilterDef.UseRange !== true) {
-                S = tp.NormalizeMaskForce(Value);
-                Result = ` (${FullName} ${S}) `;
+                if (DataType === tp.DataType.String && !tp.IsBlank(this.Value)) {
+                    S = tp.Sql.NormalizeMaskForce(this.Value);
+                    S = S.trim();
+                    Result = ` (${FullName} ${S}) `;
+                }
+                else if (tp.DataType.IsNumber(DataType) && !tp.IsBlank(this.Value)) {
+                    S = ' = ' + this.Value.trim();
+                    Result = ` (${FullName}${S}) `;
+                }
             }
-            else if (tp.DataType.IsNumber(DataType) && !tp.IsBlank(this.Value) && this.FilterDef.UseRange !== true) {
-                S = ' = ' + this.Value.trim();
-                Result = ` (${FullName}${S}) `;
+            // range
+            else if (tp.DataType.IsDateTime(DataType) || (this.FilterDef.UseRange === true && (DataType === tp.DataType.String || tp.DataType.IsNumber(DataType)))) {
+
+                let sG = '';
+                let sL = '';
+
+                // range, for all types except Date
+                if (!tp.IsBlank(this.Greater)) {
+                    switch (DataType) {
+                        case tp.DataType.Integer: sG = this.Greater; break;
+                        case tp.DataType.Float:
+                        case tp.DataType.Decimal: sG = this.Greater.replace(',', '.'); break;
+                        case tp.DataType.String: sG = `'${this.Greater}'`; break;
+                    }
+                }
+
+                if (!tp.IsBlank(this.Less)) {
+                    switch (DataType) {
+                        case tp.DataType.Integer: sL = this.Less; break;
+                        case tp.DataType.Float:
+                        case tp.DataType.Decimal: sL = this.Less.replace(',', '.'); break;
+                        case tp.DataType.String: sL = `'${this.Less}'`; break;
+                    }
+                }
+
+                // range for Dates (Date is always a range)
+                if (tp.DataType.IsDateTime(DataType)) {
+
+                    let FromDate = null;
+                    let ToDate = null;
+
+                    if (this.DateRange !== tp.DateRange.Custom) {
+                        let o = tp.DateRanges.ToDates(this.DateRange, tp.Today());
+                        if (o.Result === true) {
+                            FromDate = o.FromDate;
+                            ToDate = o.ToDate;
+                        }
+                    }
+                    else {
+
+                        if (!tp.IsBlank(this.Greater)) {
+                            let o = tp.TryParseDateTime(this.Greater);
+                            if (o.Result === true) {
+                                FromDate = o.Value;
+                            }
+                        }
+
+                        if (!tp.IsBlank(this.Less)) {
+                            let o = tp.TryParseDateTime(this.Less);
+                            if (o.Result === true) {
+                                ToDate = o.Value;
+                            }
+                        }
+                    }
+
+
+                    if (tp.IsDate(FromDate)) {
+                        FromDate = tp.StartOfDay(FromDate);
+                        sG = tp.FormatDateTime(FromDate, 'yyyy-MM-dd HH:mm:ss'); // ISO date
+                    }
+
+                    if (tp.IsDate(ToDate)) {
+                        ToDate = tp.EndOfDay(ToDate);
+                        sL = tp.FormatDateTime(ToDate, 'yyyy-MM-dd HH:mm:ss'); // ISO date
+                    }
+
+                }            
+
+                if (!tp.IsBlank(sG))
+                    sG = ` (${FullName} >= ${sG}) `
+
+                if (!tp.IsBlank(sL))
+                    sL = ` (${FullName} <= ${sL}) `;
+
+                if (!tp.IsBlank(sG) && !tp.IsBlank(sL))
+                    Result = ` (${sG} and ${sL}) `; 
+                else if (!tp.IsBlank(sG))
+                    Result = sG;
+                else if (!tp.IsBlank(sL))
+                    Result = sL;
+
             }
+            // boolean
             else if (DataType === tp.DataType.Boolean) {
-                if (this.BoolValue !== tp.TriState.Default) {                    
+                if (this.BoolValue !== tp.TriState.Default) {
                     S = this.BoolValue == tp.TriState.True ? '= 1' : '<> 1';        // assumes that boolean values are actually integer values  
                     Result = ` (${FullName} ${S}) `;
                 }
             }
-            else if (tp.DataType.IsDateTime(DataType)
-                || (this.FilterDef.UseRange === true && (DataType === tp.DataType.String || tp.DataType.IsNumber(DataType)))) {
+        }
+        else if (tp.Bf.In(this.FilterDef.Mode, tp.SqlFilterMode.EnumConst | tp.SqlFilterMode.EnumQuery) && (DataType === tp.DataType.String || DataType === tp.DataType.Integer)) {
 
-            }
+            S = '';
 
-            let sG = '';
-            let sL = '';
-            let FromDate = tp.Today();
-            let ToDate = tp.Today();
+            if (tp.IsArray(this.SelectedOptionsList) && this.SelectedOptionsList.length > 0) {
+                if (this.SelectedOptionsList.length === 1) {
+                    S = DataType === tp.DataType.String ? `'${this.SelectedOptionsList[0]}'` : this.SelectedOptionsList[0];
+                    if (!tp.IsBlank(S))
+                        Result = ` (${FullName} = ${S}) `;
+                }
+                else {
+                    this.SelectedOptionsList.forEach(item => {
+                        S += DataType === tp.DataType.String ? `'${item}', ` : `${item}, `;
+                    });
 
-            if (tp.DataType.IsDateTime(DataType) && this.DateRange !== tp.DateRange.Custom && tp.IsBlank(this.Greater) && tp.IsBlank(this.Less)) {
-                let o = tp.DateRanges(this.DateRange, tp.Today());
-                if (o.Result === true) {
-                    // EDW
-
+                    S = tp.RemoveLastComma(S);
+                    if (!tp.IsBlank(S))
+                        Result = ` (${FullName} in (${S})) `; 
                 }
             }
-            /*
-                    string sG = string.Empty;
-                    string sL = string.Empty;
-                    DateTime FromDate = Sys.Today;
-                    DateTime ToDate = Sys.Today;
-
-                    if ((DataType == SimpleType.Date) && (DateRange != DateRange.Custom) && string.IsNullOrWhiteSpace(Greater) && string.IsNullOrWhiteSpace(Less))
-                    {
-                        if (DateRange.ToDates(Sys.Today, ref FromDate, ref ToDate))
-                        {
-                            Greater = FromDate.ToString();
-                            Less = ToDate.ToString();
-                        }
-                    }
-             */
-        }
-        else {
-
+ 
         }
 
 
@@ -575,7 +663,6 @@ tp.SqlFilterValue = class {
 
 };
 //#endregion
-
 
 
 //#region tp.SqlFilterControlLink
@@ -628,6 +715,10 @@ tp.SqlFilterControlLink = class {
      * */
     elControlContainer = null;
 
+    /** Container of the 'from' and 'to' containers
+     * @type {HTMLDivElement}
+     */
+    elRangeContainer = null;
     /** Container of the 'from' control
      * @type {HTMLDivElement}
      */
@@ -637,6 +728,7 @@ tp.SqlFilterControlLink = class {
      */
     elToControlContainer = null;
 
+    elDateRangeSelectorContainer = null;
 
     /** Label displaying the title of the filter, i.e. the field name.  
      * @type {HTMLDivElement}
@@ -651,6 +743,8 @@ tp.SqlFilterControlLink = class {
      */
     lblTo = null;
 
+    lblDateRange = null;
+
     /** The main input control of this filter. Used when UseRange of the filter def is false. 
      * @type {tp.tpElement}
      */
@@ -663,7 +757,11 @@ tp.SqlFilterControlLink = class {
      * @type {tp.tpElement}
      */
     edtTo = null;
-
+    /** A combo-box displaying  
+     * @type {tp.HtmlComboBox}
+     */
+    cboDateRange = null;  
+ 
     /** The data-table of an enum filter
      * @type {tp.DataTable}
      */
@@ -737,26 +835,66 @@ tp.SqlFilterControlLink = class {
         return tp.Classes.SqlFilterString;
     }
     CreateFilterRow() {
+
+/*
+<div class="tp-SqlFilterRow">
+    <div class="tp-Text"></div>
+    <div class="tp-SqlFilter-DateRangeSelector">
+        <div class="tp-Text"></div>
+        @* DateRange combo-box here *@
+    </div>
+    <div class="tp-SqlFilter-Ctrl">
+        @* one or two controls here *@
+    </div>
+</div>
+ */
         let HtmlText =
 `<div class="${tp.Classes.SqlFilterRow}">
-    <div class="${tp.Classes.Text}">${this.FilterDef.Title}</div>
-    <div class="${tp.Classes.SqlFilterCtrl} ${this.GetControlCssClass()}"></div>
+    <div class="${tp.Classes.Text}">${this.FilterDef.Title}</div>    
 </div>`;
 
         this.elFilterRow = tp.Append(this.ParentObject.Handle, HtmlText);
-        this.lblTitle =  tp.Select(this.elFilterRow, '.' + tp.Classes.Text);
-        this.elControlContainer = tp.Select(this.elFilterRow, '.' + tp.Classes.SqlFilterCtrl);
+        this.lblTitle = tp.Select(this.elFilterRow, '.' + tp.Classes.Text);
+
+        // date-range selector
+        if (tp.DataType.IsDateTime(this.FilterDef.DataType)) {
+            let DateRangeSelectorHtmlText =
+`<div class="${tp.Classes.SqlFilterDateRangeSelector}">
+</div>`;
+
+            this.elDateRangeSelectorContainer = tp.Append(this.elFilterRow, DateRangeSelectorHtmlText);
+        }
+ 
+
+        // control container
+        let ControlContainerHtmlText =
+            `<div class="${tp.Classes.SqlFilterCtrl}"></div>`;
+
+        this.elControlContainer = tp.Append(this.elFilterRow, ControlContainerHtmlText);
     }
     CreateControl_Simple() {
+        let i, ln;
+
+        let UseRange = this.FilterDef.UseRange === true || tp.DataType.IsDateTime(this.FilterDef.DataType); // this.FilterDef.DataType === tp.DataType.DateTime || this.FilterDef.DataType === tp.DataType.Date;
  
-        let UseRange = this.FilterDef.UseRange === true || this.FilterDef.DataType === tp.DataType.DateTime || this.FilterDef.DataType === tp.DataType.Date;
-        if (UseRange)
-            tp.AddClass(this.elControlContainer, tp.Classes.SqlFilterRange);
 
         if (!UseRange) {
             this.edtBox = new this.ControlClassType(null, { Parent: this.elControlContainer });
         }
         else {
+
+            if (tp.DataType.IsDateTime(this.FilterDef.DataType)) {
+ 
+                this.lblDateRange = tp.Append(this.elDateRangeSelectorContainer, `<div class="${tp.Classes.Text}">Range</div>`);
+                this.cboDateRange = new tp.HtmlComboBox(null, { Parent: this.elDateRangeSelectorContainer });
+
+                for (i = 0, ln = tp.DateRanges.WhereRanges.length; i < ln; i++) {
+                    this.cboDateRange.Add(tp.DateRanges.WhereRangesTexts[i], tp.DateRanges.WhereRanges[i]);
+                }
+
+                this.cboDateRange.SelectedIndex = 0;
+            } 
+                
             this.elFromControlContainer = tp.Append(this.elControlContainer, `<div class="${tp.Classes.From}"></div>`);
             this.lblFrom = tp.Append(this.elFromControlContainer, `<div>From</div>`);
             this.edtFrom = new this.ControlClassType(null, { Parent: this.elFromControlContainer });
@@ -871,7 +1009,7 @@ tp.SqlFilterControlLink = class {
                 Result = Control.Text;
                 Result = tp.IsString(Result) ? Result.trim() : '';
                 if (Result !== '') {
-                    if (Bf.In(this.FilterDef.DataType, tp.DataType.Float | tp.DataType.Decimal)) {
+                    if (tp.Bf.In(this.FilterDef.DataType, tp.DataType.Float | tp.DataType.Decimal)) {
                         Result = Result.replace(',', '.');
                     }
                 }
