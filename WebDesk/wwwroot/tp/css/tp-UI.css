@@ -1296,7 +1296,11 @@ tp-SelectSqlListUi
     display: flex;
     flex-direction: column;
     padding-top: 1em;
-    gap: 0.4em;
+    gap: 0.8em;
+}
+
+.tp-SelectSqlList-ToolBar a.tp-Active {
+    border-color: var(--FocusColor);
 }
 
 .tp-SqlFilterRow {
@@ -1333,6 +1337,10 @@ tp-SelectSqlListUi
  
 .tp-SqlFilterRow > .tp-SqlFilter-Ctrl > * {
     width: 50%;
+}
+
+.tp-SqlFilterRow > .tp-SqlFilter-Ctrl > .tp-Grid {
+    width: 100%;
 }
 
 .tp-SqlFilterRow > .tp-SqlFilter-Ctrl > *.tp-From,

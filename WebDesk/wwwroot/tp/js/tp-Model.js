@@ -862,10 +862,10 @@ tp.Broker = class extends tp.tpObject {
     /**
     Executes a SELECT for the browser grid. Initializes the broker if needed. Retuns a {@link tp.BrokerAction} {@link Promise}.
     @param {string | tp.SelectSql} SelectSql - The SELECT statement to execute
-    @param {number} [RowLimit] - Optional. The row limit
+    @param {bool} [UseRowLimit] - Optional. True to use the default row limit
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
-    async SelectBrowser(SelectSql, RowLimit = null) {
+    async SelectBrowser(SelectSql, UseRowLimit = true) {
         if (this.fInitialized === false) {
             await this.Initialize();
         }
@@ -875,7 +875,7 @@ tp.Broker = class extends tp.tpObject {
         let Action = new tp.BrokerAction(this, tp.BrokerAction.SelectBrowser);
         Action.Args.Data.BrokerName = this.Name;       
         Action.Args.Data.SqlText = SelectSql.Text;
-        Action.Args.Data.RowLimit = RowLimit || -1;     
+        Action.Args.Data.UseRowLimit = tp.IsBoolean(UseRowLimit) ? UseRowLimit : true;
 
         Action.SelectSql = tp.IsString(SelectSql) ? new tp.SelectSql(SelectSql) : SelectSql;
 
@@ -1351,6 +1351,9 @@ tp.DataView = class extends tp.View {
                 let CP = { };
                 CP.SelectList = this.Broker.SelectList;
                 this.SelectSqlListUi = new tp.SelectSqlListUi(el, CP);
+                this.SelectSqlListUi.On('Execute', (Args) => {
+                    this.BrowserSelect();
+                });
             }
         }
  
@@ -1983,27 +1986,11 @@ tp.DataView = class extends tp.View {
             if (!this.gridBrowser.AutoGenerateColumns)
                 this.gridBrowser.AddSelectSqlColumns(Table, SelectSql.Columns);
 
-
             this.gridBrowser.DataSource = this.dsBrowser;
         } 
     }
 
-    GetBrowserSelectSql() {
-        let Result = {
-            SelectSql: null,
-            RowLimit: null
-        };
-
-        if (tp.IsValid(this.SelectSqlListUi)) {
-            Result = this.SelectSqlListUi.GetSelectedSelectSqlInfo();
-        }
-
-        if (tp.IsEmpty(Result.SelectSql) && this.Broker.SelectList.length > 0) {
-            Result.SelectSql = this.Broker.SelectList[0];
-        }
-
-        return Result;
-    }
+ 
 
     /**
     Executes a SELECT for the browser grid. Retuns a {@link tp.BrokerAction} {@link Promise}.
@@ -2014,38 +2001,63 @@ tp.DataView = class extends tp.View {
     async BrowserSelect() {
         let Action = null;
 
-        if (!tp.IsEmpty(this.Broker)) {
+        if (!tp.IsEmpty(this.Broker)) { 
 
-            let SelectSqlInfo = this.GetBrowserSelectSql();
-            let SelectSql = SelectSqlInfo.SelectSql;
-            let RowLimit = SelectSqlInfo.RowLimit; 
+            // SelectSql
+            /** @type {tp.SelectSql} */
+            let SelectSql = null;
 
-            this.DoSelectBrowserBefore();
- 
-            Action = await this.Broker.SelectBrowser(SelectSql, RowLimit);
+            if (tp.IsValid(this.SelectSqlListUi)) {
+                SelectSql = this.SelectSqlListUi.GenerateSql();
+            }
 
-            if (Action instanceof tp.BrokerAction) {
-                if (Action.Succeeded === true) {
+            if (tp.IsEmpty(SelectSql) && this.Broker.SelectList.length > 0) {
+                SelectSql = this.Broker.SelectList[0];
+            }
 
-                    this.UpdateBrowserDataSource(SelectSql);
+            // RowLimit
+            /** @type {boolean} */
+            let UseRowLimit = tp.IsValid(this.SelectSqlListUi) ? this.SelectSqlListUi.RowLimit : true;
 
-                    if (this.dsBrowser) {
-                        if (this.dsBrowser.CanFirst())
-                            this.dsBrowser.First();
-                        if (this.dsBrowser.Rows.length > 0 && this.gridBrowser) {
-                            this.gridBrowser.FocusedRow = this.dsBrowser.Rows[0];
+
+            let SqlText = SelectSql.Text;
+            let ForceSelect = this.ForceSelect || SqlText !== this.LastSelectSqlText || UseRowLimit !== this.LastUseRowLimit;
+
+            if (ForceSelect) {
+                this.LastSelectSqlText = SqlText;
+                this.LastUseRowLimit = UseRowLimit;
+
+                this.DoSelectBrowserBefore();
+
+                Action = await this.Broker.SelectBrowser(SelectSql, UseRowLimit);
+
+                if (Action instanceof tp.BrokerAction) {
+                    if (Action.Succeeded === true) {
+
+                        this.UpdateBrowserDataSource(SelectSql);
+
+                        if (this.dsBrowser) {
+                            if (this.dsBrowser.CanFirst())
+                                this.dsBrowser.First();
+                            if (this.dsBrowser.Rows.length > 0 && this.gridBrowser) {
+                                this.gridBrowser.FocusedRow = this.dsBrowser.Rows[0];
+                            }
                         }
+
+                        this.DoSelectBrowserAfter(Action);
+                        this.ForceSelect = false;
+
+                        this.ViewMode = tp.DataViewMode.List;
+
+                    } else {
+                        this.DisplayActionError(Action);
                     }
-
-                    this.DoSelectBrowserAfter(Action);
-                    this.ForceSelect = false;
-
-                    this.ViewMode = tp.DataViewMode.List;
- 
-                } else {
-                    this.DisplayActionError(Action);
                 }
             }
+            else {
+                this.ViewMode = tp.DataViewMode.List;
+            }
+
 
         } 
 
@@ -2386,6 +2398,17 @@ tp.DataView.prototype.ValidCommands = tp.DataViewMode.None;
  @type {boolean}
  */
 tp.DataView.prototype.ForceSelect = false;
+
+/** Field
+ @protected
+ @type {string}
+ */
+tp.DataView.prototype.LastSelectSqlText = '';
+/** Field
+ @protected
+ @type {boolean}
+ */
+tp.DataView.prototype.LastUseRowLimit = true;
 
 /** Field
  @protected

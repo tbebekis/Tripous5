@@ -1165,16 +1165,17 @@ tp.FormatNumber2 = function (v, Decimals = 0, DecimalSep = null, ThousandSep = n
     return NumPart.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + ThousandSep) + DecPart;
 };
 /**
-Formats a Date value based on a format string pattern. 
+Formats a Date value based on a specified format string pattern. <br />
+If no format is specified the current culture date format is used.  <br />
 Adapted from: https://github.com/UziTech/js-date-format/blob/master/js-date-format.js
 @param {Date} v - The Date value to format.  
-@param {string} format - The format string pattern
+@param {string} [format] - Optional. The format string pattern. If not specified the current culture date format is used.
 @returns {string} Returns the formatted string
 */
-tp.FormatDateTime = function (v, format = 'yyyy-MM-dd') {
+tp.FormatDateTime = function (v, format = null) {
     // adapted from: https://github.com/UziTech/js-date-format/blob/master/js-date-format.js
 
-    format = format || tp.DateFormatISO;
+    format = format || tp.GetDateFormat();  
 
     let Pad = function (value, length) {
         var negative = value < 0 ? "-" : "";
@@ -2037,8 +2038,25 @@ tp.Day = {
 };
 Object.freeze(tp.Day);
 
-
-
+/** Enum-like class. Indicates the pattern of a date format string.
+ @class
+ @enum {number}
+ */
+tp.DatePattern = {
+    /** MM-dd-yyyy. Middle-endian (month, day, year), e.g. 04/22/96
+     * @type {number} 
+     */
+    MDY: 0,
+    /** dd-MM-yyyy. Little-endian (day, month, year), e.g. 22.04.96 or 22/04/96
+     * @type {number}
+     */
+    DMY: 1,
+    /** yyyy-MM-dd. Big-endian (year, month, day), e.g. 1996-04-22
+     * @type {number}
+     */
+    YMD: 2
+};
+ 
 
 
 
@@ -2052,6 +2070,10 @@ Object.freeze(tp.Day);
  * @returns  {Date} A date object
  */
 tp.ParseDateTime = function (v) {
+    let o = tp.TryParseDateTime(v);
+    if (o.Result === true) {
+        return o.Value;
+    }
     return new Date(Date.parse(v));
 };
 /**
@@ -2063,13 +2085,72 @@ tp.ParseDateTime = function (v) {
  * @param   {string}   v   A date string in the format yyyy/MM/dd for local dates and yyyy-MM-dd for UTC dates.
  * @returns  {object}   Returns an object as { Value: Date, Result: boolean }
  */
-tp.TryParseDateTime = function (v) {
+tp.TryParseDateTime = function (v, CultureCode = null) {
     var Info = {
         Value: null,
         Result: false
     };
+ 
+    if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+        CultureCode = tp.CultureCode;
 
     try {
+        if (tp.IsString(v) && !tp.IsBlank(v)) {
+            let i, ln;
+            let Seps = ['-', '/', '.'];
+            v = v.trim();
+
+            let DateFormat = tp.GetDateFormat(CultureCode);
+            let DatePattern = tp.GetDatePattern(DateFormat);
+
+            let Sep = tp.GetDateSeparator(CultureCode);
+            for (i = 0, ln = Seps.length; i < ln; i++) {
+                if (v.indexOf(Seps[i]) !== -1) {
+                    Sep = Seps[i];
+                    break;
+                }
+            }
+
+            let Today = tp.Today();
+            let Year, Month, Day;
+
+            switch (DatePattern) {
+                case tp.DatePattern.DMY:
+                    Year = 3;
+                    Month = 2;
+                    Day = 1;
+                    break;
+                case tp.DatePattern.MDY:
+                    Year = 3;
+                    Month = 1;
+                    Day = 2;
+                    break;
+                default:
+                    Year = 1;
+                    Month = 2;
+                    Day = 3;
+                    break;
+            }
+
+            let Parts = v.split(Sep);
+
+            if (tp.IsArray(Parts) && Parts.length > 0) {
+                Year = Parts.length >= Year ? Parts[Year - 1] : Today.getFullYear();
+                Month = Parts.length >= Month ? Parts[Month - 1] - 1 : Today.getMonth();
+                Day = Parts.length >= Day ? Parts[Day - 1] : tp.DayOfMonth(Today);
+
+                let D = new Date(Year, Month, Day);
+                Info.Value = D;
+                Info.Result = true;
+                return Info;
+            }
+        }
+
+    } catch (e) {
+        //
+    }
+
+    try { 
         var ms = Date.parse(v);
         if (!isNaN(ms)) {
             Info.Value = new Date(ms);
@@ -2340,7 +2421,7 @@ Returns the start date-time of a specified Date value, i.e. yyyy-MM-dd 00:00:00
 @returns {Date} Returns the start date-time of a specified Date value, i.e. yyyy-MM-dd 00:00:00
 */
 tp.StartOfDay = function (v) {
-    return tp.ClearDate(v);
+    return tp.ClearTime(v);
 };
 /**
 Returns the end date-time of a specified Date value, i.e yyyy-MM-dd 23:59:59
@@ -2348,7 +2429,7 @@ Returns the end date-time of a specified Date value, i.e yyyy-MM-dd 23:59:59
 @returns {Date} Returns the end date-time of a specified Date value, i.e yyyy-MM-dd 23:59:59
 */
 tp.EndOfDay = function (v) {
-    v = tp.ClearDate(v);
+    v = tp.ClearTime(v);
     v = tp.AddDays(v, 1);
     v = tp.AddSeconds(v, -1);
     return v;
@@ -14438,7 +14519,6 @@ position: relative;
 text-decoration: none;
 padding: 0 15px;
 line-height: inherit;
-margin: 0 1px;
 `;
 
         let CP = new tp.CreateParams();
@@ -14452,7 +14532,6 @@ margin: 0 1px;
 
         Result['Command'] = Command;
         Result['DialogResult'] = DialogResult;
-        //Result.StyleProp('margin', '0 1px');
         Result.On(tp.Events.Click, this.AnyClick, this);
 
         if (ToLeft === true)
@@ -14625,6 +14704,8 @@ display: flex;
 height: ${tp.WindowSettings.CaptionHeight};
 border-top: ${tp.WindowSettings.Border};
 user-select: none;
+padding: 0.15em;
+gap: 0.15em;
 `;
         this.Footer.style.cssText = Style;  
 
@@ -16095,30 +16176,39 @@ tp.Cultures = {
 
 /**
  * Returns the decimal separator of a specified culture, i.e. en-US
- * @param {string} CultureCode The culture code, i.e. en-US
+ * @param {string} [CultureCode] The culture code, i.e. en-US. If not specified then the current culture is used.
  * @return {string} Returns the decimal separator of a specified culture, i.e. en-US
  */
 tp.GetDecimalSeparator = (CultureCode) => {
+    if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+        CultureCode = tp.CultureCode;
+
     let n = 1.1;
     let Result = n.toLocaleString(CultureCode).substring(1, 2);
     return Result;
 };
 /**
  * Returns the thousand separator of a specified culture, i.e. en-US
- * @param {string} CultureCode The culture code, i.e. en-US
+ * @param {string} [CultureCode] The culture code, i.e. en-US. If not specified then the current culture is used.
  * @return {string} Returns the thousand separator of a specified culture, i.e. en-US
  */
 tp.GetThousandSeparator = (CultureCode) => {
+    if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+        CultureCode = tp.CultureCode;
+
     let n = 1000;
     let Result = n.toLocaleString(CultureCode).substring(1, 2);
     return Result;
 };
 /**
  * Returns the date separator of a specified culture, i.e. en-US
- * @param {string} CultureCode The culture code, i.e. en-US
+ * @param {string} [CultureCode] The culture code, i.e. en-US. If not specified then the current culture is used.
  * @returns {string} Returns the date separator of a specified culture, i.e. en-US
  */
 tp.GetDateSeparator = (CultureCode) => {
+    if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+        CultureCode = tp.CultureCode;
+
     let S = new Date().toLocaleDateString(CultureCode);
 
     if (S.indexOf('/') !== -1) {
@@ -16131,12 +16221,15 @@ tp.GetDateSeparator = (CultureCode) => {
 };
 /**
  * Returns the date format, i.e. dd/MM/yyyy or MM/dd/YYYY, of a specified culture, i.e. en-US
- * @param {string} CultureCode The culture code, i.e. en-US
+ * @param {string} [CultureCode] The culture code, i.e. en-US. If not specified then the current culture is used.
  * @returns {string} Returns the date format, i.e. dd/MM/yyyy or MM/dd/YYYY, of a specified culture, i.e. en-US
  */
 tp.GetDateFormat = (CultureCode) => {
     if (CultureCode === 'ISO')
         return tp.DateFormatISO;
+
+    if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+        CultureCode = tp.CultureCode;
 
     let i, ln;
     let DateSeparator = tp.GetDateSeparator(CultureCode);
@@ -16164,6 +16257,26 @@ tp.GetDateFormat = (CultureCode) => {
     return Parts.join(DateSeparator);
 
 };
+/**
+ *  Returns a {@link tp.DatePattern} constant value by analyzing the DateFormat.
+ * @param {string} DateFormat The date format string to analyze, e.g. yyyy-MM-dd or MM/dd/YYYY
+ * @returns {number} Returns a {@link tp.DatePattern} constant value by analyzing the DateFormat.
+ */
+tp.GetDatePattern = function (DateFormat) {
+    let Result = tp.DatePattern.DMY;
+    DateFormat = DateFormat.trim();
+    let C = DateFormat.charAt(0).toUpperCase();
+
+    if (C === 'Y')
+        Result = tp.DatePattern.YMD;
+    else if (C === 'M')
+        Result = tp.DatePattern.MDY;
+    else
+        Result = tp.DatePattern.DMY;
+
+    return Result;
+};
+ 
 
 //#endregion
 

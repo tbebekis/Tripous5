@@ -99,25 +99,32 @@ namespace Tripous.Data
             if (Mode == SqlFilterMode.EnumConst)
             {
                 if (Enum.OptionList == null || Enum.OptionList.Count == 0)
-                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_ConstantOptionsList", "List of constants"));
+                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_ConstantOptionsList", "EnumConst Sql Filter. List of constants not defined."));
 
                 if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
-                    Sys.Throw("Invalid data type for Sql Filter EnumConst. Only string and integer is allowed.");
+                    Sys.Throw("EnumConst Sql Filter. Invalid data type. Only string and integer is allowed.");
             }
             else if (Mode == SqlFilterMode.EnumQuery)
             {
                 if (string.IsNullOrWhiteSpace(Enum.ResultField))
-                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_ResultFieldName", "Criterion Enum Result Field Name"));
+                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_ResultFieldName", "EnumQuery Sql Filter. Result Field Name not defined."));
+
+                if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
+                    Sys.Throw("EnumQuery Sql Filter. Invalid data type. Only string and integer is allowed.");
 
                 if (string.IsNullOrWhiteSpace(Enum.Sql))
-                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_Sql", "Criterion Enum Sql"));
+                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_Sql", "EnumQuery Sql Filter. SELECT Sql is not defined."));
 
                 Format = Res.GS("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
-                string[] Lines = Enum.DisplayLabels.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                if (Enum.DisplayLabels != null && Enum.DisplayLabels.Length > 0)
+                {
+                    string[] Lines = Enum.DisplayLabels.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-                for (int i = 0; i < Lines.Length; i++)
-                    if (!Lines[i].Contains('='))
-                        Sys.Throw(Format, i + 1);
+                    for (int i = 0; i < Lines.Length; i++)
+                        if (!Lines[i].Contains('='))
+                            Sys.Throw(Format, i + 1);
+                }
+
             }
         }
 

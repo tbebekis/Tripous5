@@ -74,6 +74,10 @@ namespace Tripous.Data
         /// </summary>
         public override void ApplyRowLimit(SelectSql SelectSql, int RowLimit)
         {
+            RowLimit = NormalizeRowLimit(RowLimit);
+            if (RowLimit <= 0)
+                return;
+
             string S;
 
             // select * from T where Id > 10 order by Id limit 400 
@@ -89,6 +93,8 @@ limit {RowLimit}";
                 SelectSql.GroupBy += S;
             else if (!string.IsNullOrWhiteSpace(SelectSql.Where))
                 SelectSql.Where += S;
+            else
+                SelectSql.From += S;
 
         }
 

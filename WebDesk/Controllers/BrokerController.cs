@@ -141,13 +141,13 @@ namespace WebDesk.Controllers
         /// the SelectList of the broker.
         /// </summary>
         [Route("/Broker/SelectBrowser")]
-        public JsonResult SelectBrowser(string BrokerName, string SqlText, int RowLimit)
+        public JsonResult SelectBrowser(string BrokerName, string SqlText, bool UseRowLimit)
         {
             HttpActionResult Result = new HttpActionResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
-                JsonDataTable Packet = broker.JsonSelectBrowser(SqlText, RowLimit);
+                JsonDataTable Packet = broker.JsonSelectBrowser(SqlText, UseRowLimit? -1: 0);
                 Packet.Name = "Browser";
                 Result.SerializePacket(Packet);  
                 Result.IsSuccess = true;

@@ -223,10 +223,8 @@ namespace Tripous.Data
 
             if (!OnSelectBefore(SS))                    // OnSelectBefore() returning true, cancels the SELECT execution
             {
-                if (RowLimit > 0)
-                {
-                    Store.Provider.ApplyRowLimit(SS, RowLimit);
-                }
+                RowLimit = Store.Provider.NormalizeRowLimit(RowLimit);
+                Store.Provider.ApplyRowLimit(SS, RowLimit);
 
                 SqlText = SS.Text;
                 Store.SelectTo(Table, SqlText);

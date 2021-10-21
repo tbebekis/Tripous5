@@ -668,6 +668,15 @@ namespace Tripous.Data
         public virtual void ApplyRowLimit(SelectSql SelectSql, int RowLimit)
         {
         }
+        /// <summary>
+        /// Normalizes RowLimit. If it is less than zero it returns a default limit value.
+        /// </summary>
+        public int NormalizeRowLimit(int RowLimit)
+        {
+            if (RowLimit < 0)
+                RowLimit = Db.DefaultRowLimit;
+            return RowLimit;
+        }
  
         /* generators */
         /// <summary>

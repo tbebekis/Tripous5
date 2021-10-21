@@ -463,8 +463,8 @@ tp.DateRanges = {
             Today = tp.Today();
 
         let Result = true;
-        let FromDate = Today;
-        let ToDate = Today;
+        let FromDate = new Date(tp.ClearTime(Today));
+        let ToDate = new Date(tp.ClearTime(Today));
 
         if (tp.IsInteger(Range)) {
             switch (Range) {

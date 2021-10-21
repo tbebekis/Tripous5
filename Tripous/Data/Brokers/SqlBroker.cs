@@ -615,12 +615,11 @@ namespace Tripous.Data
                 SqlText = SS.Text;
             }
 
-            if (RowLimit > 0)
-            {
-                SS = new SelectSql(SqlText);
-                Store.Provider.ApplyRowLimit(SS, RowLimit);
-                SqlText = SS.Text;
-            }
+            RowLimit = Store.Provider.NormalizeRowLimit(RowLimit);
+
+            SS = new SelectSql(SqlText);
+            Store.Provider.ApplyRowLimit(SS, RowLimit);
+            SqlText = SS.Text;
 
             return TableSet.SelectBrowser(Table, SqlText);
         }

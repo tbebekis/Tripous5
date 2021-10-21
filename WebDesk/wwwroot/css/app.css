@@ -99,7 +99,7 @@ script {
 .tp-SqlFilter-Ctrl input[type=text]:focus, 
 .tp-SqlFilter-Ctrl input[type=number]:focus, 
 .tp-SqlFilter-Ctrl input[type=date]:focus, 
-.tp-SqlFilter-Ctrl select,
+.tp-SqlFilter-Ctrl select:focus,
 
 .tp-CtrlRow input[type=text]:focus,
 .tp-CtrlRow input[type=email]:focus,

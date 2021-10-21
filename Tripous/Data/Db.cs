@@ -33,6 +33,8 @@ namespace Tripous.Data
         static List<SqlConnectionInfo> fConnections;
         static DbIni fMainIni;
 
+        static int fDefaultRowLimit;
+
         /// <summary>
         /// Initializes the data access layer
         /// </summary>
@@ -853,7 +855,19 @@ namespace Tripous.Data
         /// </summary>
         static public DbIni MainIni { get { return fMainIni ?? (fMainIni = new DbIni(DefaultConnectionInfo)); } }
 
-
+        /// <summary>
+        /// The default RowLimit for browser SELECTs.
+        /// </summary>
+        static public int DefaultRowLimit
+        {
+            get
+            {
+                if (fDefaultRowLimit >= 100 && fDefaultRowLimit <= 1500)
+                    return fDefaultRowLimit;
+                return 300;
+            }
+            set { fDefaultRowLimit = value; }
+        }
 
     }
 

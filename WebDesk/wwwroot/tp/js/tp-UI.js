@@ -208,21 +208,12 @@ tp.Classes = {
     /* Sql Filters          ----------------------------------------------------------------- */
     SelectSqlListUi: 'tp-SelectSqlListUi',
     SelectSqlUi: 'tp-SelectSqlUi',
+    SelectSqlListToolBar: 'tp-SelectSqlList-ToolBar',
 
     SqlFilterRow: 'tp-SqlFilterRow',
     SqlFilterCtrl: 'tp-SqlFilter-Ctrl',
     SqlFilterDateRangeSelector: 'tp-SqlFilter-DateRangeSelector',
-
-
-    SqlFilterString: 'tp-SqlFilter-String',
-    SqlFilterInteger: 'tp-SqlFilter-Integer',
-    SqlFilterFloat: 'tp-SqlFilter-Float',
-    SqlFilterDecimal: 'tp-SqlFilter-Decimal',
-    SqlFilterDate: 'tp-SqlFilter-Date',
-    SqlFilterBoolean: 'tp-SqlFilter-Boolean',
-    SqlFilterEnumQuery: 'tp-SqlFilter-EnumQuery',
-    SqlFilterEnumConst: 'tp-SqlFilter-EnumConst',
-    SqlFilterLocator: 'tp-SqlFilter-Locator',
+ 
 
     
     
@@ -5936,6 +5927,21 @@ tp.ToolBar = class extends tp.tpElement {
                 o.NoText = Flag;
             }
         }
+    }
+
+    /**
+     * Returns a child of this tool-bar having a specified command, if any, else null.
+     * @param {string} Command The command to look for, e.g. 'Execute'.
+     * @returns {tp.ButtonEx | tp.tpElement}  Returns a child of this tool-bar having a specified command, if any, else null.
+     */
+    FindItemByCommand(Command) {
+        let List = this.GetControls();
+
+        let Result = List.find(item => {
+            return tp.IsString(item.Command) && tp.IsSameText(item.Command, Command);                 
+        });
+
+        return Result;
     }
 
     /* Event triggers */
@@ -12115,7 +12121,10 @@ tp.Calendar = class extends tp.Control {
     set Date(v) {
         if (tp.IsString(v)) {
             try {
-                v = tp.ParseDateTime(v);
+                let o = tp.TryParseDateTime(v);
+                if (o.Result === true) {
+                    v = o.Value;
+                }
             } catch (e) {
                 v = new Date();
             }
@@ -12559,7 +12568,10 @@ tp.DateBox = class extends tp.Control {
     set Date(v) {
         if (tp.IsString(v)) {
             try {
-                v = tp.ParseDateTime(v);
+                let o = tp.TryParseDateTime(v);
+                if (o.Result === true) {
+                    v = o.Value;
+                }
             } catch (e) {
                 v = null;
             }
@@ -12572,7 +12584,7 @@ tp.DateBox = class extends tp.Control {
             if (v instanceof Date) {
                 this.fDate = v;
                 if (this.fTextBox)
-                    this.fTextBox.value = tp.FormatDateTime(v, 'yyyy-MM-dd');
+                    this.fTextBox.value = tp.FormatDateTime(v, tp.GetDateFormat()); //  'yyyy-MM-dd'
                 if (this.fCalendar) {
                     this.fCalendar.Date = v;
                     this.fCalendar.Update();
@@ -12587,17 +12599,7 @@ tp.DateBox = class extends tp.Control {
             this.OnDateChanged();
         }
     }
-    /**
-    Gets or sets the text display format of the control. Defaults to yyyy-MM-dd
-    @type {string}
-    */
-    get DisplayFormat() {
-        return !tp.IsBlank(this.fDisplayFormat) ? this.fDisplayFormat : 'yyyy-MM-dd';
-    }
-    set DisplayFormat(v) {
-        this.fDisplayFormat = v;
-        this.Placeholder = v;
-    }
+ 
     /**
     Gets or sets a text the control displays as a hint to the user of what can be entered in the control. <br /> 
     The placeholder text must not contain carriage returns or line-feeds.
@@ -12724,13 +12726,12 @@ tp.DateBox = class extends tp.Control {
             case tp.Events.Change:
                 tp.CancelEvent(e);
 
-                S = tp.Trim(this.Text);
-                //TODO: parse the string efficiently
+                S = tp.Trim(this.Text); 
                 let CR = tp.TryParseDateTime(S);
                 if (CR.Result) {
                     this.Date = CR.Value;
                 } else if (!tp.IsEmpty(this.Date)) {
-                    this.Text = tp.FormatDateTime(this.Date, this.DisplayFormat);
+                    this.Text = tp.FormatDateTime(this.Date);
                 } else {
                     this.Text = '';
                 }
@@ -12895,11 +12896,6 @@ tp.DateBox.prototype.fCalendar;
  * @type {Date}
  */
 tp.DateBox.prototype.fDate;
-/** Field
- * @protected
- * @type {string}
- */
-tp.DateBox.prototype.fDisplayFormat; // = 'yyyy-MM-dd'; 
 /** Field
  * @protected
  * @type {tp.Size}

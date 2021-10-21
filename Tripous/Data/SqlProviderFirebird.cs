@@ -106,6 +106,10 @@ namespace Tripous.Data
         /// </summary>
         public override void ApplyRowLimit(SelectSql SelectSql, int RowLimit)
         {
+            RowLimit = NormalizeRowLimit(RowLimit);
+            if (RowLimit <= 0)
+                return;
+
             bool Flag;
             string S;
 

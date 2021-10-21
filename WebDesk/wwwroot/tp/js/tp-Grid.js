@@ -4328,7 +4328,6 @@ tp.Grid = class extends tp.Control  {
                 }
             }
 
-
         }
     }
     /**
@@ -4503,7 +4502,7 @@ tp.Grid = class extends tp.Control  {
     RepaintRows() {
         setTimeout(() => {
             this.BuildGroups();
-        }, 700);
+        }, 100);
     }
 
     /* cache (internal methods) */
