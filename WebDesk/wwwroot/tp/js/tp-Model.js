@@ -2017,7 +2017,7 @@ tp.DataView = class extends tp.View {
 
             // RowLimit
             /** @type {boolean} */
-            let UseRowLimit = tp.IsValid(this.SelectSqlListUi) ? this.SelectSqlListUi.RowLimit : true;
+            let UseRowLimit = tp.IsValid(this.SelectSqlListUi) ? this.SelectSqlListUi.UseRowLimit : true;
 
 
             let SqlText = SelectSql.Text;

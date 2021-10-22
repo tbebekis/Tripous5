@@ -980,6 +980,10 @@ max-width 	Rules applied for any browser width less than the value defined in th
     text-align: right;
 }
 
+input[type=number] {
+    text-align: right;
+}
+
 .tp-UnSelectable {
     user-select: none;
 }

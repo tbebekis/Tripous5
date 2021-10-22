@@ -91,7 +91,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
         this.ToolBar = new tp.ToolBar(el);
         this.ToolBar.On('ButtonClick', this.AnyClick, this);
 
-        this.ToggleRowLimit();
+        this.ToggleUseRowLimit();
 
         // PanelList
         el = tp.Select(this.Handle, '.tp-PanelList');
@@ -143,7 +143,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
                         break;
 
                     case 'RowLimit':
-                        this.ToggleRowLimit();
+                        this.ToggleUseRowLimit();
                         Args.Handled = true;
                         break;
  
@@ -174,10 +174,13 @@ tp.SelectSqlListUi = class extends tp.tpElement {
         this.PanelList.SelectedPanel = PanelInfo.Panel.Handle;
     }
 
-    ToggleRowLimit() {
+    /** 
+     *  Toggles the 'UseRowLimit' flag 
+     *  */
+    ToggleUseRowLimit() {
         let Btn = this.ToolBar.FindItemByCommand('RowLimit');
         tp.ToggleClass(Btn.Handle, tp.Classes.Active);
-        this.RowLimit = !this.RowLimit;
+        this.UseRowLimit = !this.UseRowLimit;
     }
 
     /** Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
@@ -186,7 +189,6 @@ tp.SelectSqlListUi = class extends tp.tpElement {
     GenerateSql() {
         return this.CurrentSelectSqlUi.GenerateSql();
     }
-
 
     /**
     Event trigger
@@ -222,7 +224,7 @@ tp.SelectSqlListUi.prototype.CurrentSelectSqlUi = null;
 /** When true a row limit is applied to the current Sql statement.
  * @type {boolean}
  */
-tp.SelectSqlListUi.prototype.RowLimit = false;
+tp.SelectSqlListUi.prototype.UseRowLimit = false;
 //#endregion
 
 //#region tp.SelectSqlUi
@@ -266,6 +268,10 @@ tp.SelectSqlUi = class extends tp.tpElement {
         this.CreateControls();
     }
 
+    /**
+     * Creates filter controls. <br />
+     * It actually creates a {@link tp.SqlFilterControlLink} for each filter, and the link creates the needed controls.
+     * */
     CreateControls() {
         if (!tp.IsValid(this.FilterValueList)) {
             this.ControlLinks = [];
@@ -280,6 +286,9 @@ tp.SelectSqlUi = class extends tp.tpElement {
             }
         } 
     }
+    /**
+     * Clears filter controls.
+     * */
     ClearControls() {
         if (tp.IsArray(this.ControlLinks) && this.ControlLinks.length > 0) {
             this.ControlLinks.forEach(item => {
@@ -289,6 +298,10 @@ tp.SelectSqlUi = class extends tp.tpElement {
 
         this.FilterValueList.ClearValues();
     }
+
+    /** Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+     * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+     * */
     GenerateSql() {
         return this.FilterValueList.GenerateSql();
     }
@@ -352,10 +365,16 @@ tp.SqlFilterValueList = class {
      */
     InfoText = '';  
 
-
+    /** 
+     * Clears all the values items.
+     * */
     ClearValues() {
         this.Items.forEach(item => { item.Clear(); });
     }
+    /** Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+     * NOTE: The returned value is actually the {@link tp.SelectSql} of this instance.
+    * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+    * */
     GenerateSql() {
         this.Items.forEach(item => {
             item.ControlLink.InputFromControls();
@@ -370,7 +389,12 @@ tp.SqlFilterValueList = class {
         let Result = this.GenerateSqlWhereAndHaving(Ref);
         return Result;
     }
-
+    /**
+     * Generates the WHERE and the HAVING clauses.
+     * NOTE: The returned value is actually the {@link tp.SelectSql} of this instance.
+     * @param {object} Ref An object of type { sWhere: '', sHaving: '' }
+     * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+     */
     GenerateSqlWhereAndHaving(Ref) {
         this.InfoText = '';
 
@@ -540,7 +564,9 @@ tp.SqlFilterValue = class {
      */
     ControlLink = null;
 
-    /** Resets the values of the properties of this instance. */
+    /** 
+     *  Resets the values of the properties of this instance.
+     *  */
     Clear() {
         this.Value = '';
         this.Greater = '';
@@ -657,13 +683,13 @@ tp.SqlFilterValue = class {
                 }            
 
                 if (!tp.IsBlank(sG))
-                    sG = ` (${FullName} >= ${sG}) `
+                    sG = `(${FullName} >= ${sG})`
 
                 if (!tp.IsBlank(sL))
-                    sL = ` (${FullName} <= ${sL}) `;
+                    sL = `(${FullName} <= ${sL})`;
 
                 if (!tp.IsBlank(sG) && !tp.IsBlank(sL))
-                    Result = ` (${sG} and ${sL}) `; 
+                    Result = `(${sG} and ${sL})`; 
                 else if (!tp.IsBlank(sG))
                     Result = sG;
                 else if (!tp.IsBlank(sL))
@@ -824,7 +850,9 @@ tp.SqlFilterControlLink = class {
      */
     SettingSingleChoise = false;
 
-
+    /**
+     * Creates any needed control.
+     * */
     CreateControls() {
 
         this.CreateFilterRow();
@@ -858,7 +886,9 @@ tp.SqlFilterControlLink = class {
                 break;
         }
     }
-
+    /**
+     * Creates the filter row, actually a DIV.
+     * */
     CreateFilterRow() {
 
 /*
@@ -897,21 +927,28 @@ tp.SqlFilterControlLink = class {
 
         this.elControlContainer = tp.Append(this.elFilterRow, ControlContainerHtmlText);
     }
-
+    /**
+     * Creates controls when this represents a simple filter.
+     * */
     CreateControl_Simple() {
         let i, ln;
 
         let UseRange = this.FilterDef.UseRange === true || tp.DataType.IsDateTime(this.FilterDef.DataType); // this.FilterDef.DataType === tp.DataType.DateTime || this.FilterDef.DataType === tp.DataType.Date;
- 
+
+        let IsFloatingPoint = this.FilterDef.DataType === tp.DataType.Float || this.FilterDef.DataType === tp.DataType.Decimal;
 
         if (!UseRange) {
             this.edtBox = new this.ControlClassType(null, { Parent: this.elControlContainer });
 
+            // Box is a a combo-box
             if (this.FilterDef.DataType === tp.DataType.Boolean) {
                 this.edtBox.Add('', tp.TriState.Default);
                 this.edtBox.Add('False', tp.TriState.False);
                 this.edtBox.Add('True', tp.TriState.True);
             }
+
+            if (IsFloatingPoint)
+                this.edtBox.Decimals = 2;
         }
         else {
 
@@ -932,12 +969,19 @@ tp.SqlFilterControlLink = class {
             this.elFromControlContainer = tp.Append(this.elControlContainer, `<div class="${tp.Classes.From}"></div>`);
             this.lblFrom = tp.Append(this.elFromControlContainer, `<div>From</div>`);
             this.edtFrom = new this.ControlClassType(null, { Parent: this.elFromControlContainer });
+            if (IsFloatingPoint)
+                this.edtFrom.Decimals = 2;
 
             this.elToControlContainer = tp.Append(this.elControlContainer, `<div class="${tp.Classes.To}"></div>`);
             this.lblTo = tp.Append(this.elToControlContainer, `<div>To</div>`);
             this.edtTo = new this.ControlClassType(null, { Parent: this.elToControlContainer });
+            if (IsFloatingPoint)
+                this.edtTo.Decimals = 2;
         }
     }
+    /**
+     * Creates controls when this represents an enum filter (EnumQuery or EnumConst).
+     * */
     async CreateControl_Enum() {
 
         let TableColumn, GridColumn;
@@ -1060,6 +1104,9 @@ tp.SqlFilterControlLink = class {
         this.edtTo.ReadOnly = !IsCustom;
     }
 
+    /**
+     * Reads filter controls and assigns values to the filter value of this instance.
+     * */
     InputFromControls() {
 
         // -------------------------------------------------------------------------------------
@@ -1141,12 +1188,23 @@ tp.SqlFilterControlLink = class {
                 break;
         }
     }
-    ClearControls() {  
+    /**
+    * Clears any controls used with this link.
+    * */
+    ClearControls() {
         if (tp.IsValid(this.edtBox)) {
-            if (this.FilterDef.DataType === tp.DataType.Boolean)
+            if (this.FilterDef.DataType === tp.DataType.Boolean) {
                 this.edtBox.SelectedIndex = 0;
-            else
+            }
+ 
+            else {
                 this.edtBox.Text = '';
+            }
+                
+        }
+
+        if (tp.DataType.IsDateTime(this.FilterDef.DataType)) {
+            this.cboDateRange.SelectedIndex = 0;
         }
 
         if (tp.IsValid(this.edtFrom))

@@ -8073,38 +8073,6 @@ tp.NumberBox = class extends tp.InputControl {
         super(ElementOrSelector, CreateParams);
     }
 
-    /**
-    Returns a specified value formatted as text, according to its data column, if any, else return the value un-formatted. <br />
-    NOTE: Use this method with simple and list controls only
-    @param {any} v - The value to format.
-    @returns {string} The formatted text 
-    */
-    Format(v) {
-        if (tp.IsValid(v)) {
-            if (this.DataColumn instanceof tp.DataColumn) {
-                return this.DataColumn.Format(v, false);
-            }
-            else if (tp.IsNumber(v)) {
-                return tp.FormatNumber2(v, this.Decimals);
-            }
-        }      
- 
-        return '';
-    }
-    /**
-    Converts a specified string into a primitive value (or a date-time),  according to its data column, and returns the value.
-    @param {string} S - The text to convert to a value
-    @returns {any} The result of the convertion
-    */
-    Parse(S) {
-        if (tp.IsString(S) && !tp.IsBlank(S)) {
-            let Func = this.Decimals > 0 ? tp.TryStrToFloat : tp.TryStrToInt;
-            let ConvertionResult = Func(S);
-            return ConvertionResult.Result === true ? ConvertionResult.Value : null;
-        } 
-
-        return null;
-    }
 
     /**
      * Gets the number value of this instance.
@@ -8151,6 +8119,24 @@ tp.NumberBox = class extends tp.InputControl {
         this.fDataValueProperty = 'Value';
     }
     /**
+    Notification. Called by CreateHandle() after handle creation and field initialization but BEFORE options (CreateParams) processing <br />
+    Initialization steps:
+    <ul>
+        <li>Handle creation</li>
+        <li>Field initialization</li>
+        <li>Option processing</li>
+        <li>Completed notification</li>
+    </ul>
+    @protected
+    @override
+    */
+    OnFieldsInitialized() {
+        super.OnFieldsInitialized();         
+
+        // events
+        this.HookEvent(tp.Events.LostFocus); 
+    }
+    /**
     Event trigger
     @protected
     @override
@@ -8166,10 +8152,67 @@ tp.NumberBox = class extends tp.InputControl {
     @override
     */
     OnBindCompleted() {
-        this.TextAlign = tp.Alignment.ToText(tp.Alignment.Right);
+        //this.TextAlign = tp.Alignment.ToText(tp.Alignment.Right);
         super.OnBindCompleted();
     }
- 
+    OnAnyDOMEvent(e) {
+        var Type = tp.Events.ToTripous(e.type);
+        if (tp.IsSameText(tp.Events.LostFocus, Type)) {
+            this.NormalizeText();
+            this.WriteDataValue();
+            this.OnValueChanged();
+        }
+
+        super.OnAnyDOMEvent(e);
+    }
+    /** Called when the control losts focus in order to normalize the text */
+    NormalizeText() {
+        let S = this.Text;
+        let v = this.Parse(S);
+
+        let Result = !tp.IsEmpty(v);
+
+        if (Result && this.Decimals > 0) {
+            let S2 = tp.FormatNumber(v, `F${this.Decimals}`);
+            if (S !== S2)
+                this.Text = S2;
+        }
+
+        return Result;
+    }
+
+    /**
+    Returns a specified value formatted as text, according to its data column, if any, else return the value un-formatted. <br />
+    NOTE: Use this method with simple and list controls only
+    @param {any} v - The value to format.
+    @returns {string} The formatted text 
+    */
+    Format(v) {
+        if (tp.IsValid(v)) {
+            if (this.DataColumn instanceof tp.DataColumn) {
+                return this.DataColumn.Format(v, false);
+            }
+            else if (tp.IsNumber(v)) {
+                return tp.FormatNumber2(v, this.Decimals);
+            }
+        }
+
+        return '';
+    }
+    /**
+    Converts a specified string into a primitive value (or a date-time),  according to its data column, and returns the value.
+    @param {string} S - The text to convert to a value
+    @returns {any} The result of the convertion
+    */
+    Parse(S) {
+        if (tp.IsString(S) && !tp.IsBlank(S)) {
+            let Func = this.Decimals > 0 ? tp.TryStrToFloat : tp.TryStrToInt;
+            let ConvertionResult = Func(S);
+            return ConvertionResult.Result === true ? ConvertionResult.Value : null;
+        }
+
+        return null;
+    }
 };
 tp.NumberBox.prototype.fDecimals = 0;
 //#endregion
@@ -12569,9 +12612,7 @@ tp.DateBox = class extends tp.Control {
         if (tp.IsString(v)) {
             try {
                 let o = tp.TryParseDateTime(v);
-                if (o.Result === true) {
-                    v = o.Value;
-                }
+                v = o.Result === true ? o.Value : null;
             } catch (e) {
                 v = null;
             }
@@ -12728,11 +12769,14 @@ tp.DateBox = class extends tp.Control {
 
                 S = tp.Trim(this.Text); 
                 let CR = tp.TryParseDateTime(S);
-                if (CR.Result) {
+                if (CR.Result === true) {
                     this.Date = CR.Value;
-                } else if (!tp.IsEmpty(this.Date)) {
-                    this.Text = tp.FormatDateTime(this.Date);
-                } else {
+                }
+                //else if (!tp.IsEmpty(this.Date)) {
+                //    this.Text = tp.FormatDateTime(this.Date);
+                //}
+                else {
+                    this.Date = null;
                     this.Text = '';
                 }
 
