@@ -372,9 +372,13 @@ namespace WebDesk
                 });
             }
 
-
-
-            // ● MVC View location expander and Themes support
+            // ● MVC View location expander and Themes support 
+            if (WApp.HostEnvironment.IsDevelopment())
+            {
+                ViewLocationExpander.AddLocation($"/Demos/{{1}}/{{0}}.cshtml");
+                ViewLocationExpander.AddLocation($"/Demos/Shared/{{0}}.cshtml");
+            }
+ 
             ViewLocationExpander.AddLocation($"/Views/Ajax/{{0}}.cshtml");
             services.Configure<RazorViewEngineOptions>(options => { options.ViewLocationExpanders.Add(new ViewLocationExpander()); });
  

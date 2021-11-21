@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 
 namespace Tripous.Data
@@ -37,7 +38,8 @@ namespace Tripous.Data
             if (string.IsNullOrWhiteSpace(FilePath))
                 FilePath = SysConfig.SqlConnectionsFilePath;
 
-            Json.LoadFromFile(this, FilePath);
+            if (File.Exists(FilePath))
+                Json.LoadFromFile(this, FilePath);
         }
         /// <summary>
         /// Save

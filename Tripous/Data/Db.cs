@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Threading;
 
 using Tripous.Data.Metadata;
+using Tripous.Logging;
 
 namespace Tripous.Data
 {
@@ -42,6 +43,20 @@ namespace Tripous.Data
         static public void Initialize()
         {
             ObjectStore.RegisterObjectsOf(typeof(Db).Assembly);
+
+
+        }
+        /// <summary>
+        /// Loads connections from a .json file, using the <see cref="SysConfig.SqlConnectionsFilePath"/> setting.
+        /// </summary>
+        static public void LoadConnections()
+        {
+            if (File.Exists(SysConfig.SqlConnectionsFilePath))
+            {
+                SqlConnectionInfoList ConnectionInfoList = new SqlConnectionInfoList();
+                if (ConnectionInfoList.SqlConnections != null && ConnectionInfoList.SqlConnections.Count > 0)
+                    Db.Connections = ConnectionInfoList.SqlConnections;
+            }
         }
 
 
@@ -817,7 +832,10 @@ namespace Tripous.Data
             set
             {
                 if (fConnections != null)
-                    Sys.Throw("Connections strings are already set.");
+                {
+                    Logger.Warn("Connections strings are already set.");
+                    return;
+                }                    
 
                 if (value == null || value.Count == 0)
                     Sys.Throw("Can not set Connections to a null or empty list. No database connections provided");

@@ -1,0 +1,115 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Tab index and focus";
+}
+ 
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<pre>
+Tab index   < 0         - can be focused either by a mouse click, or the focus() function
+Tab index   >= 0        - can be focused either by a mouse click, or the focus() function, or the tab key, according to its tab order
+Tab index   unspecifed  - IE sets it to 0 and can be focused either by a mouse click, or the focus() function
+                          Chrome and Firefox set it to -1 and it can NOT be focused at all
+
+Clicking on a nested div (element) with unspecified tab-index
+    IE gives focus always to the child
+    Chrome and Firefox give focus only to the parent, and only if the parent has its tab-index specified explicitly
+
+Conclusion: 
+    It seems that setting tab-index explicitly to -1 is the best choice when the purpose is to control the focus 
+    either by mouse clicks or by the focus() function
+</pre>
+<br />
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex" target="_blank">MDN: Tab index</a></p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/Keyboard-navigable_JavaScript_widgets" target="_blank">MDN: Keyboar navigatable widgets</a></p>
+ 
+<br />
+
+<button id="btn1" onclick="CycleFocus()">CycleFocus</button> <br />
+<button id="btn2" onclick="AddNestedDivs()">Add nested divs</button> <br />
+
+<style>
+    .section > div {
+        position: relative;
+        border: 1px solid gray;
+        margin: 20px;
+        outline: none;
+        width: 280px;
+        height: 100px;
+    }
+
+    .section div:focus {
+        border: 3px solid #ff6a00;
+    }
+
+    .section > div > div:nth-child(1) {
+        position: absolute;
+        left: 10px;
+        top: 40px;
+        width: 100px;
+        height: 50px;
+        background-color: lavender;
+    }
+
+    .section > div > div:nth-child(2) {
+        position: absolute;
+        left: 150px;
+        top: 40px;
+        width: 100px;
+        height: 50px;
+        background-color: lightsalmon;
+    }
+</style>
+
+
+
+<section class="section">
+    <div id="div0"></div>
+
+    <div id="div1" tabindex="-1"></div>
+
+    <div id="div2" tabindex="0"></div>
+
+    <div id="div3" tabindex="1"></div>
+</section>
+
+
+<script>
+
+    var Divs = [];
+    var Index = 0;
+
+
+    tp.Ready(function () {
+        var S;
+        Divs = tp.SelectAll('.section > div');
+        for (var i = 0, ln = Divs.length; i < ln; i++) {
+            S = String(Divs[i].tabIndex);
+            if (i === 0)
+                S = 'div' + i + ' - tabIndex ' + ' : ' + S + '  (unspecified)'; // ' - tabIndex : none';
+            else
+                S = 'div' + i + ' - tabIndex ' + ' : ' + S;
+
+            Divs[i].innerHTML = S;
+        }
+    });   
+
+    var CycleFocus = function () {
+        Divs[Index].focus();
+        Index++;
+        if (Index > Divs.length - 1)
+            Index = 0;
+    }
+
+    function AddNestedDivs() {
+        var counter = -1;
+        for (var i = 0, ln = Divs.length; i < ln; i++) {
+            Divs[i].innerHTML += tp.Format('<div>tabindex unspecified</div><div tabindex="{0}">tabindex = {0}</div>', counter++);
+        }
+    }
+    
+</script>

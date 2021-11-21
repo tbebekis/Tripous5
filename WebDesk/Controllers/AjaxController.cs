@@ -87,5 +87,49 @@ namespace WebDesk.Controllers
             return Json(Result);
         }
 
+        [Route("/SqlSelectAll")]
+        public async Task<JsonResult> SqlSelectAll([FromBody] JsonDataTable JTable)
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+
+                string Name, SqlText, ConnectionName;
+                JsonDataSet JDataSet = new JsonDataSet();
+
+                DataTable Table;
+                DataTable tblSqlList = JTable.ToTable();
+                foreach (DataRow Row in tblSqlList.Rows)
+                {
+                    Name = Row.AsString("Name");
+                    ConnectionName = Row.AsString("ConnectionName");
+                    SqlText = Row.AsString("SqlText");
+
+                    Table = SelectTable(SqlText, ConnectionName);
+                    Table.TableName = Name;
+                    JTable = new JsonDataTable(Table, null);
+                    JDataSet.Tables.Add(JTable);
+                }
+
+                Result.SerializePacket(JDataSet);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
+
+
+
+            return Json(Result);
+        }
+
+ 
+
+
+
+
     }
 }

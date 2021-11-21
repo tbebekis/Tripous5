@@ -1905,8 +1905,7 @@ tp.Db = class {
     */
     static async SelectAllAsync(SqlTextItemList) {
 
-        let Url = tp.Urls.SqlSelectAll;
- 
+        let Url = tp.Urls.SqlSelectAll; 
 
         let Table = new tp.DataTable('SqlTextList');
 

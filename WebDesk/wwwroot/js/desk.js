@@ -267,11 +267,11 @@ app.Desk = class {
         let DataSetup = tp.GetDataSetupObject(elView);
 
         if (tp.IsArray(DataSetup.CSS)) {
-            await app.LoadCssFiles(DataSetup.CSS);
+            await tp.StaticFiles.LoadCssFiles(DataSetup.CSS);
         }
 
         if (tp.IsArray(DataSetup.JS)) {
-            await app.LoadJavascriptFiles(DataSetup.JS);
+            await tp.StaticFiles.LoadJavascriptFiles(DataSetup.JS);
         }
  
         if (tp.IsString(DataSetup['ClassType'])) {
@@ -398,11 +398,11 @@ app.DeskView = class extends tp.View {
             } 
 
             if (tp.IsArray(this.CreateParams.CSS)) {
-                app.UnLoadCssFiles(this.CreateParams.CSS);
+                tp.StaticFiles.UnLoadCssFiles(this.CreateParams.CSS);
             }
 
             if (tp.IsArray(this.CreateParams.JS)) {
-                app.UnLoadJavascriptFiles(this.CreateParams.JS);
+                tp.StaticFiles.UnLoadJavascriptFiles(this.CreateParams.JS);
             }
 
             super.Dispose();
@@ -467,11 +467,11 @@ app.DeskDataView = class extends tp.DataView {
             } 
 
             if (tp.IsArray(this.CreateParams.CSS)) {
-                app.UnLoadCssFiles(this.CreateParams.CSS);
+                tp.StaticFiles.UnLoadCssFiles(this.CreateParams.CSS);
             }
 
             if (tp.IsArray(this.CreateParams.JS)) {
-                app.UnLoadJavascriptFiles(this.CreateParams.JS);
+                tp.StaticFiles.UnLoadJavascriptFiles(this.CreateParams.JS);
             }
 
             super.Dispose();

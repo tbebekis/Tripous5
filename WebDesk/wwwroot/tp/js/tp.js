@@ -56,16 +56,20 @@ tp.Throw = function (Message) {
  
 /** global error handling */
 window.addEventListener("error", function (e) {
-    tp.ForceHideSpinner();
-    tp.Logger.Error(e);
+    if (tp.SysConfig.GlobalErrorHandling) {
+        tp.ForceHideSpinner();
+        tp.Logger.Error(e);
+    }
     return false;
 });
 
 /** global error handling */
 window.addEventListener('unhandledrejection', function (e) {
-    tp.ForceHideSpinner();
-    e.preventDefault();
-    tp.Logger.Error(e);
+    if (tp.SysConfig.GlobalErrorHandling) {
+        tp.ForceHideSpinner();
+        e.preventDefault();
+        tp.Logger.Error(e);
+    }
 });
 
 /**
@@ -10243,6 +10247,7 @@ tp.AjaxResponseDefaultHandler = function (Args) {
  */
 tp.AjaxOnRequestHeadersDefaultHandler = function (Args) {
 };
+
 //#region Ajax
 
 /**
@@ -15345,6 +15350,204 @@ tp.FrameBoxPromise = function (Text, ContentHtml) {
 
 
 //---------------------------------------------------------------------------------------
+// tp.StaticFiles
+//---------------------------------------------------------------------------------------
+
+/** Used in loading/unloading js and css files to head element dynamically. */
+tp.StaticFiles = { 
+};
+
+/** A list with the dynamically loaded modules (javascript files). */
+tp.StaticFiles.JavascriptFiles = [];
+/** A list with the dynamically loaded css files. */
+tp.StaticFiles.CssFiles = [];
+
+/**
+ * Loads a javascript file dynamically.
+ * NOTE: Files loaded dynamically are referenced counted. When ref-counting drops to zero the element is deleted from DOM.
+ * @param {string} Url The url path of the file.
+ * @returns {Promise} Returns a promise.
+ */
+tp.StaticFiles.LoadJavascriptFile = async function (Url) {
+ 
+    let FileUrl = Url.toLowerCase();
+    let oFile = tp.StaticFiles.JavascriptFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (!tp.IsValid(oFile)) {
+        let ExecutorFunc = (Resolve, Reject) => {
+            try {
+                let el = tp.Doc.createElement("script");
+                el.src = Url;
+                el.onload = function () {
+                    oFile = {
+                        FileUrl: FileUrl,
+                        Counter: 1,
+                        Element: el
+                    };
+                    tp.StaticFiles.JavascriptFiles.push(oFile);
+
+                    Resolve();
+                };
+                el.onerror = function (e) {
+                    Reject(e);
+                };
+                let Head = tp('head');
+                Head.appendChild(el);
+            } catch (e) {
+                Reject(e);
+            }
+        };
+
+        let Result = new Promise(ExecutorFunc);
+        return Result;
+    }
+    else {
+        oFile.Counter += 1;
+    }
+
+    return Promise.resolve();
+};
+/**
+ * Unloads a dynamically loaded javascript file.
+ * @param {string} Url The url path of the file.
+ */
+tp.StaticFiles.UnLoadJavascriptFile = function (Url) {
+    let FileUrl = Url.toLowerCase();
+    let oFile = tp.StaticFiles.JavascriptFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (tp.IsValid(oFile)) {
+        oFile.Counter -= 1;
+
+        if (oFile.Counter <= 0) {
+            let Head = tp('head');
+            Head.removeChild(oFile.Element);
+            tp.ListRemove(tp.StaticFiles.JavascriptFiles, oFile);
+        }
+    }
+};
+
+/**
+ * Loads a list of javascript files dynamically.
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+tp.StaticFiles.LoadJavascriptFiles = async function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            await tp.StaticFiles.LoadJavascriptFile(UrlList[i]);
+        }
+    }
+};
+/**
+ * Unloads a dynamically loaded list of javascript files 
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+tp.StaticFiles.UnLoadJavascriptFiles = function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            tp.StaticFiles.UnLoadJavascriptFile(UrlList[i]);
+        }
+    }
+};
+
+/**
+ * Loads a css file dynamically.
+ * NOTE: Files loaded dynamically are referenced counted. When ref-counting drops to zero the element is deleted from DOM.
+ * @param {string} Url The url path of the file.
+ * @returns {Promise} Returns a promise.
+ */
+tp.StaticFiles.LoadCssFile = async function (Url) {
+
+    let FileUrl = Url.toLowerCase();
+    let oFile = tp.StaticFiles.CssFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (!tp.IsValid(oFile)) {
+        let ExecutorFunc = (Resolve, Reject) => {
+            try {
+                let el = tp.Doc.createElement("link");
+                el.href = Url;
+                el.rel = 'stylesheet';
+                el.type = 'text/css';
+
+                el.onload = function () {
+                    oFile = {
+                        FileUrl: FileUrl,
+                        Counter: 1,
+                        Element: el
+                    };
+                    tp.StaticFiles.CssFiles.push(oFile);
+
+                    Resolve();
+                };
+                el.onerror = function (e) {
+                    Reject(e);
+                };
+                let Head = tp('head');
+                Head.appendChild(el);
+            } catch (e) {
+                Reject(e);
+            }
+        };
+
+        let Result = new Promise(ExecutorFunc);
+        return Result;
+    }
+    else {
+        oFile.Counter += 1;
+    }
+
+    return Promise.resolve();
+};
+/**
+ * Unloads a dynamically loaded css file.
+ * @param {string} Url The url path of the file.
+ */
+tp.StaticFiles.UnLoadCssFile = function (Url) {
+    let FileUrl = Url.toLowerCase();
+    let oFile = tp.StaticFiles.CssFiles.find(item => { return item.FileUrl === FileUrl; });
+
+    if (tp.IsValid(oFile)) {
+        oFile.Counter -= 1;
+
+        if (oFile.Counter <= 0) {
+            let Head = tp('head');
+            Head.removeChild(oFile.Element);
+            tp.ListRemove(tp.StaticFiles.CssFiles, oFile);
+        }
+    }
+};
+
+/**
+ * Loads a list of css files dynamically.
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+tp.StaticFiles.LoadCssFiles = async function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            await tp.StaticFiles.LoadCssFile(UrlList[i]);
+        }
+    }
+};
+/**
+ * Unloads a dynamically loaded list of css files
+ * @param {string[]} UrlList An array with the url paths of the files.
+ */
+tp.StaticFiles.UnLoadCssFiles = function (UrlList) {
+    if (tp.IsArray(UrlList)) {
+        let i, ln;
+
+        for (i = 0, ln = UrlList.length; i < ln; i++) {
+            tp.StaticFiles.UnLoadCssFile(UrlList[i]);
+        }
+    }
+};
+
+//---------------------------------------------------------------------------------------
 // NotificationBox
 //---------------------------------------------------------------------------------------
 
@@ -15742,6 +15945,7 @@ tp.SysConfig.LocatorShowDropDownRowCountLimit = 200;
 tp.SysConfig.UseServerStringResources = false;
 tp.SysConfig.UseServerCultures = false;
 tp.SysConfig.DefaultConnection = "DEFAULT";
+tp.SysConfig.GlobalErrorHandling = false;
 
 
 //#endregion
