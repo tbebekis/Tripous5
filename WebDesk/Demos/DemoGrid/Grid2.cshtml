@@ -1,0 +1,94 @@
+﻿
+
+@{
+    ViewBag.Title = "Grid 2: Initialization using CreateParams";
+}
+ 
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+ 
+    <div>
+        <button onclick="ClearRows()">Clear Rows</button> <br />
+        <button onclick="ClearGroupColumns()">Clear Group Columns</button> <br />
+        <div style="display: flex; align-items: center;">
+            <button onclick="SetGroupColumns()">Set Group Columns</button> <input type="text" id="ColumnNames" style="width: 280px; margin-left: 4px;" value="DepartmentId CountryId" /> <br />
+        </div>
+    </div>
+    <br /> 
+
+    <div id="Grid"></div>
+    <br />
+
+
+</div>
+
+
+
+<script>
+
+    var Grid,
+        tblTest,
+        tblCountry,
+        tblDepartment;
+
+    tp.Ready(function () {
+        var Data = tp.TestData.CreateTestDataTable(100);
+        tblTest = Data.Table;
+        tblCountry = tp.TestData.tblCountries;
+        tblDepartment = tp.TestData.tblDepartments;
+
+        var CP = {            
+            DataSource: tblTest,
+            ReadOnly: false,
+            ToolBarVisible: true,
+            ButtonInsertVisible: true,
+            ButtonDeleteVisible: true,
+            Columns: [
+                { Name: 'Code' },
+                { Name: 'Name' },
+                { Name: 'Age' },
+                { Name: 'DepartmentId', Text: 'Department', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblDepartment },
+                { Name: 'Salary' },
+                { Name: 'Married' },
+                { Name: 'CountryId', Text: 'Country', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblCountry},
+                { Name: 'EntryDate', Text: 'Entry Date' },
+            ],
+            CustomButtons: [
+                { Command: 'Custom.Command_1', Text: '', ToolTip: 'Custom Command_1', IcoClasses: 'fa fa-calculator', CssClasses: '', ToRight: true },
+                { Command: 'Custom.Command_2', Text: '', ToolTip: 'Custom Command_2', IcoClasses: 'fa fa-film', CssClasses: '', ToRight: true },
+            ] 
+        };
+        Grid = new tp.Grid('#Grid', CP);
+
+
+        Grid.On('ToolBarButtonClick', function (Args) { 
+            tp.InfoNote('Clicked: ' + Args.Command);
+        });
+
+    });
+
+    function ClearRows() {
+        Grid.DataSource.ClearRows();
+    }
+    function ClearGroupColumns() {
+        Grid.ClearGroupColumns();
+    }
+    function SetGroupColumns() {
+        var S = tp.Select('#ColumnNames').value;
+        if (!tp.IsBlank(S)) {
+            var Parts = tp.Split(S, ' ', true);
+            if (Parts.length > 0) {
+                var ColumnNames = [];
+                for (var i = 0, ln = Parts.length; i < ln; i++)
+                    ColumnNames.push(Parts[i]);
+
+                Grid.SetGroupColumns(ColumnNames);
+            }
+        }
+    }
+ 
+
+</script>
+

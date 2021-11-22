@@ -1,0 +1,44 @@
+﻿ 
+
+@{
+    ViewBag.Title = "DataSetBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+ 
+    <div>
+       <button  onclick="ShowDialog()">Show DataSetBox dialog</button> <br />
+    </div>
+    <br />
+ 
+</div>
+
+ 
+
+<script>       
+ 
+    tp.Ready(function () {        
+    });
+ 
+
+    function ShowDialog() { 
+        var DataSet = new tp.DataSet('DataSet1');
+
+        DataSet.AddTable(tp.TestData.CreateTestDataTable(10).Table);
+        DataSet.AddTable(tp.TestData.tblCountries);
+        DataSet.AddTable(tp.TestData.tblDepartments);
+
+        tp.DataSetBoxPromise(DataSet, 'This is the window caption')
+            .then(function (Args) {
+                let DialogResult = Args.Window.DialogResult;
+                let S = tp.EnumNameOf(tp.DialogResult, DialogResult); 
+                tp.InfoNote('DialogResult = ' + S);
+            });     
+ 
+    }
+
+</script>
+ 

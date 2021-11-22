@@ -1,0 +1,55 @@
+﻿@{
+    ViewBag.Title = "Master - Detail";
+}
+ 
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <p>Departments</p>
+    <div id="gridMaster" data-setup="{ ToolBarVisible: false, GroupsVisible: false, FilterVisible: false, FooterVisible: false, Height: 180 }"></div>
+    <br />
+
+    <p>Employees</p>
+    <div id="gridDetail" data-setup="{ ToolBarVisible: false, GroupsVisible: false, FilterVisible: false }"></div>
+    <br />
+
+</div>
+
+
+
+<script>
+ 
+    var tblMaster,
+        tblDetail,
+        gridMaster,
+        gridDetail;
+
+ 
+    tp.Ready(function () {
+        tblMaster = tp.TestData.tblDepartments;            // Departments table
+        tblDetail = tp.TestData.CreateTestDataTable(100).Table;   // Employees table
+
+        tblDetail.BindingSource.MasterSource = tblMaster.BindingSource;
+        tblDetail.BindingSource.MasterKeyField = 'Id';
+        tblDetail.BindingSource.DetailKeyField = 'DepartmentId';
+
+        gridMaster = new tp.Grid('#gridMaster');
+        gridDetail = new tp.Grid('#gridDetail');
+
+        gridMaster.DataSource = tblMaster.BindingSource;
+        gridDetail.DataSource = tblDetail.BindingSource;
+
+        gridDetail.AddAggregate('Salary', tp.AggregateType.Sum);
+        gridDetail.Sort('Name', 'ASC');
+
+    });
+
+
+
+
+
+
+</script>
+

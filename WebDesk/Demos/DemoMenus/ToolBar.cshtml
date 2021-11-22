@@ -1,0 +1,109 @@
+﻿ 
+
+@{
+    ViewBag.Title = "ToolBar and ButtonEx";
+}
+ 
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+ <div> 
+    <button onclick="ToggleNoText()">Toggle NoText</button> <br />
+    <button onclick="ToggleIcoMode()">Toggle IcoMode</button> <br />  
+</div>
+<br />
+
+<div>
+    <div id="tb1" class="ToolBar">
+        <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , IcoClasses: 'fa fa-home',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'List', Text: 'List', ToolTip: 'List' , IcoClasses: 'fa fa-list',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Filter', Text: 'Filter', ToolTip: 'Filter' , IcoClasses: 'fa fa-search',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'First', Text: 'First', ToolTip: 'First' , IcoClasses: 'fa fa-step-backward',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Prior', Text: 'Prior', ToolTip: 'Prior' , IcoClasses: 'fa fa-caret-left',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Next', Text: 'Next', ToolTip: 'Next' , IcoClasses: 'fa fa-caret-right',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Last', Text: 'Last', ToolTip: 'Last' , IcoClasses: 'fa fa-step-forward',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , IcoClasses: 'fa fa-edit',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , IcoClasses: 'fa fa-plus',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , IcoClasses: 'fa fa-minus',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Save', Text: 'Save', ToolTip: 'Save' , IcoClasses: 'fa fa-floppy-o',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'Cancel', Text: 'Cancel', ToolTip: 'Cancel' , IcoClasses: 'fa fa-times',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , IcoClasses: 'fa fa-sign-out',  NoText: true, Ico: 'Left'}"></a>
+    </div>
+ 
+    <br />
+    <div id="tb2" class="ToolBar">
+        <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , ImageUrl: '/images/Home.png',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'List', Text: 'List', ToolTip: 'List' , ImageUrl: '/images/List.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Filter', Text: 'Filter', ToolTip: 'Filter' , ImageUrl: '/images/Filter.png',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'First', Text: 'First', ToolTip: 'First' , ImageUrl: '/images/First.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Prior', Text: 'Prior', ToolTip: 'Prior' , ImageUrl: '/images/Prior.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Next', Text: 'Next', ToolTip: 'Next' , ImageUrl: '/images/Next.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Last', Text: 'Last', ToolTip: 'Last' , ImageUrl: '/images/Last.png',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , ImageUrl: '/images/Edit.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , ImageUrl: '/images/Insert.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , ImageUrl: '/images/Delete.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Save', Text: 'Save', ToolTip: 'Save' , ImageUrl: '/images/Save.png',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'Cancel', Text: 'Cancel', ToolTip: 'Cancel' , ImageUrl: '/images/Cancel.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , ImageUrl: '/images/Close.png',  NoText: true, Ico: 'Left'}"></a>
+    </div>
+</div>
+
+
+
+<script>
+ 
+    tp.Ready(function () {
+
+        function ItemClick(Args) {
+            var Command = Args.Command;
+            tp.InfoNote('Command: ' + Command);
+        }
+
+        let tb = new tp.ToolBar('#tb1');
+        tb.On('ButtonClick', ItemClick);
+
+        tb =  new tp.ToolBar('#tb2');
+        tb.On('ButtonClick', ItemClick);
+    });
+
+    
+
+    var NoText = true;
+    var IcoMode = tp.ButtonExIcoMode.IcoLeft;    
+
+    function ToggleNoText() {
+        NoText = !NoText;
+
+        let tb = tp.GetElement('#tb1');
+        tb.SetNoText(NoText);
+
+        tb = tp.GetElement('#tb2');
+        tb.SetNoText(NoText);
+    }
+
+    function ToggleIcoMode() {
+        if (IcoMode === tp.ButtonExIcoMode.IcoLeft) {
+            IcoMode = tp.ButtonExIcoMode.IcoTop;
+        } else if (IcoMode === tp.ButtonExIcoMode.IcoTop) {
+            IcoMode = tp.ButtonExIcoMode.NoIco;
+        } else {
+            IcoMode = tp.ButtonExIcoMode.IcoLeft;
+        }
+
+        let tb = tp.GetElement('#tb1');
+        tb.SetIcoMode(IcoMode);
+
+        tb = tp.GetElement('#tb2');
+        tb.SetIcoMode(IcoMode);
+        
+    }
+
+</script>

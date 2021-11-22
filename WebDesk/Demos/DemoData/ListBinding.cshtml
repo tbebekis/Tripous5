@@ -1,0 +1,118 @@
+﻿
+
+@{
+    ViewBag.Title = "List Binding";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<hr />
+<div>
+    <p>This page uses the <code>tp.CreateContainerControls()</code> to create the various controls in the page.</p>
+    <p>
+        Also, controls can be created "at once" when the page contains a container element, such as a DIV or even the BODY itself, with "Page" as the id value.
+        In that case a <code>tp.Page</code> object is created automatically by Tripous script, and then the <code>tp.Page</code> creates all page controls.
+    </p>
+    <p><strong>NOTE: </strong> There must be only one <code>tp.Page</code> per page.</p>
+    <p>Automatic control creation per container element can also be achieved using the <code>tp.View</code> object. A page may contain many <code>tp.View</code> objects. </p>
+</div>
+<hr />
+<br />
+
+<div>
+
+    <div>
+        <button id="First" onclick="Move(1)">First</button>
+        <button id="Prior" onclick="Move(2)">Prior</button>
+        <button id="Next" onclick="Move(3)">Next</button>
+        <button id="Last" onclick="Move(4)">Last</button>
+    </div>
+    <br />
+
+    <div id="log"></div>
+    <br />
+
+    <div class="tp-Row">
+        <div class="tp-Col l-33 m-50 tp-Ctrls lc-75 mc-70 sc-70">
+            <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Id', DataField: 'Id', ReadOnly: true } }"></div>
+            <div class="tp-CtrlRow" data-setup="{Text: 'Name', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"></div>
+            <div class="tp-CtrlRow" data-setup="{Text: 'Country', Control: { TypeName: 'ComboBox', Id: 'CountryId', ListOnly: true, ListValueField: 'Id', ListDisplayField: 'Name', DataField: 'CountryId' } }"></div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script>
+
+    var Table,
+        tblCountry,
+        DS,
+        edtId,
+        edtName,
+        cboCountry;
+
+    function CreateTable() {
+        var Table = new tp.DataTable();
+
+        Table.AddColumn('Id', tp.DataType.Integer);
+        Table.AddColumn('Name', tp.DataType.String, 20);
+        Table.AddColumn('CountryId', tp.DataType.Integer);
+
+        var Flag;
+        for (var i = 0, ln = 10; i < ln; i++) {
+            Flag = (i + 1) % 2 == 0;
+            Table.AddRow(i, 'Name ' + i, tp.Random(1, tblCountry.RowCount));
+        }
+
+        return Table;
+    }
+
+    function Move(v) {
+        switch (v) {
+            case 1: DS.First(); break;
+            case 2: DS.Prior(); break;
+            case 3: DS.Next(); break;
+            case 4: DS.Last(); break;
+        }
+    }
+
+    function DataSource_OnPositionChanged() {
+        tp.Enabled('#First', DS.IsFirst === false);
+        tp.Enabled('#Prior', DS.IsFirst === false);
+        tp.Enabled('#Next', DS.IsLast === false);
+        tp.Enabled('#Last', DS.IsLast === false);
+    }
+
+    tp.Ready(function () {
+        tp.CreateContainerControls();
+
+        tblCountry = tp.TestData.tblCountries;
+
+        Table = CreateTable();
+        DS = new tp.DataSource(Table);
+
+        edtId = tp.FindControlById('Id');
+        edtName = tp.FindControlById('Name');
+        cboCountry = tp.FindControlById('CountryId');
+
+        cboCountry.ListSource = new tp.DataSource(tblCountry);
+
+        edtId.DataSource = DS;
+        edtName.DataSource = DS;
+        cboCountry.DataSource = DS;
+
+        DS.On('PositionChanged', DataSource_OnPositionChanged);
+
+        DataSource_OnPositionChanged();
+    });
+
+
+
+
+
+
+</script>
+

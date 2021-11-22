@@ -1,0 +1,46 @@
+﻿ 
+
+@{
+    ViewBag.Title = "PickRowBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+ 
+    <div>
+       <button  onclick="ShowDialog()">Show PickRowBox dialog</button> <br />
+    </div>
+    <br />
+
+</div>
+
+ 
+
+<script>       
+ 
+    tp.Ready(function () {        
+    }); 
+ 
+    function ShowDialog() {  
+        var SqlText = 'select * from Trader';
+        var VisibleColumns = ['Code', 'Name'];
+        var Text = 'Select a language';
+
+        tp.PickRowBoxPromise(SqlText, VisibleColumns, Text)
+            .then(function (Args) {
+                let DialogResult = Args.Window.DialogResult;
+                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+                if (!tp.IsEmpty(Args.SelectedRow)) {
+                    S += ' \nSelected Row: ' + Args.SelectedRow.Get('Name');
+                }
+               
+ 
+                tp.InfoNote('DialogResult = ' + S);
+            });     
+ 
+    }
+
+</script>
+ 

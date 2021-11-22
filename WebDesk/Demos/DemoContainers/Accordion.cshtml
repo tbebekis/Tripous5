@@ -1,0 +1,51 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Accordion";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <button id="btn1" onclick="AddChild()">AddChild</button> <br />
+</div>
+
+<br />
+
+<div id="Control" class="tp-Accordion" data-setup="{AllowMultiExpand: false}">
+    <div>
+        <div><span style="font-weight: bold;">Item 1</span></div>
+        <div>
+            <p>Hi there</p>
+            <p>Content of the first item</p>
+        </div>
+    </div>
+    <div>
+        <div>Item 2</div>
+        <div>
+            <p>This content belongs to</p>
+            <p>the second accordion item</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    var ctrl = null;
+    var Counter = 2;
+    tp.Ready(function () {
+        ctrl = new tp.Accordion('#Control');
+    });
+
+    function AddChild() {
+        Counter++;
+        var el = ctrl.AddChild('Item ' + Counter);
+ 
+        el = ctrl.ContentChildAt(ctrl.Count - 1);
+        el.innerHTML = 'This content belongs to item ' + Counter;
+    }
+
+    
+
+</script>
+ 

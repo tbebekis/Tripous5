@@ -1,0 +1,74 @@
+﻿ 
+
+@{
+    ViewBag.Title = "DropDownBox";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <!--  -->
+    <p>Case 1: When DropDownBox and its Associate are siblings the DropDownBox gets absolute position </p>
+    <div>
+        <button id="btn1" style="width: 200px" onclick="Button1Click(1)">Button1</button> <br />
+        <div id="DropDownBox1"></div>
+        <div style="height: 200px; background-color:lightpink;"></div>
+    </div>
+
+    <br />
+
+    <!--  -->
+    <p>Case 2: When DropDownBox and its Associate are NOT siblings the DropDownBox gets fixed position</p>
+    <div style="position: relative">
+        <div id="btn2" style="width: 200px; border: 1px solid lightgray; cursor: pointer;" onclick="Button1Click(2)">Button2</div> <br />
+        <div style="height: 200px; background-color:lightblue;"></div>
+        <div>
+            <div id="DropDownBox2"></div>
+        </div>
+    </div>
+
+    
+</div>
+
+<br />
+
+ 
+
+<script>
+    var Owner = {
+        OnDropDownBoxEvent: function (Sender, Stage) {
+            log(tp.EnumNameOf(tp.DropDownBoxStage, Stage));
+        },
+    };
+
+    var box1, box2;
+    tp.Ready(function () {
+        var w = tp.BoundingRect(tp.Select('#btn1')).Width;
+
+        box1 = new tp.DropDownBox('#DropDownBox1', {
+            Associate: '#btn1',
+            Owner: Owner,
+            Width: w,
+            Height: 200,
+        });
+
+        w = tp.BoundingRect(tp.Select('#btn2')).Width;
+
+        box2 = new tp.DropDownBox('#DropDownBox2', {
+            Associate: '#btn2',
+            Owner: Owner,
+            Width: w,
+            Height: 200,
+        });
+    });
+
+    function Button1Click(n) { 
+        var box = n === 1 ? box1 : box2;
+        box.Toggle();
+    }
+
+    
+
+</script>
+ 

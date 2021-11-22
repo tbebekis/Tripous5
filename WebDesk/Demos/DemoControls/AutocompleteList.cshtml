@@ -1,0 +1,70 @@
+﻿ 
+
+@{
+    ViewBag.Title = "AutocompleteList";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <!--   -->
+    <div>
+        <p><strong>Local word list</strong>: "javascript", "typescript", "script", "scriptable", "css rules", "html" </p>
+        <p><strong>Server word list</strong>: "javascript", "typescript", "script", "scriptable", "css rules", "html", "html5", "responsive", "restfull" </p>
+    </div>
+    <div>
+        <label style="display: flex;"><input id="cb" type="checkbox"  onclick="CheckBoxClick()" /> Use server data</label>
+        <br />
+        <input id="text1" type="text" value="" placeholder="autocomplete list" tabindex="1" />
+    </div>
+
+    <br />
+ 
+
+    
+</div>
+
+ 
+
+<script>    
+    var text1, a1, cb;
+
+    function AdjustAutocompleteData() {
+        if (cb.checked === true) {
+            a1.ServerFunc = '/demo/GetAutocompleteList';
+        } else {
+            a1.ServerFunc = '';
+        }
+    }
+
+    tp.Ready(function () {
+        cb = tp.Select('#cb');
+        text1 = tp.Select('#text1');
+        a1 = new tp.AutocompleteList(text1); 
+ 
+        a1.DataList = [
+            { Id: 1, Name: 'javascript' },
+            { Id: 2, Name: 'typescript' },
+            { Id: 3, Name: 'script' },
+            { Id: 4, Name: 'scriptable' },
+            { Id: 5, Name: 'html' },
+            { Id: 6, Name: 'css rules' },
+        ]; 
+
+        a1.ListDisplayField = 'Name';
+        a1.Active = true;
+        text1.focus();
+
+        AdjustAutocompleteData();    
+        
+    });
+
+    function CheckBoxClick() { 
+        AdjustAutocompleteData();
+    }
+
+    
+
+</script>
+ 

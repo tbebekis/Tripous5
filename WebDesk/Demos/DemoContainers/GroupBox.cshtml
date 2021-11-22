@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Title = "GroupBox";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <button id="btn1" onclick="ChangeTitle()">Change Title</button>&nbsp;<input id="edtTitle" type="text" value="New Title"/>
+</div>
+
+<br />
+
+<fieldset id="GroupBox"> </fieldset>
+
+<script>
+    var ctrl = null;
+ 
+    tp.Ready(function () {
+        ctrl = new tp.GroupBox('#GroupBox');
+        ctrl.Height = 400;
+    });
+
+    function ChangeTitle() {
+        let el = tp.Select('#edtTitle');
+        ctrl.Text = el.value;
+    }
+
+    
+
+</script>
+ 

@@ -1,0 +1,42 @@
+﻿ 
+
+@{
+    ViewBag.Title = "TabControl";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <button id="btn1" onclick="AddChild()">AddChild</button> <br />
+</div>
+
+<br />
+
+<div id="Control" class="tp-TabControl" data-setup="{ SelectedIndex: 0 }">
+    <div><div>Page 1</div><div>Page 2</div><div>Page 3</div></div>
+    <div>
+        <div>Content 1</div>
+        <div>Content 2</div>
+        <div>Content 3</div>
+    </div>
+</div>
+
+<script>
+    var ctrl = null;
+    var Counter = 3;
+    tp.Ready(function () {
+        ctrl = new tp.TabControl('#Control');
+    });
+
+    function AddChild() {
+        Counter++;
+        var child = ctrl.AddPage('Item ' + Counter);
+
+        child.Page.innerHTML = 'This content belongs to item ' + Counter;
+    }
+
+    
+
+</script>
+ 

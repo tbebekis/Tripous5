@@ -8097,8 +8097,10 @@ tp.NumberBox = class extends tp.InputControl {
         return this.DataColumn instanceof tp.DataColumn ? this.DataColumn.Decimals : this.fDecimals;
     }
     set Decimals(v) {
-        if (tp.IsInteger(v))
+        if (tp.IsInteger(v) && v >= 0 && v !== this.Decimals) {
             this.fDecimals = v;
+            this.NormalizeText();
+        }            
     }
 
     /* overrides */

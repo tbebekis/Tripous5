@@ -1,0 +1,33 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Memo";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <!--   -->
+    <div>
+        <textarea id="Memo" data-setup="{Width: 300, Height: 200 }">This is memo content</textarea>
+    </div>
+</div>
+
+ 
+
+<script>    
+    var memo;
+
+ 
+
+    tp.Ready(function () {
+        memo = new tp.Memo('#Memo');
+    });
+
+ 
+
+    
+
+</script>
+ 

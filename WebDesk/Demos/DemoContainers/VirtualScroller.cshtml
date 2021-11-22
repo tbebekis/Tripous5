@@ -1,0 +1,65 @@
+﻿ 
+
+@{
+    ViewBag.Title = "VirtualScroller";
+}
+
+ 
+<partial name="~/Demos/Shared/_Index.cshtml" />
+
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <button id="btn1" onclick="Button1Click()">Button1</button> <br />
+</div>
+
+<br />
+
+<div id="Viewport1">
+    <div id="Container1">
+    </div>
+</div>
+
+<div id="Viewport"></div>
+
+<script>
+    TestVirtualScroller = function () {
+ 
+        var RowCount = 1000;
+        //var RowHeight = 50;
+        var ViewportHeight = 400;
+
+        var divViewport = tp.Select('#Viewport');
+        divViewport.tabIndex = 0;
+        //var divContainer = tp.Select('#Container');
+        var divContainer = null;
+
+        tp.SetStyle(divViewport, {
+            position: 'relative',
+            left: '40px',
+            width: '200px',
+            height: ViewportHeight + 'px',
+        });
+  
+        var A = [];
+        for (var i = 0, ln = RowCount; i < ln; i++) {
+            var o = { Name: 'row ' + i, Num: i };
+            A.push(o);
+        }
+ 
+        vs = new tp.VirtualScroller(divViewport, divContainer);
+        //vs.RowHeight = RowHeight;
+        vs.SetRowList(A);
+    };
+
+    tp.Ready(function () {
+        TestVirtualScroller();
+    });
+
+    function Button1Click() { 
+    }
+
+    
+
+</script>
+ 

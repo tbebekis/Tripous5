@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "DataView and Broker";
+}
+ 
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+
+
+<div id="Page">
+
+    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Trader' }"  >
+
+        <!-- ToolBar -->
+        <div id="ViewToolBar" class="ToolBar">
+            <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , IcoClasses: 'fa fa-home',  NoText: true, Ico: 'Left'}"></a>
+
+            <a class="ButtonEx" data-setup="{ Command: 'List', Text: 'List', ToolTip: 'List' , IcoClasses: 'fa fa-list-alt',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Filter', Text: 'Filter', ToolTip: 'Filter' , IcoClasses: 'fa fa-search',  NoText: true, Ico: 'Left'}"></a>
+
+            <a class="ButtonEx" data-setup="{ Command: 'First', Text: 'First', ToolTip: 'First' , IcoClasses: 'fa fa-step-backward',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Prior', Text: 'Prior', ToolTip: 'Prior' , IcoClasses: 'fa fa-caret-left',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Next', Text: 'Next', ToolTip: 'Next' , IcoClasses: 'fa fa-caret-right',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Last', Text: 'Last', ToolTip: 'Last' , IcoClasses: 'fa fa-step-forward',  NoText: true, Ico: 'Left'}"></a>
+
+            <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , IcoClasses: 'fa fa-edit',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , IcoClasses: 'fa fa-plus',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , IcoClasses: 'fa fa-minus',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Save', Text: 'Save', ToolTip: 'Save' , IcoClasses: 'fa fa-floppy-o',  NoText: true, Ico: 'Left'}"></a>
+
+            <a class="ButtonEx" data-setup="{ Command: 'Cancel', Text: 'Cancel', ToolTip: 'Cancel' , IcoClasses: 'fa fa-times',  NoText: true, Ico: 'Left'}"></a>
+            <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , IcoClasses: 'fa fa-sign-out',  NoText: true, Ico: 'Left'}"></a>
+        </div>
+
+
+        <div id="ViewPanelList" class="PanelList" data-setup="{ SelectedIndex: 0 }">
+
+            <!-- List -->
+            <div>
+                <div class="Grid tp-BrowserGrid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+            </div>
+
+            <!-- Edit -->
+            <div>
+                <div class="tp-Row">
+                    <div class="tp-Col l-33 m-50 tp-Ctrls lc-75 mc-70 sc-70">
+                        <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+                        <div class="tp-CtrlRow" data-setup="{Text: 'Trader', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>  
+        
+    </div>
+
+ 
+
+ 
+
+</div>
+
+
+
+<script>
+ 
+    tp.Ready(function () {      
+        //tp.CreateContainerControls();
+    });
+    
+</script>
+

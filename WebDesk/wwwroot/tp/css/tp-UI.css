@@ -767,8 +767,6 @@ button {
  
 label {
     position: relative;
-    /* line-height: var(--LineHeight); */
-    height: var(--ControlHeight);
     padding: var(--TextPadding);
     user-select: text;
 }
@@ -779,8 +777,6 @@ label {
  
 input {
     position: relative;
-    /* line-height: var(--LineHeight); */
-    height: var(--ControlHeight);
     padding: var(--TextPadding);
 }
 
@@ -977,8 +973,6 @@ select.tp-HtmlListBox {
     position: relative;
     display: inline-flex;
     align-items: center;
-    /* line-height: var(--LineHeight); */
-    height: var(--ControlHeight);
     margin: 2px;
     border: var(--Border);
     border-radius: 4px;
@@ -1120,7 +1114,6 @@ table.tp-Calendar td.tp-Marked {
 
 .tp-RadioGroup label {
     display: flex;
-    /* line-height: var(--LineHeight); */
     align-items: center;
 }
 

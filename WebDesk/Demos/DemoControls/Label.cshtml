@@ -1,0 +1,31 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Label";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+      <label id="Label">Label text</label>
+    </div>
+    
+</div>
+
+ 
+
+<script>    
+  
+ 
+    tp.Ready(function () { 
+        new tp.Label('#Label');
+    });
+
+ 
+ 
+
+</script>
+ 

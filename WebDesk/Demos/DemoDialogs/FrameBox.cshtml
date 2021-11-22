@@ -1,0 +1,56 @@
+﻿ 
+
+@{
+    ViewBag.Title = "FrameBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+       <input id="Url" type="text" value="https://www.w3.org/DOM/" style="width: 200px;" />  <button  onclick="FrameUrlDialog()">Display Url in a frame dialog</button> <br />
+    </div>
+
+    <br />
+    <div id="Content" style="display: none">
+        <p>The HTMLIFrameElement interface provides special properties and methods (beyond those of the HTMLElement 
+        interface it also has available to it by inheritance) for manipulating the layout and presentation of inline frame elements.</p>
+        <button>Hi there</button>
+        <input type="text" value="text" /> 
+    </div>
+ 
+    <div>
+        <button onclick="FrameContentDialog()">Display content in a frame dialog</button>
+    </div>
+ 
+
+    
+</div>
+
+ 
+
+<script>       
+ 
+    tp.Ready(function () {
+        
+    });
+
+ 
+    function FrameUrlDialog() {
+        var el = tp.Select('#Url');
+        var Url = el.value; 
+        tp.FrameBoxPromise('Display Url in a iframe', Url)
+            .then(function () { tp.InfoNote('Your dialog is closed.'); });
+    }
+
+    function FrameContentDialog() {
+        var el = tp.Select('#Content');
+        var Content = el.innerHTML;
+        tp.FrameBoxPromise('Display content in a iframe', Content)
+            .then(function () { tp.InfoNote('Your dialog is closed.'); });
+    }
+
+</script>
+ 

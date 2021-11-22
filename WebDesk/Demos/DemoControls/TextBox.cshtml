@@ -1,0 +1,33 @@
+﻿ 
+
+@{
+    ViewBag.Title = "TextBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>A text box with a local autocomplete list of values: 'javascript', 'typescript', 'script', 'scriptable', 'html', 'css rules' </p>
+     
+    <div>
+        <input id="TextBox" type="text" value="" data-setup="{Width: 180, AutocompleteList: ['javascript', 'typescript', 'script', 'scriptable', 'html', 'css rules'] }"  />
+    </div>
+</div>
+
+ 
+
+<script>    
+    var text1;
+
+ 
+
+    tp.Ready(function () {
+        text1 = new tp.TextBox('#TextBox');  
+    });
+
+
+    
+
+</script>
+ 

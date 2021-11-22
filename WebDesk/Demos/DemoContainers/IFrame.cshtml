@@ -1,0 +1,28 @@
+﻿ 
+
+@{
+    ViewBag.Title = "IFrame";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <iframe id="IFrame" data-setup="{Width: 800, Height: 600,  Url: 'https://jsdoc.app/'}"></iframe>
+     </div>
+
+</div>
+
+ 
+
+<script>       
+ 
+    tp.Ready(function () {
+        new tp.IFrame('#IFrame');
+    }); 
+ 
+
+</script>
+ 

@@ -1,0 +1,65 @@
+﻿
+
+@{
+    ViewBag.Title = "Grid: Thousands of rows";
+}
+ 
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+ 
+    <div> 
+        <button onclick="ClearRows()">Clear Rows</button> <br /> 
+    </div>
+    <br />
+
+    <div id="Grid"></div>
+    <br />
+
+</div>
+
+
+
+<script>
+
+    var Grid,
+        tblTest;
+
+    tp.Ready(function () {
+        var Data = tp.TestData.CreateTestDataTable(10000);
+        tblTest = Data.Table;
+ 
+        Grid = new tp.Grid('#Grid');
+
+        var StartTime = +new Date();
+        Grid.DataSource = tblTest;  
+        var Duration = +new Date() - StartTime;
+
+        Grid.ReadOnly = false;        
+        Grid.ToolBarVisible = true;
+        Grid.ButtonInsertVisible = true;
+        Grid.ButtonDeleteVisible = true;
+ 
+        // time measurement
+        var S, SB = new tp.StringBuilder();
+
+        S = 'RowCount: ' + tblTest.RowCount;
+        SB.AppendLine(S);
+        S = tp.Format('Data: {0} seconds', tp.Round(Data.MSecs / 1000, 3));
+        SB.AppendLine(S);
+        S = tp.Format('Grid bind: {0} seconds', tp.Round(Duration / 1000, 3));
+        SB.AppendLine(S);
+
+        tp.InfoNote(SB.ToString());
+    });
+
+    function ClearRows() {
+        Grid.DataSource.ClearRows();
+    }
+
+    
+ 
+
+</script>
+

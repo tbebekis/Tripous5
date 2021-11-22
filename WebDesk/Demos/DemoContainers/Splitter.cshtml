@@ -1,0 +1,72 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Splitter";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <button id="btn1" onclick="ToggleSplitter()">Toggle Splitter</button> <br />
+</div>
+
+<br />
+
+<style>
+    #Container {
+        border: 1px solid gray;
+        height: 600px;
+        width: 100%;
+    }
+
+    #A {
+        background-color: lightcoral;
+    }
+    #B {
+        background-color: lightblue;
+        flex-grow: 1;
+    }
+
+</style>
+
+<div id="Container" style="display: flex;">
+    <div id="A">This is the A panel</div>
+    <div class="tp-Splitter"></div>
+    <div id="B">This is the B panel</div>
+</div>
+
+<script>
+    var Container, A, B, Splitter;
+ 
+    tp.Ready(function () {
+        Container = tp.Select('#Container');
+        A = tp.Select('#A');
+        B = tp.Select('#B');
+        Splitter = new tp.Splitter('.tp-Splitter');
+        AdjustSplitter();
+    });
+
+    function AdjustSplitter() {
+        var o;
+        if (Splitter.IsHorizontal) {
+            tp.SetStyle(Container, { 'flex-direction': 'column', });
+            o = { height: '200px', width: '', };            
+        } else {
+            tp.SetStyle(Container, { 'flex-direction': '',  });
+            o = { height: '', width: '200px', };
+        }
+
+        tp.SetStyle(A, o);
+
+    }
+
+    function ToggleSplitter() {
+        Splitter.IsHorizontal = !Splitter.IsHorizontal;
+        AdjustSplitter();
+    }
+
+    
+
+</script>
+ 

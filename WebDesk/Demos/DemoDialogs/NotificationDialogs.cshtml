@@ -1,0 +1,64 @@
+﻿ 
+
+@{
+    ViewBag.Title = "NotificationDialogs";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<style>
+    button {
+        min-width: 120px;
+    }
+</style>
+
+<div>
+
+    <p>
+        Notifications dialogs display information to the user as modal dialog boxes. They are also movable and resizable.
+    </p>
+
+ 
+
+    <div>
+        <button onclick="InfoBox()">Info</button> <br /> <br />
+        <button onclick="YesNoBox()">Yes/No</button> <br /> <br />
+        <button onclick="ErrorBox()">Error</button> <br /> <br />
+    </div>
+
+    <br />
+
+
+
+
+
+</div>
+
+
+
+<script>
+    
+    tp.Ready(function () {
+
+    });
+
+
+    function InfoBox() {
+        var S = 'This is an Info box ';
+        tp.InfoBoxAsync(S);
+    }
+    function YesNoBox() {
+        var S = 'This is a Yes/No box';
+        tp.YesNoBoxAsync(S)
+            .then( (Result) => {
+                tp.InfoNote(Result  === true? "TRUE": "false");
+            });
+    }
+ 
+    function ErrorBox() {
+        var S = 'This is an Error box';
+        tp.ErrorBoxAsync(S);
+    }
+
+</script>

@@ -1,0 +1,76 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Empty Test";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2> 
+
+<button id="btn1" onclick="Button1Click()">Button1</button> <br />
+<button id="btn2" onclick="Button2Click()">Button2</button> <br />
+
+<style>
+    .section > div {
+        position: relative;
+        border: 1px solid gray;
+        margin: 20px;
+        outline: none;
+        width: 200px;
+        height: 150px;
+    }
+
+        .section div:focus {
+            border: 3px solid #ff6a00;
+        }
+
+        .section > div > div {
+            position: relative;
+            left: 20px;
+            top: 20px;
+            width: 120px;
+            height: 50px;
+            background-color: lavender;
+        }
+</style>
+
+<section class="section">
+    <div id="div1"></div>
+
+    <div id="div2" tabindex="-1"></div>
+
+    <div id="div3" tabindex="0"></div>
+
+    <div id="div4" tabindex="1"></div>
+
+    
+</section>
+
+
+<script>
+    tp.Ready(function () {
+        
+    });
+
+    function f() {
+        let Url = '/App/Test';
+        tp.Ajax.GetAsync(Url);
+    }
+
+    var Text = '';
+    var Button1Click = function () {
+        //tp.SysConfig.UseServerStringResources = true;
+        //tp.Languages.Current = 'el-GR';
+        //f();
+
+        //Text = tp.ToDateTimeString(new Date(), 'el-GR', true);
+        //alert(Text);
+
+        Text = tp.Format('Date: {0}, Number: {1}, Boolean: {2}', new Date(), 123.45, true);
+        alert(Text);
+    }
+
+    function Button2Click() {
+    }
+
+</script>

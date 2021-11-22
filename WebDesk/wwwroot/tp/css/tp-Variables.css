@@ -70,10 +70,8 @@
     --TextPadding: 0 4px;
     --WindowCaptionHeight: var(--Font) * 2.4;
     
-    
- /*
---LineHeight: 1.8;
---ControlHeight: 2em;
-*/
+    /* --LineHeight: 1.8; */
+    /* --ControlHeight: 2em; */
+ 
 
 }

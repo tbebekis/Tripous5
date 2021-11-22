@@ -1,0 +1,71 @@
+﻿ 
+
+@{
+    ViewBag.Title = "HtmlListBox";
+} 
+
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
+    </div>
+    <br />
+    <div>
+        <label style="display: flex; align-items: center;"><input id="MultiSelect" type="checkbox" onchange="SetMultiSelect(this)" />MultiSelect</label>
+    </div>
+
+    <div id="log"></div>
+    <br />
+
+    <div>
+        <select id="lbo" data-setup="{ Width: 140, Height: 240,  List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}]  }"></select>
+    </div>
+    <br />
+
+
+
+</div>
+
+
+
+<script>
+
+    var lbo;
+
+    tp.Ready(function () {
+        lbo = new tp.HtmlListBox('#lbo');
+
+        lbo.On('SelectedIndexChanged', function () {
+            var S = lbo.SelectedValues.join(', ');
+            tp.Html('#log', S);
+        });
+    })
+
+
+    function ResetList() {
+        lbo.Clear();
+        var List = [];
+        for (var i = 0, ln = 100; i < ln; i++) {
+            List.push({
+                Id: i + 1,
+                Name: 'Name ' + (i + 1)
+            });
+        }
+
+        lbo.AddRange(List);
+    }
+
+    function SetMultiSelect(cb) {
+        lbo.SelectAll(false);
+        lbo.MultiSelect = cb.checked;
+        tp.Html('#log', '');
+    }
+
+
+</script>
+
+ 

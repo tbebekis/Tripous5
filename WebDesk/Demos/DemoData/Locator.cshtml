@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "Locator";
+}
+ 
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+ 
+
+<div>
+    <p>
+        A Locator represents (returns) a single value, but it can handle and display multiple values
+        in order to help the end user in identifying and locating that single value.
+        <br />
+        It can be used with large data-sets because it constructs and issues SELECT statements to the server and displays the result.
+        <br />
+        For example, a TRADES data table has a CUSTOMER_ID column, representing that single value, but the user interface
+        has to display information from the CUSTOMERS table, specifically, the ID, CODE and NAME columns.
+        <br />
+        The TRADES table is the target data table and the CUSTOMER_ID is the DataField field name.
+        <br />
+        The CUSTOMERS table is the ListTableName and the ID is the ListKeyField field name.
+        <br />
+        The fields, ID, CODE and NAME, may be described by individual  field items.
+        <br />
+        A Locator can be used either as a single-row control, as the LocatorBox does, or as a group of
+        related columns in a Grid.
+        <br />
+        NOTE: A Locator of a LocatorBox, may or may not define the LocatorFieldDescriptor.DataField
+        field names. Usually in a case like that, the data table contains just the key field, the LocatorBox.DataField.
+        A Locator of a grid-type must define the names of those fields always and the data table must contain DataColumn columns
+        on those fields.
+    </p>
+    <br />
+ 
+
+    <div id="LocatorBox" data-setup="{ DataField: 'TraderId', Width: 240}"></div>
+    <br />
+    <br />
+ 
+    <div id="Grid"></div>
+    <br />
+
+</div>
+
+<div id="pnlLog">
+
+</div>
+
+
+<script>
+ 
+    tp.Ready(function () {      
+
+        // table
+        var Table = new tp.DataTable('Test');
+        Table.AddColumn('Id');
+        Table.AddColumn('TraderId');
+        Table.AddColumn('Trader__Code');
+        Table.AddColumn('Trader__Name');
+        Table.AddColumn('Amount', tp.DataType.Integer);
+
+        var Row = Table.AddEmptyRow();
+        Row.Set('Amount', 100);
+        Row = Table.AddEmptyRow();
+        Row.Set('Amount', 200);
+        Row = Table.AddEmptyRow();
+        Row.Set('Amount', 300);
+
+        // grid
+        var Grid = new tp.Grid('#Grid');
+
+        Grid.AddLocatorAsync('TraderId', 'Trader');
+
+        Grid.AutoGenerateColumns = false;
+        Grid.AddColumn('Id');
+        Grid.AddColumn('TraderId');
+        Grid.AddLocatorColumn('Trader__Name', 'Trader', 'Trader').Width = 160;
+        Grid.AddColumn('Amount');
+
+        Grid.DataSource = Table.BindingSource;
+        Grid.ReadOnly = false;
+        Grid.ToolBarVisible = true;
+        Grid.ButtonInsertVisible = true;
+        Grid.ButtonDeleteVisible = true;
+
+        // locator box
+        var LocatorBox = new tp.LocatorBox('#LocatorBox');
+        LocatorBox.LocatorName = 'Trader';      // locator descriptor comes from the server
+        LocatorBox.DataField = 'TraderId';
+        LocatorBox.DataSource = Table.BindingSource;
+
+        let Counter = 1;
+        let pnlLog = tp('#pnlLog');
+        let SB = new tp.StringBuilder("<br />");
+        Grid.DataSource.On("PositionChanged", () => {
+            let Row = Grid.DataSource.Current;
+            let Column; 
+
+            SB.Clear();
+            pnlLog.innerHTML = '';
+
+            for (Column of Table.Columns) {
+                SB.AppendLine(`${Column.Name}: ${Row.Get(Column)}`);
+            }
+
+            //let S = JSON.stringify(Row);
+            let S = SB.ToString();
+            pnlLog.innerHTML = S;
+
+        });
+    });
+    
+</script>
+

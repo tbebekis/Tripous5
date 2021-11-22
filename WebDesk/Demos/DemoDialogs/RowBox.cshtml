@@ -1,0 +1,43 @@
+﻿ 
+
+@{
+    ViewBag.Title = "RowBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+ 
+    <div>
+       <button  onclick="ShowDialog()">Show RowBox dialog</button> <br />
+    </div>
+    <br />
+
+</div>
+
+ 
+
+<script>       
+ 
+    tp.Ready(function () {        
+    });
+ 
+
+    function ShowDialog() {  
+        var Data = tp.TestData.CreateTestDataTable(1);
+        var Table = Data.Table;
+        var Row = Table.Rows[0];
+
+        tp.RowBoxPromise(Row, 'This is the window caption')
+            .then(function (Args) {
+                let DialogResult = Args.Window.DialogResult;
+                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+ 
+                tp.InfoNote('DialogResult = ' + S);
+            });     
+ 
+    }
+
+</script>
+ 

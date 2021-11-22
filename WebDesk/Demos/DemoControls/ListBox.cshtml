@@ -1,0 +1,54 @@
+﻿ 
+
+@{
+    ViewBag.Title = "ListBox";
+}
+ 
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
+    </div>
+
+    <br />
+
+    <div>
+        <div id="lbo" data-setup="{Height: 200, ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0 }"></div>
+    </div>
+
+    <br />
+ 
+
+    
+</div>
+
+ 
+
+<script>    
+    var lbo;
+ 
+    tp.Ready(function () {
+        lbo = tp.Select('#lbo');
+        lbo = new tp.ListBox(lbo);
+    });
+
+ 
+    function ResetList() {
+        var List = [];
+        for (var i = 0, ln = 100; i < ln; i++) {
+            List.push({
+                Id: i + 1,
+                Name: 'Name ' + (i + 1)
+            });
+        }
+
+        lbo.Items = List;
+    }
+    
+
+</script>
+ 

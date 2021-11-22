@@ -1,0 +1,65 @@
+﻿ 
+
+@{
+    ViewBag.Title = "ValueSlider";
+} 
+ 
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+ 
+
+    <div id="log1"></div>
+    <br />
+
+    <div>
+        <input type="range" id="ValueSlider1"  min="1" max="100" step="1" , value='50' />
+    </div>
+    <br />
+ 
+    <div id="log2"></div>
+    <br />
+
+    <div>
+        <input type="range" id="ValueSlider2" data-setup="{ ValueList: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], Value: 'Wednesday' }" />
+    </div>
+    <br />
+    
+</div>
+
+ 
+
+<script>    
+    var vs1, vs2;
+ 
+    tp.Ready(function () {
+ 
+        vs1 = new tp.ValueSlider('#ValueSlider1');
+        vs2 = new tp.ValueSlider('#ValueSlider2');
+
+        function Func1() {
+            var S = vs1.Value.toString();
+            tp.Html('#log1', S);
+        }
+        function Func2() {
+            var S = vs2.Value.toString();
+            tp.Html('#log2', S);
+        }
+
+        vs1.On('ValueChanged', Func1);
+        vs2.On('ValueChanged', Func2);
+
+        Func1();
+        Func2();
+ 
+    })
+
+ 
+ 
+    
+
+</script>
+ 

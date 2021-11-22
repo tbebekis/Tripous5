@@ -1,0 +1,55 @@
+﻿ 
+
+@{
+    ViewBag.Title = "HtmlComboBox";
+} 
+
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
+    </div>
+    <br />
+ 
+ 
+    <div>
+        <select id="cbo" data-setup="{ Width: 140,  List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}]  }"></select>
+    </div>
+    <br />
+ 
+
+    
+</div>
+
+ 
+
+<script>    
+    var cbo;
+ 
+    tp.Ready(function () { 
+        cbo = new tp.HtmlComboBox('#cbo');
+    })
+
+ 
+    function ResetList() {
+        cbo.Clear();
+        var List = [];
+        for (var i = 0, ln = 100; i < ln; i++) {
+            List.push({
+                Id: i + 1,
+                Name: 'Name ' + (i + 1)
+            });
+        }
+
+        cbo.AddRange(List);
+    }
+
+ 
+    
+
+</script>
+ 

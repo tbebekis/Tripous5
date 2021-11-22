@@ -1,0 +1,47 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Calendar";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button id="btn1" onclick="Reset()">Reset</button> <br />
+    </div>
+
+    <br />
+
+    <div>
+       <table id="Calendar" data-setup="{ Date: '2000-11-18'}"></table>
+    </div>
+
+    <br />
+ 
+
+    
+</div>
+
+ 
+
+<script>    
+    var c;
+ 
+    tp.Ready(function () {
+        c = tp.Select('#Calendar');
+        c = new tp.Calendar(c);
+    });
+
+ 
+    function Reset() {
+        c.Date = new Date();
+        //alert(tp.SizeOf(c.Handle).toString());
+        //alert(c.OffsetSize.toString());
+    }
+    
+
+</script>
+ 

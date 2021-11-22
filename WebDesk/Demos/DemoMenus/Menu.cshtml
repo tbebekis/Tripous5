@@ -1,0 +1,60 @@
+﻿ 
+
+@{
+    ViewBag.Title = "Menu";
+}
+ 
+ 
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+ 
+
+<div>
+ 
+    <div id="MainMenu">
+        <div>
+            File
+            <div data-setup="{IcoClasses: 'fa fa-university'}">Open</div>
+            <div>New
+                <div data-setup="{ImageUrl: 'http://icons.iconarchive.com/icons/double-j-design/origami-colored-pencil/24/blue-home-icon.png'}">File</div>
+                <div data-setup="{ImageUrl: 'http://icons.iconarchive.com/icons/iconsmind/outline/24/Home-2-icon.png'}">Image</div>
+            </div>
+            <div>-</div>
+            <div data-setup="{ Command: 'Exit' }">Exit</div>
+        </div>
+        <div>
+            Edit
+            <div data-setup="{ Command: 'Cut' }">Cut</div>
+            <div>Copy</div>
+            <div>Paste</div>
+        </div>
+        <div data-setup="{ Url: 'http://w3c.github.io/html/dom.html' }">View</div>
+        <div>Window</div>
+        <div>Help</div>
+    </div>
+
+
+ 
+ 
+</div>
+
+
+
+<script>
+
+    var mnu;
+    tp.Ready(function () {
+        mnu = new tp.Menu('#MainMenu');
+
+        mnu.On('ItemClick', function (Args) {
+            var S = 'MenuItem: ' + Args.MenuItem.Text + ' - Command: ' + Args.MenuItem.Command;
+            tp.InfoNote(S);
+        });
+ 
+    });
+
+
+ 
+
+</script>

@@ -394,7 +394,7 @@ namespace WebDesk
                     o.Filters.Add<ActionExceptionFilter>();
                 }
 
-                /* No global model validation, use the BaseControllerMvc.ValidateModel() method
+                /* No global model validation, use the ControllerMvc.ValidateModel() method
                   o.Filters.Add<ModelValidationFilter>();
                  */
 

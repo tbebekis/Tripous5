@@ -1,0 +1,55 @@
+﻿ 
+
+@{
+    ViewBag.Title = "RadioGroup";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button id="btn1" onclick="Add()">Add</button> <br />
+        <button onclick="LoadFromEnumType()">Load From Enum Type</button>
+    </div>
+
+    <br />
+
+    <div>
+        <fieldset id="RadioGroup" data-setup="{Name: 'group1', SelectedIndex: 0, Width: 200, Height: 300}">
+            <legend>Radio Group Title</legend>
+            <label><input type="radio" name="group1" value="Male" />Male    </label>
+            <label><input type="radio" name="group1" value="Female" />Female  </label>
+            <label><input type="radio" name="group1" value="NotSet" />Not Set </label>
+        </fieldset>        
+
+    </div>
+
+    <br />
+ 
+
+    
+</div>
+
+ 
+
+<script>    
+    var rgb;
+ 
+    tp.Ready(function () {
+        rgb = new tp.RadioGroup('#RadioGroup');
+    });
+
+ 
+    function Add() {
+        var v = rgb.Count;
+        var Text = 'radio ' + v;
+        rgb.AddItem(v, Text);
+    }
+    function LoadFromEnumType() {
+        rgb.LoadFromEnumType(tp.Sql.Token);
+    }
+
+</script>
+ 

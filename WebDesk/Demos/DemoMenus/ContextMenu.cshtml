@@ -1,0 +1,65 @@
+﻿ 
+
+@{
+    ViewBag.Title = "ContextMenu";
+}
+ 
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+ 
+
+<div style="position: relative">
+ 
+    <div id="div0" style="position: absolute; left: 20px; top: 20px; min-height: 200px; min-width: 300px; border: 1px solid gray">
+        Right click inside here to see the context menu
+    </div>
+
+    <div id="ContextMenu">
+        <div>
+            File
+            <div data-setup="{ Command: 'Open' }">Open</div>
+            <div>
+                New
+                <div>File</div>
+                <div>Image</div>
+            </div>
+            <div>-</div>
+            <div>Exit</div>
+        </div>
+        <div>
+            Edit
+            <div>Cut</div>
+            <div>Copy</div>
+            <div>Paste</div>
+        </div>
+        <div>View</div>
+        <div>Window</div>
+        <div>Help</div>
+    </div>
+ 
+</div>
+
+
+
+<script>
+
+    var mnuContext;
+    tp.Ready(function () {
+        mnuContext = new tp.ContextMenu('#ContextMenu');
+
+        tp.On(tp.Select('#div0'), tp.Events.ContextMenu, function (e) {
+            e.preventDefault();
+            mnuContext.Show(e);
+        });
+
+        mnuContext.On('ItemClick', function (Args) {
+            var S = 'MenuItem: ' + Args.MenuItem.Text + ' - Command: ' + Args.MenuItem.Command;
+            tp.InfoNote(S);
+        });
+    });
+
+
+ 
+
+</script>

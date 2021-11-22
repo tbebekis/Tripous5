@@ -1,0 +1,44 @@
+﻿ 
+
+@{
+    ViewBag.Title = "TableBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+ 
+    <div>
+       <button  onclick="ShowDialog()">Show TableBox dialog</button> <br />
+    </div>
+    <br />
+
+</div>
+
+ 
+
+<script>       
+ 
+    tp.Ready(function () {        
+    });
+ 
+
+    function ShowDialog() {  
+        var Data = tp.TestData.CreateTestDataTable(100);
+        var Table = Data.Table;
+
+        tp.TableBoxPromise(Table, 'This is the window caption')
+            .then(function (Args) {
+                let DialogResult = Args.Window.DialogResult;
+                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+                if (Args.SelectedRow) {
+                    S = S + '\nSelected Name: ' + Args.SelectedRow.Get('Name').toString();
+                }
+                tp.InfoNote('DialogResult = ' + S);
+            });     
+ 
+    }
+
+</script>
+ 

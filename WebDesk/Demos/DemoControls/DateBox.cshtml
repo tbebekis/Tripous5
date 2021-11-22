@@ -1,0 +1,45 @@
+﻿ 
+
+@{
+    ViewBag.Title = "DateBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button id="btn1" onclick="Reset()">Reset</button> <br />
+    </div>
+
+    <br />
+
+    <div>
+       <div id="Box" data-setup="{ Date: '2000-05-08'}"></div>
+    </div>
+
+    <br />
+ 
+
+    
+</div>
+
+ 
+
+<script>    
+    var c;
+ 
+    tp.Ready(function () {
+        c = tp.Select('#Box');
+        c = new tp.DateBox(c);
+    });
+
+ 
+    function Reset() {
+        c.Date = new Date();
+    }
+    
+
+</script>
+ 

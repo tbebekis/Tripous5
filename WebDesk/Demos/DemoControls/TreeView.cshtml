@@ -1,0 +1,84 @@
+﻿
+
+@{
+    ViewBag.Title = "TreeView";
+}
+ 
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <input id="txt" type="text" style="width: 400px;" value="This is a node display text, quite long, so to check the overflow" /> <br />
+        <button onclick="SetTextToLastClicked()">Set the text to the last clicked Node</button> <br />
+        <button onclick="AddToLastClicked()">Add a child Node the last clicked Node</button> <br />
+        <button onclick="RemoveLastClicked()">Remove the last clicked Node</button> <br />
+    </div>
+    <br />
+
+    <div id="log"></div>
+    <br />
+
+    <div>
+        <div id="tv" data-setup="{ Height: 200, Width: 150}">
+            <div data-setup="{ IcoClasses: 'fa fa-university',  Url: 'http://w3c.github.io/html/dom.html' }">This is a link to w3c</div>
+            <div data-setup="{ ImageUrl: 'http://icons.iconarchive.com/icons/iconsmind/outline/24/Home-2-icon.png'}">
+                Node
+                <div>Leaf</div>
+                <div>
+                    Node
+                    <div>Leaf</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+    var tv, Node;
+
+    tp.Ready(function () {
+        tv = new tp.TreeView('#tv');
+
+        tv.On('NodeClick', function (Args) {
+            Node = Args.Node;
+            var S = tp.Format('Level: {0}, <br />Index: {1}, <br />Text: {2}', Args.Node.Level, Args.Node.Index, Args.Node.Text);
+            tp.Html('#log', S);
+        });
+    })
+
+    function SetTextToLastClicked() {
+        if (Node) {
+            var S = tp.Select('#txt').value;
+            if (tp.IsBlank(S))
+                S = 'A Node';
+
+            Node.Text = S;
+        }
+    }
+
+    function AddToLastClicked() {
+        if (Node) {
+            var S = tp.Select('#txt').value;
+            if (tp.IsBlank(S))
+                S = 'New Node';
+
+            Node.AddNode(S);
+        }
+    }
+    function RemoveLastClicked() {
+        if (Node) {
+            Node.ParentTreeNode.Remove(Node);
+            Node = null;
+        }
+    }
+
+
+</script>
+

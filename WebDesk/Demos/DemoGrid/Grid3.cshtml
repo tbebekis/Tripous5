@@ -1,0 +1,92 @@
+﻿
+
+@{
+    ViewBag.Title = "Grid 3: Initialization using properties directly";
+}
+
+    <partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+    <div>
+        <button onclick="ClearRows()">Clear Rows</button> <br />
+        <button onclick="ClearGroupColumns()">Clear Group Columns</button> <br />
+        <div style="display: flex; align-items: center;">
+            <button onclick="SetGroupColumns()">Set Group Columns</button> <input type="text" id="ColumnNames" style="width: 280px; margin-left: 4px;" value="DepartmentId CountryId" /> <br />
+        </div>        
+    </div>
+    <br /> 
+ 
+    <div id="Grid"></div>
+    <br />
+
+
+</div>
+
+
+
+<script>
+
+    var Grid,
+        tblTest,
+        tblCountry,
+        tblDepartment;
+
+    tp.Ready(function () {
+        var Data = tp.TestData.CreateTestDataTable(10);
+        tblTest = Data.Table;
+        tblCountry = tp.TestData.tblCountries;
+        tblDepartment = tp.TestData.tblDepartments;
+
+        Grid = new tp.Grid('#Grid', null);
+
+        Grid.ReadOnly = false;
+        Grid.ToolBarVisible = true;
+        Grid.ButtonInsertVisible = true;
+        Grid.ButtonDeleteVisible = true;
+
+        Grid.AddToolBarButton('Custom.Command_1', '', 'Custom Command_1', 'fa fa-calculator', '', true);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
+        Grid.AddToolBarButton('Custom.Command_2', '', 'Custom Command_2', 'fa fa-film', '', true);
+
+        Grid.AutoGenerateColumns = false;        
+
+        Grid.AddColumn('Name');
+        Grid.AddColumn('Age');
+        Grid.AddColumn('Salary');
+        Grid.AddColumn('Married');
+        Grid.AddColumn('EntryDate', 'Entry Date');
+        Grid.AddLookUpColumn('DepartmentId', 'Department', 'Id', 'Name', tblDepartment);                    // Name, Text, ListValueField, ListDisplayField, ListSource
+        Grid.AddLookUpColumn('CountryId', 'Country', 'Id', 'Name', tblCountry);
+
+        Grid.AddAggregate('Salary', tp.AggregateType.Sum);                                                  // Column, Type
+
+        Grid.DataSource = tblTest;
+
+        Grid.On('ToolBarButtonClick', function (Args) {
+            tp.InfoNote('Clicked: ' + Args.Command);
+        });
+
+    });
+
+    function ClearRows() {
+        Grid.DataSource.ClearRows();
+    }
+    function ClearGroupColumns() {
+        Grid.ClearGroupColumns();
+    }
+    function SetGroupColumns() {
+        var S = tp.Select('#ColumnNames').value;
+        if (!tp.IsBlank(S)) {
+            var Parts = tp.Split(S, ' ', true);
+            if (Parts.length > 0) {
+                var ColumnNames = [];
+                for (var i = 0, ln = Parts.length; i < ln; i++)
+                    ColumnNames.push(Parts[i]);
+
+                Grid.SetGroupColumns(ColumnNames);
+            }
+        }
+    }
+</script>
+

@@ -1,0 +1,57 @@
+﻿ 
+
+@{
+    ViewBag.Title = "ProgressBar";
+} 
+ 
+ 
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+
+ 
+    <div>
+        <button  onclick="LoopProgress()">Loop Progress</button> 
+    </div>
+    <br />
+
+    <div>
+        <progress id="ProgressBar" data-setup="{ Width: 200, Max: 10, Value: 0 }"></progress> 
+    </div>
+    <br />
+ 
+ 
+    
+</div>
+
+ 
+
+<script>    
+    var pb;
+ 
+    tp.Ready(function () { 
+        pb = new tp.ProgressBar('#ProgressBar'); 
+    })
+
+    function Loop() {
+        setTimeout(function () {
+            if (pb.Value < pb.Max) {
+                pb.Value += 1;
+                Loop();
+            } else {
+                pb.Value = 0;
+            }
+        }, 100);
+    }
+    function LoopProgress() {
+        pb.Value = 0;
+        Loop();
+    }
+
+ 
+ 
+    
+
+</script>
+ 

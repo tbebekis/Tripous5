@@ -16,22 +16,31 @@ using WebLib.AspNet;
 
 namespace WebDesk.Controllers
 {
+    /// <summary>
+    /// A test controller
+    /// </summary>
     [AllowAnonymous]
-    public class DemoController : Controller
+    public class DemoMenusController : Controller
     {
-        [Route("/demos")]
-        public IActionResult Demos()
+        /* actions */
+        [Route("/demo/Menu")]
+        public IActionResult Menu()
+        {
+            return View();
+        }
+        [Route("/demo/ContextMenu")]
+        public IActionResult ContextMenu()
         {
             return View();
         }
 
-        [Route("/demo/TabIndexAndFocus")]
-        public IActionResult TabIndexAndFocus()
+        [Route("/demo/SiteMenu")]
+        public IActionResult SiteMenu()
         {
             return View();
         }
-        [Route("/demo/EmptyTest")]
-        public IActionResult EmptyTest()
+        [Route("/demo/ToolBar")]
+        public IActionResult ToolBar()
         {
             return View();
         }
