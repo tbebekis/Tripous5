@@ -7,10 +7,19 @@
 
 <h2>@ViewBag.Title</h2>
  
- 
+ <div>
+     <p>
+         An image slider <br />
+         Images are passed as an array of Urls to the Images property.<br />
+         When AutoCycle is true then images are cycled by an interval defined in AutoCycleMSecs. <br />
+         The DisplayCycleButtons controls whether the Prev and Next buttons are visible or not. <br />
+         The SelectedIndex controls and indicates what is the current image. <br />
+         When ChangeOnClick is true, the default, clicking on an image displays the next image. <br />
+     </p>
+ </div>
 
-<div>
-    <div id="ImageSlider" data-setup='{ Height: 500, Width: 700, Images: ["/images/demos/Obama.jpg", "/images/demos/Kefalonia.jpg", "/images/demos/Garden.jpg"], SelectedIndex: 2 }'></div>
+<div >
+    <div id="ImageSlider" data-setup='{ Height: "35vw", Width: "50vw", Images: ["/images/demos/Obama.jpg", "/images/demos/Kefalonia.jpg", "/images/demos/Garden.jpg"], SelectedIndex: 2 }'></div>
 </div>
 
 <script>

@@ -2,20 +2,24 @@
     ViewBag.Title = "GroupBox";
 }
 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <button id="btn1" onclick="ChangeTitle()">Change Title</button>&nbsp;<input id="edtTitle" type="text" value="New Title"/>
+    <p>A group-box container, that is a fieldset element with a legend title element. <br /></p>
+</div>
+<div>
+    <button id="btn1" onclick="ChangeTitle()">Change Title</button>&nbsp;<input id="edtTitle" type="text" value="New Title" />
 </div>
 
 <br />
 
 <fieldset id="GroupBox"> </fieldset>
+ 
 
 <script>
     var ctrl = null;
- 
+
     tp.Ready(function () {
         ctrl = new tp.GroupBox('#GroupBox');
         ctrl.Height = 400;
@@ -26,7 +30,6 @@
         ctrl.Text = el.value;
     }
 
-    
+
 
 </script>
- 

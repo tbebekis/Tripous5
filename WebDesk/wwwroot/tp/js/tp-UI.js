@@ -558,8 +558,10 @@ tp.GroupBox = class extends tp.tpElement {
         return this.fLegend instanceof HTMLLegendElement ? this.fLegend.innerHTML : '';
     }
     set Text(v) {
-        if (tp.IsString(v) && this.fLegend instanceof HTMLLegendElement)
+        if (tp.IsString(v) && this.fLegend instanceof HTMLLegendElement) {
             this.fLegend.innerHTML = v;
+            this.fLegend.style.display = tp.IsBlank(v) ? 'none' : '';
+        }           
     }
 
     /* overrides */
@@ -597,8 +599,10 @@ tp.GroupBox = class extends tp.tpElement {
             this.fLegend = el;
         } else {
             this.fLegend = this.Document.createElement('legend');
-            tp.InsertNode(this.Handle, 0, this.fLegend);
+            tp.InsertNode(this.Handle, 0, this.fLegend);            
         }
+
+        this.fLegend.style.display = tp.IsBlank(this.Text) ? 'none' : '';
 
     }
 };
@@ -1848,6 +1852,16 @@ tp.ImageSlider = class extends tp.tpElement {
         }
     }
 
+    get DisplayCycleButtons() {
+        return this.fDisplayCycleButtons === true;
+    }
+    set DisplayCycleButtons(v) {
+        v = Boolean(v);
+        if (v !== this.DisplayCycleButtons) {
+            this.fDisplayCycleButtons = v;
+            this.DisplayCycleButtonsChanged();
+        }        
+    }
 
     /* protected */
     /**
@@ -1869,6 +1883,13 @@ tp.ImageSlider = class extends tp.tpElement {
                 }
                 Context.SelectedIndex = Index;
             }, this.AutoCycleMSecs, this);
+        }
+    }
+    /** Hides or shows the prev and next buttons according to DisplayCycleButtons property value. */
+    DisplayCycleButtonsChanged() {
+        if (tp.IsElement(this.fNext)) {
+            this.fNext.style.display = this.DisplayCycleButtons === true ? '' : 'none';
+            this.fPrev.style.display = this.DisplayCycleButtons === true ? '' : 'none';
         }
     }
 
@@ -1950,12 +1971,12 @@ tp.ImageSlider = class extends tp.tpElement {
 
             case tp.Events.Click:
                 if (this.Images.length > 1) {
-                    if (this.fPrev === e.target) {
+                    if (this.fPrev === e.target || this.ChangeOnClick === true) {
                         Index = this.SelectedIndex - 1;
                         if (Index < 0) {
                             Index = this.Images.length - 1;
                         }
-                    } else {
+                    } else if (this.fNext === e.target || this.ChangeOnClick === true) {
                         Index = this.SelectedIndex + 1;
                         if (Index > this.Images.length - 1) {
                             Index = 0;
@@ -1964,7 +1985,7 @@ tp.ImageSlider = class extends tp.tpElement {
 
                     this.SelectedIndex = Index;
 
-                }
+                } 
 
                 break;
 
@@ -2030,6 +2051,19 @@ tp.ImageSlider.prototype.fNext = null;
  @type {HTMLElement}
  */
 tp.ImageSlider.prototype.fPrev = null;
+/**
+ Private field.
+ @private
+ @type {boolean}
+ */
+tp.ImageSlider.prototype.fDisplayCycleButtons = true;
+
+/** When true, clicking on an image displays the next image.
+@default true
+@public
+ @type {boolean}
+ */
+tp.ImageSlider.prototype.ChangeOnClick = true;
 //#endregion  
 
 //#region tp.Splitter
@@ -2358,7 +2392,7 @@ tp.IFrame = class extends tp.tpElement {
         return (this.Handle instanceof HTMLIFrameElement) && ('srcdoc' in this.Handle);
     }
     /**
-    Gets or sets the HTML content of the page to shown in the iframe.
+    Gets or sets the HTML content of the page to show in the iframe.
     @type {string}
     @see {@link https://www.w3schools.com/jsref/prop_frame_srcdoc.asp|w3schools}
     @see {@link https://stackoverflow.com/questions/19739001/which-is-the-difference-between-srcdoc-and-src-datatext-html-in-an|stackoverflow}
@@ -2376,8 +2410,7 @@ tp.IFrame = class extends tp.tpElement {
                     Doc.open();
                     Doc.write(v);
                     Doc.close();
-                }
-                //this.Handle.src = v;
+                } 
             }
         }
     }
@@ -2413,13 +2446,6 @@ tp.IFrame = class extends tp.tpElement {
  */
 tp.IFrame.prototype.fUrl = '';
 /**
- Private field.
- @private
- @type {boolean}
- */
-tp.IFrame.prototype.fUseSpinner = false;
-
-/**
 A value indicating whether to display a global spinner while loading a document to the iframe
 @public
 @type {boolean}
@@ -2444,7 +2470,8 @@ Object.freeze(tp.DropDownBoxStage);
 /**
 A resizable dropdown box that can serve any block, inline-block or flex element (Associate) and is controlled by an owner (Owner) object. <br />
 The dropdown box it always gets 'fixed' position. <br />
-It also recalculates its location in order to be inside the boundaries of the viewport.
+It also recalculates its location in order to be inside the boundaries of the viewport. <br />
+It recalculates its location even when its Associate changes location.  <br />
 The initialization can be done by passing an object to the CreateParams parameter of the constructor as
 <pre>
     var Owner = {
@@ -2644,6 +2671,8 @@ tp.DropDownBox = class extends tp.tpElement {
     // http://tlindig.github.io/position-calculator/
     // https://github.com/tlindig/position-calculator/blob/master/src/position-calculator.js
 
+    fAssociateChangeListener = null;
+
     /**
     Displays the dropdown box
     */
@@ -2668,7 +2697,7 @@ tp.DropDownBox = class extends tp.tpElement {
             }
 
             this.OnOwnerEvent(tp.DropDownBoxStage.Opening);
-            //this.ZIndex = tp.ZIndex(this.Associate) + 1;
+ 
             this.AddClass(tp.Classes.Visible);
 
             this.UpdateTop();
@@ -2694,6 +2723,11 @@ tp.DropDownBox = class extends tp.tpElement {
                 document.addEventListener('click', this.FuncBind(this.Document_Click), true);
             }, 0);
 
+            // for updating the top (this.Y) when the Associate changes size/location
+            this.fAssociateChangeListener = tp.ElementResizeDetector.AddListener(this.Associate, () => {
+                this.UpdateTop();
+            });
+
         }
     }
     /**
@@ -2717,6 +2751,15 @@ tp.DropDownBox = class extends tp.tpElement {
                 //
             }
 
+            try {
+                if (this.fAssociateChangeListener)
+                    tp.ElementResizeDetector.RemoveListener(this.fAssociateChangeListener);
+                this.fAssociateChangeListener = null;
+            } catch (e) {
+                //
+            }
+
+
         }
     }
     /**
@@ -2732,18 +2775,19 @@ tp.DropDownBox = class extends tp.tpElement {
     Updates the top position of the drop-down box
     */
     UpdateTop() {
+        if (this.IsOpen === true) {
+            let R = this.Associate.getBoundingClientRect();
+            let P; // tp.Point
 
-        let R = this.Associate.getBoundingClientRect();
-        let P; // tp.Point
-
-        if (tp.IsSameText('absolute', this.Position)) {
-            P = tp.ToParent(this.Associate);            
-            this.X = P.X;
-            this.Y = P.Y + R.height;
-        } else if (tp.IsSameText('fixed', this.Position)) {
-            P = tp.ToViewport(this.Associate);
-            this.X = P.X;
-            this.Y = P.Y + R.height;
+            if (tp.IsSameText('absolute', this.Position)) {
+                P = tp.ToParent(this.Associate);
+                this.X = P.X;
+                this.Y = P.Y + R.height;
+            } else if (tp.IsSameText('fixed', this.Position)) {
+                P = tp.ToViewport(this.Associate);
+                this.X = P.X;
+                this.Y = P.Y + R.height;
+            }
         }
     }
 };
@@ -11017,7 +11061,7 @@ tp.CheckComboBox = class extends tp.CheckListControl {
             elBtn = this.Document.createElement('div');
             elItem.appendChild(elBtn);
             elBtn.className = tp.Classes.Close;
-            elBtn.innerHTML = '✕';  
+            elBtn.innerHTML = '✕'; // '×'; // '✕';
             tp.SetElementInfo(elBtn, {
                 Index: Index
             });

@@ -11,7 +11,6 @@ fieldset.tp-GroupBox {
 }
 
 fieldset.tp-GroupBox legend {
-    font-weight: bold;
     padding: 0 4px;
 }
 
@@ -31,7 +30,7 @@ fieldset.tp-GroupBox legend {
 /* item caption */ 
 .tp-Accordion > * > :nth-child(1) {
     background-color: var(--BackColor);
-    line-height: 2.3em;
+    line-height: 1.8em;
     cursor: pointer;
 }
 
@@ -80,6 +79,8 @@ tab control
 /* tab buttons container */ 
 .tp-TabControl > :nth-child(1) {
     position: relative;
+    display: flex;
+    gap: 1px;
 }
 
 /* tab pages container */ 
@@ -105,11 +106,10 @@ tab control
         font-size: inherit;
         font-family: inherit;
         font-weight: normal;
-        padding: 8px 8px;
         min-width: 120px;
         background-color: var(--BackColor);
         border: var(--Border);
-        margin: 1px;
+        height: 2.3em;
     }
     /* tab buttons */ 
     .tp-TabControl > :nth-child(1) > *.tp-Selected {
@@ -122,6 +122,7 @@ tab control
     /* toggle zone */ 
     .tp-TabControl > :nth-child(1) {
         border: var(--Border);
+        height: 2.3em;
     }
 
     /* toggle zone, button + title */ 
@@ -144,7 +145,8 @@ tab control
     .tp-TabControl > :nth-child(1) > :nth-child(2) {
         justify-content: flex-start;
         flex-grow: 1;
-        padding: 4px 6px;
+        padding: 0 6px;
+        align-items: center;
     }
 
     /* toggle dropdown */ 
@@ -926,6 +928,8 @@ number box - tp-NumberBox
     font-family: monospace;
     border-left: var(--Border);
     cursor: default;
+    justify-content: center;
+    align-items: center;
 }
 
 /*---------------------------------------------------------------------------------------
@@ -972,7 +976,7 @@ select.tp-HtmlListBox {
 .tp-CheckComboBox .tp-Strip .tp-Item {
     position: relative;
     display: inline-flex;
-    align-items: center;
+    align-items: stretch;
     margin: 2px;
     border: var(--Border);
     border-radius: 4px;
@@ -989,7 +993,7 @@ select.tp-HtmlListBox {
     position: relative;
     display: flex;
     align-items: center;
-    padding: 0 5px;
+    padding: 0.4em 5px 0 5px;
     background-color: var(--BackColor);
     cursor: default;
     font-family: monospace;

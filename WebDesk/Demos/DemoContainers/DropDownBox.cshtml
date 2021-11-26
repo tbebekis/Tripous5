@@ -9,7 +9,35 @@
 
 <div>
     <!--  -->
-    <p>Case 1: When DropDownBox and its Associate are siblings the DropDownBox gets absolute position </p>
+    <p>The DropDownBox gets always a fixed position </p>
+    <p>
+        The DropDownBox is a resizable dropdown box that can serve any block, inline-block or flex element, the Associate.
+        It is controlled by an owner (Owner) object. <br />
+        The dropdown box it always gets 'fixed' position. <br />
+        It also recalculates its location in order to be inside the boundaries of the viewport.  <br />
+        It recalculates its location even when its Associate changes location.  <br />
+    </p>
+    <div>
+        <p>
+            The initialization can be done by passing an object to the CreateParams parameter of the constructor as
+<pre>
+    var Owner = {
+        OnDropDownBoxEvent: function (Sender, Stage) {
+            log(tp.EnumNameOf(tp.DropDownBoxStage, Stage));
+        },
+    };
+
+    var box1 = new tp.DropDownBox('#DropDownBox1', {
+        Associate: '#btn1',
+        Owner: Owner,
+        Width: tp.Select('#btn1').getBoundingClientRect().width,
+        Height: 200,
+    });
+</pre>
+        </p>
+    </div>
+
+
     <div>
         <button id="btn1" style="width: 200px" onclick="Button1Click(1)">Button1</button> <br />
         <div id="DropDownBox1"></div>
@@ -18,15 +46,7 @@
 
     <br />
 
-    <!--  -->
-    <p>Case 2: When DropDownBox and its Associate are NOT siblings the DropDownBox gets fixed position</p>
-    <div style="position: relative">
-        <div id="btn2" style="width: 200px; border: 1px solid lightgray; cursor: pointer;" onclick="Button1Click(2)">Button2</div> <br />
-        <div style="height: 200px; background-color:lightblue;"></div>
-        <div>
-            <div id="DropDownBox2"></div>
-        </div>
-    </div>
+ 
 
     
 </div>
@@ -53,14 +73,7 @@
             Height: 200,
         });
 
-        w = tp.BoundingRect(tp.Select('#btn2')).Width;
-
-        box2 = new tp.DropDownBox('#DropDownBox2', {
-            Associate: '#btn2',
-            Owner: Owner,
-            Width: w,
-            Height: 200,
-        });
+ 
     });
 
     function Button1Click(n) { 
