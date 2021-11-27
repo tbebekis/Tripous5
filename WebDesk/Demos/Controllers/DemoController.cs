@@ -35,5 +35,11 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+
+        [Route("/demo/AceDemo")]
+        public IActionResult AceDemo()
+        {
+            return View();
+        }
     }
 }

@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "CheckBox";
 }
 
@@ -8,23 +6,22 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <!--   -->
-    <div> 
-        <label id="CheckBox"><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
-    </div>
+    <p>A check-box control. Is actually a label element surrounding a input[type=checkbox] element.</p>
+    <p>Provides properties such as Text and Checked (boolean).</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <label id="CheckBox" class="html-code"><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
+</div>
+
+<script class="js-code">
     var cb;
- 
+
     tp.Ready(function () {
         cb = new tp.CheckBox('#CheckBox');
     });
-
- 
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

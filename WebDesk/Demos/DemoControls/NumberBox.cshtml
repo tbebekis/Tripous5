@@ -1,40 +1,28 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "NumberBox";
-} 
- 
- 
+}
+
+
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
-
-<p>A custom number box control. Contains a styled input type="text" element (NOT type="number"). </p>
-
-<p>NOTE: decimal places may be set using the Decimals property or the DataColumn of this control.    </p>
-
 <div>
-
- 
-    <div>
-        <input id="Box" type="text" data-setup="{ Width: 200, Decimals: 2  }" />
-    </div>
-
-
+    <p>A custom number box control. Contains a styled input type="text" element (<strong>NOT</strong> type="number"). </p>
+    <p>NOTE: decimal places may be set using the Decimals property or the DataColumn of this control.    </p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <input id="Box" class="html-code" type="text" data-setup="{ Width: 200, Decimals: 2  }" />
+</div>
+
+<script class="js-code">
     var ctrl;
- 
-    tp.Ready(function () { 
+
+    tp.Ready(function () {
         ctrl = new tp.NumberBox('#Box');
     })
-
- 
- 
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

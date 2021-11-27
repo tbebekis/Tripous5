@@ -2097,10 +2097,7 @@ tp.Splitter = class extends tp.tpElement {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-
-
-
+ 
     /* protected */
     /**
      * Adjusts the orientation according to IsHorizontal property value.
@@ -2117,9 +2114,7 @@ tp.Splitter = class extends tp.tpElement {
             }
         }
     }
-
-
-
+ 
     /**
     Gets or sets a boolean value indicating whether this is a horizontal splittr. Defaults to false.
     Setting this property sets a proper css class to the element.
@@ -2628,8 +2623,10 @@ tp.DropDownBox = class extends tp.tpElement {
     */
     Document_Click(e) {
         if (!tp.ContainsEventTarget(this.Handle, e.target)) {
-            if (this.IsOpen) //  && this.StyleProp('position') === 'fixed'
+            if (this.IsOpen) {
                 this.Close();
+                e.stopPropagation();
+            }                
         }
     }
 
@@ -2682,8 +2679,7 @@ tp.DropDownBox = class extends tp.tpElement {
             if (tp.IsEmpty(this.ParentHandle)) {
                 tp.Doc.body.appendChild(this.Handle);                
             }
-            this.ZIndex = tp.MaxZIndexOf(tp.Doc.body);
-
+ 
             let Style = tp.ComputedStyle(this.Associate);
             this.Handle.style.fontFamily = Style.fontFamily;
             this.Handle.style.fontSize = Style.fontSize;
@@ -2701,6 +2697,8 @@ tp.DropDownBox = class extends tp.tpElement {
             this.AddClass(tp.Classes.Visible);
 
             this.UpdateTop();
+
+            this.ZIndex = tp.MaxZIndexOf(tp.Doc.body);
 
             this.OnOwnerEvent(tp.DropDownBoxStage.Opened);
 
@@ -6174,37 +6172,37 @@ tp.AutocompleteList = class extends tp.DropDownBox {
      @private
      @type {HTMLElement}
      */
-    fContainer;
+    fContainer = null;
     /** Field
      @private
      @type {tp.VirtualScroller}
      */
-    fDropDownScroller;
+    fDropDownScroller = null;
     /** Field
      @private
      @type {number}
      */
-    fItemHeight;
+    fItemHeight = 0;
     /** Field
      @private
      @type {string}
      */
-    fListDisplayField;
+    fListDisplayField = null;
     /** Field
      @private
      @type {any}
      */
-    fSelectedItem;
+    fSelectedItem = null;
     /** Field
      @private
      @type {number}
      */
-    fMaxDropdownItems;
+    fMaxDropdownItems = 10;
     /** Field
      @private
      @type {any[]}
      */
-    fDisplayList;
+    fDisplayList = null;
 
     /* properties */
     /**
@@ -6275,18 +6273,18 @@ tp.AutocompleteList = class extends tp.DropDownBox {
     A url for a server action to call for filtering. When this is set, then the DataList local data is ignored.
     @type {string}
     */
-    ServerFunc;
+    ServerFunc = null;
     /**
     A local list of data to user when filtering
     @type {any[]}
     */
-    DataList;
+    DataList = null;
     /**
     If true, then the "starts with" logic is used when filtering. Defaults to false.
     @default false
     @type {boolean}
     */
-    UseStartsWithFilter;
+    UseStartsWithFilter = false;
     /**
     The number of characters typed in the associated, that trigger the autocompletion operation. Defaults to 3.
     @default 3

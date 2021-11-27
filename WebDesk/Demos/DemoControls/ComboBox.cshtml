@@ -1,48 +1,44 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "ComboBox";
 }
- 
+
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-
-    <div>
-        <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
-    </div>
-
-    <br />
-
-    <div>
-        <div id="cb" data-setup="{ListOnly: true, ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0 }"></div>
-    </div>
-
-    <br />
- 
-    <div>
-        <div id="cb2" data-setup="{ListOnly: true, ListValueField: 'Id', ListDisplayField: 'Name' }"></div>
-    </div>
-
-    
+    <p>A combo-box control. Inherits from <code>tp.ListControl</code> </p>
+    <p>Provides properties such as Items, SelectedIndex, SelectedItem, SelectedValue,  etc. </p>
+    <p>The <code>ListOnly</code> boolean property indicates whether the text-box portion of the control is editable or not.</p>
+    <p>In the following example the first combo-box defines a list of data in the data-setup attribute while the second combo-box is data-bound to a <code>tp.DataTable</code> with countries, through a <code>tp.DataSource</code> object</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
+</div>
+
+<br />
+
+<div class="html-code">
+    <div id="cb" data-setup="{ListOnly: true, ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0 }"></div>
+    <br />
+    <br />
+    <div id="cb2" data-setup="{ListOnly: true, ListValueField: 'Id', ListDisplayField: 'Name' }"></div>
+</div>
+
+<script class="js-code">
     var cb,
         cb2;
- 
-    tp.Ready(function () { 
+
+    tp.Ready(function () {
         cb = new tp.ComboBox('#cb');
 
         cb2 = new tp.ComboBox('#cb2');
         cb2.ListSource = new tp.DataSource(tp.TestData.tblCountries);
     });
 
- 
     function ResetList() {
         var List = [];
         for (var i = 0, ln = 100; i < ln; i++) {
@@ -54,7 +50,7 @@
 
         cb.Items = List;
     }
-    
 
 </script>
- 
+
+<partial name="_AceEditorPager" />

@@ -1,19 +1,19 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "Splitter";
 }
 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
     <p>
         A splitter bar. <br />
-        Place the splitter bar between two divs an let it auto-config. Or define a sibling div as the Associate. <br />
+        Place the splitter bar between two divs and let it auto-config. <br />
+        Or define a sibling div as the Associate. <br />
     </p>
- 
 </div>
+
+<br />
 
 <div>
     <button id="btn1" onclick="ToggleSplitter()">Toggle Splitter</button> <br />
@@ -24,29 +24,29 @@
 <style>
     #Container {
         border: 1px solid gray;
-        height: 600px;
+        height: 250px;
         width: 100%;
     }
 
     #A {
         background-color: lightcoral;
     }
+
     #B {
         background-color: lightblue;
         flex-grow: 1;
     }
-
 </style>
 
-<div id="Container" style="display: flex;">
+<div id="Container" class="html-code" style="display: flex;">
     <div id="A">This is the A panel</div>
     <div class="tp-Splitter"></div>
     <div id="B">This is the B panel</div>
 </div>
 
-<script>
+<script class="js-code">
     var Container, A, B, Splitter;
- 
+
     tp.Ready(function () {
         Container = tp.Select('#Container');
         A = tp.Select('#A');
@@ -59,9 +59,9 @@
         var o;
         if (Splitter.IsHorizontal) {
             tp.SetStyle(Container, { 'flex-direction': 'column', });
-            o = { height: '200px', width: '', };            
+            o = { height: '200px', width: '', };
         } else {
-            tp.SetStyle(Container, { 'flex-direction': '',  });
+            tp.SetStyle(Container, { 'flex-direction': '', });
             o = { height: '', width: '200px', };
         }
 
@@ -73,8 +73,6 @@
         Splitter.IsHorizontal = !Splitter.IsHorizontal;
         AdjustSplitter();
     }
-
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

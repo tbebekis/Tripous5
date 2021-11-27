@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "TextBox";
 }
 
@@ -8,26 +6,27 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <p>A text box with a local autocomplete list of values: 'javascript', 'typescript', 'script', 'scriptable', 'html', 'css rules' </p>
-     
-    <div>
-        <input id="TextBox" type="text" value="" data-setup="{Width: 180, AutocompleteList: ['javascript', 'typescript', 'script', 'scriptable', 'html', 'css rules'] }"  />
-    </div>
+    <p>
+        A control class around the HTML input[type=text] element. <br />
+        Provides properties such as MaxLength, Placeholder, RegexPattern, SelectionStart, SelectionEnd and the DOMAutocomplete boolean property for controlling the autocomplete behavior.  <br />
+
+        The following text box uses a local <a href="/demo/AutocompleteList">AutocompleteList</a> of values: 'javascript', 'typescript', 'script', 'scriptable', 'html', 'css rules' <br />
+    </p>
+
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <input id="TextBox" class="html-code" type="text" value="" data-setup="{Width: 180, AutocompleteList: ['javascript', 'typescript', 'script', 'scriptable', 'html', 'css rules'] }" />
+</div>
+
+<script class="js-code">
     var text1;
-
  
-
     tp.Ready(function () {
-        text1 = new tp.TextBox('#TextBox');  
+        text1 = new tp.TextBox('#TextBox');
     });
-
-
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

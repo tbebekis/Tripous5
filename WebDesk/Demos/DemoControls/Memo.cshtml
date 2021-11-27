@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "Memo";
 }
 
@@ -8,26 +6,25 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <!--   -->
-    <div>
-        <textarea id="Memo" data-setup="{Width: 300, Height: 200 }">This is memo content</textarea>
-    </div>
+    <p>A memo (textarea) control.</p>
+    <p>Provides properties such as Cols, Rows, MaxLength, Placeholder, SelectionStart, SelectionEnd, WordWrap and Resizable.</p>
+    <p>It also provides methods such as <code>Select()</code>, <code>SetSelectionRange(Start, End)</code>, <code>Append(Text)</code> and <code>AppendLine(Text)</code>.</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <textarea id="Memo" class="html-code" data-setup="{Width: 300, Height: 200 }">This is memo content</textarea>
+</div>
+
+<br />
+
+<script class="js-code">
     var memo;
-
  
-
     tp.Ready(function () {
         memo = new tp.Memo('#Memo');
     });
-
- 
-
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

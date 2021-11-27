@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "Label";
 }
 
@@ -8,24 +6,35 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-
-    <div>
-      <label id="Label">Label text</label>
-    </div>
-    
+    <p>
+        A control class around the HTML label element. <br />
+        The AssociateId property is a string value indicating the id attribute of a labeled control. Reflects the for HTML attribute. <br />
+    </p>
 </div>
 
  
+<div>
+    <button id="btn1" onclick="ChangeText()">Change Text</button>&nbsp;<input id="edtText" type="text" value="New Text" />
+</div>
 
-<script>    
-  
- 
-    tp.Ready(function () { 
-        new tp.Label('#Label');
+<br />
+<br />
+
+<div>
+    <label id="Label" class="html-code">Label text</label>
+</div>
+
+<script class="js-code">
+    let ctrl;
+
+    tp.Ready(function () {
+        ctrl = new tp.Label('#Label');
     });
 
- 
- 
-
+    function ChangeText() {
+        let el = tp.Select('#edtText');
+        ctrl.Text = el.value;
+    }
 </script>
- 
+
+<partial name="_AceEditorPager" />

@@ -1,12 +1,8 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "VirtualScroller";
 }
 
- 
 <partial name="~/Demos/Shared/_Index.cshtml" />
-
 <h2>@ViewBag.Title</h2>
 
 <div>
@@ -17,27 +13,20 @@
     </p>
 </div>
 
- 
-
+<br />
 <br />
 
-<div id="Viewport1">
-    <div id="Container1">
-    </div>
-</div>
+<div id="Viewport" class="html-code"></div>
 
-<div id="Viewport"></div>
-
-<script>
+<script class="js-code">
     TestVirtualScroller = function () {
- 
+
         var RowCount = 1000;
         //var RowHeight = 50;
         var ViewportHeight = 400;
 
         var divViewport = tp.Select('#Viewport');
-        divViewport.tabIndex = 0;
-        //var divContainer = tp.Select('#Container');
+        divViewport.tabIndex = 0; 
         var divContainer = null;
 
         tp.SetStyle(divViewport, {
@@ -46,13 +35,13 @@
             width: '200px',
             height: ViewportHeight + 'px',
         });
-  
+
         var A = [];
         for (var i = 0, ln = RowCount; i < ln; i++) {
             var o = { Name: 'row ' + i, Num: i };
             A.push(o);
         }
- 
+
         vs = new tp.VirtualScroller(divViewport, divContainer);
         //vs.RowHeight = RowHeight;
         vs.SetRowList(A);
@@ -61,10 +50,7 @@
     tp.Ready(function () {
         TestVirtualScroller();
     });
-
  
-
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

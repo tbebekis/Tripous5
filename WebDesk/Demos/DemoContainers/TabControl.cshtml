@@ -8,12 +8,19 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
+    <p>A TabControl.</p>
+    <p>You can add a new tab page, get or set the text of a tab, set the selected tab page, etc.</p>
+</div>
+
+<br />
+
+<div>
     <button id="btn1" onclick="AddChild()">AddChild</button> <br />
 </div>
 
 <br />
 
-<div id="Control" class="tp-TabControl" data-setup="{ SelectedIndex: 0 }">
+<div id="Control" class="tp-TabControl html-code" data-setup="{ SelectedIndex: 0 }">
     <div><div>Page 1</div><div>Page 2</div><div>Page 3</div></div>
     <div>
         <div>Content 1</div>
@@ -22,7 +29,7 @@
     </div>
 </div>
 
-<script>
+<script class="js-code">
     var ctrl = null;
     var Counter = 3;
     tp.Ready(function () {
@@ -35,8 +42,7 @@
 
         child.Page.innerHTML = 'This content belongs to item ' + Counter;
     }
-
-    
-
 </script>
+
+<partial name="_AceEditorPager" />
  

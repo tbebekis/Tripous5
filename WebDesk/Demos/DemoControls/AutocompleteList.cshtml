@@ -1,39 +1,37 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "AutocompleteList";
 }
 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <div>
-        Repesents an autocomplete list. To be used with text-boxes. The data list could be asked from the server on every search. <br />
-        The data list of the autocomplete could be a list of primitives (string, boolean, number), or just plain javascript objects. <br />
-        When the autocomplete data list is a list of objects then the ListDisplayField MUST be specified. <br />
-        The height of the dropdown list is controlled by the MaxDropdownItems numeric property.<br />
-    </div>
-    <!--   -->
-    <div>
-        <p><strong>Local word list</strong>: "javascript", "typescript", "script", "scriptable", "css rules", "html" </p>
-        <p><strong>Server word list</strong>: "javascript", "typescript", "script", "scriptable", "css rules", "html", "html5", "responsive", "restfull" </p>
-    </div>
-    <div>
-        <label style="display: flex;"><input id="cb" type="checkbox"  onclick="CheckBoxClick()" /> Use server data</label>
-        <br />
-        <input id="text1" type="text" value="" placeholder="autocomplete list" tabindex="1" />
-    </div>
-
-    <br />
+    Repesents an autocomplete list. To be used with text-boxes. The data list could be asked from the server on every search. <br />
+    The data list of the autocomplete could be a list of primitives (string, boolean, number), or just plain javascript objects. <br />
+    When the autocomplete data list is a list of objects then the ListDisplayField MUST be specified. <br />
+    The height of the dropdown list is controlled by the MaxDropdownItems numeric property.<br />
+</div>
  
-
-    
+<div>
+    <p><strong>Local word list</strong>: "javascript", "typescript", "script", "scriptable", "css rules", "html" </p>
+    <p><strong>Server word list</strong>: "javascript", "typescript", "script", "scriptable", "css rules", "html", "html5", "responsive", "restfull" </p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <label style="display: flex;"><input id="cb" type="checkbox" onclick="CheckBoxClick()" /> Use server data</label>
+</div>
+
+<br />
+
+<div class="html-code">
+    <input id="text1" type="text" value="" placeholder="autocomplete list" tabindex="1" />
+</div>
+
+<br />
+
+<script class="js-code">
     var text1, a1, cb;
 
     function AdjustAutocompleteData() {
@@ -47,8 +45,8 @@
     tp.Ready(function () {
         cb = tp.Select('#cb');
         text1 = tp.Select('#text1');
-        a1 = new tp.AutocompleteList(text1); 
- 
+        a1 = new tp.AutocompleteList(text1);
+
         a1.DataList = [
             { Id: 1, Name: 'javascript' },
             { Id: 2, Name: 'typescript' },
@@ -56,21 +54,20 @@
             { Id: 4, Name: 'scriptable' },
             { Id: 5, Name: 'html' },
             { Id: 6, Name: 'css rules' },
-        ]; 
+        ];
 
         a1.ListDisplayField = 'Name';
         a1.Active = true;
         text1.focus();
 
-        AdjustAutocompleteData();    
-        
+        AdjustAutocompleteData();
+
     });
 
-    function CheckBoxClick() { 
+    function CheckBoxClick() {
         AdjustAutocompleteData();
     }
-
-    
-
-</script>
  
+</script>
+
+<partial name="_AceEditorPager" />

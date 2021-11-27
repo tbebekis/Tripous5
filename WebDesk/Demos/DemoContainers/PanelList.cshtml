@@ -1,11 +1,8 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "PanelList";
 }
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
-
 <h2>@ViewBag.Title</h2>
 
 <div>
@@ -16,23 +13,26 @@
     </p>
 </div>
 
+<br />
+
 <div>
     <button id="btn1" onclick="AddChild()">AddChild</button> <br />
 </div>
 
 <br />
-<select id="ListBox" size="10">
 
+<select id="ListBox" size="10">
 </select>
+
 <br />
 
-<div id="PanelList" data-setup="{ Associate: '#ListBox', SelectedIndex: 0 }">
+<div id="PanelList" class="html-code" data-setup="{ Associate: '#ListBox', SelectedIndex: 0 }">
     <div>Panel 1</div>
     <div>Panel 2</div>
     <div>Panel 3</div>
 </div>
 
-<script>
+<script class="js-code">
     // a totally custom Associate object, build upon a select element.
     // A tp.ListBox can be used instead, or any other tp class providing a SelectedIndexChanged event.
     var PanelListAssociate = class extends tp.tpElement {
@@ -74,26 +74,12 @@
  
     }
     PanelListAssociate.prototype.fSelectedIndex = -1;
-</script>
 
-<script>
+
     var lbo = null;
-    var ctrl = null; 
+    var ctrl = null;
 
-    tp.Ready(function () {
-        lbo = new PanelListAssociate('#ListBox');
-        lbo.Height = 160;
-
-        ctrl = new tp.PanelList('#PanelList');
-       
- 
-        for (var i = 0, ln = ctrl.Count; i < ln; i++) {     
-            lbo.AddListItem('Panel ' + (i + 1));
-        }
-
-         
-    });
-
+    // a function for adding a child
     function AddChild() {
         var child = ctrl.AddChild();
         var S = 'Panel ' + ctrl.Count;
@@ -102,7 +88,19 @@
         lbo.AddListItem(S);
     }
 
-    
+    // create the panel list control
+    tp.Ready(function () {
+        lbo = new PanelListAssociate('#ListBox');
+        lbo.Height = 160;
 
+        ctrl = new tp.PanelList('#PanelList');       
+ 
+        for (var i = 0, ln = ctrl.Count; i < ln; i++) {     
+            lbo.AddListItem('Panel ' + (i + 1));
+        }         
+    });
+ 
 </script>
+
+<partial name="_AceEditorPager" />
  

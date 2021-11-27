@@ -1,10 +1,8 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "Accordion";
 }
 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
@@ -14,13 +12,15 @@
     </p>
 </div>
 
+<br />
+
 <div>
     <button id="btn1" onclick="AddChild()">AddChild</button> <br />
 </div>
 
 <br />
 
-<div id="Control" class="tp-Accordion" data-setup="{AllowMultiExpand: false}">
+<div id="Control" class="tp-Accordion html-code" data-setup="{AllowMultiExpand: false}">
     <div>
         <div><span style="font-weight: bold;">Item 1</span></div>
         <div>
@@ -37,7 +37,7 @@
     </div>
 </div>
 
-<script>
+<script class="js-code">
     var ctrl = null;
     var Counter = 2;
     tp.Ready(function () {
@@ -47,12 +47,12 @@
     function AddChild() {
         Counter++;
         var el = ctrl.AddChild('Item ' + Counter);
- 
+
         el = ctrl.ContentChildAt(ctrl.Count - 1);
         el.innerHTML = 'This content belongs to item ' + Counter;
     }
-
-    
-
 </script>
- 
+
+
+
+<partial name="_AceEditorPager" />

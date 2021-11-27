@@ -1,10 +1,8 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "ImageSlider";
 }
 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
-
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
  
  <div>
@@ -18,13 +16,14 @@
      </p>
  </div>
 
-<div >
-    <div id="ImageSlider" data-setup='{ Height: "35vw", Width: "50vw", Images: ["/images/demos/Obama.jpg", "/images/demos/Kefalonia.jpg", "/images/demos/Garden.jpg"], SelectedIndex: 2 }'></div>
-</div>
+<br />
 
-<script>
+<div id="ImageSlider" class="html-code" data-setup="{ Height: '35vw', Width: '50vw', Images: ['/images/demos/Obama.jpg', '/images/demos/Kefalonia.jpg', '/images/demos/Garden.jpg'], SelectedIndex: 2 }"></div>
+
+<script class="js-code">
     tp.Ready(function () {
         var is = new tp.ImageSlider('#ImageSlider');
     }); 
-
 </script>
+
+<partial name="_AceEditorPager" />
