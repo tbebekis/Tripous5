@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "TableBox";
 }
 
@@ -8,37 +6,29 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
- 
-    <div>
-       <button  onclick="ShowDialog()">Show TableBox dialog</button> <br />
-    </div>
-    <br />
+    <p>The <code>tp.TableBoxAsync(Table, Text)</code> displays a modal window with a grid displaying a <code>tp.DataTable</code>. Returns a Promise.</p>
+    <p>The <code>tp.WindowArgs</code> returned by this function contains a Grid property that references the grid and a SelectedRow property that references the Grid.FocusedRow, if any, or null. </p>
+</div>
+<br />
 
+<div class="html-code">
+    <button onclick="ShowDialog()">Show TableBox dialog</button> <br />
 </div>
 
- 
+<br />
 
-<script>       
- 
-    tp.Ready(function () {        
-    });
- 
-
-    function ShowDialog() {  
+<script class="js-code">
+    async function ShowDialog() {
         var Data = tp.TestData.CreateTestDataTable(100);
         var Table = Data.Table;
 
-        tp.TableBoxPromise(Table, 'This is the window caption')
-            .then(function (Args) {
-                let DialogResult = Args.Window.DialogResult;
-                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-                if (Args.SelectedRow) {
-                    S = S + '\nSelected Name: ' + Args.SelectedRow.Get('Name').toString();
-                }
-                tp.InfoNote('DialogResult = ' + S);
-            });     
- 
-    }
+        let Args = await tp.TableBoxAsync(Table, 'This is the window caption');
 
+        let DialogResult = Args.Window.DialogResult;
+        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+        if (Args.SelectedRow) {
+            S = S + '\nSelected Name: ' + Args.SelectedRow.Get('Name').toString();
+        }
+        tp.InfoNote('DialogResult = ' + S);
+    }
 </script>
- 

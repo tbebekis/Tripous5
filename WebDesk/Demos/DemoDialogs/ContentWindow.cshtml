@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "ContentWindow";
 }
 
@@ -8,19 +6,23 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-
     <p>
         The tp.ContentWindow can display user defined content. The content is passed either as a css selector or as a HTMLElement. <br />
         The tp.ContentWindow can be displayed either as a modal dialog or as a non-modal window. <br />
         When is modal it displays an OK and a Cancel button and when closes it returns the proper DialogResult.
     </p>
+</div>
 
+<br />
+
+<div class="html-code">
     <div>
-       <button  onclick="ShowContentDialog()">Display a content dialog</button> <br />
+        <button onclick="ShowContentDialog()">Display a content dialog</button> <br />
     </div>
 
     <br />
-    <div  style="display: none">
+
+    <div style="display: none">
         <div id="Content">
             <p>
                 The tp.ContentWindow can display user defined content. The content is passed either as a css selector or as a HTMLElement. <br />
@@ -28,35 +30,17 @@
                 When is modal it displays an OK and a Cancel button and when closes it returns the proper DialogResult.
             </p>
             <button>Hi there</button>
-            <input type="text" value="text" /> 
+            <input type="text" value="text" />
         </div>
-
     </div>
- 
- 
- 
-
-    
 </div>
 
- 
+<script class="js-code">
+    async function ShowContentDialog() {
+        let Args = await tp.ContentWindow.ShowModalAsync('Content Window', '#Content');
 
-<script>       
- 
-    tp.Ready(function () {
-        
-    });
- 
-
-    function ShowContentDialog() {  
-        tp.ContentWindow.ShowPromise(true, 'Content Window', '#Content')
-            .then(function (Args) {
-                let DialogResult = Args.Window.DialogResult;
-                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-                tp.InfoNote('DialogResult = ' + S);
-            });
-         
+        let DialogResult = Args.Window.DialogResult;
+        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+        tp.InfoNote('DialogResult = ' + S); 
     }
-
 </script>
- 

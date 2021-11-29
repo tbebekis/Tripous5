@@ -19838,7 +19838,7 @@ The Window.Args contains a Grid property that references the grid and a Selected
 @param {string} [Text] Optional. The caption title of the window
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args. The Window.Args contains a Grid property that references the grid and a SelectedRow property that references the Grid.FocusedRow, if any, or null.
 */
-tp.TableBoxPromise = function (Table, Text) {
+tp.TableBoxAsync = function (Table, Text) {
     return new Promise((Resolve, Reject) => {
         tp.TableBox(Table, Text, (Args) => {
             Resolve(Args);
@@ -19894,7 +19894,7 @@ Mainly for debug purposes.
 @param {string} [Text] Optional. The caption title of the window
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.RowBoxPromise = function (Row, Text) {
+tp.RowBoxAsync = function (Row, Text) {
     return new Promise((Resolve, Reject) => {
         tp.RowBox(Row, Text, (Args) => {
             Resolve(Args);
@@ -19939,7 +19939,7 @@ Displays a modal window with a grid displaying the tables of a dataset, returns 
 @param {string} [Text] Optional. The caption title of the window
 @returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
 */
-tp.DataSetBoxPromise = function (DataSet, Text) {
+tp.DataSetBoxAsync = function (DataSet, Text) {
     return new Promise((Resolve, Reject) => {
         tp.DataSetBox(DataSet, Text, (Args) => {
             Resolve(Args);
@@ -20086,8 +20086,8 @@ If the user clicks OK on the dialog, then the dialog SelectedRows array property
 @param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object.  Must have (mandatory) a <code>tblSource: tp.DataTable</code> property. Optionally it may contain a <code>SelectedRows: tp.DataRow[]</code> and a <code>VisibleColumns: string[]</code> property.
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowsBoxPromise1 = function (Args) {
-    return tp.PickRowsBoxPromise(Args);
+tp.PickRowsBoxAsync1 = function (Args) {
+    return tp.PickRowsBoxAsync(Args);
 };
 /**
 Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns a promise.
@@ -20099,8 +20099,8 @@ If the user clicks OK on the dialog, then the dialog SelectedRows array property
 @param {string} SourceKeyName A tblSource Key field name used to match with TargetKeyName
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowsBoxPromise2 = function (tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName) {
-    return tp.PickRowsBoxPromise(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName);
+tp.PickRowsBoxAsync2 = function (tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName) {
+    return tp.PickRowsBoxAsync(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName);
 };
 /**
 Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns a promise.
@@ -20110,11 +20110,11 @@ If the user clicks OK on the dialog, then the dialog SelectedRows array property
 @param {tp.DataRow[]} SelectedRows A {@link tp.DataRow} array containing the tblSource rows that should be initially selected
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowsBoxPromise3 = function (tblSource, VisibleColumns, SelectedRows) {
-    return tp.PickRowsBoxPromise(tblSource, VisibleColumns, SelectedRows);
+tp.PickRowsBoxAsync3 = function (tblSource, VisibleColumns, SelectedRows) {
+    return tp.PickRowsBoxAsync(tblSource, VisibleColumns, SelectedRows);
 };
 
-tp.PickRowsBoxPromise = function() {
+tp.PickRowsBoxAsync = function() {
     let Args,           // tp.WindowArgs,
         tblTarget,      // tp.DataTable,
         tblSource,      // tp.DataTable,
@@ -20351,8 +20351,8 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Must have (mandatory), at least, defined either a  <code>Table: tp.DataTable</code> or a <code>SqlText: string </code> or a <code>SelectSql: tp.SelectSql </code> property.
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowBoxPromise1 = function (Args) {
-    return tp.PickRowBoxPromise(Args);
+tp.PickRowBoxAsync1 = function (Args) {
+    return tp.PickRowBoxAsync(Args);
 };
 /**
 Displays a row pick dialog with a grid that allows the user to check/select a single row.
@@ -20365,8 +20365,8 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {string} [Text] Optional. The caption title of the window
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowBoxPromise2 = function (Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text) {
-    return tp.PickRowBoxPromise(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text);
+tp.PickRowBoxAsync2 = function (Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text) {
+    return tp.PickRowBoxAsync(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text);
 };
 
 /**
@@ -20376,8 +20376,8 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {string} [Text] Optional. The caption title of the window
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowBoxPromise3 = function (SelectSql, Text) {
-    return tp.PickRowBoxPromise(SelectSql, Text);
+tp.PickRowBoxAsync3 = function (SelectSql, Text) {
+    return tp.PickRowBoxAsync(SelectSql, Text);
 };
 /**
 Displays a row pick dialog with a grid that allows the user to check/select a single row.
@@ -20387,11 +20387,11 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {string} [Text] Optional. The caption title of the window
 @returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
 */
-tp.PickRowBoxPromise4 = function(SqlText, VisibleColumns, Text) {
-    return tp.PickRowBoxPromise(SqlText, VisibleColumns, Text);
+tp.PickRowBoxAsync4 = function(SqlText, VisibleColumns, Text) {
+    return tp.PickRowBoxAsync(SqlText, VisibleColumns, Text);
 };
 
-tp.PickRowBoxPromise = function () {
+tp.PickRowBoxAsync = function () {
     let Args,               // tp.WindowArgs,
         Table,              // tp.DataTable,
         VisibleColumns,     // string[],

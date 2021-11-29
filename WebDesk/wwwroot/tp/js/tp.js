@@ -14756,12 +14756,15 @@ flex-grow: 1;
 position: relative;
 height: auto;
 display: flex;
-height: ${tp.WindowSettings.CaptionHeight};
+align-items: center;
+min-height: ${tp.WindowSettings.CaptionHeight};
 border-top: ${tp.WindowSettings.Border};
 user-select: none;
 padding: 0.15em;
 gap: 0.15em;
 `;
+
+ 
         this.Footer.style.cssText = Style;  
 
         // 
@@ -15385,12 +15388,12 @@ tp.FrameBox = function (Text, UrlOrHtmlContent, CloseFunc = null, Creator = null
 /**
 Displays a modal window with an iframe element and returns a promise
 @param {string} Text - The caption title of the window
-@param {string} ContentHtml - The html content (text) to display
+@param {string} UrlOrHtmlContent - The url or the html content (text) to display
 @returns {Promise} Returns a promise with the modal window Args (tp.WindowArgs)
 */
-tp.FrameBoxPromise = function (Text, ContentHtml) {
+tp.FrameBoxAsync = function (Text, UrlOrHtmlContent) {
     return new Promise((Resolve, Reject) => {
-        tp.FrameBox(Text, ContentHtml, (Args) => {
+        tp.FrameBox(Text, UrlOrHtmlContent, (Args) => {
             Resolve(Args);
         });
     });

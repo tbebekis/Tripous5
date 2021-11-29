@@ -28,6 +28,11 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+        [Route("/demo/ToolBar")]
+        public IActionResult ToolBar()
+        {
+            return View();
+        }
 
         [Route("/demo/Menu")]
         public IActionResult Menu()
@@ -45,10 +50,6 @@ namespace WebDesk.Controllers
         {
             return View();
         }
-        [Route("/demo/ToolBar")]
-        public IActionResult ToolBar()
-        {
-            return View();
-        }
+
     }
 }

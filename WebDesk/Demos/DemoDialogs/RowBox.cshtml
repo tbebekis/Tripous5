@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "RowBox";
 }
 
@@ -8,36 +6,31 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
- 
-    <div>
-       <button  onclick="ShowDialog()">Show RowBox dialog</button> <br />
-    </div>
-    <br />
-
+    <p>
+        The <code>function tp.RowBoxAsync(DataRow, Text)</code> displays a modal window with a grid showing extended information about a specified <code>tp.DataRow</code> data-row and returns a Promise. <br />
+        Mainly for debug purposes.
+    </p>
 </div>
 
- 
+<br />
 
-<script>       
- 
-    tp.Ready(function () {        
-    });
- 
+<div class="html-code">
+    <button onclick="ShowDialog()">Show RowBox dialog</button> <br />
+</div>
+<br />
 
-    function ShowDialog() {  
+<script class="js-code">
+    async function ShowDialog() {
         var Data = tp.TestData.CreateTestDataTable(1);
         var Table = Data.Table;
         var Row = Table.Rows[0];
 
-        tp.RowBoxPromise(Row, 'This is the window caption')
-            .then(function (Args) {
-                let DialogResult = Args.Window.DialogResult;
-                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
- 
-                tp.InfoNote('DialogResult = ' + S);
-            });     
- 
+        let Args = await tp.RowBoxAsync(Row, 'This is the window caption');
+
+        let DialogResult = Args.Window.DialogResult;
+        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+
+        tp.InfoNote('DialogResult = ' + S);
     }
 
 </script>
- 

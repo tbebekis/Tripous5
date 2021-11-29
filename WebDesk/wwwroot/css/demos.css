@@ -33,6 +33,12 @@ legend {
     font: inherit;
 }
 
+ul.no-style li,
+ol.no-style li {
+    list-style-type: none;
+}
+ 
+
 .Ace-Pager .tab-page {
     height: 400px;
 }

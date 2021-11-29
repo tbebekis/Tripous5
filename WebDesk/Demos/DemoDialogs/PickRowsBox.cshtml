@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "PickRowsBox";
 }
 
@@ -8,35 +6,39 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
- 
-    <div>
-       <button  onclick="ShowDialog()">Show PickRowsBox dialog</button> <br />
-    </div>
-    <br />
-
+    <p>
+        The <code>tp.PickRowsBoxAsync()</code> function displays a row pick list dialog box with a grid that allows the user to check/select multiple rows. Returns a Promise.  <br />
+        There are variations of this <code>tp.PickRowsBoxAsync()</code> function accepting different set of parameters.
+    </p>
+    <ul>
+        <li><code>tp.PickRowsBoxAsync1(Args)</code></li>
+        <li><code>tp.PickRowsBoxAsync2(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName)</code></li>
+        <li><code>tp.PickRowsBoxAsync3(tblSource, VisibleColumns, SelectedRows)</code></li>
+    </ul>
+    <p>The <code>tp.WindowArgs</code> returned by this function, when the user clicks OK, contains the SelectedRows array property with the selected <code>tp.DataRow</code> rows.</p>
 </div>
 
- 
+<br />
 
-<script>       
- 
-    tp.Ready(function () {        
-    }); 
- 
-    function ShowDialog() {  
-        var Data = tp.TestData.CreateTestDataTable(50);
-        var Table = Data.Table; 
+<div class="html-code">
+    <button onclick="ShowDialog()">Show PickRowsBox dialog</button> <br />
+</div>
+<br />
 
-        tp.PickRowsBoxPromise(Table, [], [])
-            .then(function (Args) {
-                let DialogResult = Args.Window.DialogResult;
-                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-                S += ' \nSelected Rows Count: ' + Args.SelectedRows.length;
- 
-                tp.InfoNote('DialogResult = ' + S);
-            });     
- 
+<script class="js-code">
+    async function ShowDialog() {
+        let Data = tp.TestData.CreateTestDataTable(50);
+        let tblSource = Data.Table;
+
+        let VisibleColumns = [];
+        let SelectedRows = [];
+
+        let Args = await tp.PickRowsBoxAsync3(tblSource, VisibleColumns, SelectedRows)
+
+        let DialogResult = Args.Window.DialogResult;
+        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+        S += ' \nSelected Rows Count: ' + Args.SelectedRows.length;
+
+        tp.InfoNote('DialogResult = ' + S);
     }
-
 </script>
- 

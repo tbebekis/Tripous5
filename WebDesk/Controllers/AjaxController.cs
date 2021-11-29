@@ -23,10 +23,14 @@ using Tripous.Data;
 
 namespace WebDesk.Controllers
 {
+
+#warning WARNING: Remove the AllowAnonymous attribute from the AjaxController in production
+
     /// <summary>
     /// Ajax controller.
     /// <para>NOTE: All AJAX calls, except of <see cref="BrokerController"/> calls, should be handled by this controller.</para>
     /// </summary>
+    [AllowAnonymous] // <<<<<< This is here just for the demos to work. Remove it in production.
     public class AjaxController : ControllerMvc, IAjaxController
     {
         DataTable SelectTable(string SqlText, string ConnectionName)

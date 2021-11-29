@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "Notifications";
 }
 
@@ -11,11 +9,9 @@
     button {
         min-width: 120px;
     }
-
 </style>
 
 <div>
-
     <p>
         Notifications are small boxes displayed in the right bottom of the viewport, by default, for a certain period of time. They are also movable and resizable.
     </p>
@@ -23,32 +19,20 @@
     <p>
         The background color, the size and the display duration of notifications is controlled by global settings found in the <strong>tp.NotificationBoxSetup</strong> variable.
     </p>
-
-    <div>
-        <button onclick="InfoFunc()">Info</button> <br /> <br />
-        <button onclick="WarningFunc()">Warning</button> <br /> <br />
-        <button onclick="SucccessFunc()">Succcess</button> <br /> <br />
-        <button onclick="ErrorFunc()">Error</button> <br /> <br />
-    </div>
-
-    <br />
-
- 
- 
-
-    
 </div>
 
- 
+<br />
 
-<script>    
- 
- 
-    tp.Ready(function () {
- 
-    });
+<div class="html-code">
+    <button onclick="InfoFunc()">Info</button> <br /> <br />
+    <button onclick="WarningFunc()">Warning</button> <br /> <br />
+    <button onclick="SucccessFunc()">Succcess</button> <br /> <br />
+    <button onclick="ErrorFunc()">Error</button> <br /> <br />
+</div>
 
- 
+<br />
+
+<script class="js-code">
     function InfoFunc() {
         var S = 'This is a Info note';
         tp.InfoNote(S);
@@ -65,6 +49,6 @@
         var S = 'This is an Error note';
         tp.ErrorNote(S);
     }
-
 </script>
+
  

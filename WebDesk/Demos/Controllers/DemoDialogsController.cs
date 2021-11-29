@@ -35,6 +35,7 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+       
         [Route("/demo/FrameBox")]
         public IActionResult FrameBox()
         {
@@ -57,6 +58,7 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+      
         [Route("/demo/RowBox")]
         public IActionResult RowBox()
         {

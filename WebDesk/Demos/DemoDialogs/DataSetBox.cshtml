@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "DataSetBox";
 }
 
@@ -8,37 +6,28 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
- 
-    <div>
-       <button  onclick="ShowDialog()">Show DataSetBox dialog</button> <br />
-    </div>
-    <br />
- 
+    <p>The <code>tp.DataSetBoxAsync(DataSet, Text)</code> displays a modal window with a grid displaying the tables of a <code>tp.DataSet</code>. Returns a Promise.</p>
 </div>
 
- 
+<br />
 
-<script>       
- 
-    tp.Ready(function () {        
-    });
- 
+<div class="html-code">
+    <button onclick="ShowDialog()">Show DataSetBox dialog</button> <br />
+</div>
 
-    function ShowDialog() { 
+<script class="js-code">
+    function ShowDialog() {
         var DataSet = new tp.DataSet('DataSet1');
 
         DataSet.AddTable(tp.TestData.CreateTestDataTable(10).Table);
         DataSet.AddTable(tp.TestData.tblCountries);
         DataSet.AddTable(tp.TestData.tblDepartments);
 
-        tp.DataSetBoxPromise(DataSet, 'This is the window caption')
+        tp.DataSetBoxAsync(DataSet, 'This is the window caption')
             .then(function (Args) {
                 let DialogResult = Args.Window.DialogResult;
-                let S = tp.EnumNameOf(tp.DialogResult, DialogResult); 
+                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
                 tp.InfoNote('DialogResult = ' + S);
-            });     
- 
+            });
     }
-
 </script>
- 
