@@ -1,19 +1,25 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "ToolBar and ButtonEx";
 }
- 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
- <div> 
-    <button onclick="ToggleNoText()">Toggle NoText</button> <br />
-    <button onclick="ToggleIcoMode()">Toggle IcoMode</button> <br />  
+<div>
+    <p>The <code>tp.ButtonEx</code> control is button class with ico and text. It actually is an anchor element. Used by the <code>tp.ToolBar</code> control. </p>
+    <p>The <code>tp.ToolBar</code> control is a tool-bar.</p>
+    <p>Both classes provide properties to handle the display of the buttons regarding the Text and the Icon.</p>
 </div>
+
 <br />
 
 <div>
+    <button onclick="ToggleNoText()">Toggle NoText</button> <br />
+    <button onclick="ToggleIcoMode()">Toggle IcoMode</button> <br />
+</div>
+<br />
+
+<div class="html-code">
     <div id="tb1" class="ToolBar">
         <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , IcoClasses: 'fa fa-home',  NoText: true, Ico: 'Left'}"></a>
 
@@ -33,33 +39,33 @@
         <a class="ButtonEx" data-setup="{ Command: 'Cancel', Text: 'Cancel', ToolTip: 'Cancel' , IcoClasses: 'fa fa-times',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , IcoClasses: 'fa fa-sign-out',  NoText: true, Ico: 'Left'}"></a>
     </div>
- 
+
     <br />
     <div id="tb2" class="ToolBar">
-        <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , ImageUrl: '/images/Home.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , ImageUrl: '/images/demos/Home.png',  NoText: true, Ico: 'Left'}"></a>
 
-        <a class="ButtonEx" data-setup="{ Command: 'List', Text: 'List', ToolTip: 'List' , ImageUrl: '/images/List.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Filter', Text: 'Filter', ToolTip: 'Filter' , ImageUrl: '/images/Filter.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'List', Text: 'List', ToolTip: 'List' , ImageUrl: '/images/demos/List.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Filter', Text: 'Filter', ToolTip: 'Filter' , ImageUrl: '/images/demos/Filter.png',  NoText: true, Ico: 'Left'}"></a>
 
-        <a class="ButtonEx" data-setup="{ Command: 'First', Text: 'First', ToolTip: 'First' , ImageUrl: '/images/First.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Prior', Text: 'Prior', ToolTip: 'Prior' , ImageUrl: '/images/Prior.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Next', Text: 'Next', ToolTip: 'Next' , ImageUrl: '/images/Next.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Last', Text: 'Last', ToolTip: 'Last' , ImageUrl: '/images/Last.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'First', Text: 'First', ToolTip: 'First' , ImageUrl: '/images/demos/First.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Prior', Text: 'Prior', ToolTip: 'Prior' , ImageUrl: '/images/demos/Prior.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Next', Text: 'Next', ToolTip: 'Next' , ImageUrl: '/images/demos/Next.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Last', Text: 'Last', ToolTip: 'Last' , ImageUrl: '/images/demos/Last.png',  NoText: true, Ico: 'Left'}"></a>
 
-        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , ImageUrl: '/images/Edit.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , ImageUrl: '/images/Insert.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , ImageUrl: '/images/Delete.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Save', Text: 'Save', ToolTip: 'Save' , ImageUrl: '/images/Save.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , ImageUrl: '/images/demos/Edit.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , ImageUrl: '/images/demos/Insert.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , ImageUrl: '/images/demos/Delete.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Save', Text: 'Save', ToolTip: 'Save' , ImageUrl: '/images/demos/Save.png',  NoText: true, Ico: 'Left'}"></a>
 
-        <a class="ButtonEx" data-setup="{ Command: 'Cancel', Text: 'Cancel', ToolTip: 'Cancel' , ImageUrl: '/images/Cancel.png',  NoText: true, Ico: 'Left'}"></a>
-        <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , ImageUrl: '/images/Close.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Cancel', Text: 'Cancel', ToolTip: 'Cancel' , ImageUrl: '/images/demos/Cancel.png',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , ImageUrl: '/images/demos/Close.png',  NoText: true, Ico: 'Left'}"></a>
     </div>
 </div>
 
 
 
-<script>
- 
+<script class="js-code">
+
     tp.Ready(function () {
 
         function ItemClick(Args) {
@@ -70,22 +76,22 @@
         let tb = new tp.ToolBar('#tb1');
         tb.On('ButtonClick', ItemClick);
 
-        tb =  new tp.ToolBar('#tb2');
+        tb = new tp.ToolBar('#tb2');
         tb.On('ButtonClick', ItemClick);
     });
 
-    
+
 
     var NoText = true;
-    var IcoMode = tp.ButtonExIcoMode.IcoLeft;    
+    var IcoMode = tp.ButtonExIcoMode.IcoLeft;
 
     function ToggleNoText() {
         NoText = !NoText;
-
-        let tb = tp.GetElement('#tb1');
+ 
+        let tb = tp.GetScriptObject('#tb1');
         tb.SetNoText(NoText);
 
-        tb = tp.GetElement('#tb2');
+        tb = tp.GetScriptObject('#tb2');
         tb.SetNoText(NoText);
     }
 
@@ -98,12 +104,14 @@
             IcoMode = tp.ButtonExIcoMode.IcoLeft;
         }
 
-        let tb = tp.GetElement('#tb1');
+        let tb = tp.GetScriptObject('#tb1');
         tb.SetIcoMode(IcoMode);
 
-        tb = tp.GetElement('#tb2');
+        tb = tp.GetScriptObject('#tb2');
         tb.SetIcoMode(IcoMode);
-        
+
     }
 
 </script>
+
+<partial name="_AceEditorPager" />

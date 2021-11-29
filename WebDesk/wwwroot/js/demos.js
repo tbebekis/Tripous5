@@ -24,7 +24,7 @@ Demos.CreateEditorPager = () => {
 
     el = tp('.html-code');
     if (tp.IsElement(el)) {
-        Code = el.outerHTML;
+        Code = el.innerHTML;
         Demos.edtHtml.setValue(Code, -1);
     }
 

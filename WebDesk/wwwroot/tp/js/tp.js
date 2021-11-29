@@ -914,7 +914,26 @@ tp.GetFunctionParams = function (func) {
         .replace('/=[^,]+/g', '')                       // strip any ES6 defaults  
         .split(',').filter(Boolean);                  // split & filter [""]  
 };
-
+/**
+ * Returns true if a specified object has a specified property (not function).
+@param {object} o - The container object
+@param {string} Key - The name of the member
+@returns {boolean} Returns true if a specified object has a specified property (not function).
+ */
+tp.HasProperty = function (o, Key) {
+    let PI = tp.GetPropertyInfo(o, Key);
+    return PI.IsProperty == true && PI.HasSetter === true;
+};
+/**
+ * Returns true if a specified object has a specified writable property (not function).
+@param {object} o - The container object
+@param {string} Key - The name of the member
+@returns {boolean} Returns true if a specified object has a specified writable property (not function).
+ */
+tp.HasWritableProperty = function (o, Key) {
+    let PI = tp.GetPropertyInfo(o, Key);
+    return PI.IsProperty == true && (PI.IsWritable === true || PI.HasSetter === true);
+};
 //#endregion
 
 //#region Merging objects
@@ -11250,7 +11269,26 @@ tp.CreateParams.prototype.DeferHandleCreation = false;
 
 
 /**
-Represents a HTML element
+Represents a HTML element. <br />
+CAUTION: Properties (i.e. fields) in derived classes, in order to be visible from the super constructor, <br />
+should either belong to the derived class prototype, e.g. MyDerivedClass.prototype.MyProperty <br />
+or provide a getter and setter function. <br />
+Example:
+
+tp.Button = class extends tp.tpElement {
+
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    // NOT visible in the super constructor. 
+    // In addition this initial value here is passed to the instance AFTER the super constructor finishes.
+    // So if this property is initialized somehow by the super constructor, that value is lost. And this value here prevails.
+    // So put that kind of properties to MyDerivedClass.prototype.XXXX to be safe.
+    Command = '';  
+}
+
+Ofcourse it's insane.
 */
 tp.tpElement = class extends tp.tpObject {
 
@@ -12218,9 +12256,16 @@ tp.tpElement = class extends tp.tpObject {
         return ['Id', 'Name', 'Handle', 'Parent', 'Html', 'CssClasses', 'CssText'];
     }
     /**
-    Processes the this.CreateParams by applying its properties to the properties of this instance
-    @param {object} [o=null] - Optional. The create params object to processs.
-    */
+     * Processes the this.CreateParams by applying its properties to the properties of this instance <br />
+     * CAUTION: For properties to be processed here should belong to the prototype of the derived class, <br />
+     * e.g. MyDerivedClass.prototype.MyProperty, <br />
+     * and NOT in the class statement itself. <br />
+     * The reason is that this method is called from inside the super constructor and the construction cycle has not yet completed. <br />
+     * Only properties belonging to the super class and to MyDerivedClass.prototype.MyProperty are visible at this point. <br />
+     * For a property in a derived class to be visible here must have a getter and a setter in the derived class, i.e. not to be just a field but a "real" property. <br />
+     * NOTE: If you ask me, I say it is insane.
+     * @param {object} [o=null] - Optional. The create params object to processs.
+     */
     ProcessCreateParams(o = null) {
         this.CreateParams = o || {};
 
@@ -12234,17 +12279,22 @@ tp.tpElement = class extends tp.tpObject {
     }
     /**
      * Processes an entry of the this.CreateParams.
+     * CAUTION: For properties to be processed here should belong to the prototype of the derived class, <br />
+     * e.g. MyDerivedClass.prototype.MyProperty, <br />
+     * and NOT in the class statement itself. <br />
+     * The reason is that this method is called from inside the super constructor and the construction cycle has not yet completed. <br />
+     * Only properties belonging to the super class and to MyDerivedClass.prototype.MyProperty are visible at this point. <br />
+     * For a property in a derived class to be visible here must have a getter and a setter in the derived class, i.e. not to be just a field but a "real" property. <br />
+     * NOTE: If you ask me, I say it is insane.
      * @param {string} Name The name of the property in this.CreateParams
      * @param {any} Value The value of the property in this.CreateParams
      * @param {string[]} AvoidParams A string array of property names the ProcessCreateParam() should NOT set
      */
     ProcessCreateParam(Name, Value, AvoidParams) {
-        if (Name in this && !tp.IsFunction(Value)) {
+        if (tp.HasWritableProperty(this, Name) && !tp.IsFunction(Value)) {
             let Allowed = AvoidParams.indexOf(Name) === -1;
             if (Allowed) {
-                let PropInfo = tp.GetPropertyInfo(this, Name);
-                if (PropInfo.IsProperty && (PropInfo.HasSetter || PropInfo.IsWritable))
-                    this[Name] = Value;
+                this[Name] = Value;
             }
         }
     }

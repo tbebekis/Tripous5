@@ -1,22 +1,27 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "Menu";
 }
- 
- 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
- 
-
 <div>
- 
+    <p>
+        The <code>tp.Menu</code> control represents a desktop-like menu. It is a complex class. <br />
+        Inherits from <code>tp.MenuBase</code> and uses <code>tp.MenuItem</code> menu-items.
+    </p>
+    <p>A <code>tp.MenuItem</code> can have Text, Icon, a clickable Url and other <code>tp.MenuItem</code> as children, thus forming a tree. </p>
+</div>
+
+<br />
+
+<div class="html-code">
     <div id="MainMenu">
         <div>
             File
             <div data-setup="{IcoClasses: 'fa fa-university'}">Open</div>
-            <div>New
+            <div>
+                New
                 <div data-setup="{ImageUrl: 'http://icons.iconarchive.com/icons/double-j-design/origami-colored-pencil/24/blue-home-icon.png'}">File</div>
                 <div data-setup="{ImageUrl: 'http://icons.iconarchive.com/icons/iconsmind/outline/24/Home-2-icon.png'}">Image</div>
             </div>
@@ -33,16 +38,11 @@
         <div>Window</div>
         <div>Help</div>
     </div>
-
-
- 
- 
 </div>
 
 
 
-<script>
-
+<script class="js-code">
     var mnu;
     tp.Ready(function () {
         mnu = new tp.Menu('#MainMenu');
@@ -51,10 +51,8 @@
             var S = 'MenuItem: ' + Args.MenuItem.Text + ' - Command: ' + Args.MenuItem.Command;
             tp.InfoNote(S);
         });
- 
+
     });
-
-
- 
-
 </script>
+
+<partial name="_AceEditorPager" />

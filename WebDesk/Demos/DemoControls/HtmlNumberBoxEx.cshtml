@@ -1,0 +1,33 @@
+﻿@{
+    ViewBag.Title = "HtmlNumberBoxEx";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>A custom number box control. Contains a styled input type="number" element. Provides minus and plus buttons.</p>
+    <p>NOTE: adding the css class tp-MinusFirst places the minus sign first, that is at the left of the number input control</p>
+    <p>NOTE2: decimal places are set by setting the decimal places of the value of the Step property</p>
+    <br />
+    
+    <p>Properties: Min, Max, Step, Value</p>
+</div>
+
+<br />
+
+<div class="html-code">
+    <div id="Box" class="tp-MinusFirst" data-setup="{ Width: 200, Min: 0, Max: 200, Value: 100, Step: '0.500'  }"></div>
+</div>
+<br />
+
+
+<script class="js-code">
+    var ctrl;
+
+    tp.Ready(function () {
+        ctrl = new tp.HtmlNumberBoxEx('#Box');
+    })
+</script>
+
+<partial name="_AceEditorPager" />

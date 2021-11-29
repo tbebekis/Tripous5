@@ -3,10 +3,13 @@
 }
 
  
-
 <style>
     ul, ol {
-        padding-left: 40px;
+        padding-left: 0;
+    }
+    ul.no-style li,
+    ol.no-style li {
+        list-style-type: none;
     }
 </style>
 
@@ -18,7 +21,7 @@
     <div class="l3 m3 s6 xs12">
         <h2>Containers</h2>
         <div style="font-size: 14px;">
-            <ol>
+            <ol class="no-style">
                 <li><div><a href="/demo/DropDownBox" target="_self">DropDownBox</a></div></li>
                 <li><div><a href="/demo/VirtualScroller" target="_self">VirtualScroller</a></div></li>
                 <li><div><a href="/demo/Splitter" target="_self">Splitter</a></div></li>
@@ -35,44 +38,61 @@
     <div class="l3 m3 s6 xs12">
         <h2>Controls</h2>
         <div style="font-size: 14px;">
-            <ol>
+            <ol class="no-style">
                 <li><div><a href="/demo/AutocompleteList" target="_self">AutocompleteList</a></div></li>
+                <li>&nbsp;</li>
 
                 <li><div><a href="/demo/Label" target="_self">Label</a></div></li>
                 <li><div><a href="/demo/TextBox" target="_self">TextBox</a></div></li>
                 <li><div><a href="/demo/Memo" target="_self">Memo</a></div></li>
                 <li><div><a href="/demo/CheckBox" target="_self">CheckBox</a></div></li>
-                <li><div><a href="/demo/NumberBox" target="_self">NumberBox</a></div></li>
-
                 <li><div><a href="/demo/ComboBox" target="_self">ComboBox</a></div></li>
                 <li><div><a href="/demo/ListBox" target="_self">ListBox</a></div></li>
+                <li>&nbsp;</li>
+
                 <li><div><a href="/demo/CheckListBox" target="_self">CheckListBox</a></div></li>
                 <li><div><a href="/demo/CheckComboBox" target="_self">CheckComboBox</a></div></li>
+                <li><div><a href="/demo/RadioGroup" target="_self">RadioGroup</a></div></li>
+                <li>&nbsp;</li>
 
                 <li><div><a href="/demo/HtmlComboBox" target="_self">HtmlComboBox</a></div></li>
                 <li><div><a href="/demo/HtmlListBox" target="_self">HtmlListBox</a></div></li>
+                <li>&nbsp;</li>
+
+                <li><div><a href="/demo/NumberBox" target="_self">NumberBox</a></div></li>
                 <li><div><a href="/demo/HtmlNumberBox" target="_self">HtmlNumberBox</a></div></li>
+                <li><div><a href="/demo/HtmlNumberBoxEx" target="_self">HtmlNumberBoxEx</a></div></li>
+                <li>&nbsp;</li>
 
                 <li><div><a href="/demo/Calendar" target="_self">Calendar</a></div></li>
                 <li><div><a href="/demo/DateBox" target="_self">DateBox</a></div></li>
+                <li><div><a href="/demo/HtmlDateBox" target="_self">HtmlDateBox</a></div></li>
+                <li>&nbsp;</li>
+
                 <li><div><a href="/demo/ImageBox" target="_self">ImageBox</a></div></li>
-                <li><div><a href="/demo/RadioGroup" target="_self">RadioGroup</a></div></li>
                 <li><div><a href="/demo/ValueSlider" target="_self">ValueSlider</a></div></li>
-
                 <li><div><a href="/demo/ProgressBar" target="_self">ProgressBar</a></div></li>
-                <li><div><a href="/demo/TreeView" target="_self">TreeView</a></div></li>
+                <li>&nbsp;</li>
 
+                <li><div><a href="/demo/TreeView" target="_self">TreeView</a></div></li>
             </ol>
         </div>
     </div>
 
     <div class="l3 m3 s6 xs12">
-        <h2>Grid</h2>
+        <h2>Menus - Buttons - ToolBars </h2>
         <div style="font-size: 14px;">
-            <ol>
-                <li><div><a href="/demo/Grid" target="_self">Grid: Thousands of rows</a></div></li>
-                <li><div><a href="/demo/Grid2" target="_self">Grid2: Initialization using CreateParams</a></div></li>
-                <li><div><a href="/demo/Grid3" target="_self">Grid3: Initialization using properties directly</a></div></li>
+            <ol class="no-style">
+                <li><div><a href="/demo/Button" target="_self">Button</a></div></li>
+                <li><div><a href="/demo/ToolBar" target="_self">ToolBar and ButtonEx</a></div></li>
+                <li>&nbsp;</li>
+
+                <li><div><a href="/demo/Menu" target="_self">Menu</a></div></li>
+                <li><div><a href="/demo/ContextMenu" target="_self">ContextMenu</a></div></li>
+                <li>&nbsp;</li>
+
+                <li><div><a href="/demo/SiteMenu" target="_self">SiteMenu</a></div></li>
+
             </ol>
         </div>
     </div>
@@ -80,7 +100,7 @@
     <div class="l3 m3 s6 xs12">
         <h2>Dialogs</h2>
         <div style="font-size: 14px;">
-            <ol>
+            <ol class="no-style">
                 <li><div><a href="/demo/Notifications" target="_self">Notifications</a></div></li>
                 <li><div><a href="/demo/NotificationDialogs" target="_self">Notification Dialogs</a></div></li>
 
@@ -101,21 +121,20 @@
 
 <div class="tp-Row">
     <div class="l3 m3 s6 xs12">
-        <h2>Menus - Buttons - ToolBars </h2>
+        <h2>Grid</h2>
         <div style="font-size: 14px;">
-            <ol>
-                <li><div><a href="/demo/Menu" target="_self">Menu</a></div></li>
-                <li><div><a href="/demo/ContextMenu" target="_self">ContextMenu</a></div></li>
-                <li><div><a href="/demo/SiteMenu" target="_self">SiteMenu</a></div></li>
-                <li><div><a href="/demo/ToolBar" target="_self">ToolBar and ButtonEx</a></div></li>
+            <ol class="no-style">
+                <li><div><a href="/demo/Grid" target="_self">Grid: Thousands of rows</a></div></li>
+                <li><div><a href="/demo/Grid2" target="_self">Grid2: Initialization using CreateParams</a></div></li>
+                <li><div><a href="/demo/Grid3" target="_self">Grid3: Initialization using properties directly</a></div></li>
             </ol>
         </div>
     </div>
-
+ 
     <div class="l3 m3 s6 xs12">
         <h2>Data</h2>
         <div style="font-size: 14px;">
-            <ol>
+            <ol class="no-style">
                 <li><div><a href="/demo/SimpleBinding" target="_self">Simple Binding</a></div></li>
                 <li><div><a href="/demo/ListBinding" target="_self">List Binding</a></div></li>
                 <li><div><a href="/demo/MasterDetail" target="_self">Master - Detail</a></div></li>

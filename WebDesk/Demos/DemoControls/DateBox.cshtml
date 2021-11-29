@@ -1,6 +1,4 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "DateBox";
 }
 
@@ -8,38 +6,36 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-
-    <div>
-        <button id="btn1" onclick="Reset()">Reset</button> <br />
-    </div>
-
-    <br />
-
-    <div>
-       <div id="Box" data-setup="{ Date: '2000-05-08'}"></div>
-    </div>
-
-    <br />
- 
-
-    
+    <p>A date-box control. </p>
+    <p>An inline-block (thus having certain width) DIV containing an input[type=text], an arrow button and a hidden drop-down with a tp.Calendar control.</p>
+    <p>Properties: Date.</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <button id="btn1" onclick="Reset()">Reset</button> <br />
+</div>
+
+<br />
+
+<div class="html-code">
+    <div id="Box" data-setup="{ Date: '2000-05-08'}"></div>
+</div>
+
+<br />
+
+<script class="js-code">
     var c;
- 
+
     tp.Ready(function () {
         c = tp.Select('#Box');
         c = new tp.DateBox(c);
     });
 
- 
     function Reset() {
         c.Date = new Date();
     }
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

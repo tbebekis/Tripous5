@@ -1,46 +1,46 @@
-﻿
-
-@{
+﻿@{
     ViewBag.Title = "TreeView";
 }
- 
+
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
+    <p>The <code>tp.TreeView</code> is a complex control. It is actually a container of <code>tp.TreeNode</code> objects. </p>
+    <p>Both classes provide properties and methods to handle its node tree, i.e. add, remove, insert, get/set text or icon, etc.</p>
+    <p>A tree-node provides the Url property, thus a tree-node becomes a clickable anchor element.</p>
+</div>
 
-    <div>
-        <input id="txt" type="text" style="width: 400px;" value="This is a node display text, quite long, so to check the overflow" /> <br />
-        <button onclick="SetTextToLastClicked()">Set the text to the last clicked Node</button> <br />
-        <button onclick="AddToLastClicked()">Add a child Node the last clicked Node</button> <br />
-        <button onclick="RemoveLastClicked()">Remove the last clicked Node</button> <br />
-    </div>
-    <br />
+<br />
 
-    <div id="log"></div>
-    <br />
+<div>
+    <input id="txt" type="text" style="width: 400px;" value="This is a node display text, quite long, so to check the overflow" /> <br /> <br />
+    <button onclick="SetTextToLastClicked()">Set the text to the last clicked Node</button> <br /> <br />
+    <button onclick="AddToLastClicked()">Add a child Node the last clicked Node</button> <br /> <br />
+    <button onclick="RemoveLastClicked()">Remove the last clicked Node</button> <br />
+</div>
+<br />
 
-    <div>
-        <div id="tv" data-setup="{ Height: 200, Width: 150}">
-            <div data-setup="{ IcoClasses: 'fa fa-university',  Url: 'http://w3c.github.io/html/dom.html' }">This is a link to w3c</div>
-            <div data-setup="{ ImageUrl: 'http://icons.iconarchive.com/icons/iconsmind/outline/24/Home-2-icon.png'}">
+<div id="log"></div>
+<br />
+
+<div class="html-code">
+    <div id="tv" data-setup="{ Height: 300, Width: 250}">
+        <div data-setup="{ IcoClasses: 'fa fa-university',  Url: 'http://w3c.github.io/html/dom.html' }">This is a link to w3c</div>
+        <div data-setup="{ ImageUrl: 'http://icons.iconarchive.com/icons/iconsmind/outline/24/Home-2-icon.png'}">
+            Node
+            <div>Leaf</div>
+            <div>
                 Node
                 <div>Leaf</div>
-                <div>
-                    Node
-                    <div>Leaf</div>
-                </div>
             </div>
         </div>
     </div>
-
-
 </div>
 
 
 
-<script>
-
+<script class="js-code">
     var tv, Node;
 
     tp.Ready(function () {
@@ -78,7 +78,7 @@
             Node = null;
         }
     }
-
-
 </script>
+
+<partial name="_AceEditorPager" />
 

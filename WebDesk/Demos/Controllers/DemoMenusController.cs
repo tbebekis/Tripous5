@@ -23,6 +23,12 @@ namespace WebDesk.Controllers
     public class DemoMenusController : Controller
     {
         /* actions */
+        [Route("/demo/Button")]
+        public IActionResult Button()
+        {
+            return View();
+        }
+
         [Route("/demo/Menu")]
         public IActionResult Menu()
         {

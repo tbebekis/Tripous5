@@ -1,42 +1,49 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "ValueSlider";
-} 
- 
+}
+
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
+    <p>A value slider control, is an input[type='range'] html control.</p>
+    <p>
+        It can be used either as a position selector between a minimum and maximum number (range) <br />
+        or as a value selector where values come from a specified array of values and min/max are the first and the last array index.
+    </p>
+    <p>
+        Properties: Min, Max, Step, Value and ValueList. <br />
+        When a value list is used then a position change it actually changes the selected index in that list. <br />
+        In the following code the second example uses the ValueList property with day names as possible values.
+    </p> 
+</div>
 
- 
-
+<div class="html-code">
     <div id="log1"></div>
     <br />
 
     <div>
-        <input type="range" id="ValueSlider1"  min="1" max="100" step="1" , value='50' />
+        <input type="range" id="ValueSlider1" min="1" max="100" step="1" , value='50' />
     </div>
     <br />
- 
+
     <div id="log2"></div>
     <br />
 
     <div>
         <input type="range" id="ValueSlider2" data-setup="{ ValueList: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], Value: 'Wednesday' }" />
     </div>
-    <br />
-    
 </div>
 
- 
 
-<script>    
+
+
+<script class="js-code">
     var vs1, vs2;
- 
+
     tp.Ready(function () {
- 
+
         vs1 = new tp.ValueSlider('#ValueSlider1');
         vs2 = new tp.ValueSlider('#ValueSlider2');
 
@@ -54,12 +61,9 @@
 
         Func1();
         Func2();
- 
+
     })
 
- 
- 
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

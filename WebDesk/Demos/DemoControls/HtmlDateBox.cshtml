@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "HtmlDateBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>A date control built on top of a input type="date" element.</p>
+    <p>Properties: Date</p>
+</div>
+
+<br />
+
+<div class="html-code">
+    <input type="date" id="HtmlDateBox" value='2000-12-25' />
+</div>
+
+<br />
+
+
+<script class="js-code">
+    var ctrl;
+
+    tp.Ready(function () {
+        ctrl = new tp.HtmlDateBox('#HtmlDateBox');
+    })
+</script>
+
+<partial name="_AceEditorPager" />

@@ -1,15 +1,18 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "SiteMenu";
 }
- 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
- 
 
 <div>
- 
+    <p>A document-like menu, with a toggle button for small srceens, that supports columns on menu items. </p>
+</div>
+
+<br />
+
+<div class="html-code">
+
     <div id="SiteMenu" class="tp-SiteMenu" data-setup="{ BreakPoint: 768 }">
 
         <div class="tp-Toggle" style="order: 1;">
@@ -25,7 +28,7 @@
             <div class="tp-Item">
                 MenuBarItem 2                      <!-- menu bar item with child menu items -->
                 <div class="tp-Content">
-                    <div class="tp-Item tp-Title">Title</div>
+                    <div class="tp-Item tp-Title">Title 2</div>
                     <div class="tp-Item" data-command="Command1">Item 1</div>
                     <div class="tp-Item">Item 2</div>
                 </div>
@@ -36,7 +39,7 @@
                 <div class="tp-Content">
                     <div class="tp-Columns">
                         <div class="tp-Column">
-                            <div class="tp-Item tp-Title">Title</div>
+                            <div class="tp-Item tp-Title">Title 3</div>
                             <div class="tp-Item">Item 1</div>
                             <div class="tp-Item">Item 2</div>
                         </div>
@@ -50,16 +53,13 @@
 
         </div>
 
-    </div>   
+    </div>
 
-
- 
- 
 </div>
 
 
 
-<script>
+<script class="js-code">
 
     var mnu;
     tp.Ready(function () {
@@ -69,10 +69,9 @@
             var S = Args.ItemText + ' - Command: ' + Args.Command;
             tp.InfoNote(S);
         });
- 
+
     });
 
-
- 
-
 </script>
+
+<partial name="_AceEditorPager" />

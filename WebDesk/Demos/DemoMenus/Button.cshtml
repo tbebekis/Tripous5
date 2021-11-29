@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "Button";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>A button control build upon a <code>button</code> element.</p>
+    <p>Properties: Command, Tag.</p>
+    <p>You can get the value of the Command property of a button passing the <code>tp.EventArgs</code> parameter of an event to the <code>tp.GetCommand(...)</code> function.</p>
+</div>
+
+<br />
+
+<div class="html-code">
+    <button id="Button1" data-setup="{Command: 'TEST_COMMAND'}">Button1</button>
+</div>
+
+<br />
+
+
+<script class="js-code">
+    var ctrl;
+
+    tp.Ready(function () {
+        ctrl = new tp.Button('#Button1');
+        ctrl.On(tp.Events.Click, (Args) => {
+            let C = tp.GetCommand(Args);
+            if (!tp.IsBlank(C))
+                tp.InfoBox(`Command: ${C}`);
+        });
+    })
+</script>
+
+<partial name="_AceEditorPager" />

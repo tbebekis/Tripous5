@@ -1,20 +1,25 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "ContextMenu";
 }
- 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
- 
+<div>
+    <p>
+        The <code>tp.ContextMenu</code> control represents a desktop-like context menu (local menu). <br />
+        It is a complex class. Inherits from <code>tp.MenuBase</code> and uses <code>tp.MenuItem</code> menu-items.
+    </p>
+    <p>A <code>tp.MenuItem</code> can have Text, Icon, a clickable Url and other <code>tp.MenuItem</code> as children, thus forming a tree. </p>
+</div>
 
-<div style="position: relative">
- 
-    <div id="div0" style="position: absolute; left: 20px; top: 20px; min-height: 200px; min-width: 300px; border: 1px solid gray">
-        Right click inside here to see the context menu
-    </div>
+<br />
 
+<div id="div0" style="position: relative; left: 20px; top: 20px; min-height: 200px; min-width: 300px; width: 300px; border: 1px solid gray">
+    Right click inside here to see the context menu
+</div>
+
+<div class="html-code">
     <div id="ContextMenu">
         <div>
             File
@@ -37,19 +42,17 @@
         <div>Window</div>
         <div>Help</div>
     </div>
- 
 </div>
 
+<br />
+<br />
 
-
-<script>
-
+<script class="js-code">
     var mnuContext;
     tp.Ready(function () {
         mnuContext = new tp.ContextMenu('#ContextMenu');
 
         tp.On(tp.Select('#div0'), tp.Events.ContextMenu, function (e) {
-            e.preventDefault();
             mnuContext.Show(e);
         });
 
@@ -58,8 +61,7 @@
             tp.InfoNote(S);
         });
     });
-
-
- 
-
 </script>
+
+<partial name="_AceEditorPager" />
+

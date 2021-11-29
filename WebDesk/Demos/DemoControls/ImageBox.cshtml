@@ -1,21 +1,30 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "ImageBox";
 }
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
-
 <h2>@ViewBag.Title</h2>
- 
+
 <div>
-    <select id="cbo" data-setup="{ Width: 140,  List: [{Id: 1, Name: 'Crop'}, {Id: 2, Name: 'Scale'}, {Id:4, Name: 'Stretch'}]  }"></select>
-</div> 
-<br />
-<div>  
-    <div style="border:2px solid black" id="Image" data-setup='{ Url: "/Images/Kefalonia.jpg", Height: 800, Width: 800 }'></div>
+    <p>An image control.</p>
+    <p>It is <strong>NOT</strong> an <code>img</code> tag. </p>
+    <p>It is a DIV element using the css background properties, i.e. background-image, background-size, and background-position. </p>
+    <p>Properties: Url, SizeMode. SizeMode is a tp.ImageSizeMode enum type with 3 values: Crop, Scale and Stretch. </p>
 </div>
 
-<script>
+<br />
+
+<div>
+    <select id="cbo" data-setup="{ Width: 140,  List: [{Id: 1, Name: 'Crop'}, {Id: 2, Name: 'Scale'}, {Id:4, Name: 'Stretch'}]  }"></select>
+</div>
+
+<br />
+
+<div class="html-code">
+    <div style="border:2px solid black" id="Image" data-setup='{ Url: "/images/demos/Kefalonia.jpg", Height: 800, Width: 800 }'></div>
+</div>
+
+<script class="js-code">
     var cbo, fi;
     tp.Ready(function () {
         cbo = new tp.HtmlComboBox('#cbo');
@@ -26,6 +35,8 @@
             if (!tp.IsBlank(S))
                 fi.SizeMode = parseInt(S);
         });
-    }); 
+    });
 
 </script>
+
+<partial name="_AceEditorPager" />

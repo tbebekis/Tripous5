@@ -3921,7 +3921,10 @@ tp.MenuItem = class extends tp.MenuItemBase {
         return this.fListElement.style.display === '';
     }
     set IsListVisible(v) {
-        this.fListElement.style.display = v === true ? '' : 'none';
+        let Flag = v === true;
+        this.fListElement.style.display = Flag ? '' : 'none';
+        if (Flag)
+            tp.BringToFront(this.fListElement);
     }
 
     /* properties */
@@ -4049,7 +4052,6 @@ tp.MenuItem = class extends tp.MenuItemBase {
     @param {MouseEvent} e The event
     */
     OnItemClick(e) {
-        tp.CancelEvent(e);
         //e.preventDefault(); // NO, let the click do its default because the menu item may have a href defined
 
         if (this.Menu instanceof tp.MenuBase) {
@@ -4086,7 +4088,17 @@ tp.MenuItem = class extends tp.MenuItemBase {
 
             }
 
+            if (!tp.IsString(this.Url) || tp.IsBlank(this.Url)) {
+                e.preventDefault();
+            }
+
             this.Menu.OnItemClick(e, this);
+
+            e.stopPropagation();
+
+        }
+        else {
+            tp.CancelEvent(e);
         }
 
     }
@@ -4687,25 +4699,29 @@ tp.ContextMenu = class extends tp.MenuBase {
 
     /* methods */
     /**
-    Shows the context menu at event coordinates (viewport coordinates)
+    Shows the context menu at event coordinates (viewport coordinates).
+    NOTE: This method prevents the default browser menu.
     @param {MouseEvent} e The event object
     */
     Show(e) {
+        e.preventDefault();
         var X = e.clientX + 1;
         var Y = e.clientY + 1;
         this.ShowAt(X, Y);
     }
     /**
     Shows the context menu at viewport coordinates. <br />
-    It also recalculates the location in order to be inside the boundaries of the viewport.
+    It also recalculates the location in order to be inside the boundaries of the viewport. <br />
+    NOTE: This method does NOT prevent the default browser menu.
     @param {number} X The x coordination
     @param {number} Y The y coordination
     */
     ShowAt(X, Y) {
         if (tp.IsEmpty(this.ParentHandle)) {
-            this.Document.body.appendChild(this.Handle);
-            this.Position = 'fixed';
+            this.Document.body.appendChild(this.Handle);            
         }
+
+        this.Position = 'fixed';
         this.ZIndex = tp.MaxZIndexOf(this.Document.body);        
         
         this.X = X;
@@ -5126,19 +5142,7 @@ tp.Button = class extends tp.tpElement {
     */
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
-    }
-
-    /* properties */
-    /**
-    Gets or sets the button command. A user defined string.
-    @type {string}
-    */
-    Command = '';
-    /**
-    A user defined value
-    @type {any}
-    */
-    Tag = null;
+    } 
 
     /* overrides */
     /**
@@ -5155,6 +5159,16 @@ tp.Button = class extends tp.tpElement {
     }
 
 };
+/**
+Gets or sets the button command. A user defined string.
+@type {string}
+*/
+tp.Button.prototype.Command = '';
+/**
+A user defined value
+@type {any}
+*/
+tp.Button.prototype.Tag = null;
 //#endregion
 
 //#region tp.ToolBarItemClickEventArgs
@@ -12086,6 +12100,7 @@ tp.HtmlNumberBoxEx.MinusSymbol = '▾';    // ➖ - ▼ ▾
 //#endregion
 
 //#region tp.HtmlDateBox
+/** A date control built on top of a input type="date" element.*/
 tp.HtmlDateBox = class extends tp.InputControl {
 
     /**
@@ -12107,13 +12122,13 @@ tp.HtmlDateBox = class extends tp.InputControl {
     Gets or sets the value of the control.  
     @type {Date}
     */
-    get Value() {
+    get Date() {
         if (this.Handle instanceof HTMLInputElement) {
             return tp.IsBlank(this.Handle.value) ? null : Date(this.Handle.value);
         }
         return null;
     }
-    set Value(v) {
+    set Date(v) {
         if (this.Handle instanceof HTMLInputElement && tp.IsValid(v)) {
             let dValue = null;
             if (tp.IsString(v) && !tp.IsBlank(v)) {
@@ -12147,7 +12162,7 @@ tp.HtmlDateBox = class extends tp.InputControl {
         this.fDefaultCssClasses = tp.Classes.HtmlDateBox;
 
         // data-bind
-        this.fDataValueProperty = 'Value';
+        this.fDataValueProperty = 'Date';
     }
     /**
     Binds the control to its DataSource. It is called after the DataSource property is assigned.
@@ -12158,16 +12173,12 @@ tp.HtmlDateBox = class extends tp.InputControl {
         super.Bind();
         this.ReadDataValue();
     }
-
-
-
+ 
     OnHandleCreated() {
         super.OnHandleCreated();
-        //this.Handle.value = '0001-01-01';
-        //this.Handle.pattern = 'YYYY-MM-DD';
+ 
     }
-
-
+ 
 };
 //#endregion
 

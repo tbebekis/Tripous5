@@ -1,37 +1,35 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "ProgressBar";
-} 
- 
- 
+}
+
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-
- 
-    <div>
-        <button  onclick="LoopProgress()">Loop Progress</button> 
-    </div>
-    <br />
-
-    <div>
-        <progress id="ProgressBar" data-setup="{ Width: 200, Max: 10, Value: 0 }"></progress> 
-    </div>
-    <br />
- 
- 
-    
+    <p>A progress-bar control built on top of <a href='https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress'><code>progress</code></a> element.</p>
+    <p>Properties: Min, Max and Value.</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <button onclick="LoopProgress()">Loop Progress</button>
+</div>
+<br />
+
+<div class="html-code">
+    <progress id="ProgressBar" data-setup="{ Width: 200, Max: 10, Value: 0 }"></progress>
+</div>
+
+<br />
+
+
+
+<script class="js-code">
     var pb;
- 
-    tp.Ready(function () { 
-        pb = new tp.ProgressBar('#ProgressBar'); 
+
+    tp.Ready(function () {
+        pb = new tp.ProgressBar('#ProgressBar');
     })
 
     function Loop() {
@@ -49,9 +47,6 @@
         Loop();
     }
 
- 
- 
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

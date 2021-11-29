@@ -1,39 +1,38 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "HtmlListBox";
-} 
-
+}
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-
-    <div>
-        <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
-    </div>
-    <br />
-    <div>
-        <label style="display: flex; align-items: center;"><input id="MultiSelect" type="checkbox" onchange="SetMultiSelect(this)" />MultiSelect</label>
-    </div>
-
-    <div id="log"></div>
-    <br />
-
-    <div>
-        <select id="lbo" data-setup="{ Width: 140, Height: 240,  List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}]  }"></select>
-    </div>
-    <br />
-
-
-
+    <p>A single-select or multi-select list-box build up-on a select tag (HTMLSelectElement) </p>
+    <p>Inherits from <code>tp.HtmlListControl</code> and provides properties such as Items, Count, MultiSelect, SelectedIndexes and SelectedValues.</p>
 </div>
 
+<br />
+
+<div>
+    <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
+</div>
+
+<br />
+
+<div>
+    <label style="display: flex; align-items: center;"><input id="MultiSelect" type="checkbox" onchange="SetMultiSelect(this)" />MultiSelect</label>
+</div>
+
+<div id="log"></div>
+<br />
+
+<div class="html-code">
+    <select id="lbo" data-setup="{ Width: 140, Height: 240,  List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}]  }"></select>
+</div>
+<br />
 
 
-<script>
 
+<script class="js-code">
     var lbo;
 
     tp.Ready(function () {
@@ -65,7 +64,6 @@
         tp.Html('#log', '');
     }
 
-
 </script>
 
- 
+<partial name="_AceEditorPager" />

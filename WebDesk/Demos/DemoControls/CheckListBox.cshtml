@@ -1,39 +1,37 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "CheckListBox";
 }
- 
- 
+
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-
-    <div>
-        <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
-    </div>
-    <br />
-
-    <div id="log"></div>
-    <br />
-
-    <div>
-        <div id="lbo" data-setup="{Height: 200, ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}]  }"></div>
-    </div>
-    <br />
- 
-
-    
+    <p>A multi-select list-box control with check-boxes.</p>
+    <p>Inherits from <code>tp.CheckListControl</code> and provides properties such as Items, ListSource, ListDisplayField and ListValueField</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div>
+    <button id="btn1" onclick="ResetList()">Set 100 items</button> <br />
+</div>
+
+<br />
+
+<div id="log"></div>
+<br />
+
+<div class="html-code">
+    <div id="lbo" data-setup="{Height: 200, ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}]  }"></div>
+</div>
+
+<br />
+
+<script class="js-code">
     var lbo;
- 
-    tp.Ready(function () { 
+
+    tp.Ready(function () {
         lbo = new tp.CheckListBox('#lbo');
 
         lbo.On('SelectionChanged', function () {
@@ -42,7 +40,7 @@
         });
     })
 
- 
+
     function ResetList() {
         var List = [];
         for (var i = 0, ln = 100; i < ln; i++) {
@@ -54,7 +52,7 @@
 
         lbo.Items = List;
     }
-    
 
 </script>
- 
+
+<partial name="_AceEditorPager" />

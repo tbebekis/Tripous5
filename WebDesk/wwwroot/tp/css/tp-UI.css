@@ -1071,7 +1071,6 @@ table.tp-Calendar td.tp-Marked {
 .tp-DateBox .tp-Strip .tp-Text {
     position: relative;
     display: flex;
-    width: 1px;
     flex-grow: 1;
     align-items: center;
     border: none;

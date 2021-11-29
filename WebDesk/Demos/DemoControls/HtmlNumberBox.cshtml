@@ -1,37 +1,29 @@
-﻿ 
-
-@{
+﻿@{
     ViewBag.Title = "HtmlNumberBox";
-} 
- 
- 
+}
+
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
-
- 
-    <div>
-        <input type="number" id="HtmlNumberBox"  step="0.100" , value='50' />
-    </div>
-    <br />
- 
- 
-    
+    <p>A number box control built on top of a input type="number" element.</p>
+    <p>Properties: Min, Max, Step, Value</p>
 </div>
 
- 
+<br />
 
-<script>    
+<div class="html-code">
+    <input type="number" id="HtmlNumberBox" step="0.100" , value='50' />
+</div>
+<br />
+
+
+<script class="js-code">
     var ctrl;
- 
-    tp.Ready(function () { 
+
+    tp.Ready(function () {
         ctrl = new tp.HtmlNumberBox('#HtmlNumberBox');
     })
-
- 
- 
-    
-
 </script>
- 
+
+<partial name="_AceEditorPager" />

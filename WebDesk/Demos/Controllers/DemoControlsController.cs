@@ -119,6 +119,11 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+        [Route("/demo/HtmlNumberBoxEx")]
+        public IActionResult HtmlNumberBoxEx()
+        {
+            return View();
+        }
 
         [Route("/demo/Calendar")]
         public IActionResult Calendar()
@@ -130,6 +135,12 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+        [Route("/demo/HtmlDateBox")]
+        public IActionResult HtmlDateBox()
+        {
+            return View();
+        }
+
         [Route("/demo/ImageBox")]
         public IActionResult ImageBox()
         {
