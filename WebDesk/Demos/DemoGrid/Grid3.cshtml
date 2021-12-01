@@ -1,33 +1,36 @@
-﻿
-
-@{
+﻿@{
     ViewBag.Title = "Grid 3: Initialization using properties directly";
 }
 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
+    <p>The <code>tp.Grid</code> is a data grid control.</p>
 
+    <p>The following example loads 10 rows in a grid. Those rows come from a local <code>tp.DataTable</code>.</p>
+    <p>
+        This example is almost idenctical to the previous one. <br />
+        The difference is that in this version the configuration of the grid is done by javascript code using properties and methods of the grid, instead of passing a  <code>CreateParams</code> in the constructor.
+    </p>
+ 
+</div>
+
+<div class="html-code">
     <div>
         <button onclick="ClearRows()">Clear Rows</button> <br />
         <button onclick="ClearGroupColumns()">Clear Group Columns</button> <br />
         <div style="display: flex; align-items: center;">
             <button onclick="SetGroupColumns()">Set Group Columns</button> <input type="text" id="ColumnNames" style="width: 280px; margin-left: 4px;" value="DepartmentId CountryId" /> <br />
-        </div>        
+        </div>
     </div>
-    <br /> 
- 
-    <div id="Grid"></div>
     <br />
 
-
+    <div id="Grid"></div>
+    <br />
 </div>
 
-
-
-<script>
-
+<script class="js-code">
     var Grid,
         tblTest,
         tblCountry,
@@ -41,6 +44,8 @@
 
         Grid = new tp.Grid('#Grid', null);
 
+        Grid.Height = '450px';
+
         Grid.ReadOnly = false;
         Grid.ToolBarVisible = true;
         Grid.ButtonInsertVisible = true;
@@ -49,7 +54,7 @@
         Grid.AddToolBarButton('Custom.Command_1', '', 'Custom Command_1', 'fa fa-calculator', '', true);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
         Grid.AddToolBarButton('Custom.Command_2', '', 'Custom Command_2', 'fa fa-film', '', true);
 
-        Grid.AutoGenerateColumns = false;        
+        Grid.AutoGenerateColumns = false;
 
         Grid.AddColumn('Name');
         Grid.AddColumn('Age');

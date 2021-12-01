@@ -1,14 +1,29 @@
-﻿
-
-@{
+﻿@{
     ViewBag.Title = "Grid 2: Initialization using CreateParams";
 }
- 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
- 
+    <p>The <code>tp.Grid</code> is a data grid control.</p>
+    <p>
+        Dragging the caption of a column and dropping it in the Group Panel, just above the columns bar, defines a group. <br />
+        A group can also be defined by calling the <code>tp.Grid.SetGroupColumns(ColumnNames)</code> method, passing an array of column names. <br />
+    </p>
+    <p>Summaries can be defined by right clicking the footer of a group and selecting the aggregate function.</p>
+    <p>The following example loads 100 rows in a grid. Those rows come from a local <code>tp.DataTable</code>.</p>
+
+    <p>In the example the configuration of the grid is done by javascript code using the <code>CreateParams</code> object that is passed to the constructor of the grid. </p>
+    <p>
+        Grid columns are specified in the <code>CreateParams</code> object. <br />
+        Custom buttons are also defined the same way.
+    </p>
+</div>
+
+<br />
+
+<div class="html-code">
     <div>
         <button onclick="ClearRows()">Clear Rows</button> <br />
         <button onclick="ClearGroupColumns()">Clear Group Columns</button> <br />
@@ -16,18 +31,13 @@
             <button onclick="SetGroupColumns()">Set Group Columns</button> <input type="text" id="ColumnNames" style="width: 280px; margin-left: 4px;" value="DepartmentId CountryId" /> <br />
         </div>
     </div>
-    <br /> 
+    <br />
 
     <div id="Grid"></div>
     <br />
-
-
 </div>
-
-
-
-<script>
-
+ 
+<script class="js-code">
     var Grid,
         tblTest,
         tblCountry,
@@ -39,7 +49,7 @@
         tblCountry = tp.TestData.tblCountries;
         tblDepartment = tp.TestData.tblDepartments;
 
-        var CP = {            
+        var CP = {
             DataSource: tblTest,
             ReadOnly: false,
             ToolBarVisible: true,
@@ -52,18 +62,18 @@
                 { Name: 'DepartmentId', Text: 'Department', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblDepartment },
                 { Name: 'Salary' },
                 { Name: 'Married' },
-                { Name: 'CountryId', Text: 'Country', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblCountry},
+                { Name: 'CountryId', Text: 'Country', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblCountry },
                 { Name: 'EntryDate', Text: 'Entry Date' },
             ],
             CustomButtons: [
                 { Command: 'Custom.Command_1', Text: '', ToolTip: 'Custom Command_1', IcoClasses: 'fa fa-calculator', CssClasses: '', ToRight: true },
                 { Command: 'Custom.Command_2', Text: '', ToolTip: 'Custom Command_2', IcoClasses: 'fa fa-film', CssClasses: '', ToRight: true },
-            ] 
+            ]
         };
         Grid = new tp.Grid('#Grid', CP);
+        Grid.Height = '450px';
 
-
-        Grid.On('ToolBarButtonClick', function (Args) { 
+        Grid.On('ToolBarButtonClick', function (Args) {
             tp.InfoNote('Clicked: ' + Args.Command);
         });
 
@@ -88,7 +98,5 @@
             }
         }
     }
- 
-
 </script>
 

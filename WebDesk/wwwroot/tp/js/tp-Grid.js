@@ -4418,7 +4418,6 @@ tp.Grid = class extends tp.Control  {
                     el.style.justifyContent = tp.Alignment.ToFlex(Column.Alignment);
                     el.style.width = Column.Width + 'px';
 
-                    //el.textContent = Node.Parent.AggregateText(Column);
                     el.textContent = Node.Parent.GetAggregateText(Column);
 
                     this.SetElementInfo(el, Node.Parent, null, Column);

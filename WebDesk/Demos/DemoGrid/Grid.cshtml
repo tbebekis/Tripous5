@@ -1,46 +1,61 @@
-﻿
-
-@{
+﻿@{
     ViewBag.Title = "Grid: Thousands of rows";
 }
- 
-    <partial name="~/Demos/Shared/_Index.cshtml" />
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
- 
-    <div> 
-        <button onclick="ClearRows()">Clear Rows</button> <br /> 
+    <p>The <code>tp.Grid</code> is a data grid control.</p>
+    <p>Some of the features are</p>
+    <ul>
+        <li>grouping</li>
+        <li>summaries</li>
+        <li>filtering</li>
+        <li>toolbar and custom buttons</li>
+        <li>in-place editing</li>
+        <li>etc.</li>
+    </ul>
+    <p>The <code>tp.Grid</code> uses <a href="https://dev.to/adamklein/build-your-own-virtual-scroll-part-i-11ib" target="_blank">"virtual scrolling"</a>  <strong>instead of</strong> paging.</p>
+    <p>The following example loads 10 thousand rows in a grid. Those rows come from a local <code>tp.DataTable</code>.</p>
+    <p>Grid columns are created automatically based on <code>tp.DataColumn</code> objects defined in the passed <code>tp.DataTable</code>. </p>
+    <p>In this example the configuration of the grid is done by javascript code using grid properties. </p>
+
+</div>
+
+<br />
+
+<div class="html-code">
+    <div>
+        <button onclick="ClearRows()">Clear Rows</button> <br />
     </div>
     <br />
 
     <div id="Grid"></div>
     <br />
-
 </div>
 
-
-
-<script>
-
+<script class="js-code">
     var Grid,
         tblTest;
 
     tp.Ready(function () {
         var Data = tp.TestData.CreateTestDataTable(10000);
         tblTest = Data.Table;
- 
+
         Grid = new tp.Grid('#Grid');
 
         var StartTime = +new Date();
-        Grid.DataSource = tblTest;  
+        Grid.DataSource = tblTest;
         var Duration = +new Date() - StartTime;
 
-        Grid.ReadOnly = false;        
+        Grid.ReadOnly = false;
         Grid.ToolBarVisible = true;
         Grid.ButtonInsertVisible = true;
         Grid.ButtonDeleteVisible = true;
- 
+
+        Grid.Height = '450px';
+
         // time measurement
         var S, SB = new tp.StringBuilder();
 
@@ -57,9 +72,5 @@
     function ClearRows() {
         Grid.DataSource.ClearRows();
     }
-
-    
- 
-
 </script>
 

@@ -40,7 +40,7 @@ ol.no-style li {
  
 
 .Ace-Pager .tab-page {
-    height: 400px;
+    height: 650px;
 }
 
 .Ace-Pager .tab-page > .ace_editor {
@@ -50,4 +50,5 @@ ol.no-style li {
     left: 0;
     right: 0;
     font-size: 14px;
+    margin: 2px 0;
 }

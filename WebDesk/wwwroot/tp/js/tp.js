@@ -9,9 +9,6 @@ if (!window.log) {
             if (console) {
                 console.log(v);
             }
-            if (window.Debug) {
-                Debug.writeln(v);
-            }
         } catch (e) {
             //
         }
