@@ -11464,8 +11464,16 @@ tp.tpElement = class extends tp.tpObject {
     */
     get Text() { return this.Handle ? tp.val(this.Handle) : ''; }
     set Text(v) {
-        if (tp.IsString(v) && this.Handle)
-            tp.val(this.Handle, v);
+        let S = '';
+        if (this.Handle) {
+
+            if (tp.IsEmpty(v)) 
+                S = '';
+            else  
+                S = tp.IsString(v) ? v : v.toString();            
+        }
+        tp.val(this.Handle, v);
+           
     }
     /**
     Gets or sets the title attribute
@@ -12185,7 +12193,7 @@ tp.tpElement = class extends tp.tpObject {
                 }
 
                 // id
-                if (tp.IsBlank(el.Id)) {
+                if (tp.IsBlank(el.id)) {
                     if (!tp.IsBlank(this.CreateParams.Id))
                         el.id = this.CreateParams.Id;
                     else if (this.fAutoId === true)

@@ -7002,13 +7002,17 @@ tp.Control = class extends tp.tpElement  {
     }
     /**
     Converts a specified string into a primitive value (or a date-time),  according to its data column, and returns the value.
-    @param {string} S - The text to convert to a value
+    @param {string|any} v - The text or anything convertible to text, that should be converted to a value according to the data-column of this control.
     @returns {any} The result of the convertion
     */
-    Parse(S) {
-        if (tp.IsString(S)) {
-            var Col = this.DataColumn;
-            return Col ? Col.Parse(S) : S;
+    Parse(v) {
+        if (this.DataColumn instanceof tp.DataColumn) {
+            if (!tp.IsEmpty(v)) {
+                v = !tp.IsString(v) ? v.toString() : v;
+
+                var Col = this.DataColumn;
+                return Col ? Col.Parse(v) : v;
+            }  
         }
 
         return null;
@@ -7544,8 +7548,7 @@ tp.TextBox = class extends tp.InputControl {
         this.TextAlign = tp.Alignment.ToText(Alignment);
         super.OnBindCompleted();
     }
-
-
+ 
     /* public */
     /**
     Focuses an element and selects all the text in it
@@ -20583,6 +20586,8 @@ tp.Ui = class {
         let Type,
             TypeName,
             DataField,
+
+            Setup,              // data-setup attribute
             CP,
             Prefix,
             divText,            // HTMLElement
@@ -20594,28 +20599,34 @@ tp.Ui = class {
         //tp.AddClass(elRow, tp.Classes.Row);
 
         if (elRow.children.length === 0) {
-            CP = tp.GetDataSetupObject(elRow);
-            CP.Text = tp.IsString(CP.Text) ? CP.Text.trim() : '';
-            CP.Control = tp.IsObject(CP.Control) ? CP.Control : {};
+            Setup = tp.GetDataSetupObject(elRow);
+            Setup.Text = tp.IsString(Setup.Text) ? Setup.Text.trim() : '';
+            Setup.Control = tp.IsObject(Setup.Control) ? Setup.Control : {};
 
             // get the constructor
-            TypeName = CP.Control.TypeName;
+            TypeName = Setup.Control.TypeName;
             Type = this.Types[TypeName];
             if (tp.IsEmpty(Type)) {
                 tp.Throw('Control type name not registered in tp.Ui.Types: ' + TypeName);
             }
 
             // prepare formatting
-            DataField = tp.IsString(CP.Control.DataField) ? CP.Control.DataField.trim() : '';
+            DataField = tp.IsString(Setup.Control.DataField) ? Setup.Control.DataField.trim() : '';            
+
+            // Ids
             Prefix = !tp.IsBlank(DataField) ? `${tp.Prefix}CtrlRow-${DataField}-` : `${tp.Prefix}CtrlRow-`;
-            elRow.id = tp.SafeId(Prefix);
-            CP.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
+
+            if (tp.IsString(elRow.id) && tp.IsBlank(elRow.id))
+                elRow.id = tp.SafeId(Prefix);
+
+            if (tp.IsString(Setup.Control.Id) && tp.IsBlank(Setup.Control.Id))
+                Setup.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
 
             // Markup similar to following goes to the last div
             // <input class="tp-TextBox" id="Name" name="Name" type="text" value="">
             let InnerHTML =
 `<div class="${tp.Classes.CText}">
-  <label for="${CP.Control.Id}">${CP.Text}</label>
+  <label for="${Setup.Control.Id}">${Setup.Text}</label>
   <span class="${tp.Classes.RequiredMark}" style='display: none;'>*</span>
 </div>
 <div class="${tp.Classes.Ctrl}"></div>`;
@@ -20626,7 +20637,7 @@ tp.Ui = class {
             divText = tp.Select(elRow, '.' + tp.Classes.CText);
  
 
-            CP = CP.Control;
+            CP = Setup.Control;
             CP.Parent = divCtrl;
             CP.elText = tp.Select(divText, 'label');
             CP.elRequiredMark = tp.Select(divText, '.' + tp.Classes.RequiredMark);
@@ -20635,7 +20646,7 @@ tp.Ui = class {
             Result = new Type(null, CP);
 
             // further adjustments
-            Result.Id = CP.Id;
+            //Result.Id = CP.Id;
         }
 
         return Result;
@@ -20665,6 +20676,7 @@ tp.Ui = class {
         let Type = tp.CheckBox,
             TypeName = 'CheckBox',
             DataField,
+            Setup,              // data-setup attribute
             CP,
             Prefix, 
             Result = null;      // tp.tpElement  
@@ -20672,34 +20684,40 @@ tp.Ui = class {
         //tp.AddClass(elRow, tp.Classes.Row);
 
         if (elRow.children.length === 0) {
-            CP = tp.GetDataSetupObject(elRow);
-            CP.Text = tp.IsString(CP.Text) ? CP.Text.trim() : '';
-            CP.Control = tp.IsObject(CP.Control) ? CP.Control : {};
+            Setup = tp.GetDataSetupObject(elRow);
+            Setup.Text = tp.IsString(Setup.Text) ? Setup.Text.trim() : '';
+            Setup.Control = tp.IsObject(Setup.Control) ? Setup.Control : {};
 
             // get the constructor
-            TypeName = CP.Control.TypeName;
+            TypeName = Setup.Control.TypeName;
             Type = this.Types[TypeName];
             if (tp.IsEmpty(Type)) {
                 Type = tp.CheckBox;
             }
 
             // prepare formatting
-            DataField = tp.IsString(CP.Control.DataField) ? CP.Control.DataField.trim() : '';
+            DataField = tp.IsString(Setup.Control.DataField) ? Setup.Control.DataField.trim() : '';
+
+            // Ids
             Prefix = !tp.IsBlank(DataField) ? `${tp.Prefix}CheckBoxRow-${DataField}-` : `${tp.Prefix}CheckBoxRow-`;
-            elRow.id = tp.SafeId(Prefix);
-            CP.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
+
+            if (tp.IsString(elRow.id) && tp.IsBlank(elRow.id))
+                elRow.id = tp.SafeId(Prefix);
+
+            if (tp.IsString(Setup.Control.Id) && tp.IsBlank(Setup.Control.Id))
+                Setup.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
 
             // <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
             let InnerHTML =
 ` <label class="${tp.Classes.CheckBox}">
     <input type="checkbox" />
     <span class="${tp.Classes.RequiredMark}" style='display: none;'>*</span>
-    <span class="${tp.Classes.Text}">${CP.Text}</span>
+    <span class="${tp.Classes.Text}">${Setup.Text}</span>
   </label>`;
 
             tp.Html(elRow, InnerHTML);
  
-            CP = CP.Control;
+            CP = Setup.Control;
             CP.Parent = elRow;
             CP.elText = tp.Select(elRow, '.' + tp.Classes.Text);
             CP.elRequiredMark = tp.Select(elRow, '.' + tp.Classes.RequiredMark);
@@ -20709,8 +20727,8 @@ tp.Ui = class {
             Result = new Type(el, CP);
 
             // further adjustments
-            Result.Id = CP.Id;
-            Result.Text = CP.Text;
+            //Result.Id = CP.Id;
+ 
         }         
 
         return Result;
@@ -20749,7 +20767,7 @@ tp.Ui = class {
      @param {string[]} [ExcludedTypes] - Optional.  An array with type names to exclude.
      @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
      */
-    static CreateControls(ParentElementSelector, ExcludedTypes = null) {
+    static CreateControls(ParentElementSelector = null, ExcludedTypes = null) {
         var Result = [];
         ParentElementSelector = ParentElementSelector || tp.Doc.body;
         ExcludedTypes = ExcludedTypes || [];
@@ -20926,7 +20944,7 @@ tp.Ui.Types = {
  * @param {string[]} [ExcludedTypes] - Optional.  An array with type names to exclude.
  * @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
  */
-tp.CreateContainerControls = function (ParentElementSelector, ExcludedTypes) {
+tp.CreateContainerControls = function (ParentElementSelector = null, ExcludedTypes = null) {
     return tp.Ui.CreateControls(ParentElementSelector, ExcludedTypes);
 };
 

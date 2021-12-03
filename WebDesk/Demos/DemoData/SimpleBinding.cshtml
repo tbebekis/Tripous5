@@ -5,25 +5,37 @@
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
-
-<hr />
 <div>
-    <p>This page uses the <code>tp.CreateContainerControls()</code> to create the various controls in the page.</p>
-    <p>Also, controls can be created "at once" when the page contains a container element, such as a DIV or even the BODY itself, with "Page" as the id value. 
-    In that case a <code>tp.Page</code> object is created automatically by Tripous script, and then the <code>tp.Page</code> creates all page controls. </p>
-    <p><strong>NOTE: </strong> There must be only one <code>tp.Page</code> per page.</p>
-    <p>Automatic control creation per container element can also be achieved using the <code>tp.View</code> object. A page may contain many <code>tp.View</code> objects. </p>
+    <p>This page displays data-binding to "simple" controls.</p>
+    <blockquote style="background-color: lightyellow; padding: 2px 8px">
+        <p>The page uses the <code>tp.CreateContainerControls(ParentElementSelector = null, ExcludedTypes = null)</code> to create the various controls in the page.</p>
+        <p>If the first parameter is not passed in the function then the document.body is used as the container.</p>
+        <p>The <code>tp.CreateContainerControls(...)</code> creates controls "at once" based on the value of <code>data-setup</code> attribute of an element.</p>
+        <p>
+            A typical <code>data-setup</code> has a value like the following: <br />            
+        <pre>     &lt;div class="tp-CtrlRow" data-setup="{Text: 'Name', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"&gt;&lt;/div&gt; </pre>        
+        </p>
+        <p>
+            The value of a <code>data-setup</code> ends up in creating an options object known as <strong>CreateParams</strong>.
+            A <strong>CreateParams</strong> object may passed to a <code>tp.tpElement</code> constructor, (or any of its descendant control classes) which is what the <code>tp.CreateContainerControls()</code> does.
+        <pre>     constructor(ElementOrSelector, CreateParams)</pre>
+        </p>
+        <p>The CreateParams contains instructions on what control to create and the values of some of its properties, such as the <code>DataField</code> property.</p>
+        <p>The css class of the container DIV, (there are only two options: <code>tp-CtrlRow</code> or <code>tp-CheckBoxRow</code>) creates a responsive container around the actual control, along with its label.</p>
+    </blockquote>
+
+
+    <p>The following example creates a <code>tp.DataTable</code> with just a few <code>tp.DataRow</code>s and binds that table to controls.</p>
 </div>
-<hr />
+
 <br />
 
-<div>
-
+<div class="html-code">
     <div>
-        <button id="First" onclick="Move(1)">First</button>  
-        <button id="Prior" onclick="Move(2)">Prior</button>  
-        <button id="Next" onclick="Move(3)">Next</button>   
-        <button id="Last" onclick="Move(4)">Last</button>  
+        <button id="First" onclick="Move(1)">First</button>
+        <button id="Prior" onclick="Move(2)">Prior</button>
+        <button id="Next" onclick="Move(3)">Next</button>
+        <button id="Last" onclick="Move(4)">Last</button>
     </div>
     <br />
 
@@ -32,20 +44,18 @@
 
     <div class="tp-Row  tp-Ctrls lc-75 mc-70 sc-70 ">
         <div class="tp-Col l-33 m-50">
-            <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Id', DataField: 'Id', ReadOnly: true } }"></div>
+            <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Id', DataField: 'Id', ReadOnly: true } }"></div> 
             <div class="tp-CtrlRow" data-setup="{Text: 'Name', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"></div>
             <div class="tp-CtrlRow" data-setup="{Text: 'Date', Control: { TypeName: 'DateBox', Id: 'Date', DataField: 'Date' } }"></div>
-            <div class="tp-CheckBoxRow" data-setup="{Text: 'Όπως έχουμε γράψει ξανά, ολοφάνερα η συντριπτικά ισχυρότερη στρατηγική δύναμη του πλανήτη, οι ΗΠΑ, αναβιώνει υπό μια νέα εκδοχή το δόγμα Νίξον. Οι προεκτάσεις για την Ελλάδα είναι βαθύτατες και τα γεγονότα συντελούνται σε παρόντα χρόνο. Ένα είναι σίγουρο.', Control: { TypeName: 'CheckBox', Id: 'Flag', DataField: 'Flag' } }"></div>
+            <div class="tp-CheckBoxRow" data-setup="{Text: 'MDN Web Docs, previously Mozilla Developer Network and formerly Mozilla Developer Center, is a documentation repository and learning resource for web developers used by Mozilla, Microsoft, Google, and Samsung.', Control: { TypeName: 'CheckBox', Id: 'Flag', DataField: 'Flag' } }"></div>
             <div class="tp-CtrlRow" data-setup="{Text: 'Memo', Control: { TypeName: 'Memo', Id: 'Memo', DataField: 'Memo', Height: 150 } }"></div>
         </div>
     </div>
-
 </div>
 
 
 
-<script>
- 
+<script class="js-code">
     var Table,
         DS,
         edtId,
@@ -66,7 +76,7 @@
         var Flag;
         for (var i = 0, ln = 10; i < ln; i++) {
             Flag = (i + 1) % 2 == 0;
-            Table.AddRow(i, 'Name ' + i, tp.AddDays(tp.Today(), i + 1), Flag, 'memo text');
+            Table.AddRow(i, `Name ${i}`, tp.AddDays(tp.Today(), i + 1), Flag, `memo text ${i}`);
         }
 
         return Table;
@@ -100,7 +110,7 @@
         edtDate = tp.FindControlById('Date');
         chFlag = tp.FindControlById('Flag');
         edtMemo = tp.FindControlById('Memo');
-
+ 
         edtId.DataSource = DS;
         edtName.DataSource = DS;
         edtDate.DataSource = DS;
@@ -111,11 +121,5 @@
 
         DataSource_OnPositionChanged();
     });
-
-
-
-
-
-
 </script>
 
