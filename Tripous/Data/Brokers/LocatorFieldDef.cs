@@ -19,7 +19,6 @@ namespace Tripous.Data
     /// </summary>
     public class LocatorFieldDef
     {
- 
 
         /* construction */
         /// <summary>
@@ -28,33 +27,95 @@ namespace Tripous.Data
         public LocatorFieldDef()
         {
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public LocatorFieldDef(string Name, string TitleKey, DataFieldType DataType = DataFieldType.String, string TableName = "")
+        {
+            this.Name = Name;
+            this.TitleKey = TitleKey;
+            this.DataType = DataType;
+            this.TableName = TableName;
+        }
+
+        /* public */
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetDestField(string Value)
+        {
+            this.DestField = Value;
+            return this;
+        }
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetTitle(string Value)
+        {
+            this.Title = Value;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetVisible(bool Value)
+        {
+            this.Visible = Visible;
+            return this;
+        }
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetSearchable(bool Value)
+        {
+            this.Searchable = Searchable;
+            return this;
+        }
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetListVisible(bool Value)
+        {
+            this.ListVisible = ListVisible;
+            return this;
+        }
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetIsIntegerBoolean(bool Value)
+        {
+            this.IsIntegerBoolean = IsIntegerBoolean;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a property and returns this instance.
+        /// </summary>
+        public LocatorFieldDef SetWidth(int Value)
+        {
+            this.Width = Width;
+            return this;
+        }
 
         /* properties */
         /// <summary>
-        /// The field name in the source table
+        /// The field name in the list (source) table
         /// </summary>
         public string Name { get; set; }
         /// <summary>
+        /// The table name of the list (source) table
+        /// </summary>
+        public string TableName { get; set; }
+
+        /// <summary>
         /// When not empty/null then it denotes a field in the dest table where to put the value of this field.
         /// </summary>
-        public string DestFieldName { get; set; }
+        public string DestField { get; set; }
         /// <summary>
         /// The data-type of the field
         /// </summary>
         public DataFieldType DataType { get; set; } = DataFieldType.String;
-        /// <summary>
-        /// When true the field value is displayed in a UI locator control.
-        /// <para>NOTE: There can be only one visible field.</para>
-        /// </summary>
-        public bool Visible { get; set; }
-        /// <summary>
-        /// When true the field can be part in a where clause in a SELECT statement.
-        /// </summary>
-        public bool Searchable { get; set; } = true;
-        /// <summary>
-        /// Used to notify criterial links to treat the field as an integer boolea field (1 = true, 0 = false)
-        /// </summary>
-        public bool IsIntegerBoolean { get; set; }
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
@@ -69,5 +130,31 @@ namespace Tripous.Data
             get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
             set { }
         }
+
+        /// <summary>
+        /// Indicates whether a TextBox for this field is visible in a LocatorBox
+        /// </summary>
+        public bool Visible { get; set; }
+        /// <summary>
+        /// When true the field can be part in a where clause in a SELECT statement.
+        /// </summary>
+        public bool Searchable { get; set; } = true;
+        /// <summary>
+        /// Indicates whether the field is visible when the list table is displayed
+        /// </summary>
+        public bool ListVisible { get; set; } = true;
+
+
+        /// <summary>
+        /// Used to notify criterial links to treat the field as an integer boolea field (1 = true, 0 = false)
+        /// </summary>
+        public bool IsIntegerBoolean { get; set; }
+
+        /// <summary>
+        ///  Controls the width of the text box in a LocatorBox. In pixels.
+        /// </summary>
+        public int Width { get; set; } = 70;
+
+
     }
 }

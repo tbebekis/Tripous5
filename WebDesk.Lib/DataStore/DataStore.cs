@@ -184,6 +184,7 @@ namespace WebLib
                 ExecuteSchemas();
 
                 RegisterBrokers();
+                RegisterLocators();
 
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
             }

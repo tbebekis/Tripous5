@@ -39,27 +39,50 @@ namespace Tripous.Data
         /// <summary>
         /// Returns a descriptor by a specified name if any, else, null
         /// </summary>
-        static public LocatorDef FindDescriptor(string Name)
+        static public LocatorDef FindDef(string Name)
         {
             return Descriptors.Find(item => item.Name.IsSameText(Name));
         }
         /// <summary>
         /// Returns true if a descriptor is already registered under a specified name.
         /// </summary>
-        static public bool DescriptorExists(string Name)
+        static public bool DefExists(string Name)
         {
-            return FindDescriptor(Name) != null;
+            return FindDef(Name) != null;
         }
         /// <summary>
         /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
         /// </summary>
-        static public LocatorDef RegisterDescriptor(string Name)
+        static public LocatorDef Register(string Name)
         {
-            LocatorDef Result = FindDescriptor(Name);
+            if (string.IsNullOrWhiteSpace(Name))
+                Sys.Throw("Cannot register Locator. No name defined");
+
+            LocatorDef Result = FindDef(Name);
             if (Result == null)
             {
                 Result = new LocatorDef() { Name = Name };
                 Descriptors.Add(Result);
+            }
+
+            return Result;
+        }
+        /// <summary>
+        /// Registers a descriptor. If it finds a descriptor returns the already registered descriptor.
+        /// </summary>
+        static public LocatorDef Register(LocatorDef Def)
+        {
+            if (Def == null)
+                Sys.Throw("Cannot register a null Locator");
+
+            if (string.IsNullOrWhiteSpace(Def.Name))
+                Sys.Throw("Cannot register Locator. No name defined");
+
+            LocatorDef Result = FindDef(Def.Name);
+            if (Result == null)
+            {
+                Descriptors.Add(Def);
+                Result = Def;
             }
 
             return Result;
@@ -72,6 +95,22 @@ namespace Tripous.Data
         public override string ToString()
         {
             return !string.IsNullOrWhiteSpace(Name) ? Name : base.ToString();
+        }
+
+        /// <summary>
+        /// Adds and returns a field descriptor. If it finds a descriptor returns the already registered descriptor.
+        /// </summary>
+        public LocatorFieldDef Add(string Name, string TitleKey, DataFieldType DataType = DataFieldType.String, string TableName = "")
+        {
+            LocatorFieldDef Result = Fields.FirstOrDefault(item => Sys.IsSameText(Name, item.Name));
+
+            if (Result == null)
+            {
+                Result = new LocatorFieldDef(Name, TitleKey, DataType, TableName);
+                Fields.Add(Result);
+            }
+
+            return Result;
         }
 
         /* properties */
@@ -101,8 +140,21 @@ namespace Tripous.Data
         /// <summary>
         /// The SELECT statement to execute
         /// </summary>
-        public string SelectSql { get; set; }
+        public string SqlText { get; set; }
 
+        /// <summary>
+        /// The name of the list table
+        /// </summary>
+        public string ListTableName { get; set; }
+        /// <summary>
+        /// The key field of the list table. The value of this field goes to the DataField
+        /// </summary>
+        public string ListKeyField { get; set; } = "Id";
+        /// <summary>
+        /// A command that ends up displaying the zoom UI (drill down)
+        /// </summary>
+        public string ZoomCommand { get; set; }
+        
         /// <summary>
         /// Indicates whether the locator is readonly
         /// </summary>

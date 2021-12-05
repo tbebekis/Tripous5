@@ -61,7 +61,7 @@ namespace WebDesk.Controllers
         }
         #endregion
 
-        [Route("/AjaxExecute")]
+        [HttpPost("/AjaxExecute")]
         public async Task<JsonResult> AjaxExecute([FromBody] AjaxRequest R)
         {
             await Task.CompletedTask;
@@ -69,7 +69,7 @@ namespace WebDesk.Controllers
             return Json(Result);
         }
 
-        [Route("/SqlSelect")]
+        [HttpPost("/SqlSelect")]
         public async Task<JsonResult> SqlSelect([FromBody] SqlTextItem SqlTextItem)
         {
             await Task.CompletedTask;
@@ -91,7 +91,7 @@ namespace WebDesk.Controllers
             return Json(Result);
         }
 
-        [Route("/SqlSelectAll")]
+        [HttpPost("/SqlSelectAll")]
         public async Task<JsonResult> SqlSelectAll([FromBody] JsonDataTable JTable)
         {
             await Task.CompletedTask;
@@ -130,9 +130,27 @@ namespace WebDesk.Controllers
             return Json(Result);
         }
 
- 
 
+        [HttpGet("/LocatorGetDef")]
+        public async Task<JsonResult> LocatorGetDef(string Name)
+        {
+            await Task.CompletedTask;
 
+            HttpActionResult Result = new HttpActionResult();
+
+            LocatorDef Def = LocatorDef.FindDef(Name);
+            if (Def == null)
+            {
+                Result.ErrorText = $"Locator Definition not found: {Name}";
+            }
+            else
+            {
+                Result.SerializePacket(Def);
+                Result.IsSuccess = true;
+            }
+
+            return Json(Result);
+        }
 
 
     }

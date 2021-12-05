@@ -15050,6 +15050,120 @@ tp.TreeView.prototype.fItems;
 // locator and locator box
 //---------------------------------------------------------------------------------------
 
+//#region tp.LocatorEventType
+/**
+Indicates the type of a locator event
+ @class
+ @enum {number}
+*/
+tp.LocatorEventType = {
+    /**
+    Occurs when the DataValue property has chanded its value
+    */
+    DataValueChanged: 1,
+    /**
+    In both modes. Occurs when the SelectSql is already constructed.
+    Gives a chance to any client code to add special where to the passed SelectSql just before execution
+    */
+    AddToSelectSqlWhere: 2,
+    /**
+    In both modes. Occurs when the locator needs to execute a SELECT.
+    The client may execute the passed SelectSql, or any other statement, and assign the Locator.ListTable
+    */
+    SelectListTable: 4,
+    /**
+    In LookUp mode ONLY. Gives a chance to a client code to configure list table columns, titles, visibility etc.
+    */
+    SetupListTable: 8,
+    /**
+    Occurs when the ListTable.DefaultView must be filtered.
+    */
+    FilterListTable: 0x10
+};
+Object.freeze(tp.LocatorEventType);
+//#endregion
+
+//#region tp.LocatorEventArgs
+/**
+EventArgs for the locator class
+*/
+tp.LocatorEventArgs = class extends tp.EventArgs {
+
+    /**
+    Constructor.
+    @param {tp.Locator} Locator The locator
+    @param {tp.LocatorEventType} EventType The event type. One of the {@link tp.LocatorEventType} constants.
+    */
+    constructor(Locator, EventType) {
+        super(null, Locator, null);
+    }
+
+    /* private */
+    /** Field
+     @private
+     @type {tp.Locator} */
+    fLocator = null;
+    /** Field
+     @private
+     @type {tp.LocatorEventType} */
+    fEventType = tp.LocatorEventType.DataValueChanged;
+
+
+    /* properties */
+    /**
+    Returns the locator event type
+    @type {tp.LocatorEventType}
+    */
+    get EventType() {
+        return this.fEventType;
+    }
+    /**
+    Returns the locator
+    @type {tp.Locator}
+    */
+    get Locator() {
+        return this.fLocator;
+    }
+    /**
+    Returns the control associated to locator
+    @type {tp.Control}
+    */
+    get Control() {
+        return this.Locator.Control;
+    }
+    /**
+    Returns the locator descriptor
+    @type {tp.LocatorDescriptor}
+    */
+    get Descriptor() {
+        return this.Locator.Descriptor;
+    }
+    /**
+    Gets or sets the list table
+    @type {tp.DataTable}
+    */
+    get ListTable() {
+        return this.Locator.ListTable;
+    }
+    set ListTable(v) {
+        this.Locator.ListTable = v;
+    }
+
+    /**
+    Gets or sets the SELECT statement. Used with the AddToSelectSqlWhere type only.
+    @type {tp.SelectSql}
+    */
+    SelectSql = null;
+    /**
+    Gets or sets the filter to apply to ListTable.DefaultView.RowFilter
+    @type {string}
+    */
+    ListTableFilter = '';
+
+};
+
+//#endregion
+
 
 //#region tp.LocatorDescriptor
 /**
@@ -15096,33 +15210,32 @@ tp.LocatorDescriptor = class extends tp.tpObject {
         this.OrderBy = '';
     }
 
-    /* private */  
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fName = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fTitle = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fConnectionName = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fListKeyField = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fZoomCommand = '';
 
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fName;
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fTitle;
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fConnectionName;
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fListKeyField;
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fZoomCommand;
 
     /* properties */
     /**
@@ -15159,7 +15272,7 @@ tp.LocatorDescriptor = class extends tp.tpObject {
     Gets or sets the name of the list table
     @type {string}
     */
-    ListTableName;
+    ListTableName = '';
     /**
     Gets or sets the key field of the list table. The value of this field goes to the DataField
     */
@@ -15179,27 +15292,27 @@ tp.LocatorDescriptor = class extends tp.tpObject {
     set ZoomCommand(v) {
         this.fZoomCommand = v;
     }
+
     /**
     Indicates whether the locator is readonly
     @type {boolean}
     */
-    ReadOnly;
+    ReadOnly = false;
     /**
     If the value of this property is set then the locator does not generates the SELECT automatically.
     @type {tp.SelectSql}
     */
-    SelectSql;
+    SelectSql = null;
     /**
     Gets the list of descriptor fields.
     @type {tp.LocatorFieldDescriptor[]}
     */
-    Fields;
+    Fields = [];
     /**
     The order by field when the SELECT Sql is constructed by the Locator. In a description with Id and Name fields could be the ListTableName.Name
     @type {string}
     */
-    OrderBy;
-
+    OrderBy = '';
 
     /* overrides */
     /**
@@ -15286,9 +15399,13 @@ tp.LocatorDescriptor = class extends tp.tpObject {
             Field.Width = SF.Width;
         }
     }
-
-
 };
+
+
+
+
+
+
 //#endregion
 
 //#region tp.LocatorFieldDescriptor
@@ -15319,46 +15436,46 @@ tp.LocatorFieldDescriptor = class extends tp.tpObject {
         this.Width = 70;
     }
 
-    
-
     /* fields */
     /** Field
     * @private
     * @type {string}
     */
-    fListFieldAlias;
+    fListFieldAlias = '';
     /** Field
     * @private
     * @type {string}
     */
-    fListTableName;
+    fListTableName = '';
     /** Field
     * @private
     * @type {string}
     */
-    fTitleKey;
+    fTitleKey = '';
 
     /** Field
     * @type {tp.LocatorDescriptor}
     */
     Descriptor = null;
 
+
     /* properties */
     /**
     Gets or sets the data type of the field. One of the tp.DataType constants
     @type {string}
     */
-    DataType;
+    DataType = tp.DataType.String;
     /**
     Gets or sets the the name of the field in the data table. It can not be empty for grid-type locators.
     @type {string}
     */
-    DataField;
+    DataField = '';
     /**
     Gets or sets the field name of the field in the list table.
     @type {string}
     */
-    ListField;
+    ListField = '';
+
     /**
     Gets or sets the alias of the ListField.
     @type {string}
@@ -15393,32 +15510,32 @@ tp.LocatorFieldDescriptor = class extends tp.tpObject {
     Gets or sets tha Title of this descriptor, used for display purposes.
     @type {string}
     */
-    Title;
+    Title = '';
     /**
     Indicates whether a TextBox for this field is visible in a LocatorBox
     @type {boolean}
     */
-    DataVisible;
+    DataVisible = false;
     /**
     Indicates whether the field is visible when the list table is displayed
     @type {boolean}
     */
-    ListVisible;
+    ListVisible = true
     /**
     When true the field can be part in a where clause in a select statement.
     @type {boolean}
     */
-    Searchable;
+    Searchable = false;
     /**
     Used to notify criterial links to treat the field as an integer boolea fieldn (1 = true, 0 = false)
     @type {boolean}
     */
-    IsIntegerBoolean;
+    IsIntegerBoolean = false;
     /**
     Controls the width of the text box in a LocatorBox.
     @type {number}
     */
-    Width;
+    Width = 70;
 
     /* overrides */
     /**
@@ -15440,119 +15557,8 @@ tp.LocatorFieldDescriptor = class extends tp.tpObject {
     }
 };
 
+
 tp.LocatorFieldDescriptor.BoxDefaultWidth = 70;
-//#endregion
-
-
-//#region tp.LocatorEventType
-/**
-Indicates the type of a locator event
- @class
- @enum {number}
-*/
-tp.LocatorEventType = {
-    /**
-    Occurs when the DataValue property has chanded its value
-    */
-    DataValueChanged: 1,
-    /**
-    In both modes. Occurs when the SelectSql is already constructed.
-    Gives a chance to any client code to add special where to the passed SelectSql just before execution
-    */
-    AddToSelectSqlWhere: 2,
-    /**
-    In both modes. Occurs when the locator needs to execute a SELECT.
-    The client may execute the passed SelectSql, or any other statement, and assign the Locator.ListTable
-    */
-    SelectListTable: 4,
-    /**
-    In LookUp mode ONLY. Gives a chance to a client code to configure list table columns, titles, visibility etc.
-    */
-    SetupListTable: 8,
-    /**
-    Occurs when the ListTable.DefaultView must be filtered.
-    */
-    FilterListTable: 0x10
-};
-Object.freeze(tp.LocatorEventType);
-//#endregion
-
-//#region tp.LocatorEventArgs
-/**
-EventArgs for the locator class
-*/
-tp.LocatorEventArgs = class extends tp.EventArgs {
-
-    /**
-    Constructor.
-    @param {tp.Locator} Locator The locator
-    @param {tp.LocatorEventType} EventType The event type. One of the {@link tp.LocatorEventType} constants.
-    */
-    constructor(Locator, EventType) {
-        super(null, Locator, null);
-    }
-
-    /* private */
-
-    /** Field
-     @private
-     @type {tp.Locator} */
-    fLocator;
-    /** Field
-     @private
-     @type {tp.LocatorEventType} */
-    fEventType;
-
-    /* properties */
-    /**
-    Returns the locator event type
-    @type {tp.LocatorEventType}
-    */
-    get EventType() {
-        return this.fEventType;
-    }
-    /**
-    Returns the locator
-    @type {tp.Locator}
-    */
-    get Locator() {
-        return this.fLocator;
-    }
-    /**
-    Returns the control associated to locator
-    @type {tp.Control}
-    */
-    get Control() {
-        return this.Locator.Control;
-    }
-    /**
-    Returns the locator descriptor
-    @type {tp.LocatorDescriptor}
-    */
-    get Descriptor() {
-        return this.Locator.Descriptor;
-    }
-    /**
-    Gets or sets the list table
-    @type {tp.DataTable}
-    */
-    get ListTable() {
-        return this.Locator.ListTable;
-    }
-    set ListTable(v) {
-        this.Locator.ListTable = v;
-    }
-    /**
-    Gets or sets the SELECT statement. Used with the AddToSelectSqlWhere type only.
-    @type {tp.SelectSql}
-    */
-    SelectSql;
-    /**
-    Gets or sets the filter to apply to ListTable.DefaultView.RowFilter
-    @type {string}
-    */
-    ListTableFilter;
-};
 //#endregion
 
 
@@ -15623,8 +15629,8 @@ tp.Locator = class extends tp.tpObject {
         this.fControls = new tp.Dictionary(); // Key = tp.LocatorFieldDescriptor, Value = HTMLInputElement 
 
         this.fListRow = null;
-        this.fListKeyFieldDes = null; 
- 
+        this.fListKeyFieldDes = null;
+
         this.fInDataSourceEvent = false;
         this.fKeyValue = null;
 
@@ -15633,7 +15639,6 @@ tp.Locator = class extends tp.tpObject {
     }
 
     /* private */
-
     /** Field
      * @private
      * @type {tp.Locator}
@@ -15649,13 +15654,13 @@ tp.Locator = class extends tp.tpObject {
      * @private
      * @type {tp.DataRow}
      */
-    fListRow;   
+    fListRow;
     /** Field. The field descriptor of the key field of the ListTable
      * @private
      * @type {tp.LocatorFieldDescriptor}
      */
-    fListKeyFieldDes; 
- 
+    fListKeyFieldDes;
+
     /** Field
     * @private
     * @type {boolean}
@@ -15670,7 +15675,7 @@ tp.Locator = class extends tp.tpObject {
     * @private
     * @type {boolean}
     */
-    fInDataSourceEvent; 
+    fInDataSourceEvent;
 
     /** Field
     * @private
@@ -15687,7 +15692,7 @@ tp.Locator = class extends tp.tpObject {
     * @private
     * @type {tp.Control}
     */
-    fControl; 
+    fControl;
 
     /** Field. A {@link tp.Dictionary} where Key = tp.LocatorFieldDescriptor and Value = HTMLInputElement
     * @private
@@ -15833,7 +15838,7 @@ tp.Locator = class extends tp.tpObject {
     @type {string}
     */
     DataField;
- 
+
     /**
     Gets or set the list DataTable, that is the source table where data values come from.
     @type {tp.DataTable}
@@ -15848,7 +15853,7 @@ tp.Locator = class extends tp.tpObject {
     get Controls() {
         return this.fControls;
     }
- 
+
     /**
     Returns true if Locator is on a new row, not yet attached to the underlying DataTable
     @type {boolean}
@@ -15898,7 +15903,7 @@ tp.Locator = class extends tp.tpObject {
     set MaxDropdownItems(v) {
         this.fMaxDropdownItems = v;
     }
- 
+
     /**
     Returns the key value, the value the locator represents. Could be null. <br />
     NOTE: Treat setter as private and with extreme care.
@@ -15916,7 +15921,7 @@ tp.Locator = class extends tp.tpObject {
 
             if (tp.IsEmpty(v)) {
                 this.fListRow = null;
-                this.SetDataValues(null);                
+                this.SetDataValues(null);
             }
             else {
                 this.LocateKeyAsync()
@@ -15947,7 +15952,7 @@ tp.Locator = class extends tp.tpObject {
                 let Row = this.CurrentRow;
 
                 if (!tp.IsEmpty(Row)) {
- 
+
                     let Clearing = tp.IsEmpty(SourceRow);
 
                     let i, ln, v,
@@ -15956,7 +15961,7 @@ tp.Locator = class extends tp.tpObject {
                         Column,             // tp.DataColumn
                         Dest,               // string
                         Source;             // string                    
- 
+
                     for (i = 0, ln = this.Descriptor.Fields.length; i < ln; i++) {
 
                         FieldDes = this.Descriptor.Fields[i];
@@ -15968,11 +15973,11 @@ tp.Locator = class extends tp.tpObject {
                             } else {
                                 if (SourceRow.Table.ContainsColumn(FieldDes.ListFieldAlias)) {
                                     v = SourceRow.Get(FieldDes.ListFieldAlias);
-                                    Row.Set(FieldDes.DataField, v); 
+                                    Row.Set(FieldDes.DataField, v);
                                 }
                             }
                         }
- 
+
                         // sub-controls
                         SubControl = this.Controls.ContainsKey(FieldDes) ? this.Controls.Get(FieldDes) : null;
 
@@ -16030,7 +16035,7 @@ tp.Locator = class extends tp.tpObject {
     @returns {boolean} Returns a boolean {@link Promise}
     */
     async LocateKeyAsync() {
- 
+
         if (this.Active && !tp.IsEmpty(this.KeyValue) && !tp.IsEmpty(this.fListKeyFieldDes)) {
 
             this.fListRow = null;
@@ -16057,9 +16062,9 @@ tp.Locator = class extends tp.tpObject {
                     // and then look again into the new data 
                     if (RowCount > 0) {
                         let Result = this.LocateListRowInternal();
-                        return Result; 
+                        return Result;
                     }
-                    
+
                 }
                 catch (e) {
                     //
@@ -16068,7 +16073,7 @@ tp.Locator = class extends tp.tpObject {
             }
         }
 
-        return false;  
+        return false;
 
     }
 
@@ -16082,7 +16087,7 @@ tp.Locator = class extends tp.tpObject {
     */
     ConstructSelectSql() {
 
-        let Result  = this.Descriptor.SelectSql.Clone();
+        let Result = this.Descriptor.SelectSql.Clone();
 
         if (tp.Trim(Result.Select).length <= 0) {
 
@@ -16211,7 +16216,7 @@ tp.Locator = class extends tp.tpObject {
                 // TODO: PopUpForm()
             }
         }
- 
+
     }
     /**
     Executes the SELECT statement, assigns the ListTable and returns a number {@link Promise} with the row count of the table.
@@ -16253,7 +16258,7 @@ tp.Locator = class extends tp.tpObject {
     */
     MasterDataValueChanged() {
         this.FilterListTable();
-        this.SetDataValues(null); 
+        this.SetDataValues(null);
     }
 
     /** Event trigger
@@ -16365,7 +16370,7 @@ tp.Locator = class extends tp.tpObject {
 
         if (this.Active) {
             //this.fLastEnteredText = LocatorLink.BoxGetText(this, Box);
- 
+
             let S = this.DataValueAsTextOf(FieldDes.DataField);
             LocatorLink.BoxSetText(this, Box, S);
 
@@ -16383,7 +16388,7 @@ tp.Locator = class extends tp.tpObject {
         if (this.Active && !this.Assigning) {
 
             // when the user alters the text and then just leaves the text box
-            if (this.IsBoxMode) {  
+            if (this.IsBoxMode) {
                 let S = this.DataValueAsTextOf(FieldDes.DataField);
                 let S2 = LocatorLink.BoxGetText(this, Box);
                 if (S !== S2) {
@@ -16399,7 +16404,7 @@ tp.Locator = class extends tp.tpObject {
      * @param {tp.LocatorFieldDescriptor} FieldDes The {@link tp.LocatorFieldDescriptor} descriptor
      * @param {KeyboardEvent} e The {@link KeyboardEvent} event object
      */
-    Box_KeyDown(LocatorLink, Box, FieldDes, e) { 
+    Box_KeyDown(LocatorLink, Box, FieldDes, e) {
     }
     /**
      * Event handler
@@ -16798,7 +16803,7 @@ tp.LocatorBox = class extends tp.Control {
                 this.btnList = this.Handle.ownerDocument.createElement('div');
                 this.btnList.className = tp.Classes.Btn;
                 this.btnList.tabIndex = 0;
-                this.btnList.innerHTML = '&dtrif;'; 
+                this.btnList.innerHTML = '&dtrif;';
 
                 this.btnZoom = this.Handle.ownerDocument.createElement('div');
                 this.btnZoom.className = tp.Classes.Btn;

@@ -49,7 +49,9 @@
 
 <script>
  
-    tp.Ready(function () {      
+    tp.Ready(async () => {      
+
+        let Def = await tp.Locators.GetDefAsync("Trader");
 
         // table
         var Table = new tp.DataTable('Test');
@@ -69,7 +71,7 @@
         // grid
         var Grid = new tp.Grid('#Grid');
 
-        Grid.AddLocatorAsync('TraderId', 'Trader');
+        await Grid.AddLocatorAsync('TraderId', 'Trader');
 
         Grid.AutoGenerateColumns = false;
         Grid.AddColumn('Id');
