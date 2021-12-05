@@ -1,36 +1,53 @@
 ﻿@{
     ViewBag.Title = "Master - Detail";
 }
- 
+
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
 <div>
+    <p>
+        A control is bound to data through its <code>DataSource</code> property, of type <code>tp.DataSource</code>. <br />
+        If a <code>tp.DataTable</code> is passed as DataSource, instead of a <code>tp.DataSource</code>, the property creates a <code>tp.DataSource</code>. <br />
+        The <code>tp.DataSource</code> stands between a <code>tp.DataTable</code>, that is the data, and a control, such as <code>tp.TextBox</code> or <code>tp.Grid</code>.
+    </p>
+    <p>
+        A master-detail relation-ship can be defined between two <code>tp.DataSource</code> instances, using 3 properties of the detail <code>tp.DataSource</code>: <br />
+        <code>MasterSource</code> <br />
+        <code>MasterKeyField</code> and <br />
+        <code>DetailKeyField</code>
+    </p>
+    <p>
+        The following example links a detail <code>tp.Grid</code> to a master <code>tp.Grid</code> though its <code>DataSource</code>. <br />
+        Selecting a row in the master grid "filters" the detail grid properly. That is displays only the detail rows that are "children" of the master row.
+    </p>
+</div>
 
+<br />
+
+<div class="html-code">
     <p>Departments</p>
-    <div id="gridMaster" data-setup="{ ToolBarVisible: false, GroupsVisible: false, FilterVisible: false, FooterVisible: false, Height: 180 }"></div>
+    <div id="gridMaster" data-setup="{ ToolBarVisible: false, GroupsVisible: false, FilterVisible: false, FooterVisible: false, Height: 160 }"></div>
     <br />
 
     <p>Employees</p>
-    <div id="gridDetail" data-setup="{ ToolBarVisible: false, GroupsVisible: false, FilterVisible: false }"></div>
+    <div id="gridDetail" data-setup="{ ToolBarVisible: false, GroupsVisible: false, FilterVisible: false, Height: 300 }"></div>
     <br />
-
 </div>
 
 
 
-<script>
- 
+<script class="js-code">
     var tblMaster,
         tblDetail,
         gridMaster,
         gridDetail;
 
- 
     tp.Ready(function () {
-        tblMaster = tp.TestData.tblDepartments;            // Departments table
-        tblDetail = tp.TestData.CreateTestDataTable(100).Table;   // Employees table
+        tblMaster = tp.TestData.tblDepartments;                     // Departments table
+        tblDetail = tp.TestData.CreateTestDataTable(50).Table;     // Employees table
 
+        // define the relation-ship
         tblDetail.BindingSource.MasterSource = tblMaster.BindingSource;
         tblDetail.BindingSource.MasterKeyField = 'Id';
         tblDetail.BindingSource.DetailKeyField = 'DepartmentId';
@@ -43,13 +60,7 @@
 
         gridDetail.AddAggregate('Salary', tp.AggregateType.Sum);
         gridDetail.Sort('Name', 'ASC');
-
     });
-
-
-
-
-
 
 </script>
 

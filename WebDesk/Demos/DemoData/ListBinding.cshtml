@@ -7,6 +7,11 @@
 
 <div>
     <p>This page displays data-binding to "list" controls.</p>
+    <p>
+        A control is bound to data through its <code>DataSource</code> property, of type <code>tp.DataSource</code>. <br />
+        If a <code>tp.DataTable</code> is passed as DataSource, instead of a <code>tp.DataSource</code>, the property creates a <code>tp.DataSource</code>. <br />
+        The <code>tp.DataSource</code> stands between a <code>tp.DataTable</code>, that is the data, and a control, such as <code>tp.TextBox</code> or <code>tp.Grid</code>.
+    </p>
     <blockquote style="background-color: lightyellow; padding: 2px 8px">
         <p>The page uses the <code>tp.CreateContainerControls(ParentElementSelector = null, ExcludedTypes = null)</code> to create the various controls in the page.</p>
         <p>If the first parameter is not passed in the function then the document.body is used as the container.</p>

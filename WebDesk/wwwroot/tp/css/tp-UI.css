@@ -1422,6 +1422,7 @@ tp-SelectSqlListUi
     font-weight: normal;
     background-color: var(--BackColor);
     outline: none;
+    height: 200px;
 }
 
 .tp-Grid:focus {
