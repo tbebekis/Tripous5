@@ -32,10 +32,10 @@ from
 
             LocatorFieldDef FieldDef;
 
-            FieldDef = Def.Add("Id", "Id").SetListVisible(false);
-            FieldDef = Def.Add("Code", "Code").SetVisible(true);
-            FieldDef = Def.Add("Name", "Name").SetVisible(true);
- 
+            FieldDef = Def.Add("Id", "TraderId", "Id",  DataFieldType.String, false, false, true, "");
+            FieldDef = Def.Add("Code", "Trader__Code", "Code", DataFieldType.String, true, true, true, "");
+            FieldDef = Def.Add("Name", "Trader__Name", "Name", DataFieldType.String, true, true, true, "");
+
         }
 
         static void RegisterLocators()

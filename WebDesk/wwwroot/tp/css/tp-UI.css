@@ -1522,6 +1522,7 @@ tp-SelectSqlListUi
 
 input[type=text].tp-Grid-InplaceEditor {
     outline: none;
+    border: none;
 }
 
 .tp-Grid-InplaceEditor input[type=text] {
@@ -1541,7 +1542,7 @@ input[type=text].tp-Grid-InplaceEditor {
 .tp-Grid-InplaceEditor-Locator {
     position: fixed;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     overflow: hidden;
 }
 
@@ -1549,6 +1550,7 @@ input[type=text].tp-Grid-InplaceEditor {
 .tp-Grid-InplaceEditor-Locator > input[type=text] {
     position: relative;
     flex-grow: 1;
+    border: none;
 }
 
 .tp-Grid-InplaceEditor-Locator > .tp-Btn {
@@ -1686,11 +1688,13 @@ input[type=text].tp-Grid-InplaceEditor {
 }
 
 .tp-Grid .tp-Grid-Row:hover {
+    /* background-color: var(--HoverColor); */
     background-color: var(--HoverColor);
 }
 
 .tp-Grid .tp-Grid-Row.tp-Focused {
-    background-color: var(--FocusColor);
+   /*  background-color: var(--FocusColor); */
+   background-color: var(--FocusColor); 
 }
 
 .tp-Grid-Cell {

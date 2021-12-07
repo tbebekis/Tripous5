@@ -39,6 +39,8 @@
     <!-- Keep this script here. It should be the first tp.Ready() to be executed,
         in order to grab the html code before any control creation that alters the html. -->
     <script>
+        tp.SysConfig.GlobalErrorHandling = true;
+
         var Demos = Demos || {};
 
         Demos.Pager = null;

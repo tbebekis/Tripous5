@@ -1,10 +1,9 @@
 ﻿@{
     ViewBag.Title = "Locator";
 }
- 
+
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
- 
 
 <div>
     <p>
@@ -30,16 +29,17 @@
         A Locator of a grid-type must define the names of those fields always and the data table must contain DataColumn columns
         on those fields.
     </p>
-    <br />
- 
+</div>
 
+<br />
+
+<div class="html-code">
     <div id="LocatorBox" data-setup="{ DataField: 'TraderId', Width: 240}"></div>
     <br />
     <br />
- 
+
     <div id="Grid"></div>
     <br />
-
 </div>
 
 <div id="pnlLog">
@@ -47,11 +47,11 @@
 </div>
 
 
-<script>
- 
-    tp.Ready(async () => {      
+<script class="js-code">
 
-        let Def = await tp.Locators.GetDefAsync("Trader");
+    tp.Ready(async () => {
+        //let Def = await tp.Locators.GetDefAsync("Trader");
+        //let tbl = await tp.Locators.SqlSelectAsync('Trader', '');
 
         // table
         var Table = new tp.DataTable('Test');
@@ -59,29 +59,32 @@
         Table.AddColumn('TraderId');
         Table.AddColumn('Trader__Code');
         Table.AddColumn('Trader__Name');
-        Table.AddColumn('Amount', tp.DataType.Integer);
+        Table.AddColumn('Salary', tp.DataType.Decimal);
 
         var Row = Table.AddEmptyRow();
-        Row.Set('Amount', 100);
+        Row.Set('Salary', 100);
         Row = Table.AddEmptyRow();
-        Row.Set('Amount', 200);
+        Row.Set('Salary', 200);
         Row = Table.AddEmptyRow();
-        Row.Set('Amount', 300);
+        Row.Set('Salary', 300);
 
         // grid
         var Grid = new tp.Grid('#Grid');
+        Grid.Height = '240px';
 
         await Grid.AddLocatorAsync('TraderId', 'Trader');
 
         Grid.AutoGenerateColumns = false;
         Grid.AddColumn('Id');
         Grid.AddColumn('TraderId');
+        Grid.AddLocatorColumn('Trader__Code', 'Trader Code', 'Trader');
         Grid.AddLocatorColumn('Trader__Name', 'Trader', 'Trader').Width = 160;
-        Grid.AddColumn('Amount');
+        Grid.AddColumn('Salary');
 
         Grid.DataSource = Table.BindingSource;
         Grid.ReadOnly = false;
         Grid.ToolBarVisible = true;
+        Grid.GroupsVisible = false;
         Grid.ButtonInsertVisible = true;
         Grid.ButtonDeleteVisible = true;
 
@@ -91,12 +94,11 @@
         LocatorBox.DataField = 'TraderId';
         LocatorBox.DataSource = Table.BindingSource;
 
-        let Counter = 1;
         let pnlLog = tp('#pnlLog');
         let SB = new tp.StringBuilder("<br />");
         Grid.DataSource.On("PositionChanged", () => {
             let Row = Grid.DataSource.Current;
-            let Column; 
+            let Column;
 
             SB.Clear();
             pnlLog.innerHTML = '';
@@ -111,6 +113,6 @@
 
         });
     });
-    
+
 </script>
 

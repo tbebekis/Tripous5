@@ -1579,8 +1579,8 @@ tp.GridInplaceEditor = class extends tp.tpObject {
         if (tp.IsEmpty(this.Control)) {
             this.CreateControl();
 
-            if (!tp.IsEmpty(this.Control)) {
-                this.Control.Y = -1000;
+            if (!tp.IsEmpty(this.Control)) {                
+                this.Control.Y = -10000;
             }
         }
 
@@ -1588,18 +1588,35 @@ tp.GridInplaceEditor = class extends tp.tpObject {
 
         if (!tp.IsEmpty(this.Control)) {
 
+/*
+
+ */
+
+            //this.Control.SetParent(Cell);
+            
+            if (this.Control.ParentHandle !== Cell)
+                Cell.appendChild(this.Control.Handle);
+            this.Control.Position = 'absolute';
+            this.Control.Handle.style.top = 0;
+            this.Control.Handle.style.left = 0;
+            this.Control.Handle.style.bottom = 0;
+            this.Control.Handle.style.right = 0;
+            //this.Control.Handle.style.display = '';
+
+/*
             if (tp.IsEmpty(this.Control.Parent)) {
                 this.Control.SetParent(Cell.ownerDocument.body);
             }
 
-            //this.Control.Focus();
-
             var R = tp.BoundingRect(Cell);
 
-            this.Control.X = R.X;
-            this.Control.Y = R.Y;
-            this.Control.Width = R.Width - 1;
+            this.Control.X = R.X + 1;
+            this.Control.Y = R.Y + 1;
+            this.Control.Width = R.Width - 2;
             this.Control.Height = R.Height - 1;
+ */
+ 
+
 
             if (this.Control instanceof tp.Control) {
                 if (tp.IsEmpty(this.Control.DataSource))
@@ -1607,9 +1624,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
             }       
 
             this.ShowControl();
-        }
-
-        
+        }        
     }
     /**
     Hides the inplace editor
@@ -1620,8 +1635,11 @@ tp.GridInplaceEditor = class extends tp.tpObject {
         try {
             this.HideControl(PostChanges);
             this.RenderCell(PostChanges);
-            if (!tp.IsEmpty(this.Control))
-                this.Control.Y = -1000;
+
+            if (!tp.IsEmpty(this.Control)) {
+                this.Control.Y = -10000;                   
+            }
+ 
             if (this.Column.IsAggregateColumn) {
                 this.Column.Grid.Render();
             }
@@ -1892,11 +1910,7 @@ tp.GridInplaceEditorComboBox = class extends tp.GridInplaceEditor {
     constructor(Column) {
         super(Column);
     }
-
-
  
-
-
     /* properties */
     /**
     Returns the combo-box
@@ -2030,7 +2044,7 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
         if (e.target === this.btnZoom) {
             // TODO: Zoom
         } else if (e.target === this.btnList) {
-           this.Column.Locator.ShowList(this.fControl.Handle);
+           this.Column.Locator.ShowListAsync(this.fControl.Handle);
         }
     }
     /** Event handler
@@ -4030,10 +4044,8 @@ tp.Grid = class extends tp.Control  {
                         if (this.ReadOnly === false) {
                             this.ShowEditor(elTarget);
                         }
-
-
                     }
-                    else if (this.Editor) {
+                    else if (this.Editor && this.Editor.Control && !this.Editor.ContainsHandle(elTarget)) {
                         this.HideEditor(true);
                     }
 
@@ -4828,8 +4840,6 @@ tp.Grid = class extends tp.Control  {
                 this.Editor.Show(Cell);
             }
         }
-
-
     }
     /**
     Internal. Hides the inplace editor
@@ -5836,7 +5846,7 @@ tp.Grid = class extends tp.Control  {
     For a locator to be created a locator descriptor is required. Locator descriptors are keyp by the tp.Registry.
     If a locator descriptor is not found in the registry, the registry asks the descriptor from the server.
     @param {string} DataField - The field up on the locator is to be created. This is the field where the locator puts its value.
-    @param {string | tp.LocatorDescriptor} NameOrDescriptor - A locator descriptor name or a locator descriptor. It is required for creating a locator
+    @param {string | tp.LocatorDef} NameOrDescriptor - A locator descriptor name or a locator descriptor. It is required for creating a locator
     @returns {tp.Locator} Returns a {@link Promise} with a {@link tp.Locator} locator.
     */
     async AddLocatorAsync(DataField, NameOrDescriptor) {
@@ -5846,16 +5856,15 @@ tp.Grid = class extends tp.Control  {
         if (Locator)
             return Locator;
 
-        if (NameOrDescriptor instanceof tp.LocatorDescriptor) {
+        if (NameOrDescriptor instanceof tp.LocatorDef) {
             Locator = new tp.Locator();
             Locator.DataField = DataField;
             Locator.Descriptor = NameOrDescriptor;
             Locator.Control = this;
             this.Locators.push(Locator);
         }
-
-        if (!Locator) {
-            NameOrDescriptor = await tp.Registry.FindLocatorAsync(NameOrDescriptor);
+        else if (tp.IsString(NameOrDescriptor)) {
+            NameOrDescriptor = await tp.Locators.GetDefAsync(NameOrDescriptor);
             if (NameOrDescriptor) {
                 Locator = new tp.Locator();
                 Locator.DataField = DataField;
@@ -5864,7 +5873,7 @@ tp.Grid = class extends tp.Control  {
                 this.Locators.push(Locator);
             }
         }
-
+ 
         if (!Locator) {
             tp.Throw(`Can not add Locator to grid column/field ${DataField}`);
         }

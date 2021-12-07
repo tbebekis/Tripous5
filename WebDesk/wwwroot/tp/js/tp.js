@@ -1283,7 +1283,8 @@ tp.FormatDateTime = function (v, format = null) {
 
 
 /**
- Returns true if a specified string is null, undefined or it just contains white space chars (space, tab, etc)
+ Returns true if a specified string is null, undefined or it just contains white space chars (space, tab, etc). <br />
+ Throws an exception if the specified value is other than undefined, null or string.
 @param {string} v - A string value. 
 @returns {boolean}  Returns true if the string is null, undefined or it just contains white space chars (space, tab, etc)
 */
@@ -1303,6 +1304,15 @@ tp.IsBlank = function (v) {
 @returns {boolean}  Returns true if the string is null, undefined or it just contains white space chars
 */
 tp.IsNullOrWhitespace = function (v) { return tp.IsBlank(v); };
+/**
+ * Returns true if a specified string is null, undefined or it just contains white space chars (space, tab, etc). <br />
+ * No exception is thrown if the specified value is other than undefined, null or string.
+ * @param {string} v - A string value.
+ * @returns {boolean}  Returns true if the string is null, undefined or it just contains white space chars (space, tab, etc)
+ */
+tp.IsBlankString = function (v) {
+    return (v === void 0 || v === null) || (tp.IsString(v) && v.trim().length === 0);
+};
 
 /** True if a specified character is a white space char (space, tab, etc)  
 @param {character} c - A character value. 
@@ -11109,7 +11119,7 @@ tp.GetObject = function (el) {
         el = tp.Select(el);
 
     if (tp.IsElement(el)) {
-        if (el['tpObject'] && el['tpObject'] instanceof tp.tpObject)
+        if (el['tpObject']) //  && el['tpObject'] instanceof tp.tpObject
             return el['tpObject'];
     }
 
@@ -15976,7 +15986,7 @@ tp.IcoChars = {
     Insert: '+',    // '➕',
     Delete: '-',    // '➖',
     Edit: '*',      // '✱',
-    Find: '🔍',
+    Find:  '&#x1F50E;&#xFE0E;', // '🔎︎'  '🔍',
     LargeButtonDown: '&#9660;'
 };
 

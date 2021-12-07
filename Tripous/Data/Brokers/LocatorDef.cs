@@ -97,19 +97,15 @@ namespace Tripous.Data
             return !string.IsNullOrWhiteSpace(Name) ? Name : base.ToString();
         }
 
+ 
         /// <summary>
-        /// Adds and returns a field descriptor. If it finds a descriptor returns the already registered descriptor.
+        /// Adds and returns a field descriptor. 
         /// </summary>
-        public LocatorFieldDef Add(string Name, string TitleKey, DataFieldType DataType = DataFieldType.String, string TableName = "")
+        public LocatorFieldDef Add(string Name, string DataField, string TitleKey, DataFieldType DataType = DataFieldType.String,
+                                bool Visible = true, bool Searchable = true, bool ListVisible = true, string TableName = "")
         {
-            LocatorFieldDef Result = Fields.FirstOrDefault(item => Sys.IsSameText(Name, item.Name));
-
-            if (Result == null)
-            {
-                Result = new LocatorFieldDef(Name, TitleKey, DataType, TableName);
-                Fields.Add(Result);
-            }
-
+            LocatorFieldDef Result = new LocatorFieldDef(Name, DataField, TitleKey, DataType, Visible, Searchable, ListVisible, TableName);
+            Fields.Add(Result);
             return Result;
         }
 

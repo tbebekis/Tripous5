@@ -132,16 +132,16 @@ namespace WebDesk.Controllers
 
 
         [HttpGet("/LocatorGetDef")]
-        public async Task<JsonResult> LocatorGetDef(string Name)
+        public async Task<JsonResult> LocatorGetDef(string LocatorName)
         {
             await Task.CompletedTask;
 
             HttpActionResult Result = new HttpActionResult();
 
-            LocatorDef Def = LocatorDef.FindDef(Name);
+            LocatorDef Def = LocatorDef.FindDef(LocatorName);
             if (Def == null)
             {
-                Result.ErrorText = $"Locator Definition not found: {Name}";
+                Result.ErrorText = $"Locator Definition not found: {LocatorName}";
             }
             else
             {
@@ -151,7 +151,36 @@ namespace WebDesk.Controllers
 
             return Json(Result);
         }
+        [HttpGet("/LocatorSqlSelect")]
+        public async Task<JsonResult> LocatorSqlSelect(string LocatorName, string WhereSql)
+        {
+            await Task.CompletedTask;
 
+            HttpActionResult Result = new HttpActionResult();
+
+            LocatorDef Def = LocatorDef.FindDef(LocatorName);
+            if (Def == null)
+            {
+                Result.ErrorText = $"Locator Definition not found: {LocatorName}";
+            } 
+            else
+            {
+                string SqlText = Def.SqlText;
+                if (!string.IsNullOrWhiteSpace(WhereSql))
+                    SqlText = $@"
+{SqlText}
+where
+   {WhereSql}
+";
+                DataTable Table = SelectTable(SqlText, Def.ConnectionName);
+                JsonDataTable JTable = new JsonDataTable(Table);
+
+                Result.SerializePacket(JTable);
+                Result.IsSuccess = true;
+            }
+
+            return Json(Result);
+        }
 
     }
 }

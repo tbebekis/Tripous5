@@ -30,21 +30,29 @@ namespace Tripous.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        public LocatorFieldDef(string Name, string TitleKey, DataFieldType DataType = DataFieldType.String, string TableName = "")
+        public LocatorFieldDef(string Name, string DataField, string TitleKey, DataFieldType DataType = DataFieldType.String, 
+                                bool Visible = true, bool Searchable = true, bool ListVisible = true, string TableName = "")
         {
             this.Name = Name;
+            this.DataField = DataField;
             this.TitleKey = TitleKey;
             this.DataType = DataType;
+
+            this.Visible = Visible;
+            this.Searchable = Searchable;
+            this.ListVisible = ListVisible;
+
             this.TableName = TableName;
+            
         }
 
         /* public */
         /// <summary>
         /// Sets a property and returns this instance.
         /// </summary>
-        public LocatorFieldDef SetDestField(string Value)
+        public LocatorFieldDef SetDataField(string Value)
         {
-            this.DestField = Value;
+            this.DataField = Value;
             return this;
         }
         /// <summary>
@@ -109,9 +117,9 @@ namespace Tripous.Data
         public string TableName { get; set; }
 
         /// <summary>
-        /// When not empty/null then it denotes a field in the dest table where to put the value of this field.
+        /// When not empty/null then it denotes a field in the dest data table where to put the value of this field.
         /// </summary>
-        public string DestField { get; set; }
+        public string DataField { get; set; }
         /// <summary>
         /// The data-type of the field
         /// </summary>
@@ -134,7 +142,7 @@ namespace Tripous.Data
         /// <summary>
         /// Indicates whether a TextBox for this field is visible in a LocatorBox
         /// </summary>
-        public bool Visible { get; set; }
+        public bool Visible { get; set; } = true;
         /// <summary>
         /// When true the field can be part in a where clause in a SELECT statement.
         /// </summary>
