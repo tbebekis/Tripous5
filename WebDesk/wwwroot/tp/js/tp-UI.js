@@ -2662,6 +2662,8 @@ tp.DropDownBox = class extends tp.tpElement {
         this.Dragger.On(tp.Events.DragEnd, this.FuncBind(this.AnyDraggerEvent));
 
         super.OnInitializationCompleted();
+
+        this.Id = tp.SafeId('DropDown');
     }
 
     /* public */
@@ -7513,7 +7515,15 @@ tp.TextBox = class extends tp.InputControl {
         this.HookEventGroups(tp.EventGroup.Keyboard);
         super.OnHandleCreated();
     }
- 
+    /**
+    Initializes fields and properties just before applying the create params.
+    @protected
+    @override
+    */
+    InitializeFields() {
+        super.InitializeFields();
+        this.SpellCheck = false;
+    }
     /**
      * Processes an entry of the this.CreateParams.
      * @param {string} Name The name of the property in this.CreateParams
@@ -7527,6 +7537,7 @@ tp.TextBox = class extends tp.InputControl {
         }
         else {
             super.ProcessCreateParam(Name, Value, AvoidParams);
+            super.ProcessCreateParams
         }
     }
     /**
@@ -7744,8 +7755,7 @@ tp.Memo = class extends tp.Control {
     @override
     */
     OnHandleCreated() {
-        super.OnHandleCreated();
-        this.SpellCheck = false;
+        super.OnHandleCreated();        
         this.HookEvent(tp.Events.Change);
     }
     /**
@@ -7757,6 +7767,7 @@ tp.Memo = class extends tp.Control {
         super.InitializeFields();
         this.Cols = 20;
         this.Rows = 2;
+        this.SpellCheck = false;
     }
     /**
     Event trigger. Called right after the read-only property is changed
@@ -9382,6 +9393,7 @@ tp.ComboBox = class extends tp.ListControl {
 
         this.fTextBox = tp.AppendElement(ControlContainer, 'input');
         this.fTextBox.type = 'text';
+        this.fTextBox.spellcheck = false;
         this.fTextBox.className = tp.Classes.Text;
         this.fTextBox.readOnly = this.ListOnly;
 
@@ -9637,7 +9649,6 @@ tp.ComboBox = class extends tp.ListControl {
                 this.SetSelectionIndication(true);
 
                 this.fScroller.Viewport.focus();
-                //this.fDropDownBox.BringToFront();
                 break;
 
             case tp.DropDownBoxStage.Closing:
@@ -10886,6 +10897,7 @@ tp.CheckComboBox = class extends tp.CheckListControl {
         this.fTextBox = tp.AppendElement(this.fControlContainer, 'input');
         this.fTextBox.type = 'text';
         this.fTextBox.className = tp.Classes.Text;
+        this.fTextBox.spellcheck = false;
         //this.fTextBox.readOnly = this.ListOnly;
 
 
@@ -12754,6 +12766,7 @@ tp.DateBox = class extends tp.Control {
         this.fTextBox = tp.AppendElement(ControlContainer, 'input');
         this.fTextBox.type = 'text';
         this.fTextBox.className = tp.Classes.Text;
+        this.fTextBox.spellcheck = false;
 
         this.fButton = tp.AppendElement(ControlContainer, 'div');
         this.fButton.className = tp.Classes.Btn;

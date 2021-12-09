@@ -320,8 +320,30 @@ tp.Locator = class extends tp.tpObject {
 
         this.fInitialized = false;
         this.fControl = null;
+
+        this.EnsureDropDownBox();
+
     }
 
+    /** Ensures that a {@link tp.DropDownBox} is created.
+     * @private
+     * */
+    EnsureDropDownBox() {
+        if (tp.IsEmpty(this.fDropDownBox)) {
+            this.fDropDownBox = new tp.DropDownBox();
+            this.fDropDownBox.Owner = this;
+
+            // this listbox is displayed by the drop-down box
+            this.fListBox = new tp.ListBox();
+            this.fListBox.ParentHandle = this.fDropDownBox.Handle;
+            this.fListBox.Position = 'absolute';
+            this.fListBox.Width = '100%';
+            this.fListBox.Height = '100%';
+            this.fListBox.Handle.style.border = 'none';
+ 
+            this.fListBox.On(tp.Events.Click, this.ListBox_Click, this);
+        }
+    }
 
     /** Field
      * @private
@@ -469,6 +491,8 @@ tp.Locator = class extends tp.tpObject {
             }
 
             this.fControl = v;
+
+            this.fListBox.DataSource = !tp.IsValid(v) ? null : this.fControl.DataSource;
         }
     }
     /**
@@ -523,13 +547,32 @@ tp.Locator = class extends tp.tpObject {
     Gets or sets the name of the field this instance is bound to
     @type {string}
     */
-    DataField = '';
+    get DataField() {
+        return this.fListBox.DataField;
+    }
+    set DataField(v) {
+        this.fListBox.DataField = v;
+    }
 
     /**
     Gets or set the list DataTable, that is the source table where data values come from.
     @type {tp.DataTable}
     */
-    ListTable = null;
+    get ListTable() {
+        let Result = null;
+
+        if (tp.IsValid(this.fListBox) && this.fListBox.ListSource instanceof tp.DataSource)
+            Result = this.fListBox.ListSource.Table;
+
+        return Result;
+    }
+    set ListTable(v) {
+        if (!tp.IsValid(v))
+            v = null;
+
+        if (v === null || v instanceof tp.DataTable)
+            this.fListBox.ListSource = v;
+    }
 
     /**
     A {@link tp.Dictionary} dictionary, where Key = {@link tp.LocatorFieldDef}  and Value = {@link HTMLInputElement}, 
@@ -783,28 +826,7 @@ tp.Locator = class extends tp.tpObject {
 
     }
  
-    /** Ensures that a {@link tp.DropDownBox} is created.
-     * @private
-     * */
-    EnsureDropDownBox() {
-        if (tp.IsEmpty(this.fDropDownBox)) {
-            this.fDropDownBox = new tp.DropDownBox();
-            this.fDropDownBox.Owner = this;
-
-            // this listbox is displayed by the drop-down box
-            this.fListBox = new tp.ListBox();
-            this.fListBox.ParentHandle = this.fDropDownBox.Handle;
-            this.fListBox.Position = 'absolute';
-            this.fListBox.Width = '100%';
-            this.fListBox.Height = '100%';
-            this.fListBox.Handle.style.border = 'none';
-
-            this.fListBox.DataField = this.DataField;
-            this.fListBox.DataSource = this.DataSource;
-
-            this.fListBox.On(tp.Events.Click, this.ListBox_Click, this);
-        }
-    }
+ 
 
     /** Sets-up the list table
      * @private
@@ -865,7 +887,8 @@ tp.Locator = class extends tp.tpObject {
             // this may assign the ListTable
             this.OnAnyEvent(Args);
 
-            let Table = await tp.Locators.SqlSelectAsync(this.Descriptor.Name, WhereUser);
+            let Table = await tp.Locators.SqlSelectAsync(this.Descriptor.Name, WhereUser);            
+
             this.ListTable = Table;
 
             this.SetupListTable();
@@ -884,24 +907,14 @@ tp.Locator = class extends tp.tpObject {
         if (!tp.IsEmpty(this.ListTable)) {
             if (this.ListTable.Rows.length <= tp.SysConfig.LocatorShowDropDownRowCountLimit) {
 
-                // EDW
-                this.EnsureDropDownBox();
-
                 if (this.fDropDownBox.IsOpen)
-                    this.fDropDownBox.Close();
+                    this.fDropDownBox.Close(); 
 
                 this.LocateKeyAsync()
                     .then(() => {
-                        this.Assigning = true;  // to avoid calling DataSourceRowModified() with no reason
-                        try {
-                            this.fListBox.ListSource = this.ListTable;
-
-                            this.fDropDownBox.Associate = Associate;
-                            this.fDropDownBox.Open();
-                        } finally {
-                            this.Assigning = false;
-                        }
-                    });
+                        this.fDropDownBox.Associate = Associate;
+                        this.fDropDownBox.Open();
+                    }); 
 
             } else {
                 // TODO: PopUpForm()
@@ -940,6 +953,9 @@ tp.Locator = class extends tp.tpObject {
         switch (Stage) {
 
             case tp.DropDownBoxStage.Opening:
+                if (!tp.IsValid(this.fListBox.DataSource)) 
+                    this.fListBox.DataSource = this.fControl.DataSource;
+
                 break;
 
             case tp.DropDownBoxStage.Opened:
@@ -1009,6 +1025,29 @@ tp.Locator = class extends tp.tpObject {
         if (!tp.IsValid(Associate))
             tp.Throw("No Associate");
 
+        if (tp.IsValid(this.ListTable)) {
+            this.DisplayListTable(Associate);
+        }
+        else {
+            this.SelectListTableAsync('')
+                .then((RowCount) => {
+                    if (RowCount > 0) {
+                        this.DisplayListTable(Associate);
+                    } else {
+                        // nothing here
+                    }
+                });
+        }
+
+
+/*
+        let RowCount = await this.SelectListTableAsync('');
+        if (RowCount > 0) {
+            this.DisplayListTable(Associate);
+        } else {
+            // nothing here
+        }
+        // ---------------------------
         this.SelectListTableAsync('')
             .then((RowCount) => {
                 if (RowCount > 0) {
@@ -1016,7 +1055,8 @@ tp.Locator = class extends tp.tpObject {
                 } else {
                     // nothing here
                 }
-            }); 
+            });
+ */
     }
     HideList() {
         if (this.fDropDownBox.IsOpen)

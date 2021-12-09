@@ -598,6 +598,7 @@ tp.GridColumn = class extends tp.tpObject {
         // filter text box
         this.fFilterCellTextBox = this.Handle.ownerDocument.createElement('input');
         this.fFilterCellTextBox.type = 'text';
+        this.fFilterCellTextBox.spellcheck = false;
         tp.GridColumn.SetInfo(this.fFilterCellTextBox, this);
         this.fFilterCell.appendChild(this.fFilterCellTextBox);
         this.fFilterCellTextBox.className = tp.ConcatClasses(tp.Classes.FilterTextBox); // tp.Classes.NoBrowserAppearance, 
@@ -1590,6 +1591,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
             
             if (this.Control.ParentHandle !== Cell)
                 Cell.appendChild(this.Control.Handle);
+ 
             this.Control.Position = 'absolute';
             this.Control.Handle.style.top = 0;
             this.Control.Handle.style.left = 0;
@@ -1613,9 +1615,11 @@ tp.GridInplaceEditor = class extends tp.tpObject {
             if (this.Control instanceof tp.Control) {
                 if (tp.IsEmpty(this.Control.DataSource))
                     this.Control.DataSource = this.Column.Grid.DataSource;
-            }       
-
+            }
+ 
             this.ShowControl();
+
+            
         }        
     }
     /**
@@ -1631,7 +1635,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
             if (!tp.IsEmpty(this.Control)) {
                 //this.Control.Y = -10000;       
                 //this.Control.ParentHandle = null;
-                //this.Control.Handle.style.display = 'none';
+                this.Control.Handle.style.display = 'none';
             }
  
             if (this.Column.IsAggregateColumn) {
@@ -1655,6 +1659,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
         return false;
     }
 };
+ 
 
 /* protected */
 /** Field
@@ -2038,7 +2043,8 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
         if (e.target === this.btnZoom) {
             // TODO: Zoom
         } else if (e.target === this.btnList) {
-           this.Column.Locator.ShowList(this.fControl.Handle);
+            e.stopPropagation();
+            this.Column.Locator.ShowList(this.fControl.Handle);            
         }
     }
     /** Event handler
@@ -2119,6 +2125,7 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
         // textbox
         this.fTextBox = this.Column.Handle.ownerDocument.createElement('input');
         this.fTextBox.type = 'text';
+        this.fTextBox.spellcheck = false;
         this.fControl.Handle.appendChild(this.fTextBox);
 
         tp.On(this.fTextBox, tp.Events.Focus, this.FuncBind(this.Box_Enter));
@@ -2185,9 +2192,6 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
     @param {boolean} PostChanges The editor posts any changes to the underlying row ONLY if this flag is true.
     */
     HideControl(PostChanges) {
-        //this.Locator.HideList();
-        //super.HideControl(PostChanges);
-        //this.fTextBox.value = "";
     }
 };
 
@@ -4392,9 +4396,10 @@ tp.Grid = class extends tp.Control  {
             GroupColumn = this.GroupColumns[Node.Level];
             el.textContent = tp.Format('{0}: {1}', GroupColumn.Text, GroupColumn.Format(Node.Key));
             elNode.appendChild(el);
-
-            // Group Footer ==========================================================================
-        } else if (Node.IsFooter) {
+           
+        }
+         // Group Footer ==========================================================================
+        else if (Node.IsFooter) {
             tp.AddClass(elNode, tp.Classes.Summary);
 
             ln = this.GroupColumns.length;
@@ -4435,9 +4440,10 @@ tp.Grid = class extends tp.Control  {
                 }
 
             }
-
-            // Data Row ==========================================================================
-        } else if (Node.IsRow) {
+ 
+        }
+         // Data Row ==========================================================================
+        else if (Node.IsRow) {
 
             tp.AddClass(elNode, tp.Classes.GridRow);
 
@@ -4832,8 +4838,8 @@ tp.Grid = class extends tp.Control  {
             this.Editor = Column.Editor;
 
             if (this.Editor) {
-                this.Editor.Show(Cell);
-            }
+                this.Editor.Show(Cell);                
+            } 
         }
     }
     /**
@@ -4842,7 +4848,8 @@ tp.Grid = class extends tp.Control  {
     */
     HideEditor(PostChanges) {
         if (this.Editor) {
-            this.Editor.Hide(PostChanges);
+            this.Editor.Hide(PostChanges); 
+
             this.Editor = null;
         }
     }
