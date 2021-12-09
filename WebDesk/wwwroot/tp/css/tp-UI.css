@@ -1076,6 +1076,7 @@ table.tp-Calendar td.tp-Marked {
     flex-grow: 1;
     align-items: center;
     border: none;
+    width: 100%;
 }
 
 .tp-DateBox .tp-Strip .tp-Btn {
@@ -1292,7 +1293,8 @@ tp-SelectSqlListUi
     gap: 0.4em;
 }
 
-.tp-SelectSqlListUi .tp-SelectSqlUi {
+ 
+.tp-SqlFilterUi {
     position: relative;
     display: flex;
     flex-direction: column;

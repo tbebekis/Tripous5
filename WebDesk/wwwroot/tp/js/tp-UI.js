@@ -207,7 +207,7 @@ tp.Classes = {
 
     /* Sql Filters          ----------------------------------------------------------------- */
     SelectSqlListUi: 'tp-SelectSqlListUi',
-    SelectSqlUi: 'tp-SelectSqlUi',
+    SqlFilterPanel: 'tp-SqlFilterPanel',
     SelectSqlListToolBar: 'tp-SelectSqlList-ToolBar',
 
     SqlFilterRow: 'tp-SqlFilterRow',
@@ -2680,11 +2680,8 @@ tp.DropDownBox = class extends tp.tpElement {
                 tp.Doc.body.appendChild(this.Handle);                
             }
  
-            let Style = tp.ComputedStyle(this.Associate);
-            this.Handle.style.fontFamily = Style.fontFamily;
-            this.Handle.style.fontSize = Style.fontSize;
-            this.Handle.style.fontWeight = Style.fontWeight;
- 
+            //let Style = tp.ComputedStyle(this.Associate);
+            this.Handle.style.font = 'inherit';
             this.Position = 'fixed';            
 
             if (this.fIsFirstOpen === true) {
@@ -15154,12 +15151,10 @@ tp.LocatorEventArgs = class extends tp.EventArgs {
         this.Locator.ListTable = v;
     }
 
-    /**
-    Gets or sets the SELECT statement. Used with the AddToSelectSqlWhere type only.
-    @type {tp.SelectSql}
-    */
-    SelectSql = null;
-    /** The value of the where clause */
+ 
+    /** The value of the where clause 
+     @type {string}
+     */
     WhereSql = '';
     /**
     Gets or sets the filter to apply to ListTable.DefaultView.RowFilter
@@ -15183,403 +15178,6 @@ tp.LocatorEventArgs = class extends tp.EventArgs {
     }
 };
 
-//#endregion
-
-
-//#region tp.LocatorDescriptor
-/**
-Describes a {@link tp.Locator}. <br />  
-
-A locator represents (returns) a single value, but it can handle and display multiple values
-in order to help the end user in identifying and locating that single value.  <br />
-
-For example, a TRADES data table has a CUSTOMER_ID column, representing that single value, but the user interface
-has to display information from the CUSTOMERS table, specifically, the ID, CODE and NAME columns.
-
-The TRADES table is the target data table and the CUSTOMER_ID is the DataField field name.
-The CUSTOMERS table is the ListTableName and the ID is the ListKeyField field name.
-
-The fields, ID, CODE and NAME, may be described by individual LocatorFieldDescriptor field items.  <br />
-
-A locator can be used either as a single-row control, as the LocatorBox does, or as a group of
-related columns in a Grid.  <br />
-NOTE: A locator of a LocatorBox type, may or may not define the LocatorFieldDescriptor.DataField
-field names. Usually in a case like that, the data table contains just the key field, the LocatorBox.DataField.  
-A locator of a grid-type must define the names of those fields always and the data table must contain DataColumn columns
-on those fields.
- */
-tp.LocatorDescriptor = class extends tp.tpObject {
-
-    /**
-    Constructor.
-    @param {string} [Name] Optional. The name of the locator descriptor.
-    @param {string} [ListTableName] Optional.
-    @param {string} [ListKeyField] Optional.
-    */
-    constructor(Name, ListTableName, ListKeyField) {
-        super();
-
-        this.Name = Name || tp.NO_NAME;
-
-        this.ConnectionName = tp.SysConfig.DefaultConnection;
-        this.ListTableName = ListTableName || Name;
-        this.ListKeyField = ListKeyField || 'Id';
-        this.ZoomCommand = '';
-        this.ReadOnly = false;
-        this.SelectSql = new tp.SelectSql();
-        this.Fields = [];
-        this.OrderBy = '';
-    }
-
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fName = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fTitle = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fConnectionName = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fListKeyField = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fZoomCommand = '';
-
-
-    /* properties */
-    /**
-    Gets or sets the locator descriptor name
-    @type {string}
-    */
-    get Name() {
-        return !tp.IsBlank(this.fName) ? this.fName : tp.NO_NAME;
-    }
-    set Name(v) {
-        this.fName = v;
-    }
-    /**
-    Gets or sets the title of the locator descriptor.
-    @type {string}
-    */
-    get Title() {
-        return !tp.IsBlank(this.fTitle) ? this.fTitle : this.Name;
-    }
-    set Title(v) {
-        this.fTitle = v;
-    }
-    /**
-    Gets or sets the connection name  
-    @type {string}
-    */
-    get ConnectionName() {
-        return !tp.IsBlank(this.fConnectionName) ? this.fConnectionName : tp.SysConfig.DefaultConnection;
-    }
-    set ConnectionName(v) {
-        this.fConnectionName = v;
-    }
-    /**
-    Gets or sets the name of the list table
-    @type {string}
-    */
-    ListTableName = '';
-    /**
-    Gets or sets the key field of the list table. The value of this field goes to the DataField
-    */
-    get ListKeyField() {
-        return !tp.IsBlank(this.fListKeyField) ? this.fListKeyField : 'Id';
-    }
-    set ListKeyField(v) {
-        this.fListKeyField = v;
-    }
-    /**
-    Gets or sets the zoom command name. A user inteface (form) can use this name to call the command.
-    @type {string}
-    */
-    get ZoomCommand() {
-        return tp.IsBlank(this.fZoomCommand) ? (tp.IsBlank(this.ListTableName) ? '' : tp.SysConfig.DefaultConnection + "." + this.ListTableName) : this.fZoomCommand;
-    }
-    set ZoomCommand(v) {
-        this.fZoomCommand = v;
-    }
-
-    /**
-    Indicates whether the locator is readonly
-    @type {boolean}
-    */
-    ReadOnly = false;
-    /**
-    If the value of this property is set then the locator does not generates the SELECT automatically.
-    @type {tp.SelectSql}
-    */
-    SelectSql = null;
-    /**
-    Gets the list of descriptor fields.
-    @type {tp.LocatorFieldDescriptor[]}
-    */
-    Fields = [];
-    /**
-    The order by field when the SELECT Sql is constructed by the Locator. In a description with Id and Name fields could be the ListTableName.Name
-    @type {string}
-    */
-    OrderBy = '';
-
-    /* overrides */
-    /**
-    Initializes the 'static' and 'read-only' class fields, such as tpClass etc.
-    @protected
-    @override
-    */
-    InitClass() {
-        super.InitClass();
-        this.tpClass = 'tp.LocatorDescriptor';
-    }
-
-    /* public */
-    /**
-    Adds a {@link tp.LocatorFieldDescriptor} field to the locator field list. Returns the newly added field.
-    @param {string} DataType - The data type of the field. One of the tp.DataType constants
-    @param {string} DataField - The field name of the field in the target data-source
-    @param {string} ListField - The field name of the field in the list table.
-    @param {string} ListFieldAlias - The alias of the ListField.
-    @param {string} ListTableName - The name of the list table
-    @param {string} [Title] Optional. The title of the field
-    @param {boolean} [Searchable = true] Optional. Defaults to true. When true the field can be part in a where clause in a select statement.
-    @param {boolean} [DataVisible = true] Optional. Defaults to true. Indicates whether a TextBox for this field is visible in a LocatorBox
-    @param {boolean} [ListVisible = true] Optional. Defaults to true. Indicates whether the field is visible when the list table is displayed
-    @returns {tp.LocatorFieldDescriptor} Returns the newly added {@link tp.LocatorFieldDescriptor}  field.
-    */
-    Add(DataType, DataField, ListField, ListFieldAlias, ListTableName, Title, Searchable, DataVisible, ListVisible) {
-        var Result = new tp.LocatorFieldDescriptor();
-        Result.Descriptor = this;
-
-        Result.DataType = DataType;
-        Result.DataField = DataField;
-        Result.ListField = ListField;
-        Result.ListFieldAlias = ListFieldAlias;
-        Result.ListTableName = ListTableName;
-        Result.Title = Title || DataField;
-        Result.Searchable = Searchable;
-        Result.DataVisible = DataVisible;
-        Result.ListVisible = ListVisible;
-
-        this.Fields.push(Result);
-        return Result;
-    }
-    /**
-    Finds a {@link tp.LocatorFieldDescriptor}  field descriptor by list field alias and returns the field or null if not found
-    @param {string} ListFieldAlias - The alias of the ListField.
-    @returns {tp.LocatorFieldDescriptor} Finds a {@link tp.LocatorFieldDescriptor}  field descriptor by list field alias and returns the field or null if not found
-    */
-    Find(ListFieldAlias) {
-        return tp.FirstOrDefault(this.Fields, (item) => { return tp.IsSameText(ListFieldAlias, item.ListFieldAlias); });
-    }
-    /**
-    Finds a {@link tp.LocatorFieldDescriptor} field descriptor by data field and returns the field or null if not found
-    @param {string} DataField - The field name of the field in the target data-source
-    @returns {tp.LocatorFieldDescriptor} Finds a {@link tp.LocatorFieldDescriptor} field descriptor by data field and returns the field or null if not found
-    */
-    FindByDataField(DataField) {
-        return tp.FirstOrDefault(this.Fields, (item) => { return tp.IsSameText(DataField, item.DataField); });
-    }
-    /**
-    Assigns the properties of this instance from a specified source object.
-    @param {object} Source The source to copy property values from.
-    */
-    Assign(Source) {
-        this.Name = Source.Name;
-
-        this.ConnectionName = Source.ConnectionName;
-        this.ListTableName = Source.ListTableName;
-        this.ListKeyField = Source.ListKeyField;
-        this.ZoomCommand = Source.ZoomCommand;
-        this.ReadOnly = Source.ReadOnly;
-        this.SelectSql = new tp.SelectSql();
-        this.SelectSql.Assign(Source.SelectSql);
-        this.OrderBy = Source.OrderBy;
-
-        this.Fields = [];
-
-        var i, ln, Field, SF;
-        for (i = 0, ln = Source.Fields.length; i < ln; i++) {
-            SF = Source.Fields[i];
-            Field = this.Add(SF.DataType, SF.DataField, SF.ListField, SF.ListFieldAlias, SF.ListTableName, SF.Title, SF.Searchable, SF.DataVisible, SF.ListVisible);
-            Field.TitleKey = SF.TitleKey;
-            Field.IsIntegerBoolean = SF.IsIntegerBoolean;
-            Field.Width = SF.Width;
-        }
-    }
-};
-
-
-
-
-
-
-//#endregion
-
-//#region tp.LocatorFieldDescriptor
-/**
-Describes the "field" (text box or grid column) of a Locator. A field such that associates a column in the data table (the target) to a column in the list table (the source).
-*/
-tp.LocatorFieldDescriptor = class extends tp.tpObject {
-
-    /**
-    Constructor
-    */
-    constructor() {
-        super();
-
-        this.DataType = tp.DataType.String;
-        this.DataField = '';
-        this.ListField = '';
-        this.ListFieldAlias = '';
-        this.ListTableName = '';
-        this.TitleKey = '';
-        this.Title = '';
-
-        this.DataVisible = true;
-        this.ListVisible = true;
-        this.Searchable = true;
-        this.IsIntegerBoolean = false;
-
-        this.Width = 70;
-    }
-
-    /* fields */
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fListFieldAlias = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fListTableName = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fTitleKey = '';
-
-    /** Field
-    * @type {tp.LocatorDescriptor}
-    */
-    Descriptor = null;
-
-
-    /* properties */
-    /**
-    Gets or sets the data type of the field. One of the tp.DataType constants
-    @type {string}
-    */
-    DataType = tp.DataType.String;
-    /**
-    Gets or sets the the name of the field in the data table. It can not be empty for grid-type locators.
-    @type {string}
-    */
-    DataField = '';
-    /**
-    Gets or sets the field name of the field in the list table.
-    @type {string}
-    */
-    ListField = '';
-
-    /**
-    Gets or sets the alias of the ListField.
-    @type {string}
-    */
-    get ListFieldAlias() {
-        return tp.IsBlank(this.fListFieldAlias) ? this.ListField : this.fListFieldAlias;
-    }
-    set ListFieldAlias(v) {
-        this.fListFieldAlias = v;
-    }
-    /**
-    Gets or sets the  name of the list table
-    @type {string}
-    */
-    get ListTableName() {
-        return tp.IsBlank(this.fListTableName) ? (tp.IsEmpty(this.Descriptor) ? '' : this.Descriptor.ListTableName) : this.fListTableName;
-    }
-    set ListTableName(v) {
-        this.fListTableName = v;
-    }
-    /**
-    Gets or sets a resource Key used in returning a localized version of Title.
-    @type {string}
-    */
-    get TitleKey() {
-        return tp.IsBlank(this.fTitleKey) ? this.ListFieldAlias : this.fTitleKey;
-    }
-    set TitleKey(v) {
-        this.fTitleKey = v;
-    }
-    /**
-    Gets or sets tha Title of this descriptor, used for display purposes.
-    @type {string}
-    */
-    Title = '';
-    /**
-    Indicates whether a TextBox for this field is visible in a LocatorBox
-    @type {boolean}
-    */
-    DataVisible = false;
-    /**
-    Indicates whether the field is visible when the list table is displayed
-    @type {boolean}
-    */
-    ListVisible = true
-    /**
-    When true the field can be part in a where clause in a select statement.
-    @type {boolean}
-    */
-    Searchable = false;
-    /**
-    Used to notify criterial links to treat the field as an integer boolea fieldn (1 = true, 0 = false)
-    @type {boolean}
-    */
-    IsIntegerBoolean = false;
-    /**
-    Controls the width of the text box in a LocatorBox.
-    @type {number}
-    */
-    Width = 70;
-
-    /* overrides */
-    /**
-    Initializes the 'static' and 'read-only' class fields, such as tpClass etc.
-    @protected
-    @override
-    */
-    InitClass() {
-        super.InitClass();
-        this.tpClass = 'tp.LocatorFieldDescriptor';
-    }
-
-    /**
-    Returns a string representation of this instance.
-    @returns {string} Returns a string representation of this instance.
-    */
-    toString() {
-        return `${this.ListTableName}.${this.ListFieldAlias}`;
-    }
-};
-
-
-tp.LocatorFieldDescriptor.BoxDefaultWidth = 70;
 //#endregion
 
 
@@ -15613,28 +15211,368 @@ tp.ILocatorLink = class {
 };
 //#endregion
 
-//#region tp.Locator
+
+tp.Urls.LocatorGetDef = '/LocatorGetDef';
+tp.Urls.LocatorSqlSelect = '/LocatorSqlSelect';
+
+//#region tp.Locators
+/** A helper static class for locators */
+tp.Locators = class {
+
+    /**
+     * Returns a locator definition registered under a specified name, if any, else null/undefined. <br />
+     * It first searches the already downloaded definitions and if the requested is not found then calls the server.
+     * @param {string} Name The name of the locator definition.
+     * @returns {tp.LocatorDef} Returns a locator definition registered under a specified name, if any, else null/undefined.
+     */
+    static async GetDefAsync(Name) {
+        let Result = this.Descriptors.find(item => tp.IsSameText(Name, item.Name));
+
+        if (!tp.IsValid(Result)) {
+
+            let Url = tp.Urls.LocatorGetDef;
+            let Data = {
+                LocatorName: Name,
+            };
+
+            let Args = await tp.Ajax.GetAsync(Url, Data);  //= async function (Url, Data = null
+
+            var o = JSON.parse(Args.ResponseText);
+            if (o.IsSuccess === false)
+                tp.Throw(o.ErrorText);
+
+            let Packet = JSON.parse(o.Packet);
+            Result = new tp.LocatorDef();
+            Result.Assign(Packet);
+            this.Descriptors.push(Result);
+        }
+
+        return Result;
+    }
+    /**
+     * Executes the SELECT statement of a specified Locator, along with the specified where clause and returns the result {@link tp.DataTable}
+     * @param {string} Name The name of the locator definition.
+     * @param {string} WhereSql The where clause text to add to the SELECT statement of a specified Locator.
+     * @returns {tp.DataTable} Returns the result {@link tp.DataTable}
+     */
+    static async SqlSelectAsync(Name, WhereSql) {
+        let Url = tp.Urls.LocatorSqlSelect;
+        let Data = {
+            LocatorName: Name,
+            WhereSql: WhereSql || ''
+        };
+
+        let Args = await tp.Ajax.GetAsync(Url, Data);  //= async function (Url, Data = null
+
+        var o = JSON.parse(Args.ResponseText);
+        if (o.IsSuccess === false)
+            tp.Throw(o.ErrorText);
+
+        var Table = new tp.DataTable();
+        Table.Assign(Args.ResponseData.Packet);
+
+        return Table;
+    }
+};
+
+/** A list of locator definitions already downloaded from server.
+ * @static
+ * @type {tp.LocatorDef[]} 
+ * */
+tp.Locators.Descriptors = [];
+//#endregion 
+
+
+//#region tp.LocatorDef
+
 /**
-The locator represents (returns) a single value. <br />
+Describes a {@link tp.Locator}. <br />
+
+A locator represents (returns) a single value, but it can handle and display multiple values
+in order to help the end user in identifying and locating that single value.  <br />
+
+For example, a TRADES table has a CUSTOMER_ID column, representing that single value, but the user interface
+has to display information from the CUSTOMERS table, specifically, the ID, CODE and NAME columns.
+
+The TRADES table is the data table and the CUSTOMER_ID is the DataField field name.
+The CUSTOMERS table is the list table, denoted by the ListTableName, and the ID is the ListKeyField field name.
+
+The fields, ID, CODE and NAME, may be described by individual {@link tp.LocatorFieldDef} field items.  <br />
+
+In other words, the TRADES.CUSTOMER_ID value comes from the CUSTOMERS.ID value. <br />
+The TRADES is the data-table where the CUSTOMERS is the list table. <br />
+A locator provides a filtering mechanism for the user to locate a CUSTOMERS row. <br />
+Also a locator displays the CUSTOMERS rows when the filtering returns more than one row. <br />
+
+A locator can be used either as a single-row control, as the {@link tp.LocatorBox}  does, or as a group of
+related columns in a {@link tp.Grid}.  <br />
+
+NOTE: A locator of a {@link tp.LocatorBox} type, may or may not define the tp.LocatorFieldDef.DataField field names. <br />
+Usually in a case like that, the data table contains just the key field, the LocatorBox.DataField. <br />
+A locator of a grid-type must define the names of those fields always and the data table must contain DataColumn columns
+on those fields.
+ * */
+tp.LocatorDef = class {
+
+    /** Contructor */
+    constructor() {
+        this.Fields = [];
+    }
+
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fName = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fTitle = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fListKeyField = '';
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fZoomCommand = '';
+
+
+    /* properties */
+    /**
+    Gets or sets the locator descriptor name
+    @type {string}
+    */
+    get Name() {
+        return tp.IsString(this.fName) && !tp.IsBlank(this.fName) ? this.fName : tp.NO_NAME;
+    }
+    set Name(v) {
+        this.fName = v;
+    }
+    /**
+    Gets or sets the title of the locator descriptor.
+    @type {string}
+    */
+    get Title() {
+        return tp.IsString(this.fTitle) && !tp.IsBlank(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /**
+    Gets or sets the name of the list table
+    @type {string}
+    */
+    ListTableName = '';
+    /**
+    Gets or sets the key field of the list table. The value of this field goes to the DataField
+    */
+    get ListKeyField() {
+        return tp.IsString(this.fListKeyField) && !tp.IsBlank(this.fListKeyField) ? this.fListKeyField : 'Id';
+    }
+    set ListKeyField(v) {
+        this.fListKeyField = v;
+    }
+    /**
+    Gets or sets the zoom command name. A user inteface (form) can use this name to call the command.
+    @type {string}
+    */
+    get ZoomCommand() {
+        return tp.IsString(this.fZoomCommand) && !tp.IsBlank(this.fZoomCommand) ? this.fZoomCommand : '';
+    }
+    set ZoomCommand(v) {
+        this.fZoomCommand = v;
+    }
+
+    /**
+    The where clause that is produced by a locator algorithm.
+    @type {string}
+    */
+    WhereSql = '';
+    /**
+    The order by clause to append to the statement
+    @type {string}
+    */
+    OrderBySql = '';
+
+    /**
+    Indicates whether the locator is readonly
+    @type {boolean}
+    */
+    ReadOnly = false;
+    /**
+    Gets the list of descriptor fields.
+    @type {tp.LocatorFieldDef[]}
+    */
+    Fields = [];
+
+    /**
+    Assigns the properties of this instance from a specified source object.
+    @param {object} Source The source to copy property values from.
+    */
+    Assign(Source) {
+        if (tp.IsValid(Source)) {
+            for (var Prop in Source) {
+                if (!tp.IsFunction(Source[Prop]) && tp.HasWritableProperty(this, Prop)) {
+                    if (Prop === 'Fields' && tp.IsArray(Source[Prop])) {
+                        this.Fields = [];
+                        let FieldDef;
+                        Source[Prop].forEach((SourceFieldDef) => {
+                            FieldDef = new tp.LocatorFieldDef();
+                            FieldDef.Assign(SourceFieldDef);
+                            this.Fields.push(FieldDef);
+                        });
+                    }
+                    else {
+                        this[Prop] = Source[Prop];
+                    }
+                }
+            }
+        }
+
+    }
+
+    /**
+    Finds a {@link tp.LocatorFieldDef}  field descriptor by list field name and returns the field or null if not found
+    @param {string} ListField - The name of the ListField.
+    @returns {tp.LocatorFieldDef} Finds a {@link tp.LocatorFieldDef}  field descriptor by list field name and returns the field or null if not found
+    */
+    Find(ListField) {
+        return this.Fields.find((item) => { return tp.IsSameText(ListField, item.Name); });
+    }
+    /**
+    Finds a {@link tp.LocatorFieldDef} field descriptor by data field and returns the field or null if not found
+    @param {string} DataField - The field name of the field in the target data-source
+    @returns {tp.LocatorFieldDef} Finds a {@link tp.LocatorFieldDef} field descriptor by data field and returns the field or null if not found
+    */
+    FindByDataField(DataField) {
+        return this.Fields.find((item) => { return tp.IsSameText(DataField, item.DataField); });
+    }
+
+};
+//#endregion 
+
+//#region tp.LocatorFieldDef
+/** Describes the "field" (text box or grid column) of a Locator. <br />
+ * A field such that associates a column in the data table (the target) to a column in the list table (the source).
+ * */
+tp.LocatorFieldDef = class {
+
+    /** Contructor */
+    constructor() {
+    }
+
+    /**
+    The field name in the list (source) table
+    @type {string}
+    */
+    Name = '';
+    /**
+    The table name of the list (source) table
+    @type {string}
+    */
+    TableName = '';
+
+    /** When not empty/null then it denotes a field in the dest data table where to put the value of this field.
+     * @type {string}
+     */
+    DataField = '';
+    /**
+    Gets or sets the data type of the field. One of the tp.DataType constants
+    @type {string}
+    */
+    DataType = tp.DataType.String;
+
+    /**
+    Gets or sets tha Title of this descriptor, used for display purposes.
+    @type {string}
+    */
+    Title = '';
+    /**
+    Gets or sets a resource Key used in returning a localized version of Title.
+    @type {string}
+    */
+    get TitleKey() {
+        return tp.IsBlank(this.fTitleKey) ? this.Name : this.fTitleKey;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+    /**
+    Indicates whether a TextBox for this field is visible in a LocatorBox
+    @type {boolean}
+    */
+    Visible = true;
+    /**
+    When true the field can be part in a where clause in a select statement.
+    @type {boolean}
+    */
+    Searchable = true;
+    /**
+    Indicates whether the field is visible when the list table is displayed
+    @type {boolean}
+    */
+    ListVisible = true
+
+    /**
+    Used to notify criterial links to treat the field as an integer boolea fieldn (1 = true, 0 = false)
+    @type {boolean}
+    */
+    IsIntegerBoolean = false;
+    /**
+    Controls the width of the text box in a LocatorBox. In pixels.
+    @type {number}
+    */
+    Width = 70;
+
+    /**
+    Assigns the properties of this instance from a specified source object.
+    @param {object} Source The source to copy property values from.
+    */
+    Assign(Source) {
+        if (tp.IsValid(Source)) {
+            for (let Prop in Source) {
+                if (!tp.IsFunction(Source[Prop]) && tp.HasWritableProperty(this, Prop)) {
+                    this[Prop] = Source[Prop];
+                }
+            }
+        }
+    }
+};
+
+tp.LocatorFieldDef.BoxDefaultWidth = 70;
+//#endregion 
+
+
+//#region tp.Locator
+/** The locator represents (returns) a single value. <br />
 
 A locator acts similarly to a lookup combobox, in helping the user to select and return a single value. <br />
-It can be used with large data-sets because it constructs and issues SELECT statements to the server and displays the result.  <br />
-A locator is just a class, not a user interface control. There are special user interface controls, such as the {@link tp.Grid} and the {@link tp.LocatorBox},
+
+It can be used with large data-sets because it constructs a WHERE clause, asks the server to execute a named SELECT statement and displays the result.  <br />
+
+A locator is just a class, not a user interface control.  <br />
+There are special user interface controls, such as the {@link tp.Grid} and the {@link tp.LocatorBox},
 that connect to a locator and help the user to select a value using the locator. <br />
 
-The programmer never creates a {@link tp.Locator} instance. 
+The programmer never creates a {@link tp.Locator} instance.
 A locator instance is created automatically when a {@link tp.LocatorBox} is created and initialized and when a locator column is added to a {@link tp.Grid}. <br />
+
 A locator always works in conjuction with a control, a {@link tp.LocatorBox} or a {@link tp.Grid}, and its Control property returns that control.
 From that associated control the locator knows its DataSource, DataTable, DataColumn and DataField. <br />
 
-The locator provides the Descriptor property or type {@link tp.LocatorDescriptor}. 
-That descriptor contains the SELECT Sql statement of the locator and the list of its fields. <br />
-The SELECT statement returns the ListTable of the locator. 
+The locator provides the Descriptor property or type {@link tp.LocatorDef}.
+That descriptor contains a list of {@link tp.LocatorFieldDef} fields. <br />
+The fields are used in constructing a WHERE clause and when the SELECT statement is executed a ListTable is returned to the locator.
 The ListTable is used as a source by the locator. The locator locates the ListRow and then uses that row in assigning its data fields.
 @implements {tp.IDataSourceListener}
-@implements {tp.IDropDownBoxListener}
-*/
-tp.Locator2 = class extends tp.tpObject {
+@implements {tp.IDropDownBoxListener} 
+ * */
+tp.Locator = class extends tp.tpObject {
 
     /**
     Constructor
@@ -15647,100 +15585,118 @@ tp.Locator2 = class extends tp.tpObject {
         this.fAssigningCount = 0;
 
         this.fInitialized = false;
-        this.fControls = new tp.Dictionary(); // Key = tp.LocatorFieldDescriptor, Value = HTMLInputElement 
+        this.fControls = new tp.Dictionary(); // Key = tp.LocatorFieldDef, Value = HTMLInputElement 
 
         this.fListRow = null;
-        this.fListKeyFieldDes = null;
+        this.fListKeyFieldDef = null;
 
         this.fInDataSourceEvent = false;
         this.fKeyValue = null;
 
         this.fInitialized = false;
-        this.fControl = null;
+        this.fControl = null; 
+
+        // drop-down box
+        this.fDropDownBox = new tp.DropDownBox();
+        this.fDropDownBox.Owner = this;
+
+        // this listbox is displayed by the drop-down box
+        this.fListBox = new tp.ListBox();
+        this.fListBox.ParentHandle = this.fDropDownBox.Handle;
+        this.fListBox.Position = 'absolute';
+        this.fListBox.Width = '100%';
+        this.fListBox.Height = '100%';
+        this.fListBox.Handle.style.border = 'none';
+
+        this.fListBox.On(tp.Events.Click, this.ListBox_Click, this);
     }
 
-    /* private */
+
     /** Field
      * @private
      * @type {tp.Locator}
      */
-    fMaster;
+    fMaster = null;
     /** Field
      * @private
      * @type {tp.Locator[]}
      */
-    fDetailLocators;
+    fDetailLocators = [];
 
     /** Field. The located DataRow in ListTable
      * @private
      * @type {tp.DataRow}
      */
-    fListRow;
+    fListRow = null;
     /** Field. The field descriptor of the key field of the ListTable
      * @private
-     * @type {tp.LocatorFieldDescriptor}
+     * @type {tp.LocatorFieldDef}
      */
-    fListKeyFieldDes;
+    fListKeyFieldDef = null;
 
     /** Field
     * @private
     * @type {boolean}
     */
-    fActive; // true
+    fActive = false;
     /** Field
     * @private
     * @type {number}
     */
-    fAssigningCount;
+    fAssigningCount = 0;
     /** Field
     * @private
     * @type {boolean}
     */
-    fInDataSourceEvent;
+    fInDataSourceEvent = false;
 
     /** Field
     * @private
     * @type {any}
     */
-    fKeyValue;
+    fKeyValue = null;
 
     /** Field
     * @private
     * @type {boolean}
     */
-    fInitialized;
+    fInitialized = false;
     /** Field
     * @private
     * @type {tp.Control}
     */
-    fControl;
+    fControl = null;
 
     /** Field. A {@link tp.Dictionary} where Key = tp.LocatorFieldDescriptor and Value = HTMLInputElement
     * @private
     * @type {tp.Dictionary}
     */
-    fControls;
+    fControls = null;
     /** Field
     * @private
     * @type {tp.DropDownBox}
     */
-    fDropDownBox;
+    fDropDownBox = null;
     /** Field. This listbox is displayed by the drop-down box
     * @private
     * @type {tp.ListBox}
     */
-    fListBox;
+    fListBox = null;
+
+
     /** Field
     * @private
     * @type {number}
     */
-    fMaxDropdownItems;
+    fMaxDropdownItems = 10;
     /** Field
     * @private
-    * @type {tp.LocatorDescriptor}
+    * @type {tp.LocatorDef}
     */
-    fDescriptor;
+    fDescriptor = null;
 
+
+    /* properties */
     /**
     True while setting values to the Datasource fields, that is while the SetDataValues() is executing.
     @private
@@ -15755,7 +15711,6 @@ tp.Locator2 = class extends tp.tpObject {
         else
             this.fAssigningCount--;
     }
-
     /**
     Activates or deactivates the locator. Returns true when is active AND initialized
     @type {boolean}
@@ -15774,14 +15729,13 @@ tp.Locator2 = class extends tp.tpObject {
     get Initialized() {
         return this.fInitialized === true;
     }
-
     /**
-    Gets or sets the descriptor of this locator
-    @type {tp.LocatorDescriptor}
+    Gets or sets the LocatorDef of this locator
+    @type {tp.LocatorDef}
     */
     get Descriptor() {
         if (tp.IsEmpty(this.fDescriptor)) {
-            this.fDescriptor = new tp.LocatorDescriptor();
+            this.fDescriptor = new tp.LocatorDef();
         }
 
         return this.fDescriptor;
@@ -15804,6 +15758,8 @@ tp.Locator2 = class extends tp.tpObject {
             }
 
             this.fControl = v;
+
+            this.fListBox.DataSource = !tp.IsValid(v) ? null : this.fControl.DataSource;
         }
     }
     /**
@@ -15847,7 +15803,7 @@ tp.Locator2 = class extends tp.tpObject {
     */
     get DataColumn() {
         if (this.DataTable) {
-            if (this.DataField) {
+            if (!tp.IsBlank(this.DataField)) {
                 let Result = this.DataTable.FindColumn(this.DataField);
                 return Result;
             }
@@ -15858,16 +15814,35 @@ tp.Locator2 = class extends tp.tpObject {
     Gets or sets the name of the field this instance is bound to
     @type {string}
     */
-    DataField;
+    get DataField() {
+        return this.fListBox.DataField;
+    }
+    set DataField(v) {
+        this.fListBox.DataField = v;
+    }
 
     /**
     Gets or set the list DataTable, that is the source table where data values come from.
     @type {tp.DataTable}
     */
-    ListTable;
+    get ListTable() {
+        let Result = null;
+
+        if (tp.IsValid(this.fListBox) && this.fListBox.ListSource instanceof tp.DataSource)
+            Result = this.fListBox.ListSource.Table;
+
+        return Result;
+    }
+    set ListTable(v) {
+        if (!tp.IsValid(v))
+            v = null;
+
+        if (v === null || v instanceof tp.DataTable)
+            this.fListBox.ListSource = v;
+    }
 
     /**
-    A {@link tp.Dictionary} dictionary, where Key = {@link tp.LocatorFieldDescriptor}  and Value = {@link HTMLInputElement}, 
+    A {@link tp.Dictionary} dictionary, where Key = {@link tp.LocatorFieldDef}  and Value = {@link HTMLInputElement}, 
     that associates fields to sub-controls of the Control (i.e. boxes of a locator box control)
     @type {tp.Dictionary}
     */
@@ -15908,7 +15883,9 @@ tp.Locator2 = class extends tp.tpObject {
      to be used in filtering the ListTable.DefaultView based on that value coming from the Master.KeyValue.
      @type {string}
     */
-    DetailKey;
+    DetailKey = '';
+
+    DropDownBoxStage = tp.DropDownBoxStage.Closed;
 
     /**
     Gets or sets the maximum number of items to be shown in the dropdown list
@@ -15925,47 +15902,52 @@ tp.Locator2 = class extends tp.tpObject {
         this.fMaxDropdownItems = v;
     }
 
-    /**
-    Returns the key value, the value the locator represents. Could be null. <br />
-    NOTE: Treat setter as private and with extreme care.
-    CAUTION: Setting this property, ends up setting all DataFields, the DataValue and the text of the controls. <br />
-    It may end up calling the server and re-selecting the {@link tp.Locator.ListTable}.
+    /** Returns the key value, the value the locator represents. Could be null. <br />
+    This value comes from the list table.   
     @type {any}
     */
     get KeyValue() {
         return !tp.IsEmpty(this.fKeyValue) ? this.fKeyValue : null;
     }
-    set KeyValue(v) {
+    /** Sets the key value.
+     * NOTE: Treat this setter as private and with extreme care.
+     * CAUTION: Setting this property, ends up setting all DataFields, the DataValue and the text of the controls. <br />
+     * It may end up calling the server and re-selecting the {@link tp.Locator.ListTable}.
+     * @private
+     * @param {any} v The value to set as key value.
+     */
+    SetKeyValue(v) {
         if (this.Active) {
 
             this.fKeyValue = v;
 
             if (tp.IsEmpty(v)) {
                 this.fListRow = null;
-                this.SetDataValues(null);
+                this.SetDataFieldValues(null);
             }
             else {
                 this.LocateKeyAsync()
                     .then((Result) => {
                         if (Result === true)
-                            this.SetDataValues(this.fListRow);
+                            this.SetDataFieldValues(this.fListRow);
                     });
             }
         }
     }
+
     /** Gets or sets the value of the DataField <br />
+     * This value comes from the {@link tp.DataSource} of the control of this locator.
      * @type {any}
      */
     get DataValue() {
         return this.Active && !tp.IsEmpty(this.CurrentRow) ? this.CurrentRow.Get(this.DataColumn) : null;
     }
-
     /** Sets the values of all DataFields, except of the DataField, which is the key field, and the text of the controls, based on a specified {@link tp.DataRow} that comes from the ListTable.
-     * @private
-     * @param {tp.DataRow} SourceRow A {@link tp.DataRow} that comes from the ListTable.
-     */
-    SetDataValues(SourceRow) {
-        if (this.Active && !this.Assigning && !tp.IsEmpty(this.fListKeyFieldDes)) {
+    * @private
+    * @param {tp.DataRow} SourceListRow A {@link tp.DataRow} that comes from the ListTable.
+    */
+    SetDataFieldValues(SourceListRow) {
+        if (this.Active && !this.Assigning && !tp.IsEmpty(this.fListKeyFieldDef)) {
             this.Assigning = true;
             try {
                 //let S = this.IsGridMode ? "Grid" : "LocatorBox";
@@ -15974,41 +15956,41 @@ tp.Locator2 = class extends tp.tpObject {
 
                 if (!tp.IsEmpty(Row)) {
 
-                    let Clearing = tp.IsEmpty(SourceRow);
+                    let Clearing = tp.IsEmpty(SourceListRow);
 
                     let i, ln, v,
                         SubControl,         // HTMLInputElement
-                        FieldDes,           // tp.LocatorFieldDescriptor
+                        FieldDef,           // tp.LocatorFieldDef
                         Column,             // tp.DataColumn
                         Dest,               // string
                         Source;             // string                    
 
                     for (i = 0, ln = this.Descriptor.Fields.length; i < ln; i++) {
 
-                        FieldDes = this.Descriptor.Fields[i];
+                        FieldDef = this.Descriptor.Fields[i];
 
                         // data field
-                        if (FieldDes !== this.fListKeyFieldDes && !tp.IsBlank(FieldDes.DataField) && Row.Table.ContainsColumn(FieldDes.DataField)) {
+                        if (FieldDef !== this.fListKeyFieldDef && !tp.IsBlank(FieldDef.DataField) && Row.Table.ContainsColumn(FieldDef.DataField)) {
                             if (Clearing) {
-                                Row.Set(FieldDes.DataField, null);
+                                Row.Set(FieldDef.DataField, null);
                             } else {
-                                if (SourceRow.Table.ContainsColumn(FieldDes.ListFieldAlias)) {
-                                    v = SourceRow.Get(FieldDes.ListFieldAlias);
-                                    Row.Set(FieldDes.DataField, v);
+                                if (SourceListRow.Table.ContainsColumn(FieldDef.Name)) {
+                                    v = SourceListRow.Get(FieldDef.Name);
+                                    Row.Set(FieldDef.DataField, v);
                                 }
                             }
                         }
 
-                        // sub-controls
-                        SubControl = this.Controls.ContainsKey(FieldDes) ? this.Controls.Get(FieldDes) : null;
+                        // sub-controls, i.e. boxes of a locator box control
+                        SubControl = this.Controls.ContainsKey(FieldDef) ? this.Controls.Get(FieldDef) : null;
 
                         if (SubControl) {
                             if (Clearing) {
                                 SubControl.value = '';
                             } else {
-                                Column = SourceRow.Table.FindColumn(FieldDes.ListFieldAlias);
+                                Column = SourceListRow.Table.FindColumn(FieldDef.Name);
                                 if (Column) {
-                                    v = SourceRow.Get(FieldDes.ListFieldAlias);
+                                    v = SourceListRow.Get(FieldDef.Name);
                                     Dest = SubControl.value;
                                     Source = Column.Format(v, false);
                                     if (!tp.IsSameText(Dest, Source)) {
@@ -16027,6 +16009,14 @@ tp.Locator2 = class extends tp.tpObject {
             }
         }
     }
+    /** Clears the data value
+     * */
+    ClearDataValue() {
+        if (this.Active && !tp.IsEmpty(this.CurrentRow)) {
+            this.CurrentRow.Set(this.DataColumn, null);
+            this.SetDataFieldValues(null);
+        }
+    }
 
     /**
     Locates the key value in the ListTable, based on {@link KeyValue} value, and assigns the ListRow. Returns true on success.  <br />
@@ -16038,7 +16028,7 @@ tp.Locator2 = class extends tp.tpObject {
     LocateListRowInternal() {
         if (!tp.IsEmpty(this.ListTable)) {
             try {
-                this.fListRow = this.ListTable.Locate(this.fListKeyFieldDes.ListFieldAlias, this.KeyValue);
+                this.fListRow = this.ListTable.Locate(this.fListKeyFieldDef.Name, this.KeyValue);
                 return !tp.IsEmpty(this.fListRow);
             }
             catch (e) {
@@ -16057,7 +16047,7 @@ tp.Locator2 = class extends tp.tpObject {
     */
     async LocateKeyAsync() {
 
-        if (this.Active && !tp.IsEmpty(this.KeyValue) && !tp.IsEmpty(this.fListKeyFieldDes)) {
+        if (this.Active && !tp.IsEmpty(this.KeyValue) && !tp.IsEmpty(this.fListKeyFieldDef)) {
 
             this.fListRow = null;
 
@@ -16066,14 +16056,18 @@ tp.Locator2 = class extends tp.tpObject {
             }
             else {
 
+                /*
+                // TODO: 
+                tp.InfoNote("Re-select");
+
                 // then re-select
                 try {
-                    let WhereUser = tp.Format("{0}.{1}", this.fListKeyFieldDes.ListTableName, this.fListKeyFieldDes.ListField);
+                    let WhereUser = tp.Format("{0}.{1}", this.fListKeyFieldDef.TableName, this.fListKeyFieldDef.ListField);
                     let v = this.KeyValue;
 
-                    if (this.fListKeyFieldDes.DataType === tp.DataType.String)
+                    if (this.fListKeyFieldDef.DataType === tp.DataType.String)
                         WhereUser += tp.Format(" = '{0}' ", v.toString());
-                    else if (tp.DataType.IsDateTime(this.fListKeyFieldDes.DataType))
+                    else if (tp.DataType.IsDateTime(this.fListKeyFieldDef.DataType))
                         WhereUser += tp.Format(" = '{0}'", v.toString());
                     else
                         WhereUser += tp.Format(" = {0}", v); // number
@@ -16090,6 +16084,7 @@ tp.Locator2 = class extends tp.tpObject {
                 catch (e) {
                     //
                 }
+                */
 
             }
         }
@@ -16098,73 +16093,7 @@ tp.Locator2 = class extends tp.tpObject {
 
     }
 
-    /* engine */
-    /**
-    Constructs and returns the {@link tp.SelectSql} statement that is going to be executed.
-    WARNING:  we assume that all fields belong to the same table, the FListSourceName.
-    For more complex SELECTs the user must provide the descriptor.SelectSql manually
-    @private
-    @returns {tp.SelectSql} Returns the {@link tp.SelectSql} statement that is going to be executed
-    */
-    ConstructSelectSql() {
 
-        let Result = this.Descriptor.SelectSql.Clone();
-
-        if (tp.Trim(Result.Select).length <= 0) {
-
-            /* WARNING: we assume that all fields belong to the same table, the FListSourceName. 
-               For more complex SELECTs the user must provide the descriptor.SelectSql manually */
-            if (!tp.IsEmpty(this.Descriptor.ListTableName)) {
-                let S = '';
-                let FieldDes; // LocatorFieldDescriptor;
-                for (let i = 0, ln = this.Descriptor.Fields.length; i < ln; i++) {
-                    FieldDes = this.Descriptor.Fields[i];
-                    S = S + "  " + this.Descriptor.ListTableName + "." + FieldDes.ListField + " as " + FieldDes.ListFieldAlias + ", " + '\r\n';
-                }
-
-                S = tp.TrimEnd(S);
-
-                if (S.length === 0)
-                    S = "*";
-
-                S = tp.RemoveLastComma(S);
-
-                Result.Select = S;
-                Result.From = this.Descriptor.ListTableName;
-
-                if (!tp.IsBlank(this.Descriptor.OrderBy))
-                    Result.AddToOrderBy(this.Descriptor.OrderBy);
-            }
-
-        }
-
-        let Args = new tp.LocatorEventArgs(this, tp.LocatorEventType.AddToSelectSqlWhere);
-        Args.SelectSql = Result;
-        this.OnAnyEvent(Args);
-
-        return Args.SelectSql;
-    }
-    /** Ensures that a {@link tp.DropDownBox} is created.
-     * @private
-     * */
-    EnsureDropDownBox() {
-        if (tp.IsEmpty(this.fDropDownBox)) {
-            this.fDropDownBox = new tp.DropDownBox();
-            this.fDropDownBox.Owner = this;
-
-            // this listbox is displayed by the drop-down box
-            this.fListBox = new tp.ListBox();
-            this.fListBox.ParentHandle = this.fDropDownBox.Handle;
-            this.fListBox.Position = 'absolute';
-            this.fListBox.Width = '100%';
-            this.fListBox.Height = '100%';
-
-            this.fListBox.DataField = this.DataField;
-            this.fListBox.DataSource = this.DataSource;
-
-            this.fListBox.On(tp.Events.Click, this.FuncBind(this.ListBox_Click));
-        }
-    }
 
     /** Sets-up the list table
      * @private
@@ -16173,22 +16102,21 @@ tp.Locator2 = class extends tp.tpObject {
         if (!tp.IsEmpty(this.ListTable)) {
             this.FilterListTable();
 
-            let FieldDes; // LocatorFieldDescriptor;
+            let FieldDef; // LocatorFieldDef;
             let Column; // tp.DataColumn;
             for (let i = 0, ln = this.ListTable.Columns.length; i < ln; i++) {
                 Column = this.ListTable.Columns[i];
-                FieldDes = this.Descriptor.Find(Column.Name);
+                FieldDef = this.Descriptor.Find(Column.Name);
 
-                Column.Visible = (FieldDes !== null) && FieldDes.ListVisible;
+                Column.Visible = (FieldDef !== null) && FieldDef.ListVisible;
                 if (Column.Visible === true) {
                     Column.Title = '';
-                    Column.Title = FieldDes.Title;
+                    Column.Title = FieldDef.Title;
                 }
             }
 
             let Args = new tp.LocatorEventArgs(this, tp.LocatorEventType.SetupListTable);
             this.OnAnyEvent(Args);
-
         }
 
     }
@@ -16205,40 +16133,10 @@ tp.Locator2 = class extends tp.tpObject {
     */
     ResetListData() {
         this.ListTable = null;
-        return this.SelectListTableAsync("");
+        let Result = this.SelectListTableAsync("");
+        return Result;
     }
-    /**
-    Displays the result of a SELECT either as drop-down list or in a locator dialog
-    @private
-    @param {HTMLElement} Associate The associate control to set to the drop-down box
-    */
-    DisplayListTable(Associate) {
-        if (!tp.IsEmpty(this.ListTable)) {
-            if (this.ListTable.Rows.length <= tp.SysConfig.LocatorShowDropDownRowCountLimit) {
 
-                this.EnsureDropDownBox();
-
-                if (this.fDropDownBox.IsOpen)
-                    this.fDropDownBox.Close();
-
-                this.LocateKeyAsync()
-                    .then(() => {
-                        this.Assigning = true;  // to avoid calling DataSourceRowModified() with no reason
-                        try {
-                            this.fListBox.ListSource = this.ListTable;
-
-                            this.fDropDownBox.Associate = Associate;
-                            this.fDropDownBox.Open();
-                        } finally {
-                            this.Assigning = false;
-                        }
-                    });
-            } else {
-                // TODO: PopUpForm()
-            }
-        }
-
-    }
     /**
     Executes the SELECT statement, assigns the ListTable and returns a number {@link Promise} with the row count of the table.
     @private
@@ -16249,21 +16147,16 @@ tp.Locator2 = class extends tp.tpObject {
         if (this.Active) {
 
             this.ListTable = null;
-            let SS = this.ConstructSelectSql();
-
-            if (!tp.IsBlank(WhereUser))
-                SS.WhereUser = WhereUser;
 
             let Args = new tp.LocatorEventArgs(this, tp.LocatorEventType.SelectListTable);
-            Args.SelectSql = SS;
+            Args.WhereSql = WhereUser || '';
 
             // this may assign the ListTable
             this.OnAnyEvent(Args);
 
-            if (tp.IsEmpty(this.ListTable)) {
-                let Table = await tp.Db.SelectAsync(SS.Text, this.Descriptor.ConnectionName);
-                this.ListTable = Table;
-            }
+            let Table = await tp.Locators.SqlSelectAsync(this.Descriptor.Name, WhereUser);
+
+            this.ListTable = Table;
 
             this.SetupListTable();
 
@@ -16272,6 +16165,30 @@ tp.Locator2 = class extends tp.tpObject {
 
         return 0;
     }
+    /**
+    Displays the result of a SELECT either as drop-down list or in a locator dialog
+    @private
+    @param {HTMLElement} Associate The associate control to set to the drop-down box
+    */
+    DisplayListTable(Associate) {
+        if (!tp.IsEmpty(this.ListTable)) {
+            if (this.ListTable.Rows.length <= tp.SysConfig.LocatorShowDropDownRowCountLimit) {
+
+                if (this.fDropDownBox.IsOpen)
+                    this.fDropDownBox.Close();
+
+                this.LocateKeyAsync()
+                    .then(() => {
+                        this.fDropDownBox.Associate = Associate;
+                        this.fDropDownBox.Open();
+                    });
+
+            } else {
+                // TODO: PopUpForm()
+            }
+        }
+
+    }
 
     /**
     Forces a re-filtering of list table
@@ -16279,7 +16196,7 @@ tp.Locator2 = class extends tp.tpObject {
     */
     MasterDataValueChanged() {
         this.FilterListTable();
-        this.SetDataValues(null);
+        this.SetDataFieldValues(null);
     }
 
     /** Event trigger
@@ -16298,9 +16215,14 @@ tp.Locator2 = class extends tp.tpObject {
         let count,
             n;
 
+        this.DropDownBoxStage = Stage;
+
         switch (Stage) {
 
             case tp.DropDownBoxStage.Opening:
+                if (!tp.IsValid(this.fListBox.DataSource))
+                    this.fListBox.DataSource = this.fControl.DataSource;
+
                 break;
 
             case tp.DropDownBoxStage.Opened:
@@ -16346,13 +16268,12 @@ tp.Locator2 = class extends tp.tpObject {
     Initializes the locator, if the Initialized flag is false.
     */
     Initialize() {
-        if (!this.Initialized && !tp.IsEmpty(this.Control) && !tp.IsEmpty(this.Descriptor) && !tp.IsBlank(this.DataField)) {
-            let DataSource = this.Control.DataSource;
-            if (DataSource && DataSource.Table instanceof tp.DataTable) {
-                this.fListKeyFieldDes = this.Descriptor.Find(this.Descriptor.ListKeyField);
+        if (!this.Initialized && !tp.IsEmpty(this.Control) && !tp.IsBlank(this.DataField)) {
+            if (this.Control.DataSource && this.Control.DataSource.Table instanceof tp.DataTable) {
+                this.fListKeyFieldDef = this.Descriptor.Find(this.Descriptor.ListKeyField);
 
-                if (this.fListKeyFieldDes) {
-                    let Column = DataSource.Table.FindColumn(this.DataField);
+                if (this.fListKeyFieldDef) {
+                    let Column = this.Control.DataSource.Table.FindColumn(this.DataField);
                     if (Column) {
                         this.DataSource.AddDataListener(this);
                         this.fInitialized = true;
@@ -16368,31 +16289,61 @@ tp.Locator2 = class extends tp.tpObject {
     @param {HTMLElement} Associate The control to set as the associate control of the drop-down.
     */
     ShowList(Associate) {
-        this.SelectListTableAsync('')
-            .then((RowCount) => {
+        if (!tp.IsValid(Associate))
+            tp.Throw("No Associate");
+
+        if (tp.IsValid(this.ListTable)) {
+            this.DisplayListTable(Associate);
+        }
+        else {
+            this.SelectListTableAsync('')
+                .then((RowCount) => {
+                    if (RowCount > 0) {
+                        this.DisplayListTable(Associate);
+                    } else {
+                        // nothing here
+                    }
+                });
+        }
+
+
+        /*
+                let RowCount = await this.SelectListTableAsync('');
                 if (RowCount > 0) {
                     this.DisplayListTable(Associate);
                 } else {
                     // nothing here
                 }
-            });
+                // ---------------------------
+                this.SelectListTableAsync('')
+                    .then((RowCount) => {
+                        if (RowCount > 0) {
+                            this.DisplayListTable(Associate);
+                        } else {
+                            // nothing here
+                        }
+                    });
+         */
+    }
+    HideList() {
+        if (this.fDropDownBox.IsOpen)
+            this.fDropDownBox.Close();
     }
 
     /* boxes */
     /**
-     * Event handler
+     * Event handler. Called focus enters a box. 
+     * Reads from current row and sets the value of the box.
      * @param {tp.ILocatorLink} LocatorLink The {@link tp.ILocatorLink} locator link
      * @param {HTMLInputElement} Box The text box
-     * @param {tp.LocatorFieldDescriptor} FieldDes The {@link tp.LocatorFieldDescriptor} descriptor
+     * @param {tp.LocatorFieldDef} FieldDef The {@link tp.LocatorFieldDef} descriptor
      */
-    Box_Enter(LocatorLink, Box, FieldDes) {
+    Box_Enter(LocatorLink, Box, FieldDef) {
         if (!this.Initialized)
             this.Initialize();
 
-        if (this.Active) {
-            //this.fLastEnteredText = LocatorLink.BoxGetText(this, Box);
-
-            let S = this.DataValueAsTextOf(FieldDes.DataField);
+        if (this.Active && (FieldDef instanceof tp.LocatorFieldDef)) {
+            let S = this.DataValueAsTextOf(FieldDef.DataField);
             LocatorLink.BoxSetText(this, Box, S);
 
             if (this.IsBoxMode)
@@ -16400,89 +16351,103 @@ tp.Locator2 = class extends tp.tpObject {
         }
     }
     /**
-     * Event handler
+     * Event handler. Called when focus leaves a box. 
+     * If the user alters the text and then just leaves the text box, re-reads from current row and sets the value of the box.
      * @param {tp.ILocatorLink} LocatorLink The {@link tp.ILocatorLink} locator link
      * @param {HTMLInputElement} Box The text box
-     * @param {tp.LocatorFieldDescriptor} FieldDes The {@link tp.LocatorFieldDescriptor} descriptor
+     * @param {tp.LocatorFieldDef} FieldDef The {@link tp.LocatorFieldDef} descriptor
      */
-    Box_Leave(LocatorLink, Box, FieldDes) {
-        if (this.Active && !this.Assigning) {
+    Box_Leave(LocatorLink, Box, FieldDef) {
+        if (this.Active && !this.Assigning && (FieldDef instanceof tp.LocatorFieldDef)) {
 
             // when the user alters the text and then just leaves the text box
-            if (this.IsBoxMode) {
-                let S = this.DataValueAsTextOf(FieldDes.DataField);
+            //if (this.IsBoxMode)
+            {
+                let S = this.DataValueAsTextOf(FieldDef.DataField);
                 let S2 = LocatorLink.BoxGetText(this, Box);
-                if (S !== S2) {
+                //if (tp.IsBlank(S2)) this.ClearDataValue(); else
+                if (S !== S2)
                     LocatorLink.BoxSetText(this, Box, S);
+            }
+        }
+    }
+    /**
+     * Event handler. Does nothing.
+     * @param {tp.ILocatorLink} LocatorLink The {@link tp.ILocatorLink} locator link
+     * @param {HTMLInputElement} Box The text box
+     * @param {tp.LocatorFieldDef} FieldDef The {@link tp.LocatorFieldDef} descriptor
+     * @param {KeyboardEvent} e The {@link KeyboardEvent} event object
+     */
+    Box_KeyDown(LocatorLink, Box, FieldDef, e) {
+        if (this.Active && (FieldDef instanceof tp.LocatorFieldDef)) {
+            if (e.keyCode === tp.Keys.Enter) {
+                let S = LocatorLink.BoxGetText(this, Box);
+                if (tp.IsBlankString(S)) this.ClearDataValue();
+
+                else {
+                    this.OnBoxKeyEvent(LocatorLin, Box, FieldDef);
                 }
             }
         }
     }
     /**
-     * Event handler
+     * Event handler.
      * @param {tp.ILocatorLink} LocatorLink The {@link tp.ILocatorLink} locator link
      * @param {HTMLInputElement} Box The text box
-     * @param {tp.LocatorFieldDescriptor} FieldDes The {@link tp.LocatorFieldDescriptor} descriptor
+     * @param {tp.LocatorFieldDef} FieldDef The {@link tp.LocatorFieldDef} descriptor
      * @param {KeyboardEvent} e The {@link KeyboardEvent} event object
      */
-    Box_KeyDown(LocatorLink, Box, FieldDes, e) {
-    }
-    /**
-     * Event handler
-     * @param {tp.ILocatorLink} LocatorLink The {@link tp.ILocatorLink} locator link
-     * @param {HTMLInputElement} Box The text box
-     * @param {tp.LocatorFieldDescriptor} FieldDes The {@link tp.LocatorFieldDescriptor} descriptor
-     * @param {KeyboardEvent} e The {@link KeyboardEvent} event object
-     */
-    Box_KeyPress(LocatorLink, Box, FieldDes, e) {
-        if (this.Active && (FieldDes !== null) && FieldDes.Searchable) {
+    Box_KeyPress(LocatorLink, Box, FieldDef, e) {
+        if (this.Active && (FieldDef instanceof tp.LocatorFieldDef) && FieldDef.Searchable) {
 
             let KeyCode = 'charCode' in e ? e.charCode : e.keyCode;
             let c = String.fromCharCode(KeyCode);
 
             if (c === '*') {
-
-                let WhereUser = '';
-                let Text = LocatorLink.BoxGetText(this, Box);
-
-                if (!tp.IsBlank(Text)) {
-
-                    WhereUser = tp.Format("{0}.{1}", FieldDes.ListTableName, FieldDes.ListField);
-
-                    if (FieldDes.DataType === tp.DataType.String)
-                        WhereUser += tp.Format(" like '{0}%' ", Text);
-                    else if (tp.DataType.IsDateTime(FieldDes.DataType))
-                        WhereUser += tp.Format(" = '{0}'", Text);
-                    else
-                        WhereUser += tp.Format(" = {0}", Text);
-                }
-
-                this.SelectListTableAsync(WhereUser)
-                    .then((RowCount) => {
-                        if (RowCount > 0) {
-                            if (RowCount === 1) {
-                                this.fListRow = this.ListTable.Rows[0];
-                                let v = this.fListRow.Get(this.Descriptor.ListKeyField);
-                                this.DataSource.Set(this.DataField, v); // this triggers the whole sequence of setting data-fields
-                            } else {
-                                this.DisplayListTable(Box);
-                            }
-                        } else {
-                            LocatorLink.BoxSetText(this, Box, '');
-                        }
-                    });
-
+                this.OnBoxKeyEvent(LocatorLin, Box, FieldDef);
             }
         }
 
     }
 
+    OnBoxKeyEvent(LocatorLink, Box, FieldDef) {
+        let WhereUser = '';
+        let Text = LocatorLink.BoxGetText(this, Box);
+
+        if (!tp.IsBlankString(Text)) {
+
+            WhereUser = !tp.IsBlankString(FieldDef.TableName) ? `${FieldDef.TableName}.${FieldDef.Name}` : FieldDef.Name;
+
+            if (FieldDef.DataType === tp.DataType.String)
+                WhereUser += tp.Format(" like '{0}%' ", Text);
+            else if (tp.DataType.IsDateTime(FieldDef.DataType))
+                WhereUser += tp.Format(" = '{0}'", Text);
+            else
+                WhereUser += tp.Format(" = {0}", Text);
+        }
+
+        this.SelectListTableAsync(WhereUser)
+            .then((RowCount) => {
+                if (RowCount > 0) {
+                    if (RowCount === 1) {
+                        this.fListRow = this.ListTable.Rows[0];
+                        let v = this.fListRow.Get(this.Descriptor.ListKeyField);
+                        this.DataSource.Set(this.DataField, v); // this triggers the whole sequence of setting data-fields
+                    } else {
+                        this.DisplayListTable(Box);
+                    }
+                } else {
+                    LocatorLink.BoxSetText(this, Box, '');
+                }
+            });
+    }
+
     /**
-    Returns the value of the FieldName field of the CurrentRow
-    @private
-    @param {string} FieldName The field name
-    @returns {any} Returns the value of the FieldName field of the CurrentRow
-    */
+   Returns the value of the FieldName field of the CurrentRow
+   @private
+   @param {string} FieldName The field name
+   @returns {any} Returns the value of the FieldName field of the CurrentRow
+   */
     DataValueOf(FieldName) {
         if (!tp.IsEmpty(this.CurrentRow) && this.CurrentRow.Table.ContainsColumn(FieldName))
             return this.CurrentRow.Get(FieldName);
@@ -16519,12 +16484,12 @@ tp.Locator2 = class extends tp.tpObject {
     @param {tp.DataTable} Table The table
     @param {tp.DataRow} Row The row
     */
-    DataSourceRowAdded(Table, Row) {
+    async DataSourceRowAdded(Table, Row) {
 
         if (!this.fInDataSourceEvent && this.Active && this.DataSource.Position >= 0) {
             this.fInDataSourceEvent = true;
             try {
-                this.KeyValue = this.DataValue;
+                await this.SetKeyValue(this.DataValue);
             }
             finally {
                 this.fInDataSourceEvent = false;
@@ -16541,9 +16506,10 @@ tp.Locator2 = class extends tp.tpObject {
     @param {any} OldValue The old value
     @param {any} NewValue The new value
     */
-    DataSourceRowModified(Table, Row, Column, OldValue, NewValue) {
+    async DataSourceRowModified(Table, Row, Column, OldValue, NewValue) {
         if (!this.Assigning && this.Active && Row === this.CurrentRow && Column === this.DataColumn) {
-            this.KeyValue = this.DataValue;
+
+            await this.SetKeyValue(this.DataValue);
 
             // grid may have no idea that the row has changed after the above assignment
             if (this.IsGridMode) {
@@ -16566,7 +16532,7 @@ tp.Locator2 = class extends tp.tpObject {
     @param {tp.DataRow} Row The row
     @param {number} Position The new position
     */
-    DataSourcePositionChanged(Table, Row, Position) {
+    async DataSourcePositionChanged(Table, Row, Position) {
         if (this.IsBoxMode && !this.Initialized) {
             this.Initialize();
         }
@@ -16575,7 +16541,7 @@ tp.Locator2 = class extends tp.tpObject {
             //let S = this.IsGridMode ? "Grid" : "LocatorBox";
             this.fInDataSourceEvent = true;
             try {
-                this.KeyValue = this.DataValue;
+                await this.SetKeyValue(this.DataValue);
             }
             finally {
                 this.fInDataSourceEvent = false;
@@ -16602,8 +16568,620 @@ tp.Locator2 = class extends tp.tpObject {
     }
 
 };
-//#endregion
+//#endregion 
 
+//#region tp.LocatorBox
+/**
+A multi-TextBox Locator control. <br />
+It is used in data entry UIs representing the value of a single DataColumn and displaying multiple boxes. <br />
+@implements {tp.ILocatorLink}
+ */
+tp.LocatorBox = class extends tp.Control {
+
+    /**
+    Constructor
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    /* properties */
+    /**
+    Gets or sets the value this control represents
+    @type {any}
+    */
+    get Value() {
+        return this.fValue;
+    }
+    set Value(v) {
+        this.fValue = v;
+        this.WriteDataValue();
+    }
+
+    /**
+    Returns the locator
+    @type {tp.Locator}
+    */
+    get Locator() {
+        if (tp.IsEmpty(this.fLocator)) {
+            this.fLocator = new tp.Locator();
+            this.fLocator.Control = this;
+        }
+        return this.fLocator;
+    }
+    /**
+    Gets or sets the locator descriptor name
+    @type {string}
+    */
+    get LocatorName() {
+        return this.Locator.Descriptor.Name;
+    }
+    set LocatorName(v) {
+        if (v !== this.LocatorName) {
+            if (!tp.IsBlank(v)) {
+                tp.Locators.GetDefAsync(v)
+                    .then((Des) => {
+                        this.LocatorDescriptor = Des;
+                    });
+            }
+        }
+    }
+    /**
+    Gets or sets the locator descriptor.
+    @type {tp.LocatorDef}
+    */
+    get LocatorDescriptor() {
+        return this.Locator.Descriptor;
+    }
+    set LocatorDescriptor(v) {
+        if (v !== this.LocatorDescriptor && v instanceof tp.LocatorDef) {
+            this.Locator.Descriptor = v;
+            this.Bind();
+            if (this.IsDataBound === true) {
+                this.OnBindCompleted();
+            }
+        }
+    }
+
+    /**
+    Returns true if this instance is bound to a DataSource
+    @type {boolean}
+    */
+    get IsDataBound() {
+
+        var Result = false;
+
+        if (!tp.IsEmpty(this.DataSource)) {
+            if (tp.ControlBindMode.Simple === this.DataBindMode) {
+                Result = !tp.IsBlank(this.DataField)
+                    && !tp.IsBlank(this.DataValueProperty)
+                    && !tp.IsEmpty(this.DataColumn)
+                    && this.IsValidLocator;
+            }
+        }
+
+        return Result;
+    }
+    /**
+    Returns true if the locator is valid
+    @type {boolean}
+    */
+    get IsValidLocator() {
+        return this.Locator.Descriptor.Name !== tp.NO_NAME
+            && this.Locator.Descriptor.Fields.length > 0;
+    }
+
+    /**
+    Shows or hides the list button
+    @type {boolean}
+    */
+    get ButtonListVisible() {
+        return this.btnList instanceof HTMLElement ? this.btnList.style.display === '' : false;
+    }
+    set ButtonListVisible(v) {
+        if (this.btnList instanceof HTMLElement)
+            this.btnList.style.display = v === true ? '' : 'none';
+    }
+    /**
+    Shows or hides the zoom button
+    @type {boolean}
+    */
+    get ButtonZoomVisible() {
+        return this.btnZoom instanceof HTMLElement ? this.btnZoom.style.display === '' : false;
+    }
+    set ButtonZoomVisible(v) {
+        if (this.btnZoom instanceof HTMLElement)
+            this.btnZoom.style.display = v === true ? '' : 'none';
+    }
+
+    /* private */
+
+    /** Private
+     * @private
+     * */
+    ClearBoxes() {
+        for (let i = 0, ln = this.fBoxes.length; i < ln; i++) {
+            tp.Remove(this.fBoxes[i]);
+        }
+
+        if (!tp.IsEmpty(this.btnList)) {
+            tp.Remove(this.btnList);
+            tp.Remove(this.btnZoom);
+        }
+
+        this.fBoxes.length = 0;
+
+        this.fWidths.Clear();
+    }
+    /** Private
+     * @private
+     * */
+    RecreateBoxes() {
+
+        this.fCreating = true;
+        try {
+
+            this.ClearBoxes();
+
+            let ReadOnly;
+            let Box;        // HTMLInputElement;
+            let FieldDes;   // tp.LocatorFieldDef;
+
+            if (this.IsValidLocator) {
+
+                for (let i = 0, ln = this.Locator.Descriptor.Fields.length; i < ln; i++) {
+                    FieldDes = this.Locator.Descriptor.Fields[i];
+
+                    if (FieldDes.Visible) {
+                        tp.LocatorBox.BoxCount++;
+
+                        Box = this.Handle.ownerDocument.createElement('input');
+                        Box.type = 'text';
+                        this.Handle.appendChild(Box);
+                        this.fBoxes.push(Box);
+                        tp.SetObject(Box, FieldDes);
+
+                        Box.tabIndex = 0;
+                        ReadOnly = this.Locator.Descriptor.ReadOnly || (FieldDes.Searchable === false);
+                        tp.ReadOnly(Box, ReadOnly);
+                        Box.title = tp.Format("{0} - ({1}.{2} -> {3})) - [Locator: {4}]", FieldDes.Title, FieldDes.TableName, FieldDes.Name, this.DataField, this.Locator.Descriptor.Name);
+
+                        this.fWidths.Set(Box, FieldDes.Width > 0 ? FieldDes.Width : tp.LocatorFieldDef.BoxDefaultWidth);
+
+                        //tp.On(Box, tp.Events.Focus, this.FuncBind(this.Box_Enter));
+                        //tp.On(Box, tp.Events.LostFocus, this.FuncBind(this.Box_Leave));
+                        //tp.On(Box, tp.Events.KeyDown, this.FuncBind(this.Box_KeyDown));
+                        //tp.On(Box, tp.Events.KeyPress, this.FuncBind(this.Box_KeyPress));
+
+                        tp.On(Box, tp.Events.Focus, (e) => { return this.Box_Enter(e); });
+                        tp.On(Box, tp.Events.LostFocus, (e) => { return this.Box_Leave(e); });
+                        tp.On(Box, tp.Events.KeyDown, (e) => { return this.Box_KeyDown(e); });
+                        tp.On(Box, tp.Events.KeyPress, (e) => { return this.Box_KeyPress(e); });
+
+                        this.Locator.Controls.Set(FieldDes, Box);
+                    }
+                }
+
+            } else {
+                for (let i = 0, ln = 3; i < ln; i++) {
+                    Box = this.Handle.ownerDocument.createElement('input');
+                    Box.type = 'text';
+                    this.Handle.appendChild(Box);
+                    tp.ReadOnly(Box, true);
+                    this.fBoxes.push(Box);
+
+                    this.fWidths.Set(Box, tp.LocatorFieldDef.BoxDefaultWidth);
+                }
+            }
+
+
+            if (tp.IsEmpty(this.btnList)) {
+                this.btnList = this.Handle.ownerDocument.createElement('div');
+                this.btnList.className = tp.Classes.Btn;
+                this.btnList.tabIndex = 0;
+                this.btnList.innerHTML = '&dtrif;';
+
+                this.btnZoom = this.Handle.ownerDocument.createElement('div');
+                this.btnZoom.className = tp.Classes.Btn;
+                this.btnZoom.tabIndex = 0;
+                this.btnZoom.innerHTML = tp.IcoChars.Find;
+
+                //this.btnList.addEventListener('click', this.FuncBind(this.AnyButton_Click));
+                //this.btnZoom.addEventListener('click', this.FuncBind(this.AnyButton_Click));
+
+                this.btnList.addEventListener('click', (e) => { return this.AnyButton_Click(e); });
+                this.btnZoom.addEventListener('click', (e) => { return this.AnyButton_Click(e); });
+            }
+
+            this.Handle.appendChild(this.btnList);
+            this.Handle.appendChild(this.btnZoom);
+
+            // order
+            let Counter = 1;
+            for (let i = 0, ln = this.fBoxes.length; i < ln; i++) {
+                Box = this.fBoxes[i];
+                Box.style.order = Counter.toString();
+                Counter++;
+            }
+
+            this.btnList.style.order = Counter.toString();
+            Counter++;
+            this.btnZoom.style.order = Counter.toString();
+
+        } finally {
+            this.fCreating = false;
+        }
+
+        this.ApplyReadOnlyAndEnabled();
+        this.Layout();
+    }
+    /** Private
+     * @private
+     * */
+    ApplyReadOnlyAndEnabled() {
+        let ReadOnly;
+
+        let DescriptorReadOnly = this.IsValidLocator ? this.Locator.Descriptor.ReadOnly : true;
+        let Enabled = this.ReadOnly === false && this.Enabled === true && DescriptorReadOnly === false;
+
+        tp.Enabled(this.btnList, Enabled);
+        tp.Enabled(this.btnZoom, Enabled);
+
+        let FieldDef;   // LocatorFieldDef;
+        let Box;        // HTMLInputElement;
+        for (let i = 0, ln = this.fBoxes.length; i < ln; i++) {
+            Box = this.fBoxes[i];
+
+            FieldDef = tp.GetObject(Box);
+            if (!tp.IsEmpty(FieldDef)) {
+                ReadOnly = this.ReadOnly === true || !Enabled || FieldDef.Searchable === false;
+            } else {
+                ReadOnly = this.ReadOnly === true || !Enabled;
+            }
+
+            tp.ReadOnly(Box, ReadOnly);
+        }
+    }
+    /** Private
+     * @private
+     * */
+    Layout() {
+        if (!this.fLayouting && !this.fCreating) {
+
+            this.fLayouting = true;
+            try {
+
+                let ButtonWidth = 0;
+                let R; // tp.Rect
+
+                /* button bounds */
+                if (!tp.IsEmpty(this.ParentHandle)) {
+
+                    if (this.ButtonZoomVisible) {
+                        R = tp.BoundingRect(this.btnZoom);
+                        ButtonWidth += R.Width;
+                    }
+
+                    if (this.ButtonListVisible) {
+                        R = tp.BoundingRect(this.btnList);
+                        ButtonWidth += R.Width;
+                    }
+
+                    if (ButtonWidth > 0)
+                        ButtonWidth += 3;
+
+                    let W = tp.BoundingRect(this.Handle).Width - ButtonWidth;
+                    let Box; // HTMLInputElement;
+                    let BoxWidth;
+                    if (W > 0) {
+
+                        for (let i = 0, ln = this.fBoxes.length; i < ln; i++) {
+                            Box = this.fBoxes[i];
+
+                            if (W <= 0) {
+                                tp.Visible(Box, false);
+                            } else {
+                                if (i === this.fBoxes.length - 1) {
+                                    BoxWidth = W;
+                                    W = 0;
+                                } else {
+                                    BoxWidth = this.fWidths.Get(Box);
+
+                                    if (W - BoxWidth >= 0) {
+                                        W -= BoxWidth;
+                                    } else {
+                                        BoxWidth = W;
+                                        W = 0;
+                                    }
+                                }
+
+
+                                Box.style.width = tp.px(BoxWidth);
+                                tp.Visible(Box, true);
+                            }
+                        }
+                    } else {
+                        for (let i = 0, ln = this.fBoxes.length; i < ln; i++) {
+                            Box = this.fBoxes[i];
+                            tp.Visible(Box, false);
+                        }
+                    }
+
+
+                }
+
+            } finally {
+                this.fLayouting = false;
+            }
+        }
+    }
+    /** Event handler
+     * @private
+     * @param {Event} e The {@link Event} object.
+     * */
+    AnyButton_Click(e) {
+        if (!this.ReadOnly && this.Enabled && this.IsValidLocator) {
+            if (e.target === this.btnZoom) {
+                // TODO: Zoom
+            } else if (e.target === this.btnList) {
+                this.Locator.ShowList(this.Handle);
+            }
+        }
+    }
+    /** Event handler
+     * @private
+     * @param {Event} e The {@link Event} object.
+     * */
+    Box_Enter(e) {
+        let textBox = e.target;
+
+        if (!tp.ReadOnly(textBox) && tp.Enabled(textBox) && !this.ReadOnly && this.Enabled && this.IsValidLocator) {
+            let FieldDef = tp.GetObject(textBox); // tp.LocatorFieldDef            
+            this.Locator.Box_Enter(this, textBox, FieldDef);
+        }
+    }
+    /** Event handler
+    * @private
+    * @param {Event} e The {@link Event} object.
+    * */
+    Box_Leave(e) {
+        let textBox = e.target;
+
+        if (!tp.ReadOnly(textBox) && tp.Enabled(textBox) && !this.ReadOnly && this.Enabled && this.IsValidLocator) {
+            let FieldDef = tp.GetObject(textBox); // tp.LocatorFieldDef
+            this.Locator.Box_Leave(this, textBox, FieldDef);
+        }
+    }
+    /** Event handler
+    * @private
+    * @param {KeyboardEvent} e The {@link KeyboardEvent} object.
+    * */
+    Box_KeyDown(e) {
+        let textBox = e.target;
+
+        if (!tp.ReadOnly(textBox) && tp.Enabled(textBox) && !this.ReadOnly && this.Enabled && this.IsValidLocator) {
+            let FieldDef = tp.GetObject(textBox); // tp.LocatorFieldDef
+            this.Locator.Box_KeyDown(this, textBox, FieldDef, e);
+        }
+    }
+    /** Event handler
+    * @private
+    * @param {KeyboardEvent} e The {@link KeyboardEvent} object.
+    * */
+    Box_KeyPress(e) {
+        let textBox = e.target;
+
+        if (!tp.ReadOnly(textBox) && tp.Enabled(textBox) && !this.ReadOnly && this.Enabled && this.IsValidLocator) {
+            let FieldDef = tp.GetObject(textBox); // tp.LocatorFieldDef
+            this.Locator.Box_KeyPress(this, textBox, FieldDef, e);
+        }
+    }
+
+    /* ILocatorLink implementation */
+    /**
+    Sets the Text to Box
+    @param {tp.Locator} Locator The {@link tp.Locator}
+    @param {HTMLInputElement} Box The {@link HTMLInputElement} text box
+    @param {string} Text The text to set
+    */
+    BoxSetText(Locator, Box, Text) {
+        Box.value = Text;
+    }
+    /**
+    Returns the Text of the Box
+    @param {tp.Locator} Locator The {@link tp.Locator}
+    @param {HTMLInputElement} Box The {@link HTMLInputElement} text box
+    @returns {string} Returns the Text of the Box
+    */
+    BoxGetText(Locator, Box) {
+        return Box.value;
+    }
+    /**
+    Selects all text in the Box
+    @param {tp.Locator} Locator The {@link tp.Locator}
+    @param {HTMLInputElement} Box The {@link HTMLInputElement} text box
+    */
+    BoxSelectAll(Locator, Box) {
+        Box.select();
+    }
+
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.LocatorBox';
+        this.fDefaultCssClasses = tp.Classes.LocatorBox;
+
+        // data-bind
+        this.fDataBindMode = tp.ControlBindMode.Simple;
+        this.fDataValueProperty = 'Value';
+    }
+    /**
+    Initializes fields and properties just before applying the create params.
+    @protected
+    @override
+    */
+    InitializeFields() {
+        super.InitializeFields();
+    }
+    /**
+    Notification <br />
+    Initialization steps:
+    <ul>
+       <li>Handle creation</li>
+       <li>Field initialization</li>
+       <li>Option processing</li>
+       <li>Completed notification</li>
+    </ul>
+    @protected
+    @override
+    */
+    OnHandleCreated() {
+
+        this.fEnabled = true;
+        this.fValue = null;
+        this.fBoxes = [];
+        this.fWidths = new tp.Dictionary(); // Key = HTMLInputElement, Value = number
+        this.fCreating = false;
+        this.fLayouting = false;
+
+        this.IsElementResizeListener = true;
+        this.RecreateBoxes();
+
+        this.ButtonZoomVisible = false;
+        this.Layout();
+
+        super.OnHandleCreated();
+    }
+    /**
+    Event trigger
+    @protected
+    @override
+    */
+    OnResized() {
+        this.Layout();
+        super.OnResized();
+    }
+    /**
+    Binds the control to its DataSource. It is called after the DataSource property is assigned. <br />
+    @protected
+    @override
+    */
+    Bind() {
+        if (this.IsDataBound) {
+            this.RecreateBoxes();
+            this.Locator.DataField = this.DataField;
+            this.Locator.Initialize();
+            this.ReadDataValue();
+        }
+    }
+    /**
+    Reads the value from data-source and assigns the control's data value property
+    */
+    ReadDataValue() {
+        if (this.ReadingDataValue === true || this.WritingDataValue === true)
+            return;
+
+        if (this.IsDataBound && this.DataSource.Position >= 0) {
+            this.ReadingDataValue = true;
+            try {
+                this.ReadingDataValue = true;
+                try {
+                    let v = this.DataSource.Get(this.DataField);
+                    this[this.DataValueProperty] = v;
+                } finally {
+                    this.ReadingDataValue = false;
+                }
+            } finally {
+                this.ReadingDataValue = false;
+            }
+
+        }
+    }
+
+    /**
+    Event trigger
+    @protected
+    @override
+    */
+    OnParentChanged() {
+        if (!tp.IsEmpty(this.ParentHandle))
+            this.Layout();
+        super.OnParentChanged();
+    }
+    /**
+    Event trigger
+    @protected
+    @override
+    */
+    OnEnabledChanged() {
+        this.ApplyReadOnlyAndEnabled();
+        super.OnEnabledChanged();
+    }
+};
+
+
+/** Field
+ * @static
+ * @private
+ * @type {number}
+ */
+tp.LocatorBox.BoxCount = 0;
+
+/** Field
+ * @private
+ * @type {any}
+ */
+tp.LocatorBox.prototype.fValue = null;
+/** Field
+ * @private
+ * @type {tp.Locator}
+ */
+tp.LocatorBox.prototype.fLocator = null;
+/** Field
+ * @private
+ * @type {tp.LocatorDef}
+ */
+tp.LocatorBox.prototype.fLocatorDescriptor = null;
+/** Field
+ * @private
+ * @type {HTMLInputElement[]}
+ */
+tp.LocatorBox.prototype.fBoxes = [];
+/** Field. A {tp.Dictionary} with Key = HTMLInputElement, Value = number.
+ * @private
+ * @type {tp.Dictionary}
+ */
+tp.LocatorBox.prototype.fWidths = null;
+/** Field
+ * @private
+ * @type {HTMLElement}
+ */
+tp.LocatorBox.prototype.btnList = null;
+/** Field
+ * @private
+ * @type {HTMLElement}
+ */
+tp.LocatorBox.prototype.btnZoom = null;
+/** Field
+ * @private
+ * @type {boolean}
+ */
+tp.LocatorBox.prototype.fCreating = false;
+/** Field
+ * @private
+ * @type {boolean}
+ */
+tp.LocatorBox.prototype.fLayouting = false;
+
+//#endregion
 
 
 
@@ -16634,6 +17212,20 @@ tp.SelectSqlListUi = class extends tp.tpElement {
     }
 
 
+    /** The currently selected {@link tp.SqlFilterPanel} panel object.
+     * @type {tp.SqlFilterPanel}
+     */
+    get SelectedFilterPanel() {
+        let elOption = this.cboSelectList.SelectedItem;
+        return elOption.PanelInfo.Panel;
+    }
+    /** The currently selected {@link tp.SelectSql}
+     * @type {tp.SelectSql}
+     */
+    get SelectedSelectSql() {
+        let elOption = this.cboSelectList.SelectedItem;
+        return elOption.PanelInfo.SelectSql;
+    }
 
     /* overrides */
     /**
@@ -16733,7 +17325,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
                 switch (Command) {
 
                     case 'Execute':
-                        SelectSql = this.CurrentSelectSqlUi.GenerateSql();
+                        SelectSql = this.GenerateSql();
                         SqlText = SelectSql.Text;
 
 
@@ -16742,15 +17334,14 @@ tp.SelectSqlListUi = class extends tp.tpElement {
                         break;
 
                     case 'ShowSql':
-                        SelectSql = this.CurrentSelectSqlUi.GenerateSql();
+                        SelectSql = this.GenerateSql();
                         SqlText = SelectSql.Text;
                         await tp.InfoBoxAsync(SqlText);
-                        //await tp.InfoBoxAsync(this.CurrentSelectSqlUi.FilterValueList.InfoText);
                         Args.Handled = true;
                         break;
 
                     case 'ClearFilter':
-                        this.CurrentSelectSqlUi.ClearControls();
+                        this.SelectedFilterPanel.ClearControls();
                         Args.Handled = true;
                         break;
 
@@ -16774,15 +17365,16 @@ tp.SelectSqlListUi = class extends tp.tpElement {
 
         // create panels on-demand only
         let PanelInfo = elOption.PanelInfo;
+
         if (!tp.IsValid(PanelInfo.Panel)) {
             let el = this.PanelList.AddChild();
             let CP = {
-                SelectSql: PanelInfo.SelectSql
+                SelectSql: PanelInfo.SelectSql,
+                FilterDefs: PanelInfo.SelectSql.Filters
             }
-            PanelInfo.Panel = new tp.SelectSqlUi(el, CP);
+            PanelInfo.Panel = new tp.SqlFilterPanel(el, CP);
         }
-
-        this.CurrentSelectSqlUi = PanelInfo.Panel;             // set the selected panel object
+ 
         this.PanelList.SelectedPanel = PanelInfo.Panel.Handle;
     }
 
@@ -16799,7 +17391,11 @@ tp.SelectSqlListUi = class extends tp.tpElement {
      * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
      * */
     GenerateSql() {
-        return this.CurrentSelectSqlUi.GenerateSql();
+        let Result = this.SelectedSelectSql;
+        let Conditions = this.SelectedFilterPanel.GenerateSql();
+        Result.Where = Conditions.Where;
+        Result.Having = Conditions.Having;
+        return Result;
     }
 
     /**
@@ -16829,25 +17425,72 @@ tp.SelectSqlListUi.prototype.cboSelectList = null;
  * @type {tp.PanelList}
  */
 tp.SelectSqlListUi.prototype.PanelList = null;
-/** The currently selected {@link tp.SelectSqlUi} panel object.
- * @type {tp.SelectSqlUi}
- */
-tp.SelectSqlListUi.prototype.CurrentSelectSqlUi = null;
+ 
 /** When true a row limit is applied to the current Sql statement.
  * @type {boolean}
  */
 tp.SelectSqlListUi.prototype.UseRowLimit = false;
 //#endregion
 
-//#region tp.SelectSqlUi
-/** The Ui built upon a single {@link tp.SelectSql} item and its filters list.
- * Actually this is a DIV displaying a control for each filter item defined in a {@link tp.SelectSql} instance.
+//#region tp.SqlFilterConditions
+/** A helper class for constructing WHERE and HAVING Sql clauses */
+tp.SqlFilterConditions = class {
+
+    /** Constructor */
+    constructor() {
+        this.Where = '';
+        this.Having = '';
+    }
+
+    /** The WHERE clause
+     @type {string}
+     */
+    Where = '';
+    /** The HAVING clause
+     @type {string}
+     */
+    Having = '';
+    /** The informational text. Infotext is a user friendly version of the generated Where.
+     * @type {string}
+     */
+    InfoText = '';
+
+    /** Adds a condition text to this instance Where.
+     * @param {string} Text The condition to be added to Where.
+     */
+    AddToWhereSql(Text) {
+        if (tp.IsEmpty(this.Where) || !tp.IsString(this.Where))
+            this.Where = '';
+
+        if (tp.IsString(Text) && !tp.IsBlank(Text)) {
+            this.Where = tp.IsBlank(this.Where) ? Text : `${this.Where} and ${Text}`;
+        }
+    }
+    /** Adds a condition text to this instance Having.
+     * @param {string} Text The condition to be added to Having.
+     */
+    AddToHavingSql(Text) {
+        if (tp.IsEmpty(this.Having) || !tp.IsString(this.Having))
+            this.Having = '';
+
+        if (tp.IsString(Text) && !tp.IsBlank(Text)) {
+            this.Having = tp.IsBlank(this.Having) ? Text : `${this.Having} and ${Text}`;
+        }
+    }
+};
+//#endregion
+
+//#region tp.SqlFilterPanel
+/** The Ui, actually a DIV, built upon a list of {@link tp.SqlFilterDef} filters. <br />
+ * This DIV displays a control for each filter item defined in the passed in {@link tp.SqlFilterDef} filters. <br />
+ * The CreateParams passed in the constructor MUST contain an array property named FilterDefs of type {@link tp.SqlFilterDef}.
+ * NOTE: A {@link tp.SqlFilterDef} describes a single entry (search field condition) of a WHERE clause of a SELECT sql statement.
  * */
-tp.SelectSqlUi = class extends tp.tpElement {
+tp.SqlFilterPanel = class extends tp.tpElement {
     /**
     Constructor <br />
-    The passed-in element is a DIV where to build the controls of the filter list. <br />
-    The CreateParams passed-in MUST contain a property named SelectSql of type {@link tp.SelectSql}.
+    The passed-in HTML element is a DIV where to build the controls of the filter list. <br />
+    The CreateParams passed-in MUST contain an array property named FilterDefs of type {@link tp.SqlFilterDef}.
     @param {string|HTMLElement} [ElementOrSelector] - Optional.
     @param {Object} [CreateParams] - Optional.
     */
@@ -16864,8 +17507,8 @@ tp.SelectSqlUi = class extends tp.tpElement {
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.SelectSqlUi';
-        this.fDefaultCssClasses = tp.Classes.SelectSqlUi;
+        this.tpClass = 'tp.SqlFilterPanel';
+        this.fDefaultCssClasses = tp.Classes.SqlFilterPanel;
     }
 
     /**
@@ -16887,7 +17530,7 @@ tp.SelectSqlUi = class extends tp.tpElement {
     CreateControls() {
         if (!tp.IsValid(this.FilterValueList)) {
             this.ControlLinks = [];
-            this.FilterValueList = new tp.SqlFilterValueList(this.SelectSql);
+            this.FilterValueList = new tp.SqlFilterValueList(this);
 
             if (tp.IsArray(this.FilterValueList.Items)) {
                 this.FilterValueList.Items.forEach(item => {
@@ -16911,8 +17554,8 @@ tp.SelectSqlUi = class extends tp.tpElement {
         this.FilterValueList.ClearValues();
     }
 
-    /** Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
-     * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+    /** Returns a {@link tp.SqlFilterConditions} instance with user defined WHERE, if any.
+     * @returns {tp.SqlFilterConditions} Returns a {@link tp.SqlFilterConditions} instance with user defined WHERE, if any.
      * */
     GenerateSql() {
         return this.FilterValueList.GenerateSql();
@@ -16920,19 +17563,18 @@ tp.SelectSqlUi = class extends tp.tpElement {
 
 };
 
-/** A {@link tp.SelectSql} this panel represents. Contains the list for SqlFilter items.
- * NOTE: Comes from CreateParams.
- * @type {tp.SelectSql}
+/** A list of {@link tp.SqlFilterDef} items. A filter item is created based upon a {@link tp.SqlFilterDef} descriptor.
+ * @type {tp.SqlFilterDef[]}
  */
-tp.SelectSqlUi.prototype.SelectSql = null;
+tp.SqlFilterPanel.prototype.FilterDefs = [];
 /** A {@link tp.SqlFilterValueList} 
  * @type {tp.SqlFilterValueList}
  */
-tp.SelectSqlUi.prototype.FilterValueList = null;
+tp.SqlFilterPanel.prototype.FilterValueList = null;
 /** A list {@link tp.SqlFilterControlLink} control links.
  * @type {tp.SqlFilterControlLink[]}
  */
-tp.SelectSqlUi.prototype.ControlLinks = [];
+tp.SqlFilterPanel.prototype.ControlLinks = [];
 //#endregion
 
 //#region tp.SqlFilterValueList
@@ -16944,38 +17586,36 @@ tp.SelectSqlUi.prototype.ControlLinks = [];
 tp.SqlFilterValueList = class {
     /**
      * Constructor
-     * @param {tp.SelectSql} SelectSql  A {@tp.SelectSql} instance with a  list of {@link tp.SqlFilterDef} items. A filter item is created based upon a {@link tp.SqlFilterDef} descriptor.
+     * @param {tp.SqlFilterPanel} FilterPanel  A DIV that displays the filter controls.Provides a list of {@link tp.SqlFilterDef} items. A filter item is created based upon each {@link tp.SqlFilterDef} descriptor.
      */
-    constructor(SelectSql) {
+    constructor(FilterPanel) {
         this.Items = [];
-        this.SelectSql = SelectSql;
-        this.FilterDefs = SelectSql.Filters;
+        this.FilterPanel = FilterPanel;
 
         if (tp.IsArray(this.FilterDefs)) {
             this.FilterDefs.forEach(item => {
-                let Filter = new tp.SqlFilterValue(this.SelectSql, item);
+                let Filter = new tp.SqlFilterValue(item);
                 this.Items.push(Filter);
             });
         }
     }
 
-    /** A {@link tp.SelectSql} this panel represents. Contains the list for SqlFilter items.
-     * NOTE: Comes from CreateParams.
-     * @type {tp.SelectSql}
+    /** A DIV that displays the filter controls. Provides a list of {@link tp.SqlFilterDef} items.
+     * @type {tp.SqlFilterPanel}
      */
-    SelectSql = null;
-    /** A list of {@link tp.SqlFilterDef} items. A filter item is created based upon a {@link tp.SqlFilterDef} descriptor.
+    FilterPanel = null;
+
+    /** A list of {@link tp.SqlFilterDef} items. A filter item is created based upon each {@link tp.SqlFilterDef} descriptor.
      * @type {tp.SqlFilterDef[]}
      */
-    FilterDefs = null;
+    get FilterDefs() {
+        return this.FilterPanel.FilterDefs;
+    }
     /** A list of {@link tp.SqlFilterValue} items.
      * @type {tp.SqlFilterValue[]}
      */
     Items = [];
-    /** The informational text. Infotext is a user friendly version of the generated Sql.
-     * @type {string}
-     */
-    InfoText = '';
+
 
     /** 
      * Clears all the values items.
@@ -16983,56 +17623,30 @@ tp.SqlFilterValueList = class {
     ClearValues() {
         this.Items.forEach(item => { item.Clear(); });
     }
-    /** Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
-     * NOTE: The returned value is actually the {@link tp.SelectSql} of this instance.
-    * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
+    /** Returns a {@link tp.SqlFilterConditions} instance with user defined WHERE, if any.
+    * @returns {tp.SqlFilterConditions} Returns a {@link tp.SqlFilterConditions} with user defined WHERE, if any.
     * */
     GenerateSql() {
         this.Items.forEach(item => {
             item.ControlLink.InputFromControls();
         });
 
-        let Ref = {
-            sWhere: '',
-            sHaving: ''
-        };
+        let Result = new tp.SqlFilterConditions();
 
-        /** @type {tp.SelectSql} */
-        let Result = this.GenerateSqlWhereAndHaving(Ref);
+        this.DoGenerateSql(Result, true);
+        this.DoGenerateSql(Result, false);
+
         return Result;
-    }
-    /**
-     * Generates the WHERE and the HAVING clauses.
-     * NOTE: The returned value is actually the {@link tp.SelectSql} of this instance.
-     * @param {object} Ref An object of type { sWhere: '', sHaving: '' }
-     * @returns {tp.SelectSql} Returns a {@link tp.SelectSql} instance along with user defined WHERE, if any.
-     */
-    GenerateSqlWhereAndHaving(Ref) {
-        this.InfoText = '';
-
-        Ref.sWhere = tp.TrimEnd(Ref.sWhere);
-        Ref.sHaving = tp.TrimEnd(Ref.sHaving);
-
-        let SS = this.SelectSql;
-
-        this.DoGenerateSql(SS, Ref, true);
-        this.DoGenerateSql(SS, Ref, false);
-
-        SS.WhereUser = Ref.sWhere;
-        SS.Having = Ref.sHaving;
-
-        return SS;
     }
 
     /**
      * Private method. Prepares a clause (UserWhere or Having).
-     * @param {tp.SelectSql} SelectSql A {@tp.SelectSql} to operate on
-     * @param {object} Ref An object of type { sWhere: '', sHaving: '' }
+     * @param {tp.SqlFilterConditions} Ref An object containing Where, Having and InfoText properties.
      * @param {boolean} IsWhere A boolean value indicating what property of the 'Ref' value to use as clause.
      */
-    DoGenerateSql(SelectSql, Ref, IsWhere) {
+    DoGenerateSql(Ref, IsWhere) {
 
-        let sClause = IsWhere === true ? Ref.sWhere : Ref.sHaving;
+        let sClause = IsWhere === true ? Ref.Where : Ref.Having;
 
         /** @type {tp.SqlFilterValue[]} */
         let List = [];
@@ -17055,7 +17669,7 @@ tp.SqlFilterValueList = class {
             S = item.GenerateSql();
 
             PrefixConcat = sClause.length > 0
-                || (sClause.length === 0 && List.indexOf(item) === 0 && IsWhere === true && !tp.IsBlank(SelectSql.Where));
+                || (sClause.length === 0 && List.indexOf(item) === 0 && IsWhere === true && !tp.IsBlank(Ref.Where));
 
 
             if (S.length > 0) {
@@ -17096,12 +17710,12 @@ tp.SqlFilterValueList = class {
                 }
 
                 if (IsWhere === true)
-                    Ref.sWhere = sClause;
+                    Ref.Where = sClause;
                 else
-                    Ref.sHaving = sClause;
+                    Ref.Having = sClause;
 
                 if (sInfoText.length > 0)
-                    this.InfoText += `${item.FilterDef.Title} : ${sInfoText}  ${tp.LB}`;
+                    Ref.InfoText += `${item.FilterDef.Title} : ${sInfoText}  ${tp.LB}`;
 
             }
 
@@ -17113,7 +17727,7 @@ tp.SqlFilterValueList = class {
 //#endregion
 
 //#region tp.SqlFilterValue
-/** A Sql Filter item. <br />
+/** A Sql Filter value item. <br />
  * Represents a single data column that participates in a WHERE clause. <br />
  * It is actually an Sql generator, regarding that data column.  <br />
  * The data column can be of a string, integer, float, datetime or boolean-integer type.
@@ -17122,20 +17736,14 @@ tp.SqlFilterValueList = class {
 tp.SqlFilterValue = class {
     /**
      * Constructor
-     * @param {tp.SelectSql} SelectSql A {@link tp.SelectSql} instance this filter is part of.
      * @param {tp.SqlFilterDef} FilterDef The filter descriptor this filter represents.
      */
-    constructor(SelectSql, FilterDef) {
-        this.SelectSql = SelectSql;
+    constructor(FilterDef) {
         this.FilterDef = FilterDef;
         this.SelectedOptionsList = [];
     }
 
 
-    /** A {@link tp.SelectSql} instance this filter is part of. 
-     * @type {tp.SelectSql}
-     */
-    SelectSql = null;
     /** The filter descriptor this filter represents.
      * @type {tp.SqlFilterDef}
      */
@@ -17336,10 +17944,7 @@ tp.SqlFilterValue = class {
                         Result = ` (${FullName} in (${S})) `;
                 }
             }
-
         }
-
-
 
         return Result;
     }
@@ -17353,35 +17958,32 @@ tp.SqlFilterValue = class {
  * */
 tp.SqlFilterControlLink = class {
     /**
-     * 
-     * @param {tp.SelectSql} SelectSql  A {@link tp.SelectSql} the filter of this link belongs to.
-     * @param {tp.SqlFilterValue} SqlFilterValue A {@link tp.SqlFilterValue} filter item, representing a single data column that participates in a WHERE clause.
+     * Constructor
+     * @param {tp.SqlFilterPanel} FilterPanel  FilterPanel  A DIV that displays the filter controls.Provides a list of {@link tp.SqlFilterDef} items. A filter item is created based upon each {@link tp.SqlFilterDef} descriptor.
+     * @param {tp.SqlFilterValue} FilterValue A {@link tp.SqlFilterValue} filter item, representing a single data column that participates in a WHERE clause.
      */
-    constructor(ParentObject, SqlFilterValue) {
-        this.ParentObject = ParentObject;
-        this.SelectSql = this.ParentObject.SelectSql;
-        this.FilterDef = SqlFilterValue.FilterDef;
-        this.FilterValue = SqlFilterValue;
+    constructor(FilterPanel, FilterValue) {
+        this.FilterPanel = FilterPanel;
+        this.FilterValue = FilterValue;
         this.FilterValue.ControlLink = this;
     }
 
-    /** A {@link tp.SelectSqlUi} instance. Provides the parent DOM element of the control of this instance.
-     * @type {tp.SelectSqlUi}
+    /** FilterPanel  A DIV that displays the filter controls.Provides a list of {@link tp.SqlFilterDef} items. A filter item is created based upon each {@link tp.SqlFilterDef} descriptor.
+     * @type {tp.SqlFilterPanel}
      */
-    ParentObject = null;
-    /** A {@link tp.SelectSql} the filter of this link belongs to. 
-     * @type {tp.SelectSql}
-     */
-    SelectSql = null;
-    /** The filter descriptor this link is associated to.
-     * @type {tp.SqlFilterDef}
-     */
-    FilterDef = null;
+    FilterPanel = null;
     /** The {@link tp.SqlFilterValue} filter item, representing a single data column that participates in a WHERE clause. 
      * This is where values of a control link are placed.
      * @type {tp.SqlFilterValue}
      */
     FilterValue = null;
+    /** The filter descriptor this link is associated to.
+     * @type {tp.SqlFilterDef}
+     */
+    get FilterDef() {
+        return this.FilterValue.FilterDef;
+    }
+
 
     /** The tripous script class type used in creating the filter controls (edtBox, edtFrom and edtTo) of this filter
      * @type {object}
@@ -17519,7 +18121,7 @@ tp.SqlFilterControlLink = class {
     <div class="${tp.Classes.Text}">${this.FilterDef.Title}</div>    
 </div>`;
 
-        this.elFilterRow = tp.Append(this.ParentObject.Handle, HtmlText);
+        this.elFilterRow = tp.Append(this.FilterPanel.Handle, HtmlText);
         this.lblTitle = tp.Select(this.elFilterRow, '.' + tp.Classes.Text);
 
         // date-range selector
