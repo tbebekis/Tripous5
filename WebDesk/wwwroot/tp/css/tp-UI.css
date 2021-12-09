@@ -284,13 +284,14 @@ tab control
  
 .tp-DropDownBox {
     display: none;
+    position: fixed;
     cursor: default;
     border: var(--Border);
     background-color: var(--BackColor);
 }
 
 .tp-DropDownBox.tp-Visible {
-    display: inline-block;
+    display: block; /*  display: inline-block; */
     min-height: 20px;
 }
 
@@ -905,6 +906,7 @@ number box - tp-NumberBox
 .tp-ComboBox .tp-Strip {
     position: relative;
     display: flex;
+    height: 100%;
 }
 
 /* the text-box of the combo-box */ 
@@ -1417,7 +1419,7 @@ tp-SelectSqlListUi
     flex-direction: column;
     align-items: stretch;
     overflow: hidden;
-    contain: size layout paint;
+    /* contain: size layout paint; */ /* NO - disrupts dropdown repositioning */
     border: var(--Border);
     font-weight: normal;
     background-color: var(--BackColor);

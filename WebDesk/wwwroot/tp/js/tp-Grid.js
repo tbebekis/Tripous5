@@ -1587,21 +1587,15 @@ tp.GridInplaceEditor = class extends tp.tpObject {
         this.CellAssigned();
 
         if (!tp.IsEmpty(this.Control)) {
-
-/*
-
- */
-
-            //this.Control.SetParent(Cell);
             
             if (this.Control.ParentHandle !== Cell)
                 Cell.appendChild(this.Control.Handle);
             this.Control.Position = 'absolute';
             this.Control.Handle.style.top = 0;
             this.Control.Handle.style.left = 0;
-            this.Control.Handle.style.bottom = 0;
-            this.Control.Handle.style.right = 0;
-            //this.Control.Handle.style.display = '';
+            this.Control.Handle.style.height = '100%';
+            this.Control.Handle.style.width = '100%';
+            this.Control.Handle.style.display = '';
 
 /*
             if (tp.IsEmpty(this.Control.Parent)) {
@@ -1615,8 +1609,6 @@ tp.GridInplaceEditor = class extends tp.tpObject {
             this.Control.Width = R.Width - 2;
             this.Control.Height = R.Height - 1;
  */
- 
-
 
             if (this.Control instanceof tp.Control) {
                 if (tp.IsEmpty(this.Control.DataSource))
@@ -1637,7 +1629,9 @@ tp.GridInplaceEditor = class extends tp.tpObject {
             this.RenderCell(PostChanges);
 
             if (!tp.IsEmpty(this.Control)) {
-                this.Control.Y = -10000;                   
+                //this.Control.Y = -10000;       
+                //this.Control.ParentHandle = null;
+                //this.Control.Handle.style.display = 'none';
             }
  
             if (this.Column.IsAggregateColumn) {
@@ -2044,7 +2038,7 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
         if (e.target === this.btnZoom) {
             // TODO: Zoom
         } else if (e.target === this.btnList) {
-           this.Column.Locator.ShowListAsync(this.fControl.Handle);
+           this.Column.Locator.ShowList(this.fControl.Handle);
         }
     }
     /** Event handler
@@ -2191,6 +2185,7 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
     @param {boolean} PostChanges The editor posts any changes to the underlying row ONLY if this flag is true.
     */
     HideControl(PostChanges) {
+        //this.Locator.HideList();
         //super.HideControl(PostChanges);
         //this.fTextBox.value = "";
     }

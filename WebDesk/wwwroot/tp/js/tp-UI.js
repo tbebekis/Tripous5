@@ -2668,8 +2668,6 @@ tp.DropDownBox = class extends tp.tpElement {
     // http://tlindig.github.io/position-calculator/
     // https://github.com/tlindig/position-calculator/blob/master/src/position-calculator.js
 
-    fAssociateChangeListener = null;
-
     /**
     Displays the dropdown box
     */
@@ -2721,10 +2719,6 @@ tp.DropDownBox = class extends tp.tpElement {
                 document.addEventListener('click', this.FuncBind(this.Document_Click), true);
             }, 0);
 
-            // for updating the top (this.Y) when the Associate changes size/location
-            this.fAssociateChangeListener = tp.ElementResizeDetector.AddListener(this.Associate, () => {
-                this.UpdateTop();
-            });
 
         }
     }
@@ -2748,16 +2742,7 @@ tp.DropDownBox = class extends tp.tpElement {
             } catch (e) {
                 //
             }
-
-            try {
-                if (this.fAssociateChangeListener)
-                    tp.ElementResizeDetector.RemoveListener(this.fAssociateChangeListener);
-                this.fAssociateChangeListener = null;
-            } catch (e) {
-                //
-            }
-
-
+ 
         }
     }
     /**
@@ -2777,6 +2762,11 @@ tp.DropDownBox = class extends tp.tpElement {
             let R = this.Associate.getBoundingClientRect();
             let P; // tp.Point
 
+            P = tp.ToViewport(this.Associate);
+            this.X = P.X;
+            this.Y = P.Y + R.height;
+
+            /*
             if (tp.IsSameText('absolute', this.Position)) {
                 P = tp.ToParent(this.Associate);
                 this.X = P.X;
@@ -2786,6 +2776,7 @@ tp.DropDownBox = class extends tp.tpElement {
                 this.X = P.X;
                 this.Y = P.Y + R.height;
             }
+            */
         }
     }
 };
@@ -9646,6 +9637,7 @@ tp.ComboBox = class extends tp.ListControl {
                 this.SetSelectionIndication(true);
 
                 this.fScroller.Viewport.focus();
+                //this.fDropDownBox.BringToFront();
                 break;
 
             case tp.DropDownBoxStage.Closing:

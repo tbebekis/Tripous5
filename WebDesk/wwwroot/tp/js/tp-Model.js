@@ -12,67 +12,7 @@ tp.Urls.BrokerDelete = '/Broker/Delete';
 tp.Urls.BrokerCommit = '/Broker/Commit';
 tp.Urls.BrokerSelectBrowser = '/Broker/SelectBrowser'; 
 
-/**
- A registry for keeping descriptors.
-@static
-*/
-tp.Registry = class {
  
-    /**
-     * Returns a registry item, usually a descriptor, base on a specified item type and name.
-     * @private
-     * @param {string} ItemType The type of the item, e.g. Locator. Case insensitive
-     * @param {string} ItemName The name of the item, e.g. Customer. Case insensitive
-     * @returns {object} Returns a registry item, usually a descriptor, base on a specified item type and name.
-     */
-    static async GetRegistryItemAsync(ItemType, ItemName) { 
-        let Result = null;
-
-        switch (ItemType.toLowerCase()) {
-            case "locator":
-                Result = tp.FirstOrDefault(this.Locators, (item) => { return tp.IsSameText(ItemName, item.Name); });
-                break;
-        }
-
-        if (tp.IsEmpty(Result)) {
-
-            let Args = new tp.AjaxArgs();
-            Args.Url = tp.Urls.GetRegistryItem;
-            Args.Data = {
-                ItemType: ItemType,
-                ItemName: ItemName
-            };
-
-            Args = await tp.Ajax.Async(Args);
-
-            var o = JSON.parse(Args.ResponseText);
-            if (o.Result === false)
-                tp.Throw(o.ErrorText);
-
-            switch (ItemType.toLowerCase()) {
-                case "locator":
-                    Result = new tp.LocatorDescriptor('');
-                    Result.Assign(o.Packet);
-                    this.Locators.push(Result);
-                    break;
-            }
-        }
-
-        return Result;
-
-    }
-
-    /**
-     * Finds and returns a {@link tp.LocatorDescriptor} locator
-     * @param {string} Name The name of the locator
-     * @returns {tp.LocatorDescriptor} Finds and returns a {@link tp.LocatorDescriptor} locator.
-     */
-    static async FindLocatorAsync(Name) {
-        return await this.GetRegistryItemAsync("Locator", Name);
-    }
-};
-
-tp.Registry.Locators = []; // tp.LocatorDescriptor[]
 
 
  

@@ -575,6 +575,8 @@ tp.Locator = class extends tp.tpObject {
     */
     DetailKey = '';
 
+    DropDownBoxStage = tp.DropDownBoxStage.Closed;
+
     /**
     Gets or sets the maximum number of items to be shown in the dropdown list
     @type {number}
@@ -604,7 +606,7 @@ tp.Locator = class extends tp.tpObject {
      * @private
      * @param {any} v The value to set as key value.
      */
-    async SetKeyValueAsync(v) {
+    SetKeyValue(v) {
         if (this.Active) {
 
             this.fKeyValue = v;
@@ -614,10 +616,11 @@ tp.Locator = class extends tp.tpObject {
                 this.SetDataFieldValues(null);
             }
             else {
-                let Flag = await this.LocateKeyAsync();
-
-                if (Flag === true)
-                    this.SetDataFieldValues(this.fListRow);
+                this.LocateKeyAsync()
+                    .then((Result) => {
+                        if (Result === true)
+                            this.SetDataFieldValues(this.fListRow);
+                    });
             }
         }
     }
@@ -839,9 +842,9 @@ tp.Locator = class extends tp.tpObject {
     @private
     @returns {number} Returns a number {@link Promise}
     */
-    async ResetListData() {
+    ResetListData() {
         this.ListTable = null;
-        let Result = await this.SelectListTableAsync("");
+        let Result = this.SelectListTableAsync("");
         return Result;
     }
 
@@ -877,7 +880,7 @@ tp.Locator = class extends tp.tpObject {
     @private
     @param {HTMLElement} Associate The associate control to set to the drop-down box
     */
-    async DisplayListTableAsync(Associate) {
+    DisplayListTable(Associate) {
         if (!tp.IsEmpty(this.ListTable)) {
             if (this.ListTable.Rows.length <= tp.SysConfig.LocatorShowDropDownRowCountLimit) {
 
@@ -887,17 +890,18 @@ tp.Locator = class extends tp.tpObject {
                 if (this.fDropDownBox.IsOpen)
                     this.fDropDownBox.Close();
 
-                await this.LocateKeyAsync();
+                this.LocateKeyAsync()
+                    .then(() => {
+                        this.Assigning = true;  // to avoid calling DataSourceRowModified() with no reason
+                        try {
+                            this.fListBox.ListSource = this.ListTable;
 
-                this.Assigning = true;  // to avoid calling DataSourceRowModified() with no reason
-                try {
-                    this.fListBox.ListSource = this.ListTable;
-
-                    this.fDropDownBox.Associate = Associate;
-                    this.fDropDownBox.Open();
-                } finally {
-                    this.Assigning = false;
-                }
+                            this.fDropDownBox.Associate = Associate;
+                            this.fDropDownBox.Open();
+                        } finally {
+                            this.Assigning = false;
+                        }
+                    });
 
             } else {
                 // TODO: PopUpForm()
@@ -930,6 +934,8 @@ tp.Locator = class extends tp.tpObject {
     OnDropDownBoxEvent(Sender, Stage) {
         let count,
             n;
+
+        this.DropDownBoxStage = Stage;
 
         switch (Stage) {
 
@@ -999,17 +1005,22 @@ tp.Locator = class extends tp.tpObject {
     Displays a drop-down or a dialog for the user to select a data row.
     @param {HTMLElement} Associate The control to set as the associate control of the drop-down.
     */
-    async ShowListAsync(Associate) {
+    ShowList(Associate) {
         if (!tp.IsValid(Associate))
             tp.Throw("No Associate");
 
-        let RowCount = await this.SelectListTableAsync('');
-
-        if (RowCount > 0) {
-            await this.DisplayListTableAsync(Associate);
-        } else {
-            // nothing here
-        }
+        this.SelectListTableAsync('')
+            .then((RowCount) => {
+                if (RowCount > 0) {
+                    this.DisplayListTable(Associate);
+                } else {
+                    // nothing here
+                }
+            }); 
+    }
+    HideList() {
+        if (this.fDropDownBox.IsOpen)
+            this.fDropDownBox.Close();
     }
  
     /* boxes */
@@ -1060,44 +1071,15 @@ tp.Locator = class extends tp.tpObject {
      * @param {tp.LocatorFieldDef} FieldDef The {@link tp.LocatorFieldDef} descriptor
      * @param {KeyboardEvent} e The {@link KeyboardEvent} event object
      */
-    async Box_KeyDown(LocatorLink, Box, FieldDef, e) {
+    Box_KeyDown(LocatorLink, Box, FieldDef, e) {
         if (this.Active && (FieldDef instanceof tp.LocatorFieldDef)) {
             if (e.keyCode === tp.Keys.Enter) {
                 let S = LocatorLink.BoxGetText(this, Box);
                 if (tp.IsBlankString(S)) this.ClearDataValue();
 
                 else {
-                    let WhereUser = '';
-                    let Text = LocatorLink.BoxGetText(this, Box);
-
-                    if (!tp.IsBlankString(Text)) {
-
-                        WhereUser = !tp.IsBlankString(FieldDef.TableName) ? `${FieldDef.TableName}.${FieldDef.Name}` : FieldDef.Name;
-
-                        if (FieldDef.DataType === tp.DataType.String)
-                            WhereUser += tp.Format(" like '{0}%' ", Text);
-                        else if (tp.DataType.IsDateTime(FieldDef.DataType))
-                            WhereUser += tp.Format(" = '{0}'", Text);
-                        else
-                            WhereUser += tp.Format(" = {0}", Text);
-                    }
-
-                    let RowCount = await this.SelectListTableAsync(WhereUser);
-                    if (RowCount > 0) {
-                        if (RowCount === 1) {
-                            this.fListRow = this.ListTable.Rows[0];
-                            let v = this.fListRow.Get(this.Descriptor.ListKeyField);
-                            this.DataSource.Set(this.DataField, v); // this triggers the whole sequence of setting data-fields
-                        } else {
-                            await this.DisplayListTableAsync(Box);
-                        }
-                    } else {
-                        LocatorLink.BoxSetText(this, Box, '');
-                    }
+                    this.OnBoxKeyEvent(LocatorLin, Box, FieldDef);
                 }
-
-
-
             }
         }
     }
@@ -1108,44 +1090,49 @@ tp.Locator = class extends tp.tpObject {
      * @param {tp.LocatorFieldDef} FieldDef The {@link tp.LocatorFieldDef} descriptor
      * @param {KeyboardEvent} e The {@link KeyboardEvent} event object
      */
-    async Box_KeyPress(LocatorLink, Box, FieldDef, e) {
+    Box_KeyPress(LocatorLink, Box, FieldDef, e) {
         if (this.Active && (FieldDef instanceof tp.LocatorFieldDef) && FieldDef.Searchable) {
 
             let KeyCode = 'charCode' in e ? e.charCode : e.keyCode;
             let c = String.fromCharCode(KeyCode);
 
             if (c === '*') {
+                this.OnBoxKeyEvent(LocatorLin, Box, FieldDef);
+            }
+        }
 
-                let WhereUser = '';
-                let Text = LocatorLink.BoxGetText(this, Box);
+    }
 
-                if (!tp.IsBlankString(Text)) {
+    OnBoxKeyEvent(LocatorLink, Box, FieldDef) {
+        let WhereUser = '';
+        let Text = LocatorLink.BoxGetText(this, Box);
 
-                    WhereUser = !tp.IsBlankString(FieldDef.TableName) ? `${FieldDef.TableName}.${FieldDef.Name}` : FieldDef.Name;
+        if (!tp.IsBlankString(Text)) {
 
-                    if (FieldDef.DataType === tp.DataType.String)
-                        WhereUser += tp.Format(" like '{0}%' ", Text);
-                    else if (tp.DataType.IsDateTime(FieldDef.DataType))
-                        WhereUser += tp.Format(" = '{0}'", Text);
-                    else
-                        WhereUser += tp.Format(" = {0}", Text);
-                }
+            WhereUser = !tp.IsBlankString(FieldDef.TableName) ? `${FieldDef.TableName}.${FieldDef.Name}` : FieldDef.Name;
 
-                let RowCount = await this.SelectListTableAsync(WhereUser);
+            if (FieldDef.DataType === tp.DataType.String)
+                WhereUser += tp.Format(" like '{0}%' ", Text);
+            else if (tp.DataType.IsDateTime(FieldDef.DataType))
+                WhereUser += tp.Format(" = '{0}'", Text);
+            else
+                WhereUser += tp.Format(" = {0}", Text);
+        }
+
+        this.SelectListTableAsync(WhereUser)
+            .then((RowCount) => {
                 if (RowCount > 0) {
                     if (RowCount === 1) {
                         this.fListRow = this.ListTable.Rows[0];
                         let v = this.fListRow.Get(this.Descriptor.ListKeyField);
                         this.DataSource.Set(this.DataField, v); // this triggers the whole sequence of setting data-fields
                     } else {
-                        await this.DisplayListTableAsync(Box);
+                        this.DisplayListTable(Box);
                     }
                 } else {
                     LocatorLink.BoxSetText(this, Box, '');
                 }
-            }
-        }
-
+            });
     }
 
     /**
@@ -1195,7 +1182,7 @@ tp.Locator = class extends tp.tpObject {
         if (!this.fInDataSourceEvent && this.Active && this.DataSource.Position >= 0) {
             this.fInDataSourceEvent = true;
             try {
-                await this.SetKeyValueAsync(this.DataValue);
+                await this.SetKeyValue(this.DataValue);
             }
             finally {
                 this.fInDataSourceEvent = false;
@@ -1215,7 +1202,7 @@ tp.Locator = class extends tp.tpObject {
     async DataSourceRowModified(Table, Row, Column, OldValue, NewValue) {
         if (!this.Assigning && this.Active && Row === this.CurrentRow && Column === this.DataColumn) {
 
-            await this.SetKeyValueAsync(this.DataValue);
+            await this.SetKeyValue(this.DataValue);
 
             // grid may have no idea that the row has changed after the above assignment
             if (this.IsGridMode) {
@@ -1247,7 +1234,7 @@ tp.Locator = class extends tp.tpObject {
             //let S = this.IsGridMode ? "Grid" : "LocatorBox";
             this.fInDataSourceEvent = true;
             try {
-                await this.SetKeyValueAsync(this.DataValue);
+                await this.SetKeyValue(this.DataValue);
             }
             finally {
                 this.fInDataSourceEvent = false;
@@ -1640,12 +1627,12 @@ tp.LocatorBox = class extends tp.Control {
      * @private
      * @param {Event} e The {@link Event} object.
      * */
-    async AnyButton_Click(e) {
+    AnyButton_Click(e) {
         if (!this.ReadOnly && this.Enabled && this.IsValidLocator) {
             if (e.target === this.btnZoom) {
                 // TODO: Zoom
             } else if (e.target === this.btnList) {
-               await this.Locator.ShowListAsync(this.Handle);
+               this.Locator.ShowList(this.Handle);
             }
         }
     }
