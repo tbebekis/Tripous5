@@ -1500,12 +1500,17 @@ tp.TabControl = class extends tp.tpElement {
    */
     InitializeFields() {
         super.InitializeFields();
-
+ 
         var List = this.GetChildren();
         if (List.length === 2) {
             this.fTabList = List[0];
             this.fPageList = List[1];
         }
+        else {
+            this.fTabList = this.AddChild('div');
+            this.fPageList = this.AddChild('div');
+        }
+
     }
     /**
     Event trigger
@@ -5456,6 +5461,7 @@ tp.ControlToolBar = class extends tp.tpElement {
             CP.CssClasses = CssClasses;
 
         var btn = new this.ButtonClass(null, CP);
+        btn.AddClass(tp.Classes.ToolButton);
 
         if (ToRight === true) {
             this.Handle.appendChild(btn.Handle);
@@ -5921,6 +5927,7 @@ tp.ToolBar = class extends tp.tpElement {
             CP.CssClasses = CssClasses;
 
         var btn = new tp.ButtonEx(null, CP);
+        btn.AddClass(tp.Classes.ToolButton);
 
         if (ToRight === true) {
             this.Handle.appendChild(btn.Handle);
@@ -12680,7 +12687,7 @@ tp.DateBox = class extends tp.Control {
         if (v instanceof Date)
             v = tp.ClearTime(v);
 
-        if (tp.DateCompare(this.fDate, v) !== 0) {
+        if ((this.fTextBox && tp.IsBlank(this.fTextBox.value)) || tp.DateCompare(this.fDate, v) !== 0) {
             if (v instanceof Date) {
                 this.fDate = v;
                 if (this.fTextBox)
@@ -19174,7 +19181,7 @@ tp.DataSetDialog = class extends tp.tpWindow {
         this.cboTables.On('SelectedIndexChanged', this.ComboTables_SelectedIndexChanged, this);
 
         // tool-bar buttons
-        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns', '', tp.Classes.ToolButton);  // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
+        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns');  
         this.ToolBar.On('ButtonClick', this.AnyClick, this);
 
         // footer buttons
@@ -19325,9 +19332,9 @@ tp.MultiRowPickDialog = class extends tp.tpWindow {
         this.ToolBar.AddClass(tp.Classes.ToolBar);
 
         // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
-        this.btnIncludeAll = this.ToolBar.AddButton('IncludeAll', tp.IcoChars.Insert, 'Include All', '', tp.Classes.ToolButton); // tp.Classes.IcoCheck
-        this.btnExcludeAll = this.ToolBar.AddButton('ExcludeAll', tp.IcoChars.Delete, 'Exclude All', '', tp.Classes.ToolButton); // tp.Classes.IcoUnCheck
-        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns', '', tp.Classes.ToolButton);
+        this.btnIncludeAll = this.ToolBar.AddButton('IncludeAll', tp.IcoChars.Insert, 'Include All'); 
+        this.btnExcludeAll = this.ToolBar.AddButton('ExcludeAll', tp.IcoChars.Delete, 'Exclude All'); 
+        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns');
         this.ToolBar.On('ButtonClick', this.AnyClick, this);
 
         // footer buttons
@@ -19580,7 +19587,7 @@ tp.SingleRowPickDialog = class extends tp.tpWindow {
         this.ToolBar.AddClass(tp.Classes.ToolBar);
 
         // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
-        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns', '', tp.Classes.ToolButton);
+        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns');
         this.ToolBar.On('ButtonClick', this.AnyClick, this);
 
         // footer buttons
@@ -19738,57 +19745,57 @@ tp.SingleRowPickDialog = class extends tp.tpWindow {
  * @field
  * @type {tp.ControlToolBar}
  */ 
-tp.SingleRowPickDialog.prototype.ToolBar;
+tp.SingleRowPickDialog.prototype.ToolBar = null;
 /** Field
  * @field
  * @type {tp.ControlToolButton}
  */
-tp.SingleRowPickDialog.prototype.btnShowIdColumns;
+tp.SingleRowPickDialog.prototype.btnShowIdColumns = false;
 /** Field
  * @field
  * @type {tp.tpElement}
  */
-tp.SingleRowPickDialog.prototype.btnOK;
+tp.SingleRowPickDialog.prototype.btnOK = null;
 /** Field
  * @field
  * @type {tp.Grid}
  */
-tp.SingleRowPickDialog.prototype.Grid;
+tp.SingleRowPickDialog.prototype.Grid = null;
 /** Field
  * @field
  * @type {string[]}
  */
-tp.SingleRowPickDialog.prototype.VisibleColumns;
+tp.SingleRowPickDialog.prototype.VisibleColumns = [];
 /** Field
  * @field
  * @type {tp.DataRow}
  */
-tp.SingleRowPickDialog.prototype.SelectedRow;
+tp.SingleRowPickDialog.prototype.SelectedRow = null;
 /** Field
  * @field
  * @type {tp.DataTable}
  */
-tp.SingleRowPickDialog.prototype.Table;
+tp.SingleRowPickDialog.prototype.Table = null;
 /** Field
  * @field
  * @type {tp.SelectSql}
  */
-tp.SingleRowPickDialog.prototype.SelectSql;
+tp.SingleRowPickDialog.prototype.SelectSql = null;
 /** Field
  * @field
  * @type {string}
  */ 
-tp.SingleRowPickDialog.prototype.SqlText;
+tp.SingleRowPickDialog.prototype.SqlText = '';
 /** Field
  * @field
  * @type {any}
  */
-tp.SingleRowPickDialog.prototype.KeyValue;
+tp.SingleRowPickDialog.prototype.KeyValue = null;
 /** Field
  * @field
  * @type {string}
  */
-tp.SingleRowPickDialog.prototype.KeyFieldName;
+tp.SingleRowPickDialog.prototype.KeyFieldName = '';
 
 //#endregion
 

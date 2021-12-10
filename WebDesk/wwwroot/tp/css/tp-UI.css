@@ -74,6 +74,8 @@ tab control
 
 .tp-TabControl {
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 /* tab buttons container */ 
@@ -86,12 +88,14 @@ tab control
 /* tab pages container */ 
 .tp-TabControl > :nth-child(2) {
     position: relative;
-}
+    flex-grow: 1;
+} 
 
 /* tab page(s) */ 
 .tp-TabControl > :nth-child(2) > * {
     position: relative;
     overflow: auto;
+    height: 100%;
 }
 
 @media (min-width: 992px) {
@@ -168,10 +172,7 @@ tab control
 }
 
 
-/* tab pages */ 
-.tp-TabControl > :nth-child(2) {
-    /* padding: 6px 4px; */
-}
+
 
 /*---------------------------------------------------------------------------------------
  image

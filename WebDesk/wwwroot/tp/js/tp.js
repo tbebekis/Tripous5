@@ -12195,7 +12195,7 @@ tp.tpElement = class extends tp.tpObject {
                     tp.AddClasses(el, this.CreateParams.CssClasses);
                 }
 
-                tp.AddClass(el, 'tp-Object');
+                
 
                 // css text
                 if (!tp.IsEmpty(this.CreateParams.CssText) && !tp.IsBlank(this.CreateParams.CssText)) {
@@ -12239,6 +12239,9 @@ tp.tpElement = class extends tp.tpObject {
                 this.OnFieldsInitialized();                         // notification
 
                 this.ProcessCreateParams(this.CreateParams);
+
+                tp.AddClass(el, 'tp-Object');
+
                 this.OnCreateParamsProcessed();                     // notification
 
                 this.OnInitializationCompleted();                   // notification
@@ -12911,26 +12914,37 @@ tp.tpElement = class extends tp.tpObject {
                 Child = this.Handle.ownerDocument.createElement(Child);
             }
 
+
+
             if (tp.IsHTMLElement(Child)) {
 
-                var beforeElement = null;
+                let Count = this.Count;
+                let ChildrenList = this.GetChildren();
+                let beforeElement = null;
 
-                if (tp.IsNumber(IndexOrNode) && IndexOrNode >= 0) {
-                    if (IndexOrNode === 0 && this.Count === 0) {
+                if (Count === 0) {
+                    this.Handle.appendChild(Child);
+                    return Child;
+                }                
+
+                if (tp.IsNumber(IndexOrNode)) {
+                    if (IndexOrNode >= Count || IndexOrNode < 0) {
                         this.Handle.appendChild(Child);
                         return Child;
                     }
-
-                    let List = this.GetChildren();
-                    beforeElement = List[IndexOrNode];
-                } else if (tp.IsHTMLElement(IndexOrNode)) {
+                    else if (IndexOrNode >= 0 && IndexOrNode <= ChildrenList.length - 1)  
+                            beforeElement = ChildrenList[IndexOrNode];
+                }
+                else if (tp.IsHTMLElement(IndexOrNode) && ChildrenList.indexOf(IndexOrNode) !== -1) {
                     beforeElement = IndexOrNode;
                 }
 
-                if (tp.IsElement(beforeElement) && this.IsChild(beforeElement)) {
+                if (beforeElement) {
                     this.Handle.insertBefore(Child, beforeElement);
+                    return Child;
                 }
             }
+ 
         }
 
         return null;

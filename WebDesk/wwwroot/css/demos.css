@@ -39,9 +39,6 @@ ol.no-style li {
 }
  
 
-.Ace-Pager .tab-page {
-    height: 650px;
-}
 
 .Ace-Pager .tab-page > .ace_editor {
     position: absolute;

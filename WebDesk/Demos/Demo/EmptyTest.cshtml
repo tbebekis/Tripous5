@@ -58,19 +58,15 @@
     }
 
     var Text = '';
-    var Button1Click = function () {
-        //tp.SysConfig.UseServerStringResources = true;
-        //tp.Languages.Current = 'el-GR';
-        //f();
-
-        //Text = tp.ToDateTimeString(new Date(), 'el-GR', true);
-        //alert(Text);
-
-        Text = tp.Format('Date: {0}, Number: {1}, Boolean: {2}', new Date(), 123.45, true);
-        alert(Text);
+    var Button1Click = async function () {
+        let Args = new tp.WindowArgs();
+        await tp.SqlFilterBoxAsync(Args);
+        alert('after');
     }
 
     function Button2Click() {
+        let E = new tp.tpElement();
+        alert(E instanceof tp.tpObject);
     }
 
 </script>
