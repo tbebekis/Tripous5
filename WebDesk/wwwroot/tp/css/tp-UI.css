@@ -82,6 +82,7 @@ tab control
 .tp-TabControl > :nth-child(1) {
     position: relative;
     display: flex;
+    height: 2.3em;
     gap: 1px;
 }
 
@@ -113,7 +114,7 @@ tab control
         min-width: 120px;
         background-color: var(--BackColor);
         border: var(--Border);
-        height: 2.3em;
+        
     }
     /* tab buttons */ 
     .tp-TabControl > :nth-child(1) > *.tp-Selected {
@@ -125,8 +126,7 @@ tab control
 
     /* toggle zone */ 
     .tp-TabControl > :nth-child(1) {
-        border: var(--Border);
-        height: 2.3em;
+        border: var(--Border);        
     }
 
     /* toggle zone, button + title */ 

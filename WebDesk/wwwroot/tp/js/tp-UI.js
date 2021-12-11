@@ -1417,31 +1417,30 @@ tp.TabControl = class extends tp.tpElement {
     */
     EnsureResponsiveZone() {
         if (tp.IsEmpty(this.fZone)) {
-            let TabElementList = this.GetTabElementList();
+            //let TabElementList = this.GetTabElementList();
+            //let H = TabElementList[0].getBoundingClientRect().height;
 
-            if (TabElementList.length > 0) {
-                let H = TabElementList[0].getBoundingClientRect().height;
+            let H = tp.ComputedStyle(this.TabContainer).height; // this.TabContainer.getBoundingClientRect().height;
 
-                this.fZone = this.Document.createElement('div');
+            this.fZone = this.Document.createElement('div');
 
-                // button container
-                this.fZoneButtonContainer = this.Document.createElement('div');
-                this.fZone.appendChild(this.fZoneButtonContainer);
-                tp.SetStyle(this.fZoneButtonContainer, {
-                    width: H + 'px',
-                    'min-width': H + 'px',
-                    'max-width': H + 'px'
-                });
+            // button container
+            this.fZoneButtonContainer = this.Document.createElement('div');
+            this.fZone.appendChild(this.fZoneButtonContainer);
+            tp.SetStyle(this.fZoneButtonContainer, {
+                width: H,
+                'min-width': H,
+                'max-width': H
+            });
 
-                // button
-                this.fZoneButton = this.Document.createElement('img');
-                this.fZoneButtonContainer.appendChild(this.fZoneButton);
-                this.fZoneButton.src = tp.tpWindow.ICON_ThreeLines;
+            // button
+            this.fZoneButton = this.Document.createElement('img');
+            this.fZoneButtonContainer.appendChild(this.fZoneButton);
+            this.fZoneButton.src = tp.tpWindow.ICON_ThreeLines;
 
-                // title
-                this.fZoneTitle = this.Document.createElement('div');
-                this.fZone.appendChild(this.fZoneTitle);
-            }
+            // title
+            this.fZoneTitle = this.Document.createElement('div');
+            this.fZone.appendChild(this.fZoneTitle);
         }
     }
     /** 
