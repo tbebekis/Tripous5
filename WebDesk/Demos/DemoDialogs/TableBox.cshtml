@@ -24,7 +24,7 @@
 
         let Args = await tp.TableBoxAsync(Table, 'This is the window caption');
 
-        let DialogResult = Args.Window.DialogResult;
+        let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
         if (Args.SelectedRow) {
             S = S + '\nSelected Name: ' + Args.SelectedRow.Get('Name').toString();

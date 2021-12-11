@@ -5814,16 +5814,23 @@ tp.Grid = class extends tp.Control  {
     /**
     Shows or hides the columns that end with 'Id'.
     */
-    ShowHideIdGridColumns() {
-        var i, ln, Column;
-        this.fShowIdColumnsFlag = !this.fShowIdColumnsFlag;
+    ShowIdGridColumns(Flag) {
+        let i, ln, Column;
 
         for (i = 0, ln = this.Columns.length; i < ln; i++) {
             Column = this.Columns[i];
             if (tp.Db.IsIdColumn(Column.Name)) {
-                Column.Visible = this.fShowIdColumnsFlag;
+                Column.Visible = Flag === true;
             }
         }
+
+        this.fShowIdColumnsFlag = Flag === true;
+    }
+    /**
+    Shows or hides the columns that end with 'Id'.
+    */
+    ShowHideIdGridColumns() {       
+        this.ShowIdGridColumns(!this.fShowIdColumnsFlag);
     }
 
     /* locators */

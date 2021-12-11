@@ -27,7 +27,7 @@
 
         let Args = await tp.RowBoxAsync(Row, 'This is the window caption');
 
-        let DialogResult = Args.Window.DialogResult;
+        let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
 
         tp.InfoNote('DialogResult = ' + S);

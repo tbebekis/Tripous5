@@ -1,0 +1,54 @@
+﻿@{
+    ViewBag.Title = "SqlFilterBox";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>The <code>function tp.SqlFilterBoxAsync(FilterDefs, SelectFunc)</code> displays a modal dialog box, for the user to define a WHERE clause.</p>
+
+    <p>
+        The dialog displays a proper UI where the user defines the filter, executes the SELECT, and selects a single row from a grid. <br />
+        If the user clicks OK on the dialog, then the returned Args contain a SelectedRow and a Table property.
+    </p>
+</div>
+
+<br />
+
+<div class="html-code">
+    <button onclick="ShowDialog()">Show SqlFilterBox dialog</button> <br />
+</div>
+<br />
+
+
+
+<script class="js-code">
+
+    async function SelectFunc(WhereSql) {
+        let Table = await tp.Locators.SqlSelectAsync('Trader', WhereSql);
+        return Table;
+    }
+
+    async function ShowDialog() {        
+        let FilterDefs = []; 
+
+        let FilterDef = tp.SqlFilterDef.Create('Code', 'Code');
+        FilterDefs.push(FilterDef);
+
+        FilterDef = tp.SqlFilterDef.Create('Name', 'Name');
+        FilterDefs.push(FilterDef);
+
+        // A FilterDefs array, of type tp.SqlFilterDef
+        // An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a tp.DataTable.
+        let Args = await tp.SqlFilterBoxAsync(FilterDefs, SelectFunc);
+
+        let DialogResult = Args.DialogResult;  
+        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+
+        tp.InfoNote('DialogResult = ' + S);
+
+        log(Args);
+    }
+
+</script>

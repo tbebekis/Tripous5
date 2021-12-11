@@ -25,7 +25,7 @@
 
         tp.DataSetBoxAsync(DataSet, 'This is the window caption')
             .then(function (Args) {
-                let DialogResult = Args.Window.DialogResult;
+                let DialogResult = Args.DialogResult;
                 let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
                 tp.InfoNote('DialogResult = ' + S);
             });

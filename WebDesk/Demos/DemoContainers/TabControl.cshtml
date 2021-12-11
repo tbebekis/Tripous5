@@ -15,7 +15,7 @@
 <br />
 
 <div>
-    <button id="btn1" onclick="AddChild()">AddChild</button> <br />
+    <button id="btn1" onclick="AddTabPage()">Add TabPage</button> <br />
 </div>
 
 <br />
@@ -40,11 +40,11 @@
         ctrl = new tp.TabControl('#Control');
     });
 
-    function AddChild() {
+    function AddTabPage() {
         Counter++;
-        var child = ctrl.AddPage('Item ' + Counter);
+        let Page = ctrl.AddPage('Item ' + Counter);
 
-        child.Page.innerHTML = 'This content belongs to item ' + Counter;
+        tp.Append(Page.Handle, `<span>This content belongs to item ${Counter}</span>`); 
     }
 </script>
 

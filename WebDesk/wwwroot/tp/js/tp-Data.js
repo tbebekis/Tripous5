@@ -962,8 +962,21 @@ tp.SqlFilterDef = class   {
     */
     constructor(FieldPath) {
         this.Enum = new tp.SqlFilterEnum();
+        this.FieldPath = FieldPath || '';
     }
- 
+
+    /**
+     * Creates and returns a {@link tp.SqlFilterDef} descriptor.
+     * @param {string} FieldPath The full path to the field, i.e. TableAlias.FieldName, or just FieldName
+     * @param {string} Title The Title of this instance, used for display purposes
+     * @param {string} DataType Datatype. One of the values of the properties of the {@link tp.DataType}
+     */
+    static Create(FieldPath, Title, DataType = tp.DataType.String) {
+        let Result = new tp.SqlFilterDef(FieldPath);
+        Result.Title = Title || FieldPath;
+        Result.DataType = DataType;
+        return Result;
+    }
 
     /**
     Assigns a source item to this instance
@@ -1001,7 +1014,7 @@ tp.SqlFilterDef = class   {
 
  
 /**
-The full path to the field, i.e. TableAlias.FieldName
+The full path to the field, i.e. TableAlias.FieldName, or just FieldName
 @type {string}
 */
 tp.SqlFilterDef.prototype.FieldPath = '';

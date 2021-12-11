@@ -36,7 +36,7 @@
 
         let Args = await tp.PickRowBoxAsync4(SqlText, VisibleColumns, Text)
 
-        let DialogResult = Args.Window.DialogResult;
+        let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
         if (!tp.IsEmpty(Args.SelectedRow)) {
             S += ' \nSelected Row: ' + Args.SelectedRow.Get('Name');

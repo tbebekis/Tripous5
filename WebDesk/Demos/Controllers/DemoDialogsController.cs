@@ -75,6 +75,12 @@ namespace WebDesk.Controllers
             return View();
         }
 
+        [Route("/demo/SqlFilterBox")]
+        public IActionResult SqlFilterBox()
+        {
+            return View();
+        }
+
 
         [Route("/demo/MiscDialogs")]
         public IActionResult MiscDialogs()

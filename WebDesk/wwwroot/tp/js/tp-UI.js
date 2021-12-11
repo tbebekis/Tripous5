@@ -1204,28 +1204,29 @@ tp.PanelList.prototype.fSelectedIndexListener = null; //: tp.Listener;
 /**
 Represents a tab page, that is a child to a TabControl
 */
-tp.TabPage = class {
-    /**
-    Constructor
-    @param {HTMLElement} [Tab] - Optional. The caption container
-    @param {HTMLElement} [Page] - Optional. The content container
-    */
-    constructor(Tab = null, Page = null) {
-        this.Tab = Tab || null;
-        this.Page = Page || null;
+tp.TabPage = class extends tp.tpElement {
+
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
     }
- 
+
+    /** Gets or sets the title (caption) of the tab 
+     * @type {string}
+     */
+    get Title() {
+        return this.Tab.innerHTML;
+    }
+    set Title(v) {
+        this.Tab.innerHTML = v;
+    }
+
 };
 /**
 The tab is the caption container
 @type {HTMLElement}
 */
 tp.TabPage.prototype.Tab = null;
-/**
-The page is the content container
-@type {HTMLElement}
-*/
-tp.TabPage.prototype.Page = null;
+
 
 
 /**
@@ -1270,79 +1271,67 @@ tp.TabControl = class extends tp.tpElement {
     /**
      * Sets the selected page by index.
      * @protected
-     * @param {number} v The index of the page to set as selected.
+     * @param {number} Index The index of the page to set as selected.
      */
-    SetSelected(v) {
+    SetSelectedIndex(Index) {
 
-        var List;   // HTMLElement[];
-        var el;     // HTMLElement;
+        var elTab = null;     // HTMLElement;
         var i, ln;
-        let Index = -1;
 
-        // tab buttons
-        if (this.fTabList) {
-            List = tp.ChildHTMLElements(this.fTabList);
-            el = null;
-            for (i = 0, ln = List.length; i < ln; i++) {
-                if (v === i) {
-                    el = List[i];
-                    Index = i;
-                }
-                tp.RemoveClass(List[i], tp.Classes.Selected);
-            }
+        // un-select tab buttons
+        let TabElementList = this.GetTabElementList();
 
-            if (el) {
-                tp.AddClass(el, tp.Classes.Selected);
+        for (i = 0, ln = TabElementList.length; i < ln; i++) {
+            if (Index === i) {
+                elTab = TabElementList[i];
             }
+            tp.RemoveClass(TabElementList[i], tp.Classes.Selected);
         }
 
+        // un-select tab pages
+        let PageElementList = this.GetPageElementList();
 
-        // tab pages
-        if (this.fPageList) {
-
-            List = tp.ChildHTMLElements(this.fPageList);
-            for (i = 0, ln = List.length; i < ln; i++) {
-                tp.StyleProp(List[i], 'display', 'none');
-            }
-
-            if (Index >= 0)
-                List[Index].style.display = '';
+        for (i = 0, ln = PageElementList.length; i < ln; i++) {
+            tp.StyleProp(PageElementList[i], 'display', 'none');
         }
 
+        // selected
+        if (elTab) {
+            tp.AddClass(elTab, tp.Classes.Selected);
+            let elPage = elTab.TabPage.Handle;
+            elPage.style.display = '';
 
-        if (this.fZone)
-            this.fZoneTitle.innerHTML = this.GetTitleAt(Index);
+            if (this.fZone)
+                this.fZoneTitle.innerHTML = elTab.innerHTML;
+        }
 
     }
     /**
-     * Creates and returns a new page.
+     * Creates and returns a new page. <br />
+     * NOTE: It does NOT add the page to the control.
      * @protected
      * @param {string} [Title] Optional.The title text of the new page.
      * @returns {tp.TabPage} Returns the new page.
      */
-    CreateChild(Title)  {
-        let Args = this.OnChildCreating();
+    CreatePage(Title) {
+        this.OnPageCreating();
 
-        let Tab = null; // HTMLElement 
-        let Page = null; // HTMLElement 
-
-        if (Args.Child instanceof tp.TabPage) {
-            Tab = Args.Child.Tab;
-            Page = Args.Child.Page;
-        }
-
-        if (tp.IsEmpty(Tab))
-            Tab = this.Document.createElement('div');
-        if (tp.IsEmpty(Page))
-            Page = this.Document.createElement('div');
+        let elTab = this.Document.createElement('div'); // HTMLElement
+        let elPage = this.Document.createElement('div'); // HTMLElement
 
         // tab title
-        if (tp.IsString(Title))
-            Tab.innerHTML = Title;
+        if (tp.IsString(Title) && !tp.IsBlank(Title))
+            elTab.innerHTML = Title;
 
-        let Result = new tp.TabPage(Tab, Page);
+        let CP = {
+            Tab: elTab
+        };
 
-        this.OnChildCreated(Result);
+        elTab.TabPage = new tp.TabPage(elPage, CP);
+
+        let Result = elTab.TabPage;
+
+        this.OnPageCreated(Result);
 
         return Result;
     }
@@ -1352,26 +1341,26 @@ tp.TabControl = class extends tp.tpElement {
     */
     ToggleClicked() {
 
-        if (!this.fToggleTabList) {
-            this.fToggleTabList = this.Document.createElement('div');
-            tp.BringToFront(this.fToggleTabList);
+        if (!this.fTogglefTabList) {
+            this.fTogglefTabList = this.Document.createElement('div');
+            tp.BringToFront(this.fTogglefTabList);
             let List = tp.ChildHTMLElements(this.fTabList);
 
             for (let i = 0, ln = List.length; i < ln; i++) {
                 let TabItem = this.Document.createElement('div');
-                this.fToggleTabList.appendChild(TabItem);
+                this.fTogglefTabList.appendChild(TabItem);
                 TabItem.innerHTML = this.GetTitleAt(i);
             }
 
-            this.Handle.appendChild(this.fToggleTabList);
-            tp.SetStyle(this.fToggleTabList, {
+            this.Handle.appendChild(this.fTogglefTabList);
+            tp.SetStyle(this.fTogglefTabList, {
                 top: this.fZone.getBoundingClientRect().height + 'px'
             });
-            tp.AddClasses(this.fToggleTabList, tp.Classes.Toggle, tp.Classes.List);
+            tp.AddClasses(this.fTogglefTabList, tp.Classes.Toggle, tp.Classes.List);
         } else {
-            if (this.fToggleTabList && tp.IsHTMLElement(this.fToggleTabList.parentNode)) {
-                this.fToggleTabList.parentNode.removeChild(this.fToggleTabList);
-                this.fToggleTabList = null;
+            if (this.fTogglefTabList && tp.IsHTMLElement(this.fTogglefTabList.parentNode)) {
+                this.fTogglefTabList.parentNode.removeChild(this.fTogglefTabList);
+                this.fTogglefTabList = null;
             }
         }
     }
@@ -1381,72 +1370,78 @@ tp.TabControl = class extends tp.tpElement {
     @type {number}
     */
     get SelectedIndex() {
-        if (tp.IsElement(this.fTabList)) {
-            var List = tp.ChildHTMLElements(this.fTabList);
-
-            for (var i = 0, ln = List.length; i < ln; i++) {
-                if (tp.HasClass(List[i], tp.Classes.Selected)) {
-                    return i;
-                }
+        let TabElementList = this.GetTabElementList();
+        for (let i = 0, ln = TabElementList.length; i < ln; i++) {
+            if (tp.HasClass(TabElementList[i], tp.Classes.Selected)) {
+                return i;
             }
         }
+
         return -1;
     }
     set SelectedIndex(v) {
         let CurrentIndex = this.SelectedIndex;
         if (v !== CurrentIndex) {
-
             this.OnSelectedIndexChanging(CurrentIndex, v);
-            this.SetSelected(v);
+            this.SetSelectedIndex(v);
             this.OnSelectedIndexChanged(v);
         }
     }
     /**
-    Gets the selected page as HTMLElement element.
-    @type {HTMLElement}
+    Gets or sets the selected {@link tp.TabPage} page.
+    @type {tp.TabPage}
     */
     get SelectedPage() {
-        if (this.fPageList) {
-            var Index = this.SelectedIndex;
-            if (Index >= 0) {
-                let List = tp.ChildHTMLElements(this.fPageList);
-                return List[Index];
-            }
+        let Result = null;
+        var Index = this.SelectedIndex;
+        if (Index >= 0) {
+            let PageElementList = this.GetPageElementList();
+            let elPage = PageElementList[Index];
+            let Result = tp.GetObject(elPage);
         }
-        return null;
+        return Result;
+    }
+    set SelectedPage(v) {
+        if (v instanceof tp.TabPage) {
+            let PageElementList = this.GetPageElementList();
+            let Index = PageElementList.indexOf(v.Handle);
+            if (Index >= 0)
+                this.SetSelectedIndex(Index);
+        }
     }
 
     /* overridables */
-
     /**
     Ensures that the responsive zone is created.
     @protected
     */
     EnsureResponsiveZone() {
         if (tp.IsEmpty(this.fZone)) {
-            let List = tp.ChildHTMLElements(this.fTabList);
-            let H = List[0].getBoundingClientRect().height;
+            let TabElementList = this.GetTabElementList();
 
-            this.fZone = this.Document.createElement('div');
+            if (TabElementList.length > 0) {
+                let H = TabElementList[0].getBoundingClientRect().height;
 
-            // button container
-            this.fZoneButtonContainer = this.Document.createElement('div');
-            this.fZone.appendChild(this.fZoneButtonContainer);
-            tp.SetStyle(this.fZoneButtonContainer, {
-                width: H + 'px',
-                'min-width': H + 'px',
-                'max-width': H + 'px'
-            });
+                this.fZone = this.Document.createElement('div');
 
-            // button
-            this.fZoneButton = this.Document.createElement('img');
-            this.fZoneButtonContainer.appendChild(this.fZoneButton);
-            this.fZoneButton.src = tp.tpWindow.ICON_ThreeLines;
+                // button container
+                this.fZoneButtonContainer = this.Document.createElement('div');
+                this.fZone.appendChild(this.fZoneButtonContainer);
+                tp.SetStyle(this.fZoneButtonContainer, {
+                    width: H + 'px',
+                    'min-width': H + 'px',
+                    'max-width': H + 'px'
+                });
 
-            // title
-            this.fZoneTitle = this.Document.createElement('div');
-            this.fZone.appendChild(this.fZoneTitle);
+                // button
+                this.fZoneButton = this.Document.createElement('img');
+                this.fZoneButtonContainer.appendChild(this.fZoneButton);
+                this.fZoneButton.src = tp.tpWindow.ICON_ThreeLines;
 
+                // title
+                this.fZoneTitle = this.Document.createElement('div');
+                this.fZone.appendChild(this.fZoneTitle);
+            }
         }
     }
     /** 
@@ -1463,20 +1458,20 @@ tp.TabControl = class extends tp.tpElement {
                 this.fZoneTitle.innerHTML = this.GetTitleAt(Index);
             }
 
-            if (this.fTabList.parentNode === this.Handle)
-                this.Handle.removeChild(this.fTabList);
+            if (this.TabContainer.parentNode === this.Handle)
+                this.Handle.removeChild(this.TabContainer);
 
             if (this.fZone.parentNode !== this.Handle)
-                this.Handle.insertBefore(this.fZone, this.fPageList);
+                this.Handle.insertBefore(this.fZone, this.PageContainer);
         } else {
             if (this.fZone.parentNode === this.Handle)
                 this.Handle.removeChild(this.fZone);
 
-            if (this.fTabList.parentNode !== this.Handle)
-                this.Handle.insertBefore(this.fTabList, this.fPageList);
+            if (this.TabContainer.parentNode !== this.Handle)
+                this.Handle.insertBefore(this.TabContainer, this.PageContainer);
 
             // hide the toggle dropdown if visible
-            if (this.fToggleTabList)
+            if (this.fTogglefTabList)
                 this.ToggleClicked();
         }
     }
@@ -1500,17 +1495,38 @@ tp.TabControl = class extends tp.tpElement {
    */
     InitializeFields() {
         super.InitializeFields();
- 
-        var List = this.GetChildren();
+
+        let List = this.GetChildren();
+
         if (List.length === 2) {
-            this.fTabList = List[0];
-            this.fPageList = List[1];
+            this.TabContainer = List[0];
+            this.PageContainer = List[1];
+        }
+        else if (List.length === 0) {
+            this.TabContainer = this.AddChild('div');
+            this.PageContainer = this.AddChild('div');
         }
         else {
-            this.fTabList = this.AddChild('div');
-            this.fPageList = this.AddChild('div');
+            tp.Throw('Wrong TabControl structure. Should be empty or have 2 child DIVs.');
         }
 
+        let TabElementList = this.GetTabElementList();
+        let PageElementList = this.GetPageElementList();
+
+        if (TabElementList.length !== PageElementList.length)
+            tp.Throw('Tabs and Pages should be equal in number.');
+
+
+        for (let i = 0, ln = PageElementList.length; i < ln; i++) {
+            let elTab = TabElementList[i];
+            let elPage = PageElementList[i];
+
+            let CP = {
+                Tab: elTab
+            };
+
+            elTab.TabPage = new tp.TabPage(elPage, CP);
+        }
     }
     /**
     Event trigger
@@ -1553,22 +1569,23 @@ tp.TabControl = class extends tp.tpElement {
     */
     OnAnyDOMEvent(e) {
 
-        var el, i, ln, List, Type = tp.Events.ToTripous(e.type);
+        let Type = tp.Events.ToTripous(e.type);
 
         if (tp.Events.Click === Type) {
             if (e.target instanceof HTMLElement) {
 
-                if (tp.ContainsElement(this.fTabList, e.target)) {
-                    List = tp.ChildHTMLElements(this.fTabList);
-                    for (i = 0, ln = List.length; i < ln; i++) {
-                        if (e.target === List[i]) {
+                if (tp.ContainsElement(this.TabContainer, e.target)) {
+                    let TabElementList = this.GetTabElementList();
+                    for (let i = 0, ln = TabElementList.length; i < ln; i++) {
+                        if (tp.ContainsElement(TabElementList[i], e.target)) {
                             this.SelectedIndex = i;
+                            break;
                         }
                     }
                 } else if (this.fZone && tp.ContainsElement(this.fZoneButtonContainer, e.target)) {
                     this.ToggleClicked();
-                } else if (this.fToggleTabList && tp.ContainsElement(this.fToggleTabList, e.target)) {
-                    List = tp.ChildHTMLElements(this.fToggleTabList);
+                } else if (this.fTogglefTabList && tp.ContainsElement(this.fTogglefTabList, e.target)) {
+                    let List = tp.ChildHTMLElements(this.fTogglefTabList);
                     let Index = List.indexOf(e.target);
                     if (Index !== -1) {
                         this.SelectedIndex = Index;
@@ -1583,13 +1600,40 @@ tp.TabControl = class extends tp.tpElement {
     }
 
     /* public */
+    /** Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
+     * @returns {HTMLElement[]} Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
+     * */
+    GetTabElementList() {
+        return tp.IsElement(this.TabContainer) ? tp.ChildHTMLElements(this.TabContainer) : [];
+    }
+    /** Returns an array with the Page HTML Elements (tab pages). The array may be empty.
+     * @returns {HTMLElement[]} Returns an array with the Page HTML Elements (tab pages). The array may be empty.
+     * */
+    GetPageElementList() {
+        return tp.IsElement(this.PageContainer) ? tp.ChildHTMLElements(this.PageContainer) : [];
+    }
+    /** Returns an array of the contained {@link tp.TabPage} pages
+     * @returns {tp.TabPage[]} Returns an array of the contained {@link tp.TabPage} pages
+     */
+    GetPageList() {
+        let Result = [];
+        let PageElementList = this.GetPageElementList();
+        PageElementList.forEach((elPage) => {
+            let Page = tp.GetObject(elPage);
+            Result.push(Page);
+        });
+
+        return Result;
+    }
+
     /**
     Adds and returns a child. 
     @param {string} [Title] Optional. The title text of the page.
     @returns {tp.TabPage} Returns the newly added tp.TabPage child
     */
-    AddPage(Title)  {
-        return this.InsertPage(tp.ChildHTMLElements(this.fPageList).length, Title);
+    AddPage(Title) {
+        let PageElementList = this.GetPageElementList();
+        return this.InsertPage(PageElementList.length, Title);
     }
     /**
     Inserts a child at a specified index and returns the child.  
@@ -1599,22 +1643,23 @@ tp.TabControl = class extends tp.tpElement {
     */
     InsertPage(Index, Title) {
         if (this.Handle) {
-            var List = tp.ChildHTMLElements(this.fPageList);
+            let PageElementList = this.GetPageElementList();
 
-            let Child = this.CreateChild(Title); // is tp.TabPage
+            let Page = this.CreatePage(Title);
 
-            if (List.length === 0 || Index < 0 || Index >= List.length) {
-                Index = List.length === 0 ? 0 : List.length;
+            if (PageElementList.length === 0 || Index < 0 || Index >= PageElementList.length) {
+                Index = PageElementList.length === 0 ? 0 : PageElementList.length;
 
-                this.fTabList.appendChild(Child.Tab);
-                this.fPageList.appendChild(Child.Page);
+                this.TabContainer.appendChild(Page.Tab);
+                this.PageContainer.appendChild(Page.Handle);
+
             } else {
-                this.fTabList.insertBefore(Child.Tab, this.fTabList.children[Index]);
-                this.fPageList.insertBefore(Child.Page, this.fPageList.children[Index]);
+                this.TabContainer.insertBefore(Page.Tab, this.TabContainer.children[Index]);
+                this.PageContainer.insertBefore(Page.Handle, this.PageContainer.children[Index]);
             }
 
-            this.SetSelected(Index);
-            return Child;
+            this.SetSelectedIndex(Index);
+            return Page;
         }
 
         return null;
@@ -1626,11 +1671,10 @@ tp.TabControl = class extends tp.tpElement {
     @returns {tp.TabPage}  Returns a tab page object found at a specified index.
     */
     PageAt(Index) {
-        let Result = new tp.TabPage(null, null);
-        let List = tp.ChildHTMLElements(this.fTabList);
-        Result.Tab = List[Index];
-        List = tp.ChildHTMLElements(this.fPageList);
-        Result.Page = List[Index];
+        let Result = null;
+        let List = this.GetPageList();
+        if (Index >= 0 && Index <= List.length - 1)
+            Result = List[Index];
         return Result;
     }
     /**
@@ -1674,51 +1718,54 @@ tp.TabControl = class extends tp.tpElement {
     Event trigger
     @returns {tp.CreateChildEventArgs} Returns the tp.CreateChildEventArgs event Args.
     */
-    OnChildCreating() {
+    OnPageCreating() {
         let Args = new tp.CreateChildEventArgs(null);
-        this.Trigger('ChildCreating', Args);
+        this.Trigger('PageCreating', Args);
         return Args;
     }
     /**
     Event trigger
-    @param {tp.TabPage} Child The tp.TabPage created child.
+    @param {tp.TabPage} Page The tp.TabPage created child.
     */
-    OnChildCreated(Child) {
+    OnPageCreated(Page) {
         let Args = new tp.CreateChildEventArgs(null);
-        Args.Child = Child;
-        this.Trigger('ChildCreated', Args);
+        Args.Child = Page;
+        this.Trigger('PageCreated', Args);
     }
 
 };
-/** Private field. 
- @type {HTMLElement}
- */
-tp.TabPage.prototype.fTabList = null;
+
 /** Private field.
  @type {HTMLElement}
  */
-tp.TabPage.prototype.fPageList = null;
+tp.TabControl.prototype.TabContainer = null;
 /** Private field.
  @type {HTMLElement}
  */
-tp.TabPage.prototype.fZone = null;
+tp.TabControl.prototype.PageContainer = null;
+
+
 /** Private field.
  @type {HTMLElement}
  */
-tp.TabPage.prototype.fZoneButtonContainer = null;
+tp.TabControl.prototype.fZone = null;
+/** Private field.
+ @type {HTMLElement}
+ */
+tp.TabControl.prototype.fZoneButtonContainer = null;
 /** Private field.
  @type {HTMLImageElement}
  */
-tp.TabPage.prototype.fZoneButton = null;
+tp.TabControl.prototype.fZoneButton = null;
 /** Private field.
  @type {HTMLElement}
  */
-tp.TabPage.prototype.fZoneTitle = null;
+tp.TabControl.prototype.fZoneTitle = null;
 /** Private field.
  @type {HTMLElement}
  */
-tp.TabPage.prototype.fToggleTabList = null;
-//#endregion  
+tp.TabControl.prototype.fTogglefTabList = null;
+//#endregion
 
 //#region tp.ImageSlider
 
@@ -19275,8 +19322,6 @@ tp.DataSetDialog.prototype.DataSet;
 tp.DataSetDialog.prototype.Grid;
 //#endregion
 
-
-
 //#region tp.MultiRowPickDialog
 /**
 A row pick list dialog with a grid that allows the user to check/select multiple rows.
@@ -19799,6 +19844,293 @@ tp.SingleRowPickDialog.prototype.KeyFieldName = '';
 
 //#endregion
 
+//#region tp.SqlFilterDialog
+
+/** A dialog box that displays and executes {@link tp.SqlFilterDef} filters. */
+tp.SqlFilterDialog = class extends tp.tpWindow {
+    /**
+    Constructor
+    @param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Should contain a FilterDefs array property, of type {@link tp.SqlFilterDef},
+    and an async call-back function which is passed the WHERE clause this dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
+    */
+    constructor(Args) {
+        super(Args);
+    }
+
+    /* overrides */
+    /**
+    Override
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.SqlFilterDialog';
+    }
+    /**
+    Override
+    @protected
+    @override
+    */
+    CreateControls() {
+        super.CreateControls();
+
+        this.FilterDefs = this.Args.FilterDefs;
+        this.SelectFunc = this.Args.SelectFunc;
+
+        if (!tp.IsArray(this.FilterDefs) || this.FilterDefs.length === 0)
+            tp.Throw('FilterDefs not defined');
+
+        if (!tp.IsFunction(this.SelectFunc))
+            tp.Throw('SelectFunc not defined');
+
+        this.ContentWrapper.StyleProp('display', 'flex');
+        this.ContentWrapper.StyleProp('flex-direction', 'column');
+        this.ContentWrapper.StyleProp('gap', '2px');
+
+        // tool-bar 
+        this.ToolBar = new tp.ToolBar();
+        this.ToolBar.Parent = this.ContentWrapper;
+        this.ToolBar.AddClass(tp.Classes.ToolBar);
+
+        // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
+        this.btnExecute = this.ToolBar.AddButton('Execute', 'Execute', 'Execute', 'fa fa-bolt');
+        this.btnClearFilter = this.ToolBar.AddButton('ClearFilter', 'Clear', 'Clear Filter', 'fa fa-trash-o');
+        this.btnShowSql = this.ToolBar.AddButton('ShowSql', 'Show Sql', 'Show Sql', 'fa fa-file-text-o');
+        this.btnShowIdColumns = this.ToolBar.AddButton('ShowIdColumns', 'Show/Hide Id Columns', 'Show/Hide Id Columns', 'fa fa-th-list');
+
+        this.ToolBar.On('ButtonClick', this.AnyClick, this);
+
+        this.ToolBar.SetNoText(true);
+
+        // footer buttons
+        this.btnOK = this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK, false);
+        this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel, false);
+
+        // tab control
+        this.Pager = new tp.TabControl();
+        this.Pager.Parent = this.ContentWrapper;
+        this.Pager.Height = '100%';
+        this.tabFilter = this.Pager.AddPage('Filter');
+        this.tabGrid = this.Pager.AddPage('Data');
+
+        this.Pager.SelectedIndex = 0;
+
+        // filter panel
+        let el = this.tabFilter.AddChild('div');
+        this.FilterPanel = new tp.SqlFilterPanel(el, { FilterDefs: this.FilterDefs });
+        this.FilterPanel.Height = '100%';
+        this.FilterPanel.Width = '100%';
+        this.FilterPanel.StyleProp('overflow', 'auto');
+        this.FilterPanel.StyleProp('padding', '2px');
+
+        // grid
+        this.Grid = new tp.Grid();
+        this.Grid.Parent = this.tabGrid;
+        this.Args.Grid = this.Grid;
+
+        this.Grid.Height = '100%';
+        this.Grid.Width = '100%';
+
+        this.Grid.ReadOnly = true;
+        this.Grid.ToolBarVisible = false;
+        this.Grid.GroupsVisible = false;
+        this.Grid.FilterVisible = false;
+        this.Grid.FooterVisible = false;
+
+        this.Grid.AllowUserToAddRows = false;
+        this.Grid.AllowUserToDeleteRows = false;
+
+        this.Grid.AutoGenerateColumns = true;
+
+        this.Grid.On(tp.Events.DoubleClick, this.DoubleClick, this);
+
+        this.SetTable(this.Args.Table);
+    }
+
+
+    /**
+     * Sets a specified {@link tp.DataTable} as the grid's datasource.
+     * @param {tp.DataTable} Table
+     */
+    SetTable(Table) {
+        this.Grid.DataSource = null;
+        if (Table instanceof tp.DataTable) {
+            this.Grid.DataSource = Table;
+
+            if (Table.Rows.length <= 1500)
+                this.Grid.BestFitColumns();
+        }
+    }
+    /** Sets the selected row
+     * @protected
+     * */
+    SetSelectedRow() {
+        var Row = this.Grid.FocusedRow;
+        if (!tp.IsEmpty(Row)) {
+            this.Args.SelectedRow = Row;
+            this.Args.Table = Row.Table;
+            this.DialogResult = tp.DialogResult.OK;
+        }
+    }
+
+    /* event handlers */
+    /** Event handler
+     * @protected
+     * @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+     */
+    DoubleClick(Args) {
+        this.SetSelectedRow();
+    }
+
+    /** Generates and returns the WHERE text, if any, else empty string.
+     * @returns {string} Generates and returns the WHERE text, if any, else empty string.
+     * */
+    GenerateSql() {
+        let Conditions = this.FilterPanel.GenerateSql();
+        return Conditions.Where || '';
+    }
+    /** Executes the filter defined by the user and displays the result.
+     * The actual SELECT statement is executed by a specified call-back function.
+     * */
+    async Execute() {
+        let Where = this.GenerateSql() || '';
+        let Table = await this.SelectFunc(Where);
+        this.SetTable(Table);
+
+        this.Pager.SelectedPage = this.tabGrid;
+        this.Grid.ShowIdGridColumns(false);
+    }
+
+    /* Event triggers */
+    /**
+    Event handler. If a Command exists in the clicked element then the Args.Command is assigned.
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    async AnyClick(Args) {
+        if (Args.Handled !== true) {
+            let SqlText;
+
+            var Command = tp.GetCommand(Args);
+            if (!tp.IsBlank(Command)) { 
+
+                switch (Command) {
+                    case 'OK':
+                        Args.Handled = true;
+                        this.SetSelectedRow(); // get selected row
+                        break;
+
+                    case 'Execute':
+                        Args.Handled = true;
+                        await this.Execute();
+                        break;
+
+                    case 'ShowSql':
+                        Args.Handled = true;
+                        SqlText = this.GenerateSql();
+                        await tp.InfoBoxAsync(SqlText);
+                        break;
+
+                    case 'ClearFilter':
+                        Args.Handled = true;
+                        this.FilterPanel.ClearControls();
+                        this.Pager.SelectedPage = this.tabFilter;
+                        break;
+
+                    case 'ShowIdColumns':
+                        Args.Handled = true;
+                        this.Grid.ShowHideIdGridColumns();
+                        this.Pager.SelectedPage = this.tabGrid;
+                        break;
+
+                    default:
+                        super.AnyClick(Args);
+                        break;
+                }
+
+            }
+        }
+    }
+};
+
+
+/** A list of {@link tp.SqlFilterDef} items. A filter item is created based upon a {@link tp.SqlFilterDef} descriptor.
+ * @type {tp.SqlFilterDef[]}
+ */
+tp.SqlFilterDialog.prototype.FilterDefs = [];
+
+/** An async call-back function which is passed the WHERE clause this dialog generates, executes a SELECT, and returns a {@link tp.DataTable} 
+ * @type {function}
+ */
+tp.SqlFilterDialog.prototype.SelectFunc = null;
+/** The {@link tp.SqlFilterPanel} DIV panel upon which filter controls are rendered.
+ * @type {tp.SqlFilterPanel}
+ * */
+tp.SqlFilterDialog.prototype.FilterPanel = null;
+
+/** Field
+ * @field
+ * @type {tp.ControlToolBar}
+ */
+tp.SqlFilterDialog.prototype.ToolBar = null;
+
+/** Field
+ * @field
+ * @type {tp.ControlToolButton}
+ */
+tp.SqlFilterDialog.prototype.btnExecute = false;
+/** Field
+ * @field
+ * @type {tp.ControlToolButton}
+ */
+tp.SqlFilterDialog.prototype.btnClearFilter = false;
+/** Field
+ * @field
+ * @type {tp.ControlToolButton}
+ */
+tp.SqlFilterDialog.prototype.btnShowSql = false;
+/** Field
+ * @field
+ * @type {tp.ControlToolButton}
+ */
+tp.SqlFilterDialog.prototype.btnShowIdColumns = false;
+/** Field
+ * @field
+ * @type {tp.tpElement}
+ */
+tp.SqlFilterDialog.prototype.btnOK = null;
+/** Field
+ * @field
+ * @type {tp.TabControl}
+ */
+tp.SqlFilterDialog.prototype.Pager = null;
+/** Field
+ * @field
+ * @type {tp.TabPage}
+ */
+tp.SqlFilterDialog.prototype.tabFilter = null;
+/** Field
+ * @field
+ * @type {tp.TabPage}
+ */
+tp.SqlFilterDialog.prototype.tabGrid = null;
+
+/** Field
+ * @field
+ * @type {tp.Grid}
+ */
+tp.SqlFilterDialog.prototype.Grid = null;
+/** Field
+ * @field
+ * @type {tp.DataTable}
+ */
+tp.SqlFilterDialog.prototype.Table = null;
+
+
+
+//#endregion
 
 //---------------------------------------------------------------------------------------
 // data dialog-box functions
@@ -20498,6 +20830,51 @@ tp.PickRowBoxAsync = function () {
 };
 //#endregion
 
+//#region tp.SqlFilterBox
+ 
+/**
+ * Displays an WHERE filter dialog. The user defines the filter, executes the SELECT, and selects a single row from a grid.
+ * If the user clicks OK on the dialog, then the returned Args contain a SelectedRow and a Table property.
+ * @param {tp.SqlFilterDef[]} FilterDefs Required. The filters to display in the dialog
+ * @param {function} SelectFunc Required. An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
+ * @param {tp.DataTable} Table Optional. A {@link tp.DataTable} to display initially.
+ * @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
+ * @param {object} [Creator]  Optional. The context (this) for the callback function.
+ * @returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+ */
+tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table, CloseFunc, Creator) {
+    let Args = new tp.WindowArgs();
+    Args.Text = 'Filters';
+    Args.Creator = Creator;
+    Args.CloseFunc = CloseFunc;
+    Args.FilterDefs = FilterDefs;
+    Args.SelectFunc = SelectFunc;
+    Args.Table = Table;
+
+    let Result = new tp.SqlFilterDialog(Args);
+    Result.ShowModal();
+    return Result;
+};
+/**
+ * Displays an WHERE filter dialog. The user defines the filter, executes the SELECT, and selects a single row from a grid.
+ * If the user clicks OK on the dialog, then the returned Args contain a SelectedRow and a Table property.
+ * @param {tp.SqlFilterDef[]} FilterDefs Required. The filters to display in the dialog
+ * @param {function} SelectFunc Required. An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
+ * @param {tp.DataTable} Table Optional. A {@link tp.DataTable} to display initially.
+ * @returns {tp.WindowArgs} Returns the {@link tp.WindowArgs} of the dialog. If the user clicks OK, then the returned object contains the SelectedRow and the Table properties. 
+ */
+tp.SqlFilterBoxAsync = function (FilterDefs, SelectFunc, Table) {
+
+    let Result = new Promise((Resolve, Reject) => {
+        tp.SqlFilterBox(FilterDefs, SelectFunc, Table, (Args) => {
+            Resolve(Args);
+        }); 
+    });
+
+    return Result;
+
+};
+//#endregion
 
 //---------------------------------------------------------------------------------------
 // tp.Ui

@@ -56,7 +56,7 @@ fieldset.tp-GroupBox legend {
 
 .tp-PanelList {
     position: relative;
-    height: auto;
+    height: 100%;
     width: 100%;
     background-color: var(--BackColor);
     overflow: hidden;

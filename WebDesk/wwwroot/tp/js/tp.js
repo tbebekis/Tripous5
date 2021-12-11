@@ -14285,6 +14285,12 @@ tp.WindowArgs = class extends tp.CreateParams {
         super(SourceArgs);
     }
 
+    /** Returns the dialog result, one of the constants of {@link tp.DialogResult}, after a modal dialog box closes.
+     * @type {number} 
+     */
+    get DialogResult() {
+        return this.Window instanceof tp.tpWindow ? this.Window.DialogResult : tp.DialogResult.None;
+    }
 };
 
 /* properties */

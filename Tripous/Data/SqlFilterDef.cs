@@ -164,7 +164,7 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// The full path to the field, i.e. TableAlias.FieldName
+        /// The full path to the field, i.e. TableAlias.FieldName, or just FieldName
         /// </summary>
         public string FieldPath { get; set; }
         /// <summary>

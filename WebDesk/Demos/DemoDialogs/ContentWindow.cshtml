@@ -39,7 +39,7 @@
     async function ShowContentDialog() {
         let Args = await tp.ContentWindow.ShowModalAsync('Content Window', '#Content');
 
-        let DialogResult = Args.Window.DialogResult;
+        let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
         tp.InfoNote('DialogResult = ' + S); 
     }

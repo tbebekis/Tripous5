@@ -35,7 +35,7 @@
 
         let Args = await tp.PickRowsBoxAsync3(tblSource, VisibleColumns, SelectedRows)
 
-        let DialogResult = Args.Window.DialogResult;
+        let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
         S += ' \nSelected Rows Count: ' + Args.SelectedRows.length;
 
