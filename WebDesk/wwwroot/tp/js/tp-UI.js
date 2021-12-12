@@ -15837,7 +15837,6 @@ tp.LocatorFieldDef = class {
 tp.LocatorFieldDef.BoxDefaultWidth = 70;
 //#endregion 
 
-
 //#region tp.Locator
 /** The locator represents (returns) a single value. <br />
 
@@ -15884,7 +15883,7 @@ tp.Locator = class extends tp.tpObject {
         this.fKeyValue = null;
 
         this.fInitialized = false;
-        this.fControl = null; 
+        this.fControl = null;
 
         // drop-down box
         this.fDropDownBox = new tp.DropDownBox();
@@ -16462,6 +16461,8 @@ tp.Locator = class extends tp.tpObject {
     */
     DisplayListTable(Associate) {
         if (!tp.IsEmpty(this.ListTable)) {
+
+            // display a drop-down box for the user to select the list row
             if (this.ListTable.Rows.length <= tp.SysConfig.LocatorShowDropDownRowCountLimit) {
 
                 if (this.fDropDownBox.IsOpen)
@@ -16473,8 +16474,61 @@ tp.Locator = class extends tp.tpObject {
                         this.fDropDownBox.Open();
                     });
 
-            } else {
-                // TODO: PopUpForm()
+            }
+            // display an SqlFilterBox dialog box for the user to select the list row
+            else {
+
+                /** @type {tp.SqlFilterDef[]} */
+                let FilterDefs = [];
+
+                // prepare FilterDefs for the the tp.SqlFilterBox dialog
+                this.fDescriptor.Fields.forEach((item) => {
+                    if (item.Searchable) {
+                        let FieldPath = tp.FieldPath(item.TableName, item.Name);
+                        let FilterDef = tp.SqlFilterDef.Create(FieldPath, item.Title || item.Name, item.DataType);
+                        FilterDefs.push(FilterDef);
+                    }
+                });
+
+                if (FilterDefs.length > 0) {
+
+                    /** Selects and returns the list table. Called by the tp.SqlFilterBox dialog.
+                     * @param {string} WhereSql The where clause text to add to the SELECT statement of a specified Locator.
+                     * @returns {tp.DataTable} Returns a tp.DataTable
+                     */
+                    let SelectFunc = async (WhereSql) => {
+                        let Table = await tp.Locators.SqlSelectAsync(this.fDescriptor.Name, WhereSql);
+                        return Table;
+                    };
+
+                    /** Callback to call when the tp.SqlFilterBox dialog window closes. A function as function(Args: tp.WindowArgs)
+                     * @param {any} WindowArgs
+                     */
+                    let CloseFunc = (WindowArgs) => {
+                        if (WindowArgs.Window.DialogResult === tp.DialogResult.OK) {
+
+                            /** @type {tp.DataRow} */
+                            let SelectedRow = WindowArgs.SelectedRow;
+                            let Table = WindowArgs.Table;
+
+                            if (SelectedRow && Table) {
+
+                                let v = SelectedRow.Get(this.fDescriptor.ListKeyField, null);
+                                if (v) {
+                                    this.ListTable = Table;
+                                    this.SetupListTable();
+                                    this.DataSource.Current.Set(this.DataField, v);
+                                    this.fListRow = SelectedRow;
+                                    this.SetDataFieldValues(this.fListRow);
+                                }
+                            }
+                        }
+
+                    };
+
+                    // call the dialog
+                    tp.SqlFilterBox(FilterDefs, SelectFunc, this.ListTable, CloseFunc);
+                }
             }
         }
 
@@ -16858,7 +16912,7 @@ tp.Locator = class extends tp.tpObject {
     }
 
 };
-//#endregion 
+//#endregion
 
 //#region tp.LocatorBox
 /**
@@ -17473,7 +17527,6 @@ tp.LocatorBox.prototype.fCreating = false;
 tp.LocatorBox.prototype.fLayouting = false;
 
 //#endregion
-
 
 
 //---------------------------------------------------------------------------------------

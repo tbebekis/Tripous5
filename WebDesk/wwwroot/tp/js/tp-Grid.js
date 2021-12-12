@@ -5609,7 +5609,7 @@ tp.Grid = class extends tp.Control  {
     If a Column is passed then just that column is considered.
     @param {number | string | tp.GridColumn} [Column] Optional.
     */
-    BestFitColumns(Column) {
+    BestFitColumns(Column = null) {
 
         var i, ln, j, jln, el, v, Text, Row,
             SourceElement,  // HTMLElement

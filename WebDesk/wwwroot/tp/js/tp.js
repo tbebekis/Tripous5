@@ -1915,26 +1915,28 @@ tp.UrlCombine = function (A, B) {
     return A + B;
 };
 /**
- Combines a TableName a dot and a FieldName and returns a string.
-@param {string} TableName The table name
+ Combines a TableName a dot and a FieldName and returns a string. If no TableName is specified then just the FieldName is returned.
+@param {string} TableName Optional. The table name
 @param {string} FieldName The field name
-@returns {string} Returns the combined string, e.g. Customer.Name
+@returns {string} Returns the combined string, e.g. Customer.Name or just Name
 */
 tp.FieldPath = function (TableName, FieldName) {
-    if (!tp.IsBlank(TableName) && !tp.IsBlank(FieldName))
-        return TableName + '.' + FieldName;
+    if (!tp.IsBlankString(FieldName)) { 
+        return !tp.IsBlankString(TableName)? TableName + '.' + FieldName: FieldName;
+    }
 
     return '';
 };
 /**
- Combines a TableName a double dash (__) and a FieldName and returns a string.
+ Combines a TableName a double dash (__) and a FieldName and returns a string. If no TableName is specified then just the FieldName is returned.
 @param {string} TableName The table name
 @param {string} FieldName The field name
 @returns {string} Returns the combined string, e.g. Customer__Name
 */
 tp.FieldAlias = function (TableName, FieldName) {
-    if (!tp.IsBlank(TableName) && !tp.IsBlank(FieldName))
-        return TableName + '__' + FieldName;
+    if (!tp.IsBlankString(FieldName)) {
+        return !tp.IsBlankString(TableName) ? TableName + '__' + FieldName : FieldName;
+    }
 
     return '';
 };
