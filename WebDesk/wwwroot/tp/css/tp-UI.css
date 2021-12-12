@@ -79,100 +79,111 @@ tab control
 }
 
 /* tab buttons container */ 
-.tp-TabControl > :nth-child(1) {
+.tp-TabControl > .tp-Bar {
     position: relative;
     display: flex;
     height: 2.3em;
     gap: 1px;
 }
 
+/* tab buttons */ 
+.tp-TabControl > .tp-Bar > *  {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    min-width: 120px;
+    background-color: var(--BackColor);
+    border: var(--Border);
+        
+}
+/* tab buttons */ 
+.tp-TabControl > .tp-Bar > *.tp-Selected {
+    background-color: var(--BackColor2);
+}
+
 /* tab pages container */ 
-.tp-TabControl > :nth-child(2) {
+.tp-TabControl > .tp-List {
     position: relative;
     flex-grow: 1;
 } 
 
 /* tab page(s) */ 
-.tp-TabControl > :nth-child(2) > * {
+.tp-TabControl > .tp-List > * {
     position: relative;
     overflow: auto;
     height: 100%;
 }
 
-@media (min-width: 992px) {
-    /* tab buttons */ 
-    .tp-TabControl > :nth-child(1) > * {
-        position: relative;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: inherit;
-        font-family: inherit;
-        font-weight: normal;
-        min-width: 120px;
-        background-color: var(--BackColor);
-        border: var(--Border);
-        
-    }
-    /* tab buttons */ 
-    .tp-TabControl > :nth-child(1) > *.tp-Selected {
-        background-color: var(--BackColor2);
-    }
+
+/* toggle zone */ 
+.tp-TabControl > .tp-Toggle {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background-color: var(--BackColor);
+    height: 2.3em;
+    border: var(--Border);  
 }
 
-@media (max-width: 991px) {
+/* toggle button */ 
+.tp-TabControl > .tp-Toggle > .tp-Btn {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.3em;
+    border-right: var(--Border);
+    cursor: pointer;
+}
 
-    /* toggle zone */ 
-    .tp-TabControl > :nth-child(1) {
-        border: var(--Border);        
-    }
 
-    /* toggle zone, button + title */ 
-    .tp-TabControl > :nth-child(1),
-    .tp-TabControl > :nth-child(1) > * {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        background-color: var(--BackColor);
-    }
+/* toggle title - the title of the selected tab */ 
+.tp-TabControl > .tp-Toggle > .tp-Text {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-grow: 1;
+    padding: 0 6px;
+    align-items: center;
+}
 
-    /* button */ 
-    .tp-TabControl > :nth-child(1) > :nth-child(1) {
-        align-items: center;
-        border-right: var(--Border);
-        cursor: pointer;
-    }
+/* toggle drop down list, displays tab titles */
+.tp-TabToggleDropDownList {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0 4px;
+    gap: 4px; 
+}
 
-    /* title */ 
-    .tp-TabControl > :nth-child(1) > :nth-child(2) {
-        justify-content: flex-start;
-        flex-grow: 1;
-        padding: 0 6px;
-        align-items: center;
-    }
-
-    /* toggle dropdown */ 
-    .tp-TabControl .tp-Toggle.tp-List {
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        left: 0;
-        cursor: pointer;
-        background-color: var(--BackColor);
-        border: var(--Border);
-        padding: 6px 12px 0 12px;
-    }
-
-    /* toggle dropdown items */ 
-    .tp-TabControl .tp-Toggle.tp-List > * {
-        padding: 0 0 6px;
-    }
+.tp-TabToggleDropDownList > * {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 1.8em;
+    padding: 0 8px 0 3px;
+    cursor: pointer;
 }
 
 
 
+
+
+
+
+
+ 
+
+
+
+ 
 
 /*---------------------------------------------------------------------------------------
  image

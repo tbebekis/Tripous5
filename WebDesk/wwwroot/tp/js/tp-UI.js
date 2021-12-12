@@ -7,6 +7,12 @@ tp.Classes = {
 
     NoBrowserAppearance: 'tp-NoBrowserAppearance',
 
+    Normal: 'tp-Normal',
+    XSmall: 'tp-XSmall',
+    Small: 'tp-Small',
+    Medium: 'tp-Medium',
+    Large: 'tp-Large',
+
     /* states           ----------------------------------------------------------------- */
     Focused: 'tp-Focused',
     Selected: 'tp-Selected',
@@ -53,6 +59,7 @@ tp.Classes = {
     Bar: 'tp-Bar',
     Zone: 'tp-Zone',
     Toggle: 'tp-Toggle',
+ 
     Handle: 'tp-Handle',
 
     Plus: 'tp-Plus',
@@ -82,12 +89,7 @@ tp.Classes = {
 
     Top: 'tp-Top',
     Mid: 'tp-Mid',
-    Bottom: 'tp-Bottom',
-
-    Small: 'tp-Small',
-    Medium: 'tp-Medium',
-    Large: 'tp-Large',
-    Normal: 'tp-Normal',
+    Bottom: 'tp-Bottom',   
 
     Main: 'tp-Main',
     Site: 'tp-Site',
@@ -1200,571 +1202,7 @@ tp.PanelList.prototype.fUpdateAssociate = false;
 tp.PanelList.prototype.fSelectedIndexListener = null; //: tp.Listener;
 //#endregion  
 
-//#region tp.TabControl
-/**
-Represents a tab page, that is a child to a TabControl
-*/
-tp.TabPage = class extends tp.tpElement {
 
-    constructor(ElementOrSelector, CreateParams) {
-        super(ElementOrSelector, CreateParams);
-    }
-
-    /** Gets or sets the title (caption) of the tab 
-     * @type {string}
-     */
-    get Title() {
-        return this.Tab.innerHTML;
-    }
-    set Title(v) {
-        this.Tab.innerHTML = v;
-    }
-
-};
-/**
-The tab is the caption container
-@type {HTMLElement}
-*/
-tp.TabPage.prototype.Tab = null;
-
-
-
-/**
-TabControl <br />
-Example markup <br />
-<pre>
-    <div id="TabControl" class="tp-TabControl" data-setup="{ SelectedIndex: 0 }">
-        <div><div>Page 1</div><div>Page 2</div><div>Page 3</div></div>
-        <div>
-            <div>Content 1</div>
-            <div>Content 2</div>
-            <div>Content 3</div>
-        </div>
-    </div>
-</pre>
-@implements {tp.ISelectedIndex}
-*/
-tp.TabControl = class extends tp.tpElement {
-    /**
-    Constructor
-    Example markup <br />
-    <pre>
-        <div id="TabControl" class="tp-TabControl" data-setup="{ SelectedIndex: 0 }">
-            <div><div>Page 1</div><div>Page 2</div><div>Page 3</div></div>
-            <div>
-                <div>Content 1</div>
-                <div>Content 2</div>
-                <div>Content 3</div>
-            </div>
-        </div>
-</pre>
-    @param {string|HTMLElement} ElementOrSelector - Optional.
-    @param {object} CreateParams - Optional.
-    */
-    constructor(ElementOrSelector, CreateParams) {
-        super(ElementOrSelector, CreateParams);
-    }
-
-
-    /* overridables */
-
-    /**
-     * Sets the selected page by index.
-     * @protected
-     * @param {number} Index The index of the page to set as selected.
-     */
-    SetSelectedIndex(Index) {
-
-        var elTab = null;     // HTMLElement;
-        var i, ln;
-
-        // un-select tab buttons
-        let TabElementList = this.GetTabElementList();
-
-        for (i = 0, ln = TabElementList.length; i < ln; i++) {
-            if (Index === i) {
-                elTab = TabElementList[i];
-            }
-            tp.RemoveClass(TabElementList[i], tp.Classes.Selected);
-        }
-
-        // un-select tab pages
-        let PageElementList = this.GetPageElementList();
-
-        for (i = 0, ln = PageElementList.length; i < ln; i++) {
-            tp.StyleProp(PageElementList[i], 'display', 'none');
-        }
-
-        // selected
-        if (elTab) {
-            tp.AddClass(elTab, tp.Classes.Selected);
-            let elPage = elTab.TabPage.Handle;
-            elPage.style.display = '';
-
-            if (this.fZone)
-                this.fZoneTitle.innerHTML = elTab.innerHTML;
-        }
-
-    }
-    /**
-     * Creates and returns a new page. <br />
-     * NOTE: It does NOT add the page to the control.
-     * @protected
-     * @param {string} [Title] Optional.The title text of the new page.
-     * @returns {tp.TabPage} Returns the new page.
-     */
-    CreatePage(Title) {
-        this.OnPageCreating();
-
-        let elTab = this.Document.createElement('div'); // HTMLElement
-        let elPage = this.Document.createElement('div'); // HTMLElement
-
-        // tab title
-        if (tp.IsString(Title) && !tp.IsBlank(Title))
-            elTab.innerHTML = Title;
-
-        let CP = {
-            Tab: elTab
-        };
-
-        elTab.TabPage = new tp.TabPage(elPage, CP);
-
-        let Result = elTab.TabPage;
-
-        this.OnPageCreated(Result);
-
-        return Result;
-    }
-    /**
-    Shows or hides the "toggle tab list", a drop-down list of tab titles which is used in responsive screen dimensions.
-    @protected
-    */
-    ToggleClicked() {
-
-        if (!this.fTogglefTabList) {
-            this.fTogglefTabList = this.Document.createElement('div');
-            tp.BringToFront(this.fTogglefTabList);
-            let List = tp.ChildHTMLElements(this.fTabList);
-
-            for (let i = 0, ln = List.length; i < ln; i++) {
-                let TabItem = this.Document.createElement('div');
-                this.fTogglefTabList.appendChild(TabItem);
-                TabItem.innerHTML = this.GetTitleAt(i);
-            }
-
-            this.Handle.appendChild(this.fTogglefTabList);
-            tp.SetStyle(this.fTogglefTabList, {
-                top: this.fZone.getBoundingClientRect().height + 'px'
-            });
-            tp.AddClasses(this.fTogglefTabList, tp.Classes.Toggle, tp.Classes.List);
-        } else {
-            if (this.fTogglefTabList && tp.IsHTMLElement(this.fTogglefTabList.parentNode)) {
-                this.fTogglefTabList.parentNode.removeChild(this.fTogglefTabList);
-                this.fTogglefTabList = null;
-            }
-        }
-    }
-
-    /**
-    Gets or sets the selected page index
-    @type {number}
-    */
-    get SelectedIndex() {
-        let TabElementList = this.GetTabElementList();
-        for (let i = 0, ln = TabElementList.length; i < ln; i++) {
-            if (tp.HasClass(TabElementList[i], tp.Classes.Selected)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-    set SelectedIndex(v) {
-        let CurrentIndex = this.SelectedIndex;
-        if (v !== CurrentIndex) {
-            this.OnSelectedIndexChanging(CurrentIndex, v);
-            this.SetSelectedIndex(v);
-            this.OnSelectedIndexChanged(v);
-        }
-    }
-    /**
-    Gets or sets the selected {@link tp.TabPage} page.
-    @type {tp.TabPage}
-    */
-    get SelectedPage() {
-        let Result = null;
-        var Index = this.SelectedIndex;
-        if (Index >= 0) {
-            let PageElementList = this.GetPageElementList();
-            let elPage = PageElementList[Index];
-            let Result = tp.GetObject(elPage);
-        }
-        return Result;
-    }
-    set SelectedPage(v) {
-        if (v instanceof tp.TabPage) {
-            let PageElementList = this.GetPageElementList();
-            let Index = PageElementList.indexOf(v.Handle);
-            if (Index >= 0)
-                this.SetSelectedIndex(Index);
-        }
-    }
-
-    /* overridables */
-    /**
-    Ensures that the responsive zone is created.
-    @protected
-    */
-    EnsureResponsiveZone() {
-        if (tp.IsEmpty(this.fZone)) {
-            //let TabElementList = this.GetTabElementList();
-            //let H = TabElementList[0].getBoundingClientRect().height;
-
-            let H = tp.ComputedStyle(this.TabContainer).height; // this.TabContainer.getBoundingClientRect().height;
-
-            this.fZone = this.Document.createElement('div');
-
-            // button container
-            this.fZoneButtonContainer = this.Document.createElement('div');
-            this.fZone.appendChild(this.fZoneButtonContainer);
-            tp.SetStyle(this.fZoneButtonContainer, {
-                width: H,
-                'min-width': H,
-                'max-width': H
-            });
-
-            // button
-            this.fZoneButton = this.Document.createElement('img');
-            this.fZoneButtonContainer.appendChild(this.fZoneButton);
-            this.fZoneButton.src = tp.tpWindow.ICON_ThreeLines;
-
-            // title
-            this.fZoneTitle = this.Document.createElement('div');
-            this.fZone.appendChild(this.fZoneTitle);
-        }
-    }
-    /** 
-     Handles the screen mode change. 
-     */
-    DoScreenModeChanged() {
-
-        this.EnsureResponsiveZone();
-
-        if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall) {
-
-            let Index = this.SelectedIndex;
-            if (Index !== -1) {
-                this.fZoneTitle.innerHTML = this.GetTitleAt(Index);
-            }
-
-            if (this.TabContainer.parentNode === this.Handle)
-                this.Handle.removeChild(this.TabContainer);
-
-            if (this.fZone.parentNode !== this.Handle)
-                this.Handle.insertBefore(this.fZone, this.PageContainer);
-        } else {
-            if (this.fZone.parentNode === this.Handle)
-                this.Handle.removeChild(this.fZone);
-
-            if (this.TabContainer.parentNode !== this.Handle)
-                this.Handle.insertBefore(this.TabContainer, this.PageContainer);
-
-            // hide the toggle dropdown if visible
-            if (this.fTogglefTabList)
-                this.ToggleClicked();
-        }
-    }
-
-    /* overrides */
-    /**
-    Initializes the 'static' and 'read-only' class fields
-    @protected
-    @override
-    */
-    InitClass() {
-        super.InitClass();
-
-        this.tpClass = 'tp.TabControl';
-        this.fDefaultCssClasses = tp.Classes.TabControl;
-    }
-    /**
-   Initializes fields and properties just before applying the create params.
-   @protected
-   @override
-   */
-    InitializeFields() {
-        super.InitializeFields();
-
-        let List = this.GetChildren();
-
-        if (List.length === 2) {
-            this.TabContainer = List[0];
-            this.PageContainer = List[1];
-        }
-        else if (List.length === 0) {
-            this.TabContainer = this.AddChild('div');
-            this.PageContainer = this.AddChild('div');
-        }
-        else {
-            tp.Throw('Wrong TabControl structure. Should be empty or have 2 child DIVs.');
-        }
-
-        let TabElementList = this.GetTabElementList();
-        let PageElementList = this.GetPageElementList();
-
-        if (TabElementList.length !== PageElementList.length)
-            tp.Throw('Tabs and Pages should be equal in number.');
-
-
-        for (let i = 0, ln = PageElementList.length; i < ln; i++) {
-            let elTab = TabElementList[i];
-            let elPage = PageElementList[i];
-
-            let CP = {
-                Tab: elTab
-            };
-
-            elTab.TabPage = new tp.TabPage(elPage, CP);
-        }
-    }
-    /**
-    Event trigger
-    @protected
-    @override
-    */
-    OnHandleCreated() {
-        super.OnHandleCreated();
-        this.HookEvent(tp.Events.Click);
-        this.IsScreenResizeListener = true;
-    }
-    /**
-    Event trigger. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation and AFTER option processing
-    @protected
-    @override
-    */
-    OnInitializationCompleted() {
-        super.OnInitializationCompleted();
-
-        if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall)
-            this.DoScreenModeChanged();
-    }
-    /**
-     Notification sent by tp.Viewport when the screen (viewport) size changes. <br />
-     This method is called only if this.IsScreenResizeListener is true.
-     @protected
-     @override
-     @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
-     */
-    OnScreenSizeChanged(ScreenModeFlag) {
-        super.OnScreenSizeChanged(ScreenModeFlag);
-        if (ScreenModeFlag === true)
-            this.DoScreenModeChanged();
-    }
-    /**
-    Handles any DOM event
-    @protected
-    @override
-    @param {Event} e The Event object
-    */
-    OnAnyDOMEvent(e) {
-
-        let Type = tp.Events.ToTripous(e.type);
-
-        if (tp.Events.Click === Type) {
-            if (e.target instanceof HTMLElement) {
-
-                if (tp.ContainsElement(this.TabContainer, e.target)) {
-                    let TabElementList = this.GetTabElementList();
-                    for (let i = 0, ln = TabElementList.length; i < ln; i++) {
-                        if (tp.ContainsElement(TabElementList[i], e.target)) {
-                            this.SelectedIndex = i;
-                            break;
-                        }
-                    }
-                } else if (this.fZone && tp.ContainsElement(this.fZoneButtonContainer, e.target)) {
-                    this.ToggleClicked();
-                } else if (this.fTogglefTabList && tp.ContainsElement(this.fTogglefTabList, e.target)) {
-                    let List = tp.ChildHTMLElements(this.fTogglefTabList);
-                    let Index = List.indexOf(e.target);
-                    if (Index !== -1) {
-                        this.SelectedIndex = Index;
-                        this.ToggleClicked();
-                    }
-                }
-            }
-
-        }
-
-        super.OnAnyDOMEvent(e);
-    }
-
-    /* public */
-    /** Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
-     * @returns {HTMLElement[]} Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
-     * */
-    GetTabElementList() {
-        return tp.IsElement(this.TabContainer) ? tp.ChildHTMLElements(this.TabContainer) : [];
-    }
-    /** Returns an array with the Page HTML Elements (tab pages). The array may be empty.
-     * @returns {HTMLElement[]} Returns an array with the Page HTML Elements (tab pages). The array may be empty.
-     * */
-    GetPageElementList() {
-        return tp.IsElement(this.PageContainer) ? tp.ChildHTMLElements(this.PageContainer) : [];
-    }
-    /** Returns an array of the contained {@link tp.TabPage} pages
-     * @returns {tp.TabPage[]} Returns an array of the contained {@link tp.TabPage} pages
-     */
-    GetPageList() {
-        let Result = [];
-        let PageElementList = this.GetPageElementList();
-        PageElementList.forEach((elPage) => {
-            let Page = tp.GetObject(elPage);
-            Result.push(Page);
-        });
-
-        return Result;
-    }
-
-    /**
-    Adds and returns a child. 
-    @param {string} [Title] Optional. The title text of the page.
-    @returns {tp.TabPage} Returns the newly added tp.TabPage child
-    */
-    AddPage(Title) {
-        let PageElementList = this.GetPageElementList();
-        return this.InsertPage(PageElementList.length, Title);
-    }
-    /**
-    Inserts a child at a specified index and returns the child.  
-    @param {number} Index The index to use.
-    @param {string} [Title] Optional. The title text of the page.
-    @returns {tp.TabPage} Returns the newly added tp.TabPage child
-    */
-    InsertPage(Index, Title) {
-        if (this.Handle) {
-            let PageElementList = this.GetPageElementList();
-
-            let Page = this.CreatePage(Title);
-
-            if (PageElementList.length === 0 || Index < 0 || Index >= PageElementList.length) {
-                Index = PageElementList.length === 0 ? 0 : PageElementList.length;
-
-                this.TabContainer.appendChild(Page.Tab);
-                this.PageContainer.appendChild(Page.Handle);
-
-            } else {
-                this.TabContainer.insertBefore(Page.Tab, this.TabContainer.children[Index]);
-                this.PageContainer.insertBefore(Page.Handle, this.PageContainer.children[Index]);
-            }
-
-            this.SetSelectedIndex(Index);
-            return Page;
-        }
-
-        return null;
-    }
-
-    /**
-    Returns a tab page object found at a specified index.
-    @param {number} Index The index to use.
-    @returns {tp.TabPage}  Returns a tab page object found at a specified index.
-    */
-    PageAt(Index) {
-        let Result = null;
-        let List = this.GetPageList();
-        if (Index >= 0 && Index <= List.length - 1)
-            Result = List[Index];
-        return Result;
-    }
-    /**
-    Returns the title text of a child found at a specified index.
-    @param {number} Index The index to use.
-    @return {string} Returns the title text of a child found at a specified index.
-    */
-    GetTitleAt(Index) {
-        let Page = this.PageAt(Index);
-        return Page.Tab.innerHTML;
-    }
-    /**
-    Sets the title text of a child found at a specified index.
-    @param {number} Index The index to use.
-    @param {string} Text The title text.
-    */
-    SetTitleAt(Index, Text) {
-        let Page = this.PageAt(Index);
-        Page.Tab.innerHTML = Text;
-    }
-
-    /* event triggers */
-    /**
-    Event trigger
-    @param {number} CurrentIndex The current index.
-    @param {number} NewIndex The new index.
-    */
-    OnSelectedIndexChanging(CurrentIndex, NewIndex) {
-        let Args = new tp.IndexChangeEventArgs(CurrentIndex, NewIndex);
-        this.Trigger('SelectedIndexChanging', Args);
-    }
-    /**
-    Event trigger
-    @param {number} CurrentIndex The current index.
-    */
-    OnSelectedIndexChanged(CurrentIndex) {
-        let Args = new tp.IndexChangeEventArgs(CurrentIndex);
-        this.Trigger('SelectedIndexChanged', Args);
-    }
-    /**
-    Event trigger
-    @returns {tp.CreateChildEventArgs} Returns the tp.CreateChildEventArgs event Args.
-    */
-    OnPageCreating() {
-        let Args = new tp.CreateChildEventArgs(null);
-        this.Trigger('PageCreating', Args);
-        return Args;
-    }
-    /**
-    Event trigger
-    @param {tp.TabPage} Page The tp.TabPage created child.
-    */
-    OnPageCreated(Page) {
-        let Args = new tp.CreateChildEventArgs(null);
-        Args.Child = Page;
-        this.Trigger('PageCreated', Args);
-    }
-
-};
-
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.TabContainer = null;
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.PageContainer = null;
-
-
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.fZone = null;
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.fZoneButtonContainer = null;
-/** Private field.
- @type {HTMLImageElement}
- */
-tp.TabControl.prototype.fZoneButton = null;
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.fZoneTitle = null;
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.fTogglefTabList = null;
-//#endregion
 
 //#region tp.ImageSlider
 
@@ -2578,10 +2016,12 @@ tp.DropDownBox = class extends tp.tpElement {
             this.fAssociate = v;
         }
 
-        if (tp.IsHTMLElement(this.Associate)) {
-            this.Width = this.Associate.getBoundingClientRect().width;
+        let Style = this.GetComputedStyle();
+        if (Style.width !== 'auto') {
+            if (tp.IsHTMLElement(this.Associate)) {
+                this.Width = this.Associate.getBoundingClientRect().width;
+            }
         }
-
     }
     /**
     Gets or sets the owner, an object that gets notified regarding dropdown box stage changes. <br />
@@ -2729,14 +2169,15 @@ tp.DropDownBox = class extends tp.tpElement {
 
             if (tp.IsEmpty(this.ParentHandle)) {
                 tp.Doc.body.appendChild(this.Handle);                
-            }
- 
-            //let Style = tp.ComputedStyle(this.Associate);
+            } 
+            
             this.Handle.style.font = 'inherit';
             this.Position = 'fixed';            
 
             if (this.fIsFirstOpen === true) {
-                this.Width = this.Associate.getBoundingClientRect().width;
+                let Style = this.GetComputedStyle();
+                if (Style.width !== 'auto')
+                    this.Width = this.Associate.getBoundingClientRect().width;
                 this.fIsFirstOpen = false;
             }
 
@@ -2816,17 +2257,6 @@ tp.DropDownBox = class extends tp.tpElement {
             this.X = P.X;
             this.Y = P.Y + R.height;
 
-            /*
-            if (tp.IsSameText('absolute', this.Position)) {
-                P = tp.ToParent(this.Associate);
-                this.X = P.X;
-                this.Y = P.Y + R.height;
-            } else if (tp.IsSameText('fixed', this.Position)) {
-                P = tp.ToViewport(this.Associate);
-                this.X = P.X;
-                this.Y = P.Y + R.height;
-            }
-            */
         }
     }
 };
@@ -17115,12 +16545,13 @@ tp.LocatorBox = class extends tp.Control {
     }
     /**
     Event trigger
+    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     @protected
     @override
     */
-    OnResized() {
+    OnResized(ResizeInfo) {
         this.Layout();
-        super.OnResized();
+        super.OnResized(ResizeInfo);
     }
     /**
     Binds the control to its DataSource. It is called after the DataSource property is assigned. <br />
@@ -18170,7 +17601,7 @@ tp.SqlFilterControlLink = class {
         </div>
          */
         let HtmlText =
-            `<div class="${tp.Classes.SqlFilterRow}">
+`<div class="${tp.Classes.SqlFilterRow}">
     <div class="${tp.Classes.Text}">${this.FilterDef.Title}</div>    
 </div>`;
 

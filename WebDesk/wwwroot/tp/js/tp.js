@@ -258,7 +258,7 @@ tp.NotificationBoxes = (function () {
             let Result = 5;
             if (Boxes.length > 0) {
                 let Box = Boxes[Boxes.length - 1];
-                let CS = tp.ComputedStyle(Box);
+                let CS = tp.GetComputedStyle(Box);
                 Result = Result + tp.ExtractNumber(CS.bottom) + tp.ExtractNumber(CS.height);
             }
 
@@ -273,7 +273,7 @@ tp.NotificationBoxes = (function () {
             let Result = 5;
             if (Boxes.length > 0) {
                 let Box = Boxes[Boxes.length - 1];
-                let CS = tp.ComputedStyle(Box);
+                let CS = tp.GetComputedStyle(Box);
                 Result = Result + tp.ExtractNumber(CS.top) + tp.ExtractNumber(CS.height);
             }
 
@@ -4105,7 +4105,7 @@ tp.StyleProp = function (el, Name, v = null) {
     el = tp.Select(el);
     if (tp.IsHTMLElement(el) && tp.IsString(Name)) {
         if (tp.IsEmpty(v)) {                        // get
-            var Style = tp.ComputedStyle(el);
+            var Style = tp.GetComputedStyle(el);
             return Style.getPropertyValue(Name);
         } else {                                    // set  
             if (Name in el.style) {
@@ -4142,7 +4142,7 @@ Returns the currently active style of an element.
 @param {string|Element} el - A selector or an element
 @returns {CSSStyleDeclaration} - Returns the style object property of an element, which updates itself automatically when the element's style is changed.
 */
-tp.ComputedStyle = function (el) {
+tp.GetComputedStyle = function (el) {
     el = tp.Select(el);
     if (tp.IsHTMLElement(el))
         return el.ownerDocument.defaultView.getComputedStyle(el, '');
@@ -4297,7 +4297,7 @@ tp.Display = function (el, v = null) {
 
     if (tp.IsHTMLElement(el)) {
         if (tp.IsEmpty(v)) {        // get
-            return tp.ComputedStyle(el).display;
+            return tp.GetComputedStyle(el).display;
         } else {                    // set
             el.style.display = v;
             return v;
@@ -4392,7 +4392,7 @@ tp.Visible = function (el, v = null) {
 
     if (tp.IsHTMLElement(el)) {
         if (tp.IsEmpty(v)) {        // get
-            return tp.ComputedStyle(el).display !== 'none';
+            return tp.GetComputedStyle(el).display !== 'none';
         } else {                    // set
             el.style.display = v === true ? '' : 'none';
         }
@@ -4816,7 +4816,7 @@ tp.ZIndex = function (el, v = null) {
 
     if (tp.IsHTMLElement(el)) {
         if (tp.IsEmpty(v)) {
-            var Result = tp.ComputedStyle(el).zIndex;
+            var Result = tp.GetComputedStyle(el).zIndex;
             return tp.StrToInt(Result, 0);
             //return Number(isNaN(Result) ? '0' : Result);
         } else {
@@ -6823,7 +6823,7 @@ tp.Viewport = {
             let R = tp.BoundingRect(el);
             let L = (this.Width / 2) - (R.Width / 2);
             let T = (this.Height / 2) - (R.Height / 2);
-            let Style = tp.ComputedStyle(el);
+            let Style = tp.GetComputedStyle(el);
             if (Style.position === 'absolute')
                 T += window.pageYOffset;
 
@@ -8623,7 +8623,7 @@ tp.Debug.Show = function (o) {
     if (!tp.IsEmpty(o)) {
         S = tp.IsSimple(o) ? o.toString() : tp.Debug.AsText(o);
     }
-    alert(S);
+    tp.InfoNote(S);
 };
 /**
  * Converts a specified object to JSON and displays it to the console
@@ -11358,7 +11358,7 @@ tp.tpElement = class extends tp.tpObject {
             if (!this.Handle) {
                 this.fDisplayType = 'block';
             } else {
-                var S = tp.ComputedStyle(this.Handle).display;
+                var S = tp.GetComputedStyle(this.Handle).display;
                 this.fDisplayType = !tp.IsSameText('none', S) ? S : 'block';
             }
         }
@@ -11549,7 +11549,7 @@ tp.tpElement = class extends tp.tpObject {
     Shows or hides the element by setting the visibility style property.
     @type {boolean}
     */
-    get Visibility() { return this.Handle ? tp.IsSameText(this.ComputedStyle.visibility, "visible") : false; }
+    get Visibility() { return this.Handle ? tp.IsSameText(this.GetComputedStyle().visibility, "visible") : false; }
     set Visibility(v) {
         this.Handle.style.visibility = v === true ? "visible" : "hidden";
     }
@@ -11558,7 +11558,7 @@ tp.tpElement = class extends tp.tpObject {
     Gets or sets the opacity style property. Opacity is a float number from 0.0 to 1.0
     @type {number}
     */
-    get Opacity() { return this.Handle ? tp.StrToFloat(this.ComputedStyle.opacity) : 0; }
+    get Opacity() { return this.Handle ? tp.StrToFloat(this.GetComputedStyle().opacity) : 0; }
     set Opacity(v) {
         if (this.Handle)
             this.Handle.style.opacity = v.toString();
@@ -11568,7 +11568,7 @@ tp.tpElement = class extends tp.tpObject {
     Gets or sets the background color
     @type {string}
     */
-    get BackColor() { return this.Handle ? this.ComputedStyle.backgroundColor : ''; }
+    get BackColor() { return this.Handle ? this.GetComputedStyle().backgroundColor : ''; }
     set BackColor(v) {
         if (this.Handle)
             this.Handle.style.backgroundColor = v;
@@ -11577,7 +11577,7 @@ tp.tpElement = class extends tp.tpObject {
     Gets or sets the font color
     @type {string}
     */
-    get FontColor() { return this.Handle ? this.ComputedStyle.color : ''; }
+    get FontColor() { return this.Handle ? this.GetComputedStyle().color : ''; }
     set FontColor(v) {
         if (this.Handle)
             this.Handle.style.color = v;
@@ -11591,7 +11591,7 @@ tp.tpElement = class extends tp.tpObject {
     */
     get ZIndex() {
         if (this.Handle) {
-            var Result = this.ComputedStyle.zIndex;
+            var Result = this.GetComputedStyle().zIndex;
             return isNaN(Result) ? 0 : Number(Result);
         }
 
@@ -11605,7 +11605,7 @@ tp.tpElement = class extends tp.tpObject {
     Gets or sets the the mouse cursor - for valid values see tp.Cursors
     @type {string}
     */
-    get Cursor() { return this.Handle ? this.ComputedStyle.cursor : ''; }
+    get Cursor() { return this.Handle ? this.GetComputedStyle().cursor : ''; }
     set Cursor(v) {
         this.Handle.style.cursor = v;
     }
@@ -11614,7 +11614,7 @@ tp.tpElement = class extends tp.tpObject {
     Gets or sets the text align string. Valid values: left, right, justify
     @type {string}
     */
-    get TextAlign() { return this.Handle ? this.ComputedStyle.textAlign : ''; }
+    get TextAlign() { return this.Handle ? this.GetComputedStyle().textAlign : ''; }
     set TextAlign(v) {
         this.Handle.style.textAlign = v;
     }
@@ -11702,7 +11702,7 @@ tp.tpElement = class extends tp.tpObject {
     Could be string or number. If a number is passed then it is considered as pixels
     @type {number|string}
     */
-    get X() { return this.Handle ? this.ComputedStyle.left : null; }
+    get X() { return this.Handle ? this.GetComputedStyle().left : null; }
     set X(v) {
         if (this.Handle) {
             this.Handle.style.left = tp.IsNumber(v) ? tp.px(v) : v;
@@ -11713,7 +11713,7 @@ tp.tpElement = class extends tp.tpObject {
     Could be string or number. If a number is passed then it is considered as pixels
     @type {number|string}
     */
-    get Y() { return this.Handle ? this.ComputedStyle.top : null; }
+    get Y() { return this.Handle ? this.GetComputedStyle().top : null; }
     set Y(v) {
         if (this.Handle) {
             this.Handle.style.top = tp.IsNumber(v) ? tp.px(v) : v;
@@ -11724,7 +11724,7 @@ tp.tpElement = class extends tp.tpObject {
     Could be string or number. If a number is passed then it is considered as pixels
     @type {number|string}
     */
-    get Width() { return this.Handle ? this.ComputedStyle.width : null; }
+    get Width() { return this.Handle ? this.GetComputedStyle().width : null; }
     set Width(v) {
         if (this.Handle) {
             this.Handle.style.width = tp.IsNumber(v) ? tp.px(v) : v;
@@ -11735,7 +11735,7 @@ tp.tpElement = class extends tp.tpObject {
     Could be string or number. If a number is passed then it is considered as pixels
     @type {number|string}
     */
-    get Height() { return this.Handle ? this.ComputedStyle.height : null; }
+    get Height() { return this.Handle ? this.GetComputedStyle().height : null; }
     set Height(v) {
         if (this.Handle) {
             this.Handle.style.height = tp.IsNumber(v) ? tp.px(v) : v;
@@ -11746,7 +11746,7 @@ tp.tpElement = class extends tp.tpObject {
     Could be string or number. If a number is passed then it is considered as pixels
     @type {number|string}
     */
-    get Right() { return this.Handle ? this.ComputedStyle.right : null; }
+    get Right() { return this.Handle ? this.GetComputedStyle().right : null; }
     set Right(v) {
         if (this.Handle) {
             this.Handle.style.right = tp.IsNumber(v) ? tp.px(v) : v;
@@ -11757,7 +11757,7 @@ tp.tpElement = class extends tp.tpObject {
     Could be string or number. If a number is passed then it is considered as pixels
     @type {number|string}
     */
-    get Bottom() { return this.Handle ? this.ComputedStyle.bottom : null; }
+    get Bottom() { return this.Handle ? this.GetComputedStyle().bottom : null; }
     set Bottom(v) {
         if (this.Handle) {
             this.Handle.style.bottom = tp.IsNumber(v) ? tp.px(v) : v;
@@ -11803,7 +11803,7 @@ tp.tpElement = class extends tp.tpObject {
     Gets the computed style 
     @type {CSSStyleDeclaration}
     */
-    get ComputedStyle() {
+    GetComputedStyle() {
         if (!this.Handle)
             tp.Throw('Cannot get computed css style. No handle yet.');
  
@@ -11820,17 +11820,22 @@ tp.tpElement = class extends tp.tpObject {
     Registered instances receive notifications in their OnElementSizeChanged() method.
     @type {boolean}
     */
-    get IsElementResizeListener() { return !tp.IsEmpty(this.fElementResizeListener); }
+    get IsElementResizeListener() { return !tp.IsEmpty(this.fResizeDetector); }
     set IsElementResizeListener(v) {
         v = v === true;
+
         if (this.Handle && v !== this.IsElementResizeListener) {
             if (v) {
-                this.fElementResizeListener = tp.ElementResizeDetector.AddListener(this.Handle, this.OnElementSizeChanged, this);
-            } else {
-                tp.ElementResizeDetector.RemoveListener(this.fElementResizeListener);
-                this.fElementResizeListener = null;
+                if (tp.IsEmpty(this.fResizeDetector))
+                    this.fResizeDetector = new tp.ResizeDetector(this.Handle, this.OnElementSizeChanged, this, true);
+                else
+                    this.fResizeDetector.Start();
+            }
+            else if (!tp.IsEmpty(this.fResizeDetector)) {
+                this.fResizeDetector.Stop();
             }
         }
+ 
     }
     /**
     Registers or unregisters this instance as a listener to screen size changes and screen mode (XSmall, Small, Medium, Large) changes.
@@ -11883,12 +11888,12 @@ tp.tpElement = class extends tp.tpObject {
     */
     OnScreenSizeChanged(ScreenModeFlag) { }
     /**
-    Notification sent by tp.ElementResizeDetector when the size of this element changes. 
+    Notification sent by tp.ResizeDetector when the size of this element changes.
     This method is called only if this.IsElementResizeListener is true.
-    @param {tp.ElementResizeEventArgs} e The event args.
+    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnElementSizeChanged(e) {
-        this.OnResized();
+    OnElementSizeChanged(ResizeInfo) {
+        this.OnResized(ResizeInfo);
     }
     /**
     Handles any DOM event
@@ -12015,10 +12020,11 @@ tp.tpElement = class extends tp.tpObject {
     OnVisibleChanged() { this.Trigger('VisibleChanged', {}); }
     /**
     Event trigger
+    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnResized() {
+    OnResized(ResizeInfo) {
         this.PropagateSize();
-        this.Trigger('Resized', {});
+        this.Trigger('Resized', ResizeInfo);
     }
 
 
@@ -13063,10 +13069,10 @@ tp.tpElement.prototype.fChildMarkupControls = [];
  * @type {string[]|null}
  * */
 tp.tpElement.prototype.fHookedEvents = null;
-/** The instance of a listener or null.
- * @type {tp.ElementResizeListener}
+/** Detects size changes in an HTMLElement and sends notifications to a listener function.
+ * @type {tp.ResizeDetector}
  * */
-tp.tpElement.prototype.fElementResizeListener = null;
+tp.tpElement.prototype.fResizeDetector = null;
 /** The instance of a listener or null.
  * @type {tp.Listener}
  * */
@@ -13379,191 +13385,104 @@ tp.GetCommand = function (v) {
 // Element drag and resize, and resize detection
 //---------------------------------------------------------------------------------------
 
-//#region tp.ElementResizeListener
-
-/**
-A listener to the ElementResizeDetector notification events
-*/
-tp.ElementResizeListener = class extends tp.Listener {
+//#region  tp.ResizeDetector
+/** Detects size changes in an HTMLElement and sends notifications to a listener function.  <br />
+ * Uses the {@link https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API|ResizeObserver} API.
+ */
+tp.ResizeDetector = class {
 
     /**
-    Constructor
-    @param {function} [Func=null] - The callback function as function(Args: tp.ElementResizeEventArgs): void.
-    @param {object} [Context=null] - The context (this) of the callback function
-    */
-    constructor(Func = null, Context = null) {
-        super(Func, Context);
+     * Constructor.
+     * @param {string|HTMLElement} SelectorOrElement Required. The element to observe.
+     * @param {function} OnResizeFunc Required. A call-back that accepting an object of type <c>{Width: boolean, Height: boolean}</c>.
+     * @param {object} Context Optional.The context to be used when calling the call-back function 
+     * @param {boolean} ImmediateStart Optional. When true, the default, the observation starts immediately. Otherwise a call to <c>Start()</c> is required.
+     */
+    constructor(SelectorOrElement, OnResizeFunc, Context = null, ImmediateStart = true) {
+        this.Element = tp(SelectorOrElement);
+        this.OnResizeFunc = OnResizeFunc;
+        this.Context = Context;
+        this.Observer = new ResizeObserver((Entries, Observer) => {
+            this.ObserverCallback(Entries, Observer);
+        });
+
+        if (ImmediateStart === true) {
+            this.Start();
+        }
     }
 
-};
-/** The element the ElementResizeDetector observes for size changes */
-tp.ElementResizeListener.Element = null;
-/** The current width of the element */
-tp.ElementResizeListener.Width = null;
-/** The current height of the element */
-tp.ElementResizeListener.Height = null;
-//#endregion
 
-//#region  tp.ElementResizeEventArgs
-/**
-EventArgs derived class for the ElementResizeDetector notification events.
-*/
-tp.ElementResizeEventArgs = class extends tp.EventArgs {
+    /** The observer
+     * @type {ResizeObserver}
+     */
+    Observer = null;
+    /** The element to observe
+     * @type {HTMLElement}
+     */
+    Element = null;
+    /** The call-back function to call on size changes
+     * @type {function}
+     */
+    OnResizeFunc = null;
+    /** The context to be used when calling the call-back function 
+     * @type{object}
+     */
+    Context = null;
+    /** Internal
+     * @type {integer}
+     */
+    Width = 0;
+    /** Internal
+     * @type {integer}
+     */
+    Height = 0;
 
-    /**
-    Constructor
-    */
-    constructor() {
-        super(tp.ElementResizeDetector.EventName, tp.ElementResizeDetector, null);
+    /** Starts the observation. */
+    Start() {
+        this.Width = this.Element.offsetWidth;
+        this.Height = this.Element.offsetHeight;
+
+        let Options = {
+            box: "border-box"
+        };
+        this.Observer.observe(this.Element, Options);
     }
+    /** Stops the observation */
+    Stop() {
+        this.Observer.unobserve(this.Element);
+    }
+    /** The call-back called by the observer.
+     * SEE: {@link https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver/ResizeObserver| ResizeObserver constructor}
+     * @param {ResizeObserverEntry[]} Entries An array of ResizeObserverEntry objects that can be used to access the new dimensions of the element after each change.
+     * @param {ResizeObserver} Observer A reference to the ResizeObserver itself
+     */
+    ObserverCallback(Entries, Observer) {
+        if (Entries && Entries.length > 0) {
+            /** @type {ResizeObserverEntry} */
+            let Entry = Entries[0];
+            if (Entry.borderBoxSize && Entry.borderBoxSize.length > 0) {
+                let Size = Entry.borderBoxSize[0];
+                let w = Size.inlineSize;
+                let h = Size.blockSize;
 
-};
-/** The tp.ElementResizeDetector listener that recieves the notification */
-tp.ElementResizeEventArgs.prototype.Listener = null;
-/** The old width of the listener's element */
-tp.ElementResizeEventArgs.prototype.OldWidth = null;
-/** The old height of the listener's element */
-tp.ElementResizeEventArgs.prototype.OldHeight = null;
-//#endregion
+                if (w !== this.Width || h !== this.Height) {
 
-//#region tp.ElementResizeDetector
-/**
- adapted from: http://stackoverflow.com/questions/6492683/how-to-detect-divs-dimension-changed
- @class
-*/
-tp.ElementResizeDetector = (function () {
+                    let ResizeInfo = {
+                        Width: w !== this.Width,
+                        Height: h !== this.Height
+                    };
 
-    /** MutationObserver */
-    let mo = null;
-    /** tp.ElementResizeListener array */
-    let Listeners = [];
+                    this.Width = w;
+                    this.Height = h;
 
+                    tp.Call(this.OnResizeFunc, this.Context, ResizeInfo);
 
-    /**
-    Callback function.
-    It is called either by the MutationObserver as (mutations: MutationRecord[], observer: MutationObserver): void
-    or by the window resize event as (e: Event)
-    so the signature must remain empty, in order to be compatible to both calls.
-    The code of this function detects any change to the size of the subscribed listener element,
-    and if that size is changed, then it fires a call to the listener.
-    */
-    let OnWindowResizeFunc = function () {
-        let i, ln;
-        let Listener;   // tp.ElementResizeListener;
-        let Args;       // tp.ElementResizeEventArgs;
-
-        for (i = 0, ln = Listeners.length; i < ln; i++) {
-            Listener = Listeners[i];
-
-            if (Listener.Element.offsetWidth !== Listener.Width || Listener.Element.offsetHeight !== Listener.Height) {
-
-                Args = new tp.ElementResizeEventArgs();
-                Args.Listener = Listener;
-                Args.OldWidth = Listener.Width;
-                Args.OldHeight = Listener.Height;
-
-                Listener.Width = Listener.Element.offsetWidth;
-                Listener.Height = Listener.Element.offsetHeight;
-
-                Listener.Func.call(Listener.Context, Args);
-            }
-        }
-    };
-    /**
-    * Hooks or un-hooks to the size change notifications of the window resize event and the MutationObserver.observe() method
-    * @param {boolean} Flag - 
-    */
-    let Hook = function (Flag) {
-        if (Flag) {
-            // Listen to the window's size changes
-            window.addEventListener('resize', OnWindowResizeFunc);
-
-            // Listen to changes on the elements in the page that affect layout              
-            mo.observe(document.body, {
-                attributes: true,
-                childList: true,
-                characterData: true,
-                subtree: true
-            });
-        } else {
-            window.removeEventListener('resize', OnWindowResizeFunc);
-            mo.takeRecords();
-            mo.disconnect();
-        }
-    };
-    /**
-    Initializes this class
-    */
-    let Initialize = function () {
-        if (!mo) {
-            mo = tp.CreateMutationObserver(OnWindowResizeFunc);
-
-            window.addEventListener('unload', function () {
-                if (Listeners.length > 0) {
-                    Hook(false);
                 }
-            });
-        }
-    };
-
-    Initialize();
-
-    return {
-        /** 
-         Returns the event name
-         @type {string}
-         @memberof tp.ElementResizeDetector
-         @static
-         */
-        get EventName() { return 'ResizeDetectorNotification'; },
-
-        /**
-        Adds a listener to this size change detector.  
-        It creates a listener, based on the specified parameters, and returns that listener. 
-         @param  {Element} Element - The element to watch for size changes
-         @param  {function} Func - A callback function, as (Args: ElementResizeEventArgs) => void, to call when the Element size changes.
-         @param  {object} [Context=null] - Optional. The context (this) to use when calling the callback function.
-         @returns {tp.ElementResizeListener} - Returns the newly created tp.ElementResizeListener listener object.
-         @memberof tp.ElementResizeDetector
-         @static
-         */
-        AddListener: function (Element, Func, Context = null) {
-            var o = new tp.ElementResizeListener(Func, Context);
-            o.Element = Element;
-            o.Width = Element.offsetWidth;
-            o.Height = Element.offsetHeight;
-
-            Listeners.push(o);
-
-            if (Listeners.length === 1) {
-                Hook(true);
-            }
-
-            return o;
-        },
-        /**
-        Removes a listener added by a previous call to AddListener().
-        @param {tp.ElementResizeListener} Listener - The listener to remove
-        @memberof tp.ElementResizeDetector
-        @static
-        */
-        RemoveListener: function (Listener) {
-            var Index = Listeners.indexOf(Listener);
-
-            if (Index !== -1) {
-                Listeners.splice(Index, 1);
-            }
-
-            if (Listeners.length === 0) {
-                Hook(false);
             }
         }
-    };
 
-
-
-
-})();
+    }
+};
 //#endregion
 
 //#region  tp.WrapObserver
@@ -14002,7 +13921,7 @@ tp.Dragger = class extends tp.tpObject {
     DragStart(e) {
         if (this.Dragging === true || this.Resizing === true) {
             var Mouse = tp.Mouse.ToElement(e, this.fHandle.parentNode);
-            var Style = tp.ComputedStyle(this.Handle);
+            var Style = tp.GetComputedStyle(this.Handle);
             var X = Mouse.X - tp.ExtractNumber(Style.left);
             var Y = Mouse.Y - tp.ExtractNumber(Style.top);
             this.fDelta = new tp.Point(X, Y);
@@ -14032,7 +13951,7 @@ tp.Dragger = class extends tp.tpObject {
             this.OnDragMove(e);
         } else if (this.IsResizable && this.Resizing) {
 
-            let Style = tp.ComputedStyle(this.fHandle);
+            let Style = tp.GetComputedStyle(this.fHandle);
             L = tp.ExtractNumber(Style.left);
             T = tp.ExtractNumber(Style.top);
             W = tp.ExtractNumber(Style.width);

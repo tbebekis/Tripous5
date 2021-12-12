@@ -3139,27 +3139,9 @@ tp.GridViewportPanel = class extends tp.tpObject {
         this.Handle.appendChild(this.Content);
         this.Content.className = tp.Classes.Content;
 
-        this.fElementResizeListener = tp.ElementResizeDetector.AddListener(this.Handle, this.OnElementSizeChanged, this);
+        this.fResizeDetector = new tp.ResizeDetector(this.Handle, this.OnElementSizeChanged, this, true);
     }
-
-
-    /** The owner grid
-     * @type {tp.Grid}
-     */
-    Grid;
-    /** The {@link HTMLElement} of this panel
-     * @type {HTMLElement}
-     */
-    Handle;
-    /** The content {@link HTMLElement} elemnt
-     @type {HTMLElement}
-    */
-    Content;
-    /** The {@link tp.ElementResizeListener} resize listener.
-     @type {tp.ElementResizeListener}
-     */
-    fElementResizeListener;
-
+ 
     /**
      Gets or sets the scroll top value.
      @type {number}
@@ -3194,13 +3176,12 @@ tp.GridViewportPanel = class extends tp.tpObject {
     }
 
     /**
-    Notification sent by tp.ElementResizeDetector when the size of this element changes. <br />
+    Notification sent by tp.ResizeDetector when the size of this element changes.
     This method is called only if this.IsElementResizeListener is true.
-    @protected
-    @param {tp.ElementResizeEventArgs} e The {@link tp.ElementResizeEventArgs} event arguments.
+    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnElementSizeChanged(e) {
-        this.Trigger('Resized', null);
+    OnElementSizeChanged(ResizeInfo) {
+        this.Trigger('Resized', ResizeInfo);
     }
 
     /* public */
@@ -3216,6 +3197,22 @@ tp.GridViewportPanel = class extends tp.tpObject {
     }
 
 };
+/** The owner grid
+ * @type {tp.Grid}
+ */
+tp.GridViewportPanel.prototype.Grid = null;
+/** The {@link HTMLElement} of this panel
+ * @type {HTMLElement}
+ */
+tp.GridViewportPanel.prototype.Handle = null;
+/** The content {@link HTMLElement} elemnt
+ @type {HTMLElement}
+*/
+tp.GridViewportPanel.prototype.Content = null;
+/** Detects size changes in an HTMLElement and sends notifications to a listener function.
+ * @type {tp.ResizeDetector}
+ * */
+tp.GridViewportPanel.prototype.fResizeDetector = null;
 //#endregion
 
 //#region  tp.GridSummariesPanel
@@ -4128,27 +4125,7 @@ tp.Grid = class extends tp.Control  {
         super.OnAnyDOMEvent(e);
     }
 
-    /**
-    Notification sent by tp.Viewport when the screen (viewport) size changes. <br />
-    This method is called only if this.IsScreenResizeListener is true.
-    @protected
-    @override
-    @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
-    */
-    OnScreenSizeChanged(ScreenModeFlag) {
-    }
-    /**
-    Notification sent by tp.ElementResizeDetector when the size of this element changes.
-    This method is called only if this.IsElementResizeListener is true.
-    @protected
-    @override
-    @param {tp.ElementResizeEventArgs} e The {@link tp.ElementResizeEventArgs} event args.
-    */
-    OnElementSizeChanged(e) {
-        this.OnResized();
-    }
-
-
+ 
     /* IDataSourceListener implementation */
     /**
     Notification

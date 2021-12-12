@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "Element Resize Detector";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>
+        Detects size changes in an HTMLElement and sends notifications to a listener function.
+    </p>
+    <p>
+        Uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API" target="_blank">ResizeObserver API</a>
+    </p>
+</div>
+
+<br />
+
+<style>
+    .detect {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 300px;
+        width: 100%;
+        background-color: brown;
+    }
+</style>
+
+<div class="html-code">
+    <div>
+        <button id="btn1" type="button">Button1</button>
+    </div>
+    <br />
+    <div>
+        <label for="edtWidth">width</label> &nbsp; <input id="edtWidth" type="text" value="450" />
+    </div>
+
+    <br />
+    <br />
+    <div id='div1' class="detect">
+
+    </div>
+</div>
+
+
+<script class="js-code">
+    ResizableDiv = class {
+        constructor(el) {
+            this.Handle = el;
+            new tp.ResizeDetector(this.Handle, this.ResizeDetectorFunc, this, true);
+        }
+
+        Handle = null;
+
+        ResizeDetectorFunc(ResizeInfo) {
+            tp.Debug.Show(ResizeInfo);
+        }
+    }
+
+    tp.Ready(() => {
+        new ResizableDiv(div1);
+    });
+
+    btn1.addEventListener('click', (e) => {
+        let w = edtWidth.value;
+        div1.style.width = w + 'px';
+    });
+</script>
+
+
+

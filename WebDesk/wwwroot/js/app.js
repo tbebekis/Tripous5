@@ -110,7 +110,7 @@ app.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
     List = tp(List);
  
     Button.addEventListener('click', (ev) => {
-        let Position = tp.ComputedStyle(List).position;
+        let Position = tp.GetComputedStyle(List).position;
         let R = Button.getBoundingClientRect();
         let P; // tp.Point
 
@@ -478,7 +478,7 @@ app.TabBarHandler = class {
     
 
     IsItemVisible(el) {
-        let display = tp.ComputedStyle(el).display;
+        let display = tp.GetComputedStyle(el).display;
         return !tp.IsSameText('none', display);
     }
     GetBarWidth() {

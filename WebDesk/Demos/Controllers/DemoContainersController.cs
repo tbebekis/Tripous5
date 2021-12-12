@@ -69,5 +69,10 @@ namespace WebDesk.Controllers
             return View();
         }
 
+        [Route("/demo/ElementResizeDetector")]
+        public IActionResult ElementResizeDetector()
+        {
+            return View();
+        }
     }
 }
