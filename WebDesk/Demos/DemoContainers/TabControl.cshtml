@@ -9,18 +9,30 @@
 
 <div>
     <p>A TabControl.</p>
+    <p>
+        TabControl uses an <a href="https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API" target="_blank">IntersectionObserver</a>
+        to detect whether tabs exceed tab-bar width, when rendering in Normal mode.
+    </p>
+    <p>
+        TabControll uses a <a href="https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver" target="_blank">ResizeObserver</a> (actually a <code>tp.ResizeDetector</code>)
+        to detect whether tabs fit in tab-bar width, when rendering in Toggle mode.
+    </p>
+
     <p>You can add a new tab page, get or set the text of a tab, set the selected tab page, etc.</p>
 </div>
 
 <br />
 
-<div>
-    <button id="btn1" onclick="AddTabPage()">Add TabPage</button> <br />
-</div>
 
-<br />
 
 <div class="html-code">
+    <div>
+        <p><button id="btn1" onclick="AddTabPage()">Add Page</button></p>
+        <p><button id="btn2" onclick="RemovePageAt()">Remove Page at Index</button>&nbsp; <input id="edtIndex" type="text" value="0" /> </p>
+    </div>
+
+    <br />
+
     <div id="Control" class="tp-TabControl" data-setup="{ SelectedIndex: 0 }">
         <div><div>Page 1</div><div>Page 2</div><div>Page 3</div></div>
         <div>
@@ -33,19 +45,45 @@
 
 
 
-<script class="js-code">
+<script class="js-code"> 
     var ctrl = null;
     var Counter = 3;
-    tp.Ready(function () {
-        ctrl = new tp.TabControl('#Control');
-    });
+
+    function SetupPage(Page) {
+        Page.BackColor = tp.RandomColor();
+        Page.StyleProp('font-size', '14px');
+        Page.StyleProp('font-weight', 'bold');
+    }
 
     function AddTabPage() {
         Counter++;
-        let Page = ctrl.AddPage('Item ' + Counter);
 
-        tp.Append(Page.Handle, `<span>This content belongs to item ${Counter}</span>`); 
+        let Page = ctrl.AddPage('Item ' + Counter);
+        tp.Append(Page.Handle, `<span>This content belongs to item ${Counter}</span>`);
+
+        SetupPage(Page);
     }
+
+    function RemovePageAt() {
+        let v = edtIndex.value;
+        let NumberConvertionResult = tp.TryStrToInt(v);
+        if (NumberConvertionResult.Result === true)
+            ctrl.RemovePageAt(NumberConvertionResult.Value);
+    }
+
+    tp.Ready(function () {
+        ctrl = new tp.TabControl('#Control');
+        ctrl.Height = 120;
+
+        let List = ctrl.GetPageList();
+        List.forEach((page) => {
+            SetupPage(page);
+        });
+    });
+
+
+
+
 </script>
 
  

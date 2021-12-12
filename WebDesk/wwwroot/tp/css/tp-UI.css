@@ -76,6 +76,7 @@ tab control
     position: relative;
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 /* tab buttons container */ 
@@ -84,6 +85,7 @@ tab control
     display: flex;
     height: 2.3em;
     gap: 1px;
+    user-select: none;
 }
 
 /* tab buttons */ 
@@ -99,8 +101,7 @@ tab control
     font-weight: normal;
     min-width: 120px;
     background-color: var(--BackColor);
-    border: var(--Border);
-        
+    border: var(--Border);        
 }
 /* tab buttons */ 
 .tp-TabControl > .tp-Bar > *.tp-Selected {
@@ -129,6 +130,7 @@ tab control
     background-color: var(--BackColor);
     height: 2.3em;
     border: var(--Border);  
+    user-select: none;
 }
 
 /* toggle button */ 
@@ -161,6 +163,7 @@ tab control
     flex-direction: column;
     padding: 0 4px;
     gap: 4px; 
+    user-select: none;
 }
 
 .tp-TabToggleDropDownList > * {
@@ -172,18 +175,6 @@ tab control
     cursor: pointer;
 }
 
-
-
-
-
-
-
-
- 
-
-
-
- 
 
 /*---------------------------------------------------------------------------------------
  image

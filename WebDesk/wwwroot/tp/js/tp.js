@@ -7417,6 +7417,7 @@ tp.Colors = (function () {
             return S;
         }
 
+
     };
 
 })();
@@ -11820,7 +11821,7 @@ tp.tpElement = class extends tp.tpObject {
     Registered instances receive notifications in their OnElementSizeChanged() method.
     @type {boolean}
     */
-    get IsElementResizeListener() { return !tp.IsEmpty(this.fResizeDetector); }
+    get IsElementResizeListener() { return !tp.IsEmpty(this.fResizeDetector) && this.fResizeDetector.Observing === true; }
     set IsElementResizeListener(v) {
         v = v === true;
 
@@ -13437,19 +13438,36 @@ tp.ResizeDetector = class {
      */
     Height = 0;
 
+    fObserving = false;
+
+    get Observing() { return this.fObserving; }
+
     /** Starts the observation. */
     Start() {
-        this.Width = this.Element.offsetWidth;
-        this.Height = this.Element.offsetHeight;
+        if (!this.fObserving) {
 
-        let Options = {
-            box: "border-box"
-        };
-        this.Observer.observe(this.Element, Options);
+            this.Width = this.Element.offsetWidth;
+            this.Height = this.Element.offsetHeight;
+
+            let Options = {
+                box: "border-box"
+            };
+            this.Observer.observe(this.Element, Options);
+
+            this.fObserving = true;
+        }
     }
     /** Stops the observation */
     Stop() {
-        this.Observer.unobserve(this.Element);
+        if (this.fObserving) {
+
+            this.Observer.unobserve(this.Element);
+            this.Observer.disconnect();
+
+            this.fObserving = false;
+        }
+
+
     }
     /** The call-back called by the observer.
      * SEE: {@link https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver/ResizeObserver| ResizeObserver constructor}
