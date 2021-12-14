@@ -1,1 +1,645 @@
-﻿
+﻿//---------------------------------------------------------------------------------------
+// page and view
+//---------------------------------------------------------------------------------------
+
+
+//#region tp.PageMode
+
+/**
+Indicates the page mode (document or desktop)
+@class
+@enum {number}
+*/
+tp.PageMode = {
+    /** Document-like */
+    Document: 1,
+    /** Desktop-like */
+    Desktop: 2
+};
+Object.freeze(tp.PageMode);
+
+//#endregion
+
+
+//#region tp.Page
+/**
+The main tripous container on a page. There must be only one instance of this class (singleton) <br />
+Do NOT explicitly create an instance (call the constructor) of this class or any descendant.
+The singleton instance of this class is created by Tripous script, if a proper markup is provided, by calling the tp.Page.CreatePage().
+In that case the class type of the page is controlled by the provided markup.
+If not page markup is provided then an explicit call to tp.Page.CreatePage() is required. <br />
+Example markup
+<pre>
+    <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }">
+        ...
+    </div>
+</pre>
+@implements {tp.IBroadcasterListener}
+*/
+tp.Page = class extends tp.tpElement {
+
+    /**
+    Constructor <br />  
+    Do NOT explicitly create an instance (call the constructor) of this class or any descendant.
+    The singleton instance of this class is created by Tripous script, if a proper markup is provided, by calling the tp.Page.CreatePage().
+    In that case the class type of the page is controlled by the provided markup.
+    If not page markup is provided then an explicit call to tp.Page.CreatePage() is required. <br />
+    Example markup
+    @example
+    <pre>
+        <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }">
+            ...
+        </div>
+    </pre>
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+
+    /* properties */
+    /**
+    Gets or sets the page mode, i.e. desktop-like or document-like.
+    NOTE: The page mode it can not be set when the viewport (screen) is x-small or small. In that case the page mode is always document-like.
+    @type {tp.PageMode}
+    */
+    get Mode() {
+        if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall)
+            return tp.PageMode.Document;
+
+        return this.fMode > 0 ? this.fMode : tp.PageMode.Document;
+    }
+    set Mode(v) {
+        if (!tp.Viewport.IsXSmall && !tp.Viewport.IsSmall && v !== this.fMode) {
+            this.fMode = v;
+            this.OnModeChanged();
+        }
+    }
+    /** 
+    Gets or sets the name  
+    @type {string}
+    */
+    get Name() {
+        return this.fName;
+    }
+    set Name(v) {
+        this.fName = v;
+    }
+
+
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.Page';
+        this.fDefaultCssClasses = 'tp-Page';
+        this.fDisplayType = 'block';
+    }
+    /**
+    Notification <br />
+    Initialization steps:
+    <ul>
+        <li>Handle creation</li>
+        <li>Field initialization</li>
+        <li>Option processing</li>
+        <li>Completed notification</li>
+    </ul>
+    @protected
+    @override
+    */
+    OnHandleCreated() {
+        super.OnHandleCreated();
+
+        if (!tp.IsEmpty(tp.Page.Instance))
+            tp.Throw('A page is already created.');
+
+        tp.Page.Instance = this;
+
+        this.IsScreenResizeListener = true;
+        this.IsElementResizeListener = true;
+
+        this.Handle.tabIndex = -1;
+
+        tp.Broadcaster.Add(this);
+        this.HookEvent(tp.Events.Click);
+    }
+    /**
+    Initializes fields and properties just before applying the create params.    
+    @protected
+    @override
+    */
+    InitializeFields() {
+        super.InitializeFields();
+        this.fName = tp.NextName('Page');
+    }
+    /**
+    Processes the this.CreateParams by applying its properties to the properties of this instance
+    @protected
+    @override
+    @param {object} [o] Optional. The create params object to processs.
+    */
+    ProcessCreateParams(o) {
+        o = o || {};
+
+        let InitialMode = tp.PageMode.Document;
+
+        for (var Prop in o) {
+            if (!tp.IsFunction(o[Prop])) {
+                if (Prop === 'Mode') {
+                    InitialMode = o[Prop];
+                    //Mode = o[Prop];
+                } else {
+                    this[Prop] = o[Prop];
+                }
+            }
+        }
+
+        this.fInitialMode = InitialMode;
+        let Mode = (tp.Viewport.IsXSmall || tp.Viewport.IsSmall) ? tp.PageMode.Document : InitialMode;
+        this.fMode = Mode;
+    }
+    /**
+    Notification sent by tp.Viewport when the screen (viewport) size changes. <br />
+    This method is called only if this.IsScreenResizeListener is true.
+    @protected
+    @override
+    @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
+    */
+    OnScreenSizeChanged(ScreenModeFlag) {
+        if (ScreenModeFlag === true) {
+            if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall) {
+                if (this.fMode !== tp.PageMode.Document) {
+                    this.fMode = tp.PageMode.Document;
+                    this.OnModeChanged();
+                }
+            } else if (this.Mode !== this.fInitialMode) {
+                this.fMode = this.fInitialMode;
+                this.OnModeChanged();
+            }
+        }
+
+    }
+    /**
+    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+    @protected
+    @override
+    */
+    Dispose() {
+        if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
+            tp.Broadcaster.Remove(this);
+            super.Dispose();
+        }
+    }
+    /**
+    Handles any DOM event
+    @protected
+    @override
+    @param {Event} e The {@link Event} object
+    */
+    OnAnyDOMEvent(e) {
+        var Type = tp.Events.ToTripous(e.type);
+
+        switch (Type) {
+            case tp.Events.Click:
+                this.OnAnyClick(e);
+                break;
+        }
+    }
+
+    /* overridables */
+    /**
+    Event trigger
+    @protected
+    @param {Event} e The {@link Event} object
+    */
+    OnAnyClick(e) {
+        let Args = new tp.EventArgs('Click', this, e);
+        Args.Command = tp.GetCommand(Args);
+        this.AnyClick(Args);
+        this.Trigger('Click', Args);
+    }
+    /**
+    Just for the inheritors. If a Command exists in the clicked element then the Args.Command is assigned.
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    AnyClick(Args) {
+    }
+    /** 
+    Called by tp.Broadcaster to notify a listener about an event.
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    @returns {any} Returns a value or null.
+    */
+    BroadcasterFunc(Args) {
+        return null;
+    }
+
+    /**
+    Called automatically when the page mode changes, because of a screen (viewport) size change.
+    @protected
+    */
+    OnModeChanged() {
+        switch (this.Mode) {
+            case tp.PageMode.Desktop:
+                this.Document.body.style.height = '100vh';
+                break;
+            case tp.PageMode.Document:
+                this.Document.body.style.height = null; // inherit
+                break;
+        }
+
+        this.Trigger('ModeChanged');
+    }
+    /**
+    Creates the controls (tp.tpElement descendants) of the page.
+    It first tries to create the views (tp.View descendants). If there is markup for views in the page, then it creates the views and then the views create their controls.
+    Otherwise, if no markup for views exist, it creates the controls based on the provided markup.
+    @protected
+    */
+    CreateControls() {
+        let List = tp.SelectAll('.tp-View');
+        let el;
+
+        if (List.length === 0) {                                    // no views, just controls
+            tp.CreateContainerControls(this.Handle);
+        } else {                                                    // there are views
+            for (let i = 0, ln = List.length; i < ln; i++) {
+                el = List[i];
+                if (tp.IsHTMLElement(el)) {
+                    tp.View.CreateView(el, null);
+                }
+            }
+        }
+    }
+    /**
+    Event Trigger. Called automatically by the Run() method, when any views or controls are created and the whole initialization is done. <br />    
+    @protected
+    */
+    OnUiReady() {
+        this.Trigger('UiReady', {});
+        tp.Broadcaster.Send('UiReady', this, {});
+    }
+
+    /* public */
+    /**
+    Returns a string representation of this instance.
+    @returns {string} Returns a string representation of this instance.
+    */
+    toString() {
+        return this.Name;
+    }
+    /**
+    Starts the application
+    */
+    Run() {
+        this.OnModeChanged();
+        this.CreateControls();
+        this.OnUiReady();
+    }
+
+    /**
+    Returns the views.  <br />
+    Returns an array with all {@link tp.View} objects existing on direct or nested child DOM elements, of the handle of this instance.
+    @returns {tp.View[]} Returns an array with all {@link tp.View} objects existing on direct or nested child DOM elements, of the handle of this instance.
+    */
+    GetViews() {
+        let Result = [];
+
+        let List = this.GetControls();
+        for (let i = 0, ln = List.length; i < ln; i++) {
+            if (List[i] instanceof tp.View)
+                Result.push(List[i]);
+        }
+
+        return Result;
+    }
+    /**
+    Returns the controls. <br />
+    Returns an array with all {@link tp.tpElement}  objects existing on direct or nested child DOM elements, of the handle of this instance.
+    @override
+    @returns {tp.tpElement[]} Returns an array with all {@link tp.tpElement} objects existing on direct or nested child DOM elements, of the handle of this instance.
+    */
+    GetControls() {
+        return super.GetControls();
+    }
+
+    /* static */
+    /**
+    Creates and returns a page. The class type of the page is controlled by the provided markup or the passed in CreateParams parameter.
+    Example markup
+    @example
+    <pre>
+        <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }">
+            ...
+        </div>
+    </pre>
+    @param {object} [CreateParams]  Optional.
+    @returns {tp.Page} Returns the newly created {@link tp.Page} page.
+    */
+    static CreatePage(CreateParams) {
+
+        // <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }"></div>
+
+        if (tp.IsEmpty(tp.Page.Instance)) {
+            let TypeName = 'Page';
+            let Type = tp.Page;
+            let CP = null;
+            let el = tp.Select('.tp-Page');
+
+            if (!el)
+                el = tp.Select('#Page');
+
+            if (el) {
+
+                if (!tp.IsEmpty(CreateParams)) {
+                    CP = CreateParams;
+                } else {
+                    CP = tp.Data(el, 'setup');
+                    if (!tp.IsBlank(CP))
+                        CP = eval("(" + CP + ")");
+                }
+
+                if (tp.IsEmpty(CP)) {
+                    CP = {
+                        Mode: tp.PageMode.Document
+                    };
+                }
+
+                if ('TypeName' in CP && !tp.IsBlank(CP['TypeName'])) {
+                    TypeName = CP['TypeName'];
+                }
+
+                if (TypeName in tp.PageTypes)
+                    Type = tp.PageTypes[TypeName];
+
+                let Page = new Type(el, CP);
+                Page.Run();
+            }
+
+        }
+
+        return tp.Page.Instance;
+    }
+};
+
+/**
+Treat it as a read-only. Returns the single instance of this class.
+@type {tp.Page}
+*/
+tp.Page.Instance;
+
+/** Field
+ * @protected
+ * @type {tp.PageMode}
+ */
+tp.Page.prototype.fMode = 0;
+/** Field
+ * @protected
+ * @type {tp.PageMode}
+ */
+tp.Page.prototype.fInitialMode = 0;
+/** Field
+ * @protected
+ * @type {string}
+ */
+tp.Page.prototype.fName;
+
+//#endregion
+
+
+
+tp.PageTypes = {
+    Page: tp.Page
+};
+
+
+
+
+
+
+
+
+
+
+/** Creates and returns an overlay div.
+ * @returns {HTMLElement} Returns the overlay div. */
+app.CreateOverlay = function () {
+    let Result = tp.Div(tp.Doc.body);
+    Result.id = tp.SafeId('Overlay');
+    tp.AddClass(Result, 'overlay');
+    tp.BringToFront(Result);
+    return Result;
+};
+
+/** Options class for the modal dialog */
+app.ModalDialogOptions = function () {
+
+    return {
+        /** The caption title of the dialog */
+        Text: '',
+        /** When true the dialog closes with Cancel() when the user clicks on the underlying overlay DIV */
+        CloseOnOverlayClick: true,
+        /** When true the dialog is a non-resizable one */
+        NonResizable: true,
+        /** The context (this) of the call-back functions */
+        Context: null,
+        /** Call-back function, called after the dialog is initialized */
+        OnInitialized: (Box) => { },
+        /** Call-back function, called just before the dialog closes */
+        OnClosing: (Box) => { },
+        /** Call-back function, called after the dialog is closed */
+        OnClosed: (Box) => { }
+    };
+
+};
+
+
+/** Used by app.ModalDialog class, see below. */
+app.InternalModalDialogClass = class {
+    constructor(elContent, Options) {
+
+        // options
+        let DefaultOptions = new app.ModalDialogOptions();
+
+        Options = Options || {};
+        this.Options = {};
+        for (var Prop in DefaultOptions) {
+            this.Options[Prop] = Prop in Options ? Options[Prop] : DefaultOptions[Prop];
+        }
+
+        // overlay
+        this.Overlay = app.CreateOverlay();
+        this.Overlay.style.justifyContent = 'center';
+        this.Overlay.style.alignItems = 'center';
+
+        // dialog
+        this.elDialog = tp('.dialog-box-template');
+        this.elDialog = this.elDialog.cloneNode(true);
+        this.elDialog.className = 'dialog-box';
+        this.Overlay.appendChild(this.elDialog);
+
+        // title
+        this.elTitle = tp.Select(this.elDialog, '.title');
+        this.btnClose = tp.Select(this.elDialog, '.close');
+
+        // content container  and content
+        this.elContentContainer = tp.Select(this.elDialog, '.content-container');
+        this.elContent = tp(elContent);
+        this.OldParent = this.elContent.parentNode;
+
+        // events
+        this.btnClose.addEventListener('click', this);      // close button        
+        tp.Doc.body.addEventListener('keyup', this);        // close on ESCAPE key        
+        if (this.Options.CloseOnOverlayClick === true)      // close on overlay click
+            this.Overlay.addEventListener('click', this);
+
+        // title and content        
+        this.elTitle.innerHTML = this.Options.Text;
+        this.elContentContainer.appendChild(this.elContent);
+
+        // location
+        tp.Viewport.CenterInWindow(this.elDialog);
+
+        // Dragger setup
+        let Mode = this.Options.NonResizable === true ? tp.DraggerMode.Drag : tp.DraggerMode.Both;
+        this.Dragger = new tp.Dragger(Mode, this.elDialog, this.elTitle);
+        this.Dragger.On(tp.Events.DragStart, (Args) => {
+            if (this.Dragger) {
+                let X = this.elDialog.offsetLeft - 5;
+                let Y = this.elDialog.offsetTop - 5;
+
+                requestAnimationFrame(() => {
+                    this.elDialog.style.top = tp.px(Y);
+                    this.elDialog.style.left = tp.px(X);
+                });
+            }
+        }, null);
+
+
+        // call on initialized
+        tp.Call(this.Options.OnInitialized, this.Options.Context, this);
+
+        // re-center
+        tp.Viewport.CenterInWindow(this.elDialog);
+
+    }
+
+    Options = {};
+
+    Overlay = null;
+    elDialog = null;
+    elTitle = null;
+    btnClose = null;
+    elContentContainer = null;
+    elContent = null;
+
+    OldParent = null;
+    Cancelled = false;
+    ResolveFunc = null;
+
+
+    handleEvent(e) {
+        switch (e.type) {
+            case 'click':
+                if (this.btnClose === e.target || tp.ContainsElement(this.btnClose, e.target)) {
+                    e.stopPropagation();
+                    this.Cancel();
+                }
+                else if (this.Overlay === e.target && !tp.ContainsEventTarget(this.elDialog, e.target)) {
+                    e.stopPropagation();
+                    this.Cancel();
+                }
+                break;
+            case 'keyup':
+                if (e.keyCode === tp.Keys.Escape && !tp.IsEmpty(this.Overlay)) {
+                    this.Cancel();
+                }
+                break;
+        }
+    }
+
+    Cancel() {
+        if (tp.IsValid(this.Overlay)) {
+            this.Cancelled = true;
+            this.Close();
+        }
+    }
+    Close(DialogResult = null) {
+        if (tp.IsValid(this.Overlay)) {
+
+            // remove handlers
+            this.btnClose.removeEventListener('click', this);
+
+            if (this.Options.CloseOnOverlayClick === true)
+                this.Overlay.removeEventListener('click', this);
+
+            tp.Doc.body.removeEventListener('keyup', this);
+
+            // handle the results
+            this.DialogResult = DialogResult;
+            tp.Call(this.Options.OnClosing, this.Options.Context, this);
+            if (this.OldParent)
+                this.OldParent.appendChild(this.elContent)
+            this.Overlay.parentNode.removeChild(this.Overlay);
+            this.Overlay = null;
+            tp.Call(this.Options.OnClosed, this.Options.Context, this);
+
+            // The promise resolves to either a this instance or a javascript object passed to the Close() method.
+            let Result = tp.IsValid(this.DialogResult) ? this.DialogResult : this;
+            tp.Call(this.ResolveFunc, null, Result);
+
+            // remove from boxes
+            tp.ListRemove(app.ModalDialog.Boxes, this);
+        }
+    }
+
+};
+
+/**
+ * Async function. Displays a modal dialog box. The dialog displays a specified content element. <br />
+ * CAUTION: The width and height of the passed-in content element determines the dimensions of the dialog box.
+ * @param {string|HTMLElement} elContent - A selector or a HTMLElement. The content element.
+ * @param {app.ModalDialogOptions} Options - Options object. See the app.ModalDialogOptions class.
+ * @returns {Promise} Returns a promise which resolves when the dialog closes for any reason. <br /> 
+ * That promise resolves to either an app.InternalModalDialogClass instance or a javascript object passed to the Close() method.
+ */
+app.ModalDialog = async function (elContent, Options) {
+
+    // create the dialog
+    let Box = new app.InternalModalDialogClass(elContent, Options); //new BoxClass(elContent, Options);
+    app.ModalDialog.Boxes.push(Box);
+
+    // return a promise
+    return new Promise((Resolve, Reject) => {
+        Box.ResolveFunc = Resolve;
+    });
+};
+
+/** Internal property. A stack where all opened dialogs are placed.  */
+app.ModalDialog.Boxes = [];
+/**
+ * Closes the (top) dialog with success
+ * @param {any} DialogResult The result to return on success.
+ */
+app.ModalDialog.Close = function (DialogResult = null) {
+    if (this.Boxes.length > 0) {
+        let Box = this.Boxes[this.Boxes.length - 1];
+        Box.Close(DialogResult);
+    }
+};
+/** 
+ *  Closes the (top) dialog with cancel. The dialog Cancelled property is set to true. 
+ */
+app.ModalDialog.Cancel = function () {
+    if (this.Boxes.length > 0) {
+        let Box = this.Boxes[this.Boxes.length - 1];
+        Box.Cancel();
+    }
+};

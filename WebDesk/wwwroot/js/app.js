@@ -5,382 +5,8 @@ app.Config.CurrencySymbol = '€';
 
 app.Resources = app.Resources || {}; 
 
-/**
- * Converts a string to float number. Returns a float number on success or a specified default value on failure. <br />
- * The decimal separator could be point or comma. <br />
- * @param {string} v The string to operate on.
- * @param {number} Default Optional. The default value to return on failure.
- * @returns {number} Returns a float number on success or a specified default value on failure.
- */
-app.StrToFloat = function (v, Default = 0) {
-    if (tp.IsString(v)) {
-        v = v.replace(',', '.');
-        let Convertion = tp.TryStrToFloat(v);
-        if (Convertion.Result === true) {
-            return Convertion.Value;
-        }
-        return Default;
-    };
-
-    return v;
-}
-
-/**
- * Waits for a specified number of milli-seconds and then calls a specified function, if passed.
- * @param {number} MSecsToWait Milli-seconds to wait
- * @param {Function} [FuncToCall=null] Function to call
- */
-app.WaitAsync = async function (MSecsToWait, FuncToCall = null) {
-    function f() { }
-    FuncToCall = FuncToCall || f;
-    return new Promise((Resolve, Reject) => {
-        setTimeout(() => {
-            try {
-                f();
-                Resolve();
-            } catch (e) {
-                Reject(e);
-            }
-        }, MSecsToWait);
-    })
-};
-
-/**
- * Should be called after a tp ajax call having errors. Displays the errors using notification boxes.
- * @param {tp.AjaxArgs} Args An instance of tp ajax arguments
- */
-app.DisplayAjaxErrors = function (Args) {
-    let i, ln, Packet;
-
-    if (Args.ResponseData.IsSuccess === false) {
-        if (tp.IsString(Args.ResponseData.ErrorText) && !tp.IsBlank(Args.ResponseData.ErrorText)) {
-            tp.ErrorNote(Args.ResponseData.ErrorText);
-        }
-        if (tp.IsString(Args.ResponseData.Packet) && !tp.IsBlank(Args.ResponseData.Packet)) {
-            tp.ErrorNote(Args.ResponseData.Packet);
-        }
-        else if (tp.IsArray(Args.ResponseData.Packet)) {
-            Packet = Args.ResponseData.Packet;
-            for (i = 0, ln = Packet.length; i < ln; i++) {
-                tp.ErrorNote(Packet[i]);
-            }
-        }
-    }
-};
-
-/**
- * Gets or sets an key-value information object to a DOM element. <br />
- * If the second parameter is not passed the it just gets and returns the information object.
- * @param {HTMLElement} el The DOM element to get from or set the info to.
- * @param {object} Info A key-value information object
- */
-app.DeskInfo = function (el, Info = null) {
-    if (tp.IsValid(Info)) {
-        el.__DeskInfo = Info;
-    }
-    else {
-        if ('__DeskInfo' in el)
-            Info = el.__DeskInfo;
-    }
-
-    return Info;
-};
-
- 
-
-/** Creates and returns an overlay div.
- * @returns {HTMLElement} Returns the overlay div. */
-app.CreateOverlay = function () {
-    let Result = tp.Div(tp.Doc.body);
-    Result.id = tp.SafeId('Overlay');
-    tp.AddClass(Result, 'overlay');
-    tp.BringToFront(Result);
-    return Result;
-};
-
-/**
- * Handles a drop-down operation by toggling the visibility and positioning of the drop-down list. <br />
- * The list element could be in absolute or fixed position.
- * @param {string|Element} Button Selector or Element. The element which displays the drop-down when is clicked
- * @param {string|Element} List Selector or Element. The drop-down list
- * @param {string} CssClass The css class to toggle to the drop-down list
- */
-app.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
-    Button = tp(Button);
-    List = tp(List);
- 
-    Button.addEventListener('click', (ev) => {
-        let Position = tp.GetComputedStyle(List).position;
-        let R = Button.getBoundingClientRect();
-        let P; // tp.Point
-
-        // toggle() returns true if adds the class
-        if (List.classList.toggle(CssClass)) {
-            if (tp.IsSameText('absolute', Position)) {
-                P = tp.ToParent(Button);
-                List.X = P.X;
-                List.Y = P.Y + R.height;
-            } else if (tp.IsSameText('fixed', Position)) {
-                P = tp.ToViewport(Button);
-                List.X = P.X;
-                List.Y = P.Y + R.height;
-            }
-        }
-    });
-
-    window.addEventListener('click', (ev) => {
-        if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
-            List.classList.remove(CssClass);
-        }
-    });
-
-    window.addEventListener('scroll', (ev) => {
-        if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
-            List.classList.remove(CssClass);
-        }
-    });
-};
-
-/**
- * Returns an HTMLElement based on a specified Selector or HtmlText. Throws an exception on failure. <br />
- * Used when he have to display a content div inside another div, such as in dialog boxes.
- * @param {HTMLElement|string} ElementOrSelectorOrHtmlText Could be an HTMLElement, a selector or just plain HTML text.
- * @returns {HTMLElement} Returns an HTMLElement based on a specified Selector or HtmlText
- */
-app.GetContentElement = function (ElementOrSelectorOrHtmlText) {
-    let Result = null;
-    if (tp.IsElement(ElementOrSelectorOrHtmlText)) {
-        Result = ElementOrSelectorOrHtmlText;
-    }
-
-    if (Result === null) {
-        if (tp.ContainsText(ElementOrSelectorOrHtmlText, '<div',  true)) {
-            // create a temp div
-            let div = tp.Div(tp.Doc.body);
-            div.innerHTML = ElementOrSelectorOrHtmlText.trim();
-            Result = div.firstChild;
-            div.parentNode.removeChild(div);
-        }
-        else {
-            Result = tp(ElementOrSelectorOrHtmlText);
-        }
-    }
-
-    if (Result === null) {
-        tp.Throw('Can not extract the Content element');
-    }
-
-    return Result;
-
-};
-
-/** Options class for the modal dialog */
-app.ModalDialogOptions = function () {
-
-    return {
-        /** The caption title of the dialog */
-        Text: '',
-        /** When true the dialog closes with Cancel() when the user clicks on the underlying overlay DIV */
-        CloseOnOverlayClick: true,
-        /** When true the dialog is a non-resizable one */
-        NonResizable: true,
-        /** The context (this) of the call-back functions */
-        Context: null,
-        /** Call-back function, called after the dialog is initialized */
-        OnInitialized: (Box) => { },
-        /** Call-back function, called just before the dialog closes */
-        OnClosing: (Box) => { },
-        /** Call-back function, called after the dialog is closed */
-        OnClosed: (Box) => { }
-    };
-
-};
 
 
-/** Used by app.ModalDialog class, see below. */
-app.InternalModalDialogClass = class {
-    constructor(elContent, Options) {
-
-        // options
-        let DefaultOptions = new app.ModalDialogOptions();
-
-        Options = Options || {};
-        this.Options = {};
-        for (var Prop in DefaultOptions) {
-            this.Options[Prop] = Prop in Options ? Options[Prop] : DefaultOptions[Prop];
-        }
-
-        // overlay
-        this.Overlay = app.CreateOverlay();
-        this.Overlay.style.justifyContent = 'center';
-        this.Overlay.style.alignItems = 'center';
-
-        // dialog
-        this.elDialog = tp('.dialog-box-template');
-        this.elDialog = this.elDialog.cloneNode(true);
-        this.elDialog.className = 'dialog-box';
-        this.Overlay.appendChild(this.elDialog);
-
-        // title
-        this.elTitle = tp.Select(this.elDialog, '.title');
-        this.btnClose = tp.Select(this.elDialog, '.close');
-
-        // content container  and content
-        this.elContentContainer = tp.Select(this.elDialog, '.content-container');
-        this.elContent = tp(elContent);
-        this.OldParent = this.elContent.parentNode;
-
-        // events
-        this.btnClose.addEventListener('click', this);      // close button        
-        tp.Doc.body.addEventListener('keyup', this);        // close on ESCAPE key        
-        if (this.Options.CloseOnOverlayClick === true)      // close on overlay click
-            this.Overlay.addEventListener('click', this);
-
-        // title and content        
-        this.elTitle.innerHTML = this.Options.Text;
-        this.elContentContainer.appendChild(this.elContent);
-
-        // location
-        tp.Viewport.CenterInWindow(this.elDialog);
-
-        // Dragger setup
-        let Mode = this.Options.NonResizable === true ? tp.DraggerMode.Drag : tp.DraggerMode.Both;
-        this.Dragger = new tp.Dragger(Mode, this.elDialog, this.elTitle);
-        this.Dragger.On(tp.Events.DragStart, (Args) => {
-            if (this.Dragger) {
-                let X = this.elDialog.offsetLeft - 5;
-                let Y = this.elDialog.offsetTop - 5;
-
-                requestAnimationFrame(() => {
-                    this.elDialog.style.top = tp.px(Y);
-                    this.elDialog.style.left = tp.px(X);
-                });
-            }
-        }, null);
-
-
-        // call on initialized
-        tp.Call(this.Options.OnInitialized, this.Options.Context, this);
-
-        // re-center
-        tp.Viewport.CenterInWindow(this.elDialog);
-
-    }
-
-    Options = {};
-
-    Overlay = null;
-    elDialog = null;
-    elTitle = null;
-    btnClose = null;
-    elContentContainer = null;
-    elContent = null;
-
-    OldParent = null;
-    Cancelled = false;
-    ResolveFunc = null;
-
-
-    handleEvent(e) {
-        switch (e.type) {
-            case 'click':
-                if (this.btnClose === e.target || tp.ContainsElement(this.btnClose, e.target)) {
-                    e.stopPropagation();
-                    this.Cancel();
-                }
-                else if (this.Overlay === e.target && !tp.ContainsEventTarget(this.elDialog, e.target)) {
-                    e.stopPropagation();
-                    this.Cancel();
-                }
-                break;
-            case 'keyup':
-                if (e.keyCode === tp.Keys.Escape && !tp.IsEmpty(this.Overlay)) {
-                    this.Cancel();
-                }
-                break;
-        }
-    }
-
-    Cancel() {
-        if (tp.IsValid(this.Overlay)) {
-            this.Cancelled = true;
-            this.Close();
-        }
-    }
-    Close(DialogResult = null) {
-        if (tp.IsValid(this.Overlay)) {
-
-            // remove handlers
-            this.btnClose.removeEventListener('click', this);
-
-            if (this.Options.CloseOnOverlayClick === true)
-                this.Overlay.removeEventListener('click', this);
-
-            tp.Doc.body.removeEventListener('keyup', this);
-
-            // handle the results
-            this.DialogResult = DialogResult;
-            tp.Call(this.Options.OnClosing, this.Options.Context, this);
-            if (this.OldParent)
-                this.OldParent.appendChild(this.elContent)
-            this.Overlay.parentNode.removeChild(this.Overlay);
-            this.Overlay = null;
-            tp.Call(this.Options.OnClosed, this.Options.Context, this);
-
-            // The promise resolves to either a this instance or a javascript object passed to the Close() method.
-            let Result = tp.IsValid(this.DialogResult) ? this.DialogResult : this;
-            tp.Call(this.ResolveFunc, null, Result);
-
-            // remove from boxes
-            tp.ListRemove(app.ModalDialog.Boxes, this);
-        }
-    }
-
-};
-
-/**
- * Async function. Displays a modal dialog box. The dialog displays a specified content element. <br />
- * CAUTION: The width and height of the passed-in content element determines the dimensions of the dialog box.
- * @param {string|HTMLElement} elContent - A selector or a HTMLElement. The content element.
- * @param {app.ModalDialogOptions} Options - Options object. See the app.ModalDialogOptions class.
- * @returns {Promise} Returns a promise which resolves when the dialog closes for any reason. <br /> 
- * That promise resolves to either an app.InternalModalDialogClass instance or a javascript object passed to the Close() method.
- */
-app.ModalDialog = async function (elContent, Options) {
-
-    // create the dialog
-    let Box = new app.InternalModalDialogClass(elContent, Options); //new BoxClass(elContent, Options);
-    app.ModalDialog.Boxes.push(Box);
-
-    // return a promise
-    return new Promise((Resolve, Reject) => {
-        Box.ResolveFunc = Resolve;
-    });
-};
-
-/** Internal property. A stack where all opened dialogs are placed.  */
-app.ModalDialog.Boxes = [];
-/**
- * Closes the (top) dialog with success
- * @param {any} DialogResult The result to return on success.
- */
-app.ModalDialog.Close = function (DialogResult = null) {
-    if (this.Boxes.length > 0) {
-        let Box = this.Boxes[this.Boxes.length - 1];
-        Box.Close(DialogResult);
-    }
-};
-/** 
- *  Closes the (top) dialog with cancel. The dialog Cancelled property is set to true. 
- */
-app.ModalDialog.Cancel = function () {
-    if (this.Boxes.length > 0) {
-        let Box = this.Boxes[this.Boxes.length - 1];
-        Box.Cancel();
-    }
-};
-
- 
  
 /** Handles controls and operations of the header */
 app.Header = class {
@@ -393,7 +19,7 @@ app.Header = class {
         this.Options = Options;
 
         // handles the language selection drop-down
-        app.DropDownHandler('#btnLanguage', '#cboLanguage', 'tp-Visible');
+        tp.DropDownHandler('#btnLanguage', '#cboLanguage', 'tp-Visible');
 
 
 
@@ -439,7 +65,7 @@ app.Footer = {
 
  
 
-
+// TODO: with InterectionObserver
 
 /** Handles a bar of items, like a menu bar or a tab bar, and the left or right scrolling of bar items. <br />
  * The bar provides a to-left and a to-right button in order to scroll the items. <br />
@@ -588,6 +214,56 @@ app.TabBarHandler = class {
         }
     }
 
+};
+
+/** A command executor class. <br />
+ *  A command executor must provide two functions: CanExecuteCommand(Cmd) and async ExecuteCommand(Cmd).
+ * */
+app.MainMenuCommandExecutor = class extends tp.DesktopCommandExecutor {
+    constructor() {
+        super();
+
+        this.ValidCommands = [
+            'Ui.SysData.Tables',
+            'Ui.Traders'
+        ];
+    } 
+ 
+    /**
+     * Executes a specified command. The CanExecuteCommand() is called just before this call.
+     * @param {tp.Command} Cmd The command to execute.
+     * @returns {Promise} Returns whatever the specified command dictates to return. For a Ui command returns the Packet from the server.
+     */
+    async ExecuteCommand(Cmd) {
+        let Result = null;
+
+        if (Cmd.IsUiCommand()) {
+            if ((Cmd.IsSingleInstance && !app.Desk.Instance.TabExists(Cmd.Name)) || !Cmd.IsSingleInstance) {
+                let Params = {
+                    Type: Cmd.Type,
+                    IsSingleInstance: Cmd.IsSingleInstance
+                };
+                Params = tp.MergeQuick(Params, Cmd.Params);
+                let Request = new tp.DesktopAjaxRequest(Cmd.Name, Params);
+                let Packet = await tp.Desk.AjaxExecute(Request);
+                if (tp.IsValid(Packet))
+                    Result = await tp.Desk.CreateViewElement(Packet);
+            }
+        }
+        else {
+            tp.Throw('Command not found');
+        }
+
+        return Result;
+    }
+};
+
+
+
+/** Tripous notification function. <br />
+ * NOTE: It is executed before any ready listeners. */
+tp.AppInitializeBefore = function () {
+    new app.Desk();
 };
 
 

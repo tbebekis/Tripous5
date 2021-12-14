@@ -1,5 +1,6 @@
-﻿/** A command class. This is here mostly for reference only. */
-app.Command = class {
+﻿
+/** A command class. This is here mostly for reference only. */
+tp.Command = class {
 
     /** constructor */
     constructor(Source) {
@@ -24,7 +25,7 @@ app.Command = class {
 };
 
 /** Represents an ajax request */
-app.AjaxRequest = class {
+tp.DesktopAjaxRequest = class {
 
     /**
      * Constructor
@@ -45,26 +46,52 @@ app.AjaxRequest = class {
     Params = {};
 };
 
-/** A single instance class. It handles the desk. */
-app.Desk = class {
+
+/**
+ * Gets or sets a key-value information object to a DOM element. <br />
+ * If the second parameter is not passed then it just gets and returns the information object.
+ * @param {HTMLElement} el The DOM element to get from or set the info to.
+ * @param {object} Info A key-value information object
+ */
+tp.DeskInfo = function (el, Info = null) {
+    if (tp.IsValid(Info)) {
+        el.__DeskInfo = Info;
+    }
+    else {
+        if ('__DeskInfo' in el)
+            Info = el.__DeskInfo;
+    }
+
+    return Info;
+
+};
+
+
+/**
+ * @type {tp.Desktop}
+ * */
+tp.Desk = null;
+
+
+tp.Desktop = class {
     constructor() {
-        if (app.Desk.Instance)
+        if (tp.Desk)
             tp.Throw('Desk is already created');
 
-        app.Desk.Instance = this;
+        tp.Desk = this;
 
         this.elMainMenu = tp('.main-menu');
         this.elContainer = tp('.pager-container.main-pager-container');
 
-        this.elTabBarContainer = tp.Select(this.elContainer, '.tab-container');
-        new app.TabBarHandler(this.elTabBarContainer);
+        //this.elTabBarContainer = tp.Select(this.elContainer, '.tab-container');
+        //new app.TabBarHandler(this.elTabBarContainer);
 
-        this.elTabBar = tp.Select(this.elContainer, '.tab-bar'); 
+        this.elTabBar = tp.Select(this.elContainer, '.tab-bar');
         this.elViewList = tp.Select(this.elContainer, '.view-list');
- 
+
         this.CommandExecutors = [];
 
-        this.CommandExecutors.push(new app.MainMenuCommandExecutor()); 
+        //this.CommandExecutors.push(new app.MainMenuCommandExecutor());
 
         if (this.elMainMenu)
             this.elMainMenu.addEventListener('click', this);
@@ -75,10 +102,7 @@ app.Desk = class {
         tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
     }
 
-    /** The single instance of this class
-     * @type {app.Desk}
-     */
-    static Instance = null;
+ 
     /** The main menu container. Not contained by the elContainer of this instance.
      * @type {HTMLDivElement}
      */
@@ -96,23 +120,23 @@ app.Desk = class {
     /** The tab-bar. Contains the tabs (captions) of the pages (views)
      * @type {HTMLDivElement}
      */
-    elTabBar = null;           
+    elTabBar = null;
     /** Contains the pages (views)
      * @type {HTMLDivElement}
      */
-    elViewList = null;          
+    elViewList = null;
     /** A list of registered command executors.
      * @type {array}
      */
     CommandExecutors = [];
- 
+
 
     /**
     Notification sent by tp.Viewport when the screen (viewport) size changes. 
     This method is called only if this.IsScreenResizeListener is true.
     @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
     */
-    OnScreenSizeChanged(ScreenModeFlag) { 
+    OnScreenSizeChanged(ScreenModeFlag) {
     }
     /**
      * Event handler. Handles all events
@@ -130,7 +154,7 @@ app.Desk = class {
                     }
                 }
                 else if (tp.HasClass(e.target, 'main-menu-command')) {
-                    Cmd = new app.Command(tp.GetDataSetupObject(e.target));
+                    Cmd = new tp.Command(tp.GetDataSetupObject(e.target));
                     await this.ExecuteCommand(Cmd);
                 }
                 break;
@@ -146,7 +170,7 @@ app.Desk = class {
     }
     /**
      * Calls all registered command executors until it finds one that can execute the command. Then it passes the command to that executor.
-     * @param {app.Command} Cmd
+     * @param {tp.Command} Cmd
      */
     async ExecuteCommand(Cmd) {
         let i, ln, Executor;
@@ -168,7 +192,7 @@ app.Desk = class {
     FindTab(ViewName) {
         let TabList = this.GetTabList();
         let Tab = TabList.find(elTab => {
-            let Info = app.DeskInfo(elTab);
+            let Info = tp.DeskInfo(elTab);
             return tp.IsValid(Info) ? ViewName === Info.Name : false;
         });
         return Tab;
@@ -201,7 +225,7 @@ app.Desk = class {
 
     /**
      * Executes an ajax request to the server and returns the Packet as it comes from server.
-     * @param {app.AjaxRequest} Request The request object.
+     * @param {tp.DesktopAjaxRequest} Request The request object.
      * @returns {object} Returns the Packet from the server.
      */
     async AjaxExecute(Request) {
@@ -211,10 +235,10 @@ app.Desk = class {
         let Args = await tp.Ajax.PostModelAsync(Url, Request);
         if (Args.ResponseData.IsSuccess === true) {
             let Packet = Args.ResponseData.Packet;
-            Result = Packet; 
+            Result = Packet;
         }
         else {
-            app.DisplayAjaxErrors(Args);           
+            tp.DisplayAjaxErrors(Args);
         }
 
         return Result;
@@ -229,17 +253,17 @@ app.Desk = class {
            <div class="tp-Text">${Packet.ViewName}</div>
        </div>
 `;
-      
-        let elView = app.GetContentElement(Packet.HtmlText.trim());
-        let elTab = app.GetContentElement(TabHtmlText.trim());
+
+        let elView = tp.ContentWindow.GetContentElement(Packet.HtmlText.trim());
+        let elTab = tp.ContentWindow.GetContentElement(TabHtmlText.trim());
 
         let DeskInfo = {};
         DeskInfo.Name = Packet.ViewName;
         DeskInfo.elTab = elTab;
         DeskInfo.elPage = elView;
 
-        app.DeskInfo(elTab, DeskInfo);
-        app.DeskInfo(elView, DeskInfo);
+        tp.DeskInfo(elTab, DeskInfo);
+        tp.DeskInfo(elView, DeskInfo);
 
         this.elViewList.appendChild(elView);
         this.elTabBar.appendChild(elTab);
@@ -273,7 +297,7 @@ app.Desk = class {
         if (tp.IsArray(DataSetup.JS)) {
             await tp.StaticFiles.LoadJavascriptFiles(DataSetup.JS);
         }
- 
+
         if (tp.IsString(DataSetup['ClassType'])) {
             DataSetup.ClassType = eval(DataSetup.ClassType);
         }
@@ -296,7 +320,7 @@ app.Desk = class {
         let TabList = this.GetTabList();
         let PageList = this.GetViewList();
 
-        let Info = app.DeskInfo(elTab);
+        let Info = tp.DeskInfo(elTab);
         let elPage = Info.elPage;
 
         for (i = 0, ln = TabList.length; i < ln; i++) {
@@ -309,66 +333,47 @@ app.Desk = class {
     }
 };
 
-/** A command executor class. <br />
+
+
+
+/** Base command executor class. <br />
  *  A command executor must provide two functions: CanExecuteCommand(Cmd) and async ExecuteCommand(Cmd).
  * */
-app.MainMenuCommandExecutor = class {
+tp.DesktopCommandExecutor = class {
+
+    /** Constructor */
     constructor() {
     }
 
-    /** A list of command names this executor can handle.
-     * @type {string[]}
-     */
-    ValidCommands = [
-        'Ui.SysData.Tables',
-        'Ui.Traders'
-    ];
-
     /**
      * Returns true if this executor can handle the specified command.
-     * @param {app.Command} Cmd The command to check.
+     * @param {tp.Command} Cmd The command to check.
      * @returns {boolean} Returns true if this executor can handle the specified command.
      */
     CanExecuteCommand(Cmd) {
-        return this.ValidCommands.find(item => { return tp.IsSameText(item, Cmd.Name); });  
+        return this.ValidCommands.find(item => { return tp.IsSameText(item, Cmd.Name); });
     }
     /**
      * Executes a specified command. The CanExecuteCommand() is called just before this call.
-     * @param {app.Command} Cmd The command to execute.
+     * @param {tp.Command} Cmd The command to execute.
      * @returns {Promise} Returns whatever the specified command dictates to return. For a Ui command returns the Packet from the server.
      */
     async ExecuteCommand(Cmd) {
-        let Result = null;
-
-        if (Cmd.IsUiCommand()) {
-            if ((Cmd.IsSingleInstance && !app.Desk.Instance.TabExists(Cmd.Name)) || !Cmd.IsSingleInstance) {
-                let Params = {
-                    Type: Cmd.Type,
-                    IsSingleInstance: Cmd.IsSingleInstance
-                };
-                Params = tp.MergeQuick(Params, Cmd.Params);
-                let Request = new app.AjaxRequest(Cmd.Name, Params);
-                let Packet = await app.Desk.Instance.AjaxExecute(Request);
-                if (tp.IsValid(Packet))
-                    Result = await app.Desk.Instance.CreateViewElement(Packet);
-            }                
-        }
-        else {
-            tp.Throw('Command not found'); 
-        }
-
-        return Result;
+        return null;
     }
 };
+tp.DesktopCommandExecutor.ValidCommands = [];
+
+ 
 
 
 /** Represents a desk view. Used as base view class. */
-app.DeskView = class extends tp.View {
+tp.DeskView = class extends tp.View {
 
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
- 
+
     /**
     Notification 
     Initialization steps:
@@ -395,7 +400,7 @@ app.DeskView = class extends tp.View {
             if (tp.IsElement(this.CreateParams.elTab)) {
                 tp.Remove(this.CreateParams.elTab);
                 this.CreateParams.elTab = null;
-            } 
+            }
 
             if (tp.IsArray(this.CreateParams.CSS)) {
                 tp.StaticFiles.UnLoadCssFiles(this.CreateParams.CSS);
@@ -412,7 +417,7 @@ app.DeskView = class extends tp.View {
 
     /**
      * Executes a command that returns a Packet from server for creating a modal dialog.
-     * @param {app.Command} Cmd The command to execute.
+     * @param {tp.Command} Cmd The command to execute.
      * @returns {object} Returns the Packet from the server.
      */
     async AjaxExecuteDialog(Cmd) {
@@ -421,15 +426,15 @@ app.DeskView = class extends tp.View {
             ViewName: Cmd.Name
         };
         Params = tp.MergeQuick(Params, Cmd.Params);
-        let Request = new app.AjaxRequest("GetHtmlView", Params);
-        let Packet = await app.Desk.Instance.AjaxExecute(Request);
+        let Request = new tp.DesktopAjaxRequest("GetHtmlView", Params);
+        let Packet = await tp.Desk.AjaxExecute(Request);
 
         return Packet;
     }
 
 };
 
-app.DeskDataView = class extends tp.DataView {
+tp.DeskDataView = class extends tp.DataView {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
@@ -464,7 +469,7 @@ app.DeskDataView = class extends tp.DataView {
             if (tp.IsElement(this.CreateParams.elTab)) {
                 tp.Remove(this.CreateParams.elTab);
                 this.CreateParams.elTab = null;
-            } 
+            }
 
             if (tp.IsArray(this.CreateParams.CSS)) {
                 tp.StaticFiles.UnLoadCssFiles(this.CreateParams.CSS);
@@ -481,11 +486,133 @@ app.DeskDataView = class extends tp.DataView {
 
 };
 
-/** Tripous notification function. <br />
- * NOTE: It is executed before any ready listeners. */
-tp.AppInitializeBefore = function () {
-    new app.Desk();
+
+
+
+
+
+
+/** Represents a view. Displays a list of items of a certain DataType. */
+tp.SysDataViewList = class extends tp.DeskView {
+    /**
+     * Constructs the page
+     * @param {HTMLElement} elPage The page element.
+     * @param {object} [Params=null] Optional. A javascript object with initialization parameters.
+     */
+    constructor(elPage, CreateParams = null) {
+        super(elPage, CreateParams);
+    }
+
+    /**
+     * @type {tp.ToolBar}
+     */
+    ToolBar = null;
+    /**
+     * @type {tp.Grid}
+     */
+    Grid = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    Table = null;
+
+    /** Creates page controls */
+    CreateControls() {
+        super.CreateControls();
+        let el = tp.Select(this.Handle, '.tp-ToolBar');
+        this.ToolBar = new tp.ToolBar(el);
+
+        this.ToolBar.On('ButtonClick', this.AnyToolBarButtonClick, this);
+
+        this.Table = new tp.DataTable();
+        this.Table.Assign(this.CreateParams.Packet.Table);
+
+        el = tp.Select(this.Handle, '.tp-Grid');
+
+        let CP = {
+            DataSource: this.Table,
+            ReadOnly: true,
+            ToolBarVisible: false,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            Columns: [
+                { Name: 'DataName' },
+                { Name: 'TitleKey' },
+                { Name: 'Owner' }
+            ]
+        };
+
+        this.Grid = new tp.Grid(el, CP);
+    }
+
+    async ShowModal(IsInsert) {
+
+        // get the packet
+        let DataType = this.Setup.DataType;
+        let Cmd = new tp.Command();
+        Cmd.Name = IsInsert === true ? `Ui.SysData.Insert.${DataType}` : `Ui.SysData.Edit.${DataType}`;
+        if (IsInsert !== true) {
+            let Row = this.Grid.DataSource.Current;
+            Cmd.Params.Id = Row.GetByName('Id');
+        }
+
+        let Packet = await this.AjaxExecuteDialog(Cmd);
+
+        // create the page element
+        let elPage = tp.ContentWindow.GetContentElement(Packet.HtmlText.trim());
+
+        let DeskInfo = {};
+        DeskInfo.Name = Packet.ViewName;
+        DeskInfo.elPage = elPage;
+        tp.DeskInfo(elPage, DeskInfo);
+
+        // create the page instance
+        let CreateParams = {
+            Name: Packet.ViewName,
+            Packet: Packet,
+        };
+
+        let Page = await tp.Desk.CreateViewObject(elPage, CreateParams);
+
+        // display the dialog
+        let WindowArgs = await tp.ContentWindow.ShowModalAsync(Packet.ViewName, elPage);
+
+        let DialogResult = WindowArgs.Window.DialogResult;
+        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+        tp.InfoNote('DialogResult = ' + S);
+
+        return DialogResult;
+    }
+    async AnyToolBarButtonClick(Args) {
+        let Command = Args.Command;
+        switch (Command) {
+            case 'Close':
+                this.Close();
+                break;
+            case 'Insert':
+                await this.ShowModal(true);
+                break;
+            default:
+                tp.InfoNote('Command: ' + Command);
+                break;
+        }
+    }
 };
+
+/** Represents a page. Edit/Insert view of the Table DataType. */
+tp.SysDataViewEditTable = class extends tp.DeskView {
+    /**
+     * Constructs the page
+     * @param {HTMLElement} elPage The page element.
+     * @param {object} [Params=null] Optional. A javascript object with initialization parameters.
+     */
+    constructor(elPage, CreateParams = null) {
+        super(elPage, CreateParams);
+    }
+};
+
+
 
 
 

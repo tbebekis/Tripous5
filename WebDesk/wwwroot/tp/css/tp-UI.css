@@ -175,7 +175,102 @@ tab control
     cursor: pointer;
 }
 
+/*---------------------------------------------------------------------------------------
+item bar
+---------------------------------------------------------------------------------------*/
+.tp-ItemBar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 2.3em;
+    gap: 2px;
+    user-select: none;
+}
 
+.tp-ItemBar > .tp-Toggle {
+    position: relative;
+    display: flex;
+    user-select: none;
+    height: 100%;
+    width: 100%;
+    background-color: var(--BackColor); 
+    border: var(--Border);
+}
+
+.tp-ItemBar > .tp-Toggle > .tp-Btn {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; 
+    cursor: pointer;
+    width: 2.3em;
+    border-right: var(--Border);
+}
+
+.tp-ItemBar > .tp-Toggle > .tp-Text {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    align-items: center;
+    flex-grow: 1;
+    padding: 0 6px;    
+}
+
+.tp-ItemBar > .tp-Prev,
+.tp-ItemBar > .tp-Next {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--BackColor); 
+    border: var(--Border);
+    user-select: none;
+    height: 100%;
+    width: 1.8em;
+    min-width: 1.8em;
+    font-size: 18px;
+}
+
+.tp-ItemBar > .tp-ItemList  {
+    position: relative;
+    display: flex;
+    align-items: center; 
+    flex-grow:1;
+    height: 100%;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.tp-ItemBar > .tp-ItemList > * {
+    position: relative;
+    display: flex;
+     
+    align-items: center; 
+    background-color: var(--BackColor); 
+    border: var(--Border);
+    height: 100%;
+    white-space: nowrap;
+}
+
+.tp-ToggleItemList {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0 4px;
+    gap: 4px;
+    user-select: none;
+}
+
+.tp-ToggleItemList > * {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 1.8em;
+    padding: 0 8px 0 3px;
+    cursor: pointer;
+}
 /*---------------------------------------------------------------------------------------
  image
 ---------------------------------------------------------------------------------------*/

@@ -39,6 +39,7 @@ tp.Classes = {
 
     /* general          ----------------------------------------------------------------- */
     Item: 'tp-Item',
+    ItemList: 'tp-ItemList',
     Text: 'tp-Text',
     Ctrl: 'tp-Ctrl',
     CText: 'tp-CText',         // label text of a control
@@ -59,6 +60,7 @@ tp.Classes = {
     Bar: 'tp-Bar',
     Zone: 'tp-Zone',
     Toggle: 'tp-Toggle',
+    ToggleItemList: 'tp-ToggleItemList',
  
     Handle: 'tp-Handle',
 
@@ -250,8 +252,9 @@ tp.Classes = {
     DropDownBox: 'tp-DropDownBox',
     DropDownBoxItem: 'tp-DropDownBoxItem',
 
+    ItemBar: 'tp-ItemBar',
     Button: 'tp-Button',
-    ButtonEx: 'tp-ButtonEx',
+    ButtonEx: 'tp-ButtonEx',    
     ToolBar: 'tp-ToolBar',
     ToolButton: 'tp-ToolButton',
     ButtonStrip: 'tp-ButtonStrip',
@@ -18791,418 +18794,11 @@ tp.SqlFilterControlLink = class {
 // page and view
 //---------------------------------------------------------------------------------------
 
-
-//#region tp.PageMode
-
-/**
-Indicates the page mode (document or desktop)
-@class
-@enum {number}
-*/
-tp.PageMode = {
-    /** Document-like */
-    Document: 1,
-    /** Desktop-like */
-    Desktop: 2
-};
-Object.freeze(tp.PageMode);
-
-//#endregion
- 
-
-//#region tp.Page
-/**
-The main tripous container on a page. There must be only one instance of this class (singleton) <br />
-Do NOT explicitly create an instance (call the constructor) of this class or any descendant.
-The singleton instance of this class is created by Tripous script, if a proper markup is provided, by calling the tp.Page.CreatePage().
-In that case the class type of the page is controlled by the provided markup.
-If not page markup is provided then an explicit call to tp.Page.CreatePage() is required. <br />
-Example markup
-<pre>
-    <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }">
-        ...
-    </div>
-</pre>
-@implements {tp.IBroadcasterListener}
-*/
-tp.Page = class extends tp.tpElement {
-
-    /**
-    Constructor <br />  
-    Do NOT explicitly create an instance (call the constructor) of this class or any descendant.
-    The singleton instance of this class is created by Tripous script, if a proper markup is provided, by calling the tp.Page.CreatePage().
-    In that case the class type of the page is controlled by the provided markup.
-    If not page markup is provided then an explicit call to tp.Page.CreatePage() is required. <br />
-    Example markup
-    @example
-    <pre>
-        <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }">
-            ...
-        </div>
-    </pre>
-    @param {string|HTMLElement} [ElementOrSelector] - Optional.
-    @param {Object} [CreateParams] - Optional.
-    */
-    constructor(ElementOrSelector, CreateParams) {
-        super(ElementOrSelector, CreateParams);
-    }
-        
-
-    /* properties */
-    /**
-    Gets or sets the page mode, i.e. desktop-like or document-like.
-    NOTE: The page mode it can not be set when the viewport (screen) is x-small or small. In that case the page mode is always document-like.
-    @type {tp.PageMode}
-    */
-    get Mode() {
-        if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall)
-            return tp.PageMode.Document;
-
-        return this.fMode > 0 ? this.fMode : tp.PageMode.Document;
-    }
-    set Mode(v) {
-        if (!tp.Viewport.IsXSmall && !tp.Viewport.IsSmall && v !== this.fMode) {
-            this.fMode = v;
-            this.OnModeChanged();
-        }
-    }
-    /** 
-    Gets or sets the name  
-    @type {string}
-    */
-    get Name() {
-        return this.fName;
-    }
-    set Name(v) {
-        this.fName = v;
-    }
-
-
-    /* overrides */
-    /**
-    Initializes the 'static' and 'read-only' class fields
-    @protected
-    @override
-    */
-    InitClass() {
-        super.InitClass();
-
-        this.tpClass = 'tp.Page';
-        this.fDefaultCssClasses = 'tp-Page';
-        this.fDisplayType = 'block';
-    }
-    /**
-    Notification <br />
-    Initialization steps:
-    <ul>
-        <li>Handle creation</li>
-        <li>Field initialization</li>
-        <li>Option processing</li>
-        <li>Completed notification</li>
-    </ul>
-    @protected
-    @override
-    */
-    OnHandleCreated() {
-        super.OnHandleCreated();
-
-        if (!tp.IsEmpty(tp.Page.Instance))
-            tp.Throw('A page is already created.');
-
-        tp.Page.Instance = this;
-
-        this.IsScreenResizeListener = true;
-        this.IsElementResizeListener = true;
-
-        this.Handle.tabIndex = -1;
-
-        tp.Broadcaster.Add(this);
-        this.HookEvent(tp.Events.Click);
-    }
-    /**
-    Initializes fields and properties just before applying the create params.    
-    @protected
-    @override
-    */
-    InitializeFields() {
-        super.InitializeFields();
-        this.fName = tp.NextName('Page');
-    }
-    /**
-    Processes the this.CreateParams by applying its properties to the properties of this instance
-    @protected
-    @override
-    @param {object} [o] Optional. The create params object to processs.
-    */
-    ProcessCreateParams(o) {
-        o = o || {};
-
-        let InitialMode = tp.PageMode.Document;
-
-        for (var Prop in o) {
-            if (!tp.IsFunction(o[Prop])) {
-                if (Prop === 'Mode') {
-                    InitialMode = o[Prop];
-                    //Mode = o[Prop];
-                } else {
-                    this[Prop] = o[Prop];
-                }
-            }
-        }
-
-        this.fInitialMode = InitialMode;
-        let Mode = (tp.Viewport.IsXSmall || tp.Viewport.IsSmall) ? tp.PageMode.Document : InitialMode;
-        this.fMode = Mode;
-    }
-    /**
-    Notification sent by tp.Viewport when the screen (viewport) size changes. <br />
-    This method is called only if this.IsScreenResizeListener is true.
-    @protected
-    @override
-    @param {boolean} ScreenModeFlag - Is true when the screen mode (XSmall, Small, Medium, Large) is changed as well.
-    */
-    OnScreenSizeChanged(ScreenModeFlag) {
-        if (ScreenModeFlag === true) {
-            if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall) {
-                if (this.fMode !== tp.PageMode.Document) {
-                    this.fMode = tp.PageMode.Document;
-                    this.OnModeChanged();
-                }
-            } else if (this.Mode !== this.fInitialMode) {
-                this.fMode = this.fInitialMode;
-                this.OnModeChanged();
-            }
-        }
-
-    }
-    /**
-    Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
-    @protected
-    @override
-    */
-    Dispose() {
-        if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
-            tp.Broadcaster.Remove(this);
-            super.Dispose();
-        }
-    }
-    /**
-    Handles any DOM event
-    @protected
-    @override
-    @param {Event} e The {@link Event} object
-    */
-    OnAnyDOMEvent(e) {
-        var Type = tp.Events.ToTripous(e.type);
-
-        switch (Type) {
-            case tp.Events.Click:
-                this.OnAnyClick(e);
-                break;
-        }
-    }
-
-    /* overridables */
-    /**
-    Event trigger
-    @protected
-    @param {Event} e The {@link Event} object
-    */
-    OnAnyClick(e) {
-        let Args = new tp.EventArgs('Click', this, e);
-        Args.Command = tp.GetCommand(Args);
-        this.AnyClick(Args);
-        this.Trigger('Click', Args);
-    }
-    /**
-    Just for the inheritors. If a Command exists in the clicked element then the Args.Command is assigned.
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    AnyClick(Args) {
-    }
-    /** 
-    Called by tp.Broadcaster to notify a listener about an event.
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    @returns {any} Returns a value or null.
-    */
-    BroadcasterFunc(Args) {
-        return null;
-    }
-
-    /**
-    Called automatically when the page mode changes, because of a screen (viewport) size change.
-    @protected
-    */
-    OnModeChanged() {
-        switch (this.Mode) {
-            case tp.PageMode.Desktop:
-                this.Document.body.style.height = '100vh';
-                break;
-            case tp.PageMode.Document:
-                this.Document.body.style.height = null; // inherit
-                break;
-        }
-
-        this.Trigger('ModeChanged');
-    }
-    /**
-    Creates the controls (tp.tpElement descendants) of the page.
-    It first tries to create the views (tp.View descendants). If there is markup for views in the page, then it creates the views and then the views create their controls.
-    Otherwise, if no markup for views exist, it creates the controls based on the provided markup.
-    @protected
-    */
-    CreateControls() {
-        let List = tp.SelectAll('.tp-View');
-        let el; 
-
-        if (List.length === 0) {                                    // no views, just controls
-            tp.CreateContainerControls(this.Handle);
-        } else {                                                    // there are views
-            for (let i = 0, ln = List.length; i < ln; i++) {
-                el = List[i];
-                if (tp.IsHTMLElement(el)) {
-                    tp.View.CreateView(el, null);
-                }
-            }
-        }
-    }
-    /**
-    Event Trigger. Called automatically by the Run() method, when any views or controls are created and the whole initialization is done. <br />    
-    @protected
-    */
-    OnUiReady() {
-        this.Trigger('UiReady', {});
-        tp.Broadcaster.Send('UiReady', this, {});
-    }
-
-    /* public */
-    /**
-    Returns a string representation of this instance.
-    @returns {string} Returns a string representation of this instance.
-    */
-    toString() {
-        return this.Name;
-    }
-    /**
-    Starts the application
-    */
-    Run() {
-        this.OnModeChanged();
-        this.CreateControls();
-        this.OnUiReady();
-    }
-
-    /**
-    Returns the views.  <br />
-    Returns an array with all {@link tp.View} objects existing on direct or nested child DOM elements, of the handle of this instance.
-    @returns {tp.View[]} Returns an array with all {@link tp.View} objects existing on direct or nested child DOM elements, of the handle of this instance.
-    */
-    GetViews() {
-        let Result = [];
-
-        let List = this.GetControls();
-        for (let i = 0, ln = List.length; i < ln; i++) {
-            if (List[i] instanceof tp.View)
-                Result.push(List[i]);
-        }
-
-        return Result;
-    }
-    /**
-    Returns the controls. <br />
-    Returns an array with all {@link tp.tpElement}  objects existing on direct or nested child DOM elements, of the handle of this instance.
-    @override
-    @returns {tp.tpElement[]} Returns an array with all {@link tp.tpElement} objects existing on direct or nested child DOM elements, of the handle of this instance.
-    */
-    GetControls()  {
-        return super.GetControls();
-    }
-
-    /* static */
-    /**
-    Creates and returns a page. The class type of the page is controlled by the provided markup or the passed in CreateParams parameter.
-    Example markup
-    @example
-    <pre>
-        <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }">
-            ...
-        </div>
-    </pre>
-    @param {object} [CreateParams]  Optional.
-    @returns {tp.Page} Returns the newly created {@link tp.Page} page.
-    */
-    static CreatePage(CreateParams) {
-
-        // <div class="tp-Page" data-setup="{ TypeName: 'Page', Mode: tp.PageMode.Document, .... }"></div>
-
-        if (tp.IsEmpty(tp.Page.Instance)) {
-            let TypeName = 'Page';
-            let Type = tp.Page;
-            let CP = null;
-            let el = tp.Select('.tp-Page');
-
-            if (!el)
-                el = tp.Select('#Page');
-
-            if (el) {
-
-                if (!tp.IsEmpty(CreateParams)) {
-                    CP = CreateParams;
-                } else {
-                    CP = tp.Data(el, 'setup');
-                    if (!tp.IsBlank(CP))
-                        CP = eval("(" + CP + ")");
-                }
-
-                if (tp.IsEmpty(CP)) {
-                    CP = {
-                        Mode: tp.PageMode.Document
-                    };
-                }
-
-                if ('TypeName' in CP && !tp.IsBlank(CP['TypeName'])) {
-                    TypeName = CP['TypeName'];
-                }
-
-                if (TypeName in tp.PageTypes)
-                    Type = tp.PageTypes[TypeName];
-
-                let Page = new Type(el, CP);
-                Page.Run();
-            }
-
-        }
-
-        return tp.Page.Instance;
-    }
-};
-
-/**
-Treat it as a read-only. Returns the single instance of this class.
-@type {tp.Page}
-*/
-tp.Page.Instance;
-
-/** Field
- * @protected
- * @type {tp.PageMode}
- */
-tp.Page.prototype.fMode  = 0;
-/** Field
- * @protected
- * @type {tp.PageMode}
- */
-tp.Page.prototype.fInitialMode = 0;
-/** Field
- * @protected
- * @type {string}
- */
-tp.Page.prototype.fName;
-
-//#endregion
-
 //#region tp.View
+
+
+
+
 /**
 A view represents a control container that automatically can create its controls from the provided markup. <br />
 Example markup
@@ -19230,7 +18826,7 @@ tp.View = class extends tp.tpElement {
         super(ElementOrSelector, CreateParams);
     }
 
- 
+
 
     /* properties */
     /** 
@@ -19295,7 +18891,7 @@ tp.View = class extends tp.tpElement {
     Creates the controls of the view based on the provided markup.
     @protected
     */
-    CreateControls() {        
+    CreateControls() {
     }
     /**
     Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
@@ -19424,9 +19020,9 @@ tp.View = class extends tp.tpElement {
                 }
                 else {
                     return new Type(el, CP);
-                }                
+                }
             }
-                
+
         }
 
         return null;
@@ -19434,16 +19030,13 @@ tp.View = class extends tp.tpElement {
 };
 
 
-
-//#endregion
- 
-tp.PageTypes = {
-    Page: tp.Page
-};
-
 tp.ViewTypes = {
     View: tp.View
 };
+
+
+
+//#endregion
 
 //---------------------------------------------------------------------------------------
 // data dialog-boxes
@@ -20421,6 +20014,7 @@ tp.SqlFilterDialog.prototype.Table = null;
 
 
 //#endregion
+
 
 //---------------------------------------------------------------------------------------
 // data dialog-box functions

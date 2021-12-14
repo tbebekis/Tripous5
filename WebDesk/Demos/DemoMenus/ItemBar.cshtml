@@ -1,0 +1,58 @@
+﻿@{
+    ViewBag.Title = "ItemBar";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p></p>
+</div>
+
+<br />
+
+<div>
+ 
+</div>
+<br />
+
+<div class="html-code">
+    <div>
+        <label for="cboMode">Responsive Mode: </label>
+        <select id="cboMode" onchange="SelectedModeChanged()">
+            <option value="2" >Toggle</option>
+            <option value="4" selected>Prev-Next</option>
+        </select>
+    </div>
+    <br />
+    <div id="ib1">
+        <div>Item 1</div>
+        <div>Item 2</div>
+        <div>Item 3</div>
+        <div>Item 4</div>
+        <div>Item 5</div>
+        <div>Item 6</div>
+        <div>Item 7</div>
+        <div>Item 8</div>
+    </div>
+</div>
+
+
+
+<script class="js-code">
+ 
+    let ctrl;
+    tp.Ready(function () {
+        ctrl = new tp.ItemBar(ib1);
+        ctrl.BackColor = tp.Colors.Cornsilk;
+    });
+
+    function SelectedModeChanged() {
+        let Mode = cboMode.value;
+        Mode = tp.StrToInt(Mode);
+        ctrl.ResponsiveMode = Mode;
+    }
+
+</script>
+
+ 

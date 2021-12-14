@@ -13,13 +13,15 @@
 
 <br />
 
-<div>
-    <button onclick="ToggleNoText()">Toggle NoText</button> <br /> <br />
-    <button onclick="ToggleIcoMode()">Toggle IcoMode</button> <br />
-</div>
-<br />
+
 
 <div class="html-code">
+    <div>
+        <button onclick="ToggleNoText()">Toggle NoText</button> <br /> <br />
+        <button onclick="ToggleIcoMode()">Toggle IcoMode</button> <br />
+    </div>
+    <br />
+
     <div id="tb1" class="ToolBar">
         <a class="ButtonEx" data-setup="{ Command: 'Home', Text: 'Home', ToolTip: 'Home' , IcoClasses: 'fa fa-home',  NoText: true, Ico: 'Left'}"></a>
 
@@ -65,7 +67,6 @@
 
 
 <script class="js-code">
-
     tp.Ready(function () {
 
         function ItemClick(Args) {

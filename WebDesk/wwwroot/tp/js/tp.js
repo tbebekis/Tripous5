@@ -193,7 +193,7 @@ tp.NotificationBoxSetup = {
 
     ToTop: false,
     DurationSecs: 10,
-    Height: 110,
+    Height: 100,
     Width: 350
 };
 
@@ -350,7 +350,28 @@ Displays an information message to the user.
 */
 tp.SuccessNote = function (Message) { tp.Notify(Message, tp.NotificationType.Success); };
 
+/**
+ * Should be called after a tp ajax call having errors. Displays the errors using notification boxes.
+ * @param {tp.AjaxArgs} Args An instance of tp ajax arguments
+ */
+tp.DisplayAjaxErrors = function (Args) {
+    let i, ln, Packet;
 
+    if (Args.ResponseData.IsSuccess === false) {
+        if (tp.IsString(Args.ResponseData.ErrorText) && !tp.IsBlankString(Args.ResponseData.ErrorText)) {
+            tp.ErrorNote(Args.ResponseData.ErrorText);
+        }
+        if (tp.IsString(Args.ResponseData.Packet) && !tp.IsBlankString(Args.ResponseData.Packet)) {
+            tp.ErrorNote(Args.ResponseData.Packet);
+        }
+        else if (tp.IsArray(Args.ResponseData.Packet)) {
+            Packet = Args.ResponseData.Packet;
+            for (i = 0, ln = Packet.length; i < ln; i++) {
+                tp.ErrorNote(Packet[i]);
+            }
+        }
+    }
+};
 
 //#endregion
 
@@ -1757,37 +1778,110 @@ tp.SetLength = function SetLength(v, NewLength) {
     }
     return v;
 };
+
+
+/** Used as the return value by number convertion functions 
+ */
+tp.NumberConvertionResult = class {
+
+    /**
+     * Constructor
+     * @param {number} Value The value after the convertion
+     * @param {boolean} Result Result of the convertion 
+     */
+    constructor(Value = 0, Result = false) {
+        this.Value = Value || 0;
+        this.Result = Result === true;
+    }
+
+    /** The value after the convertion
+     @type {number}
+     */
+    Value = 0;
+    /** Result of the convertion
+     @type {boolean}
+     */
+    Result = false;
+
+};
+
 /**
-Converts a string to an integer and returns that integer.
+Tries to convert a string into an integer.   <br />
+Returns a {@link tp.NumberConvertionResult} object as <code>{Value: v, Result: true}</code> where Value is the convertion result, if successful, and Result indicates success or failure.
+@param  {string} v - The string to operate on.
+@returns {tp.NumberConvertionResult} Returns an {@link tp.NumberConvertionResult} object as <code> {Value: v, Result: true}</code>
+ */
+tp.TryStrToInt = function (v) {
+    let NCR = new tp.NumberConvertionResult();
+
+    if (tp.IsNumber(v)) {
+        v = tp.Truncate(v);
+        NCR.Value = v;
+        NCR.Result = true;
+    }
+    else if (!tp.IsBlankString(v)) {
+        try {
+            v = parseInt(v, 10);
+            NCR.Value = v;
+            NCR.Result = isNaN(v) ? false : true;
+        } catch (e) {
+            //
+        }
+    }
+
+    return NCR;
+};
+/**
+Tries to convert a string into a float.  <br />
+NOTE: The decimal separator could be point or comma. <br />
+Returns a {@link tp.NumberConvertionResult} object as <code>{Value: v, Result: true}</code>  where Value is the convertion result, if successful, and Result indicates success or failure.
+@param  {string} v - The string to operate on.
+@returns {tp.NumberConvertionResult} Returns a {@link tp.NumberConvertionResult} object as <code> {Value: v, Result: true}</code>
+ */
+tp.TryStrToFloat = function (v) {
+
+    let NCR = new tp.NumberConvertionResult();
+
+    if (tp.IsNumber(v)) {
+        NCR.Value = v;
+        NCR.Result = true;
+    }
+    else if (!tp.IsBlankString(v)) {
+        try {
+            v = v.replace(',', '.');
+            v = parseFloat(v, 10);
+            NCR.Value = v;
+            NCR.Result = isNaN(v) ? false : true;
+        } catch (e) {
+            //
+        }
+    }
+
+    return NCR;
+ 
+}; 
+
+/**
+Converts a string (or a number) to an integer and returns that integer. <br />
+Uses the "try" version to perform the convertion.
 @param  {string} v - The string to operate on.
 @param {number} [Default=0] - The default value to return if the convertion is not possible. Defaults to 0.
 @returns {number} Returns the number.
  */
 tp.StrToInt = function (v, Default = 0) {
-    if (tp.IsBlank(v) || isNaN(v))
-        return tp.IsEmpty(Default) ? 0 : Default;
-
-    var n = parseInt(v, 10);
-
-    if (isNaN(n) || !isFinite(n)) {
-        return tp.IsEmpty(Default) ? 0 : Default;
-    }
-    return n;
+    let NCR = tp.TryStrToInt(v);
+    return NCR.Result === true ? NCR.Value : Default;
 };
 /**
-Converts a string to a float and returns that float.
+Converts a string (or a number) to a float and returns that float. <br />
+Uses the "try" version to perform the convertion.
 @param  {string} v - The string to operate on.
 @param {number} [Default=0] - The default value to return if the convertion is not possible. Defaults to 0.
 @returns {number} Returns the number.
  */
 tp.StrToFloat = function (v, Default = 0) {
-    if (tp.IsBlank(v))
-        return tp.IsEmpty(Default) ? 0 : Default;
-    var n = parseFloat(v);
-    if (isNaN(n) || !isFinite(n)) {
-        return tp.IsEmpty(Default) ? 0 : Default;
-    }
-    return n;
+    let NCR = tp.TryStrToFloat(v);
+    return NCR.Result === true ? NCR.Value : Default;
 };
 /**
 Converts a string to a boolean and returns that boolean.  
@@ -1807,56 +1901,6 @@ tp.StrToBool = function (v, Default = false) {
 
     return Default;
 };
-
-/** Used as the return value by number convertion functions 
- */
-tp.NumberConvertionResult = class {
-
-    /**
-     * Constructor
-     * @param {number} Value The value after the convertion
-     * @param {boolean} Result Result of the convertion 
-     */
-    constructor(Value, Result) {
-        this.Value = Value;
-        this.Result = Result;
-    }
-
-};
-/** The value after the convertion
- @type {number}
- */
-tp.NumberConvertionResult.prototype.Value;
-/** Result of the convertion
- @type {boolean}
- */
-tp.NumberConvertionResult.prototype.Result;
-
-/**
-Tries to convert a string into an integer.   <br />
-Returns a {@link tp.NumberConvertionResult} object as <code>{Value: v, Result: true}</code> where Value is the convertion result, if successful, and Result indicates success or failure.
-@param  {string} v - The string to operate on.
-@returns {tp.NumberConvertionResult} Returns an {@link tp.NumberConvertionResult} object as <code> {Value: v, Result: true}</code>
- */
-tp.TryStrToInt = function (v) {
-    var n = parseInt(v, 10);
-    return new tp.NumberConvertionResult(n, isNaN(n) ? false : true);
-};
-/**
-Tries to convert a string into a float.  <br />
-NOTE: The decimal separator could be point or comma. <br />
-Returns a {@link tp.NumberConvertionResult} object as <code>{Value: v, Result: true}</code>  where Value is the convertion result, if successful, and Result indicates success or failure.
-@param  {string} v - The string to operate on.
-@returns {tp.NumberConvertionResult} Returns a {@link tp.NumberConvertionResult} object as <code> {Value: v, Result: true}</code>
- */
-tp.TryStrToFloat = function (v) {
-    if (tp.IsString(v)) {
-        v = v.replace(',', '.');
-    };
-
-    var n = parseFloat(v);
-    return new tp.NumberConvertionResult(n, isNaN(n) || !isFinite(n) ? false : true);
-}; 
 
 
 /**
@@ -2010,6 +2054,14 @@ tp.FromBase64 = function (v) {
 
 //#region Numbers
 
+/** polyfill for Math.trunc */
+if (!Math.trunc) {
+    Math.trunc = function (v) {
+        return v | 0;
+    };
+}
+
+
 /**
 * Rounds a float number (or a string representation of a float number) to specified decimal places (defaults to 2).
 * @param   {number|string} v The float number or the string representation of a float number.
@@ -2031,7 +2083,7 @@ Truncates a float number to an integer
 @returns {number} Returns an integer.
 */
 tp.Truncate = function (v) {
-    return v | 0;
+    return Math.trunc(v);  //return v | 0;
 };
 /** Returns a random integer inside a specified range
 @param {number} Min The minimum number in the desirable range
@@ -7581,6 +7633,67 @@ tp.RandomColor = function () {
     S += tp.ToHex(tp.Random(0, 0xFF));
     S += tp.ToHex(tp.Random(0, 0xFF));
     return S;
+};
+/**
+ * Waits for a specified number of milli-seconds and then calls a specified function, if passed.
+ * @param {number} MSecsToWait Milli-seconds to wait
+ * @param {Function} [FuncToCall=null] Function to call
+ */
+tp.WaitAsync = async function (MSecsToWait, FuncToCall = null) {
+    FuncToCall = tp.IsFunction(FuncToCall) ? FuncToCall : () => { };
+    return new Promise((Resolve, Reject) => {
+        setTimeout(() => {
+            try {
+                FuncToCall();
+                Resolve();
+            } catch (e) {
+                Reject(e);
+            }
+        }, MSecsToWait);
+    })
+};
+
+/**
+ * Handles a drop-down operation by toggling the visibility and positioning of a specified element that plays the role of a drop-down list. <br />
+ * The list element could be in absolute or fixed position.
+ * @param {string|Element} Button Selector or Element. The element which displays the drop-down when is clicked
+ * @param {string|Element} List Selector or Element. The drop-down list
+ * @param {string} CssClass The css class to toggle to the drop-down list
+ */
+tp.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
+    Button = tp(Button);
+    List = tp(List);
+
+    Button.addEventListener('click', (ev) => {
+        let Position = tp.GetComputedStyle(List).position;
+        let R = Button.getBoundingClientRect();
+        let P; // tp.Point
+
+        // toggle() returns true if adds the class
+        if (List.classList.toggle(CssClass)) {
+            if (tp.IsSameText('absolute', Position)) {
+                P = tp.ToParent(Button);
+                List.X = P.X;
+                List.Y = P.Y + R.height;
+            } else if (tp.IsSameText('fixed', Position)) {
+                P = tp.ToViewport(Button);
+                List.X = P.X;
+                List.Y = P.Y + R.height;
+            }
+        }
+    });
+
+    window.addEventListener('click', (ev) => {
+        if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
+            List.classList.remove(CssClass);
+        }
+    });
+
+    window.addEventListener('scroll', (ev) => {
+        if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
+            List.classList.remove(CssClass);
+        }
+    });
 };
 //#endregion
 
@@ -15026,6 +15139,40 @@ tp.ContentWindow = class extends tp.tpWindow {
         }
     }
 };
+
+/**
+ * Returns an HTMLElement based on a specified Selector or HtmlText. Throws an exception on failure. <br />
+ * Used when he have to display a content div inside another div, such as in dialog boxes.
+ * @param {HTMLElement|string} ElementOrSelectorOrHtmlText Could be an HTMLElement, a selector or just plain HTML text.
+ * @returns {HTMLElement} Returns an HTMLElement based on a specified Selector or HtmlText
+ */
+tp.ContentWindow.GetContentElement = function (ElementOrSelectorOrHtmlText) {
+    let Result = null;
+    if (tp.IsElement(ElementOrSelectorOrHtmlText)) {
+        Result = ElementOrSelectorOrHtmlText;
+    }
+
+    if (Result === null && !tp.IsBlankString(ElementOrSelectorOrHtmlText)) {
+        if (tp.IsHtml(ElementOrSelectorOrHtmlText)) {
+            // create a temp div
+            let div = tp.Div(tp.Doc.body);
+            div.innerHTML = ElementOrSelectorOrHtmlText.trim();
+            Result = div.firstChild;
+            div.parentNode.removeChild(div);
+        }
+        else {
+            Result = tp(ElementOrSelectorOrHtmlText);
+        }
+    }
+
+    if (Result === null) {
+        tp.Throw('Can not extract the Content element');
+    }
+
+    return Result;
+
+};
+
 /* static */
 /**
 Displays a content window, either as modal or as non-modal.
@@ -15380,6 +15527,7 @@ tp.FrameBoxAsync = function (Text, UrlOrHtmlContent) {
 // tp.StaticFiles
 //---------------------------------------------------------------------------------------
 
+//#region  Ftp.StaticFiles
 /** Used in loading/unloading js and css files to head element dynamically. */
 tp.StaticFiles = { 
 };
@@ -15573,6 +15721,7 @@ tp.StaticFiles.UnLoadCssFiles = function (UrlList) {
         }
     }
 };
+//#endregion
 
 //---------------------------------------------------------------------------------------
 // NotificationBox
@@ -15640,7 +15789,6 @@ NotificationBox = class extends tp.tpElement {
 
 
         // further initialize the box
-
         let CssStyle = {
             'position': 'fixed',
             'display': 'flex',
@@ -15685,7 +15833,6 @@ user-select: none;
         CssText = `
 padding: 2px 0;
 cursor: default;
-font-family: monospace;
 font-size: 12px;
 padding: 0 2px;
 user-select: none;
@@ -15894,7 +16041,12 @@ tp.NotifyFunc = (Message, Type) => {
  * WARNING: .Net line break = \r\n */
 tp.LB = '\n';
 tp.SPACE = ' ';
+/** The "no-name" string constant
+ * @type {string} */
 tp.NO_NAME = 'no-name';
+
+/** The "[none]" string constant
+ * @type {string} */
 tp.NONE = "[none]";
 
 tp.NULL = "___null___";
@@ -15966,6 +16118,7 @@ The system configuration global object
 @class
 */
 tp.SysConfig = {};
+tp.SysConfig.DebugMode = false;
 tp.SysConfig.CompanyFieldName = 'CompanyId';
 tp.SysConfig.VariablesPrefix = ':@';
 tp.SysConfig.LocatorShowDropDownRowCountLimit = 200;
@@ -16781,7 +16934,8 @@ tp.AddLanguagesFunc = null;
 
     let ReadyFunc = function () {
 
-        InitializeLogDiv();
+        if (tp.SysConfig.DebugMode === true)
+            InitializeLogDiv();
 
         InitializeLanguages();
         InitializeCulture();
@@ -16792,11 +16946,7 @@ tp.AddLanguagesFunc = null;
 
         if (tp.IsFunction(tp.AppInitializeBefore))
             tp.Call(tp.AppInitializeBefore);
-
-        if (tp.Page) {
-            tp.Page.CreatePage();
-        }
-
+ 
         // call "ready listeners"
         var list = tp.ReadyListeners;
         var listener;
@@ -16810,8 +16960,7 @@ tp.AddLanguagesFunc = null;
 
         // call Main()
         if (tp.IsFunction(tp.Main))  
-            tp.Call(tp.Main);
- 
+            tp.Call(tp.Main); 
 
     };
 

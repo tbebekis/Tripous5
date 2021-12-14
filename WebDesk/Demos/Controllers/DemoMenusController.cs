@@ -33,6 +33,11 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+        [Route("/demo/ItemBar")]
+        public IActionResult ItemBar()
+        {
+            return View();
+        }
 
         [Route("/demo/Menu")]
         public IActionResult Menu()
