@@ -1207,19 +1207,6 @@ tp.PanelList.prototype.fSelectedIndexListener = null; //: tp.Listener;
 
 //#region tp.TabControl
 
-/** Indicates how is rendered the tab-bar of a tab control
- @class
- @enum {number}
- */
-tp.TabRenderMode = {
-    /** none  */
-    None: 0,
-    /** Normal, tabs are rendered in the tab-bar */
-    Normal: 1,
-    /** Displays a toogle button and tabs are rendered in a drop-down */
-    Toggle: 2,
-};
-Object.freeze(tp.TabRenderMode);
 
 /**
 Represents a tab page, that is a child to a TabControl
@@ -1249,8 +1236,13 @@ tp.TabPage = class extends tp.tpElement {
     */
     Dispose() {
         if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
-            if (tp.IsHTMLElement(this.Tab) && tp.IsHTMLElement(this.Tab.parentNode)) {
-                this.Tab.parentNode.removeChild(this.Tab);
+            try {
+                if (tp.IsHTMLElement(this.Tab) && tp.IsHTMLElement(this.Tab.parentNode)) {
+                    this.Tab.parentNode.removeChild(this.Tab);
+                }
+
+            } catch (e) {
+                //
             }
 
             super.Dispose();
@@ -1264,11 +1256,11 @@ The tab is the caption text container
 tp.TabPage.prototype.Tab = null;
 
 
-
 /**
 TabControl <br />
-This control uses an IntersectionObserver to detect whether tabs exceed tab-bar width, when rendering in Normal mode. <br >
-This control uses a ResizeObserver (actually a {@link tp.ResizeDetector}) to detect whether tabs fit in tab-bar width, when rendering in Toggle mode.
+This control uses a ResizeObserver (actually a {@link tp.ResizeDetector}) to detect whether tabs fit in tab-bar width. <br />
+Provides three rendering modes: Normal, Toggle and NextPrev. The rendering mode changes automatically from Normal to the others and back. <br />
+The user defines just the <code>ResponsiveMode</code> and then the mode goes from Normal to that <code>ResponsiveMode</code> depending on the width.
 Example markup <br />
 <pre>
     <div id="TabControl" class="tp-TabControl" data-setup="{ SelectedIndex: 0 }">
@@ -1306,80 +1298,34 @@ tp.TabControl = class extends tp.tpElement {
 
     /* properties */
     /**
-     Gets or sets the render mode. One of the {@link tp.TabRenderMode} constants
+     Gets or sets the render mode. One of the {@link tp.ItemBarRenderMode} constants
      @type {number}
      @private
      */
     get RenderMode() {
-        return this.fRenderMode;
+        return this.TabBar.RenderMode;
     }
-    set RenderMode(v) {
-        if (tp.IsNumber(v) && (v !== this.fRenderMode) && (this.ChangingMode === false)) {
-            this.ChangingMode = true;
-            try {
-                this.fRenderMode = v;
-
-                // hide the toggle dropdown if visible
-                if (this.fToggleDropDownBox && this.fToggleDropDownBox.IsOpen)
-                    this.fToggleDropDownBox.Close();
-
-                switch (this.RenderMode) {
-                    case tp.TabRenderMode.Toggle:
-                        this.ToggleContainer.style.display = '';
-                        this.IsElementResizeListener = true;
-
-                        this.StopIntersectionObserver();
-                        this.TabContainer.style.display = 'none';
-
-                        let Index = this.SelectedIndex;
-                        if (Index !== -1) {
-                            this.fToggleZoneTitle.innerHTML = this.GetTitleAt(Index);
-                        }
-
-                        break;
-
-                    case tp.TabRenderMode.Normal:
-                        this.TabContainer.style.display = '';
-                        this.StartIntersectionObserver();
-
-                        this.IsElementResizeListener = false;
-                        this.ToggleContainer.style.display = 'none';
-                        break;
-                }
-
-
-
-                this.OnRenderModeChanged();
-
-
-
-            } finally {
-                this.ChangingMode = false
-            }
-        }
+    /** The rendering mode to go to when total item width exceeds this instance width.
+      One of the {@link tp.ItemBarRenderMode} constants.
+      @type {number}
+     */
+    get ResponsiveMode() {
+        return this.TabBar.ResponsiveMode;
     }
+    set ResponsiveMode(v) {
+        this.TabBar.ResponsiveMode = v;
+    }
+
 
     /**
     Gets or sets the selected page index
     @type {number}
     */
     get SelectedIndex() {
-        let TabElementList = this.GetTabElementList();
-        for (let i = 0, ln = TabElementList.length; i < ln; i++) {
-            if (tp.HasClass(TabElementList[i], tp.Classes.Selected)) {
-                return i;
-            }
-        }
-
-        return -1;
+        return this.TabBar.SelectedIndex;
     }
     set SelectedIndex(v) {
-        let CurrentIndex = this.SelectedIndex;
-        if (v !== CurrentIndex) {
-            this.OnSelectedIndexChanging(CurrentIndex, v);
-            this.SetSelectedIndex(v);
-            this.OnSelectedIndexChanged(v);
-        }
+        this.TabBar.SelectedIndex = v;
     }
     /**
     Gets or sets the selected {@link tp.TabPage} page.
@@ -1387,11 +1333,13 @@ tp.TabControl = class extends tp.tpElement {
     */
     get SelectedPage() {
         let Result = null;
-        var Index = this.SelectedIndex;
-        if (Index >= 0) {
-            let PageElementList = this.GetPageElementList();
-            let elPage = PageElementList[Index];
-            let Result = tp.GetObject(elPage);
+        let elPage = null;
+        let Index = this.SelectedIndex;
+
+        let PageElementList = this.GetPageElementList();
+        if (Index >= 0 && Index <= PageElementList.length - 1) {
+            elPage = PageElementList[Index];
+            Result = tp.GetObject(elPage);
         }
         return Result;
     }
@@ -1399,8 +1347,7 @@ tp.TabControl = class extends tp.tpElement {
         if (v instanceof tp.TabPage) {
             let PageElementList = this.GetPageElementList();
             let Index = PageElementList.indexOf(v.Handle);
-            if (Index >= 0)
-                this.SetSelectedIndex(Index);
+            this.SelectedIndex = Index;
         }
     }
 
@@ -1414,17 +1361,12 @@ tp.TabControl = class extends tp.tpElement {
     SetSelectedIndex(Index) {
 
         var elTab = null;     // HTMLElement;
-        var i, ln;
+        var i, ln, Index;
 
-        // un-select tab buttons
+        this.TabBar.SetSelectedIndex(Index);
+
         let TabElementList = this.GetTabElementList();
-
-        for (i = 0, ln = TabElementList.length; i < ln; i++) {
-            if (Index === i) {
-                elTab = TabElementList[i];
-            }
-            tp.RemoveClass(TabElementList[i], tp.Classes.Selected);
-        }
+        elTab = TabElementList[Index];
 
         // un-select tab pages
         let PageElementList = this.GetPageElementList();
@@ -1435,16 +1377,12 @@ tp.TabControl = class extends tp.tpElement {
 
         // selected
         if (elTab && elTab.TabPage) {
-            tp.AddClass(elTab, tp.Classes.Selected);
-
             let elPage = elTab.TabPage.Handle;
             elPage.style.display = '';
-
-            if (this.ToggleContainer)
-                this.fToggleZoneTitle.innerHTML = elTab.innerHTML;
         }
 
     }
+
     /**
      * Creates and returns a new page. <br />
      * NOTE: It does NOT add the page to the control.
@@ -1471,83 +1409,32 @@ tp.TabControl = class extends tp.tpElement {
 
         return Result;
     }
-    /**
-    Shows or hides the "toggle tab list", a drop-down list of tab titles which is used in responsive screen dimensions.
-    @private
-    */
-    ToggleClicked() {
 
-        if (!this.fToggleDropDownBox) {
-            let el = this.Document.createElement('div');
-            this.fToggleDropDownBox = new tp.DropDownBox(el, {
-                Associate: this.fToggleButton,
-                Owner: this,
-                Height: 'auto',
-                Width: 'auto'
-            });
-
-            this.fToggleTabList = this.fToggleDropDownBox.AddChild('div');
-            tp.AddClass(this.fToggleTabList, 'tp-TabToggleDropDownList');
-            this.fToggleTabList.addEventListener('click', (e) => {
-                this.OnAnyDOMEvent(e);
-            });
-
-        }
-
-        this.fToggleDropDownBox.Toggle();
-
-    }
-    /**
-    Called by the dropdown box to inform its owner about a stage change.
-    @private
-    @param {tp.DropDownBox} Sender The sender
-    @param {tp.DropDownBoxStage} Stage One of the {@link tp.DropDownBoxStage} constants.
-    */
-    OnDropDownBoxEvent(Sender, Stage) {
-        let i, ln, List, ToggleTabItem;
-
-        switch (Stage) {
-
-            case tp.DropDownBoxStage.Opening:
-                this.fToggleTabList.innerHTML = '';
-                break;
-
-            case tp.DropDownBoxStage.Opened:
-                List = this.GetTabElementList();
-                for (i = 0, ln = List.length; i < ln; i++) {
-                    ToggleTabItem = this.Document.createElement('div');
-                    this.fToggleTabList.appendChild(ToggleTabItem);
-                    ToggleTabItem.innerHTML = this.GetTitleAt(i);
-                }
-                break;
-
-            case tp.DropDownBoxStage.Closing:
-                break;
-
-            case tp.DropDownBoxStage.Closed:
-                break;
-        }
-    }
     /** Creates child controls of this instance. Called in construction sequence.
      * @private
      * */
     CreateControls() {
         let List = this.GetChildren();
+        let elTabBar;
 
         if (List.length === 2) {
-            this.TabContainer = List[0];
+            elTabBar = List[0];
             this.PageContainer = List[1];
         }
         else if (List.length === 0) {
-            this.TabContainer = this.AddChild('div');
+            elTabBar = this.AddChild('div');
             this.PageContainer = this.AddChild('div');
         }
         else {
             tp.Throw('Wrong TabControl structure. Should be empty or have 2 child DIVs.');
         }
 
+        this.TabBar = new tp.ItemBar(elTabBar);
+        this.TabBar.On('SelectedIndexChanging', this.OnSelectedIndexChanging, this);
+        this.TabBar.On('SelectedIndexChanged', this.OnSelectedIndexChanged, this);
+
         // add classes to containers
-        tp.AddClass(this.TabContainer, tp.Classes.Bar);
+        //tp.AddClass(this.TabContainer, tp.Classes.Bar);
         tp.AddClass(this.PageContainer, tp.Classes.List);
 
         let TabElementList = this.GetTabElementList();
@@ -1569,82 +1456,8 @@ tp.TabControl = class extends tp.tpElement {
             TabPage = new tp.TabPage(elPage, CP);
             elTab.TabPage = TabPage;
         }
-
-        // toggle zone and button
-        let HtmlText =
-            `<div class="${tp.Classes.Toggle}">
-    <div class="${tp.Classes.Btn}">
-         <img class="${tp.Classes.Img}" src="${tp.tpWindow.ICON_ThreeLines}" />
-    </div>
-    <div class="${tp.Classes.Text}"></div>    
-</div>`;
-
-        this.ToggleContainer = tp.Prepend(this.Handle, HtmlText);
-        this.fToggleButton = tp.Select(this.ToggleContainer, '.' + tp.Classes.Btn);
-        this.fToggleZoneTitle = tp.Select(this.ToggleContainer, '.' + tp.Classes.Text);
-
-
-        this.ToggleContainer.style.display = 'none';
     }
 
-    /** Creates an IntersectionObserver <br />
-     * This control uses an IntersectionObserver to detect whether tabs exceed tab-bar width.
-     * */
-    CreateIntersectionObserver() {
-        let Options = {
-            // The root to use for intersection.
-            // If not provided, use the top-level document’s viewport.
-            root: this.TabContainer,
-            // Same as margin, can be 1, 2, 3 or 4 components, possibly negative lengths.
-            // If an explicit root element is specified, components may be percentages of the
-            // root element size.  If no explicit root element is specified, using a percentage
-            // is an error.
-            rootMargin: "0px",
-            // Threshold(s) at which to trigger callback, specified as a ratio, or list of
-            // ratios, of (visible area / total area) of the observed element (hence all
-            // entries must be in the range [0, 1]).  Callback will be invoked when the visible
-            // ratio of the observed element crosses a threshold in the list.
-            threshold: 1.0 // []
-
-        };
-
-        let Func = (entries) => {
-            if (tp.IsArray(entries) && entries.length > 0) {
-                let Flag = entries.some((entry) => { return entry.intersectionRatio < 1.0; });
-                if (Flag === true) {
-                    this.RenderMode = tp.TabRenderMode.Toggle;
-                }
-            }
-        };
-
-        this.IntersectionObserver = new IntersectionObserver(Func, Options);
-    }
-    /** Starts the IntersectionObserver <br />
-     * This control uses an IntersectionObserver to detect whether tabs exceed tab-bar width.
-     * */
-    StartIntersectionObserver() {
-        if (this.IntersectionObserver) {
-            this.StopIntersectionObserver();
-
-            let List = this.GetTabElementList();
-
-            if (List.length > 0) {
-                this.LastTab = List[List.length - 1];
-                if (tp.IsHTMLElement(this.LastTab))
-                    this.IntersectionObserver.observe(this.LastTab);
-            }
-        }
-
-    }
-    /** Stops the IntersectionObserver <br />
-     * This control uses an IntersectionObserver to detect whether tabs exceed tab-bar width.
-     * */
-    StopIntersectionObserver() {
-        if (this.IntersectionObserver && this.LastTab) {
-            this.IntersectionObserver.unobserve(this.LastTab);
-            this.IntersectionObserver.disconnect();
-        }
-    }
 
 
     /* overrides */
@@ -1677,88 +1490,15 @@ tp.TabControl = class extends tp.tpElement {
         super.OnInitializationCompleted();
 
         this.HookEvent(tp.Events.Click);
-
-        this.ToggleContainer.style.display = '';
-
-        this.CreateIntersectionObserver();
-        this.RenderMode = tp.TabRenderMode.Normal;
     }
-    /**
-    Event trigger
-    @protected
-    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
-    */
-    OnResized(ResizeInfo) {
-        super.OnResized(ResizeInfo);
 
-        if (this.RenderMode === tp.TabRenderMode.Toggle) {
-
-            this.TabContainer.style.display = '';
-            try {
-
-                let TabTotalWidth = 0;
-                let ContainerWidth = this.ToggleContainer.offsetWidth - 7;
-                let List = this.GetTabElementList();
-
-                List.forEach((item) => {
-                    TabTotalWidth += item.offsetWidth;
-                });
-
-                ContainerWidth -= (List.length * 3);
-
-                if (ContainerWidth > TabTotalWidth) {
-                    this.RenderMode = tp.TabRenderMode.Normal;
-                }
-            } finally {
-                if (this.RenderMode === tp.TabRenderMode.Toggle)
-                    this.TabContainer.style.display = 'none';
-            }
-        }
-    }
-    /**
-    Handles any DOM event
-    @protected
-    @override
-    @param {Event} e The Event object
-    */
-    OnAnyDOMEvent(e) {
-
-        let Type = tp.Events.ToTripous(e.type);
-
-        if (tp.Events.Click === Type) {
-            if (e.target instanceof HTMLElement) {
-
-                if (tp.ContainsElement(this.TabContainer, e.target)) {
-                    let TabElementList = this.GetTabElementList();
-                    for (let i = 0, ln = TabElementList.length; i < ln; i++) {
-                        if (tp.ContainsElement(TabElementList[i], e.target)) {
-                            this.SelectedIndex = i;
-                            break;
-                        }
-                    }
-                } else if (this.ToggleContainer && tp.ContainsElement(this.fToggleButton, e.target)) {
-                    this.ToggleClicked();
-                } else if (this.fToggleTabList && tp.ContainsElement(this.fToggleTabList, e.target)) {
-                    let List = tp.ChildHTMLElements(this.fToggleTabList);
-                    let Index = List.indexOf(e.target);
-                    if (Index !== -1) {
-                        this.SelectedIndex = Index;
-                        this.ToggleClicked();
-                    }
-                }
-            }
-
-        }
-
-        super.OnAnyDOMEvent(e);
-    }
 
     /* public */
     /** Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
      * @returns {HTMLElement[]} Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
      * */
     GetTabElementList() {
-        return tp.IsElement(this.TabContainer) ? tp.ChildHTMLElements(this.TabContainer) : [];
+        return this.TabBar.GetItemElementList();
     }
     /** Returns an array with the Page HTML Elements (tab pages). The array may be empty.
      * @returns {HTMLElement[]} Returns an array with the Page HTML Elements (tab pages). The array may be empty.
@@ -1797,10 +1537,6 @@ tp.TabControl = class extends tp.tpElement {
     */
     InsertPage(Index, Title) {
         if (this.Handle) {
-
-            if (this.RenderMode === tp.TabRenderMode.Normal)
-                this.StopIntersectionObserver();
-
             let PageElementList = this.GetPageElementList();
 
             let Page = this.CreatePage(Title);
@@ -1808,22 +1544,17 @@ tp.TabControl = class extends tp.tpElement {
             if (PageElementList.length === 0 || Index < 0 || Index >= PageElementList.length) {
                 Index = PageElementList.length === 0 ? 0 : PageElementList.length;
 
-                this.TabContainer.appendChild(Page.Tab);
+                this.TabBar.AddItem(Page.Tab);
                 this.PageContainer.appendChild(Page.Handle);
 
             } else {
-                this.TabContainer.insertBefore(Page.Tab, this.TabContainer.children[Index]);
+                this.TabBar.InsertAt(Index, Page.Tab);
                 this.PageContainer.insertBefore(Page.Handle, this.PageContainer.children[Index]);
             }
 
-            this.SetSelectedIndex(Index);
-
-            if (this.RenderMode === tp.TabRenderMode.Normal)
-                this.StartIntersectionObserver();
-            else
-                this.OnResized(null);
-
             this.OnPageAdded(Page);
+
+            this.SelectedIndex = Index;
 
             return Page;
         }
@@ -1838,21 +1569,28 @@ tp.TabControl = class extends tp.tpElement {
             let List = this.GetPageList();
             if (Index >= 0 && Index <= List.length - 1) {
 
-                if (this.RenderMode === tp.TabRenderMode.Normal)
-                    this.StopIntersectionObserver();
-
                 let Page = List[Index];
 
                 this.OnPageRemoving(Page);
-
+                this.TabBar.RemoveItemAt(Index);
                 Page.Dispose();
 
-                if (this.RenderMode === tp.TabRenderMode.Normal)
-                    this.StartIntersectionObserver();
-                else
-                    this.OnResized(null);
-
                 this.OnPageRemoved(Page);
+
+                // new index
+                List = this.GetPageList();
+                let NewIndex = Index - 1;
+                let NewIndex2 = Index + 1;
+                if (NewIndex >= 0 && NewIndex <= List.length - 1) {
+                    this.SelectedIndex = NewIndex;
+                }
+                else if (NewIndex2 >= 0 && NewIndex2 <= List.length - 1) {
+                    this.SelectedIndex = NewIndex;
+                }
+                else {
+                    this.SelectedIndex = List.length > 0 ? List.length - 1 : -1;
+                }
+
             }
         }
     }
@@ -1904,16 +1642,15 @@ tp.TabControl = class extends tp.tpElement {
     @param {number} CurrentIndex The current index.
     @param {number} NewIndex The new index.
     */
-    OnSelectedIndexChanging(CurrentIndex, NewIndex) {
-        let Args = new tp.IndexChangeEventArgs(CurrentIndex, NewIndex);
+    OnSelectedIndexChanging(Args) {
         this.Trigger('SelectedIndexChanging', Args);
     }
     /**
     Event trigger
     @param {number} CurrentIndex The current index.
     */
-    OnSelectedIndexChanged(CurrentIndex) {
-        let Args = new tp.IndexChangeEventArgs(CurrentIndex);
+    OnSelectedIndexChanged(Args) {
+        this.SetSelectedIndex(Args.CurrentIndex);
         this.Trigger('SelectedIndexChanged', Args);
     }
     /**
@@ -1943,62 +1680,22 @@ tp.TabControl = class extends tp.tpElement {
         Args.Child = Page;
         this.Trigger('PageRemoved', Args);
     }
-    /**
-    Event trigger
-    */
-    OnRenderModeChanged() {
-        let Args = new tp.EventArgs(null);
-        this.Trigger('RenderModeChanged', Args);
-        return Args;
-    }
-
 
 };
-tp.TabControl.prototype.ChangingMode = false;
-/** Private field.
- @type {number}
- */
-tp.TabControl.prototype.fRenderMode = tp.TabRenderMode.None;
+
+
 
 /** Private field.
- @type {IntersectionObserver}
+ @type {tp.ItemBar}
  */
-tp.TabControl.prototype.IntersectionObserver = null;
-
-/** Private field.
- @type {HTMLElement}
- */
-tp.TabControl.prototype.TabContainer = null;
+tp.TabControl.prototype.TabBar = null;
 /** Private field.
  @type {HTMLElement}
  */
 tp.TabControl.prototype.PageContainer = null;
 
 
-/** The zone displayed when in responsive mode
- * @private
- @type {HTMLElement}
- */
-tp.TabControl.prototype.ToggleContainer = null;
-/** The three lines toggle button 
- * @private
- @type {HTMLElement}
- */
-tp.TabControl.prototype.fToggleButton = null;
-/** The text of the selected tab. Displayed when in responsive mode
- * @private
- @type {HTMLElement}
- */
-tp.TabControl.prototype.fToggleZoneTitle = null;
-/** The list of tab titles displayed when in responsive mode
-* @type {HTMLElement}
-* */
-tp.TabControl.prototype.fToggleTabList = null;
 
-/** Private field.
- @type {tp.DropDownBox}
- */
-tp.TabControl.prototype.fToggleDropDownBox = null;
 
 //#endregion
 
@@ -3437,7 +3134,7 @@ tp.VirtualScroller.prototype.Context = null;
 //#endregion  
 
 //---------------------------------------------------------------------------------------
-// buttons tool-bars
+// menus
 //---------------------------------------------------------------------------------------
 
 //#region  tp.MenuItemType
@@ -5422,9 +5119,10 @@ Object.freeze(tp.TabRenderMode);
 
 
 /** A bar (a zone) that can display items. Can be used as base class for tool-bars, tab-bars, etc. <br />
- * Functions in three rendering modes: Normal, Toggle and NextPrev. <br />
- * The rendering mode changes automatically  from Normal to the others and back.
- * The user defines just the <code>ResponsiveMode</code> and then the mode goes from Normal to that <code>ResponsiveMode</code> depending on the width. <br />
+This controls uses a {@link https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver|ResizeObserver}, actually a <code>tp.ResizeDetector</code>,
+to detect whether items fit in item-bar width. <br />
+Provides three rendering modes: Normal, Toggle and NextPrev. The rendering mode changes automatically from Normal to the others and back. <br />
+The user defines just the <code>ResponsiveMode</code> and then the mode goes from Normal to that <code>ResponsiveMode</code> depending on the width.
  * Properties: SelectedIndex, ResponsiveMode <br />
  * Methods: AddItem(), InsertItem(), RemoveItemAt() <br />
  * Events: RenderModeChanged, SelectedIndexChanging, SelectedIndexChanged, ItemClicked
@@ -5527,7 +5225,6 @@ tp.ItemBar = class extends tp.tpElement {
             this.OnSelectedIndexChanged(v);
         }
     }
-
 
     /* overrides */
     /**
@@ -5652,12 +5349,12 @@ tp.ItemBar = class extends tp.tpElement {
                     }
                 }
                 else if (tp.ContainsEventTarget(this.btnToLeft, e.target)) {
-                    if (this.CanHideNext())
-                        this.HideNext();
-                }
-                else if (tp.ContainsEventTarget(this.btnToRight, e.target)) {
                     if (this.CanShowNext())
                         this.ShowNext();
+                }
+                else if (tp.ContainsEventTarget(this.btnToRight, e.target)) {
+                    if (this.CanHideNext())
+                        this.HideNext();
                 }
             }
 
@@ -5958,10 +5655,13 @@ tp.ItemBar = class extends tp.tpElement {
         return tp.IsElement(this.ItemContainer) ? tp.ChildHTMLElements(this.ItemContainer) : [];
     }
 
-    /** Adds an item at the end of items
-     * @param {HTMLElement} el The element to add
+    /** Adds an item (HTMLElement or tp.tpElement instance) at the end of items
+     * @param {HTMLElement|tp.tpElement} el The item to add
      */
     AddItem(el) {
+        if (el instanceof tp.tpElement)
+            el = el.Handle;
+
         if (tp.IsElement(el)) {
             this.ItemContainer.appendChild(el);
             this.ItemListChanged();
@@ -5999,6 +5699,7 @@ tp.ItemBar = class extends tp.tpElement {
     RemoveItemAt(Index) {
         let List = this.GetItemElementList();
         if (Index >= 0 && Index <= List.length - 1) {
+
             this.IsElementResizeListener = false;
             try {
                 let el = List[Index];
@@ -6010,7 +5711,14 @@ tp.ItemBar = class extends tp.tpElement {
             this.ItemListChanged();
         }
     }
-
+    /** Returns the index of a specified item.
+     * @param {HTMLElement} el
+     * @returns {number} Returns the index of a specified item.
+     */
+    IndexOfItem(el) {
+        let List = this.GetItemElementList();
+        return List.indexOf(el);
+    }
     /* event triggers */
     /**
     Event trigger
@@ -6059,7 +5767,8 @@ tp.ItemBar = class extends tp.tpElement {
 };
 
 tp.ItemBar.prototype.ChangingMode = false;
-/** Private field.
+/** The rendering mode to go to when total item width exceeds this instance width.
+ One of the {@link tp.ItemBarRenderMode} constants.
  @type {number}
  */
 tp.ItemBar.prototype.fRenderMode = tp.ItemBarRenderMode.None;

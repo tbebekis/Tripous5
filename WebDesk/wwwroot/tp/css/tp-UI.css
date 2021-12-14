@@ -89,9 +89,9 @@ tab control
 }
 
 /* tab buttons */ 
-.tp-TabControl > .tp-Bar > *  {
+.tp-TabControl > .tp-ItemBar > .tp-ItemList > *  {
     position: relative;
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
@@ -101,10 +101,12 @@ tab control
     font-weight: normal;
     min-width: 120px;
     background-color: var(--BackColor);
-    border: var(--Border);        
+    border: var(--Border);  
+    height: 100%;
+    white-space: nowrap;
 }
 /* tab buttons */ 
-.tp-TabControl > .tp-Bar > *.tp-Selected {
+.tp-ItemBar > .tp-ItemList > *.tp-Selected {
     background-color: var(--BackColor2);
 }
 
@@ -120,60 +122,7 @@ tab control
     overflow: auto;
     height: 100%;
 }
-
-
-/* toggle zone */ 
-.tp-TabControl > .tp-Toggle {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    background-color: var(--BackColor);
-    height: 2.3em;
-    border: var(--Border);  
-    user-select: none;
-}
-
-/* toggle button */ 
-.tp-TabControl > .tp-Toggle > .tp-Btn {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 2.3em;
-    border-right: var(--Border);
-    cursor: pointer;
-}
-
-
-/* toggle title - the title of the selected tab */ 
-.tp-TabControl > .tp-Toggle > .tp-Text {
-    position: relative;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-grow: 1;
-    padding: 0 6px;
-    align-items: center;
-}
-
-/* toggle drop down list, displays tab titles */
-.tp-TabToggleDropDownList {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    padding: 0 4px;
-    gap: 4px; 
-    user-select: none;
-}
-
-.tp-TabToggleDropDownList > * {
-    position: relative;
-    display: flex;
-    align-items: center;
-    height: 1.8em;
-    padding: 0 8px 0 3px;
-    cursor: pointer;
-}
+ 
 
 /*---------------------------------------------------------------------------------------
 item bar
@@ -241,17 +190,6 @@ item bar
     height: 100%;
     gap: 2px;
     overflow: hidden;
-}
-
-.tp-ItemBar > .tp-ItemList > * {
-    position: relative;
-    display: flex;
-     
-    align-items: center; 
-    background-color: var(--BackColor); 
-    border: var(--Border);
-    height: 100%;
-    white-space: nowrap;
 }
 
 .tp-ToggleItemList {

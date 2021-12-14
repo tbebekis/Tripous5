@@ -5,12 +5,28 @@
 <partial name="~/Demos/Shared/_Index.cshtml" />
 <h2>@ViewBag.Title</h2>
 
+<style>
+
+    .tp-ItemBar > .tp-ItemList > * {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background-color: var(--BackColor);
+        border: var(--Border);
+        height: 100%;
+        white-space: nowrap;
+    }
+
+</style>
+
 <div>
     <p>
-        A bar (a zone) that can display items. Can be used as base class for tool-bars, tab-bars, etc.        
+        A bar (a zone) that can display items. Can be used as base class for tool-bars, tab-bars, etc.
     </p>
     <p>
-        Functions in three rendering modes: Normal, Toggle and NextPrev. The rendering mode changes automatically from Normal to the others and back. <br />
+        This controls uses a <a href="https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver" target="_blank">ResizeObserver</a> (actually a <code>tp.ResizeDetector</code>)
+        to detect whether items fit in item-bar width. <br />
+        Provides three rendering modes: Normal, Toggle and NextPrev. The rendering mode changes automatically from Normal to the others and back. <br />
         The user defines just the <code>ResponsiveMode</code> and then the mode goes from Normal to that <code>ResponsiveMode</code> depending on the width.
     </p>
     <p>
