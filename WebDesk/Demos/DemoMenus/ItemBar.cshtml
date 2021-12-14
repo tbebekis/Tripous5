@@ -6,7 +6,18 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <p></p>
+    <p>
+        A bar (a zone) that can display items. Can be used as base class for tool-bars, tab-bars, etc.        
+    </p>
+    <p>
+        Functions in three rendering modes: Normal, Toggle and NextPrev. The rendering mode changes automatically from Normal to the others and back. <br />
+        The user defines just the <code>ResponsiveMode</code> and then the mode goes from Normal to that <code>ResponsiveMode</code> depending on the width.
+    </p>
+    <p>
+        Properties: SelectedIndex, ResponsiveMode <br />
+        Methods: AddItem(), InsertItem(), RemoveItemAt() <br />
+        Events: RenderModeChanged, SelectedIndexChanging, SelectedIndexChanged, ItemClicked
+    </p>
 </div>
 
 <br />
@@ -20,20 +31,30 @@
     <div>
         <label for="cboMode">Responsive Mode: </label>
         <select id="cboMode" onchange="SelectedModeChanged()">
-            <option value="2" >Toggle</option>
+            <option value="2">Toggle</option>
             <option value="4" selected>Prev-Next</option>
         </select>
     </div>
     <br />
+
+    <div>
+        <button id="btnAdd" onclick="AddItem()">Add Item</button>
+    </div>
+    <br />
+
+    <div>
+        <button id="btnInsert" onclick="InsertItem()">Insert Item at</button>&nbsp;
+        <button id="btnRemove" onclick="RemoveItem()">Remove Item at</button>&nbsp;&nbsp;&nbsp;
+        <label for="edtIndex">Index</label>&nbsp;
+        <input id="edtIndex" type="text" value="0" />
+    </div> <br />
+
     <div id="ib1">
         <div>Item 1</div>
         <div>Item 2</div>
         <div>Item 3</div>
         <div>Item 4</div>
         <div>Item 5</div>
-        <div>Item 6</div>
-        <div>Item 7</div>
-        <div>Item 8</div>
     </div>
 </div>
 
@@ -42,15 +63,41 @@
 <script class="js-code">
  
     let ctrl;
+    let Counter = 0;
     tp.Ready(function () {
         ctrl = new tp.ItemBar(ib1);
         ctrl.BackColor = tp.Colors.Cornsilk;
+        ctrl.On('ItemClicked', (Args) => {
+            let Text = ctrl.GetItemTextAt(Args.ItemIndex);
+            tp.InfoNote(`Item clicked: ${Text}`);
+        });
     });
 
     function SelectedModeChanged() {
         let Mode = cboMode.value;
         Mode = tp.StrToInt(Mode);
         ctrl.ResponsiveMode = Mode;
+    }
+
+    function AddItem() {
+        Counter++;
+        let el = ctrl.Document.createElement('div');
+        el.innerHTML = `New Item ${Counter}`;
+        ctrl.AddItem(el);
+    }
+    function InsertItem() {
+        Counter++;
+        let Index = edtIndex.value;
+        Index = tp.StrToInt(Index);
+        let el = ctrl.Document.createElement('div');
+        el.innerHTML = `New Item ${Counter}`;
+        ctrl.InsertItem(el, Index);
+    }
+    function RemoveItem() {
+        Counter++;
+        let Index = edtIndex.value;
+        Index = tp.StrToInt(Index);
+        ctrl.RemoveItemAt(Index);
     }
 
 </script>
