@@ -169,20 +169,18 @@ namespace WebLib
         /// </summary>
         public string IconKey { get; set; }
         /// <summary>
-        /// User defined parameters
-        /// </summary>
-        public Dictionary<string, object> Params { get; set; } = new Dictionary<string, object>();
-
-        /// <summary>
         /// True when this is a single instance Ui command.
         /// </summary>
         public bool IsSingleInstance { get; set; }
-
  
 
         /// <summary>
         /// The list of child commands, if any, else null.
         /// </summary>
         public List<Command> Items { get; set; }
+        /// <summary>
+        /// User defined parameters
+        /// </summary>
+        public Dictionary<string, object> Params { get; set; } = new Dictionary<string, object>();
     }
 }

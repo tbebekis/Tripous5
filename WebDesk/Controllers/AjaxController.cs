@@ -90,7 +90,6 @@ namespace WebDesk.Controllers
 
             return Json(Result);
         }
-
         [HttpPost("/SqlSelectAll")]
         public async Task<JsonResult> SqlSelectAll([FromBody] JsonDataTable JTable)
         {
@@ -126,6 +125,20 @@ namespace WebDesk.Controllers
             }
 
 
+
+            return Json(Result);
+        }
+
+        [HttpGet("/DeskGetMainMenu")]
+        public async Task<JsonResult> DeskGetMainMenu()
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+
+            Command[] MenuItems = DataStore.GetMainMenu();
+            Result.SerializePacket(MenuItems);
+            Result.IsSuccess = true;
 
             return Json(Result);
         }

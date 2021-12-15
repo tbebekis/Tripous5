@@ -3861,6 +3861,31 @@ tp.Html = function (el, v = '') {
 };
 
 /**
+ * Returns an HTMLElement based on a specified HtmlText. Throws an exception on failure. <br />
+ * Used when he have to display a content div inside another div, such as in dialog boxes.
+ * @param {string} HtmlText Plain HTML text.
+ * @returns {HTMLElement} Returns an HTMLElement
+ */
+tp.HtmlToElement = function (HtmlText) {
+    let Result = null; 
+
+    if (!tp.IsBlankString(HtmlText) && tp.IsHtml(HtmlText)) {
+        // create a temp div
+        let div = tp.Div(tp.Doc.body);
+        div.innerHTML = HtmlText.trim();
+        Result = div.firstChild;
+        div.parentNode.removeChild(div);
+    }
+
+    if (Result === null) {
+        tp.Throw('HtmlToElement: Can not extract the created element');
+    }
+
+    return Result;
+
+};
+
+/**
 Safely removes an HTMLElement from the DOM, that is from its parent node, if any.
 @param {string|Node} ElementOrSelector The element to remove from DOM
 */
@@ -4536,24 +4561,16 @@ tp.AddClasses = function (el, ...Names) {
 
     el = tp.Select(el);
 
-    let i, ln;
-    if (tp.IsHTMLElement(el)) {
-        if (tp.IsArray(Names)) {
-            if (Names.length === 1) {
-                let S = Names[0];
-                let Parts = S.split(' ');
-                for (i = 0, ln = Parts.length; i < ln; i++) {
-                    if (!tp.IsBlank(Parts[i]))
-                        tp.AddClass(el, Parts[i]);
-                }
-            } else {
-                for (i = 0, ln = Names.length; i < ln; i++) {
-                    if (!tp.IsBlank(Names[i]))
-                        tp.AddClass(el, Names[i]);
-                }
-            }
+    let Add = (Name) => {
+        if (tp.IsArray(Name)) {
+            Name.forEach(item => Add(item));
         }
-    }
+        else if (!tp.IsBlankString(Name))
+            tp.AddClass(el, Name);
+    };
+
+    Add(Names);
+ 
 };
 /**
 Removes one or more css classes from an element.
@@ -7673,12 +7690,12 @@ tp.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
         if (List.classList.toggle(CssClass)) {
             if (tp.IsSameText('absolute', Position)) {
                 P = tp.ToParent(Button);
-                List.X = P.X;
-                List.Y = P.Y + R.height;
+                List.style.left = tp.px(P.X);
+                List.style.top = tp.px(P.Y + R.height);
             } else if (tp.IsSameText('fixed', Position)) {
                 P = tp.ToViewport(Button);
-                List.X = P.X;
-                List.Y = P.Y + R.height;
+                List.style.left = tp.px(P.X);
+                List.style.top = tp.px(P.Y + R.height);
             }
         }
     });
@@ -7690,9 +7707,9 @@ tp.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
     });
 
     window.addEventListener('scroll', (ev) => {
-        if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
+        //if (List.classList.contains(CssClass) && !tp.ContainsEventTarget(Button, ev.target)) {
             List.classList.remove(CssClass);
-        }
+        //}
     });
 };
 //#endregion
@@ -11984,7 +12001,7 @@ tp.tpElement = class extends tp.tpObject {
 
         this.fElementType = 'div';
         this.fDisplayType = '';         // by default, either the css defined or block
-        this.fDefaultCssClasses = '';
+        this.fDefaultCssClasses = [];
         this.fAutoId = false;
     }
     /**
@@ -12159,13 +12176,8 @@ tp.tpElement = class extends tp.tpObject {
         if (tp.IsElement(el)) {
             var s = '';
 
-            if (this.tpClass === 'tp.Element') {
-                s = el.nodeName;
-                s = s.toLowerCase();
-            } else {
-                var Parts = tp.Split(this.tpClass, '.');
-                s = Parts[Parts.length - 1];
-            }
+            var Parts = tp.Split(this.tpClass, '.');
+            s = Parts[Parts.length - 1];
 
             return tp.SafeId(s);
         }
@@ -12307,7 +12319,7 @@ tp.tpElement = class extends tp.tpObject {
                 this.CreateParams = tp.MergeQuick(this.CreateParams, DataSetup);
 
                 // css classes  
-                if (!tp.IsBlank(this.fDefaultCssClasses)) {
+                if (tp.IsArray(this.fDefaultCssClasses) && this.fDefaultCssClasses.length > 0) {
                     tp.AddClasses(el, this.fDefaultCssClasses);
                 }
 
@@ -13152,9 +13164,9 @@ tp.tpElement.prototype.fElementType = '';
  * */
 tp.tpElement.prototype.fElementSubType = '';
 /** Default css classes.
- * @type {string}
+ * @type {string[]}
  * */
-tp.tpElement.prototype.fDefaultCssClasses = '';
+tp.tpElement.prototype.fDefaultCssClasses = [];
 /** When true the constructor does NOT create the handle (dom element)
  * @type {boolean}
  * */
@@ -14492,7 +14504,7 @@ outline: none;
         super.InitClass();
 
         this.tpClass = 'tp.tpWindow';
-        this.fDefaultCssClasses = 'tp-Window';
+        this.fDefaultCssClasses = ['tp-Window'];
     }
     /**
     Notification  
@@ -15098,7 +15110,7 @@ tp.ContentWindow = class extends tp.tpWindow {
         super.InitClass();
 
         this.tpClass = 'tp.ContentWindow';
-        this.fDefaultCssClasses = tp.tpWindow.CSS_CLASS_Window;
+        this.fDefaultCssClasses = [tp.tpWindow.CSS_CLASS_Window];
     }
     /**
     @override

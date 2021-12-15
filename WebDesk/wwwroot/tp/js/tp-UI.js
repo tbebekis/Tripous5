@@ -58,6 +58,7 @@ tp.Classes = {
     Strip: 'tp-Strip',
     TabBar: 'tp-TabBar',
     Bar: 'tp-Bar',
+    BarItem: 'tp-BarItem',
     Zone: 'tp-Zone',
     Toggle: 'tp-Toggle',
     ToggleItemList: 'tp-ToggleItemList',
@@ -582,7 +583,7 @@ tp.GroupBox = class extends tp.tpElement {
 
         this.fElementType = 'fieldset';
         this.fDisplayType = '';         // by default, either the css defined or block
-        this.fDefaultCssClasses = tp.Classes.GroupBox;
+        this.fDefaultCssClasses = [tp.Classes.GroupBox];
     }
     /**
     Notification <br />
@@ -736,7 +737,7 @@ tp.Accordion = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.Accordion';
-        this.fDefaultCssClasses = tp.Classes.Accordion;
+        this.fDefaultCssClasses = [tp.Classes.Accordion];
     }
     /**
     Initializes fields and properties just before applying the create params.
@@ -1124,7 +1125,7 @@ tp.PanelList = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.PanelList';
-        this.fDefaultCssClasses = tp.Classes.PanelList;
+        this.fDefaultCssClasses = [tp.Classes.PanelList];
     }
     /**
    Initializes fields and properties just before applying the create params.
@@ -1470,7 +1471,7 @@ tp.TabControl = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.TabControl';
-        this.fDefaultCssClasses = tp.Classes.TabControl;
+        this.fDefaultCssClasses = [tp.Classes.TabControl];
     }
     /**
    Initializes fields and properties just before applying the create params.
@@ -1887,7 +1888,7 @@ tp.ImageSlider = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.ImageSlider';
-        this.fDefaultCssClasses = tp.Classes.ImageSlider;
+        this.fDefaultCssClasses = [tp.Classes.ImageSlider];
     }
     /**
    Initializes fields and properties just before applying the create params.
@@ -2135,7 +2136,7 @@ tp.Splitter = class extends tp.tpElement {
     InitClass() {
         super.InitClass();
         this.tpClass = 'tp.Splitter';
-        this.fDefaultCssClasses = tp.Classes.Splitter;
+        this.fDefaultCssClasses = [tp.Classes.Splitter];
     }
     /**
     Event trigger. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation and AFTER option processing
@@ -2417,7 +2418,7 @@ tp.IFrame = class extends tp.tpElement {
 
         this.tpClass = 'tp.IFrame';
         this.fElementType = 'iframe';          // inline frame
-        this.fDefaultCssClasses = tp.Classes.Frame;
+        this.fDefaultCssClasses = [tp.Classes.Frame];
     }
     /**
     Notification
@@ -2638,7 +2639,7 @@ tp.DropDownBox = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.DropDownBox';
-        this.fDefaultCssClasses = tp.Classes.DropDownBox;
+        this.fDefaultCssClasses = [tp.Classes.DropDownBox];
     }
     /**
     Event trigger. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation and AFTER option processing
@@ -4519,7 +4520,7 @@ tp.Menu = class extends tp.MenuBase {
         super.InitClass();
 
         this.tpClass = 'tp.Menu';
-        this.fDefaultCssClasses = tp.Classes.Menu;
+        this.fDefaultCssClasses = [tp.Classes.Menu];
     }
 
 };
@@ -4606,7 +4607,7 @@ tp.ContextMenu = class extends tp.MenuBase {
         super.InitClass();
 
         this.tpClass = 'tp.ContextMenu';
-        this.fDefaultCssClasses = tp.Classes.ContextMenu;
+        this.fDefaultCssClasses = [tp.Classes.ContextMenu];
     }
     /**
     Notification <br />
@@ -4921,7 +4922,7 @@ tp.SiteMenu = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.SiteMenu';
-        this.fDefaultCssClasses = tp.Classes.SiteMenu;
+        this.fDefaultCssClasses = [tp.Classes.SiteMenu];
     }
     /**
     Notification <br />
@@ -5236,7 +5237,7 @@ tp.ItemBar = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.ItemBar';
-        this.fDefaultCssClasses = tp.Classes.ItemBar;
+        this.fDefaultCssClasses = [tp.Classes.ItemBar];
     }
     /**
    Initializes fields and properties just before applying the create params.
@@ -5667,6 +5668,23 @@ tp.ItemBar = class extends tp.tpElement {
             this.ItemListChanged();
         }
     }
+    /** Adds an array of items (HTMLElement or tp.tpElement instances) at the end of items
+     * @param {HTMLElement[]|tp.tpElement[]} ItemList The list of items to add
+     */
+    AddRange(ItemList) {
+        if (tp.IsArray(ItemList)) {
+
+            ItemList.forEach((item) => {
+                let el = item instanceof tp.tpElement ? item.Handle : (tp.IsElement(item)? item: null);
+
+                if (tp.IsElement(el)) {
+                    this.ItemContainer.appendChild(el);                    
+                }
+            });
+
+            this.ItemListChanged();
+        }
+    }
     /** Adds an item at a specified index
      * @param {HTMLElement} el The element to insert
      * @param {number} Index The index
@@ -5852,7 +5870,7 @@ tp.Button = class extends tp.tpElement {
         this.tpClass = 'tp.Button';
         this.fElementType = 'button';
         this.fElementSubType = 'button';
-        this.fDefaultCssClasses = tp.Classes.Button;
+        this.fDefaultCssClasses = [tp.Classes.Button];
     }
 
 };
@@ -5963,7 +5981,7 @@ tp.ControlToolButton = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.ControlToolButton';
-        this.fDefaultCssClasses = tp.Classes.ControlToolButton;
+        this.fDefaultCssClasses = [tp.Classes.ControlToolButton];
     }
     /**
    Notification <br />
@@ -6110,7 +6128,7 @@ tp.ControlToolBar = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.ControlToolBar';
-        this.fDefaultCssClasses = tp.Classes.ControlToolBar;
+        this.fDefaultCssClasses = [tp.Classes.ControlToolBar];
         this.ButtonClass = tp.ControlToolButton;
     }
     /**
@@ -6377,7 +6395,7 @@ tp.ButtonEx = class extends tp.tpElement {
         this.tpClass = 'tp.ButtonEx';
         this.fElementType = 'a';
 
-        this.fDefaultCssClasses = tp.Classes.ButtonEx;
+        this.fDefaultCssClasses = [tp.Classes.ButtonEx];
     }
     /**
    Notification <br />
@@ -6572,7 +6590,7 @@ tp.ToolBar = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.ToolBar';
-        this.fDefaultCssClasses = tp.Classes.ToolBar;
+        this.fDefaultCssClasses = [tp.Classes.ToolBar];
     }
     /**
     Notification <br />
@@ -7104,7 +7122,7 @@ tp.AutocompleteList = class extends tp.DropDownBox {
         super.InitClass();
 
         this.tpClass = 'tp.AutocompleteList';
-        this.fDefaultCssClasses = (this.fDefaultCssClasses || '') + ' ' + tp.Classes.AutocompleteList;
+        this.fDefaultCssClasses.push(tp.Classes.AutocompleteList);  
     }
     /**
     Called by the Open()/Close() methods and notifies the owner, if any, about a stage change
@@ -7935,7 +7953,7 @@ tp.Label = class extends tp.Control {
         this.tpClass = 'tp.Label';
         this.fElementType = 'label';
         this.fDisplayType = 'inline-block';
-        this.fDefaultCssClasses = tp.Classes.Label;
+        this.fDefaultCssClasses = [tp.Classes.Label];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -8206,7 +8224,7 @@ tp.TextBox = class extends tp.InputControl {
 
         this.tpClass = 'tp.TextBox';
         this.fElementSubType = 'text';
-        this.fDefaultCssClasses = tp.Classes.TextBox;
+        this.fDefaultCssClasses = [tp.Classes.TextBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -8442,7 +8460,7 @@ tp.Memo = class extends tp.Control {
         this.tpClass = 'tp.Memo';
         this.fElementType = 'textarea';
         //this.fDisplayType = 'inline';
-        this.fDefaultCssClasses = tp.Classes.Memo;
+        this.fDefaultCssClasses = [tp.Classes.Memo];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -8658,7 +8676,7 @@ tp.CheckBox = class extends tp.Control {
 
         this.tpClass = 'tp.CheckBox';
         this.fElementType = 'label';
-        this.fDefaultCssClasses = tp.Classes.CheckBox;
+        this.fDefaultCssClasses = [tp.Classes.CheckBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -8881,7 +8899,7 @@ tp.NumberBox = class extends tp.InputControl {
 
         this.tpClass = 'tp.NumberBox';
         this.fElementSubType = 'text';
-        this.fDefaultCssClasses = tp.Classes.NumberBox;
+        this.fDefaultCssClasses = [tp.Classes.NumberBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -9709,7 +9727,7 @@ tp.ListControl = class extends tp.Control {
         super.InitClass();
 
         this.tpClass = 'tp.ListControl';
-        this.fDefaultCssClasses = tp.Classes.ListControl;
+        this.fDefaultCssClasses = [tp.Classes.ListControl];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.List;
@@ -10060,7 +10078,7 @@ tp.ComboBox = class extends tp.ListControl {
         super.InitClass();
 
         this.tpClass = 'tp.ComboBox';
-        this.fDefaultCssClasses = tp.ConcatClasses(tp.Classes.ComboBox, this.fDefaultCssClasses);
+        this.fDefaultCssClasses.push(tp.Classes.ComboBox);  
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.List;
@@ -10479,7 +10497,7 @@ tp.ListBox = class extends tp.ListControl {
         super.InitClass();
 
         this.tpClass = 'tp.ListBox';
-        this.fDefaultCssClasses = tp.ConcatClasses(tp.Classes.ListBox, this.fDefaultCssClasses);
+        this.fDefaultCssClasses.push(tp.Classes.ListBox); 
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.List;
@@ -11083,7 +11101,7 @@ tp.CheckListControl = class extends tp.Control {
         super.InitClass();
 
         this.tpClass = 'tp.CheckListControl';
-        this.fDefaultCssClasses = tp.Classes.ListControl;
+        this.fDefaultCssClasses = [tp.Classes.ListControl];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.List;
@@ -11448,7 +11466,7 @@ tp.CheckListBox = class extends tp.CheckListControl {
         super.InitClass();
 
         this.tpClass = 'tp.CheckListBox';
-        this.fDefaultCssClasses = tp.ConcatClasses(tp.Classes.CheckListBox, this.fDefaultCssClasses);
+        this.fDefaultCssClasses.push(tp.Classes.CheckListBox);  
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.List;
@@ -11565,7 +11583,7 @@ tp.CheckComboBox = class extends tp.CheckListControl {
         super.InitClass();
 
         this.tpClass = 'tp.CheckComboBox';
-        this.fDefaultCssClasses = tp.ConcatClasses(tp.Classes.CheckComboBox, this.fDefaultCssClasses);
+        this.fDefaultCssClasses.push(tp.Classes.CheckComboBox); 
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.List;
@@ -12322,7 +12340,7 @@ tp.HtmlComboBox = class extends tp.HtmlListControl {
         super.InitClass();
 
         this.tpClass = 'tp.HtmlComboBox';
-        this.fDefaultCssClasses = tp.Classes.HtmlComboBox;
+        this.fDefaultCssClasses = [tp.Classes.HtmlComboBox];
     }
 };
 //#endregion
@@ -12571,7 +12589,7 @@ tp.HtmlNumberBox = class extends tp.InputControl {
 
         this.tpClass = 'tp.HtmlNumberBox';
         this.fElementSubType = 'number';
-        this.fDefaultCssClasses = tp.Classes.HtmlNumberBox;
+        this.fDefaultCssClasses = [tp.Classes.HtmlNumberBox];
 
         // data-bind
         this.fDataValueProperty = 'Value';
@@ -12717,7 +12735,7 @@ tp.HtmlNumberBoxEx = class extends tp.Control {
 
         this.tpClass = tp.HtmlNumberBoxEx;
 
-        this.fDefaultCssClasses = tp.Classes.NumberBox;
+        this.fDefaultCssClasses = [tp.Classes.NumberBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -12872,7 +12890,7 @@ tp.HtmlDateBox = class extends tp.InputControl {
 
         this.tpClass = 'tp.HtmlDateBox';
         this.fElementSubType = 'date';
-        this.fDefaultCssClasses = tp.Classes.HtmlDateBox;
+        this.fDefaultCssClasses = [tp.Classes.HtmlDateBox];
 
         // data-bind
         this.fDataValueProperty = 'Date';
@@ -12969,7 +12987,7 @@ tp.Calendar = class extends tp.Control {
 
         this.tpClass = 'tp.Calendar';
         this.fElementType = 'table';
-        this.fDefaultCssClasses = tp.Classes.Calendar;
+        this.fDefaultCssClasses = [tp.Classes.Calendar];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -13441,7 +13459,7 @@ tp.DateBox = class extends tp.Control {
 
         this.tpClass = 'tp.DateBox';
         this.fElementType = 'div';
-        this.fDefaultCssClasses = tp.Classes.DateBox;
+        this.fDefaultCssClasses = [tp.Classes.DateBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -13799,7 +13817,7 @@ tp.ImageBox = class extends tp.Control {
 
         this.tpClass = 'tp.ImageBox';
         this.fElementType = 'div';
-        this.fDefaultCssClasses = tp.Classes.ImageBox;
+        this.fDefaultCssClasses = [tp.Classes.ImageBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -13912,7 +13930,7 @@ tp.RadioGroup = class extends tp.Control {
 
         this.tpClass = 'tp.RadioGroup';
         this.fElementType = 'fieldset';
-        this.fDefaultCssClasses = tp.Classes.RadioGroup;
+        this.fDefaultCssClasses = [tp.Classes.RadioGroup];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -14411,7 +14429,7 @@ tp.ValueSlider = class extends tp.InputControl {
 
         this.tpClass = 'tp.ValueSlider';
         this.fElementSubType = 'range';
-        this.fDefaultCssClasses = tp.Classes.ValueSlider;
+        this.fDefaultCssClasses = [tp.Classes.ValueSlider];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -14564,7 +14582,7 @@ tp.ProgressBar = class extends tp.tpElement {
 
         this.tpClass = 'tp.ProgressBar';
         this.fElementType = 'progress';
-        this.fDefaultCssClasses = tp.Classes.ProgressBar;
+        this.fDefaultCssClasses = [tp.Classes.ProgressBar];
     }
     /**
     Initializes fields and properties just before applying the create params.
@@ -15395,7 +15413,7 @@ tp.TreeView = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.TreeView';
-        this.fDefaultCssClasses = tp.Classes.TreeView;
+        this.fDefaultCssClasses = [tp.Classes.TreeView];
     }
     /**
     Notification <br />
@@ -17780,7 +17798,7 @@ tp.LocatorBox = class extends tp.Control {
         super.InitClass();
 
         this.tpClass = 'tp.LocatorBox';
-        this.fDefaultCssClasses = tp.Classes.LocatorBox;
+        this.fDefaultCssClasses = [tp.Classes.LocatorBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -18000,7 +18018,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.SelectSqlListUi';
-        this.fDefaultCssClasses = tp.Classes.SelectSqlListUi;
+        this.fDefaultCssClasses = [tp.Classes.SelectSqlListUi];
     }
 
 
@@ -18271,7 +18289,7 @@ tp.SqlFilterPanel = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.SqlFilterPanel';
-        this.fDefaultCssClasses = tp.Classes.SqlFilterPanel;
+        this.fDefaultCssClasses = [tp.Classes.SqlFilterPanel];
     }
 
     /**
@@ -19261,7 +19279,7 @@ tp.View = class extends tp.tpElement {
         super.InitClass();
 
         this.tpClass = 'tp.View';
-        this.fDefaultCssClasses = tp.Classes.View;
+        this.fDefaultCssClasses = [tp.Classes.View];
     }
     /**
     Initializes fields and properties just before applying the create params.     

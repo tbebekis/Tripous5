@@ -45,7 +45,8 @@
     --InfoColor: #ff9;
     --HoverColor: #FFD200;
     --DisabledColor: var(--BackColor2);
-    --SelectedColor: var(--BackGreen);
+    --SelectedColor: lightgoldenrodyellow; 
+    --SelectedListItemColor: lightblue;
     --MarkColor: var(--BackGreen);
     --FocusColor: #4ab2f1;
     --FooterBackColor: #535353;

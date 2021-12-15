@@ -68,61 +68,7 @@ fieldset.tp-GroupBox legend {
     overflow: auto;
 }
 
-/*---------------------------------------------------------------------------------------
-tab control
----------------------------------------------------------------------------------------*/
 
-.tp-TabControl {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-/* tab buttons container */ 
-.tp-TabControl > .tp-Bar {
-    position: relative;
-    display: flex;
-    height: 2.3em;
-    gap: 1px;
-    user-select: none;
-}
-
-/* tab buttons */ 
-.tp-TabControl > .tp-ItemBar > .tp-ItemList > *  {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: inherit;
-    font-family: inherit;
-    font-weight: normal;
-    min-width: 120px;
-    background-color: var(--BackColor);
-    border: var(--Border);  
-    height: 100%;
-    white-space: nowrap;
-}
-/* tab buttons */ 
-.tp-ItemBar > .tp-ItemList > *.tp-Selected {
-    background-color: var(--BackColor2);
-}
-
-/* tab pages container */ 
-.tp-TabControl > .tp-List {
-    position: relative;
-    flex-grow: 1;
-} 
-
-/* tab page(s) */ 
-.tp-TabControl > .tp-List > * {
-    position: relative;
-    overflow: auto;
-    height: 100%;
-}
- 
 
 /*---------------------------------------------------------------------------------------
 item bar
@@ -172,14 +118,17 @@ item bar
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;
-    background-color: var(--BackColor); 
-    border: var(--Border);
+    align-items: center;    
     user-select: none;
     height: 100%;
     width: 1.8em;
     min-width: 1.8em;
-    font-size: 18px;
+    font-size: 19px;
+    cursor: pointer;
+/*
+background-color: var(--BackColor); 
+    border: var(--Border);
+*/
 }
 
 .tp-ItemBar > .tp-ItemList  {
@@ -209,6 +158,60 @@ item bar
     padding: 0 8px 0 3px;
     cursor: pointer;
 }
+
+/*---------------------------------------------------------------------------------------
+tab control
+---------------------------------------------------------------------------------------*/
+
+.tp-TabControl {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tp-TabControl > .tp-ItemBar > .tp-Prev,
+.tp-TabControl > .tp-ItemBar > .tp-Next { 
+    background-color: var(--BackColor); 
+    border: var(--Border); 
+}
+
+/* tab buttons */ 
+.tp-TabControl > .tp-ItemBar > .tp-ItemList > *  {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    padding: 0 8px;
+    background-color: var(--BackColor);
+    border: var(--Border);  
+    height: 100%;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+/* tab buttons */ 
+.tp-TabControl > .tp-ItemBar > .tp-ItemList > *.tp-Selected {
+    background-color: var(--SelectedColor);
+}
+
+/* tab pages container */ 
+.tp-TabControl > .tp-List {
+    position: relative;
+    flex-grow: 1;
+} 
+
+/* tab page(s) */ 
+.tp-TabControl > .tp-List > * {
+    position: relative;
+    overflow: auto;
+    height: 100%;
+}
+ 
+
 /*---------------------------------------------------------------------------------------
  image
 ---------------------------------------------------------------------------------------*/
@@ -324,6 +327,8 @@ item bar
     cursor: default;
     border: var(--Border);
     background-color: var(--BackColor);
+    width: 90px;
+    min-width: 40px;
 }
 
 .tp-DropDownBox.tp-Visible {
@@ -797,7 +802,7 @@ button {
 }
 
 .tp-AutocompleteList .tp-List .tp-Item.tp-Selected {
-    background-color: lightblue;
+    background-color: var(--SelectedListItemColor);
 }
 
 /*---------------------------------------------------------------------------------------
@@ -922,7 +927,7 @@ number box - tp-NumberBox
 }
 
 .tp-ListControl .tp-List .tp-Item.tp-Selected {
-    background-color: lightblue;
+    background-color: var(--SelectedListItemColor);
 }
 
 .tp-ListControl .tp-List .tp-Item:focus {
@@ -1765,3 +1770,103 @@ input[type=text].tp-Grid-InplaceEditor {
     padding: 2px 0;
     border-bottom: var(--Border);
 } 
+
+
+/*---------------------------------------------------------------------------------------
+  desktop
+---------------------------------------------------------------------------------------*/
+.tp-Desk {
+    position: relative;
+    display: flex; 
+    flex-grow: 1;
+} 
+
+/* desk main menu bar items */
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem  {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    padding: 0 8px;
+    height: 100%;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem:hover {
+    text-decoration: underline var(--HoverColor) solid; 
+    text-decoration-thickness: 3px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-Text {
+    position: relative;
+}
+ 
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background-color: var(--GrayLight);
+    color: var(--Black);
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List.tp-Visible {
+    display: block;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List > * {
+    display: flex;
+    min-height: 2em;
+    align-items: center;
+    padding: 0 0.9em 0 0.6em;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List > *:hover {
+    border-left: 4px solid var(--HoverColor);
+    padding-left: 6px;   
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.tp-Desk .pager-container.main-pager > .top-zone {
+    background-color: var(--Color4);
+    color: var(--White);  
+}
+
+ 
+ 
+.desk-view {
+    position: relative;
+    display: flex; 
+    flex-direction: column;
+    width: 100%;
+    padding: 6px 2%;
+    gap: 6px;
+}
+
+/*---------------------------------------------------------------------------------------
+ data-view
+---------------------------------------------------------------------------------------*/
+.desk-view.tp-DataView > .tp-PanelList {
+    height: 100%;
+}
+

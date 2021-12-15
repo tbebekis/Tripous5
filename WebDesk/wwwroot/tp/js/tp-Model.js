@@ -1089,7 +1089,7 @@ tp.DataView = class extends tp.View {
         super.InitClass();
 
         this.tpClass = 'tp.DataView';
-        this.fDefaultCssClasses = tp.Classes.View + ' ' + tp.Classes.DataView;
+        this.fDefaultCssClasses = [tp.Classes.View, tp.Classes.DataView];
     }
     /**
     Initializes fields and properties just before applying the create params.      

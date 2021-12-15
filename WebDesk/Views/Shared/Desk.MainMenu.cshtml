@@ -1,6 +1,7 @@
 ﻿@{
-    Command[] BarItems = DataStore.GetMainMenu();
-}
+//Command[] BarItems = DataStore.GetMainMenu();
+
+/*
 
 <div class="tab-container main-menu menu" >
     <div class="btn-to-left">◂</div>
@@ -18,19 +19,19 @@
                     }
                 }
            </div>
-       </div>     
+       </div>
     }
     </div>
     <div class="btn-to-right">▸</div>
-</div> 
+</div>
 
 <script>
-    tp.Ready(() => {       
+    tp.Ready(() => {
         let TabBarHandler = new app.TabBarHandler('.main-menu');
         let TabBarItems = TabBarHandler.GetTabBarItems();
 
-        const CssClass = 'tp-Visible';        
- 
+        const CssClass = 'tp-Visible';
+
         TabBarItems.forEach((elBarItem) => {
             let Button = tp.Select(elBarItem, '.tp-Text');
             let List = tp.Select(elBarItem, '.tp-List');
@@ -38,4 +39,13 @@
             tp.DropDownHandler(Button, List, CssClass);
         });
     });
+
 </script>
+*/
+}
+
+<div class="tp-Desk-MainMenu">
+
+</div>
+
+ 

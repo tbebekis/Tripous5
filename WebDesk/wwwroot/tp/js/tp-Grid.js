@@ -3699,7 +3699,7 @@ tp.Grid = class extends tp.Control  {
         super.InitClass();
 
         this.tpClass = 'tp.Grid';
-        this.fDefaultCssClasses = tp.Classes.Grid;
+        this.fDefaultCssClasses = [tp.Classes.Grid];
         this.fDataBindMode = tp.ControlBindMode.Grid;
     }
     /**

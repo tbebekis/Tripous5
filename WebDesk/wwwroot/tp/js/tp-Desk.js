@@ -1,28 +1,84 @@
 ﻿
+tp.Urls.DeskGetMainMenu = '/DeskGetMainMenu';
+
+tp.Classes.Desk = 'tp-Desk';
+tp.Classes.DeskMainMenu = 'tp-Desk-MainMenu';
+tp.Classes.DeskMainMenuBarItem = 'tp-Desk-MainMenuBarItem';
+
+//#region tp.Command
+
 /** A command class. This is here mostly for reference only. */
 tp.Command = class {
 
     /** constructor */
-    constructor(Source) {
+    constructor() {
         this.Params = {};
-
-        if (tp.IsValid(Source))
-            tp.MergeQuick(this, Source);
+        this.Items = [];
     }
 
-    /** A name unique among all commands. */
-    Name = '';
-    /** The command type. What a command does when it is called. */
+    /** Database Id
+     * @type {string}
+     */
+    Id = '';
+    /** The command type. What a command does when it is called. 
+     * @type {string}
+     */
     Type = 'Ui';
+    /** A name unique among all commands.
+     * @type {string}
+     * */
+    Name = '';
+
+    /** The text title of this instance, used for display purposes.
+     * @type {string}
+     * */
+    Title = '';
+
+    /** Icon key
+     * @type {string}
+     * */
+    IconKey = '';
     /** True when this is a single instance Ui command. */
     IsSingleInstance = false;
+
+    /** The list of child commands, if any, else null. */
+    Items = [];
     /** User defined parameters */
     Params = {};
 
+    /** Assigns this instance's properties from a specified source object.
+     * @param {object} Source
+     */
+    Assign(Source) {
+        if (tp.IsValid(Source)) {
+            this.Id = Source.Id || '';
+            this.Type = Source.Type || '';
+            this.Name = Source.Name || '';
+            this.Title = Source.Title || '';
+            this.IconKey = Source.IconKey || '';
+            this.Params = {};
+            if (Source.Params)
+                tp.MergeQuick(this.Params, Source.Params);
+
+            this.Items = [];
+
+            if (tp.IsArray(Source.Items)) {
+                Source.Items.forEach((item) => {
+                    let Cmd = new tp.Command();
+                    this.Items.push(Cmd);
+                    Cmd.Assign(item);
+                });
+            } 
+        }
+    }
     IsUiCommand() {
         return this.Type === 'Ui' || tp.StartsWith(this.Name, 'Ui.', true);
     }
 };
+
+//#endregion
+
+//#region tp.DesktopAjaxRequest
 
 /** Represents an ajax request */
 tp.DesktopAjaxRequest = class {
@@ -46,6 +102,9 @@ tp.DesktopAjaxRequest = class {
     Params = {};
 };
 
+//#endregion
+
+//#region tp.DeskInfo
 
 /**
  * Gets or sets a key-value information object to a DOM element. <br />
@@ -63,9 +122,24 @@ tp.DeskInfo = function (el, Info = null) {
     }
 
     return Info;
-
 };
 
+//#endregion
+
+//#region tp.Desktop
+
+
+tp.DeskOptions = {
+
+    /** Main menu element
+     * @type {HTMLElement}
+     */
+    elMainMenu: null,
+    /** Element
+     * @type {HTMLElement}
+     */
+    elMainPager: null,
+};
 
 /**
  * @type {tp.Desktop}
@@ -74,11 +148,16 @@ tp.Desk = null;
 
 
 tp.Desktop = class {
-    constructor() {
+    /**
+     * 
+     * @param {tp.DeskOptions} Options
+     */
+    constructor(Options) {
         if (tp.Desk)
             tp.Throw('Desk is already created');
 
         tp.Desk = this;
+        this.Options = Options || {};
 
         this.elMainMenu = tp('.main-menu');
         this.elContainer = tp('.pager-container.main-pager-container');
@@ -102,7 +181,7 @@ tp.Desktop = class {
         tp.Viewport.AddListener(this.OnScreenSizeChanged, this);
     }
 
- 
+    Options = {};
     /** The main menu container. Not contained by the elContainer of this instance.
      * @type {HTMLDivElement}
      */
@@ -332,9 +411,11 @@ tp.Desktop = class {
         elPage.style.display = '';
     }
 };
+//#endregion
 
 
 
+//#region tp.DesktopCommandExecutor
 
 /** Base command executor class. <br />
  *  A command executor must provide two functions: CanExecuteCommand(Cmd) and async ExecuteCommand(Cmd).
@@ -364,8 +445,15 @@ tp.DesktopCommandExecutor = class {
 };
 tp.DesktopCommandExecutor.ValidCommands = [];
 
- 
+//#endregion
 
+
+//---------------------------------------------------------------------------------------
+// views
+//---------------------------------------------------------------------------------------
+
+
+//#region tp.DeskView
 
 /** Represents a desk view. Used as base view class. */
 tp.DeskView = class extends tp.View {
@@ -434,6 +522,10 @@ tp.DeskView = class extends tp.View {
 
 };
 
+//#endregion
+
+//#region tp.DeskDataView
+
 tp.DeskDataView = class extends tp.DataView {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
@@ -486,11 +578,9 @@ tp.DeskDataView = class extends tp.DataView {
 
 };
 
+//#endregion
 
-
-
-
-
+//#region tp.SysDataViewList
 
 /** Represents a view. Displays a list of items of a certain DataType. */
 tp.SysDataViewList = class extends tp.DeskView {
@@ -600,6 +690,10 @@ tp.SysDataViewList = class extends tp.DeskView {
     }
 };
 
+//#endregion
+
+//#region tp.SysDataViewEditTable
+
 /** Represents a page. Edit/Insert view of the Table DataType. */
 tp.SysDataViewEditTable = class extends tp.DeskView {
     /**
@@ -612,6 +706,7 @@ tp.SysDataViewEditTable = class extends tp.DeskView {
     }
 };
 
+//#endregion
 
 
 
