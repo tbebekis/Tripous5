@@ -686,7 +686,7 @@ tp.Accordion = class extends tp.tpElement {
 
         let el,
             elCaption,
-            List = this.GetChildren();
+            List = this.GetElementList();
 
         for (let i = 0, ln = List.length; i < ln; i++) {
             el = List[i];
@@ -771,7 +771,7 @@ tp.Accordion = class extends tp.tpElement {
         if (tp.Events.Click === Type) {
             el = this.FindClickedChild(e);
             if (el) {
-                i = this.IndexOfChild(el);
+                i = this.IndexOfElement(el);
                 var IsExpanded = tp.HasClass(el, tp.Classes.Expanded);
                 this.Expand(!IsExpanded, i);
             }
@@ -792,7 +792,7 @@ tp.Accordion = class extends tp.tpElement {
         if (tp.IsEmpty(ChildIndex))
             ChildIndex = -1;
 
-        var List = this.GetChildren();
+        var List = this.GetElementList();
 
         if (ChildIndex < 0) {
             for (i = 0, ln = List.length; i < ln; i++) {
@@ -825,7 +825,7 @@ tp.Accordion = class extends tp.tpElement {
     @param {number} Index The child index.
     */
     Toggle(Index) {
-        let el = this.ChildAt(Index);
+        let el = this.GetElementAt(Index);
         if (el) {
             this.Expand(!this.IsExpanded(Index), Index);
         }
@@ -836,7 +836,7 @@ tp.Accordion = class extends tp.tpElement {
     @returns {boolean} Returns true if an child item at a specified index is expanded.
     */
     IsExpanded(Index) {
-        let el = this.ChildAt(Index);
+        let el = this.GetElementAt(Index);
         if (el) {
             return tp.HasClass(el, tp.Classes.Expanded);
         }
@@ -850,7 +850,7 @@ tp.Accordion = class extends tp.tpElement {
     @returns {HTMLElement} Returns the newly added child
     */
     AddChild(Title)  {
-        return this.InsertChild(this.GetChildren().length, Title);
+        return this.InsertChild(this.GetElementList().length, Title);
     }
     /**
     Inserts a child at a specified index and returns the child. A child is a div with two children divs, a title div and a content div.
@@ -860,7 +860,7 @@ tp.Accordion = class extends tp.tpElement {
     */
     InsertChild(Index, Title) {
         if (this.Handle) {
-            var List = this.GetChildren();
+            var List = this.GetElementList();
 
             let Child = this.CreateChild(Title);
 
@@ -886,7 +886,7 @@ tp.Accordion = class extends tp.tpElement {
     @return {HTMLElement} Returns the title HTMLElement if found, else null
     */
     TitleChildAt(Index) {
-        let el = this.ChildAt(Index);
+        let el = this.GetElementAt(Index);
         if ((el instanceof HTMLElement) && el.children.length > 0) {
             return el.children[0];
         }
@@ -900,7 +900,7 @@ tp.Accordion = class extends tp.tpElement {
     @return {HTMLElement} Returns the title HTMLElement if found, else null
     */
     ContentChildAt(Index)  {
-        let el = this.ChildAt(Index);
+        let el = this.GetElementAt(Index);
         if ((el instanceof HTMLElement) && el.children.length > 1) {
             return el.children[1];
         }
@@ -1153,7 +1153,7 @@ tp.PanelList = class extends tp.tpElement {
     */
     InsertChild(Index)  {
         if (this.Handle) {
-            var List = this.GetChildren();
+            var List = this.GetElementList();
 
             let Child = this.Document.createElement('div');
 
@@ -1176,7 +1176,7 @@ tp.PanelList = class extends tp.tpElement {
     @returns {HTMLElement[]} Returns an array with the panel elements
     */
     GetPanels()  {
-        return this.GetChildren();
+        return this.GetElementList();
     }
 
     /* event triggers */
@@ -1234,20 +1234,19 @@ tp.TabPage = class extends tp.tpElement {
 
     /**
     Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+    @protected
     */
-    Dispose() {
-        if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
-            try {
-                if (tp.IsHTMLElement(this.Tab) && tp.IsHTMLElement(this.Tab.parentNode)) {
-                    this.Tab.parentNode.removeChild(this.Tab);
-                }
-
-            } catch (e) {
-                //
+    DoDispose() {
+        try {
+            if (tp.IsHTMLElement(this.Tab) && tp.IsHTMLElement(this.Tab.parentNode)) {
+                this.Tab.parentNode.removeChild(this.Tab);
             }
 
-            super.Dispose();
+        } catch (e) {
+            //
         }
+
+        super.DoDispose();
     }
 };
 /**
@@ -1415,7 +1414,7 @@ tp.TabControl = class extends tp.tpElement {
      * @private
      * */
     CreateControls() {
-        let List = this.GetChildren();
+        let List = this.GetElementList();
         let elTabBar;
 
         if (List.length === 2) {
@@ -1423,8 +1422,8 @@ tp.TabControl = class extends tp.tpElement {
             this.PageContainer = List[1];
         }
         else if (List.length === 0) {
-            elTabBar = this.AddChild('div');
-            this.PageContainer = this.AddChild('div');
+            elTabBar = this.AddDivElement();
+            this.PageContainer = this.AddDivElement();
         }
         else {
             tp.Throw('Wrong TabControl structure. Should be empty or have 2 child DIVs.');
@@ -5227,6 +5226,31 @@ tp.ItemBar = class extends tp.tpElement {
         }
     }
 
+    /** Get or sets the selected HTMLElement.
+     * The setter may be passed an HTMLElement or an object with a Handle property of type HTMLElement.
+     * @type {HTMLElement}
+     */
+    get SelectedItem() {
+        let Index = this.SelectedIndex;
+
+        if (Index >= 0) {
+            let List = this.GetItemElementList();
+            return List[Index];
+        }
+
+        return null;
+    }
+    set SelectedItem(v) {
+        if (tp.IsValid(v)) {
+            let el = tp.IsHTMLElement(v) ? v : (tp.IsHTMLElement(v.Handle) ? v.Handle : null);
+            if (el) {
+                let Index = this.IndexOfItem(el);
+                if (Index >= 0)
+                    this.SelectedIndex = Index;
+            }
+        }
+    }
+
     /* overrides */
     /**
     Initializes the 'static' and 'read-only' class fields
@@ -5408,7 +5432,7 @@ tp.ItemBar = class extends tp.tpElement {
                 Width: 'auto'
             });
 
-            this.ToggleItemList = this.ToggleDropDownBox.AddChild('div');
+            this.ToggleItemList = this.ToggleDropDownBox.AddDivElement();
             tp.AddClass(this.ToggleItemList, tp.Classes.ToggleItemList);
             this.ToggleItemList.addEventListener('click', (e) => {
                 this.OnAnyDOMEvent(e);
@@ -5453,7 +5477,7 @@ tp.ItemBar = class extends tp.tpElement {
     * @private
     * */
     CreateControls() {
-        let List = this.GetChildren();
+        let List = this.GetElementList();
 
         // remove any elements
         List.forEach((item) => { tp.Remove(item); });
@@ -5656,28 +5680,31 @@ tp.ItemBar = class extends tp.tpElement {
         return tp.IsElement(this.ItemContainer) ? tp.ChildHTMLElements(this.ItemContainer) : [];
     }
 
-    /** Adds an item (HTMLElement or tp.tpElement instance) at the end of items
-     * @param {HTMLElement|tp.tpElement} el The item to add
+    /** Adds an item (which is an HTMLElement or an object with a Handle property of type HTMLElement) at the end of items.
+     * @param {HTMLElement|object} el The item to add. An HTMLElement or an object with a Handle property of type HTMLElement.
      */
     AddItem(el) {
-        if (el instanceof tp.tpElement)
-            el = el.Handle;
+        if (tp.IsValid(el)) {
+            if (!tp.IsHTMLElement(el) && tp.IsHTMLElement(el.Handle))
+                el = el.Handle;
 
-        if (tp.IsElement(el)) {
-            this.ItemContainer.appendChild(el);
-            this.ItemListChanged();
-        }
+            if (tp.IsHTMLElement(el)) {
+                this.ItemContainer.appendChild(el);
+                this.ItemListChanged();
+            }
+        } 
     }
-    /** Adds an array of items (HTMLElement or tp.tpElement instances) at the end of items
-     * @param {HTMLElement[]|tp.tpElement[]} ItemList The list of items to add
+    /** Adds an array of items (where each item is an HTMLElement or an object with a Handle property of type HTMLElement) at the end of items
+     * @param {HTMLElement[]|object[]} ItemList The array of items to add. Each item is an HTMLElement or an object with a Handle property of type HTMLElement.
      */
     AddRange(ItemList) {
         if (tp.IsArray(ItemList)) {
 
-            ItemList.forEach((item) => {
-                let el = item instanceof tp.tpElement ? item.Handle : (tp.IsElement(item)? item: null);
-
-                if (tp.IsElement(el)) {
+            ItemList.forEach((el) => {
+                if (!tp.IsHTMLElement(el) && tp.IsHTMLElement(el.Handle))
+                    el = el.Handle;
+ 
+                if (tp.IsHTMLElement(el)) {
                     this.ItemContainer.appendChild(el);                    
                 }
             });
@@ -5737,6 +5764,7 @@ tp.ItemBar = class extends tp.tpElement {
         let List = this.GetItemElementList();
         return List.indexOf(el);
     }
+
     /* event triggers */
     /**
     Event trigger
@@ -6612,10 +6640,7 @@ tp.ToolBar = class extends tp.tpElement {
         this.fRightAligner.className = tp.Classes.FlexFill;
 
         tp.Ui.CreateControls(this.Handle);
-        //let List = this.GetChildren();
-        //if (List.length === 0) {                                    
-        //    tp.CreateContainerControls(this.Handle);
-        //}
+ 
     }
 
     /* public */
@@ -19259,16 +19284,7 @@ tp.View = class extends tp.tpElement {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-
-
-    /* properties */
-    /** 
-    Gets or sets the name  
-    @type {string}
-    */
-    Name = '[no view name]';
-
+ 
     /* overrides */
     /**
     Initializes the 'static' and 'read-only' class fields
@@ -19288,7 +19304,7 @@ tp.View = class extends tp.tpElement {
     */
     InitializeFields() {
         super.InitializeFields();
-        this.Name = tp.NextName('View');
+        this.ViewName = tp.NextName('View');
     }
     /**
     Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
@@ -19332,11 +19348,9 @@ tp.View = class extends tp.tpElement {
     @protected
     @override
     */
-    Dispose() {
-        if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
-            tp.Broadcaster.Remove(this);
-            super.Dispose();
-        }
+    DoDispose() {
+        tp.Broadcaster.Remove(this);
+        super.DoDispose();
     }
     /**
     Handles any DOM event
@@ -19390,7 +19404,7 @@ tp.View = class extends tp.tpElement {
     @returns {string} Returns a string representation of this instance.
     */
     toString() {
-        return this.Name;
+        return this.ViewName;
     }
     /**
     Returns the controls. <br />
@@ -19462,7 +19476,16 @@ tp.View = class extends tp.tpElement {
         return null;
     }
 };
-
+/** 
+Gets or sets the name of the view 
+@type {string}
+*/
+tp.View.prototype.ViewName = '[no view name]';
+/**
+The ajax packet sent by server app when this view is created, if any.
+@type {object}
+*/
+tp.View.prototype.Packet = {};
 
 tp.ViewTypes = {
     View: tp.View
@@ -20235,7 +20258,7 @@ tp.SqlFilterDialog = class extends tp.tpWindow {
         this.Pager.SelectedIndex = 0;
 
         // filter panel
-        let el = this.tabFilter.AddChild('div');
+        let el = this.tabFilter.AddDivElement();
         this.FilterPanel = new tp.SqlFilterPanel(el, { FilterDefs: this.FilterDefs });
         this.FilterPanel.Height = '100%';
         this.FilterPanel.Width = '100%';

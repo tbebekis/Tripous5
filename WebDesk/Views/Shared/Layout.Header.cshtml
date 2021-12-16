@@ -4,7 +4,7 @@
     Language SelectedLanguage = Lib.App.Language;
 }
 
-<header class="header">
+<header class="header" data-setup="{ ReturnUrl: '@RelativeRawUrlEncoded'}">
     @if (Lib.IsCookieAuthenticated)
     {
         @await Html.PartialAsync("Desk.MainMenu")
@@ -74,15 +74,7 @@
 
 </header>
 
+ 
 
-<script>
 
-    let HeaderOptions = {
-        ReturnUrl: '@RelativeRawUrlEncoded',
-    };
-
-    tp.Ready(() => {
-        new app.Header(HeaderOptions);
-    });
-
-</script>
+ 

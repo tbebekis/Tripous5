@@ -5,71 +5,68 @@ app.Config.CurrencySymbol = '€';
 
 app.Resources = app.Resources || {}; 
 
-
+//#region app.Header
 /** Handles controls and operations of the header */
-app.Header = class {
-    constructor(Options) {
-        let i, ln, List;
-        if (app.Header.Instance !== null)
-            tp.Throw('app.Header is a single-instance class');
+app.Header = class extends tp.tpElement {
 
-        app.Header.Instance = this;
-        this.Options = Options;
-
-        // handles the language selection drop-down
-        tp.DropDownHandler('#btnLanguage', '#cboLanguage', 'tp-Visible');
-
-
-
-        // events
-        tp.Doc.body.addEventListener('click', this);
-
-        tp.Viewport.AddListener(this.ScreenSizeChanged, this);
+    /** Constructor
+     * @param {string|HTMLElement} ElementOrSelector
+     * @param {object|tp.CreateParams} CreateParams
+     */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
     }
 
-    Options = {
-        ReturnUrl: '',
-    }; 
-
-    handleEvent(e) {
-        switch (e.type) {
-            case 'click':
-
-                break;
-
-        }
+    /** Returns the ReturnUrl of the current page, if any, else empty string
+     * @type {string}
+     * */
+    get ReturnUrl() {
+        return !tp.IsBlankString(this.CreateParams.ReturnUrl) ? this.CreateParams.ReturnUrl : '';
     }
 
     /**
-     * Called when the screen size changes.
-     * @param {bool} ScreenModeFlag True when screen mode has changed too (i.e. from Large to Medium)
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+        this.tpClass = 'app.Header'; 
+    }
+    /**
+    Event trigger. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation and AFTER option processing
+    @protected
+    @override
+    */
+    OnInitializationCompleted() {
+        super.OnInitializationCompleted();
+        // handles the language selection drop-down
+        tp.DropDownHandler('#btnLanguage', '#cboLanguage', 'tp-Visible');
+    }
+ 
+};
+//#endregion
+
+//#region app.Footer
+/** Handles controls and operations of the footer */
+app.Footer = class extends tp.tpElement {
+
+    /** Constructor
+     * @param {string|HTMLElement} ElementOrSelector
+     * @param {object|tp.CreateParams} CreateParams
      */
-    ScreenSizeChanged(ScreenModeFlag) {
-        if (ScreenModeFlag === true) {
-            if (tp.Viewport.IsXSmall || tp.Viewport.IsSmall) {
-                //
-            }
-            else {
-                //
-            }
-        }
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
     }
 };
-app.Header.Instance = null;
-
-/** Handles controls and operations of the header */
-app.Footer = {
-};
-
-
+//#endregion
 
  
- 
-
+//#region app.MainCommandExecutor
 /** A command executor class. <br />
  *  A command executor must provide two functions: CanExecuteCommand(Cmd) and async ExecuteCommand(Cmd).
  * */
-app.MainMenuCommandExecutor = class extends tp.DesktopCommandExecutor {
+app.MainCommandExecutor = class extends tp.DeskCommandExecutor {
     constructor() {
         super();
 
@@ -88,16 +85,16 @@ app.MainMenuCommandExecutor = class extends tp.DesktopCommandExecutor {
         let Result = null;
 
         if (Cmd.IsUiCommand()) {
-            if ((Cmd.IsSingleInstance && !app.Desk.Instance.TabExists(Cmd.Name)) || !Cmd.IsSingleInstance) {
-                let Params = {
-                    Type: Cmd.Type,
-                    IsSingleInstance: Cmd.IsSingleInstance
-                };
-                Params = tp.MergeQuick(Params, Cmd.Params);
-                let Request = new tp.DesktopAjaxRequest(Cmd.Name, Params);
+            if (Cmd.IsSingleInstance && tp.Desk.ViewPager.ViewExists(Cmd.Name)) {
+                let View = tp.Desk.ViewPager.FindViewByName(Cmd.Name);
+                tp.Desk.ViewPager.ShowView(View);
+                Result = View;
+            }
+            else {
+                let Request = tp.DeskAjaxRequest.CreateFromCommand(Cmd);  
                 let Packet = await tp.Desk.AjaxExecute(Request);
                 if (tp.IsValid(Packet))
-                    Result = await tp.Desk.CreateViewElement(Packet);
+                    Result = await tp.Desk.ViewPager.AddView(Packet);
             }
         }
         else {
@@ -107,7 +104,7 @@ app.MainMenuCommandExecutor = class extends tp.DesktopCommandExecutor {
         return Result;
     }
 };
-
+//#endregion
 
 
 /** Tripous notification function. <br />
@@ -115,9 +112,42 @@ app.MainMenuCommandExecutor = class extends tp.DesktopCommandExecutor {
 tp.AppInitializeBefore = function () {
  
     let el;
-    //new app.Desk();
+ 
+
+    // header
+    el = tp('.header');
+    if (!tp.IsHTMLElement(el))
+        tp.Throw('Header element not found');
+
+    tp.DeskOptions.Header = new app.Header(el);
+
+    // footer
+    el = tp('.footer');
+    if (!tp.IsHTMLElement(el))
+        tp.Throw('Footer element not found');
+
+    tp.DeskOptions.Footer = new app.Footer(el);
+
+    // main menu
     el = tp('.' + tp.Classes.DeskMainMenu);
-    new tp.DeskMainMenu(el);
+    if (!tp.IsHTMLElement(el))
+        tp.Throw('MainMenu element not found');
+
+    tp.DeskOptions.MainMenu = new tp.DeskMainMenu(el);
+
+    // main command executor
+    tp.DeskOptions.MainCommandExecutor = new app.MainCommandExecutor();
+
+
+    // desk view main pager  
+    el = tp('.' + tp.Classes.DeskViewPager);
+    if (!tp.IsHTMLElement(el))
+        tp.Throw('View Pager element not found');
+
+    tp.DeskOptions.ViewPager = new tp.DeskViewPager(el);
+
+    // desktop
+    tp.Desk = new tp.Desktop(tp.DeskOptions);
 };
 
 

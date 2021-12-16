@@ -219,7 +219,7 @@ app.TabBarHandler = class {
 /** A command executor class. <br />
  *  A command executor must provide two functions: CanExecuteCommand(Cmd) and async ExecuteCommand(Cmd).
  * */
-app.MainMenuCommandExecutor = class extends tp.DesktopCommandExecutor {
+app.MainCommandExecutor = class extends tp.DeskCommandExecutor {
     constructor() {
         super();
 

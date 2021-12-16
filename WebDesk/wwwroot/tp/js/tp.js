@@ -804,7 +804,7 @@ tp.GetPropertyInfo = function (o, Key) {
         Result.IsProperty = !Result.IsFunction && !Result.IsConstructor;
         Result.IsConfigurable = PD.configurable;
         Result.IsEnumerable = PD.enumerable;
-        Result.IsWritable = PD.writable || 'set' in PD;
+        Result.IsWritable = PD.writable === true || Result.HasSetter === true;
         Result.Pointer = Pointer;
     }
 
@@ -950,7 +950,7 @@ tp.HasProperty = function (o, Key) {
  */
 tp.HasWritableProperty = function (o, Key) {
     let PI = tp.GetPropertyInfo(o, Key);
-    return PI.IsProperty == true && (PI.IsWritable === true || PI.HasSetter === true);
+    return PI.IsProperty == true && (PI.IsWritable === true || PI.HasSetter === true  );
 };
 //#endregion
 
@@ -4524,8 +4524,17 @@ Adds a specified css class to an element, if not already there.
 tp.AddClass = function (el, Name) {
     el = tp.Select(el);
 
-    if (tp.IsHTMLElement(el) && !tp.IsBlank(Name) && !el.classList.contains(Name)) {
-        el.classList.add(Name);
+    if (tp.IsHTMLElement(el) && !tp.IsBlankString(Name)) {
+
+        // we may passed something like 'fa fa-xxxx'
+        let StringList = tp.Split(Name, ' ', true);
+        if (tp.IsArray(StringList)) {
+            StringList.forEach((item) => {
+                if (!el.classList.contains(item))
+                    el.classList.add(item);
+            });
+        }
+        
     }
 };
 /**
@@ -4563,10 +4572,15 @@ tp.AddClasses = function (el, ...Names) {
 
     let Add = (Name) => {
         if (tp.IsArray(Name)) {
-            Name.forEach(item => Add(item));
+            Name.forEach(item => {
+                if (!tp.IsBlankString(item))
+                    Add(item)
+            });
         }
-        else if (!tp.IsBlankString(Name))
+        else if (!tp.IsBlankString(Name)) {
             tp.AddClass(el, Name);
+        }
+            
     };
 
     Add(Names);
@@ -11990,7 +12004,6 @@ tp.tpElement = class extends tp.tpObject {
 
 
     /* protected */
-
     /**
     Initializes the 'static' and 'read-only' class fields
     */
@@ -12079,8 +12092,7 @@ tp.tpElement = class extends tp.tpObject {
     - Completed notification
     */
     OnInitializationCompleted() { }
-
-
+ 
     /**
      * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
      * 
@@ -12159,7 +12171,14 @@ tp.tpElement = class extends tp.tpObject {
         this.PropagateSize();
         this.Trigger('Resized', ResizeInfo);
     }
-
+    /**
+    Event trigger
+    */
+    OnDisposing() { this.Trigger('Disposing', {}); }
+    /**
+    Event trigger
+    */
+    OnDisposed() { this.Trigger('Disposed', {}); }
 
     //---------------------------------------------------------------------------------------
     // public
@@ -12382,22 +12401,35 @@ tp.tpElement = class extends tp.tpObject {
             }
         }
     }
+    /** Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
+     * @protected
+     * */
+    DoDispose() {
+        this.IsElementResizeListener = false;
+        this.IsScreenResizeListener = false;
+
+        var el = this.fHandle;
+        tp.SetObject(this.Handle, null);
+        this.fHandle = null;
+
+        try {
+            if (tp.IsElement(el.parentNode)) {
+                el.parentNode.removeChild(el);
+            }
+        } catch (e) {
+            //
+        }
+
+        this.fIsDisposed = true;
+    }
     /**
     Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
     */
     Dispose() {
         if (this.fIsDisposed === false && tp.IsElement(this.fHandle)) {
-            this.IsElementResizeListener = false;
-            this.IsScreenResizeListener = false;
-
-            var el = this.fHandle;
-            tp.SetObject(this.Handle, null);
-            this.fHandle = null;
-            if (tp.IsElement(el.parentNode)) {
-                el.parentNode.removeChild(el);
-            }
-
-            this.fIsDisposed = true;
+            this.OnDisposing();
+            this.DoDispose();
+            this.OnDisposed();
         }
     }
 
@@ -12443,7 +12475,7 @@ tp.tpElement = class extends tp.tpObject {
      * @param {string[]} AvoidParams A string array of property names the ProcessCreateParam() should NOT set
      */
     ProcessCreateParam(Name, Value, AvoidParams) {
-        if (tp.HasWritableProperty(this, Name) && !tp.IsFunction(Value)) {
+        if (!tp.IsFunction(Value) && tp.HasWritableProperty(this, Name)) {
             let Allowed = AvoidParams.indexOf(Name) === -1;
             if (Allowed) {
                 this[Name] = Value;
@@ -12464,18 +12496,17 @@ tp.tpElement = class extends tp.tpObject {
         return Default;
     }
  
-
     /**
     Adds a listener to an event of this instance and returns the listener object. 
     The caller specifies the event name, a callback function and a context for the callback.  
     When the event occurs then this instance invokes the callback passing a single parameter of type tp.EventArgs.
     @example
-    MyObject.On('OnSomething', function(Args: tp.EventArgs) {
+    MyObject.On('SomethingHappened', function(Args: tp.EventArgs) {
         //
     });
 
     // or
-    MyObject.On('OnSomething', this.HandlerFunc, this);
+    MyObject.On('SomethingHappened', this.HandlerFunc, this);
 
     // or, if the caller is a tp.tpObject
     MyObject.On('OnSomething', this.FuncBind(this.HandlerFunc));
@@ -12608,7 +12639,7 @@ tp.tpElement = class extends tp.tpObject {
         if (this.Handle) {
             this.ResizeControls();
             var i, ln, o;
-            var List = this.GetChildren();
+            var List = this.GetElementList();
             for (i = 0, ln = List.length; i < ln; i++) {
                 o = tp.GetObject(List[i]);
                 if (o instanceof tp.tpElement) {
@@ -12836,7 +12867,7 @@ tp.tpElement = class extends tp.tpObject {
             this.Handle.click();
     }
 
-
+ 
     /* direct or nested tp.tpElement children */
     /**
     Returns an array with all tp.tpElement objects existing on direct or nested child DOM elements, of the handle of this instance. 
@@ -12882,21 +12913,35 @@ tp.tpElement = class extends tp.tpObject {
     FindControlByProp(PropName, PropValue) {
         return tp.FindControlByProp(PropName, PropValue, this.Handle);
     }
+ 
+    /* direct tp.tpElement children of this instance */
+    /** Returns an array of all direct tp.tpElement children
+     * @returns {tp.tpElement[]} Returns an array of all direct tp.tpElement children
+     * */
+    GetControlList() {
+        let ResultList = [];
+        let List = this.GetElementList();
+        List.forEach((el) => {
+            let o = tp.GetScriptObject(el);
+            if (o)
+                ResultList.push(o);
+        });
 
-    /* direct tp.tpElement children */
+        return ResultList;
+    }
     /**
     Returns the associated tp.tpElement of a direct child  (DOM element) found at a specified index, if any, else null
     @param {number} Index The index to use.
     @returns {tp.tpElement} Returns the associated tp.tpElement of a direct child  (DOM element) found at a specified index, if any, else null
     */
-    ControlAt(Index) {
-        let el = this.ChildAt(Index);
-        let o = tp.GetObject(el);
-        return o instanceof tp.tpElement ? o : null;
+    GetControlAt(Index) {
+        let el = this.GetElementAt(Index);
+        let o = tp.GetScriptObject(el);
+        return o;
     }
     /**
     Adds a child tp.tpElement to this instance and returns the child.
-    @param {string|tp.tpElement} Child - Could be any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. or a tp.tpElement
+    @param {string|tp.tpElement} Child - A tp.tpElement instance or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. 
     @returns {tp.tpElement} Returns the newly added tp.tpElement.
     */
     AddControl(Child) {
@@ -12917,7 +12962,7 @@ tp.tpElement = class extends tp.tpObject {
     /**
     Inserts a child tp.tpElement to this instance, at a specified child position, and returns the child.
     @param {number|Node} IndexOrNode - A number indicating the child position or an already existing child element
-    @param {string|tp.tpElement} Child - Could be any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. or a tp.tpElement
+    @param {string|tp.tpElement} Child - A tp.tpElement instance or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
     @returns {tp.tpElement} Returns the newly inserted tp.tpElement.
     */
     InsertControl(IndexOrNode, Child) {
@@ -12942,7 +12987,7 @@ tp.tpElement = class extends tp.tpObject {
                     beforeElement = IndexOrNode;
                 }
 
-                if (tp.IsElement(beforeElement) && this.IsChild(beforeElement)) {
+                if (tp.IsElement(beforeElement) && this.IsChildElement(beforeElement)) {
                     this.Handle.insertBefore(Child.Handle, beforeElement);
                 }
             }
@@ -12972,12 +13017,12 @@ tp.tpElement = class extends tp.tpObject {
 
     }
 
-    /* direct DOM element children */
+    /* direct HTMLElement children */
     /**
     Returns an array with the direct HTMLElement children of this element
     @returns {HTMLElement[]} Returns an array with the direct HTMLElement children of this element
     */
-    GetChildren() {
+    GetElementList() {
         return this.Handle ? tp.ChildHTMLElements(this.Handle) : [];
     }
     /**
@@ -12985,8 +13030,8 @@ tp.tpElement = class extends tp.tpObject {
     @param {number} Index The index to use
     @returns {HTMLElement} Returns a direct child (DOM element) found at a specified index, if any, else null
     */
-    ChildAt(Index) {
-        let List = this.GetChildren();
+    GetElementAt(Index) {
+        let List = this.GetElementList();
         if (tp.InRange(List, Index)) {
             return List[Index];
         }
@@ -12998,7 +13043,7 @@ tp.tpElement = class extends tp.tpObject {
     @param {string|HTMLElement|tp.tpElement} Child The child to find the index
     @returns {number} Returns the index of a direct child, if exists, else -1.
     */
-    IndexOfChild(Child) {
+    IndexOfElement(Child) {
         if (this.Handle) {
             let el = null;
 
@@ -13011,7 +13056,7 @@ tp.tpElement = class extends tp.tpObject {
             }
 
             if (el) {
-                let List = this.GetChildren();
+                let List = this.GetElementList();
                 for (let i = 0, ln = List.length; i < ln; i++) {
                     if (el === List[i])
                         return i;
@@ -13026,72 +13071,87 @@ tp.tpElement = class extends tp.tpObject {
      @param {string|HTMLElement|tp.tpElement} Child The child to check
      @return {boolean} Retuns true if a specified element is a direct child of this element.
      */
-    IsChild(Child) { return this.IndexOfChild(Child) !== -1; }
+    IsChildElement(Child) { return this.IndexOfElement(Child) !== -1; }
     /**
     Adds a child HTMLElement to this instance and returns the child.
-    @param {string|HTMLElement} Child - Could be any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. or a HTMLElement
+    @param {string|HTMLElement} Child - A HTMLElement or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
     @returns {HTMLElement} Returns the newly added child HTMLElement
     */
-    AddChild(Child) {
-        return this.InsertChild(this.Count, Child);
-    }
-    /**
-    Inserts a child HTMLElement to this instance, at a specified child position, and returns the child.
-    @param {number|Node} IndexOrNode - A number indicating the child position or an already existing child element
-    @param {string|HTMLElement} Child - Could be any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. or a tp.tpElement
-    @returns {HTMLElement} Returns the newly added child HTMLElement
-    */
-    InsertChild(IndexOrNode, Child) {
+    AddElement(Child) {
+        let Result = null;
+
         if (this.Handle) {
 
             if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
                 Child = this.Handle.ownerDocument.createElement(Child);
             }
 
+            if (tp.IsHTMLElement(Child)) {
+                this.Handle.appendChild(Child);
+                Result = Child;
+            }
+        }
+ 
 
+        return Result;
+    }
+    /**
+    Inserts a child HTMLElement to this instance, at a specified child position, and returns the child.
+    @param {number|Node} IndexOrNode - A number indicating the child position or an already existing child element
+    @param {string|HTMLElement} Child - Child - A HTMLElement or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
+    @returns {HTMLElement} Returns the newly added child HTMLElement
+    */
+    InsertElement(IndexOrNode, Child) {
+        let Result = null;
+
+        if (this.Handle) {
+
+            if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
+                Child = this.Handle.ownerDocument.createElement(Child);
+            }
 
             if (tp.IsHTMLElement(Child)) {
+                let List = this.GetElementList();
 
-                let Count = this.Count;
-                let ChildrenList = this.GetChildren();
-                let beforeElement = null;
-
-                if (Count === 0) {
-                    this.Handle.appendChild(Child);
-                    return Child;
-                }                
-
+                // find the index
+                let Index = -1;
                 if (tp.IsNumber(IndexOrNode)) {
-                    if (IndexOrNode >= Count || IndexOrNode < 0) {
-                        this.Handle.appendChild(Child);
-                        return Child;
-                    }
-                    else if (IndexOrNode >= 0 && IndexOrNode <= ChildrenList.length - 1)  
-                            beforeElement = ChildrenList[IndexOrNode];
+                    Index = IndexOrNode;
                 }
-                else if (tp.IsHTMLElement(IndexOrNode) && ChildrenList.indexOf(IndexOrNode) !== -1) {
-                    beforeElement = IndexOrNode;
+                else if (tp.IsHTMLElement(IndexOrNode)) {
+                    Index = List.indexOf(IndexOrNode);
                 }
 
-                if (beforeElement) {
-                    this.Handle.insertBefore(Child, beforeElement);
-                    return Child;
+                // insert the new element
+                if (Index >= 0 && Index <= List.length - 1) {
+                    List.forEach(item => tp.Remove(item));
+                    tp.ListInsert(List, Index, Child);
+                    List.forEach(item => this.Handle.appendChild(item));
+
+                    Result = Child;
                 }
             }
- 
-        }
+        } 
 
-        return null;
+        return Result;
     }
-
+    /**
+    Adds a div to this instance and returns the HTMLDivElement
+    @returns {HTMLDivElement} Returns a HTMLDivElement
+    */
+    AddDivElement() {
+        let Result = this.Handle.ownerDocument.createElement('div');
+        this.Handle.appendChild(Result);
+        return Result;
+    }
     /**
     Removes a direct child
     @param {string|HTMLElement} Child The child to remove
     */
-    RemoveChild(Child) {
-        let Index = this.IndexOfChild(Child);
+    RemoveElement(Child) {
+        let Index = this.IndexOfElement(Child);
         if (Index !== -1) {
-            let List = this.GetChildren();
+            let List = this.GetElementList();
             this.Handle.removeChild(List[Index]);
         }
     }
@@ -13099,43 +13159,20 @@ tp.tpElement = class extends tp.tpObject {
     Removes a direct child by index
     @param {number} Index The index of the child to remove
     */
-    RemoveChildAt(Index) {
-        let Child = this.ChildAt(Index);
+    RemoveElementAt(Index) {
+        let Child = this.GetElementAt(Index);
         if (Child)
             this.Handle.removeChild(Child);
     }
     /**
     Removes all children
    */
-    ClearChildren() {
+    RemoveAllElements() {
         if (this.Handle) {
             tp.RemoveChildren(this.Handle);
         }
     }
-
-    /* miscs */
-    /**
-    Adds a div to this instance, creates a tp.tpElement on that div and returns the tp.tpElement
-    @returns {tp.tpElement} Returns a tp.tpElement.
-    */
-    AddDiv() { return this.AddControl('div'); }
-    /**
-    Adds a span to this instance, creates a tp.tpElement on that span and returns the tp.tpElement
-    @returns {tp.tpElement} Returns a tp.tpElement.
-    */
-    AddSpan() { return this.AddControl('span'); }
-
-
-
-    /**
-    Attaches this element as a direct child to document.body
-    */
-    ToBody() {
-        if (this.Handle) {
-            this.Handle.ownerDocument.body.appendChild(this.Handle);
-        }
-    }
-
+ 
 };
 
 // ------------------------------------------------------------
@@ -14558,10 +14595,11 @@ outline: none;
     }
     /**
     Override
+    @protected
     */
-    Dispose() {
+    DoDispose() {
         this.DisposeOverlay();
-        super.Dispose();
+        super.DoDispose();
     }
     /**
     Override
@@ -15116,11 +15154,11 @@ tp.ContentWindow = class extends tp.tpWindow {
     @override
     @protected
     */
-    Dispose() {
+    DoDispose() {
         if (tp.IsElement(this.Args.ContentParent)) {
             this.Args.ContentParent.appendChild(this.Args.Content);
         }
-        super.Dispose();
+        super.DoDispose();
     }
     /** Creates all controls of this window.
     @override
@@ -15985,9 +16023,9 @@ background-color: ${BorderColor};
     @protected
     @override
     */
-    Dispose() {
+    DoDispose() {
         tp.NotificationBoxes.Remove(this.Handle);
-        super.Dispose();
+        super.DoDispose();
     }
 };
 /** Field

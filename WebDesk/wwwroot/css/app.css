@@ -76,9 +76,7 @@ script {
 .tp-TextTop .tp-CheckBoxRow {
     padding-left: 0;
     padding-right: 0;
-}
-
- 
+} 
 
 .tp-SqlFilter-Ctrl input[type=text], 
 .tp-SqlFilter-Ctrl input[type=number], 
@@ -111,15 +109,6 @@ script {
 .tp-CtrlRow select:focus {
     border: 1px solid var(--GrayDarkDeep);
 } 
-
-/*
-.tp-CtrlRow textarea {
-    border: 1px solid var(--Gray);
-    padding: 4px;
-}
-*/
- 
- 
 
  
 /* background color on hover */
@@ -214,7 +203,7 @@ button:not(.btn-test),
 
 /*---------------------------------------------------------------------------------------
   tab bar
----------------------------------------------------------------------------------------*/
+
 .tab-container {
     position: relative;
     display: flex; 
@@ -268,32 +257,10 @@ button:not(.btn-test),
 .tab-container > .tab-bar > .tab-item > .tp-Text {
     position: relative;
 }
-/*---------------------------------------------------------------------------------------
-  tab pager
 ---------------------------------------------------------------------------------------*/
 
-.pager-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
+ 
 
-.pager-container > .top-zone {
-    position: relative;
-    display: flex;
-    align-items: center; 
-
-    background-color: var(--Color1);
-    color: var(--White);
-}
-
-.pager-container > .page-list {
-    position: relative;
-    display: flex;
-    flex-grow: 1;
-    width: 100%;
-}
 
 /*---------------------------------------------------------------------------------------
   header
@@ -321,35 +288,7 @@ button:not(.btn-test),
     width: 100%;
 } 
 
-/*---------------------------------------------------------------------------------------
-  main-menu
----------------------------------------------------------------------------------------*/
  
-.header .main-menu .tab-bar > .tab-item > .tp-List {
-    display: none;
-    position: fixed;
-    z-index: 2;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    background-color: var(--GrayLight);
-    color: var(--Black);
-}
-
-.header .main-menu .tab-bar > .tab-item > .tp-List.tp-Visible {
-    display: block;
-}
-
-.header .main-menu .tab-bar > .tab-item > .tp-List > * {
-    display: flex;
-    min-height: 2em;
-    align-items: center;
-    padding: 0 0.9em 0 0.6em;
-}
-
-.header .main-menu .tab-bar > .bar-item > .tp-List > *:hover {
-    border-left: 4px solid var(--HoverColor);
-    padding-left: 6px;   
-}
-
 
 
 /*---------------------------------------------------------------------------------------
