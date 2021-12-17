@@ -275,7 +275,7 @@ namespace Tripous.Data
                 {
                     if (IsBrowserSelect)
                     {
-                        if (FieldDes.DataType.IsBlob() && ((Flags & BuildSqlFlags.BrowseBlobFields) == BuildSqlFlags.None))
+                        if (FieldDes.DataType.IsBlob() && ((Flags & BuildSqlFlags.IncludeBlobFields) == BuildSqlFlags.None))
                             continue;
                     }
 

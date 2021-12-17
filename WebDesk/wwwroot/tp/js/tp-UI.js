@@ -47,6 +47,9 @@ tp.Classes = {
     List: 'tp-List',
     ListItem: 'tp-ListItem',
 
+    Edit: 'tp-Edit',
+ 
+
     Viewport: 'tp-Viewport',
     Container: 'tp-Container',
 
@@ -341,9 +344,6 @@ tp.Classes = {
     Summary: 'tp-Summary',
 
     CellTube: 'tp-Cell-Tube',
-
-    ViewBrowserGrid: 'ViewBrowserGrid',
-
 
     /* icons                ----------------------------------------------------------------- */
     IcoArrowDown: 'fa fa-caret-down', // 'fa fa-caret-down'  ti ti-ArrowDown
@@ -1494,6 +1494,12 @@ tp.TabControl = class extends tp.tpElement {
 
 
     /* public */
+    /** Shows or hides the tab-bar according to a specified flag
+     * @param {boolean} Flag 
+     */
+    ShowTabBar(Flag) {
+        this.TabBar.Visible = Flag === true;
+    }
     /** Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
      * @returns {HTMLElement[]} Returns an array with the Tab HTML Elements (tab captions). The array may be empty.
      * */
@@ -1518,6 +1524,12 @@ tp.TabControl = class extends tp.tpElement {
         });
 
         return Result;
+    }
+    /** Returns the number of pages
+     * @returns {number} Returns the number of pages
+     * */
+    GetPageCount() {
+        return this.GetPageList().length;
     }
 
     /**
@@ -18008,7 +18020,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
     /**
     Constructor <br />
     The passed-in element is DIV where to build the Filters panel Ui. <br />
-    The CreateParams passed-in MUST contain a property named SelectList, 
+    The CreateParams passed-in MUST contain a property named SelectSqlList,
     which is a list of {@link tp.SelectSql} items to display. The first item must be named 'Main' is it is non-editable and non-deletable.
     @param {string|HTMLElement} [ElementOrSelector] - Optional.
     @param {Object} [CreateParams] - Optional.
@@ -18022,14 +18034,14 @@ tp.SelectSqlListUi = class extends tp.tpElement {
      * @type {tp.SqlFilterPanel}
      */
     get SelectedFilterPanel() {
-        let elOption = this.cboSelectList.SelectedItem;
+        let elOption = this.cboSelectSqlList.SelectedItem;
         return elOption.PanelInfo.Panel;
     }
     /** The currently selected {@link tp.SelectSql}
      * @type {tp.SelectSql}
      */
     get SelectedSelectSql() {
-        let elOption = this.cboSelectList.SelectedItem;
+        let elOption = this.cboSelectSqlList.SelectedItem;
         return elOption.PanelInfo.SelectSql;
     }
 
@@ -18082,11 +18094,11 @@ tp.SelectSqlListUi = class extends tp.tpElement {
             Width: 240
         };
 
-        this.cboSelectList = new tp.HtmlComboBox(null, CP);
+        this.cboSelectSqlList = new tp.HtmlComboBox(null, CP);
 
-        // SelectList comes from CreateParams.
-        this.SelectList.forEach(item => {
-            let elOption = this.cboSelectList.Add(item.Name, '');
+        // SelectSqlList comes from CreateParams.
+        this.SelectSqlList.forEach(item => {
+            let elOption = this.cboSelectSqlList.Add(item.Name, '');
 
             elOption.PanelInfo = {
                 SelectSql: item,
@@ -18094,7 +18106,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
             }
         });
 
-        this.cboSelectList.On('SelectedIndexChanged', this.cboSelectList_SelectedIndexChanged, this);
+        this.cboSelectSqlList.On('SelectedIndexChanged', this.cboSelectSqlList_SelectedIndexChanged, this);
 
         // ToolBar
         el = tp.Select(this.Handle, '.ToolBar');
@@ -18108,7 +18120,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
         this.PanelList = new tp.PanelList(el);
 
 
-        this.cboSelectList.OnSelectedIndexChanged();
+        this.cboSelectSqlList.OnSelectedIndexChanged();
 
     }
 
@@ -18165,7 +18177,7 @@ tp.SelectSqlListUi = class extends tp.tpElement {
     @protected
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
-    cboSelectList_SelectedIndexChanged(Args) {
+    cboSelectSqlList_SelectedIndexChanged(Args) {
         Args.Handled = true;
         let elOption = Args.Sender.SelectedItem;
 
@@ -18218,7 +18230,7 @@ tp.SelectSqlListUi.prototype.elPanel = null;
  * NOTE: Comes from CreateParams.
  * @type {tp.SelectSql[]}
  */
-tp.SelectSqlListUi.prototype.SelectList = [];
+tp.SelectSqlListUi.prototype.SelectSqlList = [];
 /** ToolBar
  * @type {tp.ToolBar}
  */
@@ -18226,7 +18238,7 @@ tp.SelectSqlListUi.prototype.ToolBar = null;
 /** ComboBox displaying the select statements
  * @type {tp.HtmlComboBox}
  */
-tp.SelectSqlListUi.prototype.cboSelectList = null;
+tp.SelectSqlListUi.prototype.cboSelectSqlList = null;
 /** A panel list. Each panel corresponds to single {@link tp.SelectSql} instance.
  * @type {tp.PanelList}
  */
@@ -21683,7 +21695,7 @@ tp.Ui.Types = {
     RadioGroup: tp.RadioGroup,
     ValueSlider: tp.ValueSlider,    
     ProgressBar: tp.ProgressBar,
-    TreeView: tp.TreeView
+    TreeView: tp.TreeView,   
 
 };
 

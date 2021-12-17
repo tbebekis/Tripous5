@@ -31,7 +31,7 @@ namespace WebLib
     {
         static bool IsUiRequest(AjaxRequest R)
         {
-            return R.Params != null && R.Params.ContainsKey("Type") && R.Params["Type"] != null && R.Params["Type"].ToString() == "Ui";
+            return R.Params != null && R.Params.ContainsKey("Type") && R.Params["Type"] != null && Sys.IsSameText(R.Params["Type"].ToString(), "Ui");
         }
         static bool IsSingleInstance(AjaxRequest R)
         {

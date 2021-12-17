@@ -675,15 +675,9 @@ tp.DeskView = class extends tp.View {
      * @param {tp.Command} Cmd The command to execute.
      * @returns {object} Returns the Packet from the server.
      */
-    async AjaxExecuteDialog(Cmd) {
-
-        let Params = {
-            ViewName: Cmd.Name
-        };
-        Params = tp.MergeQuick(Params, Cmd.Params);
-        let Request = new tp.DeskAjaxRequest("GetHtmlView", Params);
+    async AjaxExecuteDialog(Cmd) { 
+        let Request = tp.DeskAjaxRequest.CreateFromCommand(Cmd);   
         let Packet = await tp.Desk.AjaxExecute(Request);
-
         return Packet;
     }
 
@@ -777,9 +771,12 @@ tp.SysDataViewList = class extends tp.DeskView {
     async ShowModal(IsInsert) {
 
         // get the packet
-        let DataType = this.Setup.DataType;
+        let DataType = this.CreateParams.DataType;
+
         let Cmd = new tp.Command();
         Cmd.Name = IsInsert === true ? `Ui.SysData.Insert.${DataType}` : `Ui.SysData.Edit.${DataType}`;
+        Cmd.Type = 'Ui';
+
         if (IsInsert !== true) {
             let Row = this.Grid.DataSource.Current;
             Cmd.Params.Id = Row.GetByName('Id');

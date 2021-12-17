@@ -237,7 +237,7 @@ namespace Tripous.Data
         /// </summary>
         public SelectSql[] GetMergedSelectSqlList()
         {
-            SelectSql[] statements = SelectList.ToArray();
+            SelectSql[] statements = SelectSqlList.ToArray();
             List<SelectSql> List = new List<SelectSql>(statements);
 
             /*
@@ -332,14 +332,14 @@ namespace Tripous.Data
         {
             get
             {
-                SelectSql Result = SelectList.Find(item => item.Name.IsSameText(Sys.MainSelect));
+                SelectSql Result = SelectSqlList.Find(item => item.Name.IsSameText(Sys.MainSelect));
                 if (Result == null)
                 {
                     Result = new SelectSql();
                     Result.Name = Sys.MainSelect;
                     if (!string.IsNullOrWhiteSpace(MainTableName))
                         Result.Text = $"select * from {MainTableName}";  
-                    SelectList.Insert(0, Result);
+                    SelectSqlList.Insert(0, Result);
                 }
 
                 return Result;
@@ -349,7 +349,7 @@ namespace Tripous.Data
         /// <summary>
         /// The list of select statements
         /// </summary>
-        public List<SelectSql> SelectList { get; set; } = new List<SelectSql>();
+        public List<SelectSql> SelectSqlList { get; set; } = new List<SelectSql>();
         /// <summary>
         /// Gets the table descriptors
         /// </summary>

@@ -51,7 +51,7 @@ namespace Tripous.Data
                 foreach (var QD in Descriptor.Queries)
                     QueryNames.Add(QD.Name);
 
-                SelectList.AddRange(Descriptor.GetMergedSelectSqlList());
+                SelectSqlList.AddRange(Descriptor.GetMergedSelectSqlList());
             }
 
             // tables
@@ -130,7 +130,7 @@ namespace Tripous.Data
         /// <summary>
         /// Tables
         /// </summary>
-        public List<SelectSql> SelectList { get; set; } = new List<SelectSql>();
+        public List<SelectSql> SelectSqlList { get; set; } = new List<SelectSql>();
 
     }
 }

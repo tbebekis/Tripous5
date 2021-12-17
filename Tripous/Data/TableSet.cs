@@ -650,10 +650,10 @@ namespace Tripous.Data
         }
         /// <summary>
         /// Executes the SELECT SqlText and puts the returned data rows to the Table.
-        /// <para>It is used when selecting for the browse part of a data form.</para>
+        /// <para>It is used when selecting for the List (browser) part of a data form.</para>
         /// <para>Normally the Table passed to this method is not part of the table tree of the TableSet.</para>
         /// </summary>
-        public int SelectBrowser(MemTable Table, string SqlText)
+        public int SelectList(MemTable Table, string SqlText)
         {
             int Result = 0;
 

@@ -140,15 +140,15 @@ namespace WebDesk.Controllers
         /// Action. The SqlText could be a SELECT statement or a SelectSql Name from
         /// the SelectList of the broker.
         /// </summary>
-        [Route("/Broker/SelectBrowser")]
-        public JsonResult SelectBrowser(string BrokerName, string SqlText, bool UseRowLimit)
+        [Route("/Broker/SelectList")]
+        public JsonResult SelectList(string BrokerName, string SqlText, bool UseRowLimit)
         {
             HttpActionResult Result = new HttpActionResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
-                JsonDataTable Packet = broker.JsonSelectBrowser(SqlText, UseRowLimit? -1: 0);
-                Packet.Name = "Browser";
+                JsonDataTable Packet = broker.JsonSelectList(SqlText, UseRowLimit? -1: 0);
+                Packet.Name = "List";
                 Result.SerializePacket(Packet);  
                 Result.IsSuccess = true;
             }

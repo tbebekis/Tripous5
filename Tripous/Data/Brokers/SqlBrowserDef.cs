@@ -48,7 +48,7 @@ namespace Tripous.Data
                 return;
 
             SelectList.Clear();
-            SelectList.AddRange(BrokerDes.SelectList);
+            SelectList.AddRange(BrokerDes.SelectSqlList);
         }
 
         /* properties */

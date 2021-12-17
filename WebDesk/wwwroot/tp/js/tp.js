@@ -12879,14 +12879,20 @@ tp.tpElement = class extends tp.tpObject {
         return this.Handle ? tp.GetScriptObjects(this.Handle) : [];
     }
     /**
-    Returns a direct or nested child tp.tpElement having a specified css class, if any, else null
+    Returns the first found direct or nested child tp.tpElement having a specified css class, if any, else null
     @param {string} v - The css class
+    @param {string|HTMLElement} Optional. The parent element or selector to parent element.
     @returns {tp.tpElement} The found tp.tpElement or null
     */
-    FindControlByCssClass(v) {
-        var List = this.GetControls();
+    FindControlByCssClass(v, elParent = null) {
+ 
+        if (!tp.IsValid(elParent))
+            elParent = this.Handle;
+
+        let List = tp.GetObjects(elParent);
+ 
         for (var i = 0, ln = List.length; i < ln; i++) {
-            if (List[i].HasClass(v))
+            if (List[i] instanceof tp.tpElement && List[i].HasClass(v))
                 return List[i];
         }
         return null;

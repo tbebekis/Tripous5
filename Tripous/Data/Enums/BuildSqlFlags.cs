@@ -28,9 +28,9 @@ namespace Tripous.Data
         /// </summary>
         GuidOids = 2,
         /// <summary>
-        /// When is set indicates that blob fields must included into the SELECT of the Browse part.
+        /// When is set indicates that blob fields must included into the SELECT of the List (browser) part.
         /// </summary>
-        BrowseBlobFields = 4,
+        IncludeBlobFields = 4,
         /// <summary>
         /// When is set indicates that look up fields are included in the generated S with join clauses
         /// </summary>

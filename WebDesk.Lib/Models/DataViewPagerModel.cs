@@ -35,9 +35,9 @@ namespace WebLib.Models
 
         /* properties */
         /// <summary>
-        /// Css classes for the pager, e.g. 'TabControl ViewDataPager'
+        /// Css classes for the pager, e.g. 'tp-TabControl'
         /// </summary>
-        public string CssClasses { get; set; } = "TabControl ";
+        public string CssClasses { get; set; } = "TabControl";
         /// <summary>
         /// Text of the data-setup attribute, e.g. '{ SelectedIndex: 0 }'
         /// </summary>

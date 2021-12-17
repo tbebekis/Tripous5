@@ -12,25 +12,26 @@
 @if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
 {
     <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Setup.Serialize())'>
+        
         @await Html.PartialAsync("DataView.ToolBar", Model.ViewDef.ToolBarFlags)
  
-        <div class="PanelList ViewPanelList tp-PanelList" data-setup="{ SelectedIndex: 0 }">
+        <div class="PanelList" data-setup="{ SelectedIndex: 0 }">
 
-            <div class="ViewBrowserPanel" data-setup="{ PanelMode: 'List' }">
-                <div class="ViewBrowserGrid tp-Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+            <div data-setup="{ PanelMode: 'List' }">
+                <div class="Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
             </div>    
 
-            <div class="ViewEditPanel" data-setup="{ PanelMode: 'Edit' }">
+            <div data-setup="{ PanelMode: 'Edit' }">
                 @{ // this creates the Edit panel, the container of the edit part of the view.
                     DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef);
-                    PagerModel.CssClasses = "TabControl ViewDataPager";
+                    PagerModel.CssClasses = "TabControl";
                     PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
 
                     @await Html.PartialAsync("DataView.Tabs", PagerModel)
                 }
             </div>            
 
-            <div class="ViewFilterPanel" data-setup="{ PanelMode: 'Filters' }">
+            <div data-setup="{ PanelMode: 'Filters' }">
             </div>
         </div>
 

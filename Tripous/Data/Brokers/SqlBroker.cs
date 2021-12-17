@@ -284,7 +284,7 @@ namespace Tripous.Data
                 Result |= BuildSqlFlags.OidModeIsBefore;
 
             if (IsListBroker)
-                Result |= BuildSqlFlags.BrowseBlobFields;
+                Result |= BuildSqlFlags.IncludeBlobFields;
 
             return Result;
         }
@@ -596,22 +596,22 @@ namespace Tripous.Data
 
 
 
-        /* browser select */
+        /* List select */
         /// <summary>
         /// Executes a SELECT statements and puts the returned data rows to the Table.
         /// <para>SqlText could be the statement text or a SelectSql Name found in Descriptor.SelectList.</para>
         /// <para>RowLimit greater than zero, is an instruction to apply a row limit to the SELECT statement</para>
-        /// <para>NOTE: This method is used when selecting for the browse part of a data form. 
+        /// <para>NOTE: This method is used when selecting for the List (browser) part of a data form. 
         ///  Normally the Table passed to this method is not part of the table tree of the TableSet.</para>
         /// </summary>
-        public virtual int SelectBrowser(MemTable Table, string SqlText, int RowLimit)
+        public virtual int SelectList(MemTable Table, string SqlText, int RowLimit)
         {
             SelectSql SS = null;
             string SelectSqlName = SqlText.Trim();
 
             if (!SelectSqlName.StartsWithText("SELECT")) // it's a SelectSql name
             {
-                SS = this.Descriptor.SelectList.Find(item => item.Name.IsSameText(SelectSqlName));
+                SS = this.Descriptor.SelectSqlList.Find(item => item.Name.IsSameText(SelectSqlName));
                 SqlText = SS.Text;
             }
 
@@ -621,16 +621,16 @@ namespace Tripous.Data
             Store.Provider.ApplyRowLimit(SS, RowLimit);
             SqlText = SS.Text;
 
-            return TableSet.SelectBrowser(Table, SqlText);
+            return TableSet.SelectList(Table, SqlText);
         }
         /// <summary>
         /// Executes the SELECT SqlText and puts the returned data rows to the Table.
-        /// <para>It is used when selecting for the browse part of a data form.</para>
+        /// <para>It is used when selecting for the List (browser) part of a data form.</para>
         /// <para>Normally the Table passed to this method is not part of the table tree of the TableSet.</para>
         /// </summary>
-        public virtual int SelectBrowser(MemTable Table, string SqlText)
+        public virtual int SelectList(MemTable Table, string SqlText)
         {
-            return TableSet.SelectBrowser(Table, SqlText);
+            return TableSet.SelectList(Table, SqlText);
         }
  
         /* batch commits */
@@ -961,14 +961,14 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// SelectBrowser json counterpart
+        /// SelectList json counterpart
         /// <para>SqlText could be the statement text or a SelectSql Name found in Descriptor.SelectList.</para>
         /// <para>RowLimit greater than zero, is an instruction to apply a row limit to the SELECT statement</para>
         /// </summary>
-        public virtual JsonDataTable JsonSelectBrowser(string SqlText, int RowLimit)
+        public virtual JsonDataTable JsonSelectList(string SqlText, int RowLimit)
         {
             MemTable Table = new MemTable();
-            SelectBrowser(Table, SqlText, RowLimit);
+            SelectList(Table, SqlText, RowLimit);
             JsonDataTable JTable = new JsonDataTable(Table, null);
             return JTable;
         }

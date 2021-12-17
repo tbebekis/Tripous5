@@ -1,21 +1,17 @@
 ﻿//---------------------------------------------------------------------------------------
-// registry
+// Urls
 //---------------------------------------------------------------------------------------
-
-tp.Urls.GetRegistryItem = '/App/GetRegistryItem';
-tp.Urls.GetRegistryList = '/App/GetRegistryList';
 
 tp.Urls.BrokerInitialize = '/Broker/Initialize';
 tp.Urls.BrokerInsert = '/Broker/Insert';
 tp.Urls.BrokerEdit = '/Broker/Edit';
 tp.Urls.BrokerDelete = '/Broker/Delete';
 tp.Urls.BrokerCommit = '/Broker/Commit';
-tp.Urls.BrokerSelectBrowser = '/Broker/SelectBrowser'; 
-
+tp.Urls.BrokerSelectList = '/Broker/SelectList'; 
  
-
-
- 
+//---------------------------------------------------------------------------------------
+// Broker
+//---------------------------------------------------------------------------------------
 
 //#region tp.BrokerAction
 
@@ -63,8 +59,8 @@ tp.BrokerAction = class {
                 this.AssignFlag = true;
                 break;
 
-            case tp.BrokerAction.SelectBrowser:
-                this.Args.Url = tp.Urls.BrokerSelectBrowser;
+            case tp.BrokerAction.SelectList:
+                this.Args.Url = tp.Urls.BrokerSelectList;
                 this.AssignFlag = false;
                 break;
         }
@@ -92,7 +88,7 @@ tp.BrokerAction = class {
     AssignFlag;
 
     /**
-    The SELECT of a SelectBrowser
+    The SELECT of a List part 
     @type {tp.SelectSql}
     */
     SelectSql;
@@ -114,7 +110,7 @@ tp.BrokerAction.Insert = 'Insert';
 tp.BrokerAction.Edit = 'Edit';
 tp.BrokerAction.Delete = 'Delete';
 tp.BrokerAction.Commit = 'Commit';
-tp.BrokerAction.SelectBrowser = 'SelectBrowser';
+tp.BrokerAction.SelectList = 'SelectList';
 
 //#endregion
 
@@ -239,10 +235,9 @@ tp.Broker = class extends tp.tpObject {
     InitializeFields() {
         this.Name = tp.NextName('Broker');
         this.QueryNames = [];
-        this.SelectList = [];
+        this.SelectSqlList = [];
 
-        this.tblBrowser = null;
-        this.SelectList = null;
+        this.tblList = null;
         this.DataSet = new tp.DataSet();
 
         this.fInitialized = false;
@@ -263,28 +258,28 @@ tp.Broker = class extends tp.tpObject {
     }
 
     /**
-    Creates and returns the browser {@link tp.DataTable} data table
+    Creates and returns the List {@link tp.DataTable} data table
     @protected
     @param {object} Source The source object to copy property values from.
-    @returns {tp.DataTable} Returns the browser {@link tp.DataTable} data table
+    @returns {tp.DataTable} Returns the List {@link tp.DataTable} data table
     */
-    CreateBrowserTable(Source) {
-        this.tblBrowser = new tp.DataTable("Browser");
-        this.tblBrowser.Assign(Source);
-        return this.tblBrowser;
+    CreateListTable(Source) {
+        this.tblList = new tp.DataTable("List");
+        this.tblList.Assign(Source);
+        return this.tblList;
     }
     /**
     Assigns the select list, that is the array of {@link tp.SelectSql} items.
     @protected
-    @param {any[]} SourceList An array of {@link tp.SelectSql} items to copy items from.
+    @param {any[]} Source An array of {@link tp.SelectSql} items to copy items from.
     */
-    AssignSelectList(SourceList) {
-        this.SelectList = [];
+    AssignSelectSqlList(Source) {
+        this.SelectSqlList = [];
         let SS; // tp.SelectSql;
-        for (let i = 0, ln = SourceList.length; i < ln; i++) {
+        for (let i = 0, ln = Source.length; i < ln; i++) {
             SS = new tp.SelectSql();
-            this.SelectList.push(SS);
-            SS.Assign(SourceList[i]);
+            this.SelectSqlList.push(SS);
+            SS.Assign(Source[i]);
         }
     }
     /**
@@ -294,10 +289,10 @@ tp.Broker = class extends tp.tpObject {
     @returns {tp.SelectSql} Returns a {@link tp.SelectSql} item by name, if any, else null
     */
     FindSelectSql(Name) {
-        if (!tp.IsEmpty(this.SelectList) && tp.IsString(Name) && !tp.IsBlank(Name)) {
+        if (!tp.IsEmpty(this.SelectSqlList) && tp.IsString(Name) && !tp.IsBlank(Name)) {
             Name = tp.Trim(Name);
             if (!tp.StartsWith(Name, "SELECT ")) {
-                return tp.FirstOrDefault(this.SelectList, (item) => {
+                return tp.FirstOrDefault(this.SelectSqlList, (item) => {
                     return tp.IsSameText(Name, item.Name);
                 });
             }
@@ -424,7 +419,7 @@ tp.Broker = class extends tp.tpObject {
 
 
         if (!this.fInitialized) {
-            this.AssignSelectList(Source.SelectList);
+            this.AssignSelectSqlList(Source.SelectSqlList);
         }
 
         this.fInitialized = true;
@@ -447,7 +442,7 @@ tp.Broker = class extends tp.tpObject {
     }
 
     /**
-    Executes an action (Insert, Edit, Delete, Commit, SelectBrowser) and retuns a {@link tp.BrokerAction} {@link Promise}.
+    Executes an action (Insert, Edit, Delete, Commit, SelectList) and retuns a {@link tp.BrokerAction} {@link Promise}.
     @protected
     @param {tp.BrokerAction} Action - An information object regarding the action. It also contains the tp.AjaxArgs of the action.
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
@@ -658,7 +653,7 @@ tp.Broker = class extends tp.tpObject {
     @protected
     @param {tp.BrokerAction} Action - An {@link tp.BrokerAction} information object regarding the action.
     */
-    DoSelectBrowserBefore(Action) {
+    DoSelectListBefore(Action) {
     }
     /**
     Do function
@@ -666,7 +661,7 @@ tp.Broker = class extends tp.tpObject {
     @param {tp.BrokerAction} Action - An {@link tp.BrokerAction} information object regarding the action.
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
-    async DoSelectBrowser(Action) {
+    async DoSelectList(Action) {
         return this.Action(Action);
     }
     /**
@@ -674,7 +669,7 @@ tp.Broker = class extends tp.tpObject {
     @protected
     @param {tp.BrokerAction} Action - An {@link tp.BrokerAction} information object regarding the action.
     */
-    DoSelectBrowserAfter(Action) {
+    DoSelectListAfter(Action) {
     }
 
 
@@ -756,12 +751,12 @@ tp.Broker = class extends tp.tpObject {
         this.CheckCanDelete(Action);
         Action = await this.DoDelete(Action);
 
-        // delete row from browser table
+        // delete row from List table
         if (Action.Succeeded === true) {
-            if (this.tblBrowser instanceof tp.DataTable) {
-                let Row = this.tblBrowser.FindRow(this.PrimaryKeyField, Id);
+            if (this.tblList instanceof tp.DataTable) {
+                let Row = this.tblList.FindRow(this.PrimaryKeyField, Id);
                 if (!tp.IsEmpty(Row)) {
-                    this.tblBrowser.RemoveRow(Row);
+                    this.tblList.RemoveRow(Row);
                 }
             }
         }
@@ -800,39 +795,39 @@ tp.Broker = class extends tp.tpObject {
         return Action; 
     }
     /**
-    Executes a SELECT for the browser grid. Initializes the broker if needed. Retuns a {@link tp.BrokerAction} {@link Promise}.
+    Executes a SELECT for the List grid. Initializes the broker if needed. Retuns a {@link tp.BrokerAction} {@link Promise}.
     @param {string | tp.SelectSql} SelectSql - The SELECT statement to execute
     @param {bool} [UseRowLimit] - Optional. True to use the default row limit
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
-    async SelectBrowser(SelectSql, UseRowLimit = true) {
+    async SelectList(SelectSql, UseRowLimit = true) {
         if (this.fInitialized === false) {
             await this.Initialize();
         }
 
         this.LastSelectSql = null;
  
-        let Action = new tp.BrokerAction(this, tp.BrokerAction.SelectBrowser);
+        let Action = new tp.BrokerAction(this, tp.BrokerAction.SelectList);
         Action.Args.Data.BrokerName = this.Name;       
         Action.Args.Data.SqlText = SelectSql.Text;
         Action.Args.Data.UseRowLimit = tp.IsBoolean(UseRowLimit) ? UseRowLimit : true;
 
         Action.SelectSql = tp.IsString(SelectSql) ? new tp.SelectSql(SelectSql) : SelectSql;
 
-        this.DoSelectBrowserBefore(Action);
-        Action = await this.DoSelectBrowser(Action);
+        this.DoSelectListBefore(Action);
+        Action = await this.DoSelectList(Action);
 
         if (Action.Succeeded === true) {
             if (!tp.IsEmpty(Action) && !tp.IsEmpty(Action.Args.ResponseData.Packet)) {
                 let Packet = Action.Args.ResponseData.Packet;
-                this.CreateBrowserTable(Packet);
+                this.CreateListTable(Packet);
 
                 this.LastSelectSql = Action.SelectSql;             
-                Action.SelectSql.Table = this.tblBrowser;
+                Action.SelectSql.Table = this.tblList;
             }
         }
 
-        this.DoSelectBrowserAfter(Action);
+        this.DoSelectListAfter(Action);
 
         return Action; 
     }
@@ -869,7 +864,7 @@ tp.Broker.prototype.DataSet = null;
 /** Field
 @type {tp.DataTable}
 */
-tp.Broker.prototype.tblBrowser = null;
+tp.Broker.prototype.tblList = null;
 /** Field
 @type {string[]}
 */
@@ -877,8 +872,8 @@ tp.Broker.prototype.QueryNames = [];
 /** Field
 @type {tp.SelectSql[]}
 */
-tp.Broker.prototype.SelectList = [];
-/** Field. The last SelectSql statement executed for the browser
+tp.Broker.prototype.SelectSqlList = [];
+/** Field. The last SelectSql statement executed for the List (not for the Item) 
 @type {tp.SelectSql}
 */
 tp.Broker.prototype.LastSelectSql = null;
@@ -937,6 +932,10 @@ tp.Broker.prototype.GuidOids = true;
 
 //#endregion
 
+//---------------------------------------------------------------------------------------
+// DataView
+//---------------------------------------------------------------------------------------
+
 //#region tp.DataViewMode
 
 /**
@@ -962,7 +961,7 @@ tp.DataViewMode = {
     Save: 0x800,
     Cancel: 0x1000,
 
-    Close: 0x2000 
+    Close: 0x2000
 };
 Object.freeze(tp.DataViewMode);
 
@@ -1109,7 +1108,7 @@ tp.DataView = class extends tp.View {
         this.PrimaryKeyField = 'Id';
         this.ForceSelect = false;
     }
- 
+
     /**
     * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
     * 
@@ -1154,7 +1153,7 @@ tp.DataView = class extends tp.View {
 
     /* overridables */
 
-    /** This is called after the base class initialization completes and creates just the tool-bar, the main panel-list and the browser grid. <br />
+    /** This is called after the base class initialization completes and creates just the tool-bar, the main panel-list and the List grid. <br />
      * It also creates the broker. <br /> 
      * NOTE: Controls of the edit part are created and bound the first time an insert or edit is requested.
      * @protected
@@ -1164,7 +1163,7 @@ tp.DataView = class extends tp.View {
 
         this.CreateToolBar();
         this.CreatePanelList();
-        this.CreateBrowserGrid();
+        this.CreateListGrid();
 
         this.CreateBroker();
 
@@ -1173,31 +1172,38 @@ tp.DataView = class extends tp.View {
             this.BrokerInitialize();
         }
     }
+
+    /** Returns an array with the panels of the panel list
+     * @returns {HTMLElement[]}
+     * */
+    GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetElementList() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
+
     /** Returns a DOM Element contained by this view.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewToolBarElement() { return tp.Select(this.Handle, '.ViewToolBar'); }
+    GetViewToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
     /** Returns a DOM Element contained by this view. Returns the main panel-list which in turn contains the three part panels: Brower, Edit and Filters.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewPanelListElement() { return tp.Select(this.Handle, '.ViewPanelList'); }
-    /** Returns a DOM Element contained by this view. Returns the Browser Panel, the container of the browser grid, which displays the results of the various SELECTs of the broker.
+    GetViewPanelListElement() { return tp.Select(this.Handle, '.PanelList'); }
+
+    /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewBrowserPanelElement() { return tp.Select(this.Handle, '.ViewBrowserPanel'); }
+    GetViewListPanelElement() { return this.GetPanelListElements()[0]; }
     /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewEditPanelElement() { return tp.Select(this.Handle, '.ViewEditPanel'); }
+    GetViewEditPanelElement() { return this.GetPanelListElements()[1]; }
     /** Returns a DOM Element contained by this view. Returns the Filters panel, the container of the filter controls.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewFilterPanelElement() { return tp.Select(this.Handle, '.ViewFilterPanel'); }
+    GetViewFilterPanelElement() { return this.GetPanelListElements()[2]; }
 
-    /** Returns a DOM Element contained by this view. Returns the element upon to create the browser grid.
+    /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewBrowserGridElement() { return tp.Select(this.Handle, '.ViewBrowserGrid'); }
+    GetViewListGridElement() { return tp.Select(this.GetViewListPanelElement(), '.Grid'); }
 
     /** Creates the toolbar of the view 
      @protected
@@ -1209,38 +1215,81 @@ tp.DataView = class extends tp.View {
             this.ToolBar.On('ButtonClick', this.AnyClick, this);
         }
     }
-    /** Creates the panel-list of the view, the one with the 3 panels: Browser, Edit and Filters panels.
+    /** Creates the panel-list of the view, the one with the 3 panels: List, Edit and Filters panels.
      @protected
      */
     CreatePanelList() {
         if (tp.IsEmpty(this.PanelList)) {
             let el = this.GetViewPanelListElement();
             this.PanelList = new tp.PanelList(el);
-        }        
+        }
     }
     /**
-    Creates the browser grid. <br />
-    NOTE: For the browser grid to be created automatically by this method, a div marked with the ViewBrowserGrid is required.
+    Creates the List (browser) grid. <br />
+    NOTE: For the List (browser) grid to be created automatically by this method, a div marked with the Grid class is required in the List panel.
     @protected
     */
-    CreateBrowserGrid() {
-        if (tp.IsEmpty(this.gridBrowser)) {
-            let el = this.GetViewBrowserGridElement();
-            this.gridBrowser = new tp.Grid(el);
+    CreateListGrid() {
+        if (tp.IsEmpty(this.gridList)) {
+            let el = this.GetViewListGridElement();
+            this.gridList = new tp.Grid(el);
         }
 
-        let o = this.FindControlByCssClass(tp.Classes.ViewBrowserGrid);
-        this.gridBrowser = o instanceof tp.Grid ? o : null;
+        if (tp.IsEmpty(this.gridList)) {
+            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetViewListPanelElement());
+            this.gridList = o instanceof tp.Grid ? o : null;
+        }
 
-        if (this.gridBrowser) {
-            this.gridBrowser.ReadOnly = true;
-            this.gridBrowser.AllowUserToAddRows = false;
-            this.gridBrowser.AllowUserToDeleteRows = false;
-            this.gridBrowser.ToolBarVisible = false;            
+        if (this.gridList) {
+            this.gridList.ReadOnly = true;
+            this.gridList.AllowUserToAddRows = false;
+            this.gridList.AllowUserToDeleteRows = false;
+            this.gridList.ToolBarVisible = false;
 
-            this.gridBrowser.On(tp.Events.DoubleClick, this.BrowserGrid_DoubleClick, this);
+            this.gridList.On(tp.Events.DoubleClick, this.ListGrid_DoubleClick, this);
         }
     }
+    /** Creates and binds the controls of the edit part, if not already created.
+     * */
+    CreateEditControls() {
+        if (!this.EditControlsCreated) {
+            let el = this.GetViewEditPanelElement();
+            let ControlList = tp.Ui.CreateControls(el);
+
+            let List = tp.ChildHTMLElements(el);
+            if (List.length === 1) {
+                let o = tp.GetScriptObject(List[0]);
+                if (o instanceof tp.TabControl) {
+                    this.pagerEdit = o;
+                    if (this.pagerEdit.GetPageCount() === 1) {
+                        this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
+                    }
+                }
+            }
+
+            this.BindControls(ControlList);
+            this.EditControlsCreated = true;
+        }
+    }
+    /** Creates the controls of the filter part, if not already created. 
+     * */
+    CreateFilterControls() {
+
+        if (!tp.IsValid(this.SelectSqlListUi)) {
+            let elParent = this.FindPanelByPanelMode('Filters');
+            if (elParent) {
+                let el = tp.Div(elParent);
+                let CP = {};
+                CP.SelectSqlList = this.Broker.SelectSqlList;
+                this.SelectSqlListUi = new tp.SelectSqlListUi(el, CP);
+                this.SelectSqlListUi.On('Execute', (Args) => {
+                    this.ListSelect();
+                });
+            }
+        }
+
+    }
+
     /**
     Creates the broker based on CreateParams settings
     @protected
@@ -1268,35 +1317,6 @@ tp.DataView = class extends tp.View {
                 this.BrokerName = BrokerName;
             }
         }
-    }
-
-    /** Creates and binds the controls of the edit part, if not already created.
-     * */
-    CreateEditControls() {
-        if (!this.EditControlsCreated) {
-            let el = this.GetViewEditPanelElement();
-            let ControlList = tp.Ui.CreateControls(el);
-            this.BindControls(ControlList);
-            this.EditControlsCreated = true;
-        }
-    }
-    /** Creates the controls of the filter part, if not already created. 
-     * */
-    CreateFilterControls() {
- 
-        if (!tp.IsValid(this.SelectSqlListUi)) {
-            let elParent = this.FindPanelByPanelMode('Filters');
-            if (elParent) {
-                let el = tp.Div(elParent);
-                let CP = { };
-                CP.SelectList = this.Broker.SelectList;
-                this.SelectSqlListUi = new tp.SelectSqlListUi(el, CP);
-                this.SelectSqlListUi.On('Execute', (Args) => {
-                    this.BrowserSelect();
-                });
-            }
-        }
- 
     }
 
     /**
@@ -1367,7 +1387,7 @@ tp.DataView = class extends tp.View {
 
         return -1;
     }
- 
+
 
     /**
      * Binds controls of the Edit part. <br />
@@ -1379,7 +1399,7 @@ tp.DataView = class extends tp.View {
     BindControls(ControlList) {
 
         var i, ln, Control;
- 
+
         for (i = 0, ln = ControlList.length; i < ln; i++) {
             Control = ControlList[i];
             if (this.CanBindControl(Control))
@@ -1400,7 +1420,7 @@ tp.DataView = class extends tp.View {
                 case tp.ControlBindMode.List:
                     return !tp.IsBlank(Control.DataField);
                 case tp.ControlBindMode.Grid:
-                    return !tp.IsBlank(Control.SourceName) && !tp.HasClass(Control.Handle, tp.Classes.ViewBrowserGrid);
+                    return !tp.IsBlank(Control.SourceName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
             }
         }
 
@@ -1411,9 +1431,9 @@ tp.DataView = class extends tp.View {
     @protected
     @param {tp.Control} Control A {@link tp.Control}
     */
-    BindControl(Control) { 
+    BindControl(Control) {
         Control.DataSource = this.GetDataSource(Control.SourceName);
- 
+
         if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
             let Column = Control.DataColumn;
             if (!tp.IsBlank(Control['ListSourceName'])) {
@@ -1516,19 +1536,19 @@ tp.DataView = class extends tp.View {
 
 
     /**
-    Returns the Id (value of the primary key field) of the selected data-row of the browser grid, if any, else null.
+    Returns the Id (value of the primary key field) of the selected data-row of the List (browser) grid, if any, else null.
     @protected
     @returns {any} Returns the Id (value of the primary key field) of the selected data-row of the browser grid, if any, else null.
     */
-    GetBrowserSelectedId() {
+    GetListSelectedId() {
         if (tp.IsBlank(this.PrimaryKeyField)) {
             if (this.tblItem instanceof tp.DataTable) {
                 this.PrimaryKeyField = this.tblItem.PrimaryKeyField;
             }
         }
 
-        if (!tp.IsBlank(this.PrimaryKeyField) && !tp.IsEmpty(this.gridBrowser)) {
-            var Row = this.gridBrowser.FocusedRow;
+        if (!tp.IsBlank(this.PrimaryKeyField) && !tp.IsEmpty(this.gridList)) {
+            var Row = this.gridList.FocusedRow;
             if (!tp.IsEmpty(Row) && Row.Table.ContainsColumn(this.PrimaryKeyField)) {
                 return Row.Get(this.PrimaryKeyField);
             }
@@ -1563,7 +1583,7 @@ tp.DataView = class extends tp.View {
 
         if (Index >= 0) {
             this.SetVisiblePanel(Index);
-        } 
+        }
     }
     /**
      * Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
@@ -1574,7 +1594,7 @@ tp.DataView = class extends tp.View {
     FindPanelByPanelMode(PanelMode) {
         if (tp.IsValid(this.PanelList)) {
             let Panels = this.PanelList.GetPanels();
- 
+
             let i, ln, elPanel, Setup;
 
             for (i = 0, ln = Panels.length; i < ln; i++) {
@@ -1625,14 +1645,14 @@ tp.DataView = class extends tp.View {
     @protected
     @param {tp.BrokerAction} Action - An {@link tp.BrokerAction} information object regarding the action.
     */
-    DoInitializeAfter(Action) {        
+    DoInitializeAfter(Action) {
     }
 
     /**
     Before function
     @protected
     */
-    DoInsertBefore() {        
+    DoInsertBefore() {
     }
     /**
     Check function. It may check a number of conditions and throw an exception.
@@ -1647,7 +1667,7 @@ tp.DataView = class extends tp.View {
     */
     DoInsertAfter(Action) {
     }
- 
+
     /**
     Before function 
     @protected
@@ -1667,7 +1687,7 @@ tp.DataView = class extends tp.View {
     */
     DoEditAfter(Action) {
     }
- 
+
     /**
     Before function
     @protected
@@ -1687,7 +1707,7 @@ tp.DataView = class extends tp.View {
     */
     DoDeleteAfter(Action) {
     }
- 
+
     /**
     Before function
     @protected
@@ -1712,14 +1732,14 @@ tp.DataView = class extends tp.View {
     Before function
     @protected
     */
-    DoSelectBrowserBefore() {
+    DoSelectListBefore() {
     }
     /**
     After function
     @protected
     @param {tp.BrokerAction} Action - An {@link tp.BrokerAction} information object regarding the action.
     */
-    DoSelectBrowserAfter(Action) {
+    DoSelectListAfter(Action) {
     }
 
     /**
@@ -1757,8 +1777,8 @@ tp.DataView = class extends tp.View {
                 } else {
                     this.DisplayActionError(Action);
                 }
-            } 
-        } 
+            }
+        }
 
         return Action;
     }
@@ -1783,11 +1803,11 @@ tp.DataView = class extends tp.View {
 
                     this.ViewMode = tp.DataViewMode.Insert;
                     this.DoInsertAfter(Action);
- 
+
                 } else {
                     this.DisplayActionError(Action);
                 }
-            } 
+            }
         }
 
         return Action;
@@ -1802,7 +1822,7 @@ tp.DataView = class extends tp.View {
 
         let Action = null;
 
-        Id = Id || this.GetBrowserSelectedId();
+        Id = Id || this.GetListSelectedId();
 
         if (tp.IsEmpty(Id)) {
             tp.ErrorNote('No selected row');
@@ -1819,11 +1839,11 @@ tp.DataView = class extends tp.View {
                     this.DoEditAfter(Action);
 
                     this.ViewMode = tp.DataViewMode.Edit;
- 
+
                 } else {
                     this.DisplayActionError(Action);
                 }
-            } 
+            }
         }
 
         return Action;
@@ -1836,7 +1856,7 @@ tp.DataView = class extends tp.View {
     async Delete(Id = null) {
         let Action = null;
 
-        Id = Id || this.GetBrowserSelectedId();
+        Id = Id || this.GetListSelectedId();
 
         if (tp.IsEmpty(Id)) {
             tp.ErrorNote('No selected row');
@@ -1853,18 +1873,18 @@ tp.DataView = class extends tp.View {
                 if (Action instanceof tp.BrokerAction) {
                     if (Action.Succeeded === true) {
                         tp.SuccessNote('Deleted successfully');
- 
+
                         this.DoDeleteAfter(Action);
 
                         this.ViewMode = tp.DataViewMode.List;
- 
+
                     } else {
                         this.DisplayActionError(Action);
                     }
-                } 
-            } 
+                }
+            }
         }
- 
+
         return Action;
     }
     /**
@@ -1893,55 +1913,52 @@ tp.DataView = class extends tp.View {
                     this.ForceSelect = true;
 
                     this.ViewMode = tp.DataViewMode.Edit;
- 
+
                 } else {
                     this.DisplayActionError(Action);
                 }
-            } 
+            }
         }
 
         return Action;
     }
 
-
     /**
-    Sets the data-source of the browser grid
+    Sets the data-source of the List (browser) grid
     @param {tp.SelectSql} SelectSql - The SelectSql instance containing the DataTable.
     @protected
     */
-    UpdateBrowserDataSource(SelectSql) {
-        this.gridBrowser.DataSource = null;        
+    UpdateListDataSource(SelectSql) {
+        this.gridList.DataSource = null;
 
         if (tp.IsValid(this.Broker) && (SelectSql instanceof tp.SelectSql)) {
-            let Table = this.Broker.tblBrowser;
+            let Table = this.Broker.tblList;
 
             SelectSql.SetupTable(Table);
 
-            this.gridBrowser.AutoGenerateColumns = !tp.IsValid(SelectSql.Columns) || SelectSql.Columns.length === 0;
-            this.gridBrowser.ClearColumns();
+            this.gridList.AutoGenerateColumns = !tp.IsValid(SelectSql.Columns) || SelectSql.Columns.length === 0;
+            this.gridList.ClearColumns();
 
-            this.dsBrowser = new tp.DataSource(Table);
+            this.dsList = new tp.DataSource(Table);
 
             // grid columns should be defined before binding
-            if (!this.gridBrowser.AutoGenerateColumns)
-                this.gridBrowser.AddSelectSqlColumns(Table, SelectSql.Columns);
+            if (!this.gridList.AutoGenerateColumns)
+                this.gridList.AddSelectSqlColumns(Table, SelectSql.Columns);
 
-            this.gridBrowser.DataSource = this.dsBrowser;
-        } 
+            this.gridList.DataSource = this.dsList;
+        }
     }
 
- 
-
     /**
-    Executes a SELECT for the browser grid. Retuns a {@link tp.BrokerAction} {@link Promise}.
+    Executes a SELECT for the List (browser) grid. Retuns a {@link tp.BrokerAction} {@link Promise}.
     @param {string | tp.SelectSql} [SelectSql] - Optional. The SELECT statement to execute
     @param {number} [RowLimit] - Optional. The row limit
     @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise}.
     */
-    async BrowserSelect() {
+    async ListSelect() {
         let Action = null;
 
-        if (!tp.IsEmpty(this.Broker)) { 
+        if (!tp.IsEmpty(this.Broker)) {
 
             // SelectSql
             /** @type {tp.SelectSql} */
@@ -1951,8 +1968,8 @@ tp.DataView = class extends tp.View {
                 SelectSql = this.SelectSqlListUi.GenerateSql();
             }
 
-            if (tp.IsEmpty(SelectSql) && this.Broker.SelectList.length > 0) {
-                SelectSql = this.Broker.SelectList[0];
+            if (tp.IsEmpty(SelectSql) && this.Broker.SelectSqlList.length > 0) {
+                SelectSql = this.Broker.SelectSqlList[0];
             }
 
             // RowLimit
@@ -1967,24 +1984,24 @@ tp.DataView = class extends tp.View {
                 this.LastSelectSqlText = SqlText;
                 this.LastUseRowLimit = UseRowLimit;
 
-                this.DoSelectBrowserBefore();
+                this.DoSelectListBefore();
 
-                Action = await this.Broker.SelectBrowser(SelectSql, UseRowLimit);
+                Action = await this.Broker.SelectList(SelectSql, UseRowLimit);
 
                 if (Action instanceof tp.BrokerAction) {
                     if (Action.Succeeded === true) {
 
-                        this.UpdateBrowserDataSource(SelectSql);
+                        this.UpdateListDataSource(SelectSql);
 
-                        if (this.dsBrowser) {
-                            if (this.dsBrowser.CanFirst())
-                                this.dsBrowser.First();
-                            if (this.dsBrowser.Rows.length > 0 && this.gridBrowser) {
-                                this.gridBrowser.FocusedRow = this.dsBrowser.Rows[0];
+                        if (this.dsList) {
+                            if (this.dsList.CanFirst())
+                                this.dsList.First();
+                            if (this.dsList.Rows.length > 0 && this.gridList) {
+                                this.gridList.FocusedRow = this.dsList.Rows[0];
                             }
                         }
 
-                        this.DoSelectBrowserAfter(Action);
+                        this.DoSelectListAfter(Action);
                         this.ForceSelect = false;
 
                         this.ViewMode = tp.DataViewMode.List;
@@ -1999,7 +2016,7 @@ tp.DataView = class extends tp.View {
             }
 
 
-        } 
+        }
 
         return Action;
     }
@@ -2012,8 +2029,8 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
 @returns {tp.BrokerAction} Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if broker is already initialized. <br />
 */
     async ExecuteStartCmd() {
-        if (!tp.IsEmpty(this.gridBrowser) && !tp.IsEmpty(this.Broker) && this.Broker.Initialized)
-            await this.BrowserSelect();
+        if (!tp.IsEmpty(this.gridList) && !tp.IsEmpty(this.Broker) && this.Broker.Initialized)
+            await this.ListSelect();
         return null;
     }
 
@@ -2050,7 +2067,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
         switch (this.ViewMode) {
             case tp.DataViewMode.List:
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.List |                    
+                    tp.DataViewMode.List |
                     tp.DataViewMode.Save |
                     tp.DataViewMode.Cancel
                 );
@@ -2087,16 +2104,16 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 );
                 break;
         }
- 
 
-        if (this.dsBrowser) {
-            if (!this.dsBrowser.CanFirst())
+
+        if (this.dsList) {
+            if (!this.dsList.CanFirst())
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.First);
-            if (!this.dsBrowser.CanPrior())
+            if (!this.dsList.CanPrior())
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Prior);
-            if (!this.dsBrowser.CanNext())
+            if (!this.dsList.CanNext())
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Next);
-            if (!this.dsBrowser.CanLast())
+            if (!this.dsList.CanLast())
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Last);
         }
     }
@@ -2122,7 +2139,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
 
                         if (!tp.IsBlank(Command) && Command in tp.DataViewMode) {
                             ViewMode = tp.DataViewMode[Command];
-                            c.Enabled = tp.Bf.In(ViewMode, this.ValidCommands);   
+                            c.Enabled = tp.Bf.In(ViewMode, this.ValidCommands);
                         }
                     }
                 }
@@ -2144,7 +2161,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
         }
         else if (tp.IsInteger(Command)) {
             ViewMode = Command;
-        } 
+        }
 
         switch (ViewMode) {
             case tp.DataViewMode.Home:
@@ -2152,33 +2169,33 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 break;
 
             case tp.DataViewMode.List:
-                this.BrowserSelect();
+                this.ListSelect();
                 break;
             case tp.DataViewMode.Filters:
                 this.DisplayFilterPanel();
                 break;
 
             case tp.DataViewMode.First:
-                if (this.dsBrowser && this.dsBrowser.CanFirst()) {
-                    this.dsBrowser.First();
+                if (this.dsList && this.dsList.CanFirst()) {
+                    this.dsList.First();
                     this.Edit();
                 }
                 break;
             case tp.DataViewMode.Prior:
-                if (this.dsBrowser && this.dsBrowser.CanPrior()) {
-                    this.dsBrowser.Prior();
+                if (this.dsList && this.dsList.CanPrior()) {
+                    this.dsList.Prior();
                     this.Edit();
                 }
                 break;
             case tp.DataViewMode.Next:
-                if (this.dsBrowser && this.dsBrowser.CanNext()) {
-                    this.dsBrowser.Next();
+                if (this.dsList && this.dsList.CanNext()) {
+                    this.dsList.Next();
                     this.Edit();
                 }
                 break;
             case tp.DataViewMode.Last:
-                if (this.dsBrowser && this.dsBrowser.CanLast()) {
-                    this.dsBrowser.Last();
+                if (this.dsList && this.dsList.CanLast()) {
+                    this.dsList.Last();
                     this.Edit();
                 }
                 break;
@@ -2201,7 +2218,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                     this.ViewMode = tp.DataViewMode.Cancel;
                     this.ViewMode = tp.DataViewMode.List;
                 } else {
-                    this.BrowserSelect();
+                    this.ListSelect();
                 }
 
                 break;
@@ -2232,12 +2249,12 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
 
             case tp.DataViewMode.Filters:
                 this.SetVisiblePanelByPanelMode('Filters');
-                break; 
+                break;
         }
 
         this.Trigger('OnViewModeChanged', {});
     }
- 
+
     /**
     Event handler. If a Command exists in the clicked element then the Args.Command is assigned.
     @protected
@@ -2255,7 +2272,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
     @protected
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
-    BrowserGrid_DoubleClick(Args) {
+    ListGrid_DoubleClick(Args) {
         this.ExecuteCommand(tp.DataViewMode.Edit);
     }
 };
@@ -2275,12 +2292,12 @@ tp.DataView.prototype.Broker = null;
  @protected
  @type {tp.DataSource}
  */
-tp.DataView.prototype.dsBrowser = null;
+tp.DataView.prototype.dsList = null;
 /** Field
  @protected
  @type {tp.Grid}
  */
-tp.DataView.prototype.gridBrowser = null;
+tp.DataView.prototype.gridList = null;
 /** Field
  @protected
  @type {string}
@@ -2321,13 +2338,18 @@ tp.DataView.prototype.ToolBar = null;
  @type {tp.PanelList}
  */
 tp.DataView.prototype.PanelList = null;
+/** Field. The tab-control where edit part controls are reside
+ @protected
+ @type {tp.TabControl}
+ */
+tp.DataView.prototype.pagerEdit = null;
 /** Field. 
  @protected
  @type {tp.SelectSqlListUi}
  */
 tp.DataView.prototype.SelectSqlListUi = null;
 
- 
+
 /** Field. A bit-field (set) build using the {@link tp.DataViewMode} constants
  @protected
  @type {number}
@@ -2355,7 +2377,7 @@ tp.DataView.prototype.LastUseRowLimit = true;
  @type {boolean}
  */
 tp.DataView.prototype.EditControlsCreated = false;
- 
+
 
 
 /* properties */
