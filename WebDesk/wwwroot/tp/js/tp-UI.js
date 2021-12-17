@@ -19306,6 +19306,21 @@ tp.View = class extends tp.tpElement {
         super.InitializeFields();
         this.ViewName = tp.NextName('View');
     }
+
+    /**
+    Notification 
+    Initialization steps:
+    - Handle creation
+    - Field initialization
+    - Option processing
+    - Completed notification
+    */
+    OnHandleCreated() {
+        super.OnHandleCreated();
+        this.IsScreenResizeListener = true;
+    }
+
+
     /**
     Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
     and AFTER options (CreateParams) processing <br />

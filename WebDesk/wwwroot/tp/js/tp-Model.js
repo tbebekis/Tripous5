@@ -1161,6 +1161,7 @@ tp.DataView = class extends tp.View {
      * @override
     */
     InitializeView() {
+
         this.CreateToolBar();
         this.CreatePanelList();
         this.CreateBrowserGrid();
@@ -1235,8 +1236,7 @@ tp.DataView = class extends tp.View {
             this.gridBrowser.ReadOnly = true;
             this.gridBrowser.AllowUserToAddRows = false;
             this.gridBrowser.AllowUserToDeleteRows = false;
-            this.gridBrowser.ToolBarVisible = false;
-            
+            this.gridBrowser.ToolBarVisible = false;            
 
             this.gridBrowser.On(tp.Events.DoubleClick, this.BrowserGrid_DoubleClick, this);
         }

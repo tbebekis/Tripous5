@@ -82,6 +82,10 @@ tp.Command = class {
 };
 
 //#endregion
+ 
+//---------------------------------------------------------------------------------------
+// desktop
+//---------------------------------------------------------------------------------------
 
 //#region tp.DeskAjaxRequest
 
@@ -120,28 +124,6 @@ tp.DeskAjaxRequest.CreateFromCommand = function (Cmd) {
 
     let Result = new tp.DeskAjaxRequest(Cmd.Name, Params);
     return Result;
-};
-
-//#endregion
-
-//#region tp.DeskInfo
-
-/**
- * Gets or sets a key-value information object to a DOM element. <br />
- * If the second parameter is not passed then it just gets and returns the information object.
- * @param {HTMLElement} el The DOM element to get from or set the info to.
- * @param {object} Info A key-value information object
- */
-tp.DeskInfo = function (el, Info = null) {
-    if (tp.IsValid(Info)) {
-        el.__DeskInfo = Info;
-    }
-    else {
-        if ('__DeskInfo' in el)
-            Info = el.__DeskInfo;
-    }
-
-    return Info;
 };
 
 //#endregion
@@ -352,8 +334,7 @@ tp.DeskMainMenu = class extends tp.ItemBar {
 
         if (E instanceof tp.tpElement) {
             let Cmd = E.Cmd;
-            await tp.Desk.ExecuteCommand(Cmd);
- 
+            await tp.Desk.ExecuteCommand(Cmd); 
         }
     }
 
@@ -499,7 +480,6 @@ tp.DeskViewPager = class extends tp.tpElement {
     */
     OnInitializationCompleted() {
         super.OnInitializationCompleted();
-
         this.CreateControls();
     }
     /** Creates child controls of this instance. Called in construction sequence.
@@ -672,7 +652,7 @@ tp.DeskViewPager.prototype.PageListContainer = null;
 
 //#region tp.DeskView
 
-/** Represents a desk view. Used as base view class. */
+/** A {@link tp.View} view for the desktop.  */
 tp.DeskView = class extends tp.View {
 
     /** Constructor
@@ -682,20 +662,10 @@ tp.DeskView = class extends tp.View {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
+ 
 
-    /**
-    Notification 
-    Initialization steps:
-    - Handle creation
-    - Field initialization
-    - Option processing
-    - Completed notification
-    */
-    OnHandleCreated() {
-        super.OnHandleCreated();
-        this.IsScreenResizeListener = true;
-    }
-
+    /** Closes and disposes the view
+     * */
     CloseView() {
         this.Dispose();
     }
@@ -723,6 +693,7 @@ tp.DeskView = class extends tp.View {
 
 //#region tp.DeskDataView
 
+/** A {@link tp.DataView} view for the desktop */
 tp.DeskDataView = class extends tp.DataView {
 
     /** Constructor
@@ -732,20 +703,7 @@ tp.DeskDataView = class extends tp.DataView {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-    /**
-    Notification 
-    Initialization steps:
-    - Handle creation
-    - Field initialization
-    - Option processing
-    - Completed notification
-    */
-    OnHandleCreated() {
-        super.OnHandleCreated();
-        this.IsScreenResizeListener = true;
-    }
-
+ 
     /**
     Closes the view and removes the view from the DOM.
     @protected

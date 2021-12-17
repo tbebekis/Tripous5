@@ -112,37 +112,31 @@ app.MainCommandExecutor = class extends tp.DeskCommandExecutor {
 tp.AppInitializeBefore = function () {
  
     let el;
- 
+
+    let GetElement = (Selector) => {
+        let Result = tp(Selector);
+        if (!tp.IsHTMLElement(Result))
+            tp.Throw(`Element not found. Selector: ${Selector}`);
+        return Result;
+    };
 
     // header
-    el = tp('.header');
-    if (!tp.IsHTMLElement(el))
-        tp.Throw('Header element not found');
-
+    el = GetElement('.header');
     tp.DeskOptions.Header = new app.Header(el);
 
     // footer
-    el = tp('.footer');
-    if (!tp.IsHTMLElement(el))
-        tp.Throw('Footer element not found');
-
+    el = GetElement('.footer');
     tp.DeskOptions.Footer = new app.Footer(el);
 
     // main menu
-    el = tp('.' + tp.Classes.DeskMainMenu);
-    if (!tp.IsHTMLElement(el))
-        tp.Throw('MainMenu element not found');
-
+    el = GetElement('.' + tp.Classes.DeskMainMenu);
     tp.DeskOptions.MainMenu = new tp.DeskMainMenu(el);
 
     // main command executor
     tp.DeskOptions.MainCommandExecutor = new app.MainCommandExecutor();
 
-
     // desk view main pager  
-    el = tp('.' + tp.Classes.DeskViewPager);
-    if (!tp.IsHTMLElement(el))
-        tp.Throw('View Pager element not found');
+    el = GetElement('.' + tp.Classes.DeskViewPager);
 
     tp.DeskOptions.ViewPager = new tp.DeskViewPager(el);
 
