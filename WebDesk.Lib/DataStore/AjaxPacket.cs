@@ -42,7 +42,5 @@ namespace WebLib
             get { return Properties.ContainsKey(Key)? Properties[Key]: null; }
             set { Properties[Key] = value; }
         }
-
-
     }
 }

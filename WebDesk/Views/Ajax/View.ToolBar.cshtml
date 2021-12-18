@@ -1,0 +1,17 @@
+﻿@model IEnumerable<ViewToolBarButtonDef>
+
+<div class="ToolBar">
+    @{
+        if (Model != null  && Model.Count() > 0)
+        {
+            // Example: <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , IcoClasses: 'fa fa-sign-out',  NoText: true, Ico: 'Left'}"></a>
+
+            foreach (var ButtonDef in Model)
+            {
+                <a class="ButtonEx" data-setup='@Html.Raw(ButtonDef.GetDataSetupText())'></a>
+            }
+        }
+    }
+</div>
+
+

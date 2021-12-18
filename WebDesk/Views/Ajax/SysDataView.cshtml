@@ -1,0 +1,19 @@
+﻿@model ViewModel
+@{
+    // The SysData.DataType 
+    string DataType = ViewData.ContainsKey("DataType")? ViewData["DataType"].ToString(): string.Empty; 
+}
+
+<div class="desk-view sys-data-list-page" data-setup="{JS: [], CSS: [], ClassType: 'tp.SysDataViewList', DataType: '@DataType'}">
+    <div class="tp-ToolBar">        
+        <a class="ButtonEx" data-setup="{ Command: 'Edit', Text: 'Edit', ToolTip: 'Edit' , IcoClasses: 'fa fa-edit',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Insert', Text: 'Insert', ToolTip: 'Insert' , IcoClasses: 'fa fa-plus',  NoText: true, Ico: 'Left'}"></a>
+        <a class="ButtonEx" data-setup="{ Command: 'Delete', Text: 'Delete', ToolTip: 'Delete' , IcoClasses: 'fa fa-minus',  NoText: true, Ico: 'Left'}"></a>
+
+        <a class="ButtonEx" data-setup="{ Command: 'Close', Text: 'Close', ToolTip: 'Close' , IcoClasses: 'fa fa-sign-out',  NoText: true, Ico: 'Left'}"></a>
+    </div>
+
+    <div class="tp-Grid"></div>
+
+</div>
+

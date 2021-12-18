@@ -23,6 +23,16 @@ namespace WebLib.Models
         public ViewModel(ViewDef ViewDef)
         {
             this.ViewDef = ViewDef;
+            this.DataSetup.BrokerName = ViewDef.BrokerName;
+        }
+
+
+        /// <summary>
+        /// Returns the <see cref="DataSetup"/> of this instance serialized in order to properly used as a data-setup html attribute.
+        /// </summary>
+        public string GetDataSetupText()
+        {
+            return DataSetup.Serialize();
         }
 
         /* properties */
@@ -30,6 +40,10 @@ namespace WebLib.Models
         /// The definition of the view
         /// </summary>
         public ViewDef ViewDef { get; }
+        /// <summary>
+        /// Used as the generator of the data-setup attribute value for a default DataView razor view.
+        /// </summary>
+        public ViewDataSetup DataSetup { get; } = new ViewDataSetup();
     }
 
 }

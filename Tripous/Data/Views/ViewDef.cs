@@ -189,7 +189,6 @@ namespace Tripous.Data
             return SB.ToString();
         }
 
-
         /* public */
         /// <summary>
         /// Returns a string representation of this instance.
@@ -206,6 +205,30 @@ namespace Tripous.Data
            return Tabs.Find(item => Sys.IsSameText(item.TabId, TabId));
         }
  
+        /// <summary>
+        /// Adds the buttons to the tool-bar for a default data-view
+        /// </summary>
+        public void AddDefaultDataViewButtons()
+        {
+            ToolBarButtons.Clear();
+
+            ToolBarButtons.AddRange(new ViewToolBarButtonDef []
+            {
+                ViewToolBarButtonDef.CreateHome(),
+
+                ViewToolBarButtonDef.CreateList(),
+                ViewToolBarButtonDef.CreateFilters(),
+
+                ViewToolBarButtonDef.CreateEdit(),
+                ViewToolBarButtonDef.CreateInsert(),
+                ViewToolBarButtonDef.CreateDelete(),
+                ViewToolBarButtonDef.CreateSave(),
+
+                ViewToolBarButtonDef.CreateCancel(),
+                ViewToolBarButtonDef.CreateClose(),
+            });
+        }
+
         /* properties */
         /// <summary>
         /// A unique name among all view containers. 
@@ -253,9 +276,9 @@ namespace Tripous.Data
         public UiSplit ColumnSplit { get; set; } = new UiSplit();
 
         /// <summary>
-        /// Tool-bar flags. Indicates what buttons to display.
+        /// Tool-bar buttons.
         /// </summary>
-        public ViewToolBarFlags ToolBarFlags { get; set; } = ViewToolBarFlags.Cancel | ViewToolBarFlags.Close;
+        public List<ViewToolBarButtonDef> ToolBarButtons { get; } = new List<ViewToolBarButtonDef>();
 
         /// <summary>
         /// A list of tabs. Could be empty.

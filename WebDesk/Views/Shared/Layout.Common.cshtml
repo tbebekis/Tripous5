@@ -6,6 +6,7 @@
 
 @{
     var Settings = DataStore.GetSettings();
+    string Flag = WSys.IsDevelopment ? "true" : "false";
 }
 
 <div class="dialog-box-template">
@@ -18,12 +19,6 @@
 </div>
 
  
-
- 
-
-
-
-
 <script>
     tp.Ready(() => {
 
@@ -32,6 +27,8 @@
             Small: 992,
             Medium: 1200
         };
+
+        tp.SysConfig.GlobalErrorHandling = @Flag;
 
         tp.NotificationBoxSetup.ToTop = false;
         tp.NotificationBoxSetup.Height = 100;

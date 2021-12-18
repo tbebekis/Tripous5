@@ -25,15 +25,9 @@ namespace WebLib.Models
         /// </summary>
         public DataViewModel(ViewDef ViewDef)
             : base(ViewDef)
-        {
-            this.Setup.BrokerName = ViewDef.BrokerName;
+        {            
         }
-
-        /* properties */
-        /// <summary>
-        /// Used as the generator of the data-setup attribute value for a default DataView razor view.
-        /// </summary>
-        public ViewDataSetup Setup { get; } = new ViewDataSetup();          
+        
     }
  
 }

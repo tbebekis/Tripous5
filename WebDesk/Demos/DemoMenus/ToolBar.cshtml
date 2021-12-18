@@ -84,7 +84,7 @@
 
 
     var NoText = true;
-    var IcoMode = tp.ButtonExIcoMode.IcoLeft;
+    var IcoMode = tp.ButtonExIcoMode.Left;
 
     function ToggleNoText() {
         NoText = !NoText;
@@ -97,12 +97,12 @@
     }
 
     function ToggleIcoMode() {
-        if (IcoMode === tp.ButtonExIcoMode.IcoLeft) {
-            IcoMode = tp.ButtonExIcoMode.IcoTop;
-        } else if (IcoMode === tp.ButtonExIcoMode.IcoTop) {
-            IcoMode = tp.ButtonExIcoMode.NoIco;
+        if (IcoMode === tp.ButtonExIcoMode.Left) {
+            IcoMode = tp.ButtonExIcoMode.Top;
+        } else if (IcoMode === tp.ButtonExIcoMode.Top) {
+            IcoMode = tp.ButtonExIcoMode.None;
         } else {
-            IcoMode = tp.ButtonExIcoMode.IcoLeft;
+            IcoMode = tp.ButtonExIcoMode.Left;
         }
 
         let tb = tp.GetScriptObject('#tb1');

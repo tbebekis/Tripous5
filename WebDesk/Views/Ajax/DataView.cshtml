@@ -11,9 +11,9 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
 {
-    <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Setup.Serialize())'>
+    <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.GetDataSetupText())'>
         
-        @await Html.PartialAsync("DataView.ToolBar", Model.ViewDef.ToolBarFlags)
+        @await Html.PartialAsync("View.ToolBar", Model.ViewDef.ToolBarButtons)
  
         <div class="PanelList" data-setup="{ SelectedIndex: 0 }">
 
@@ -27,7 +27,7 @@
                     PagerModel.CssClasses = "TabControl";
                     PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
 
-                    @await Html.PartialAsync("DataView.Tabs", PagerModel)
+                    @await Html.PartialAsync("View.Tabs", PagerModel)
                 }
             </div>            
 

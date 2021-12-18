@@ -14,7 +14,7 @@ namespace Tripous.Data
     /// </summary>
     [Flags]
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ViewToolBarFlags
+    public enum ViewToolBarFlags_NOT_USED
     {
         /// <summary>
         /// None

@@ -17,7 +17,7 @@
                     {
                         // it's a TabControl
                         ViewPagerModel PagerModel = new ViewPagerModel(Model.ViewDef, Tab);
-                        @await Html.PartialAsync("DataView.Tabs", PagerModel)
+                        @await Html.PartialAsync("View.Tabs", PagerModel)
                     }
                     else if (Tab.Groups.Count > 0)
                     {
@@ -29,7 +29,7 @@
                         foreach (var Row in Tab.Rows)
                         {
                             ViewRowModel RowModel = new ViewRowModel(Model.ViewDef, Row);
-                            @await Html.PartialAsync("DataView.Row", RowModel)
+                            @await Html.PartialAsync("View.Row", RowModel)
                         }
                     }
 

@@ -27,90 +27,98 @@ namespace WebLib
 {
 
 
+    /*
+
+     //Packet["ViewName"] = R.IsSingleInstance ? R.OperationName : Names.Next(R.OperationName);
+
+    Dictionary<string, object> ViewData = new Dictionary<string, object>();     // ViewData for the razor view
+
+    string RazorViewNameOrPath = string.Empty;
+    object Model = null;
+    DataTable Table; 
+
+    void PrepareDefaultDataView(string BrokerName)
+    {
+        RazorViewNameOrPath = "DataView";
+
+        ViewDef ViewDef = ViewDef.Find(BrokerName);
+        // no view definition, construct a default one.
+        if (ViewDef == null)
+        {
+            SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
+            ViewDef = new ViewDef(BrokerDef);
+            ViewDef.ToolBarFlags = ViewToolBarFlags.List | ViewToolBarFlags.Filters | ViewToolBarFlags.AllEdits | ViewToolBarFlags.Cancel | ViewToolBarFlags.Close;
+        }
+
+        DataViewModel DVM = new DataViewModel(ViewDef);
+        DVM.Setup.BrokerName = BrokerName;  
+
+
+        Model = DVM;
+    }
+
+    switch (R.OperationName)
+    {
+        case "Ui.SysData.Table":
+            RazorViewNameOrPath = "SysData.List";
+            ViewData["DataType"] = "Table";
+            Packet["DataType"] = "Table";
+            Table = SysData.Select("Table", NoBlobs: true);
+            Packet["Table"] = JsonDataTable.ToJObject(Table);
+            break;
+
+        case "Ui.SysData.Insert.Table":
+            RazorViewNameOrPath = "SysData.Insert.Table";
+            ViewData["DataType"] = "Table";
+            Packet["DataType"] = "Table";
+            Packet["IsInsert"] = true;
+            break;
+
+        case "Ui.Traders":
+            PrepareDefaultDataView("Trader");
+            break;
+    }
+
+    if (!string.IsNullOrWhiteSpace(RazorViewNameOrPath))
+    {
+        string HtmlText = Controller.ViewToString(RazorViewNameOrPath, Model, ViewData);
+        Packet["HtmlText"] = HtmlText;
+    }
+    */
+
+
+
     static public partial class DataStore
     {
- 
 
-        static HttpActionResult GetHtmlView(IAjaxController Controller, AjaxRequest R)
+        /// <summary>
+        /// Prepares and returns an <see cref="HttpActionResult"/> for a Ui request
+        /// </summary>
+        static HttpActionResult GetHtmlView(IAjaxController Controller, AjaxRequest Request)
         {
-            AjaxPacket Packet = new AjaxPacket(R.OperationName);
-            //Packet["ViewName"] = R.IsSingleInstance ? R.OperationName : Names.Next(R.OperationName);
-
-            /*
-            Dictionary<string, object> ViewData = new Dictionary<string, object>();     // ViewData for the razor view
+            AjaxPacket Packet = new AjaxPacket(Request.OperationName);
  
-            string RazorViewNameOrPath = string.Empty;
-            object Model = null;
-            DataTable Table; 
-
-            void PrepareDefaultDataView(string BrokerName)
-            {
-                RazorViewNameOrPath = "DataView";
-
-                ViewDef ViewDef = ViewDef.Find(BrokerName);
-                // no view definition, construct a default one.
-                if (ViewDef == null)
-                {
-                    SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
-                    ViewDef = new ViewDef(BrokerDef);
-                    ViewDef.ToolBarFlags = ViewToolBarFlags.List | ViewToolBarFlags.Filters | ViewToolBarFlags.AllEdits | ViewToolBarFlags.Cancel | ViewToolBarFlags.Close;
-                }
-
-                DataViewModel DVM = new DataViewModel(ViewDef);
-                DVM.Setup.BrokerName = BrokerName;  
-               
-
-                Model = DVM;
-            }
-
-            switch (R.OperationName)
-            {
-                case "Ui.SysData.Tables":
-                    RazorViewNameOrPath = "SysData.List";
-                    ViewData["DataType"] = "Table";
-                    Packet["DataType"] = "Table";
-                    Table = SysData.Select("Table", NoBlobs: true);
-                    Packet["Table"] = JsonDataTable.ToJObject(Table);
-                    break;
-
-                case "Ui.SysData.Insert.Table":
-                    RazorViewNameOrPath = "SysData.Insert.Table";
-                    ViewData["DataType"] = "Table";
-                    Packet["DataType"] = "Table";
-                    Packet["IsInsert"] = true;
-                    break;
-
-                case "Ui.Traders":
-                    PrepareDefaultDataView("Trader");
-                    break;
-            }
- 
-            if (!string.IsNullOrWhiteSpace(RazorViewNameOrPath))
-            {
-                string HtmlText = Controller.ViewToString(RazorViewNameOrPath, Model, ViewData);
-                Packet["HtmlText"] = HtmlText;
-            }
-            */
-
-
+            // find a view info provider that handles this Ui request
             AjaxViewInfo ViewInfo = null;
             foreach (var ViewInfoProvider in AjaxViewInfoProviders)
             {
-                ViewInfo = ViewInfoProvider.GetViewInfo(R, Packet);
+                ViewInfo = ViewInfoProvider.GetViewInfo(Request, Packet);
                 if (ViewInfo != null)
                     break;
             }
 
             if (ViewInfo == null)
-                Sys.Throw($"No View Info for requested view. Operation: {R.OperationName}");
+                Sys.Throw($"No View Info for requested view. Operation: {Request.OperationName}");
 
+            // set the ViewName if empty
             string ViewName = Packet["ViewName"] as string;
             if (string.IsNullOrWhiteSpace(ViewName))
             {
-                ViewName = R.IsSingleInstance ? R.OperationName : Names.Next(R.OperationName);
+                ViewName = Request.IsSingleInstance ? Request.OperationName : Names.Next(Request.OperationName);
                 Packet["ViewName"] = ViewName;
             }
 
+            // set the HtmlText if empty
             string HtmlText = Packet["HtmlText"] as string;
             if (string.IsNullOrWhiteSpace(HtmlText) && !string.IsNullOrWhiteSpace(ViewInfo.RazorViewNameOrPath))
             {
@@ -118,6 +126,7 @@ namespace WebLib
                 Packet["HtmlText"] = HtmlText;
             }
 
+            // return the result
             HttpActionResult Result = HttpActionResult.SetPacket(Packet.GetPacketObject(), true);
             return Result;
         }

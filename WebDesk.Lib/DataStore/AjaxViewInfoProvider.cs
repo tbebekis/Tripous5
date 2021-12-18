@@ -14,6 +14,8 @@ namespace WebLib
     {
         AjaxViewInfo GetViewInfo(AjaxRequest AjaxRequest, AjaxPacket Packet);
     }
+
+
     public class AjaxViewInfoProvider : IAjaxViewInfoProvider
     {
         public virtual AjaxViewInfo GetViewInfo(AjaxRequest AjaxRequest, AjaxPacket Packet)

@@ -71,7 +71,7 @@ namespace WebLib.Models
                 Result.SetControlProperty("Required", ControlDef.Required);
             }
 
-            return Result.GetSetupText();
+            return Result.GetDataSetupText();
         }
  
         /* public */
@@ -89,10 +89,11 @@ namespace WebLib.Models
         {
             JControl[Name] = Value;
         }
+    
         /// <summary>
         /// Returns the text of this setup.
         /// </summary>
-        public string GetSetupText()
+        public string GetDataSetupText()
         {
             return JSetup.ToString();
         }

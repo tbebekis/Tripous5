@@ -175,7 +175,7 @@ namespace WebLib
                 DataStore.App = App;
 
                 Logger.Add(new DataLogListener());
-                Register(new AjaxViewInfoProviderMain());
+                Register(new AjaxViewInfoProviderDefault());
 
                 RegisterDbProviderFactories();
                 ConnectDatabases();
@@ -362,11 +362,11 @@ where
 
             Command BarItem = new Command() { TitleKey = "System" };
             Result.Add(BarItem);
-            BarItem.Add("Ui.SysData.Tables").IsSingleInstance = true;
+            BarItem.Add("Ui.SysData.Table", "Tables").IsSingleInstance = true;
 
             BarItem = new Command() { TitleKey = "Admin" };
             Result.Add(BarItem);
-            BarItem.Add("Ui.Traders").IsSingleInstance = true;
+            BarItem.Add("Ui.Data.Trader", "Traders").IsSingleInstance = true;
 
             return Result.ToArray();
 

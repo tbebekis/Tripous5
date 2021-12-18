@@ -6276,9 +6276,9 @@ Indicates the mode (existence and position) of the icon of a button.
 @enum {number}
 */
 tp.ButtonExIcoMode = {
-    IcoLeft: 0,
-    IcoTop: 1,
-    NoIco: 2
+    None: 0,
+    Left: 1,
+    Top: 2 
 };
 Object.freeze(tp.ButtonExIcoMode);
 //#endregion
@@ -6400,9 +6400,9 @@ tp.ButtonEx = class extends tp.tpElement {
     set IcoMode(v) {
         this.fIcoMode = v;
         this.RemoveClasses(tp.Classes.NoIco, tp.Classes.IcoTop);
-        if (this.fIcoMode === tp.ButtonExIcoMode.NoIco) {
+        if (this.fIcoMode === tp.ButtonExIcoMode.None) {
             this.AddClass(tp.Classes.NoIco);
-        } else if (this.fIcoMode === tp.ButtonExIcoMode.IcoTop) {
+        } else if (this.fIcoMode === tp.ButtonExIcoMode.Top) {
             this.AddClass(tp.Classes.IcoTop);
         }
     }
@@ -6481,7 +6481,7 @@ tp.ButtonEx = class extends tp.tpElement {
     */
     InitializeFields() {
         super.InitializeFields();
-        this.fIcoMode = tp.ButtonExIcoMode.IcoLeft;
+        this.fIcoMode = tp.ButtonExIcoMode.Left;
         this.fNoText = false;
     }
     /**
@@ -6494,18 +6494,18 @@ tp.ButtonEx = class extends tp.tpElement {
         o = o || {};
 
         if (tp.IsBlank(o.IcoClasses) && tp.IsBlank(o.ImageUrl)) {
-            this.IcoMode = tp.ButtonExIcoMode.NoIco;
+            this.IcoMode = tp.ButtonExIcoMode.None;
         } else if (!tp.IsBlank(o.IcoClasses) || !tp.IsBlank(o.ImageUrl)) {
-            this.IcoMode = tp.ButtonExIcoMode.IcoLeft;
+            this.IcoMode = tp.ButtonExIcoMode.Left;
         }
 
         for (var Prop in o) {
             if (!tp.IsFunction(o[Prop]) /* NO  && (Prop in this) */) {
                 if (Prop === 'Ico') {
                     if (tp.IsSameText('Top', o[Prop])) {
-                        this.IcoMode = tp.ButtonExIcoMode.IcoTop;
+                        this.IcoMode = tp.ButtonExIcoMode.Top;
                     } else if (tp.IsSameText('No', o[Prop]) || tp.IsSameText('NoIco', o[Prop])) {
-                        this.IcoMode = tp.ButtonExIcoMode.NoIco;
+                        this.IcoMode = tp.ButtonExIcoMode.None;
                     }
                 } else {
                     this[Prop] = o[Prop];
@@ -6570,7 +6570,7 @@ tp.ButtonEx.prototype.fTextElement = null;
  @protected
  @type {tp.ButtonExIcoMode}
  */
-tp.ButtonEx.prototype.fIcoMode = tp.ButtonExIcoMode.IcoLeft;
+tp.ButtonEx.prototype.fIcoMode = tp.ButtonExIcoMode.Left;
 /**
  Field
  @protected
@@ -6708,7 +6708,7 @@ tp.ToolBar = class extends tp.tpElement {
     }
 
     /**
-    Sets the ico mode (IcoLeft, IcoTop, NoIco) to all of the buttons of this toolbar
+    Sets the ico mode (None, Left, Top) to all of the buttons of this toolbar
     @param {tp.ButtonExIcoMode} v The mode to set. One of {@link tp.ButtonExIcoMode} constants.
     */
     SetIcoMode(v) {
