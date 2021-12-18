@@ -38,9 +38,9 @@ namespace Tripous.Data
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        public ViewTabDef GetTabById(string Id)
+        public ViewTabDef GetTabById(string TabId)
         {
-            return Tabs.Find(item => Sys.IsSameText(item.Id, Id));
+            return Tabs.Find(item => Sys.IsSameText(item.TabId, TabId));
         }
 
 
@@ -48,9 +48,9 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// A unique Id among sibling tabs, e.g. Filters, List, Edit, etc
+        /// A unique Id among sibling tabs, e.g. List, Edit, Filters,  etc
         /// </summary>
-        public string Id { get; set; }
+        public string TabId { get; set; }
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
@@ -62,7 +62,7 @@ namespace Tripous.Data
         /// </summary>    
         public string Title
         {
-            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Id; }
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : TabId; }
             set { }
         }
 

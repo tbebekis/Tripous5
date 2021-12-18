@@ -11,32 +11,44 @@ using Newtonsoft.Json.Linq;
 using Tripous;
 using Tripous.Data;
 
-namespace WebLib
+namespace WebLib.Models
 {
-    public class DataViewControlDataSetup
+
+    /// <summary>
+    /// Generates the text for the data-setup attribute of a control.
+    /// <para>NOTE: The data-setup of a control has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
+    /// </summary>
+    public class ViewControlDataSetup
     {
-        JObject Setup;
-        JObject Control;
+        JObject JSetup;
+        JObject JControl;
 
-
-        public DataViewControlDataSetup()
+        /* construction */
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ViewControlDataSetup()
         {
-            Setup = new JObject();
-            Setup["Text"] = Sys.None;
+            JSetup = new JObject();
+            JSetup["Text"] = Sys.None;
 
-            Control = new JObject();
-            Setup["Control"] = Control;
+            JControl = new JObject();
+            JSetup["Control"] = JControl;
 
-            Control["TypeName"] = "TextBox";
+            JControl["TypeName"] = "TextBox";
 
             // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
             // <div class="tp-CtrlRow" data-setup="{Text: 'Test', Control: { TypeName: 'ComboBox', DataField: '', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0} }"></div>
 
         }
 
+        /* static */
+        /// <summary>
+        /// Generates the text for the data-setup attribute of a control based on a specified <see cref="ViewControlDef"/> and optionally a <see cref="SqlBrokerFieldDef"/>.
+        /// </summary>
         static public string GetSetupText(ViewControlDef ControlDef, SqlBrokerFieldDef FieldDef = null)
         {
-            DataViewControlDataSetup Result = new DataViewControlDataSetup();
+            ViewControlDataSetup Result = new ViewControlDataSetup();
 
             if (FieldDef != null)
             {
@@ -61,26 +73,39 @@ namespace WebLib
 
             return Result.GetSetupText();
         }
-
-
-
+ 
+        /* public */
+        /// <summary>
+        /// Get a <see cref="JToken"/> with the value of a specified property
+        /// </summary>
         public JToken GetControlProperty(string Name)
         {
-            return Control.ContainsKey(Name) ? Control[Name] : null;
+            return JControl.ContainsKey(Name) ? JControl[Name] : null;
         }
+        /// <summary>
+        /// Sets the value of a specified property. The second parameter, the <see cref="JToken"/>, could be a value of any type.
+        /// </summary>
         public void SetControlProperty(string Name, JToken Value)
         {
-            Control[Name] = Value;
+            JControl[Name] = Value;
         }
+        /// <summary>
+        /// Returns the text of this setup.
+        /// </summary>
         public string GetSetupText()
         {
-            return Setup.ToString();
+            return JSetup.ToString();
         }
 
-        public string Text
+
+        /* properties */
+        /// <summary>
+        /// Gets or sets the "Text" part of this setup.
+        /// </summary>
+        private string Text
         {
-            get { return Setup["Text"].ToString(); }
-            set { Setup["Text"] = value; }
+            get { return JSetup["Text"].ToString(); }
+            set { JSetup["Text"] = value; }
         }
     }
 }

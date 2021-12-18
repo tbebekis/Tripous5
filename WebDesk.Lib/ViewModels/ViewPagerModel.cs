@@ -14,7 +14,7 @@ namespace WebLib.Models
     /// <summary>
     /// A model for a pager (TabControl)
     /// </summary>
-    public class DataViewPagerModel
+    public class ViewPagerModel
     {
         /* construction */
         /// <summary>
@@ -22,13 +22,13 @@ namespace WebLib.Models
         /// <para>Constructs a model for the Pager (TabControl) of the Edit part (DIV) of a standard data view.</para>
         /// <para>The other two parts of a standard data-view are the Browser (DIV) and the Filters (DIV) part.</para>
         /// </summary>
-        public DataViewPagerModel(ViewDef ViewDef, ViewTabDef Pager = null)
+        public ViewPagerModel(ViewDef ViewDef, ViewTabDef Pager = null)
         {
             this.ViewDef = ViewDef;
 
             // we always expect that the Edit tab represents a TabControl with tab pages.
             if (Pager == null)
-                Pager = ViewDef.Tabs.Find(item => Sys.IsSameText(item.Id, "Edit"));
+                Pager = ViewDef.Tabs.Find(item => Sys.IsSameText(item.TabId, "Edit"));
 
             this.Pager = Pager;
         }

@@ -10,20 +10,20 @@ using Newtonsoft.Json.Converters;
 using Tripous;
 
 
-namespace WebLib
+namespace WebLib.Models
 {
 
     /// <summary>
     /// Type to be used as the generator of the data-setup attribute value for a default DataView razor view.
     /// </summary>
-    public class DataViewSetup
+    public class ViewDataSetup
     {
         /* construction */
         /// <summary>
         /// Constructor.
         /// <para>Creates an instance with default values in ClassType = 'tp.DataView' and BrokerClass = 'tp.Broker'.</para>
         /// </summary>
-        public DataViewSetup()
+        public ViewDataSetup()
         {
         }
 

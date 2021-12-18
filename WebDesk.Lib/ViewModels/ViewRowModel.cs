@@ -13,7 +13,7 @@ namespace WebLib.Models
     /// <summary>
     /// A model for a row
     /// </summary>
-    public class DataViewRowModel
+    public class ViewRowModel
     {
         /// <summary>
         /// Constant. Default column and width classes
@@ -24,7 +24,7 @@ namespace WebLib.Models
         /// <summary>
         /// Constructor
         /// </summary>
-        public DataViewRowModel(ViewDef ViewDef, ViewRowDef RowDef)
+        public ViewRowModel(ViewDef ViewDef, ViewRowDef RowDef)
         {
             this.ViewDef = ViewDef;
             this.RowDef = RowDef;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace WebLib
+namespace Tripous
 {
     /// <summary>
     /// The command type. What a command does when it is called.

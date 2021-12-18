@@ -3,9 +3,9 @@
 
 @{
     // The standard DataView contains 3 panels in a tp.PanelList with the following indexes:
-    // 0 - Browser
-    // 1 - Edit (which is a TabPager)
-    // 2 - Filter
+    // 0 - List     (the container of the List (browser) grid)
+    // 1 - Edit     (the container of a TabPager with data entry controls)
+    // 2 - Filter   (the container of the filter controls)
     string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.ViewDef.TextTop, Model.ViewDef.TextSplitPercent);
 }
 
@@ -23,7 +23,7 @@
 
             <div data-setup="{ PanelMode: 'Edit' }">
                 @{ // this creates the Edit panel, the container of the edit part of the view.
-                    DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef);
+                    ViewPagerModel PagerModel = new ViewPagerModel(Model.ViewDef);
                     PagerModel.CssClasses = "TabControl";
                     PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
 

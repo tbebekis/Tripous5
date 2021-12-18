@@ -40,7 +40,7 @@ namespace Tripous.Data
         /// </summary>
         public ViewTabDef GetTabById(string Id)
         {
-            return Tabs.Find(item => Sys.IsSameText(item.Id, Id));
+            return Tabs.Find(item => Sys.IsSameText(item.TabId, Id));
         }
 
         /* properties */

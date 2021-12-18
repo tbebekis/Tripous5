@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Tripous;
+ 
 
-namespace WebLib
+namespace Tripous
 {
 
     /// <summary>

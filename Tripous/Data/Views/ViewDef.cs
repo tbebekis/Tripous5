@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Tripous.Data
 {
+
+
  
     /// <summary>
     /// Top level container. Represents a desktop form or a html page.
@@ -44,25 +46,25 @@ namespace Tripous.Data
             // filters (search) tab
             ViewTabDef FilterTab = new ViewTabDef();
             Tabs.Add(FilterTab);
-            FilterTab.Id = "Filters";
+            FilterTab.TabId = "Filters";
             FilterTab.TitleKey = "Filters";
 
             // list (browse) tab
             ViewTabDef ListTab = new ViewTabDef();
             Tabs.Add(ListTab);
-            ListTab.Id = "List";
+            ListTab.TabId = "List";
             ListTab.TitleKey = "List";
 
             // Edit tab (contains a tab pager, i.e. its tabs is not empty)
             ViewTabDef EditTab = new ViewTabDef();
             Tabs.Add(EditTab);
-            EditTab.Id = "Edit";
+            EditTab.TabId = "Edit";
             EditTab.TitleKey = "Edit";
 
             // the single tab page of the Edit pager
             ViewTabDef DataTab = new ViewTabDef(); // new ViewTabDef("Data") { TitleKey = "Data" };
             EditTab.Tabs.Add(DataTab);
-            DataTab.Id = "Data";
+            DataTab.TabId = "Data";
             DataTab.TitleKey = "Data";
             DataTab.TableName = Broker.MainTableName;
  
@@ -199,9 +201,9 @@ namespace Tripous.Data
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        public ViewTabDef GetTabById(string Id)
+        public ViewTabDef GetTabById(string TabId)
         {
-           return Tabs.Find(item => Sys.IsSameText(item.Id, Id));
+           return Tabs.Find(item => Sys.IsSameText(item.TabId, TabId));
         }
  
         /* properties */
@@ -257,14 +259,17 @@ namespace Tripous.Data
 
         /// <summary>
         /// A list of tabs. Could be empty.
+        /// <para>A tab is a single tab page or a TabControl (Pager) with child tab pages.</para>
         /// </summary>
         public List<ViewTabDef> Tabs { get; } = new List<ViewTabDef>();
         /// <summary>
         /// A list of groups. Could be empty.
+        /// <para>A group is a container such as a DIV or panel which groups controls under a specified text.</para>
         /// </summary>
         public List<ViewGroupDef> Groups { get; } = new List<ViewGroupDef>();
         /// <summary>
         /// A list of rows. Could be empty.
+        /// <para>A row is a panel. It may contain a grid or rows with controls.</para>
         /// </summary>
         public List<ViewRowDef> Rows { get; } = new List<ViewRowDef>();
 

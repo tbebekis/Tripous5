@@ -100,16 +100,25 @@ tp.DeskAjaxRequest = class {
     constructor(OperationName, Params = null) {
         this.OperationName = OperationName;
         this.Params = Params || {};
+
+        tp.DeskAjaxRequest.Counter++;
+        this.Id = tp.DeskAjaxRequest.Counter.toString();
     }
-    /** The name of the request operation.
+
+    /** Optional. The id of the request.
+     * @type {string}
+     */
+    Id = '';
+    /** Required. The name of the request operation.
      * @type {string}
      */
     OperationName = '';
-    /** A user defined key-pair object with parameters.
+    /** Optional. A user defined key-pair object with parameters.
      * @type {object}
      */
     Params = {};
 };
+
 /** Creates and returns an instance based on a specified {@link tp.Command}
  * @param {tp.Command} Cmd
  */
@@ -125,6 +134,10 @@ tp.DeskAjaxRequest.CreateFromCommand = function (Cmd) {
     let Result = new tp.DeskAjaxRequest(Cmd.Name, Params);
     return Result;
 };
+/** Id counter.
+ * @param {number}  
+ */
+tp.DeskAjaxRequest.Counter = 0;
 
 //#endregion
 

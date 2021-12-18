@@ -1,6 +1,6 @@
-﻿@model DataViewRowModel
+﻿@model ViewRowModel
 @{
-    string ColumnCssClasses = !string.IsNullOrWhiteSpace(Model.ColumnCssClasses) ? Model.ColumnCssClasses : DataViewRowModel.DefaultColumnCssClasses;
+    string ColumnCssClasses = !string.IsNullOrWhiteSpace(Model.ColumnCssClasses) ? Model.ColumnCssClasses : ViewRowModel.DefaultColumnCssClasses;
     string CtrlRowCssClass;
 
     SqlBrokerDef BrokerDef = SqlBrokerDef.Find(Model.ViewDef.BrokerName);
@@ -32,7 +32,7 @@
                     {
                         CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
                         FieldDef = TableDef.FindAnyField(Ctrl.DataField).Item2;
-                        ControlDataSetupText = DataViewControlDataSetup.GetSetupText(Ctrl, FieldDef);
+                        ControlDataSetupText = ViewControlDataSetup.GetSetupText(Ctrl, FieldDef);
                         <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
                     }
                 </div>

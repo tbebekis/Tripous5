@@ -1,4 +1,4 @@
-﻿@model DataViewPagerModel
+﻿@model ViewPagerModel
 
 @if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
 {
@@ -16,7 +16,7 @@
                     @if (Tab.Tabs.Count > 0)
                     {
                         // it's a TabControl
-                        DataViewPagerModel PagerModel = new DataViewPagerModel(Model.ViewDef, Tab);
+                        ViewPagerModel PagerModel = new ViewPagerModel(Model.ViewDef, Tab);
                         @await Html.PartialAsync("DataView.Tabs", PagerModel)
                     }
                     else if (Tab.Groups.Count > 0)
@@ -28,7 +28,7 @@
                     {
                         foreach (var Row in Tab.Rows)
                         {
-                            DataViewRowModel RowModel = new DataViewRowModel(Model.ViewDef, Row);
+                            ViewRowModel RowModel = new ViewRowModel(Model.ViewDef, Row);
                             @await Html.PartialAsync("DataView.Row", RowModel)
                         }
                     }

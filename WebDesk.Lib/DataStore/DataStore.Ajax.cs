@@ -29,23 +29,16 @@ namespace WebLib
 
     static public partial class DataStore
     {
-        static bool IsUiRequest(AjaxRequest R)
-        {
-            return R.Params != null && R.Params.ContainsKey("Type") && R.Params["Type"] != null && Sys.IsSameText(R.Params["Type"].ToString(), "Ui");
-        }
-        static bool IsSingleInstance(AjaxRequest R)
-        {
-            return R.Params != null && R.Params.ContainsKey("IsSingleInstance") && R.Params["IsSingleInstance"] != null && Convert.ToBoolean(R.Params["IsSingleInstance"]);
-        }
+ 
 
         static HttpActionResult GetHtmlView(IAjaxController Controller, AjaxRequest R)
         {
+            AjaxPacket Packet = new AjaxPacket(R.OperationName);
+            //Packet["ViewName"] = R.IsSingleInstance ? R.OperationName : Names.Next(R.OperationName);
+
+            /*
             Dictionary<string, object> ViewData = new Dictionary<string, object>();     // ViewData for the razor view
  
-            JObject Packet = new JObject();
-            Packet["OperationName"] = R.OperationName;
-            Packet["ViewName"] = IsSingleInstance(R) ? R.OperationName : Names.Next(R.OperationName);
-
             string RazorViewNameOrPath = string.Empty;
             object Model = null;
             DataTable Table; 
@@ -97,8 +90,35 @@ namespace WebLib
                 string HtmlText = Controller.ViewToString(RazorViewNameOrPath, Model, ViewData);
                 Packet["HtmlText"] = HtmlText;
             }
+            */
 
-            HttpActionResult Result = HttpActionResult.SetPacket(Packet, true);
+
+            AjaxViewInfo ViewInfo = null;
+            foreach (var ViewInfoProvider in AjaxViewInfoProviders)
+            {
+                ViewInfo = ViewInfoProvider.GetViewInfo(R, Packet);
+                if (ViewInfo != null)
+                    break;
+            }
+
+            if (ViewInfo == null)
+                Sys.Throw($"No View Info for requested view. Operation: {R.OperationName}");
+
+            string ViewName = Packet["ViewName"] as string;
+            if (string.IsNullOrWhiteSpace(ViewName))
+            {
+                ViewName = R.IsSingleInstance ? R.OperationName : Names.Next(R.OperationName);
+                Packet["ViewName"] = ViewName;
+            }
+
+            string HtmlText = Packet["HtmlText"] as string;
+            if (string.IsNullOrWhiteSpace(HtmlText) && !string.IsNullOrWhiteSpace(ViewInfo.RazorViewNameOrPath))
+            {
+                HtmlText = Controller.ViewToString(ViewInfo.RazorViewNameOrPath, ViewInfo.Model, ViewInfo.ViewData);
+                Packet["HtmlText"] = HtmlText;
+            }
+
+            HttpActionResult Result = HttpActionResult.SetPacket(Packet.GetPacketObject(), true);
             return Result;
         }
 
@@ -109,7 +129,7 @@ namespace WebLib
         {
             HttpActionResult Result = null;
 
-            if (IsUiRequest(R))
+            if (R.IsUiRequest)
             {
                 Result = Result = GetHtmlView(Controller, R);
             }

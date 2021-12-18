@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-using Tripous;
+ 
 
-namespace WebLib
+namespace Tripous
 {
     /// <summary>
     /// A command or action
@@ -45,9 +45,7 @@ namespace WebLib
             public Dictionary<string, object> Params => Cmd.Params;
         }
 
-
         Setup fSetup;
- 
 
         /* construction */
         /// <summary>
@@ -56,9 +54,7 @@ namespace WebLib
         public Command()
         {
         }
-
-
-
+ 
         /* static */
         /// <summary>
         /// Registers a command executor.
@@ -147,7 +143,6 @@ namespace WebLib
         /// A name unique among all commands.
         /// </summary>
         public string Name { get; set; }
-
  
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title

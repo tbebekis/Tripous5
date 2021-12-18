@@ -32,6 +32,8 @@ namespace WebLib
     static public partial class DataStore
     {
 
+        static List<IAjaxViewInfoProvider> AjaxViewInfoProviders = new List<IAjaxViewInfoProvider>();
+
         /// <summary>
         /// English language
         /// </summary>
@@ -173,6 +175,7 @@ namespace WebLib
                 DataStore.App = App;
 
                 Logger.Add(new DataLogListener());
+                Register(new AjaxViewInfoProviderMain());
 
                 RegisterDbProviderFactories();
                 ConnectDatabases();
@@ -204,7 +207,24 @@ namespace WebLib
         }
 
 
+
         /* public */
+        /// <summary>
+        /// Registers a specified ajax view information provider
+        /// </summary>
+        static public void Register(IAjaxViewInfoProvider Provider)
+        {
+            if (!AjaxViewInfoProviders.Contains(Provider))
+                AjaxViewInfoProviders.Add(Provider);
+        }
+        /// <summary>
+        /// Unregisters a specified ajax view information provider
+        /// </summary>
+        static public void Unregister(IAjaxViewInfoProvider Provider)
+        {
+            AjaxViewInfoProviders.Remove(Provider);
+        }
+
         /// <summary>
         /// Returns the list of languages this web-site supports
         /// </summary>

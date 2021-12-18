@@ -9,6 +9,9 @@ namespace Tripous.Data
 
     /// <summary>
     /// Represents a panel. It may contain a grid or rows with controls.
+    /// <para><see cref = "Grid" /> and <see cref = "Columns" /> are checked in that order. If any is not empty the rest are ignored.</para>
+    /// <para>Contains a single Grid when the <see cref="Grid"/> is not empty. </para>
+    /// <para>Contains a list of columns when the <see cref="Columns"/> is not empty. Columns are control containers. </para>
     /// </summary>
     public class ViewRowDef
     {
@@ -31,7 +34,7 @@ namespace Tripous.Data
         public string TableName { get; set; }
 
         /// <summary>
-        /// The whole row is occupied by a grid controls.
+        /// The whole row is occupied by a grid control.
         /// </summary>
         public ViewControlDef Grid { get; set; }
         /// <summary>
