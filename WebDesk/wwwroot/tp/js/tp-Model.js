@@ -1176,7 +1176,7 @@ tp.DataView = class extends tp.View {
     /** Returns an array with the panels of the panel list
      * @returns {HTMLElement[]}
      * */
-    GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetElementList() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
+    GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetPanels() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
 
     /** Returns a DOM Element contained by this view.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
@@ -1187,18 +1187,19 @@ tp.DataView = class extends tp.View {
      *  */
     GetViewPanelListElement() { return tp.Select(this.Handle, '.PanelList'); }
 
-    /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetViewListPanelElement() { return this.GetPanelListElements()[0]; }
-    /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetViewEditPanelElement() { return this.GetPanelListElements()[1]; }
     /** Returns a DOM Element contained by this view. Returns the Filters panel, the container of the filter controls.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewFilterPanelElement() { return this.GetPanelListElements()[2]; }
+    GetViewFilterPanelElement() { return this.FindPanelByPanelMode('Filters'); }
+    /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewListPanelElement() { return this.FindPanelByPanelMode('List'); }
+    /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewEditPanelElement() { return this.FindPanelByPanelMode('Edit'); }
+
 
     /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
@@ -1532,9 +1533,7 @@ tp.DataView = class extends tp.View {
         for (var i = 0, ln = this.DataSources.length; i < ln; i++)
             this.DataSources[i].Update();
     }
-
-
-
+ 
     /**
     Returns the Id (value of the primary key field) of the selected data-row of the List (browser) grid, if any, else null.
     @protected
@@ -1586,7 +1585,7 @@ tp.DataView = class extends tp.View {
         }
     }
     /**
-     * Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * Each panel of the main pager (a PanelList) MUST have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
      * This function returns a panel found having a specified PanelMode, or null if not found.
      * @param {string} PanelMode The panel mode to check for.
      * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.

@@ -11,6 +11,7 @@ namespace Tripous.Data
 
     /// <summary>
     /// Represents a container such as a DIV or panel which groups controls under a specified text.
+    /// <para>May contain: Tabs and Rows.</para>
     /// <para><see cref="Tabs"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
     /// <para>Contains a single Pager (TabControl) when the <see cref="Tabs"/> are not empty. </para>
     /// <para>Contains a signle Panel (DIV) with one or more rows when the <see cref="Rows"/> is not empty. </para>
@@ -35,12 +36,45 @@ namespace Tripous.Data
         {
             return Title;
         }
+
+        /// <summary>
+        /// Adds and returns a <see cref="ViewTabDef"/>
+        /// </summary>
+        public ViewTabDef AddTab(string TitleKey, string TabId = "")
+        {
+            ViewTabDef Result = new ViewTabDef()
+            {
+                TitleKey = TitleKey,
+                TabId = TabId,
+            };
+
+            Tabs.Add(Result);
+
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a <see cref="ViewRowDef"/>
+        /// </summary>
+        public ViewRowDef AddRow()
+        {
+            ViewRowDef Result = new ViewRowDef();
+            Rows.Add(Result);
+            return Result;
+        }
+
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        public ViewTabDef GetTabById(string Id)
+        public ViewTabDef FindTabById(string Id)
         {
             return Tabs.Find(item => Sys.IsSameText(item.TabId, Id));
+        }
+        /// <summary>
+        /// Returns true if a <see cref="ViewTabDef"/> found under a specified Id.
+        /// </summary>
+        public bool ContainsTab(string TabId)
+        {
+            return FindTabById(TabId) != null;
         }
 
         /* properties */

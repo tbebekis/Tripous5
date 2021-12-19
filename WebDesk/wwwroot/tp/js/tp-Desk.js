@@ -516,7 +516,7 @@ tp.DeskViewPager = class extends tp.tpElement {
         // tab
         let elTab = tp.Doc.createElement('div');
         let TabItem = new tp.tpElement(elTab);
-        TabItem.Text = Packet.ViewName;
+        TabItem.Text = !tp.IsBlankString(Packet.ViewTitle) ? Packet.ViewTitle: Packet.ViewName;
 
         // view
         let elView = tp.HtmlToElement(Packet.HtmlText);

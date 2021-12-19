@@ -26,7 +26,6 @@ namespace WebLib
             {
                 SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
                 ViewDef = new ViewDef(BrokerDef);
-                ViewDef.AddDefaultDataViewButtons(); 
             }
 
             DataViewModel ViewModel = new DataViewModel(ViewDef);
@@ -36,6 +35,9 @@ namespace WebLib
 
             Info.RazorViewNameOrPath = "DataView";
             Info.Model = ViewModel;
+
+            Packet["ViewName"] = Request.OperationName;
+            Packet["ViewTitle"] = ViewDef.Title;
 
             return Info;
         }

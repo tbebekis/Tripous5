@@ -9,6 +9,7 @@ namespace Tripous.Data
 
     /// <summary>
     /// Represents a panel. It may contain a grid or rows with controls.
+    /// <para>May contain: A single Grid or Columns.</para>
     /// <para><see cref = "Grid" /> and <see cref = "Columns" /> are checked in that order. If any is not empty the rest are ignored.</para>
     /// <para>Contains a single Grid when the <see cref="Grid"/> is not empty. </para>
     /// <para>Contains a list of columns when the <see cref="Columns"/> is not empty. Columns are control containers. </para>
@@ -25,9 +26,28 @@ namespace Tripous.Data
         {
         }
 
- 
+        /// <summary>
+        /// Adds and returns a <see cref="ViewColumnDef"/>
+        /// </summary>
+        public ViewColumnDef AddColumn(string TitleKey)
+        {
+            ViewColumnDef Result = new ViewColumnDef();
+            Columns.Add(Result);
+            return Result;
+        }
+        /// <summary>
+        /// Sets the <see cref="Grid"/> control.
+        /// </summary>
+        public ViewControlDef SetGrid(string TableName = "")
+        {
+            this.Grid = new ViewControlDef() {
+                TypeName = ViewControlDef.Grid,
+                TableName = TableName,
+            };
+            return this.Grid;
+        }
 
-        /* properties */ 
+        /* properties */
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.
         /// </summary>

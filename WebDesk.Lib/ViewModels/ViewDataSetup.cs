@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 
 using Tripous;
-
+using Tripous.Data;
 
 namespace WebLib.Models
 {
@@ -29,6 +29,24 @@ namespace WebLib.Models
         public ViewDataSetup()
         {
         }
+        /// <summary>
+        /// Constructor.
+        /// <para>Creates an instance with default values from a specified <see cref="ViewDef"/> .</para>
+        /// </summary>
+        public ViewDataSetup(ViewDef ViewDef)
+        {
+            this.ClassType = !string.IsNullOrWhiteSpace(ViewDef.JSClassType)? ViewDef.JSClassType : "tp.DeskDataView";  
+            this.BrokerClass = !string.IsNullOrWhiteSpace(ViewDef.JSBrokerClass)? ViewDef.JSBrokerClass : "tp.Broker";  
+            this.BrokerName = ViewDef.BrokerName;
+
+            this.AutocreateControls = ViewDef.AutocreateControls;
+
+            if (ViewDef.JS != null & ViewDef.JS.Count > 0)
+                this.JS.AddRange(ViewDef.JS);
+
+            if (ViewDef.CSS != null & ViewDef.CSS.Count > 0)
+                this.JS.AddRange(ViewDef.CSS);
+        }
 
         /* public */
         /// <summary>
@@ -36,7 +54,6 @@ namespace WebLib.Models
         /// </summary>
         public string Serialize()
         {
-
             Dictionary<string, object> Result = new Dictionary<string, object>();
 
             if (!string.IsNullOrWhiteSpace(ClassType))
@@ -55,7 +72,6 @@ namespace WebLib.Models
 
             if (CSS != null && CSS.Count > 0)
                 Result["CSS"] = JS;
-
 
             string JsonText = Json.Serialize(Result);
             return JsonText;

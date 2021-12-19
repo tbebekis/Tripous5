@@ -17,6 +17,7 @@ namespace WebLib
         static void RegisterBroker_Trader()
         { 
             SqlBrokerDef Broker = SqlBrokerDef.Register("Trader");
+            Broker.TitleKey = "Traders";
             //Broker.CodeProducerName = SysCodeProducers.Simple6_3;
             SelectSql MainSelect = Broker.MainSelect;
 
@@ -60,9 +61,7 @@ from
             FilterDef.Enum.IncludeAll = true;
             FilterDef.Enum.OptionList.AddRange(new string[] { "one", "two", "three" });
             */
-
-
-
+ 
 
             MainSelect.Filters.CheckDescriptors();
 

@@ -2,6 +2,9 @@
 @model DataViewModel
 
 @{
+
+    ViewDef ViewDef = Model.ViewDef; 
+
     // The standard DataView contains 3 panels in a tp.PanelList with the following indexes:
     // 0 - List     (the container of the List (browser) grid)
     // 1 - Edit     (the container of a TabPager with data entry controls)
@@ -12,29 +15,42 @@
 @if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
 {
     <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.GetDataSetupText())'>
-        
-        @await Html.PartialAsync("View.ToolBar", Model.ViewDef.ToolBarButtons)
- 
-        <div class="PanelList" data-setup="{ SelectedIndex: 0 }">
 
-            <div data-setup="{ PanelMode: 'List' }">
-                <div class="Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
-            </div>    
+        @await Html.PartialAsync("View.ToolBar", ViewDef.ToolBarButtons)
 
-            <div data-setup="{ PanelMode: 'Edit' }">
-                @{ // this creates the Edit panel, the container of the edit part of the view.
-                    ViewPagerModel PagerModel = new ViewPagerModel(Model.ViewDef);
-                    PagerModel.CssClasses = "TabControl";
-                    PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
+        @if (ViewDef.Tabs.Count > 0)
+        {
 
-                    @await Html.PartialAsync("View.Tabs", PagerModel)
+        <div class="PanelList">
+            @foreach (var TabDef in ViewDef.Tabs)
+            {
+                if (Sys.IsSameText(TabDef.TabId, "List"))
+                {
+                    <div data-setup="{ PanelMode: 'List' }">
+                        <div class="Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
+                    </div>
                 }
-            </div>            
+                else if (Sys.IsSameText(TabDef.TabId, "Edit"))
+                {
+                    <div data-setup="{ PanelMode: 'Edit' }">
+                        @{ // this creates the Edit panel, the container of the edit part of the view.
+                            ViewPagerModel PagerModel = new ViewPagerModel(Model.ViewDef);
+                            PagerModel.CssClasses = "TabControl";
+                            PagerModel.DataSetupText = "{ SelectedIndex: 0 }";
 
-            <div data-setup="{ PanelMode: 'Filters' }">
-            </div>
+                            @await Html.PartialAsync("View.Tabs", PagerModel)
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div data-setup="{ PanelMode: '@TabDef.TabId' }">
+                    </div>
+                }
+            }
+
         </div>
-
+        }
 
     </div>
 }

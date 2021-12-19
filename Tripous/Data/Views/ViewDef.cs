@@ -12,6 +12,7 @@ namespace Tripous.Data
  
     /// <summary>
     /// Top level container. Represents a desktop form or a html page.
+    /// <para>May contain: Tabs, Groups and Rows.</para>
     /// <para><see cref="Tabs"/>, <see cref="Groups"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
     /// <para>Contains a single Pager (TabControl) when the <see cref="Tabs"/> are not empty. </para>
     /// <para>Contains a single Accordeon when the <see cref="Groups"/> is not empty. </para>
@@ -43,13 +44,18 @@ namespace Tripous.Data
 
             Title = Broker.Title;
 
+            this.JSClassType = "tp.DeskDataView";
+            this.JSBrokerClass = "tp.Broker";
+
+            this.AddDefaultDataViewButtons();
+
             // filters (search) tab
             ViewTabDef FilterTab = new ViewTabDef();
             Tabs.Add(FilterTab);
             FilterTab.TabId = "Filters";
             FilterTab.TitleKey = "Filters";
 
-            // list (browse) tab
+            // List (browse) tab
             ViewTabDef ListTab = new ViewTabDef();
             Tabs.Add(ListTab);
             ListTab.TabId = "List";
@@ -61,15 +67,16 @@ namespace Tripous.Data
             EditTab.TabId = "Edit";
             EditTab.TitleKey = "Edit";
 
+
             // the single tab page of the Edit pager
-            ViewTabDef DataTab = new ViewTabDef(); // new ViewTabDef("Data") { TitleKey = "Data" };
+            ViewTabDef DataTab = new ViewTabDef(); 
             EditTab.Tabs.Add(DataTab);
             DataTab.TabId = "Data";
             DataTab.TitleKey = "Data";
             DataTab.TableName = Broker.MainTableName;
  
             // the single row of the Data tab-page
-            ViewRowDef Row = new ViewRowDef(); // new ViewRowDef();
+            ViewRowDef Row = new ViewRowDef();  
             DataTab.Rows.Add(Row);
             Row.TableName = DataTab.TableName;
 
@@ -200,9 +207,16 @@ namespace Tripous.Data
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        public ViewTabDef GetTabById(string TabId)
+        public ViewTabDef FindTabById(string TabId)
         {
            return Tabs.Find(item => Sys.IsSameText(item.TabId, TabId));
+        }
+        /// <summary>
+        /// Returns true if a <see cref="ViewTabDef"/> found under a specified Id.
+        /// </summary>
+        public bool ContainsTab(string TabId)
+        {
+            return FindTabById(TabId) != null;
         }
  
         /// <summary>
@@ -214,19 +228,75 @@ namespace Tripous.Data
 
             ToolBarButtons.AddRange(new ViewToolBarButtonDef []
             {
-                ViewToolBarButtonDef.CreateHome(),
+                ViewToolBarButtonDef.ButtonHome,
 
-                ViewToolBarButtonDef.CreateList(),
-                ViewToolBarButtonDef.CreateFilters(),
-
-                ViewToolBarButtonDef.CreateEdit(),
-                ViewToolBarButtonDef.CreateInsert(),
-                ViewToolBarButtonDef.CreateDelete(),
-                ViewToolBarButtonDef.CreateSave(),
-
-                ViewToolBarButtonDef.CreateCancel(),
-                ViewToolBarButtonDef.CreateClose(),
+                ViewToolBarButtonDef.ButtonList,
+                ViewToolBarButtonDef.ButtonFilters,
+                                      
+                ViewToolBarButtonDef.ButtonEdit,
+                ViewToolBarButtonDef.ButtonInsert,
+                ViewToolBarButtonDef.ButtonDelete,
+                ViewToolBarButtonDef.ButtonSave,
+                                      
+                ViewToolBarButtonDef.ButtonCancel,
+                ViewToolBarButtonDef.ButtonClose,
             });
+        }
+
+        /// <summary>
+        /// Adds and returns a <see cref="ViewTabDef"/>
+        /// </summary>
+        public ViewTabDef AddTab(string TitleKey, string TabId = "")
+        {
+            ViewTabDef Result = new ViewTabDef()
+            {
+                TitleKey = TitleKey,
+                TabId = TabId,
+            };
+
+            Tabs.Add(Result);
+
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a <see cref="ViewGroupDef"/>
+        /// </summary>
+        public ViewGroupDef AddGroup(string TitleKey)
+        {
+            ViewGroupDef Result = new ViewGroupDef()
+            {
+                TitleKey = TitleKey,    
+            };
+
+            Groups.Add(Result);
+
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a <see cref="ViewRowDef"/>
+        /// </summary>
+        public ViewRowDef AddRow(string TitleKey)
+        {
+            ViewRowDef Result = new ViewRowDef();
+            Rows.Add(Result);
+            return Result;
+        }
+
+        /// <summary>
+        /// Adds and returns a <see cref="ViewToolBarButtonDef"/>
+        /// </summary>
+        public ViewToolBarButtonDef AddButton(string Command, string Text, string IcoClasses, string ToolTip = "")
+        {
+            ViewToolBarButtonDef Result = new ViewToolBarButtonDef()
+            {
+                Command = Command,
+                Text = Text,
+                IcoClasses = IcoClasses,
+                ToolTip = !string.IsNullOrWhiteSpace(ToolTip)? ToolTip: Text,
+            };
+
+            ToolBarButtons.Add(Result);
+            return Result;
         }
 
         /* properties */
@@ -261,6 +331,30 @@ namespace Tripous.Data
             get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
             set { }
         }
+
+        /// <summary>
+        /// Returns the javascript class name of a view class to be used when creating the view object in javascript.
+        /// </summary>
+        public string JSClassType { get; set; }
+        /// <summary>
+        /// Returns the javascript class name of a broker class to be used when creating the broker object in javascript.
+        /// </summary>
+        public string JSBrokerClass { get; set; }
+
+        /// <summary>
+        /// When true, controls are auto-created.
+        /// <para>Defaults to false.</para>
+        /// </summary>
+        public bool AutocreateControls { get; set; } = false;
+
+        /// <summary>
+        /// A list of javascript files this view needs in order to function properly.
+        /// </summary>
+        public List<string> JS { get; set; } = new List<string>();
+        /// <summary>
+        /// A list of csss files this view needs in order to function properly.
+        /// </summary>
+        public List<string> CSS { get; set; } = new List<string>();
 
         /// <summary>
         /// When true, then <see cref="TextSplitPercent"/> is not applied. Control labels go on top of each control.

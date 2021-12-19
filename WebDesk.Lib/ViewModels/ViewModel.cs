@@ -16,6 +16,8 @@ namespace WebLib.Models
     /// </summary>
     public class ViewModel
     {
+        ViewDataSetup fDataSetup;
+
         /* construction */
         /// <summary>
         /// Constructor
@@ -43,7 +45,16 @@ namespace WebLib.Models
         /// <summary>
         /// Used as the generator of the data-setup attribute value for a default DataView razor view.
         /// </summary>
-        public ViewDataSetup DataSetup { get; } = new ViewDataSetup();
+        public ViewDataSetup DataSetup
+        {
+            get
+            {
+                if (fDataSetup == null)
+                    fDataSetup = new ViewDataSetup(ViewDef);
+
+                return fDataSetup;
+            }
+        }
     }
 
 }

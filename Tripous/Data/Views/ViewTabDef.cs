@@ -8,7 +8,10 @@ namespace Tripous.Data
 {
 
     /// <summary>
-    /// Represents a tab page or a TabControl (Pager) with child tab pages.
+    /// Represents a single tab page or a TabControl (Pager) with child tab pages. 
+    /// <para>May contain: Tabs, Groups and Rows.</para>
+    /// <para>When <see cref="Tabs"/> is empty then this instance is a signle tab page.</para>
+    /// <para>When <see cref="Tabs"/> is NOT empty then this instance is a TabControl (Pager) with child tab pages.</para>
     /// <para><see cref="Tabs"/>, <see cref="Groups"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
     /// <para>Contains a single Pager (TabControl) when the <see cref="Tabs"/> are not empty. </para>
     /// <para>Contains a single Accordeon when the <see cref="Groups"/> is not empty. </para>
@@ -34,17 +37,61 @@ namespace Tripous.Data
         public override string ToString()
         {
             return Title;
-        }        
+        }
+
+        /// <summary>
+        /// Adds and returns a <see cref="ViewTabDef"/>
+        /// </summary>
+        public ViewTabDef AddTab(string TitleKey, string TabId = "")
+        {
+            ViewTabDef Result = new ViewTabDef()
+            {
+                TitleKey = TitleKey,
+                TabId = TabId,
+            };
+
+            Tabs.Add(Result);
+
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a <see cref="ViewGroupDef"/>
+        /// </summary>
+        public ViewGroupDef AddGroup(string TitleKey)
+        {
+            ViewGroupDef Result = new ViewGroupDef()
+            {
+                TitleKey = TitleKey,
+            };
+
+            Groups.Add(Result);
+
+            return Result;
+        }
+        /// <summary>
+        /// Adds and returns a <see cref="ViewRowDef"/>
+        /// </summary>
+        public ViewRowDef AddRow(string TitleKey)
+        {
+            ViewRowDef Result = new ViewRowDef();
+            Rows.Add(Result);
+            return Result;
+        }
+
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        public ViewTabDef GetTabById(string TabId)
+        public ViewTabDef FindTabById(string TabId)
         {
             return Tabs.Find(item => Sys.IsSameText(item.TabId, TabId));
         }
-
-
-
+        /// <summary>
+        /// Returns true if a <see cref="ViewTabDef"/> found under a specified Id.
+        /// </summary>
+        public bool ContainsTab(string TabId)
+        {
+            return FindTabById(TabId) != null;
+        }
 
         /* properties */
         /// <summary>
@@ -84,5 +131,26 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewRowDef> Rows { get; } = new List<ViewRowDef>();
  
+    }
+
+    /// <summary>
+    /// Extensions
+    /// </summary>
+    static public class ViewTabDefExtensions
+    {
+        /// <summary>
+        /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
+        /// </summary>
+        static public ViewTabDef FindTabById(this IEnumerable<ViewTabDef> Tabs, string TabId)
+        {
+            return Tabs.FirstOrDefault(item => Sys.IsSameText(item.TabId, TabId));
+        }
+        /// <summary>
+        /// Returns true if a <see cref="ViewTabDef"/> found under a specified Id.
+        /// </summary>
+        static public bool Contains(this IEnumerable<ViewTabDef> Tabs, string TabId)
+        {
+            return Tabs.FindTabById(TabId) != null;
+        }
     }
 }

@@ -21,7 +21,6 @@ namespace Tripous.Data
         string fMainTableName;
         string fEntityName;
 
-
         /* construction */
         /// <summary>
         /// Constructor
@@ -156,9 +155,7 @@ namespace Tripous.Data
             }
 
             return Result.ToArray();
-        }
-
-        
+        }        
 
         /* public */
         /// <summary>
@@ -193,8 +190,6 @@ namespace Tripous.Data
             Sys.AssignObject(this, Result);
             return Result;
         }
-
-
 
         /// <summary>
         /// Creates and adds a table to tables.
@@ -250,15 +245,11 @@ namespace Tripous.Data
             return List.ToArray();
         }
 
-
-
-
         /* properties */
         /// <summary>
         /// The Name must be unique.
         /// </summary> 
         public string Name { get; set; }
-
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
@@ -277,8 +268,7 @@ namespace Tripous.Data
         /// <summary>
         /// Gets or sets the connection name (database)
         /// </summary>
-        public string ConnectionName { get; set; } = SysConfig.DefaultConnection;
- 
+        public string ConnectionName { get; set; } = SysConfig.DefaultConnection; 
 
         /// <summary>
         /// Gets or set the name of the main table
@@ -297,7 +287,6 @@ namespace Tripous.Data
         /// </summary>
         public string SubLinesTableName { get; set; }
 
-
         /// <summary>
         /// The name of the Entity this broker represents
         /// </summary>
@@ -306,7 +295,6 @@ namespace Tripous.Data
             get { return !string.IsNullOrWhiteSpace(fEntityName) ? fEntityName : this.Name; }
             set { this.fEntityName = value; }
         }
-
 
         /// <summary>
         /// Returns the connection info (database)

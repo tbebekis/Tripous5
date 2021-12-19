@@ -189,6 +189,8 @@ namespace WebLib
                 RegisterBrokers();
                 RegisterLocators();
 
+                RegisterViews();
+
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
             }
 
