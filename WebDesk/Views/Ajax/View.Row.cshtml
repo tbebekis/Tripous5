@@ -32,7 +32,7 @@
                     {
                         CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
                         FieldDef = TableDef.FindAnyField(Ctrl.DataField).Item2;
-                        ControlDataSetupText = ViewControlDataSetup.GetSetupText(Ctrl, FieldDef);
+                        ControlDataSetupText = ViewControlDataSetup.GetDataSetupText(Ctrl, FieldDef);
                         <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
                     }
                 </div>

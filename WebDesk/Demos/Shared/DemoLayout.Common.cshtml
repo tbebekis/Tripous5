@@ -7,23 +7,7 @@
 @{
     var Settings = DataStore.GetSettings();
 }
-
-<div class="dialog-box-template">
-    <div class="caption">
-        <div class="title">@*PLACE DIALOG-BOX TITLE HERE*@</div>
-        <img class="close" src='@SystemImageUrl("CloseWindow.png")' asp-append-version="true" />
-    </div>
-    <div class="content-container">
-    </div>
-</div>
-
  
-
- 
-
-
-
-
 <script>
     tp.Ready(() => {
 
@@ -33,6 +17,8 @@
             Medium: 1200
         };
 
+        tp.SysConfig.GlobalErrorHandling = true;
+
         tp.NotificationBoxSetup.ToTop = false;
         tp.NotificationBoxSetup.Height = 100;
 
@@ -40,8 +26,6 @@
         tp.NotificationBoxSetup.Warning.Title = '@L("Warning")';
         tp.NotificationBoxSetup.Error.Title = '@L("Error")';
         tp.NotificationBoxSetup.Success.Title = '@L("Success")';
-
- 
     });
 
 

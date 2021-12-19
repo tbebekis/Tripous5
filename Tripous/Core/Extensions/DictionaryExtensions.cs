@@ -249,14 +249,18 @@ namespace Tripous
                 }
             }
         }
+       
+        
         /// <summary>
         /// Assigns Dest to Source
         /// </summary>
-        static public void Assign(this IDictionary<string, string> Source, IDictionary<string, string> Dest)
+        static public void Assign<TKey, TValue>(this IDictionary<TKey, TValue> Source, IDictionary<TKey, TValue> Dest, bool ClearSource = true)
         {
-            Source.Clear();
+            if (ClearSource)
+                Source.Clear();
+
             if (Dest != null)
-                foreach (string Key in Dest.Keys)
+                foreach (TKey Key in Dest.Keys)
                 {
                     Source.Add(Key, Dest[Key]);
                 }

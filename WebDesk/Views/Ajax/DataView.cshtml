@@ -3,24 +3,22 @@
 
 @{
 
-    ViewDef ViewDef = Model.ViewDef; 
+    ViewDef ViewDef = Model.ViewDef;
 
     // The standard DataView contains 3 panels in a tp.PanelList with the following indexes:
-    // 0 - List     (the container of the List (browser) grid)
-    // 1 - Edit     (the container of a TabPager with data entry controls)
-    // 2 - Filter   (the container of the filter controls)
+    // 0 - Filter   (the container of the filter controls)
+    // 1 - List     (the container of the List (browser) grid)
+    // 2 - Edit     (the container of a TabPager with data entry controls)
+
     string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.ViewDef.TextTop, Model.ViewDef.TextSplitPercent);
 }
 
-@if (!string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName))
-{
-    <div class="desk-view tp-DataView @Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.GetDataSetupText())'>
+<div class="@Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.GetDataSetupText())'>
 
-        @await Html.PartialAsync("View.ToolBar", ViewDef.ToolBarButtons)
+    @await Html.PartialAsync("View.ToolBar", ViewDef.ToolBarButtons)
 
-        @if (ViewDef.Tabs.Count > 0)
-        {
-
+    @if (ViewDef.Tabs.Count > 0)
+    {
         <div class="PanelList">
             @foreach (var TabDef in ViewDef.Tabs)
             {
@@ -50,9 +48,8 @@
             }
 
         </div>
-        }
+    }
 
-    </div>
-}
+</div>
 
 

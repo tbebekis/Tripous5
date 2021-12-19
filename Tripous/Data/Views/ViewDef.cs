@@ -67,7 +67,6 @@ namespace Tripous.Data
             EditTab.TabId = "Edit";
             EditTab.TitleKey = "Edit";
 
-
             // the single tab page of the Edit pager
             ViewTabDef DataTab = new ViewTabDef(); 
             EditTab.Tabs.Add(DataTab);
@@ -167,7 +166,6 @@ namespace Tripous.Data
             return Register(Def);
         }
 
-
         /// <summary>
         /// Returns a string with css classes that control the widths of controls/titles in control rows. Examples
         /// <para><c>tp-Ctrls lc-75 mc-70 sc-70</c></para>
@@ -204,6 +202,34 @@ namespace Tripous.Data
         {
             return Title;
         }
+    
+        /// <summary>
+        /// Assigns properties to a data-setup object
+        /// </summary>
+        public void AssignTo(Dictionary<string, object> DataSetup)
+        {
+            if (!string.IsNullOrWhiteSpace(JSClassType))
+                DataSetup["ClassType"] = JSClassType;
+
+            if (!string.IsNullOrWhiteSpace(JSBrokerClass))
+                DataSetup["BrokerClass"] = JSBrokerClass;
+
+            if (!string.IsNullOrWhiteSpace(BrokerName))
+                DataSetup["BrokerName"] = BrokerName;
+
+            if (AutocreateControls)
+                DataSetup["AutocreateControls"] = AutocreateControls;
+ 
+            if (JS != null & JS.Count > 0)
+                DataSetup["JS"] = JS;
+
+            if (CSS != null & CSS.Count > 0)
+                DataSetup["CSS"] = JS;
+
+            if (CssClasses != null & CssClasses.Count > 0)
+                DataSetup["CssClasses"] = JS;
+        }
+
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
@@ -331,31 +357,7 @@ namespace Tripous.Data
             get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Name; }
             set { }
         }
-
-        /// <summary>
-        /// Returns the javascript class name of a view class to be used when creating the view object in javascript.
-        /// </summary>
-        public string JSClassType { get; set; }
-        /// <summary>
-        /// Returns the javascript class name of a broker class to be used when creating the broker object in javascript.
-        /// </summary>
-        public string JSBrokerClass { get; set; }
-
-        /// <summary>
-        /// When true, controls are auto-created.
-        /// <para>Defaults to false.</para>
-        /// </summary>
-        public bool AutocreateControls { get; set; } = false;
-
-        /// <summary>
-        /// A list of javascript files this view needs in order to function properly.
-        /// </summary>
-        public List<string> JS { get; set; } = new List<string>();
-        /// <summary>
-        /// A list of csss files this view needs in order to function properly.
-        /// </summary>
-        public List<string> CSS { get; set; } = new List<string>();
-
+ 
         /// <summary>
         /// When true, then <see cref="TextSplitPercent"/> is not applied. Control labels go on top of each control.
         /// </summary>
@@ -390,7 +392,37 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewRowDef> Rows { get; } = new List<ViewRowDef>();
 
-         
+        /* data-setup properties */
+        /// <summary>
+        /// Returns the javascript class name of a view class to be used when creating the view object in javascript.
+        /// </summary>
+        public string JSClassType { get; set; }
+        /// <summary>
+        /// Returns the javascript class name of a broker class to be used when creating the broker object in javascript.
+        /// </summary>
+        public string JSBrokerClass { get; set; }
+
+        /// <summary>
+        /// A list of javascript files this view needs in order to function properly.
+        /// </summary>
+        public List<string> JS { get; set; } = new List<string>();
+        /// <summary>
+        /// A list of css files this view needs in order to function properly.
+        /// </summary>
+        public List<string> CSS { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of css classes for the view
+        /// </summary>
+        public List<string> CssClasses { get; set; } = new List<string>() ;
+
+        /// <summary>
+        /// When true, controls are auto-created.
+        /// <para>Defaults to false.</para>
+        /// </summary>
+        public bool AutocreateControls { get; set; } = false;
+
+
     } 
 
 }

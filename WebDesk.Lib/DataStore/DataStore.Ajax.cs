@@ -27,65 +27,6 @@ namespace WebLib
 {
 
 
-    /*
-
-     //Packet["ViewName"] = R.IsSingleInstance ? R.OperationName : Names.Next(R.OperationName);
-
-    Dictionary<string, object> ViewData = new Dictionary<string, object>();     // ViewData for the razor view
-
-    string RazorViewNameOrPath = string.Empty;
-    object Model = null;
-    DataTable Table; 
-
-    void PrepareDefaultDataView(string BrokerName)
-    {
-        RazorViewNameOrPath = "DataView";
-
-        ViewDef ViewDef = ViewDef.Find(BrokerName);
-        // no view definition, construct a default one.
-        if (ViewDef == null)
-        {
-            SqlBrokerDef BrokerDef = SqlBrokerDef.Find(BrokerName);
-            ViewDef = new ViewDef(BrokerDef);
-            ViewDef.ToolBarFlags = ViewToolBarFlags.List | ViewToolBarFlags.Filters | ViewToolBarFlags.AllEdits | ViewToolBarFlags.Cancel | ViewToolBarFlags.Close;
-        }
-
-        DataViewModel DVM = new DataViewModel(ViewDef);
-        DVM.Setup.BrokerName = BrokerName;  
-
-
-        Model = DVM;
-    }
-
-    switch (R.OperationName)
-    {
-        case "Ui.SysData.Table":
-            RazorViewNameOrPath = "SysData.List";
-            ViewData["DataType"] = "Table";
-            Packet["DataType"] = "Table";
-            Table = SysData.Select("Table", NoBlobs: true);
-            Packet["Table"] = JsonDataTable.ToJObject(Table);
-            break;
-
-        case "Ui.SysData.Insert.Table":
-            RazorViewNameOrPath = "SysData.Insert.Table";
-            ViewData["DataType"] = "Table";
-            Packet["DataType"] = "Table";
-            Packet["IsInsert"] = true;
-            break;
-
-        case "Ui.Traders":
-            PrepareDefaultDataView("Trader");
-            break;
-    }
-
-    if (!string.IsNullOrWhiteSpace(RazorViewNameOrPath))
-    {
-        string HtmlText = Controller.ViewToString(RazorViewNameOrPath, Model, ViewData);
-        Packet["HtmlText"] = HtmlText;
-    }
-    */
-
 
 
     static public partial class DataStore

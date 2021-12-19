@@ -8,16 +8,6 @@
     var Settings = DataStore.GetSettings();
     string Flag = WSys.IsDevelopment ? "true" : "false";
 }
-
-<div class="dialog-box-template">
-    <div class="caption">
-        <div class="title">@*PLACE DIALOG-BOX TITLE HERE*@</div>
-        <img class="close" src='@SystemImageUrl("CloseWindow.png")' asp-append-version="true" />
-    </div>
-    <div class="content-container">
-    </div>
-</div>
-
  
 <script>
     tp.Ready(() => {

@@ -49,9 +49,7 @@ namespace Tripous.Data
         /// <summary>
         /// Constant
         /// </summary>
-        public const string Grid = "Grid";
-
- 
+        public const string Grid = "Grid"; 
 
         /* construction */
         /// <summary>
@@ -117,6 +115,34 @@ namespace Tripous.Data
             return Title;
         }
 
+        /// <summary>
+        /// Assigns properties to a data-setup object
+        /// </summary>
+        public void AssignTo(Dictionary<string, object> DataSetup)
+        {
+            if (!string.IsNullOrWhiteSpace(TypeName))
+                DataSetup["TypeName"] = TypeName;
+
+            if (!string.IsNullOrWhiteSpace(DataField))
+                DataSetup["DataField"] = DataField;
+
+            if (!string.IsNullOrWhiteSpace(TableName))
+                DataSetup["TableName"] = TableName;
+
+            if (!string.IsNullOrWhiteSpace(Id))
+                DataSetup["Id"] = Id;
+
+            if (ReadOnly)
+                DataSetup["ReadOnly"] = ReadOnly;
+
+            if (Required)
+                DataSetup["Required"] = Required;
+
+            foreach (var Entry in Properties)
+                DataSetup[Entry.Key] = Entry.Value;
+        }
+
+
         /* properties */
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
@@ -149,7 +175,6 @@ namespace Tripous.Data
         /// When true the control must have a value
         /// </summary>
         public bool Required { get; set; }
-
  
         /// <summary>
         /// The data source name. When empty then it binds to its parent's source.
@@ -159,5 +184,12 @@ namespace Tripous.Data
         /// The data field to bind
         /// </summary>
         public string DataField { get; set; } = "";
+
+
+        /// <summary>
+        /// Dictionary for more properties of the Control part of the data-setup attribute.
+        /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
+        /// </summary>
+        public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
     }
 }

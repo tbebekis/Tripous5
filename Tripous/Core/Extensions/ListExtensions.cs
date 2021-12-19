@@ -70,7 +70,7 @@ namespace Tripous
         /// <summary>
         /// Returns the content of a generic string list as a string
         /// </summary>
-        static public string AsString(this IList<string> List)
+        static public string AsTextLines(this IList<string> List)
         {
 
             if ((List == null) || (List.Count == 0))

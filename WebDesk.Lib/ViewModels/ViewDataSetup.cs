@@ -20,6 +20,7 @@ namespace WebLib.Models
     public class ViewDataSetup
     {
         Dictionary<string, object> Properties = new Dictionary<string, object>();
+        ViewDef ViewDef;
 
         /* construction */
         /// <summary>
@@ -35,17 +36,26 @@ namespace WebLib.Models
         /// </summary>
         public ViewDataSetup(ViewDef ViewDef)
         {
-            this.ClassType = !string.IsNullOrWhiteSpace(ViewDef.JSClassType)? ViewDef.JSClassType : "tp.DeskDataView";  
-            this.BrokerClass = !string.IsNullOrWhiteSpace(ViewDef.JSBrokerClass)? ViewDef.JSBrokerClass : "tp.Broker";  
-            this.BrokerName = ViewDef.BrokerName;
+            this.ViewDef = ViewDef; 
+        }
 
-            this.AutocreateControls = ViewDef.AutocreateControls;
+        List<string> MergeLists(List<string> A, List<string> B)
+        {
+            List<string> Result = new List<string>();
 
-            if (ViewDef.JS != null & ViewDef.JS.Count > 0)
-                this.JS.AddRange(ViewDef.JS);
+            if (A != null && A.Count > 0)
+                Result.AddRange(A);
 
-            if (ViewDef.CSS != null & ViewDef.CSS.Count > 0)
-                this.JS.AddRange(ViewDef.CSS);
+            if (B != null && B.Count > 0)
+            {
+                foreach (var S in B)
+                {
+                    if (!Result.Contains(S))
+                        Result.Add(S);
+                }
+            }
+
+            return Result;
         }
 
         /* public */
@@ -56,6 +66,9 @@ namespace WebLib.Models
         {
             Dictionary<string, object> Result = new Dictionary<string, object>();
 
+            if (ViewDef != null)
+                ViewDef.AssignTo(Result);
+
             if (!string.IsNullOrWhiteSpace(ClassType))
                 Result["ClassType"] = ClassType;
 
@@ -65,13 +78,33 @@ namespace WebLib.Models
             if (!string.IsNullOrWhiteSpace(BrokerName))
                 Result["BrokerName"] = BrokerName;
 
-            Result["AutocreateControls"] = AutocreateControls;
+            if (AutocreateControls)
+                Result["AutocreateControls"] = AutocreateControls;
 
-            if (JS != null && JS.Count > 0)
-                Result["JS"] = JS;
 
-            if (CSS != null && CSS.Count > 0)
-                Result["CSS"] = JS;
+            List<string> TempList;
+
+            // JS
+            List<string> ViewJS = Result.ContainsKey("JS")? Result["JS"] as List<string>: null;
+            TempList = MergeLists(ViewJS, JS);
+            if (TempList.Count > 0)
+                Result["JS"] = TempList;
+            else
+                Result.Remove("JS");
+
+            // CSS
+            List<string> ViewCSS = Result.ContainsKey("CSS") ? Result["CSS"] as List<string> : null;
+            TempList = MergeLists(ViewCSS, JS);
+            if (TempList.Count > 0)
+                Result["CSS"] = TempList;
+            else
+                Result.Remove("CSS"); 
+
+            // CssClasses
+            List<string> ViewCssClasses = Result.ContainsKey("CssClasses") ? Result["CssClasses"] as List<string> : null;
+            TempList = MergeLists(ViewCssClasses, CssClasses);
+            if (TempList.Count > 0)
+                Result["CssClasses"] = string.Join(" ", TempList.ToArray());
 
             string JsonText = Json.Serialize(Result);
             return JsonText;
@@ -112,6 +145,11 @@ namespace WebLib.Models
         /// A list of csss files this view needs in order to function properly.
         /// </summary>
         public List<string> CSS { get; set; } = new List<string>();
+
+        /// <summary>
+        /// A list of css classes for the view
+        /// </summary>
+        public List<string> CssClasses { get; set; } = new List<string>() { "tp-Desk-View" };
 
         /// <summary>
         /// Custom properties

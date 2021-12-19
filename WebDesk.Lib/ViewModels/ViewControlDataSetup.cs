@@ -15,13 +15,13 @@ namespace WebLib.Models
 {
 
     /// <summary>
-    /// Generates the text for the data-setup attribute of a control.
-    /// <para>NOTE: The data-setup of a control has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
+    /// Generates the text for the data-setup attribute of a control row.
+    /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
     /// </summary>
     public class ViewControlDataSetup
     {
-        JObject JSetup;
-        JObject JControl;
+ 
+        Dictionary<string, object> Properties = new Dictionary<string, object>();
 
         /* construction */
         /// <summary>
@@ -29,73 +29,61 @@ namespace WebLib.Models
         /// </summary>
         public ViewControlDataSetup()
         {
-            JSetup = new JObject();
-            JSetup["Text"] = Sys.None;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ViewControlDataSetup(ViewControlDef ControlDef)
+        {
+            this.Text = ControlDef.Title;
 
-            JControl = new JObject();
-            JSetup["Control"] = JControl;
-
-            JControl["TypeName"] = "TextBox";
-
-            // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
-            // <div class="tp-CtrlRow" data-setup="{Text: 'Test', Control: { TypeName: 'ComboBox', DataField: '', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0} }"></div>
-
+            ControlDef.AssignTo(this.Properties); 
         }
 
         /* static */
         /// <summary>
         /// Generates the text for the data-setup attribute of a control based on a specified <see cref="ViewControlDef"/> and optionally a <see cref="SqlBrokerFieldDef"/>.
         /// </summary>
-        static public string GetSetupText(ViewControlDef ControlDef, SqlBrokerFieldDef FieldDef = null)
+        static public string GetDataSetupText(ViewControlDef ControlDef, SqlBrokerFieldDef FieldDef = null)
         {
-            ViewControlDataSetup Result = new ViewControlDataSetup();
+            ViewControlDataSetup Result = new ViewControlDataSetup(ControlDef);
 
             if (FieldDef != null)
             {
                 Result.Text = FieldDef.Title;
 
-                Result.SetControlProperty("TypeName", ViewControlDef.GetTypeName(FieldDef));
-                Result.SetControlProperty("SourceName", ControlDef.TableName);
-                Result.SetControlProperty("DataField", FieldDef.Name);
-                Result.SetControlProperty("ReadOnly", FieldDef.IsReadOnly);
-                Result.SetControlProperty("Required", FieldDef.IsRequired); 
-            }
-            else
-            {
-                Result.Text = FieldDef.Title;
+                Result.Properties["TypeName"] = ViewControlDef.GetTypeName(FieldDef);
 
-                Result.SetControlProperty("TypeName", ControlDef.TypeName);
-                Result.SetControlProperty("SourceName", ControlDef.TableName);
-                Result.SetControlProperty("DataField", ControlDef.DataField);
-                Result.SetControlProperty("ReadOnly", ControlDef.ReadOnly);
-                Result.SetControlProperty("Required", ControlDef.Required);
+                if (!string.IsNullOrWhiteSpace(FieldDef.Name))
+                    Result.Properties["DataField"] = FieldDef.Name;
+
+                if (FieldDef.IsReadOnly)
+                    Result.Properties["ReadOnly"] = FieldDef.IsReadOnly;
+
+                if (FieldDef.IsRequired)
+                    Result.Properties["Required"] = FieldDef.IsRequired;
             }
 
-            return Result.GetDataSetupText();
+            string JsonText =  Result.Serialize();
+            return JsonText;
         }
  
-        /* public */
-        /// <summary>
-        /// Get a <see cref="JToken"/> with the value of a specified property
-        /// </summary>
-        public JToken GetControlProperty(string Name)
-        {
-            return JControl.ContainsKey(Name) ? JControl[Name] : null;
-        }
-        /// <summary>
-        /// Sets the value of a specified property. The second parameter, the <see cref="JToken"/>, could be a value of any type.
-        /// </summary>
-        public void SetControlProperty(string Name, JToken Value)
-        {
-            JControl[Name] = Value;
-        }
-    
+        /* public */    
         /// <summary>
         /// Returns the text of this setup.
         /// </summary>
-        public string GetDataSetupText()
+        public string Serialize()
         {
-            return JSetup.ToString();
+            // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
+            // <div class="tp-CtrlRow" data-setup="{Text: 'Test', Control: { TypeName: 'ComboBox', DataField: '', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0} }"></div>
+
+            Dictionary<string, object> Result = new Dictionary<string, object>();
+
+            Result["Text"] = Text;
+            Result["Control"] = Properties;
+
+            string JsonText = Json.Serialize(Result);
+            return JsonText;
         }
 
 
@@ -103,10 +91,16 @@ namespace WebLib.Models
         /// <summary>
         /// Gets or sets the "Text" part of this setup.
         /// </summary>
-        private string Text
+        private string Text { get; set; }
+ 
+        /// <summary>
+        /// Custom properties for more properties of the Control part of the data-setup attribute.
+        /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
+        /// </summary>
+        public object this[string Key]
         {
-            get { return JSetup["Text"].ToString(); }
-            set { JSetup["Text"] = value; }
+            get { return Properties.ContainsKey(Key) ? Properties[Key] : null; }
+            set { Properties[Key] = value; }
         }
     }
 }

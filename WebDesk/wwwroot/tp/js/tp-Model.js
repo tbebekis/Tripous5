@@ -1421,7 +1421,7 @@ tp.DataView = class extends tp.View {
                 case tp.ControlBindMode.List:
                     return !tp.IsBlank(Control.DataField);
                 case tp.ControlBindMode.Grid:
-                    return !tp.IsBlank(Control.SourceName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
+                    return !tp.IsBlank(Control.TableName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
             }
         }
 
@@ -1433,7 +1433,7 @@ tp.DataView = class extends tp.View {
     @param {tp.Control} Control A {@link tp.Control}
     */
     BindControl(Control) {
-        Control.DataSource = this.GetDataSource(Control.SourceName);
+        Control.DataSource = this.GetDataSource(Control.TableName);
 
         if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
             let Column = Control.DataColumn;

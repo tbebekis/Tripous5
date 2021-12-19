@@ -1889,31 +1889,16 @@ main menu bar items
 }
 
  
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .tp-Desk .pager-container.main-pager > .top-zone {
     background-color: var(--Color4);
     color: var(--White);  
 }
 
+/*---------------------------------------------------------------------------------------
+ desk view
+---------------------------------------------------------------------------------------*/
  
- 
-.desk-view {
+.tp-Desk-View {
     position: relative;
     display: flex; 
     flex-direction: column;
@@ -1922,10 +1907,10 @@ main menu bar items
     gap: 6px;
 }
 
-/*---------------------------------------------------------------------------------------
- data-view
----------------------------------------------------------------------------------------*/
-.desk-view.tp-DataView > .tp-PanelList {
+.tp-Desk-View.tp-DataView > .tp-PanelList {
     height: 100%;
 }
 
+.tp-Desk-View > .tp-PanelList {
+    height: 100%;
+}

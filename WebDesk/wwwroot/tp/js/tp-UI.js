@@ -7331,9 +7331,7 @@ tp.Control = class extends tp.tpElement  {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
- 
-                      
+             
 
     /* static */
 
@@ -7454,10 +7452,10 @@ tp.Control = class extends tp.tpElement  {
         }
     }
     /**
-    Get or sets the DataSource name, a string value used for declarative data-binding.
+    Get or sets the table name, a string value used for declarative data-binding.
     @type {string}
     */
-    SourceName = "";
+    TableName = "";
 
     /**
     Returns true if this instance is bound to a DataSource

@@ -1,8 +1,7 @@
 ﻿@* List view, used with all SysData DataTypes. *@
 @{
     // The SysData.DataType 
-    string DataType = ViewData.ContainsKey("DataType")? ViewData["DataType"].ToString(): string.Empty;
- 
+    string DataType = ViewData.ContainsKey("DataType")? ViewData["DataType"].ToString(): string.Empty; 
 }
 
 <div class="desk-view sys-data-list-page" data-setup="{JS: [], CSS: [], ClassType: 'tp.SysDataViewList', DataType: '@DataType'}">

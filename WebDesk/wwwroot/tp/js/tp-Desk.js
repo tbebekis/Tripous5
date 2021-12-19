@@ -5,6 +5,7 @@ tp.Classes.Desk = 'tp-Desk';
 tp.Classes.DeskMainMenu = 'tp-Desk-MainMenu';
 tp.Classes.DeskMainMenuBarItem = 'tp-Desk-MainMenuBarItem';
 tp.Classes.DeskViewPager = 'tp-Desk-ViewPager';
+tp.Classes.DeskView = 'tp-Desk-View';
 
 //#region tp.Command
 
@@ -556,7 +557,6 @@ tp.DeskViewPager = class extends tp.tpElement {
         if (View instanceof tp.DataView)
             View.OnAfterConstruction();
 
-
         return View;
     }
     /** Shows a specified view. 
@@ -722,6 +722,272 @@ tp.DeskDataView = class extends tp.DataView {
 };
 
 //#endregion
+
+
+//DeskSysDataView
+
+//#region tp.DeskSysDataView
+
+/** Represents a view. Displays a list of items of a certain DataType. */
+tp.DeskSysDataView = class extends tp.DeskView {
+    /**
+     * Constructs the page
+     * @param {HTMLElement} elPage The page element.
+     * @param {object} [Params=null] Optional. A javascript object with initialization parameters.
+     */
+    constructor(elPage, CreateParams = null) {
+        super(elPage, CreateParams);
+    }
+
+    /**
+     * @type {tp.ToolBar}
+     */
+    ToolBar = null;
+    /**
+     * @type {tp.Grid}
+     */
+    Grid = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    ListTable = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    Table = null;
+
+
+    /**
+    Sets the visible panel index in the panel list.
+    @protected
+    @param {number} PanelIndex The panel index
+    */
+    SetVisiblePanel(PanelIndex) {
+        if (this.PanelList) {
+            this.PanelList.SelectedIndex = PanelIndex;
+        }
+    }
+    /**
+     * Sets the visible panel of the main pager (a PanelList) by its 'PanelMode'.
+     * NOTE: Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * @param {string} PanelMode The panel mode to check for.
+     */
+    SetVisiblePanelByPanelMode(PanelMode) {
+        let elPanel = this.FindPanelByPanelMode(PanelMode);
+        let Index = -1;
+        if (elPanel) {
+            let Panels = this.PanelList.GetPanels();
+            Index = Panels.indexOf(elPanel);
+        }
+
+        if (Index >= 0) {
+            this.SetVisiblePanel(Index);
+        }
+    }
+    /**
+     * Each panel of the main pager (a PanelList) MUST have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * This function returns a panel found having a specified PanelMode, or null if not found.
+     * @param {string} PanelMode The panel mode to check for.
+     * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.
+     */
+    FindPanelByPanelMode(PanelMode) {
+        if (tp.IsValid(this.PanelList)) {
+            let Panels = this.PanelList.GetPanels();
+
+            let i, ln, elPanel, Setup;
+
+            for (i = 0, ln = Panels.length; i < ln; i++) {
+                elPanel = Panels[i];
+                Setup = tp.GetDataSetupObject(elPanel);
+                if (tp.IsValid(Setup)) {
+                    if (PanelMode === Setup.PanelMode) {
+                        return elPanel;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** Returns an array with the panels of the panel list
+     * @returns {HTMLElement[]}
+     * */
+    GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetPanels() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
+
+    /** Returns a DOM Element contained by this view.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
+    /** Returns a DOM Element contained by this view. Returns the main panel-list which in turn contains the three part panels: Brower, Edit and Filters.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewPanelListElement() { return tp.Select(this.Handle, '.PanelList'); }
+
+    /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewListPanelElement() { return this.FindPanelByPanelMode('List'); }
+    /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewEditPanelElement() { return this.FindPanelByPanelMode('Edit'); }
+
+
+    /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetViewListGridElement() { return tp.Select(this.GetViewListPanelElement(), '.Grid'); }
+
+    /* overridables */
+
+    /** Creates the toolbar of the view 
+ @protected
+ */
+    CreateToolBar() {
+        if (tp.IsEmpty(this.ToolBar)) {
+            let el = this.GetViewToolBarElement();
+            this.ToolBar = new tp.ToolBar(el);
+            this.ToolBar.On('ButtonClick', this.AnyClick, this);
+        }
+
+        
+    }
+    /** Creates the panel-list of the view, the one with the 3 panels: List, Edit and Filters panels.
+     @protected
+     */
+    CreatePanelList() {
+        if (tp.IsEmpty(this.PanelList)) {
+            let el = this.GetViewPanelListElement();
+            this.PanelList = new tp.PanelList(el);
+        }
+    }
+    /**
+    Creates the List (browser) grid. <br />
+    NOTE: For the List (browser) grid to be created automatically by this method, a div marked with the Grid class is required in the List panel.
+    @protected
+    */
+    CreateListGrid() {
+        if (tp.IsEmpty(this.gridList)) {
+            let el = this.GetViewListGridElement();
+            this.gridList = new tp.Grid(el);
+        }
+
+        if (tp.IsEmpty(this.gridList)) {
+            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetViewListPanelElement());
+            this.gridList = o instanceof tp.Grid ? o : null;
+        }
+
+        if (this.gridList) {
+            this.gridList.ReadOnly = true;
+            this.gridList.AllowUserToAddRows = false;
+            this.gridList.AllowUserToDeleteRows = false;
+            this.gridList.ToolBarVisible = false;
+
+            this.gridList.On(tp.Events.DoubleClick, this.ListGrid_DoubleClick, this);
+        }
+
+        if (this.gridList && !this.ListTable) {
+            this.ListTable = new tp.DataTable();
+            this.ListTable.Assign(this.CreateParams.Packet.ListTable);
+            this.gridList.DataSource = this.ListTable;
+
+            // EDW: Ρυθμίζουμε τις στήλες του πίνακα να ΜΗΝ φέρνει τα blobs
+            // και τις στήλες του Grid
+        }
+    }
+
+    /** Creates child controls of this instance. Called in construction sequence.
+    * @private
+    * */
+    CreateControls() {
+        super.CreateControls();
+
+        this.CreateToolBar();
+        this.CreatePanelList();
+        this.CreateListGrid();
+
+/*
+        let el = tp.Select(this.Handle, '.tp-ToolBar');
+        this.ToolBar = new tp.ToolBar(el);
+
+        this.ToolBar.On('ButtonClick', this.AnyToolBarButtonClick, this);
+
+        this.Table = new tp.DataTable();
+        this.Table.Assign(this.CreateParams.Packet.Table);
+
+        el = tp.Select(this.Handle, '.tp-Grid');
+
+        let CP = {
+            DataSource: this.Table,
+            ReadOnly: true,
+            ToolBarVisible: false,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            Columns: [
+                { Name: 'DataName' },
+                { Name: 'TitleKey' },
+                { Name: 'Owner' }
+            ]
+        };
+
+        this.Grid = new tp.Grid(el, CP);
+ */
+    }
+
+    /**
+    Event handler. If a Command exists in the clicked element then the Args.Command is assigned.
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    AnyClick(Args) {
+        if (Args.Handled !== true) {
+            var Command = tp.GetCommand(Args);
+            if (!tp.IsBlank(Command)) {
+                switch (Command) {
+                    case 'Close':
+                        this.CloseView();
+                        break; 
+                    default:
+                        tp.InfoNote('Command: ' + Command);
+                        break;
+                }
+            }
+            
+        }
+    }
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    ListGrid_DoubleClick(Args) {
+        //this.ExecuteCommand(tp.DataViewMode.Edit);
+        tp.InfoNote('ListGrid_DoubleClick');
+    }
+
+ 
+    async AnyToolBarButtonClick(Args) {
+        let Command = Args.Command;
+        switch (Command) {
+            case 'Close':
+                this.CloseView();
+                break;
+            case 'Insert':
+                await this.ShowModal(true);
+                break;
+            default:
+                tp.InfoNote('Command: ' + Command);
+                break;
+        }
+    }
+};
+
+//#endregion
+
+
+
 
 //#region tp.SysDataViewList
 

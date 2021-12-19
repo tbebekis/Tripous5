@@ -16,9 +16,7 @@ namespace WebLib
     {
         static void RegisterView_SysData_Table()
         {
-            ViewDef View = new ViewDef();
-            View.Name = "SysData.Table";
-            View.TitleKey = "Tables";
+            ViewDef View = ViewDef.Register("SysData.Table", "Tables");
 
             View.JSClassType = "tp.SysDataView";
 
