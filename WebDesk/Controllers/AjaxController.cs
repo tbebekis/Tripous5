@@ -28,7 +28,7 @@ namespace WebDesk.Controllers
 
     /// <summary>
     /// Ajax controller.
-    /// <para>NOTE: All AJAX calls, except of <see cref="BrokerController"/> calls, should be handled by this controller.</para>
+    /// <para>NOTE: All AJAX calls should be handled by this controller.</para>
     /// </summary>
     [AllowAnonymous] // <<<<<< This is here just for the demos to work. Remove it in production.
     public class AjaxController : ControllerMvc, IAjaxController
@@ -41,6 +41,7 @@ namespace WebDesk.Controllers
             return Table;
         }
 
+        // non-actions -------------------------------------------------------------------------------
 
         #region IAjaxController
         /// <summary>
@@ -61,15 +62,18 @@ namespace WebDesk.Controllers
         }
         #endregion
 
-        [HttpPost("/AjaxExecute")]
+        // actions -------------------------------------------------------------------------------
+
+        [HttpPost("/Ajax/Execute")]
         public async Task<JsonResult> AjaxExecute([FromBody] AjaxRequest R)
         {
             await Task.CompletedTask;
             HttpActionResult Result = DataStore.AjaxExecute(this, R);
             return Json(Result);
         }
-
-        [HttpPost("/SqlSelect")]
+       
+        #region Sql
+        [HttpPost("/Sql/Select")]
         public async Task<JsonResult> SqlSelect([FromBody] SqlTextItem SqlTextItem)
         {
             await Task.CompletedTask;
@@ -90,7 +94,7 @@ namespace WebDesk.Controllers
 
             return Json(Result);
         }
-        [HttpPost("/SqlSelectAll")]
+        [HttpPost("/Sql/SelectAll")]
         public async Task<JsonResult> SqlSelectAll([FromBody] JsonDataTable JTable)
         {
             await Task.CompletedTask;
@@ -128,23 +132,142 @@ namespace WebDesk.Controllers
 
             return Json(Result);
         }
+        #endregion
 
-        [HttpGet("/DeskGetMainMenu")]
-        public async Task<JsonResult> DeskGetMainMenu()
+        #region Broker
+        /// <summary>
+        /// Action
+        /// </summary>
+        [Route("/Broker/Initialize")]
+        public JsonResult Initialize(string BrokerName)
         {
-            await Task.CompletedTask;
-
             HttpActionResult Result = new HttpActionResult();
-
-            Command[] MenuItems = DataStore.GetMainMenu();
-            Result.SerializePacket(MenuItems);
-            Result.IsSuccess = true;
+            try
+            {
+                SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
+                JsonBroker Packet = broker.JsonInitialize();
+                Result.SerializePacket(Packet);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
 
             return Json(Result);
         }
 
+        /// <summary>
+        /// Action
+        /// </summary>
+        [Route("/Broker/Insert")]
+        public JsonResult Insert(string BrokerName)
+        {
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
+                JsonBroker Packet = broker.JsonInsert();
+                Result.SerializePacket(Packet);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
 
-        [HttpGet("/LocatorGetDef")]
+            return this.Json(Result);
+        }
+        /// <summary>
+        /// Action
+        /// </summary>
+        [Route("/Broker/Edit")]
+        public JsonResult Edit(string BrokerName, string Id)
+        {
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
+                JsonBroker Packet = broker.JsonEdit(Id);
+                Result.SerializePacket(Packet);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
+
+            return this.Json(Result);
+        }
+        /// <summary>
+        /// Action
+        /// </summary>
+        [Route("/Broker/Delete")]
+        public JsonResult Delete(string BrokerName, string Id)
+        {
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
+                broker.JsonDelete(Id);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
+
+            return this.Json(Result);
+        }
+        /// <summary>
+        /// Action
+        /// </summary>
+        [Route("/Broker/Commit")]
+        public JsonResult Commit([FromBody] JsonBroker Packet)
+        {
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                SqlBroker broker = SqlBroker.Create(Packet.Name, true, false);
+                Packet = broker.JsonCommit(Packet);
+                Result.SerializePacket(Packet);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
+
+            return this.Json(Result);
+        }
+
+        /// <summary>
+        /// Action. The SqlText could be a SELECT statement or a SelectSql Name from
+        /// the SelectList of the broker.
+        /// </summary>
+        [Route("/Broker/SelectList")]
+        public JsonResult SelectList(string BrokerName, string SqlText, bool UseRowLimit)
+        {
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
+                JsonDataTable Packet = broker.JsonSelectList(SqlText, UseRowLimit ? -1 : 0);
+                Packet.Name = "List";
+                Result.SerializePacket(Packet);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = Sys.ExceptionText(e);
+            }
+
+            return this.Json(Result);
+        }
+        #endregion
+
+        #region Locator
+        [HttpGet("/Locator/GetDef")]
         public async Task<JsonResult> LocatorGetDef(string LocatorName)
         {
             await Task.CompletedTask;
@@ -164,7 +287,7 @@ namespace WebDesk.Controllers
 
             return Json(Result);
         }
-        [HttpGet("/LocatorSqlSelect")]
+        [HttpGet("/Locator/SqlSelect")]
         public async Task<JsonResult> LocatorSqlSelect(string LocatorName, string WhereSql)
         {
             await Task.CompletedTask;
@@ -194,6 +317,53 @@ where
 
             return Json(Result);
         }
+        #endregion
 
+        #region SysData
+        [HttpGet("/SysData/SelectList")]
+        public async Task<JsonResult> SysDataSelectList(string DataType, bool NoBlobs)
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult(); 
+
+            DataTable Table = SysData.Select(DataType, NoBlobs);
+            JsonDataTable JTable = new JsonDataTable(Table);
+            Result.SerializePacket(JTable);
+            Result.IsSuccess = true;
+
+            return Json(Result);
+        }
+        [HttpGet("/SysData/SelectById")]
+        public async Task<JsonResult> SysDataSelectById(object Id)
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+
+            DataTable Table = SysData.SelectById(Id);
+            JsonDataTable JTable = new JsonDataTable(Table);
+            Result.SerializePacket(JTable);
+            Result.IsSuccess = true;
+
+            return Json(Result);
+        }
+        #endregion
+
+        #region Desk
+        [HttpGet("/Desk/GetMainMenu")]
+        public async Task<JsonResult> DeskGetMainMenu()
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+
+            Command[] MenuItems = DataStore.GetMainMenu();
+            Result.SerializePacket(MenuItems);
+            Result.IsSuccess = true;
+
+            return Json(Result);
+        }
+        #endregion
     }
 }

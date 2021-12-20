@@ -7,7 +7,11 @@ tp.Urls.BrokerInsert = '/Broker/Insert';
 tp.Urls.BrokerEdit = '/Broker/Edit';
 tp.Urls.BrokerDelete = '/Broker/Delete';
 tp.Urls.BrokerCommit = '/Broker/Commit';
-tp.Urls.BrokerSelectList = '/Broker/SelectList'; 
+tp.Urls.BrokerSelectList = '/Broker/SelectList';
+
+tp.Urls.SysDataSelectList = '/SysData/SelectList';
+tp.Urls.SysDataSelectById = '/SysData/SelectById';
+
  
 //---------------------------------------------------------------------------------------
 // Broker
@@ -450,20 +454,11 @@ tp.Broker = class extends tp.tpObject {
     async Action(Action) {
 
         let Args = await tp.Ajax.Async(Action.Args);
-
-        if (Args.ResponseData.IsSuccess === false) {
-            let ErrorText = 'Action failed. Unknown error.';
-            if (tp.IsString(Args.ResponseData.ErrorText) && !tp.IsBlank(Args.ResponseData.ErrorText)) {
-                ErrorText = Args.ResponseData.ErrorText;
-            }
-            tp.Throw(ErrorText);
-        }
-
         Action.Args = Args; 
 
         if (Action.AssignFlag === true) {
             this.Clear();
-            this.Assign(Args.ResponseData.Packet);
+            this.Assign(Args.Packet);
         }
 
         this.OnAction(Action);
@@ -818,8 +813,8 @@ tp.Broker = class extends tp.tpObject {
         Action = await this.DoSelectList(Action);
 
         if (Action.Succeeded === true) {
-            if (!tp.IsEmpty(Action) && !tp.IsEmpty(Action.Args.ResponseData.Packet)) {
-                let Packet = Action.Args.ResponseData.Packet;
+            if (!tp.IsEmpty(Action) && !tp.IsEmpty(Action.Args.Packet)) {
+                let Packet = Action.Args.Packet;
                 this.CreateListTable(Packet);
 
                 this.LastSelectSql = Action.SelectSql;             
@@ -1109,47 +1104,7 @@ tp.DataView = class extends tp.View {
         this.ForceSelect = false;
     }
 
-    /**
-    * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
-    * 
-    * WARNING
-    * 
-    * In javascript fields contained in a derived class declaration, are initialized after the base constructor finishes.
-    * So, if the base constructor calls a virtual method where the derived class initializes a field,
-    * when the constructor finishes, the field is assigned again whatever value the class declaration dictates.
-    *
-    * A = class {
-    *     constructor() {
-    *         this.SetFields();
-    *     }
-    *
-    *     SetFields() { }
-    * }
-    *
-    * B = class extends A {
-    *     constructor() {
-    *         super();
-    *         this.Display();
-    *     }
-    *
-    *     Field2 = 123;	// this is assigned again after the SetFields() call, when the constructor completes.
-    *
-    *     SetFields() {
-    *         super.SetFields();
-    *         this.Field2 = 987;
-    *     }
-    *     Display() {
-    *         alert(this.Field2);
-    *     }
-    * }
-    *
-    * The result is that the field retains the value it had in the class declaration, the null value.
-    *
-    * 
-    * */
-    OnAfterConstruction() {
-        this.InitializeView();
-    }
+ 
 
     /* overridables */
 
@@ -1160,6 +1115,7 @@ tp.DataView = class extends tp.View {
      * @override
     */
     InitializeView() {
+        super.InitializeView();
 
         this.CreateToolBar();
         this.CreatePanelList();
@@ -2073,7 +2029,6 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 break;
             case tp.DataViewMode.Insert:
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    //tp.DataViewMode.Filters |
                     tp.DataViewMode.Insert |
                     tp.DataViewMode.Edit |
                     tp.DataViewMode.Delete
@@ -2081,7 +2036,6 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 break;
             case tp.DataViewMode.Edit:
                 this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    //tp.DataViewMode.Filters |
                     tp.DataViewMode.Edit
                 );
                 break;
@@ -2153,16 +2107,18 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
     ExecuteCommand(Command) {
         let ViewMode = tp.DataViewMode.None;
 
-        if (tp.IsString(Command)) {
-            if (tp.IsBlank(Command))
-                return;
+        if (tp.IsString(Command) && !tp.IsBlank(Command)) {
             ViewMode = Command in tp.DataViewMode ? tp.DataViewMode[Command] : tp.DataViewMode.None;
         }
         else if (tp.IsInteger(Command)) {
             ViewMode = Command;
         }
-
+ 
         switch (ViewMode) {
+            case tp.DataViewMode.None:
+                this.ExecuteCustomCommand(Command);
+                break;
+
             case tp.DataViewMode.Home:
                 this.DisplayHomeLocalMenu();
                 break;
@@ -2226,6 +2182,12 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
                 this.CloseView();
                 break;
         }
+    }
+    /**
+    Executes a custom command by name specified by a command name.
+    @param {string} Command - A string denoting the custom command.
+    */
+    ExecuteCustomCommand(Command) {
     }
 
 
@@ -2321,7 +2283,7 @@ tp.DataView.prototype.ftblSubLines = null;
  @protected
  @type {number}
  */
-tp.DataView.fViewMode = tp.DataViewMode.None;
+tp.DataView.prototype.fViewMode = tp.DataViewMode.None;
 /** Field. One of the  {@link tp.DataViewMode} constants
  @protected
  @type {number}

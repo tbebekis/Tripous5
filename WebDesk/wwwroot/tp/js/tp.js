@@ -350,28 +350,7 @@ Displays an information message to the user.
 */
 tp.SuccessNote = function (Message) { tp.Notify(Message, tp.NotificationType.Success); };
 
-/**
- * Should be called after a tp ajax call having errors. Displays the errors using notification boxes.
- * @param {tp.AjaxArgs} Args An instance of tp ajax arguments
- */
-tp.DisplayAjaxErrors = function (Args) {
-    let i, ln, Packet;
-
-    if (Args.ResponseData.IsSuccess === false) {
-        if (tp.IsString(Args.ResponseData.ErrorText) && !tp.IsBlankString(Args.ResponseData.ErrorText)) {
-            tp.ErrorNote(Args.ResponseData.ErrorText);
-        }
-        if (tp.IsString(Args.ResponseData.Packet) && !tp.IsBlankString(Args.ResponseData.Packet)) {
-            tp.ErrorNote(Args.ResponseData.Packet);
-        }
-        else if (tp.IsArray(Args.ResponseData.Packet)) {
-            Packet = Args.ResponseData.Packet;
-            for (i = 0, ln = Packet.length; i < ln; i++) {
-                tp.ErrorNote(Packet[i]);
-            }
-        }
-    }
-};
+ 
 
 //#endregion
 
@@ -562,16 +541,48 @@ tp.IsPlainObject = function (v) { return tp.IsObject(v) && !v.nodeType; };
  */
 tp.IsNode = function (v) { return v instanceof Node; };
 
+
+/** Parses a json text and returns an object, array, string, number, boolean on success, else null.
+ * @param {string} JsonText The json text to parse.
+ * @returns {object} Returns an object, array, string, number, boolean on success, else null.
+ */
+tp.ParseJson = function (JsonText) {
+    let Result = null;
+
+    if (typeof JsonText === 'string' && !tp.IsBlank(JsonText)) {
+        try {
+            // JSON.parse returns an Object, Array, string, number, boolean, or null value corresponding to the given JSON text
+            let o = JSON.parse(JsonText);
+            Result = tp.IsValid(o) ? o : null;
+        } catch (e) {
+            //
+        }
+    }
+
+    return Result;
+};
+/** Tries to parse a json text. <br />
+ * Returns an object of type <code>{Value: object, Result: boolean}</code> where the Result is true on success and the Value is the parsed object.
+ * @param {string} JsonText The json text to parse.
+ * @returns {object} Returns an object of type <code>{Value: object, Result: boolean}</code> where the Result is true on success and the Value is the parsed object.
+ */
+tp.TryParseJson = function (JsonText) {
+    let o = tp.ParseJson(JsonText);
+    return {
+        Value: o,
+        Result: tp.IsValid(o)
+    };
+};
 /**
  * Returns true if a specified string is a json string.
  * @param {string} Text The text to check
  * @returns {boolean} Returns true if a specified string is a json string.
  */
-tp.IsJson = function (Text) {
+tp.IsJsonText = function (Text) {
     if (typeof Text === 'string' && !tp.IsBlank(Text)) {
         try {
             let o = JSON.parse(Text);
-            return (o && typeof o === "object");
+            return tp.IsValid(o);
         } catch (e) {
             //
         }
@@ -10231,7 +10242,7 @@ tp.AjaxArgs = class {
         this.Result = false;                    // true if ajax call succeeded
 
         this.ResponseData = {                   // server response  
-            Result: false,
+            IsSuccess: false,
             ErrorText: '',
             Packet: {}
         };
@@ -10343,8 +10354,8 @@ tp.AjaxArgs.prototype.OnRequestHeaders = null;
  * A function(Args: tp.AjaxArgs) callback function. It is called just before the OnSuccess() call-back. <br />
  * Processes the response after an ajax call returns. <br />
  * The default response handler deserializes the Args.ResponseText into an object and assigns the Args.ResponseData object.
- * It assumes that the ResponseText is a json text containing an object with at least two properties: <code> { Result: boolean, ErrorText: string } </code>. <br />
- * Further on, if the Args.ResponseData  contains a Packet property and that Packet property is a json text, deserializes it into an object.
+ * It assumes that the ResponseText is a json text containing an object with at least two properties: <code> { IsSuccess: boolean, ErrorText: string } </code>. <br />
+ * Further on, if the Args.ResponseData contains a Packet property and that Packet property is a json text, deserializes it into an object.
  @default null
  @type {function}
  */
@@ -10365,11 +10376,16 @@ tp.AjaxArgs.prototype.ErrorText = '';
  */
 tp.AjaxArgs.prototype.Result = false;
 /** The response from the server it is always packaged as a C# Tripous.HttpActionResult instance. <br />
- * That is it comes as an object <code>{ IsSuccess: false, ErrorText: '', Packet: {} }</code>  where Packet is the actual response json data. <br />
+ * That is it comes as an object <code>{ IsSuccess: false, ErrorText: '', Packet: {} }</code>. <br />
+ * The default response handler places the parsed json object in the Packet property of the ResponseData on success. <br />
  * <strong>Valid only after response from server</strong>
  @type {object}
  */
-tp.AjaxArgs.prototype.ResponseData = { Result: false, ErrorText: '', Packet: {} };
+tp.AjaxArgs.prototype.ResponseData = { IsSuccess: false, ErrorText: '', Packet: {} };
+/** The default response handler places the parsed json object in the Packet on success.
+ * @type {object}
+ * */
+tp.AjaxArgs.prototype.Packet = null;
 /** A user defined value.  
  @default null
  @type {any}
@@ -10381,36 +10397,41 @@ tp.AjaxArgs.prototype.Tag = null;
 /**
  * The default handler after an ajax call returns. <br />
  * Deserializes the Args.ResponseText into an object and assigns the Args.ResponseData object.
- * It assumes that the ResponseText is a json text containing an object with at least two properties: <code> { Result: boolean, ErrorText: string } </code>. <br />
+ * It assumes that the ResponseText is a json text containing an object with at least two properties: <code> { IsSuccess: boolean, ErrorText: string } </code>. <br />
  * Further on, if the Args.ResponseData  contains a Packet property and that Packet property is a json text, deserializes it into an object.
  * @param {tp.AjaxArgs} Args  A {@link tp.AjaxArgs} instance
  */
 tp.AjaxResponseDefaultHandler = function (Args) {
+
     function ErrorText(Text) {
         return tp.IsString(Text) && !tp.IsBlank(Text) ? Text : "Unknown error";
     }
 
     if (Args.Result === false)
-        throw ErrorText(Args.ErrorText);
+        throw `Ajax network error: ${ErrorText(Args.ErrorText)}`;  
 
-    let o = null;
-    try {
-        o = JSON.parse(Args.ResponseText);
-        Args.ResponseData = o;
-    } catch (e) {
-        return;
-    }
+    let o = JSON.parse(Args.ResponseText);
+    Args.ResponseData = o;
 
-    if (!tp.IsEmpty(o) && o.Result === false)
-        throw ErrorText(o.ErrorText);
+    if (!tp.IsEmpty(o) && o.IsSuccess === false)
+        throw `Ajax operation error: ${ErrorText(o.ErrorText)}`;
 
-    if (tp.IsJson(Args.ResponseData.Packet)) {
-        try {
-            Args.ResponseData.Packet = JSON.parse(Args.ResponseData.Packet);
-        } catch (e) {
-            //
+    if (tp.IsValid(Args.ResponseData)) {
+
+        // packet is a json string
+        if (tp.IsString(Args.ResponseData.Packet) && !tp.IsBlank(Args.ResponseData.Packet)) {
+            let JsonResult = tp.TryParseJson(Args.ResponseData.Packet);
+            if (JsonResult.Result === true) {
+                Args.ResponseData.Packet = JsonResult.Value;
+                Args.Packet = JsonResult.Value;
+            }
         }
-    }
+        // packet is already an object
+        else if (tp.IsValid(Args.ResponseData.Packet)) {
+            Args.Packet = Args.ResponseData.Packet;
+        }
+    }  
+
 };
 
 /**
@@ -10543,6 +10564,10 @@ tp.Ajax.Async = async function (Args) {
     // ------------------------------------------
     let ExecutorFunc = function (Resolve, Reject) {
         Args.Context = null;
+
+        /** Called on success
+         * @param  {tp.AjaxArgs} Args The passed arguments object.
+         */
         Args.OnSuccess = function SuccessFunc(Args) {
 
             if (tp.IsFunction(OnSuccess)) {
@@ -10956,6 +10981,76 @@ tp.Async.All = async function (ShowSpinner, List, Func, Context = null) {
     return Result;
 };
 
+
+//#endregion
+
+//#region tp.AjaxRequest
+/** Represents an ajax request */
+tp.AjaxRequest = class {
+
+    /**
+     * Constructor
+     * @param {string} OperationName The name of the request operation.
+     * @param {object} Params Optional. A user defined key-pair object with parameters.
+     */
+    constructor(OperationName, Params = null) {
+        this.OperationName = OperationName;
+        this.Params = Params || {};
+
+        tp.AjaxRequest.Counter++;
+        this.Id = tp.AjaxRequest.Counter.toString();
+    }
+
+    /** Optional. The id of the request.
+     * @type {string}
+     */
+    Id = '';
+    /** Required. The name of the request operation.
+     * @type {string}
+     */
+    OperationName = '';
+    /** Optional. A user defined key-pair object with parameters.
+     * @type {object}
+     */
+    Params = {};
+};
+/** Id counter.
+ * @param {number}  
+ */
+tp.AjaxRequest.Counter = 0;
+
+
+
+/**
+ * Executes an ajax request to the server and returns the Packet as it comes from server.
+ * @param {tp.AjaxRequest|object|string} RequestOrOperationName Required. A {@link tp.AjaxRequest} object, or a plain object with an OperationName property, or a string denoting the operation name to execute.
+ * @param {object} Params Optional. Used only when the first parameter is a string in order to create a {@link tp.AjaxRequest} object.
+ * @returns {object} Returns the Packet from the server.
+ */
+tp.AjaxRequest.Execute = async function (RequestOrOperationName, Params = null) {
+    let Result = null;
+
+    /** @type {tp.AjaxRequest} */
+    let Request = null;
+    let Url = tp.Urls.AjaxExecute;
+
+    if (tp.IsString(RequestOrOperationName)) {
+        Request = new tp.AjaxRequest(RequestOrOperationName, Params);
+    }
+    else if (tp.IsObject(RequestOrOperationName) && !tp.IsBlankString(RequestOrOperationName.OperationName)) {
+        Request = RequestOrOperationName;
+    }
+    else {
+        tp.Throw('Cannot execute ajax request. Invalid parameters.');
+    }
+
+    let Args = await tp.Ajax.PostModelAsync(Url, Request);
+    Result = Args.Packet; 
+
+    return Result;
+};
+tp.AjaxRequest.ExecuteAsync = tp.AjaxRequest.Execute;
+ 
 
 //#endregion
 
@@ -12398,6 +12493,7 @@ tp.tpElement = class extends tp.tpObject {
                 this.OnCreateParamsProcessed();                     // notification
 
                 this.OnInitializationCompleted();                   // notification
+ 
             }
         }
     }
@@ -16144,6 +16240,7 @@ tp.ButtonClasses = [];
 
 /** A global object for keeping the urls used by a javascript application in ajax and other calls. */
 tp.Urls = {};
+tp.Urls.AjaxExecute = '/Ajax/Execute'; 
 tp.Urls.Language = '/App/Language';
 tp.Urls.StringResource = '/App/StringResource';
 tp.Urls.StringResourceList = '/App/StringResourceList';
@@ -16407,7 +16504,7 @@ tp.Res = {
                 ResultFunc.call(Context, Value, UserTag);
             } else if (tp.SysConfig.UseServerStringResources === true) {
                 tp.Ajax.GetAsync(tp.Urls.StringResource, (Args) => {
-                    Value = Args.ResponseData.Packet;
+                    Value = Args.Packet;
                     tp.Languages.Current.Items.Set(Key, Value);
                     ResultFunc.call(Context, Value, UserTag);
                 });

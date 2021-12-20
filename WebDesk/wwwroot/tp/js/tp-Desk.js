@@ -1,11 +1,12 @@
 ﻿
-tp.Urls.DeskGetMainMenu = '/DeskGetMainMenu';
+tp.Urls.DeskGetMainMenu = '/Desk/GetMainMenu';
 
 tp.Classes.Desk = 'tp-Desk';
 tp.Classes.DeskMainMenu = 'tp-Desk-MainMenu';
 tp.Classes.DeskMainMenuBarItem = 'tp-Desk-MainMenuBarItem';
 tp.Classes.DeskViewPager = 'tp-Desk-ViewPager';
 tp.Classes.DeskView = 'tp-Desk-View';
+tp.Classes.DeskSysDataView = 'tp-Desk-SysData-View';
 
 //#region tp.Command
 
@@ -88,42 +89,11 @@ tp.Command = class {
 // desktop
 //---------------------------------------------------------------------------------------
 
-//#region tp.DeskAjaxRequest
-
-/** Represents an ajax request */
-tp.DeskAjaxRequest = class {
-
-    /**
-     * Constructor
-     * @param {string} OperationName The name of the request operation.
-     * @param {object} Params Optional. A user defined key-pair object with parameters.
-     */
-    constructor(OperationName, Params = null) {
-        this.OperationName = OperationName;
-        this.Params = Params || {};
-
-        tp.DeskAjaxRequest.Counter++;
-        this.Id = tp.DeskAjaxRequest.Counter.toString();
-    }
-
-    /** Optional. The id of the request.
-     * @type {string}
-     */
-    Id = '';
-    /** Required. The name of the request operation.
-     * @type {string}
-     */
-    OperationName = '';
-    /** Optional. A user defined key-pair object with parameters.
-     * @type {object}
-     */
-    Params = {};
-};
-
+//#region tp.AjaxRequest
 /** Creates and returns an instance based on a specified {@link tp.Command}
  * @param {tp.Command} Cmd
  */
-tp.DeskAjaxRequest.CreateFromCommand = function (Cmd) {
+tp.AjaxRequest.CreateFromCommand = function (Cmd) {
  
     let Params = {
         Type: Cmd.Type,
@@ -132,14 +102,9 @@ tp.DeskAjaxRequest.CreateFromCommand = function (Cmd) {
     if (Cmd.Params)
         Params = tp.MergeQuick(Params, Cmd.Params);
 
-    let Result = new tp.DeskAjaxRequest(Cmd.Name, Params);
+    let Result = new tp.AjaxRequest(Cmd.Name, Params);
     return Result;
 };
-/** Id counter.
- * @param {number}  
- */
-tp.DeskAjaxRequest.Counter = 0;
-
 //#endregion
 
 //#region tp.Desktop
@@ -230,26 +195,7 @@ tp.Desktop = class {
         this.CommandExecutors.push(Executor);
     }
 
-    /**
-     * Executes an ajax request to the server and returns the Packet as it comes from server.
-     * @param {tp.DeskAjaxRequest} Request The request object.
-     * @returns {object} Returns the Packet from the server.
-     */
-    async AjaxExecute(Request) {
-        let Result = null;
-        let Url = '/AjaxExecute'
-
-        let Args = await tp.Ajax.PostModelAsync(Url, Request);
-        if (Args.ResponseData.IsSuccess === true) {
-            let Packet = Args.ResponseData.Packet;
-            Result = Packet;
-        }
-        else {
-            tp.DisplayAjaxErrors(Args);
-        }
-
-        return Result;
-    }
+ 
     /**
      * Calls all registered command executors until it finds one that can execute the command. Then it passes the command to that executor.
      * @param {tp.Command} Cmd
@@ -317,12 +263,7 @@ tp.DeskMainMenu = class extends tp.ItemBar {
         let Url = tp.Urls.DeskGetMainMenu;
 
         let Args = await tp.Ajax.GetAsync(Url);
-
-        var o = JSON.parse(Args.ResponseText);
-        if (o.IsSuccess === false)
-            tp.Throw(o.ErrorText);
-
-        let Packet = JSON.parse(o.Packet);
+        let Packet = Args.Packet;
 
         let BarItemList = [];
         let BarItem;
@@ -554,7 +495,7 @@ tp.DeskViewPager = class extends tp.tpElement {
 
         this.TabBar.SelectedItem = TabItem;
 
-        if (View instanceof tp.DataView)
+        if (View instanceof tp.View)
             View.OnAfterConstruction();
 
         return View;
@@ -682,17 +623,7 @@ tp.DeskView = class extends tp.View {
     CloseView() {
         this.Dispose();
     }
-
-    /**
-     * Executes a command that returns a Packet from server for creating a modal dialog.
-     * @param {tp.Command} Cmd The command to execute.
-     * @returns {object} Returns the Packet from the server.
-     */
-    async AjaxExecuteDialog(Cmd) { 
-        let Request = tp.DeskAjaxRequest.CreateFromCommand(Cmd);   
-        let Packet = await tp.Desk.AjaxExecute(Request);
-        return Packet;
-    }
+ 
 
 };
 
@@ -724,7 +655,6 @@ tp.DeskDataView = class extends tp.DataView {
 //#endregion
 
 
-//DeskSysDataView
 
 //#region tp.DeskSysDataView
 
@@ -739,23 +669,74 @@ tp.DeskSysDataView = class extends tp.DeskView {
         super(elPage, CreateParams);
     }
 
-    /**
-     * @type {tp.ToolBar}
-     */
-    ToolBar = null;
-    /**
-     * @type {tp.Grid}
-     */
-    Grid = null;
-    /**
-     * @type {tp.DataTable}
-     */
-    ListTable = null;
-    /**
-     * @type {tp.DataTable}
-     */
-    Table = null;
+ 
 
+    /**
+    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
+    @type {tp.DataViewMode}
+    */
+    get ViewMode() {
+        return this.fViewMode;
+    }
+    /**
+    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
+    @type {tp.DataViewMode}
+    */
+    set ViewMode(v) {
+        if (this.fViewMode !== v) {
+            this.fLastViewMode = this.fViewMode;
+            this.fViewMode = v;
+            this.OnViewModeChanged();
+            this.EnableCommands();
+        }
+    }
+ 
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.DeskSysDataView';
+        this.fDefaultCssClasses = [tp.Classes.View, tp.Classes.DeskSysDataView];
+    }
+    /**
+    Initializes fields and properties just before applying the create params.      
+    @protected
+    @override
+    */
+    InitializeFields() {
+        super.InitializeFields();
+
+        this.fName = tp.NextName('DataView');
+        this.fViewMode = tp.DataViewMode.None;
+        this.fLastViewMode = tp.DataViewMode.None;
+
+        this.PrimaryKeyField = 'Id';
+        this.ForceSelect = false;
+    }
+ 
+    /* overridables */
+    /** This is called after the base class initialization completes and creates just the tool-bar, the main panel-list and the List grid. <br />
+     * It also creates the broker. <br /> 
+     * NOTE: Controls of the edit part are created and bound the first time an insert or edit is requested.
+     * @protected
+     * @override
+    */
+    InitializeView() {
+        super.InitializeView();
+
+        this.DataType = this.CreateParams.Packet.DataType
+
+        this.CreateToolBar();
+        this.CreatePanelList();
+        this.CreateListGrid();
+
+        this.ListSelect();
+    }
 
     /**
     Sets the visible panel index in the panel list.
@@ -814,7 +795,6 @@ tp.DeskSysDataView = class extends tp.DeskView {
      * @returns {HTMLElement[]}
      * */
     GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetPanels() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
-
     /** Returns a DOM Element contained by this view.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
@@ -823,7 +803,6 @@ tp.DeskSysDataView = class extends tp.DeskView {
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
     GetViewPanelListElement() { return tp.Select(this.Handle, '.PanelList'); }
-
     /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
@@ -832,15 +811,30 @@ tp.DeskSysDataView = class extends tp.DeskView {
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
     GetViewEditPanelElement() { return this.FindPanelByPanelMode('Edit'); }
-
-
     /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
     GetViewListGridElement() { return tp.Select(this.GetViewListPanelElement(), '.Grid'); }
 
-    /* overridables */
 
+    /**
+    Returns the Id (value of the primary key field) of the selected data-row of the List (browser) grid, if any, else null.
+    @protected
+    @returns {any} Returns the Id (value of the primary key field) of the selected data-row of the browser grid, if any, else null.
+    */
+    GetListSelectedId() {
+ 
+        if (!tp.IsBlank(this.PrimaryKeyField) && !tp.IsEmpty(this.gridList)) {
+            var Row = this.gridList.FocusedRow;
+            if (!tp.IsEmpty(Row) && Row.Table.ContainsColumn(this.PrimaryKeyField)) {
+                return Row.Get(this.PrimaryKeyField);
+            }
+        }
+
+        return null;
+    }
+
+    /* overridables */
     /** Creates the toolbar of the view 
  @protected
  */
@@ -883,59 +877,319 @@ tp.DeskSysDataView = class extends tp.DeskView {
             this.gridList.AllowUserToAddRows = false;
             this.gridList.AllowUserToDeleteRows = false;
             this.gridList.ToolBarVisible = false;
+            this.gridList.GroupsVisible = false;
+            this.gridList.GroupFooterVisible = false;
+            this.gridList.AutoGenerateColumns = false;
+
+            this.gridList.AddColumn('Owner');
+            //this.gridList.AddColumn('DataType');
+            this.gridList.AddColumn('DataName');
+            this.gridList.AddColumn('TitleKey');
+
+            this.gridList.AddColumn('Tag1');
+            this.gridList.AddColumn('Tag2');
+            this.gridList.AddColumn('Tag3');
+            this.gridList.AddColumn('Tag4');
 
             this.gridList.On(tp.Events.DoubleClick, this.ListGrid_DoubleClick, this);
         }
 
-        if (this.gridList && !this.ListTable) {
-            this.ListTable = new tp.DataTable();
-            this.ListTable.Assign(this.CreateParams.Packet.ListTable);
-            this.gridList.DataSource = this.ListTable;
-
-            // EDW: Ρυθμίζουμε τις στήλες του πίνακα να ΜΗΝ φέρνει τα blobs
-            // και τις στήλες του Grid
-        }
-    }
-
-    /** Creates child controls of this instance. Called in construction sequence.
-    * @private
-    * */
-    CreateControls() {
-        super.CreateControls();
-
-        this.CreateToolBar();
-        this.CreatePanelList();
-        this.CreateListGrid();
-
 /*
-        let el = tp.Select(this.Handle, '.tp-ToolBar');
-        this.ToolBar = new tp.ToolBar(el);
+        if (this.gridList && !this.tblList) {
+            this.tblList = new tp.DataTable();
+            this.tblList.Assign(this.CreateParams.Packet.ListTable);
 
-        this.ToolBar.On('ButtonClick', this.AnyToolBarButtonClick, this);
-
-        this.Table = new tp.DataTable();
-        this.Table.Assign(this.CreateParams.Packet.Table);
-
-        el = tp.Select(this.Handle, '.tp-Grid');
-
-        let CP = {
-            DataSource: this.Table,
-            ReadOnly: true,
-            ToolBarVisible: false,
-            GroupsVisible: false,
-            FilterVisible: false,
-            FooterVisible: false,
-            Columns: [
-                { Name: 'DataName' },
-                { Name: 'TitleKey' },
-                { Name: 'Owner' }
-            ]
-        };
-
-        this.Grid = new tp.Grid(el, CP);
+            this.dsList = new tp.DataSource(this.tblList);
+            this.gridList.DataSource = this.dsList;
+        }
  */
     }
+ 
+    /** Creates and binds the controls of the edit part, if not already created.
+     * */
+    CreateEditControls() {
 
+    }
+
+    // commands/modes
+    /**
+    Returns the bit-field (set) of the valid commands for this view. <br />
+    @protected
+    @returns {number} Returns the bit-field (set) of the valid commands for this view. <br />
+    */
+    GetValidCommands() {
+        let Result = tp.DataViewMode.None;
+
+        for (var PropName in tp.DataViewMode) {
+            if (tp.IsInteger(tp.DataViewMode[PropName])) {
+                Result |= tp.DataViewMode[PropName];
+            }
+        }
+
+        return Result;
+    }
+    /**
+    Validates standard commands, that is decides which is or not valid at the moment of the call.
+    @protected
+    */
+    ValidateCommands() {
+
+        let Navigation = tp.DataViewMode.First |
+            tp.DataViewMode.Prior |
+            tp.DataViewMode.Next |
+            tp.DataViewMode.Last;
+
+        this.ValidCommands = this.GetValidCommands();
+        this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, Navigation);
+
+        switch (this.ViewMode) {
+            case tp.DataViewMode.List:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.List |
+                    tp.DataViewMode.Save |
+                    tp.DataViewMode.Cancel
+                );
+                break;
+            case tp.DataViewMode.Insert:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.Insert |
+                    tp.DataViewMode.Edit |
+                    tp.DataViewMode.Delete
+                );
+                break;
+            case tp.DataViewMode.Edit:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.Edit
+                );
+                break;
+            case tp.DataViewMode.Delete:
+                break;
+            case tp.DataViewMode.Cancel:
+                break;
+            case tp.DataViewMode.Save:
+                break;
+
+            case tp.DataViewMode.Filters:
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
+                    tp.DataViewMode.Filters |
+                    tp.DataViewMode.Insert |
+                    tp.DataViewMode.Edit |
+                    tp.DataViewMode.Delete |
+                    tp.DataViewMode.Save |
+                    tp.DataViewMode.Cancel
+                );
+                break;
+        }
+
+
+        if (this.dsList) {
+            if (!this.dsList.CanFirst())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.First);
+            if (!this.dsList.CanPrior())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Prior);
+            if (!this.dsList.CanNext())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Next);
+            if (!this.dsList.CanLast())
+                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Last);
+        }
+    }
+    /**
+    Enables/disables buttons and menu items.
+    @protected
+    */
+    EnableCommands() {
+        this.ValidateCommands();
+        if (tp.IsNumber(this.ValidCommands)) {
+            if (this.ToolBar) {
+
+                let ControlList = this.ToolBar.GetControls(),
+                    c,          // tp.tpElement,
+                    Command,    // string
+                    ViewMode    // integer
+                    ;
+
+                for (let i = 0, ln = ControlList.length; i < ln; i++) {
+                    c = ControlList[i];
+                    if (tp.HasCommandProperty(c)) {
+                        Command = c.Command;
+
+                        if (!tp.IsBlank(Command) && Command in tp.DataViewMode) {
+                            ViewMode = tp.DataViewMode[Command];
+                            c.Enabled = tp.Bf.In(ViewMode, this.ValidCommands);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    /**
+    Executes a standard command by name
+    @param {number | string} Command - One of the {@link tp.DataViewMode} constants, either the name or the value.
+    */
+    ExecuteCommand(Command) {
+        let ViewMode = tp.DataViewMode.None;
+
+        if (tp.IsString(Command) && !tp.IsBlank(Command)) {
+            ViewMode = Command in tp.DataViewMode ? tp.DataViewMode[Command] : tp.DataViewMode.None;
+        }
+        else if (tp.IsInteger(Command)) {
+            ViewMode = Command;
+        }
+
+        switch (ViewMode) {
+            case tp.DataViewMode.None:
+                this.ExecuteCustomCommand(Command);
+                break;
+
+            case tp.DataViewMode.Home:
+                this.DisplayHomeLocalMenu();
+                break;
+
+            case tp.DataViewMode.List:
+                this.ListSelect();
+                break;
+            case tp.DataViewMode.Filters:
+                this.DisplayFilterPanel();
+                break;
+
+            case tp.DataViewMode.First:
+                if (this.dsList && this.dsList.CanFirst()) {
+                    this.dsList.First();
+                    this.Edit();
+                }
+                break;
+            case tp.DataViewMode.Prior:
+                if (this.dsList && this.dsList.CanPrior()) {
+                    this.dsList.Prior();
+                    this.Edit();
+                }
+                break;
+            case tp.DataViewMode.Next:
+                if (this.dsList && this.dsList.CanNext()) {
+                    this.dsList.Next();
+                    this.Edit();
+                }
+                break;
+            case tp.DataViewMode.Last:
+                if (this.dsList && this.dsList.CanLast()) {
+                    this.dsList.Last();
+                    this.Edit();
+                }
+                break;
+
+
+            case tp.DataViewMode.Edit:
+                this.Edit();
+                break;
+            case tp.DataViewMode.Insert:
+                this.Insert();
+                break;
+            case tp.DataViewMode.Delete:
+                this.Delete();
+                break;
+            case tp.DataViewMode.Save:
+                this.Commit();
+                break;
+            case tp.DataViewMode.Cancel:
+                if (this.ForceSelect !== true) {
+                    this.ViewMode = tp.DataViewMode.Cancel;
+                    this.ViewMode = tp.DataViewMode.List;
+                } else {
+                    this.ListSelect();
+                }
+                break;
+
+            case tp.DataViewMode.Close:
+                this.CloseView();
+                break;
+        }
+    }
+    /**
+    Executes a custom command by name specified by a command name.
+    @param {string} Command - A string denoting the custom command.
+    */
+    ExecuteCustomCommand(Command) {
+    }
+
+    // EDW: 1. Να οριστούν τα edit controls στο ViewDef (DataStore.Views -> RegisterView_SysData_Table() )
+    // 2. Να φτιαχτεί κλάση SysDataTypeHandler που θα χειρίζεται το Edit part κάθε ξεχωριστού DataType
+    // 3. Να γραφτούν οι Edit(), Insert() κλπ με 
+
+
+    async ListSelect() {
+        let Url = tp.Urls.SysDataSelectList;
+        let Data = {
+            DataType: this.DataType,
+            NoBlobs: true
+        }
+
+        let Args = await tp.Ajax.GetAsync(Url, Data);
+        this.tblList = new tp.DataTable();
+        this.tblList.Assign(Args.Packet);
+
+        this.dsList = new tp.DataSource(this.tblList);
+        this.gridList.DataSource = this.dsList;
+
+        this.ForceSelect = false;
+        this.ViewMode = tp.DataViewMode.List;
+    }
+
+    
+    async Insert() {
+        //this.CreateEditControls();
+        //this.SetVisiblePanelByPanelMode('Edit');
+    }
+    async Edit() {
+        this.CreateEditControls();
+
+        let Id = this.GetListSelectedId();
+
+        if (tp.IsEmpty(Id)) {
+            tp.ErrorNote('No selected row');
+        } else {
+            //this.DoEditBefore();
+            //this.CheckCanEdit();
+            let Url = tp.Urls.SysDataSelectById;
+            let Data = {
+                Id: Id
+            }
+
+            let Args = await tp.Ajax.GetAsync(Url, Data);
+ 
+            this.tblData = new tp.DataTable();
+            this.tblData.Assign(Args.Packet);
+
+            this.ViewMode = tp.DataViewMode.Edit;
+        }
+    }
+    async Delete() {
+
+    }
+    async Commit() {
+
+    }
+
+
+    /* Event triggers */
+    /**
+    Event trigger
+    */
+    OnViewModeChanged() {
+        switch (this.ViewMode) {
+            case tp.DataViewMode.List:
+            case tp.DataViewMode.Cancel:
+                this.SetVisiblePanelByPanelMode('List');
+                break;
+
+            case tp.DataViewMode.Insert:
+            case tp.DataViewMode.Edit:
+                this.SetVisiblePanelByPanelMode('Edit');
+                break; 
+        }
+
+        this.Trigger('OnViewModeChanged', {});
+    }
     /**
     Event handler. If a Command exists in the clicked element then the Args.Command is assigned.
     @protected
@@ -945,16 +1199,8 @@ tp.DeskSysDataView = class extends tp.DeskView {
         if (Args.Handled !== true) {
             var Command = tp.GetCommand(Args);
             if (!tp.IsBlank(Command)) {
-                switch (Command) {
-                    case 'Close':
-                        this.CloseView();
-                        break; 
-                    default:
-                        tp.InfoNote('Command: ' + Command);
-                        break;
-                }
-            }
-            
+                this.ExecuteCommand(Command);
+            }            
         }
     }
     /**
@@ -963,146 +1209,65 @@ tp.DeskSysDataView = class extends tp.DeskView {
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
     ListGrid_DoubleClick(Args) {
-        //this.ExecuteCommand(tp.DataViewMode.Edit);
-        tp.InfoNote('ListGrid_DoubleClick');
+        this.ExecuteCommand(tp.DataViewMode.Edit);
     }
 
- 
-    async AnyToolBarButtonClick(Args) {
-        let Command = Args.Command;
-        switch (Command) {
-            case 'Close':
-                this.CloseView();
-                break;
-            case 'Insert':
-                await this.ShowModal(true);
-                break;
-            default:
-                tp.InfoNote('Command: ' + Command);
-                break;
-        }
-    }
 };
+
+tp.DeskSysDataView.prototype.PrimaryKeyField = 'Id';
+/** The DataType, i.e. Table, Broker, Report, etc.
+ * @type {string}
+ */
+tp.DeskSysDataView.prototype.DataType = '';
+/** The tool-bar
+ * @type {tp.ToolBar}
+ */
+tp.DeskSysDataView.prototype.ToolBar = null;
+/** The panel list. Contains the List and Edit panels
+ @protected
+ @type {tp.PanelList}
+ */
+tp.DeskSysDataView.prototype.PanelList = null;
+/** The List (browser) grid
+ * @type {tp.Grid}
+ */
+tp.DeskSysDataView.prototype.gridList = null;
+/** Field
+ @protected
+ @type {tp.DataSource}
+ */
+tp.DeskSysDataView.prototype.dsList = null;
+/** The List (browser) table
+ * @type {tp.DataTable}
+ */
+tp.DeskSysDataView.prototype.tblList = null;
+/** The Edit (data) table
+ * @type {tp.DataTable}
+ */
+tp.DeskSysDataView.prototype.tblData = null;
+/** Field. One of the  {@link tp.DataViewMode} constants
+ @protected
+ @type {number}
+ */
+tp.DeskSysDataView.prototype.fViewMode = tp.DataViewMode.None;
+/** Field. One of the  {@link tp.DataViewMode} constants
+ @protected
+ @type {number}
+ */
+tp.DeskSysDataView.prototype.fLastViewMode = tp.DataViewMode.None;
+/** Field
+@protected
+@type {boolean}
+*/
+tp.DeskSysDataView.prototype.ForceSelect = false;
+
 
 //#endregion
 
 
 
 
-//#region tp.SysDataViewList
-
-/** Represents a view. Displays a list of items of a certain DataType. */
-tp.SysDataViewList = class extends tp.DeskView {
-    /**
-     * Constructs the page
-     * @param {HTMLElement} elPage The page element.
-     * @param {object} [Params=null] Optional. A javascript object with initialization parameters.
-     */
-    constructor(elPage, CreateParams = null) {
-        super(elPage, CreateParams);
-    }
-
-    /**
-     * @type {tp.ToolBar}
-     */
-    ToolBar = null;
-    /**
-     * @type {tp.Grid}
-     */
-    Grid = null;
-    /**
-     * @type {tp.DataTable}
-     */
-    Table = null;
-
-    /** Creates child controls of this instance. Called in construction sequence.
-    * @private
-    * */
-    CreateControls() {
-        super.CreateControls();
-        let el = tp.Select(this.Handle, '.tp-ToolBar');
-        this.ToolBar = new tp.ToolBar(el);
-
-        this.ToolBar.On('ButtonClick', this.AnyToolBarButtonClick, this);
-
-        this.Table = new tp.DataTable();
-        this.Table.Assign(this.CreateParams.Packet.Table);
-
-        el = tp.Select(this.Handle, '.tp-Grid');
-
-        let CP = {
-            DataSource: this.Table,
-            ReadOnly: true,
-            ToolBarVisible: false,
-            GroupsVisible: false,
-            FilterVisible: false,
-            FooterVisible: false,
-            Columns: [
-                { Name: 'DataName' },
-                { Name: 'TitleKey' },
-                { Name: 'Owner' }
-            ]
-        };
-
-        this.Grid = new tp.Grid(el, CP);
-    }
-
-    async ShowModal(IsInsert) {
-
-        // get the packet
-        let DataType = this.CreateParams.DataType;
-
-        let Cmd = new tp.Command();
-        Cmd.Name = IsInsert === true ? `Ui.SysData.Insert.${DataType}` : `Ui.SysData.Edit.${DataType}`;
-        Cmd.Type = 'Ui';
-
-        if (IsInsert !== true) {
-            let Row = this.Grid.DataSource.Current;
-            Cmd.Params.Id = Row.GetByName('Id');
-        }
-
-        let Packet = await this.AjaxExecuteDialog(Cmd);
-
-        // create the page element
-        let elPage = tp.ContentWindow.GetContentElement(Packet.HtmlText.trim());
-
-        let DeskInfo = {};
-        DeskInfo.Name = Packet.ViewName;
-        DeskInfo.elPage = elPage;
-        tp.DeskInfo(elPage, DeskInfo);
-
-        // create the page instance
-        let CreateParams = {
-            Name: Packet.ViewName,
-            Packet: Packet,
-        };
-
-        let Page = await tp.Desk.CreateViewObject(elPage, CreateParams);
-
-        // display the dialog
-        let WindowArgs = await tp.ContentWindow.ShowModalAsync(Packet.ViewName, elPage);
-
-        let DialogResult = WindowArgs.Window.DialogResult;
-        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-        tp.InfoNote('DialogResult = ' + S);
-
-        return DialogResult;
-    }
-    async AnyToolBarButtonClick(Args) {
-        let Command = Args.Command;
-        switch (Command) {
-            case 'Close':
-                this.CloseView();
-                break;
-            case 'Insert':
-                await this.ShowModal(true);
-                break;
-            default:
-                tp.InfoNote('Command: ' + Command);
-                break;
-        }
-    }
-};
+ 
 
 //#endregion
 

@@ -7283,13 +7283,8 @@ tp.AutocompleteList = class extends tp.DropDownBox {
 
             let Args = await tp.Ajax.PostAsync(this.ServerFunc, Data);
 
-            o = JSON.parse(Args.ResponseText);
-            if (o.Result === false) {
-                tp.ErrorNote(o.ErrorText);
-            } else {
-                self.fDisplayList = o.List;
-                self.SetScrollerList(Text);
-            }
+            self.fDisplayList = Args.Packet;
+            self.SetScrollerList(Text);
 
         } else {                                                // use local data
 
@@ -15974,8 +15969,8 @@ tp.ILocatorLink = class {
 //#endregion
 
 
-tp.Urls.LocatorGetDef = '/LocatorGetDef';
-tp.Urls.LocatorSqlSelect = '/LocatorSqlSelect';
+tp.Urls.LocatorGetDef = '/Locator/GetDef';
+tp.Urls.LocatorSqlSelect = '/Locator/SqlSelect';
 
 //#region tp.Locators
 /** A helper static class for locators */
@@ -15997,15 +15992,10 @@ tp.Locators = class {
                 LocatorName: Name,
             };
 
-            let Args = await tp.Ajax.GetAsync(Url, Data);  //= async function (Url, Data = null
-
-            var o = JSON.parse(Args.ResponseText);
-            if (o.IsSuccess === false)
-                tp.Throw(o.ErrorText);
-
-            let Packet = JSON.parse(o.Packet);
+            let Args = await tp.Ajax.GetAsync(Url, Data);  
+ 
             Result = new tp.LocatorDef();
-            Result.Assign(Packet);
+            Result.Assign(Args.Packet);
             this.Descriptors.push(Result);
         }
 
@@ -16024,14 +16014,9 @@ tp.Locators = class {
             WhereSql: WhereSql || ''
         };
 
-        let Args = await tp.Ajax.GetAsync(Url, Data);  //= async function (Url, Data = null
-
-        var o = JSON.parse(Args.ResponseText);
-        if (o.IsSuccess === false)
-            tp.Throw(o.ErrorText);
-
-        var Table = new tp.DataTable();
-        Table.Assign(Args.ResponseData.Packet);
+        let Args = await tp.Ajax.GetAsync(Url, Data); 
+        let Table = new tp.DataTable();
+        Table.Assign(Args.Packet);
 
         return Table;
     }
@@ -19316,7 +19301,6 @@ tp.View = class extends tp.tpElement {
         super.InitializeFields();
         this.ViewName = tp.NextName('View');
     }
-
     /**
     Notification 
     Initialization steps:
@@ -19324,13 +19308,13 @@ tp.View = class extends tp.tpElement {
     - Field initialization
     - Option processing
     - Completed notification
+    @protected
+    @override
     */
     OnHandleCreated() {
         super.OnHandleCreated();
         this.IsScreenResizeListener = true;
     }
-
-
     /**
     Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
     and AFTER options (CreateParams) processing <br />
@@ -19349,25 +19333,51 @@ tp.View = class extends tp.tpElement {
 
         tp.Broadcaster.Add(this);
         this.HookEvent(tp.Events.Click);
-
-        this.AutocreateControls();
-    }
-    AutocreateControls() {
-        if (this.CreateParams.AutocreateControls === true) {
-            let List = this.GetControls();
-            if (List.length === 0)
-                tp.CreateContainerControls(this.Handle);
-        }
-        else {
-            this.CreateControls();
-        }
     }
     /**
-    Creates the controls of the view based on the provided markup.
-    @protected
-    */
-    CreateControls() {
+    * This should be called OUTSIDE of any constructor, after the constructor finishes. <br />
+    * 
+    * WARNING
+    * 
+    * In javascript fields contained in a derived class declaration, are initialized after the base constructor finishes.
+    * So, if the base constructor calls a virtual method where the derived class initializes a field,
+    * when the constructor finishes, the field is assigned again whatever value the class declaration dictates.
+    *
+    * A = class {
+    *     constructor() {
+    *         this.SetFields();
+    *     }
+    *
+    *     SetFields() { }
+    * }
+    *
+    * B = class extends A {
+    *     constructor() {
+    *         super();
+    *         this.Display();
+    *     }
+    *
+    *     Field2 = 123;	// this is assigned again after the SetFields() call, when the constructor completes.
+    *
+    *     SetFields() {
+    *         super.SetFields();
+    *         this.Field2 = 987;
+    *     }
+    *     Display() {
+    *         alert(this.Field2);
+    *     }
+    * }
+    *
+    * The result is that the field retains the value it had in the class declaration, the null value.
+    *
+    * @protected
+    * @override
+    * */
+    OnAfterConstruction() {
+        this.AutocreateControls();
+        this.InitializeView();
     }
+
     /**
     Destroys the handle (element) of this instance by removing it from DOM and releases any other resources.
     @protected
@@ -19393,8 +19403,34 @@ tp.View = class extends tp.tpElement {
         }
     }
 
-
     /* overridables */
+    /** If the AutocreateControls flag is true then it automatically creates controls from the markup.
+     * Else it just calls the CreateControls() method, so inheritor classes create any needed control.
+     * @protected
+     * */
+    AutocreateControls() {
+        if (this.CreateParams.AutocreateControls === true) {
+            let List = this.GetControls();
+            if (List.length === 0)
+                tp.CreateContainerControls(this.Handle);
+        }
+        else {
+            this.CreateControls();
+        }
+    }
+    /**
+    Creates the controls of the view based on the provided markup.
+    @protected
+    */
+    CreateControls() {
+    }
+
+    /** This is called after the construction is completed, and outside of construction sequence. <br />
+     * @protected
+    */
+    InitializeView() { 
+    }
+ 
     /**
     Event trigger
     @protected
@@ -19421,8 +19457,7 @@ tp.View = class extends tp.tpElement {
     BroadcasterFunc(Args) {
         return null;
     }
-
-
+ 
     /* public */
     /**
     Returns a string representation of this instance.

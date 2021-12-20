@@ -18,11 +18,12 @@ namespace Tripous
         public HttpActionResult()
         {
         }
- 
+
 
         /// <summary>
         /// Creates and returns a result.
         /// <para>Use this when the caller waits the Packet to be serialized as JSON text.</para>
+        /// <para>Mostly for AJAX calls. </para>
         /// </summary>
         static public HttpActionResult SetPacket(object Packet, bool IsSuccess = true)
         {
@@ -34,6 +35,7 @@ namespace Tripous
         /// <summary>
         /// Creates and returns a result.
         /// Use this when the caller waits for the Entity to be part of the whole JSON returned.
+        /// <para>Mostly for WebAPI calls. </para>
         /// </summary>
         static public HttpActionResult SetEntity(object Entity, bool IsSuccess = true)
         {
@@ -64,10 +66,12 @@ namespace Tripous
         /* properties */
         /// <summary>
         /// A text or json text. This is the actual information returned to the caller.
+        /// <para>Mostly for AJAX calls. </para>
         /// </summary>
         public string Packet { get; set; }
         /// <summary>
-        /// An object that is serialized along with this result as a whole.
+        /// An object that is serialized along with this result as a whole. 
+        /// <para>Mostly for WebAPI calls. </para>
         /// </summary>
         public object Entity { get; set; }
         /// <summary>

@@ -46,11 +46,31 @@ namespace Tripous.Data
 
         /// <summary>
         /// Creates and returns a DataTable based on the schema of the system data table.
+        /// <para>NOTE: It always returns a DataTable with ALL table columns.</para>
         /// </summary>
-        static public DataTable CreateDataTable()
+        static public DataTable CreateDataTable(/* bool NoBlobs */)
         {
             DataTable Result = new DataTable(SysTables.Data);
             Store.GetNativeSchema(string.Empty, SysTables.Data, string.Empty, Result);
+
+            /*
+                        if (NoBlobs)
+                        {
+                            string FieldName;
+                            DataColumn Column;
+                            for (int i = 1; i < 6; i++)
+                            {
+                                FieldName = $"Data{i}";
+                                Column = Result.FindColumn(FieldName);
+                                if (Column != null)
+                                {
+                                    Result.Columns.Remove(Column);
+                                }
+
+                            }
+                        } 
+             */
+
             return Result;
         }
  
@@ -156,6 +176,14 @@ where
             return Result;
         }
 
+        /// <summary>
+        /// Selects an item by a specified id and returns a <see cref="DataTable"/>
+        /// </summary>
+        static public DataTable SelectById(object Id)
+        {
+            string SqlText = $@"select * from {SysTables.Data} where Id = {Sys.IdStr(Id)}";
+            return Store.Select(SqlText);
+        }
  
         /* misc select */
         /// <summary>

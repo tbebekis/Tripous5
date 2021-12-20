@@ -91,9 +91,8 @@ app.MainCommandExecutor = class extends tp.DeskCommandExecutor {
                 Result = View;
             }
             else {
-                let Request = tp.DeskAjaxRequest.CreateFromCommand(Cmd);  
-                let Packet = await tp.Desk.AjaxExecute(Request);
-                log(Packet);
+                let Request = tp.AjaxRequest.CreateFromCommand(Cmd);
+                let Packet = await tp.AjaxRequest.ExecuteAsync(Request);
                 if (tp.IsValid(Packet))
                     Result = await tp.Desk.ViewPager.AddView(Packet);
             }

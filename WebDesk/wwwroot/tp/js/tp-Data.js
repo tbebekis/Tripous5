@@ -1758,8 +1758,8 @@ Object.freeze(tp.DataMode);
 // tp.Db
 //---------------------------------------------------------------------------------------
 
-tp.Urls.SqlSelect = '/SqlSelect';
-tp.Urls.SqlSelectAll = '/SqlSelectAll';
+tp.Urls.SqlSelect = '/Sql/Select';
+tp.Urls.SqlSelectAll = '/Sql/SelectAll';
  
 
 //#region tp.Db
@@ -1906,7 +1906,7 @@ tp.Db = class {
         Args = await tp.Ajax.Async(Args);
  
         var Table = new tp.DataTable();
-        Table.Assign(Args.ResponseData.Packet);
+        Table.Assign(Args.Packet);
 
         return Table;
     }
@@ -1936,7 +1936,7 @@ tp.Db = class {
         Args = await tp.Ajax.Async(Args);
 
         var DataSet = new tp.DataSet();
-        DataSet.Assign(Args.ResponseData.Packet);
+        DataSet.Assign(Args.Packet);
 
         return DataSet;
     }

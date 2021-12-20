@@ -61,14 +61,7 @@ namespace WebLib
 
             Packet["ViewName"] = Request.OperationName;
             Packet["ViewTitle"] = ViewDef.Title;
-            Packet["DataType"] = DataType;
-            DataTable Table = SysData.Select(DataType, NoBlobs: true);
-            Packet["ListTable"] = JsonDataTable.ToJObject(Table);
-            
-            // EDW
-            // Να γίνει ViewDef registration για SysData.Table
-            // με ToolBar
-            // και Edit μέρος
+            Packet["DataType"] = DataType; 
  
             return Info;
         }

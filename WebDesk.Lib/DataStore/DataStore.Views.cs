@@ -24,7 +24,8 @@ namespace WebLib
             View.ToolBarButtons.Clear();
             View.ToolBarButtons.AddRange(new ViewToolBarButtonDef[]
             {
-                ViewToolBarButtonDef.ButtonHome, 
+                ViewToolBarButtonDef.ButtonHome,
+                ViewToolBarButtonDef.ButtonList,
 
                 ViewToolBarButtonDef.ButtonEdit,
                 ViewToolBarButtonDef.ButtonInsert,
@@ -37,7 +38,7 @@ namespace WebLib
 
             // tabs
             ViewTabDef ListTab = View.AddTab("List", "List");  
-            ViewTabDef EditTab = View.AddTab("Data", "Data");
+            ViewTabDef EditTab = View.AddTab("Edit", "Edit");
 
             // accordeon
 

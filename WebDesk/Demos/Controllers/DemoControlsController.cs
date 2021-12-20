@@ -42,12 +42,12 @@ namespace WebDesk.Controllers
             object List = A.Where(S => UseStartsWith ? S.StartsWith(Text, StringComparison.OrdinalIgnoreCase) : S.IndexOf(Text, StringComparison.OrdinalIgnoreCase) >= 0).
                 Select(S => new { Id = Id++, Name = S }).ToArray();
 
-
+            // should look like a Tripous.HttpActionResult
             object Data = new
             {
                 ErrorText = "",
-                Result = true,
-                List = List,
+                IsSuccess = true,
+                Packet = List,
             };
 
             IActionResult Result = Json(Data);
