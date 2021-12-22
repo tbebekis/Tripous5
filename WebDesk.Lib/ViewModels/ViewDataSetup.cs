@@ -19,7 +19,7 @@ namespace WebLib.Models
     /// </summary>
     public class ViewDataSetup
     {
-        Dictionary<string, object> Properties = new Dictionary<string, object>();
+        
         ViewDef ViewDef;
 
         /* construction */
@@ -80,7 +80,6 @@ namespace WebLib.Models
 
             if (AutocreateControls)
                 Result["AutocreateControls"] = AutocreateControls;
-
 
             List<string> TempList;
 
@@ -149,17 +148,24 @@ namespace WebLib.Models
         /// <summary>
         /// A list of css classes for the view
         /// </summary>
-        public List<string> CssClasses { get; set; } = new List<string>() { "tp-Desk-View" };
+        public List<string> CssClasses { get; set; } = new List<string>() { "tp-DeskView" };
 
         /// <summary>
-        /// Custom properties
+        /// Custom properties helper.
+        /// <para>Custom properties for more properties of the Control part of the data-setup attribute.</para>
         /// </summary>
         public object this[string Key]
         {
             get { return Properties.ContainsKey(Key) ? Properties[Key] : null; }
             set { Properties[Key] = value; }
         }
-
-
+        /// <summary>
+        /// Dictionary with custom properties. 
+        /// <para>Custom properties for more properties of the Control part of the data-setup attribute.</para>
+        /// </summary>
+        public Dictionary<string, object> Properties { get; } = new Dictionary<string, object>();
     }
+
+
+    
 }

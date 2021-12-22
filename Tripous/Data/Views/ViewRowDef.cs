@@ -16,7 +16,10 @@ namespace Tripous.Data
     /// </summary>
     public class ViewRowDef
     {
-
+        /// <summary>
+        /// Constant. Default column and width classes
+        /// </summary>
+        public const string DefaultColumnCssClasses = "tp-Col l-75 m-70 s-70 xs-100 ";
 
         /* construction */
         /// <summary>
@@ -29,9 +32,10 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns a <see cref="ViewColumnDef"/>
         /// </summary>
-        public ViewColumnDef AddColumn(string TitleKey)
+        public ViewColumnDef AddColumn(string TableName = "")
         {
             ViewColumnDef Result = new ViewColumnDef();
+            Result.TableName = TableName;
             Columns.Add(Result);
             return Result;
         }
@@ -44,6 +48,9 @@ namespace Tripous.Data
                 TypeName = ViewControlDef.Grid,
                 TableName = TableName,
             };
+
+            this.Grid["Width"] = "100%";
+
             return this.Grid;
         }
 
@@ -52,6 +59,10 @@ namespace Tripous.Data
         /// The data source name. When empty then it binds to its parent's source.
         /// </summary>
         public string TableName { get; set; }
+        /// <summary>
+        /// Column and width classes. Not used when columns is empty.
+        /// </summary>
+        public string ColumnCssClasses { get; set; } = DefaultColumnCssClasses;
 
         /// <summary>
         /// The whole row is occupied by a grid control.
@@ -62,4 +73,7 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewColumnDef> Columns { get; set; } = new List<ViewColumnDef>();
     }
+
+
+ 
 }

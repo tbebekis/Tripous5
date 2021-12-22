@@ -18,7 +18,8 @@ namespace WebLib
         {
             ViewDef View = ViewDef.Register("SysData.Table", "Tables");
 
-            View.JSClassType = "tp.SysDataView";
+            View.ClassType = "tp.SysDataView";
+            View.CssClasses.AddRange(new string[] { "tp-View", "tp-DeskView" });
 
             // tool-bar
             View.ToolBarButtons.Clear();
@@ -36,21 +37,42 @@ namespace WebLib
                 ViewToolBarButtonDef.ButtonClose,
             });
 
-            // tabs
-            ViewTabDef ListTab = View.AddTab("List", "List");  
-            ViewTabDef EditTab = View.AddTab("Edit", "Edit");
+            // PanelList   
+            ViewPanelListPanelDef ListPanel = View.AddPanelListPanel("List", "List");               // List (browse) panel
+            ViewPanelListPanelDef EditPanel = View.AddPanelListPanel("Edit", "Edit");               // Edit panel (contains a tab pager, i.e. its tabs is not empty)
 
-            // accordeon
-
-            // grid accordeon item
-            ViewGroupDef Group = EditTab.AddGroup("Fields");
-            ViewRowDef Row = Group.AddRow();
-            ViewControlDef Grid = Row.SetGrid();
-
-            // controls accordeon item
-            Group = EditTab.AddGroup("Data");
-            Row = Group.AddRow();
+            // Edit TabControl pages
+            ViewTabPageDef DataPage = EditPanel.AddTabPage("Data", "Data");                     // the single tab page of the Edit pager    
  
+
+
+            // the single row of the Data tab-page
+           
+            List<ViewControlDef> Controls = new List<ViewControlDef>();
+            Controls.Add(ViewControlDef.TextBox, "DataType", "DataType", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "DataName", "DataName", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "TitleKey", "TitleKey", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Owner", "Owner", "", new object { });
+
+            Controls.Add(ViewControlDef.TextBox, "Tag1", "Tag1", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag2", "Tag2", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag3", "Tag3", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag4", "Tag4", "", new object { });
+
+            List<List<ViewControlDef>> ColumnControlLists = Controls.Split(View.ColumnSplit.Large);
+
+            ViewRowDef ControlsRow = DataPage.AddRow();
+            foreach (var ControlList in ColumnControlLists)
+            {
+                ViewColumnDef Column = ControlsRow.AddColumn(ControlsRow.TableName); 
+
+                foreach (var Control in ControlList) 
+                    Column.AddControl(Control);
+            }
+
+
+            ViewRowDef GridRow = DataPage.AddRow();
+            GridRow.SetGrid();
 
         }
 

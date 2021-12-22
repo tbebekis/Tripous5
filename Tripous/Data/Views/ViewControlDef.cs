@@ -12,7 +12,7 @@ namespace Tripous.Data
     /// <para>The row is the control container along with its caption text.</para>
     /// <para>The control may be data-bindable or not.</para>
     /// </summary>
-    public class ViewControlDef
+    public class ViewControlDef: ViewDefComponent
     {
         /// <summary>
         /// Constant
@@ -72,6 +72,32 @@ namespace Tripous.Data
             Required = Field.IsRequired;
             TypeName = GetTypeName(Field);
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public ViewControlDef(string TypeName, string TitleKey, string DataField = "", string TableName = "", object Properties = null)
+        {
+            this.TypeName = TypeName;
+            this.TitleKey = TitleKey;
+            this.DataField = DataField;
+            this.TableName = TableName;
+
+            if (Properties != null)
+            {
+                Type T = Properties.GetType();
+                var PropList = T.GetProperties();
+
+                foreach (var Prop in PropList)
+                {
+                    var PropName = Prop.Name;
+                    var Value = Prop.GetValue(Properties);
+                    this.Properties[PropName] = Value;
+                }
+            }
+
+            if (this.TypeName == Grid && !this.Properties.ContainsKey("Width"))
+                this.Properties["Width"] = "100%";
+        }
 
         /* static */
         /// <summary>
@@ -114,20 +140,39 @@ namespace Tripous.Data
         {
             return Title;
         }
+        /// <summary>
+        /// Assigns properties of this instance from a specified <see cref="SqlBrokerFieldDef"/>
+        /// </summary>
+        public void AssignField(SqlBrokerFieldDef FieldDef = null)
+        {
+            if (FieldDef != null)
+            {
+                if (!string.IsNullOrWhiteSpace(FieldDef.Title))
+                    this.Title = FieldDef.Title;
 
+                if (!string.IsNullOrWhiteSpace(ViewControlDef.GetTypeName(FieldDef)))
+                    this.TypeName = ViewControlDef.GetTypeName(FieldDef);
+
+                if (!string.IsNullOrWhiteSpace(FieldDef.Name))
+                    this.DataField = FieldDef.Name;
+
+                if (FieldDef.IsReadOnly)
+                    this.ReadOnly = FieldDef.IsReadOnly;
+
+                if (FieldDef.IsRequired)
+                    this.Required = FieldDef.IsRequired;
+            }
+        }
         /// <summary>
         /// Assigns properties to a data-setup object
         /// </summary>
-        public void AssignTo(Dictionary<string, object> DataSetup)
+        public override void AssignTo(Dictionary<string, object> DataSetup)
         {
             if (!string.IsNullOrWhiteSpace(TypeName))
                 DataSetup["TypeName"] = TypeName;
 
             if (!string.IsNullOrWhiteSpace(DataField))
                 DataSetup["DataField"] = DataField;
-
-            if (!string.IsNullOrWhiteSpace(TableName))
-                DataSetup["TableName"] = TableName;
 
             if (!string.IsNullOrWhiteSpace(Id))
                 DataSetup["Id"] = Id;
@@ -141,28 +186,44 @@ namespace Tripous.Data
             foreach (var Entry in Properties)
                 DataSetup[Entry.Key] = Entry.Value;
         }
+ 
+        /// <summary>
+        /// Serializes this instance in order to properly used as a data-setup html attribute.
+        /// </summary>
+        public override string  GetDataSetupText()
+        {
+            // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
+            // <div class="tp-CtrlRow" data-setup="{Text: 'Test', Control: { TypeName: 'ComboBox', DataField: '', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0} }"></div>
+
+            Dictionary<string, object> Result = null;
+
+            if (TypeName == ViewControlDef.Grid)
+            {
+                Result = this.Properties;
+            }
+            else
+            {
+                Result = new Dictionary<string, object>();
+                Dictionary<string, object> Control = new Dictionary<string, object>();
+                AssignTo(Control);
+
+                Result["Text"] = Title;
+                Result["Control"] = Control;
+            }
+
+
+            string JsonText = Json.Serialize(Result);
+            return JsonText;
+        }
 
 
         /* properties */
-        /// <summary>
-        /// Gets or sets a resource Key used in returning a localized version of Title
-        /// </summary>
-        public string TitleKey { get; set; }
-        /// <summary>
-        /// Gets the Title of this instance, used for display purposes. 
-        /// <para>NOTE: The setter is fake. Do NOT use it.</para>
-        /// </summary>    
-        public string Title
-        {
-            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None; }
-            set { }
-        }
-
         /// <summary>
         /// The HTML Id and HTML Name of the control.
         /// <para>The name of a desktop control.</para>
         /// </summary>
         public string Id { get; set; } = "";
+   
         /// <summary>
         /// Indicates the control type, such as TextBox
         /// </summary>
@@ -174,22 +235,35 @@ namespace Tripous.Data
         /// <summary>
         /// When true the control must have a value
         /// </summary>
-        public bool Required { get; set; }
+        public bool Required { get; set; } 
  
-        /// <summary>
-        /// The data source name. When empty then it binds to its parent's source.
-        /// </summary>
-        public string TableName { get; set; } = "";
         /// <summary>
         /// The data field to bind
         /// </summary>
         public string DataField { get; set; } = "";
 
 
-        /// <summary>
-        /// Dictionary for more properties of the Control part of the data-setup attribute.
-        /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
-        /// </summary>
-        public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
+ 
     }
+
+
+    /// <summary>
+    /// Extensions
+    /// </summary>
+    static public class ViewControlDefExtensions
+    {
+
+
+        /// <summary>
+        /// Adds and returns a <see cref="ViewControlDef"/>
+        /// </summary>
+        static public ViewControlDef Add(this List<ViewControlDef> Controls, string TypeName, string TitleKey, string DataField = "", string TableName = "", object Properties = null)
+        {
+            ViewControlDef Result = new ViewControlDef(TypeName, TitleKey, DataField, TableName, Properties);
+            Controls.Add(Result);
+            return Result;
+        }
+    }
+
+
 }

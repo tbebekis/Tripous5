@@ -20,8 +20,8 @@ namespace WebLib.Models
     /// </summary>
     public class ViewControlDataSetup
     {
- 
-        Dictionary<string, object> Properties = new Dictionary<string, object>();
+
+        ViewControlDef ControlDef;
 
         /* construction */
         /// <summary>
@@ -35,6 +35,8 @@ namespace WebLib.Models
         /// </summary>
         public ViewControlDataSetup(ViewControlDef ControlDef)
         {
+            this.ControlDef = ControlDef;
+
             this.Text = ControlDef.Title;
 
             ControlDef.AssignTo(this.Properties); 
@@ -77,10 +79,20 @@ namespace WebLib.Models
             // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
             // <div class="tp-CtrlRow" data-setup="{Text: 'Test', Control: { TypeName: 'ComboBox', DataField: '', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0} }"></div>
 
-            Dictionary<string, object> Result = new Dictionary<string, object>();
+            Dictionary<string, object> Result = null;
 
-            Result["Text"] = Text;
-            Result["Control"] = Properties;
+            if (this.ControlDef != null && this.ControlDef.TypeName == ViewControlDef.Grid)
+            {
+                Result = this.Properties;
+            }
+            else
+            {
+                Result = new Dictionary<string, object>();
+
+                Result["Text"] = Text;
+                Result["Control"] = Properties;
+            }      
+
 
             string JsonText = Json.Serialize(Result);
             return JsonText;
@@ -92,9 +104,10 @@ namespace WebLib.Models
         /// Gets or sets the "Text" part of this setup.
         /// </summary>
         private string Text { get; set; }
- 
+
         /// <summary>
-        /// Custom properties for more properties of the Control part of the data-setup attribute.
+        /// Custom properties helper.
+        /// <para>Custom properties for more properties of the Control part of the data-setup attribute.</para>
         /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
         /// </summary>
         public object this[string Key]
@@ -102,5 +115,10 @@ namespace WebLib.Models
             get { return Properties.ContainsKey(Key) ? Properties[Key] : null; }
             set { Properties[Key] = value; }
         }
+        /// <summary>
+        /// Dictionary with custom properties.
+        /// <para>Custom properties for more properties of the Control part of the data-setup attribute.</para>
+        /// </summary>
+        public Dictionary<string, object> Properties { get; } = new Dictionary<string, object>();
     }
 }

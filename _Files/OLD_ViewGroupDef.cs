@@ -7,28 +7,26 @@ using System.Threading.Tasks;
 namespace Tripous.Data
 {
 
+
+
     /// <summary>
-    /// Represents a single tab page or a TabControl (Pager) with child tab pages. 
-    /// <para>May contain: Tabs, Groups and Rows.</para>
-    /// <para>When <see cref="Tabs"/> is empty then this instance is a signle tab page.</para>
-    /// <para>When <see cref="Tabs"/> is NOT empty then this instance is a TabControl (Pager) with child tab pages.</para>
-    /// <para><see cref="Tabs"/>, <see cref="Groups"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
+    /// Represents a container such as a DIV or panel which groups controls under a specified text.
+    /// <para>May contain: Tabs and Rows.</para>
+    /// <para><see cref="Tabs"/> and <see cref="Rows"/> are checked in that order. If any is not empty the rest are ignored.</para>
     /// <para>Contains a single Pager (TabControl) when the <see cref="Tabs"/> are not empty. </para>
-    /// <para>Contains a single Accordeon when the <see cref="Groups"/> is not empty. </para>
     /// <para>Contains a signle Panel (DIV) with one or more rows when the <see cref="Rows"/> is not empty. </para>
     /// </summary>
-    public class ViewTabDef  
+    public class ViewGroupDef
     {
-
 
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewTabDef()
+        public ViewGroupDef()
         {
+
         }
- 
 
         /* public */
         /// <summary>
@@ -55,25 +53,12 @@ namespace Tripous.Data
             return Result;
         }
         /// <summary>
-        /// Adds and returns a <see cref="ViewGroupDef"/>
-        /// </summary>
-        public ViewGroupDef AddGroup(string TitleKey)
-        {
-            ViewGroupDef Result = new ViewGroupDef()
-            {
-                TitleKey = TitleKey,
-            };
-
-            Groups.Add(Result);
-
-            return Result;
-        }
-        /// <summary>
         /// Adds and returns a <see cref="ViewRowDef"/>
         /// </summary>
-        public ViewRowDef AddRow(string TitleKey)
+        public ViewRowDef AddRow(string TableName = "")
         {
             ViewRowDef Result = new ViewRowDef();
+            Result.TableName = TableName;
             Rows.Add(Result);
             return Result;
         }
@@ -81,9 +66,9 @@ namespace Tripous.Data
         /// <summary>
         /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        public ViewTabDef FindTabById(string TabId)
+        public ViewTabDef FindTabById(string Id)
         {
-            return Tabs.Find(item => Sys.IsSameText(item.TabId, TabId));
+            return Tabs.Find(item => Sys.IsSameText(item.TabId, Id));
         }
         /// <summary>
         /// Returns true if a <see cref="ViewTabDef"/> found under a specified Id.
@@ -95,9 +80,9 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// A unique Id among sibling tabs, e.g. List, Edit, Filters,  etc
+        /// A unique Id among sibling groups, e.g. Main, Details, Addresses,  etc
         /// </summary>
-        public string TabId { get; set; }
+        public string GroupId { get; set; }
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
@@ -109,7 +94,7 @@ namespace Tripous.Data
         /// </summary>    
         public string Title
         {
-            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : TabId; }
+            get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : Sys.None; }
             set { }
         }
 
@@ -123,34 +108,47 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewTabDef> Tabs { get; } = new List<ViewTabDef>();
         /// <summary>
-        /// A list of groups. Could be empty.
-        /// </summary>
-        public List<ViewGroupDef> Groups { get; } = new List<ViewGroupDef>();
-        /// <summary>
         /// A list of rows. Could be empty.
         /// </summary>
         public List<ViewRowDef> Rows { get; } = new List<ViewRowDef>();
- 
     }
+
 
     /// <summary>
     /// Extensions
     /// </summary>
-    static public class ViewTabDefExtensions
+    static public class ViewGroupDefExtensions
     {
         /// <summary>
-        /// Returns a <see cref="ViewTabDef"/> found under a specified Id, if any, else null.
+        /// Returns a <see cref="ViewGroupDef"/> found under a specified Id, if any, else null.
         /// </summary>
-        static public ViewTabDef FindTabById(this IEnumerable<ViewTabDef> Tabs, string TabId)
+        static public ViewGroupDef FindGroupById(this IEnumerable<ViewGroupDef> Groups, string GroupId)
         {
-            return Tabs.FirstOrDefault(item => Sys.IsSameText(item.TabId, TabId));
+            return Groups.FirstOrDefault(item => Sys.IsSameText(item.GroupId, GroupId));
         }
         /// <summary>
-        /// Returns true if a <see cref="ViewTabDef"/> found under a specified Id.
+        /// Returns true if a <see cref="ViewGroupDef"/> found under a specified Id.
         /// </summary>
-        static public bool Contains(this IEnumerable<ViewTabDef> Tabs, string TabId)
+        static public bool Contains(this IEnumerable<ViewGroupDef> Groups, string TabId)
         {
-            return Tabs.FindTabById(TabId) != null;
+            return Groups.FindGroupById(TabId) != null;
+        }
+
+        /// <summary>
+        /// Adds and returns a <see cref="ViewGroupDef"/>
+        /// </summary>
+        static public ViewGroupDef Add(this List<ViewGroupDef> Groups, string TitleKey, string GroupId = "")
+        {
+            ViewGroupDef Result = new ViewGroupDef()
+            {
+                TitleKey = TitleKey,
+                GroupId = GroupId,
+            };
+
+            Groups.Add(Result);
+
+            return Result;
         }
     }
+
 }

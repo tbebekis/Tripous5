@@ -1,0 +1,22 @@
+﻿@model ViewTabControlModel
+
+<div class='TabControl' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+    <div>
+        @foreach (var PageDef in Model.Def.Items)
+        {
+            <div>@PageDef.Title</div>
+        }
+    </div>
+    <div>
+        <div>
+            @foreach (var PageDef in Model.Def.Items)
+            {
+                var ContainerPanelModel = new ViewContainerPanelModel(Model.ViewDef, PageDef);
+                @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)
+            }
+        </div>
+
+    </div>
+
+</div>
+

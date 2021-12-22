@@ -17,13 +17,13 @@ namespace WebLib.Models
     /// <para>The Filters part contains the filter controls.</para>
     /// <para>The Edit part contains a pager (TabControl) with one or more tab-pages for editing/inserting data.</para>
     /// </summary>
-    public class DataViewModel : ViewModel
+    public class DataViewModel2 : ViewModel
     {
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public DataViewModel(ViewDef ViewDef)
+        public DataViewModel2(ViewDef ViewDef)
             : base(ViewDef)
         {            
         }

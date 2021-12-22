@@ -1,0 +1,36 @@
+﻿@*
+    ● The ViewPanelListDef, ViewTabControlDef and ViewAccordeonDef are ViewDefContainerPanel
+    ● ViewDefContainerPanel may contain either a ViewTabControlDef, or a ViewAccordeonDef or a list of ViewRowDef, but not at the same time.
+    ● That is a Container may contain either a TabControl, or an Accordeon or a Rows list.
+
+    PanelListPanel
+        TabControl | Accordeon | Rows
+    -------------------------------------------
+    TabPage
+        TabControl | Accordeon | Rows
+    -------------------------------------------
+    AccordeonPanel
+        TabControl | Accordeon | Rows
+*@
+
+@model ViewContainerPanelModel
+
+@if (Model.Def.TabControl != null)
+{
+    var TabControlModel = new ViewTabControlModel(Model.ViewDef, Model.Def.TabControl);
+    @await Html.PartialAsync("View.TabControl", TabControlModel)
+}
+else if (Model.Def.Accordeon != null)
+{
+    var AccordeonModel = new ViewAccordeonModel(Model.ViewDef, Model.Def.Accordeon);
+    @await Html.PartialAsync("View.Accordeon", AccordeonModel)
+}
+else if (Model.Def.Rows != null && Model.Def.Rows.Count > 0)
+{
+    foreach (var Row in Model.Def.Rows)
+    {
+        var RowModel = new ViewRowModel(Model.ViewDef, Row);
+        @await Html.PartialAsync("View.Row", RowModel)
+    }
+}
+

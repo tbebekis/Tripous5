@@ -1,0 +1,14 @@
+﻿@model ViewPanelListModel
+
+<div class='PanelList' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+    @foreach (var PanelDef in Model.Def.Items)
+    {
+        <div>
+            @{
+                var ContainerPanelModel = new ViewContainerPanelModel(Model.ViewDef, PanelDef);
+                @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)
+            }
+        </div>
+    }
+</div>
+

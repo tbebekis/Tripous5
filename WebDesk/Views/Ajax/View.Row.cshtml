@@ -1,13 +1,18 @@
 ﻿@model ViewRowModel
 @{
-    string ColumnCssClasses = !string.IsNullOrWhiteSpace(Model.ColumnCssClasses) ? Model.ColumnCssClasses : ViewRowModel.DefaultColumnCssClasses;
+    string ColumnCssClasses = !string.IsNullOrWhiteSpace(Model.Def.ColumnCssClasses) ? Model.Def.ColumnCssClasses : ViewRowDef.DefaultColumnCssClasses;
     string CtrlRowCssClass;
 
-    SqlBrokerDef BrokerDef = SqlBrokerDef.Find(Model.ViewDef.BrokerName);
-    SqlBrokerTableDef TableDef = BrokerDef != null && Model.RowDef != null && !string.IsNullOrWhiteSpace(Model.RowDef.TableName) ? BrokerDef.FindTable(Model.RowDef.TableName) : null;
+    SqlBrokerDef BrokerDef = !string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName) ? SqlBrokerDef.Find(Model.ViewDef.BrokerName) : null;
+    SqlBrokerTableDef TableDef = BrokerDef != null && !string.IsNullOrWhiteSpace(Model.Def.TableName) ? BrokerDef.FindTable(Model.Def.TableName) : null;
     SqlBrokerFieldDef FieldDef;
+    string ControlDataSetupText = "";
 
-    string ControlDataSetupText;
+    SqlBrokerFieldDef GetFieldDef(ViewControlDef ControlDef)
+    {
+        var Tuple = TableDef != null ? TableDef.FindAnyField(ControlDef.DataField) : null;
+        return Tuple != null ? Tuple.Item2 : null;
+    }
 
     // Examples of control row
     // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
@@ -15,29 +20,30 @@
 
 }
 
-@if (TableDef != null)
-{
-    <div class="tp-Row">
-        @if (Model.RowDef.Grid != null)
-        {
-            // TODO: Grid
-        }
-        else if (Model.RowDef.Columns.Count > 0)
-        {
-            // columns
-            foreach (var Col in Model.RowDef.Columns)
-            {
-                <div class='@Html.Raw(ColumnCssClasses)'>
-                    @foreach (var Ctrl in Col.Controls)
-                    {
-                        CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
-                        FieldDef = TableDef.FindAnyField(Ctrl.DataField).Item2;
-                        ControlDataSetupText = ViewControlDataSetup.GetDataSetupText(Ctrl, FieldDef);
-                        <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
-                    }
-                </div>
-            }
-        }
 
-    </div>
-}
+<div class="tp-Row">
+    @if (Model.Def.Grid != null)
+    {
+        ControlDataSetupText = Model.Def.Grid.GetDataSetupText();
+        <div class="Grid" data-setup='@Html.Raw(ControlDataSetupText)'></div>
+    }
+    else if (Model.Def.Columns != null && Model.Def.Columns.Count > 0)
+    {
+        // columns
+        foreach (var Col in Model.Def.Columns)
+        {
+            <div class='@Html.Raw(ColumnCssClasses)'>
+                @foreach (var Ctrl in Col.Controls)
+                {
+                    CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
+                    FieldDef = GetFieldDef(Ctrl);
+                    if (FieldDef != null)
+                        Ctrl.AssignField(FieldDef);
+                    ControlDataSetupText = Ctrl.GetDataSetupText();
+                    <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
+                }
+            </div>
+        }
+    }
+
+</div>

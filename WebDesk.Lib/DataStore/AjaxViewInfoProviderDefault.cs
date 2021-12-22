@@ -28,12 +28,13 @@ namespace WebLib
                 ViewDef = new ViewDef(BrokerDef);
             }
 
-            DataViewModel ViewModel = new DataViewModel(ViewDef);
-            ViewModel.DataSetup.ClassType  = "tp.DeskDataView"; 
-            ViewModel.DataSetup.BrokerClass = "tp.Broker";
-            ViewModel.DataSetup.BrokerName = BrokerName;
+            ViewDef.ClassType = "tp.DeskDataView";
+            ViewDef.BrokerClass = "tp.Broker";
+            ViewDef.BrokerName = BrokerName;
 
-            Info.RazorViewNameOrPath = "DataView";
+            ViewModel ViewModel = new ViewModel(ViewDef);
+
+            Info.RazorViewNameOrPath = "View";
             Info.Model = ViewModel;
 
             Packet["ViewName"] = Request.OperationName;
@@ -50,11 +51,12 @@ namespace WebLib
             if (ViewDef == null)
                 Sys.Throw($"ViewDef not found: {ViewDefName}");
 
-            DataViewModel ViewModel = new DataViewModel(ViewDef);
-            ViewModel.DataSetup.ClassType = "tp.DeskSysDataView";
-            ViewModel.DataSetup["DataType"] = DataType;
+            ViewDef.ClassType = "tp.DeskSysDataView";
+            ViewDef["DataType"] = DataType;
 
-            Info.RazorViewNameOrPath = "DataView";  // until now no SysDataView is needed
+            ViewModel ViewModel = new ViewModel(ViewDef);
+
+            Info.RazorViewNameOrPath = "View";  // until now no SysDataView is needed
             Info.Model = ViewModel;
 
             Info.ViewData["DataType"] = DataType;

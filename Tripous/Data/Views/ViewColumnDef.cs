@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Tripous.Data
 {
@@ -26,18 +27,19 @@ namespace Tripous.Data
         /// <summary>
         /// Adds and returns a <see cref="ViewControlDef"/>
         /// </summary>
-        public ViewControlDef AddControl(string TypeName, string TitleKey, string DataField = "", string TableName = "")
+        public ViewControlDef AddControl(string TypeName, string TitleKey, string DataField = "", string TableName = "", object Properties = null)
         {
-            ViewControlDef Result = new ViewControlDef()
-            {
-                TypeName = TypeName,
-                TitleKey = TitleKey,
-                DataField = DataField,
-                TableName = TableName,
-            };
-
+            ViewControlDef Result = new ViewControlDef(TypeName, TitleKey, DataField, TableName, Properties);
             Controls.Add(Result);
             return Result;
+        }
+        /// <summary>
+        /// Adds and returns a <see cref="ViewControlDef"/>
+        /// </summary>
+        public ViewControlDef AddControl(ViewControlDef ControlDef)
+        {
+            Controls.Add(ControlDef);
+            return ControlDef;
         }
 
 

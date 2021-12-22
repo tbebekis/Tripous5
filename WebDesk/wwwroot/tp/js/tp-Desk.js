@@ -5,7 +5,7 @@ tp.Classes.Desk = 'tp-Desk';
 tp.Classes.DeskMainMenu = 'tp-Desk-MainMenu';
 tp.Classes.DeskMainMenuBarItem = 'tp-Desk-MainMenuBarItem';
 tp.Classes.DeskViewPager = 'tp-Desk-ViewPager';
-tp.Classes.DeskView = 'tp-Desk-View';
+tp.Classes.DeskView = 'tp-DeskView';
 tp.Classes.DeskSysDataView = 'tp-Desk-SysData-View';
 
 //#region tp.Command
@@ -905,10 +905,29 @@ tp.DeskSysDataView = class extends tp.DeskView {
  */
     }
  
-    /** Creates and binds the controls of the edit part, if not already created.
-     * */
-    CreateEditControls() {
+ 
 
+    /** Creates and binds the controls of the edit part, if not already created.
+    * */
+    CreateEditControls() {
+        if (!tp.IsValid(this.pagerEdit)) {
+            let el = this.GetViewEditPanelElement();
+            let ControlList = tp.Ui.CreateControls(el);
+
+            let List = tp.ChildHTMLElements(el);
+            if (List.length === 1) {
+                let o = tp.GetScriptObject(List[0]);
+                if (o instanceof tp.TabControl) {
+                    this.pagerEdit = o;
+                    if (this.pagerEdit.GetPageCount() === 1) {
+                        this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
+                    }
+                }
+            }
+
+            //this.BindControls(ControlList);
+   
+        }
     }
 
     // commands/modes
@@ -1137,7 +1156,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
     
     async Insert() {
-        //this.CreateEditControls();
+        this.CreateEditControls();
         //this.SetVisiblePanelByPanelMode('Edit');
     }
     async Edit() {

@@ -1897,20 +1897,23 @@ main menu bar items
 /*---------------------------------------------------------------------------------------
  desk view
 ---------------------------------------------------------------------------------------*/
- 
-.tp-Desk-View {
+
+.tp-View {
     position: relative;
     display: flex; 
-    flex-direction: column;
     width: 100%;
+}
+ 
+.tp-DeskView {
+    flex-direction: column; 
     padding: 6px 2%;
     gap: 6px;
 }
 
-.tp-Desk-View.tp-DataView > .tp-PanelList {
+.tp-DeskView.tp-View > .tp-PanelList {
     height: 100%;
 }
 
-.tp-Desk-View > .tp-PanelList {
+.tp-DeskView > .tp-PanelList {
     height: 100%;
 }
