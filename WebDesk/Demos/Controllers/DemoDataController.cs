@@ -39,8 +39,8 @@ namespace WebDesk.Controllers
         {
             return View();
         }
-        [Route("/demo/DataView")]
-        public IActionResult DataView()
+        [Route("/demo/BrokerView")]
+        public IActionResult BrokerView()
         {
             return View();
         }

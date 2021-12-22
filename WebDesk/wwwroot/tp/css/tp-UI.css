@@ -19,12 +19,19 @@ fieldset.tp-GroupBox legend {
 ---------------------------------------------------------------------------------------*/
  
 .tp-Accordion {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
     overflow: hidden;
 }
 
 /* item */ 
 .tp-Accordion > * {
-    margin: 0 0 5px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 /* item caption */ 
@@ -1781,6 +1788,11 @@ input[type=text].tp-Grid-InplaceEditor {
     display: flex; 
     flex-grow: 1;
 } 
+
+.tp-Accordion > * > :nth-child(1) {
+    background-color: whitesmoke;
+    border: 1px solid lightgray;
+}
  
 /*---------------------------------------------------------------------------------------
 main menu bar items
@@ -1835,6 +1847,7 @@ main menu bar items
     padding-left: 6px;   
 }
 
+
 /*---------------------------------------------------------------------------------------
   desk view main pager - The pager that shows the views
 ---------------------------------------------------------------------------------------*/
@@ -1844,7 +1857,6 @@ main menu bar items
     flex-direction: column;
     width: 100%;
 }
-
  
 /* page tabs */
 .tp-Desk-ViewPager > .tp-ItemBar {
@@ -1893,15 +1905,19 @@ main menu bar items
     background-color: var(--Color4);
     color: var(--White);  
 }
-
 /*---------------------------------------------------------------------------------------
  desk view
 ---------------------------------------------------------------------------------------*/
-
 .tp-View {
     position: relative;
     display: flex; 
     width: 100%;
+}
+
+.tp-View > .tp-TabControl,
+.tp-View > .tp-Accordion,
+.tp-View > .tp-PanelList {
+   height: 100%;
 }
  
 .tp-DeskView {
@@ -1910,10 +1926,8 @@ main menu bar items
     gap: 6px;
 }
 
-.tp-DeskView.tp-View > .tp-PanelList {
+.tp-Row.ListGridContainer {
     height: 100%;
 }
 
-.tp-DeskView > .tp-PanelList {
-    height: 100%;
-}
+ 

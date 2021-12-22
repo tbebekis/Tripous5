@@ -4285,7 +4285,7 @@ tp.Data = function (el, o, v = null) {
 };
 
 /**
- * Converts a string into a class (i.e. function), e.g. 'tp.DataView'. <br />
+ * Converts a string into a class (i.e. function), e.g. 'tp.BrokerView'. <br />
  * Returns the class on success. Returns the passed in string on failure. <br />
  * A flag controls whether to throw an exception on failure.
  * @param {string} S The string to operate on
@@ -4350,6 +4350,9 @@ tp.GetDataSetupObject = function (el) {
                 tp.MergeQuick(Result, o);
             }
         }
+
+        if (tp.SysConfig.DebugMode === false)
+            tp.RemoveAttribute(el, 'data-setup');
 
         el['__DataSetup'] = Result;
     }

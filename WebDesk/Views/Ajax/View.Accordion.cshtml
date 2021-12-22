@@ -1,11 +1,11 @@
-﻿@model ViewAccordeonModel
+﻿@model ViewAccordionModel
 
-<div class='Accordeon' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+<div class='Accordion @Html.Raw(Model.Def.GetCssClassesText())' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
     @foreach (var PanelDef in Model.Def.Items)
     {
         <div>
             <div>@PanelDef.Title</div>
-            <div>
+            <div class="@Html.Raw(PanelDef.GetCssClassesText())" data-setup='@Html.Raw(PanelDef.GetDataSetupText())'>
                 @{
                     var ContainerPanelModel = new ViewContainerPanelModel(Model.ViewDef, PanelDef);
                     @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)

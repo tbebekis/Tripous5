@@ -617,22 +617,14 @@ tp.DeskView = class extends tp.View {
         super(ElementOrSelector, CreateParams);
     }
  
-
-    /** Closes and disposes the view
-     * */
-    CloseView() {
-        this.Dispose();
-    }
- 
-
 };
 
 //#endregion
 
 //#region tp.DeskDataView
 
-/** A {@link tp.DataView} view for the desktop */
-tp.DeskDataView = class extends tp.DataView {
+/** A {@link tp.BrokerView} view for the desktop */
+tp.DeskDataView = class extends tp.BrokerView {
 
     /** Constructor
      * @param {string|HTMLElement} ElementOrSelector
@@ -642,18 +634,39 @@ tp.DeskDataView = class extends tp.DataView {
         super(ElementOrSelector, CreateParams);
     }
  
-    /**
-    Closes the view and removes the view from the DOM.
-    @protected
-    */
-    CloseView() {
-        this.Dispose();
-    }
-
 };
 
 //#endregion
 
+//#region tp.DeskSysDataView Handlers
+
+tp.SysDataHandler = class {
+    constructor(View, DataType) {
+        this.View = View;
+        this.DataType = DataType;
+    }
+};
+
+/**
+ @type {string}
+ */
+tp.SysDataHandler.prototype.DataType = 'Table';
+/**
+ @type {tp.DeskSysDataView}
+ */
+tp.SysDataHandler.prototype.View = null;
+
+
+tp.SysDataHandlerTable = class extends tp.SysDataHandler {
+
+    constructor(View, DataType) {
+        super(View, DataType )
+    }
+
+
+};
+
+//#endregion
 
 
 //#region tp.DeskSysDataView
@@ -670,18 +683,13 @@ tp.DeskSysDataView = class extends tp.DeskView {
     }
 
  
-
     /**
-    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
-    @type {tp.DataViewMode}
+    Gets or sets the data mode. One of the {@link tp.DataViewMode} constants.
+    @type {number}
     */
     get ViewMode() {
         return this.fViewMode;
     }
-    /**
-    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
-    @type {tp.DataViewMode}
-    */
     set ViewMode(v) {
         if (this.fViewMode !== v) {
             this.fLastViewMode = this.fViewMode;
@@ -711,7 +719,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
     InitializeFields() {
         super.InitializeFields();
 
-        this.fName = tp.NextName('DataView');
+        this.fName = tp.NextName('DeskSysDataView');
         this.fViewMode = tp.DataViewMode.None;
         this.fLastViewMode = tp.DataViewMode.None;
 
@@ -730,50 +738,58 @@ tp.DeskSysDataView = class extends tp.DeskView {
         super.InitializeView();
 
         this.DataType = this.CreateParams.Packet.DataType
+        switch (this.DataType) {
+            case 'Table':
+                this.Handler = new tp.SysDataHandlerTable(this, this.DataType);
+                break;
+            default:
+                tp.Throw(`SysData DataType not supported: ${this.DataType}`);
+                break;
+        }
 
         this.CreateToolBar();
-        this.CreatePanelList();
+        this.CreateTabControl();
         this.CreateListGrid();
 
         this.ListSelect();
-    }
+    } 
 
     /**
     Sets the visible panel index in the panel list.
     @protected
-    @param {number} PanelIndex The panel index
+    @param {number} PageIndex The panel index
     */
-    SetVisiblePanel(PanelIndex) {
-        if (this.PanelList) {
-            this.PanelList.SelectedIndex = PanelIndex;
+    SetVisiblePage(PageIndex) {
+        if (this.MainPager) {
+            this.MainPager.SelectedIndex = PageIndex;
         }
     }
     /**
      * Sets the visible panel of the main pager (a PanelList) by its 'PanelMode'.
      * NOTE: Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
-     * @param {string} PanelMode The panel mode to check for.
+     * @param {string} PageName The panel mode to check for.
      */
-    SetVisiblePanelByPanelMode(PanelMode) {
-        let elPanel = this.FindPanelByPanelMode(PanelMode);
+    SetVisiblePageByName(PageName) {
+        let elPanel = this.FindPageByName(PageName);
         let Index = -1;
         if (elPanel) {
-            let Panels = this.PanelList.GetPanels();
+            let Panels = this.GetTabPageElements();
             Index = Panels.indexOf(elPanel);
         }
 
         if (Index >= 0) {
-            this.SetVisiblePanel(Index);
+            this.SetVisiblePage(Index);
         }
     }
     /**
      * Each panel of the main pager (a PanelList) MUST have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
      * This function returns a panel found having a specified PanelMode, or null if not found.
-     * @param {string} PanelMode The panel mode to check for.
+     * @param {string} PageName The panel mode to check for.
      * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.
      */
-    FindPanelByPanelMode(PanelMode) {
-        if (tp.IsValid(this.PanelList)) {
-            let Panels = this.PanelList.GetPanels();
+    FindPageByName(PageName) {
+        if (tp.IsValid(this.MainPager)) {
+            let Panels = this.GetTabPageElements();
 
             let i, ln, elPanel, Setup;
 
@@ -781,7 +797,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
                 elPanel = Panels[i];
                 Setup = tp.GetDataSetupObject(elPanel);
                 if (tp.IsValid(Setup)) {
-                    if (PanelMode === Setup.PanelMode) {
+                    if (PageName === Setup.Name) {
                         return elPanel;
                     }
                 }
@@ -791,30 +807,42 @@ tp.DeskSysDataView = class extends tp.DeskView {
         return null;
     }
 
-    /** Returns an array with the panels of the panel list
-     * @returns {HTMLElement[]}
-     * */
-    GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetPanels() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
     /** Returns a DOM Element contained by this view.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
+    GetToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
     /** Returns a DOM Element contained by this view. Returns the main panel-list which in turn contains the three part panels: Brower, Edit and Filters.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewPanelListElement() { return tp.Select(this.Handle, '.PanelList'); }
+    GetTabControlElement() { return tp.Select(this.Handle, '.MainContainer'); }
+    /** Returns an array with the panels of the panel list
+     * @returns {HTMLElement[]}
+     * */
+    GetTabPageElements() {
+        if (tp.IsValid(this.MainPager)) {
+            let List = tp.ChildHTMLElements(this.GetTabControlElement());
+            if (List && List.length === 2) {
+                return tp.ChildHTMLElements(List[1])
+            }
+        }
+        return [];
+    }
+    /** Returns a DOM Element contained by this view. Returns the Filters panel, the container of the filter controls.
+     * @returns {HTMLElement} Returns a DOM Element contained by this view.
+     *  */
+    GetFilterPageElement() { return this.FindPageByName('Filters'); }
     /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewListPanelElement() { return this.FindPanelByPanelMode('List'); }
+    GetListPageElement() { return this.FindPageByName('List'); }
     /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewEditPanelElement() { return this.FindPanelByPanelMode('Edit'); }
+    GetEditPageElement() { return this.FindPageByName('Edit'); }
     /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewListGridElement() { return tp.Select(this.GetViewListPanelElement(), '.Grid'); }
+    GetListGridElement() { return tp.Select(this.GetListPageElement(), '.Grid'); }
 
 
     /**
@@ -840,7 +868,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
  */
     CreateToolBar() {
         if (tp.IsEmpty(this.ToolBar)) {
-            let el = this.GetViewToolBarElement();
+            let el = this.GetToolBarElement();
             this.ToolBar = new tp.ToolBar(el);
             this.ToolBar.On('ButtonClick', this.AnyClick, this);
         }
@@ -850,10 +878,11 @@ tp.DeskSysDataView = class extends tp.DeskView {
     /** Creates the panel-list of the view, the one with the 3 panels: List, Edit and Filters panels.
      @protected
      */
-    CreatePanelList() {
-        if (tp.IsEmpty(this.PanelList)) {
-            let el = this.GetViewPanelListElement();
-            this.PanelList = new tp.PanelList(el);
+    CreateTabControl() {
+        if (tp.IsEmpty(this.MainPager)) {
+            let el = this.GetTabControlElement();
+            this.MainPager = new tp.TabControl(el);
+            this.MainPager.ShowTabBar(false);   // hide tab-bar 
         }
     }
     /**
@@ -863,12 +892,12 @@ tp.DeskSysDataView = class extends tp.DeskView {
     */
     CreateListGrid() {
         if (tp.IsEmpty(this.gridList)) {
-            let el = this.GetViewListGridElement();
+            let el = this.GetListGridElement();
             this.gridList = new tp.Grid(el);
         }
 
         if (tp.IsEmpty(this.gridList)) {
-            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetViewListPanelElement());
+            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
             this.gridList = o instanceof tp.Grid ? o : null;
         }
 
@@ -905,14 +934,21 @@ tp.DeskSysDataView = class extends tp.DeskView {
  */
     }
  
- 
-
     /** Creates and binds the controls of the edit part, if not already created.
     * */
     CreateEditControls() {
         if (!tp.IsValid(this.pagerEdit)) {
-            let el = this.GetViewEditPanelElement();
+            let el = this.GetEditPageElement();
             let ControlList = tp.Ui.CreateControls(el);
+
+            if (tp.IsArray(ControlList)) {
+                ControlList.forEach((c) => {
+                    if (c instanceof tp.Accordion) {
+                        this.Accordion = c;
+                        this.Accordion.Expand(true, -1);
+                    }                       
+                });
+            }
 
             let List = tp.ChildHTMLElements(el);
             if (List.length === 1) {
@@ -923,9 +959,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
                         this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
                     }
                 }
-            }
-
-            //this.BindControls(ControlList);
+            }          
    
         }
     }
@@ -1153,11 +1187,10 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.ForceSelect = false;
         this.ViewMode = tp.DataViewMode.List;
     }
-
-    
+ 
     async Insert() {
         this.CreateEditControls();
-        //this.SetVisiblePanelByPanelMode('Edit');
+  
     }
     async Edit() {
         this.CreateEditControls();
@@ -1178,6 +1211,13 @@ tp.DeskSysDataView = class extends tp.DeskView {
  
             this.tblData = new tp.DataTable();
             this.tblData.Assign(Args.Packet);
+            this.tblData.Name = 'SysData';
+
+            this.DataSources.length = 0;
+            this.DataSources.push(new tp.DataSource(this.tblData));
+
+            let DataControlList = this.GetDataControlList();
+            this.BindControls(DataControlList); 
 
             this.ViewMode = tp.DataViewMode.Edit;
         }
@@ -1189,6 +1229,32 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
     }
 
+    /* data-binding */
+    /**
+    Finds and returns a {@link tp.DataSource} data-source by name, if any, else null. <br />
+    @protected
+    @param {string} SourceName The data-source by name
+    @returns {tp.DataSource} Returns a {@link tp.DataSource} data-source or null
+    */
+    GetDataSource(SourceName) {
+        return super.GetDataSource(SourceName);
+    }
+    /** Returns the list of data controls.
+     * @returns {tp.Control[]}  Returns the list of data controls.
+     * */
+    GetDataControlList() {
+        let Result = [];
+        let PanelElementList = this.Accordion.GetPanelElements();
+
+        let List = tp.GetScriptObjects(PanelElementList[0]);
+        List.forEach((c) => {
+            if (c instanceof tp.Control && 'DataField' in c && tp.IsString(c.DataField) && !tp.IsBlank(c.DataField)) {
+                Result.push(c);
+            }
+        });
+
+        return Result;
+    }
 
     /* Event triggers */
     /**
@@ -1198,12 +1264,12 @@ tp.DeskSysDataView = class extends tp.DeskView {
         switch (this.ViewMode) {
             case tp.DataViewMode.List:
             case tp.DataViewMode.Cancel:
-                this.SetVisiblePanelByPanelMode('List');
+                this.SetVisiblePageByName('List');
                 break;
 
             case tp.DataViewMode.Insert:
             case tp.DataViewMode.Edit:
-                this.SetVisiblePanelByPanelMode('Edit');
+                this.SetVisiblePageByName('Edit');
                 break; 
         }
 
@@ -1242,11 +1308,16 @@ tp.DeskSysDataView.prototype.DataType = '';
  * @type {tp.ToolBar}
  */
 tp.DeskSysDataView.prototype.ToolBar = null;
-/** The panel list. Contains the List and Edit panels
+/** Field
  @protected
- @type {tp.PanelList}
+ @type {tp.TabControl}
  */
-tp.DeskSysDataView.prototype.PanelList = null;
+tp.DeskSysDataView.prototype.MainPager = null;
+/** Field. The tab-control where edit part controls are reside
+ @protected
+ @type {tp.TabControl}
+ */
+tp.DeskSysDataView.prototype.EditPager = null;
 /** The List (browser) grid
  * @type {tp.Grid}
  */
@@ -1279,32 +1350,24 @@ tp.DeskSysDataView.prototype.fLastViewMode = tp.DataViewMode.None;
 @type {boolean}
 */
 tp.DeskSysDataView.prototype.ForceSelect = false;
+/** The Accordion in the Edit part. The Accordion is the container of the edit controls. Its first panel contains the data-bound controls.
+@protected
+@type {tp.Accordion}
+*/
+tp.DeskSysDataView.prototype.Accordion = null;
+/** An object that handles a specific DataType, e.g. Table, Broker, Report, etc.
+@protected
+@type {tp.SysDataHandler}
+*/
+tp.DeskSysDataView.prototype.Handler = null;
 
 
 //#endregion
-
-
 
 
  
 
-//#endregion
-
-//#region tp.SysDataViewEditTable
-
-/** Represents a page. Edit/Insert view of the Table DataType. */
-tp.SysDataViewEditTable = class extends tp.DeskView {
-    /**
-     * Constructs the page
-     * @param {HTMLElement} elPage The page element.
-     * @param {object} [Params=null] Optional. A javascript object with initialization parameters.
-     */
-    constructor(elPage, CreateParams = null) {
-        super(elPage, CreateParams);
-    }
-};
-
-//#endregion
+ 
 
 
 

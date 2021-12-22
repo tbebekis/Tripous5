@@ -14,13 +14,9 @@ namespace Tripous.Data
     /// <para>Contains a single Grid when the <see cref="Grid"/> is not empty. </para>
     /// <para>Contains a list of columns when the <see cref="Columns"/> is not empty. Columns are control containers. </para>
     /// </summary>
-    public class ViewRowDef
+    public class ViewRowDef: ViewDefComponent
     {
-        /// <summary>
-        /// Constant. Default column and width classes
-        /// </summary>
-        public const string DefaultColumnCssClasses = "tp-Col l-75 m-70 s-70 xs-100 ";
-
+ 
         /* construction */
         /// <summary>
         /// Constructor
@@ -55,15 +51,6 @@ namespace Tripous.Data
         }
 
         /* properties */
-        /// <summary>
-        /// The data source name. When empty then it binds to its parent's source.
-        /// </summary>
-        public string TableName { get; set; }
-        /// <summary>
-        /// Column and width classes. Not used when columns is empty.
-        /// </summary>
-        public string ColumnCssClasses { get; set; } = DefaultColumnCssClasses;
-
         /// <summary>
         /// The whole row is occupied by a grid control.
         /// </summary>

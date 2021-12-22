@@ -335,9 +335,11 @@ where
             return Json(Result);
         }
         [HttpGet("/SysData/SelectById")]
-        public async Task<JsonResult> SysDataSelectById(object Id)
+        public async Task<JsonResult> SysDataSelectById(string Id)
         {
             await Task.CompletedTask;
+
+            Type T = Id.GetType();
 
             HttpActionResult Result = new HttpActionResult();
 

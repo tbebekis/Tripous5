@@ -10,7 +10,7 @@ namespace Tripous.Data
     /// <summary>
     /// 
     /// </summary>
-    public class ViewDef: ViewDefComponent
+    public class ViewDef: ViewDefContainerPanel // ViewDefComponent
     {
         static List<ViewDef> RegistryList = new List<ViewDef>();
 
@@ -36,22 +36,32 @@ namespace Tripous.Data
 
             this.ClassType = "tp.DeskDataView";
             this.BrokerClass = "tp.Broker";
-
-            this.CssClasses.AddRange(new string[] { "tp-View", "tp-DeskView" });
+ 
+            this.AddCssClasses("tp-View tp-DeskView");
 
             this.AddDefaultDataViewButtons();
 
-            // PanelList  
-            ViewPanelListPanelDef FilterPanel = AddPanelListPanel("Filters", "Filters");       // filters (search) panel
-            ViewPanelListPanelDef ListPanel = AddPanelListPanel("List", "List");               // List (browse) panel
-            ViewPanelListPanelDef EditPanel = AddPanelListPanel("Edit", "Edit");               // Edit panel (contains a tab pager, i.e. its tabs is not empty)
+            // main TabControl
+            this.TabControl = new ViewTabControlDef();
+            this.TabControl.CssClasses.AddRange(new string[] { "MainContainer" });
+
+            ViewTabPageDef FilterPage = AddTabPage("Filters", "Filters");                       // filters (search) panel
+            ViewTabPageDef ListPage = AddTabPage("List", "List");                               // List (browse) panel
+            ViewTabPageDef EditPage = AddTabPage("Edit", "Edit");                               // Edit panel (contains a tab pager, i.e. its tabs is not empty)
+ 
+            // ListPage
+            ViewRowDef Row = ListPage.AddRow();
+            Row.AddCssClasses("ListGridContainer");
+
+            Row.SetGrid();
+            Row.Grid["Height"] = "100%";
 
             // Edit TabControl pages
-            ViewTabPageDef DataPage = EditPanel.AddTabPage("Data", "Data");       // the single tab page of the Edit pager    
+            ViewTabPageDef DataPage = EditPage.AddTabPage("Data", "Data");       // the single tab page of the Edit pager    
             DataPage.TableName = Broker.MainTableName;
 
             // the single row of the Data tab-page
-            ViewRowDef Row = DataPage.AddRow(DataPage.TableName);
+            Row = DataPage.AddRow(DataPage.TableName);
  
             // columns in the row
             var MainTable = Broker.MainTable;
@@ -168,58 +178,7 @@ namespace Tripous.Data
             return SB.ToString();
         }
 
-        /* public */
-        /// <summary>
-        /// Adds and returns a <see cref="ViewPanelListPanelDef"/>
-        /// <para>NOTE: Creates the container if is null.</para>
-        /// </summary>
-        public ViewPanelListPanelDef AddPanelListPanel(string TitleKey, string Name = "")
-        {
-            if (PanelList == null)
-                PanelList = new ViewPanelListDef();
-
-            ViewPanelListPanelDef Result = PanelList.Add(TitleKey, Name);
-            return Result;
-        }
-        /// <summary>
-        /// Adds and returns a <see cref="ViewTabPageDef"/>
-        /// <para>NOTE: Creates the container if is null.</para>
-        /// </summary>
-        public ViewTabPageDef AddTabPage(string TitleKey, string Name = "")
-        {
-            if (TabControl == null)
-                TabControl = new ViewTabControlDef();
-
-            ViewTabPageDef Result = TabControl.Add(TitleKey, Name);
-            return Result;
-        }
-        /// <summary>
-        /// Adds and returns a <see cref="ViewAccordeonPanelDef"/>
-        /// <para>NOTE: Creates the container if is null.</para>
-        /// </summary>
-        public ViewAccordeonPanelDef AddGroup(string TitleKey, string Name = "")
-        {
-            if (Accordeon == null)
-                Accordeon = new ViewAccordeonDef();
-
-            ViewAccordeonPanelDef Result = Accordeon.Add(TitleKey, Name);
-            return Result;
-        }
-        /// <summary>
-        /// Adds and returns a <see cref="ViewRowDef"/>
-        /// <para>NOTE: Creates the rows list if is null.</para>
-        /// </summary>
-        public ViewRowDef AddRow(string TableName = "")
-        {
-            if (Rows == null)
-                Rows = new List<ViewRowDef>();
-
-            ViewRowDef Result = new ViewRowDef();
-            Result.TableName = TableName;
-            Rows.Add(Result);
-            return Result;
-        }
-
+        /* public */ 
         /// <summary>
         /// Adds and returns a <see cref="ViewToolBarButtonDef"/>
         /// </summary>
@@ -281,10 +240,7 @@ namespace Tripous.Data
                 DataSetup["JS"] = JS;
 
             if (CSS != null & CSS.Count > 0)
-                DataSetup["CSS"] = CSS;
-
-            if (CssClasses != null & CssClasses.Count > 0)
-                DataSetup["CssClasses"] = string.Join(" ", CssClasses.ToArray());
+                DataSetup["CSS"] = CSS; 
 
             base.AssignTo(DataSetup);
         }
@@ -293,8 +249,7 @@ namespace Tripous.Data
         /// <summary>
         /// The broker name. When not set then it returns the Name.
         /// </summary>
-        public string BrokerName { get; set; }
- 
+        public string BrokerName { get; set; } 
 
         /// <summary>
         /// When true, then <see cref="TextSplitPercent"/> is not applied. Control labels go on top of each control.
@@ -314,25 +269,6 @@ namespace Tripous.Data
         /// </summary>
         public List<ViewToolBarButtonDef> ToolBarButtons { get; } = new List<ViewToolBarButtonDef>();
 
-        /* properties */
-        /// <summary>
-        /// A panel list control
-        /// </summary>
-        public ViewPanelListDef PanelList { get; set; }
-        /// <summary>
-        /// A tab control
-        /// </summary>
-        public ViewTabControlDef TabControl { get; set; }
-        /// <summary>
-        /// An accordeon control
-        /// </summary>
-        public ViewAccordeonDef Accordeon { get; set; }
-        /// <summary>
-        /// A list of rows. Could be empty.
-        /// <para>A row is a panel. It may contain a grid or columns with controls (control rows).</para>
-        /// </summary>
-        public List<ViewRowDef> Rows { get; set; }  
-
         /* data-setup properties */
         /// <summary>
         /// Returns the javascript class name of a view class to be used when creating the view object in javascript.
@@ -351,11 +287,6 @@ namespace Tripous.Data
         /// A list of css files this view needs in order to function properly.
         /// </summary>
         public List<string> CSS { get; set; } = new List<string>();
-
-        /// <summary>
-        /// A list of css classes for the view
-        /// </summary>
-        public List<string> CssClasses { get; set; } = new List<string>();
 
         /// <summary>
         /// When true, controls are auto-created.

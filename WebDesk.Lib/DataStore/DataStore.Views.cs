@@ -19,7 +19,7 @@ namespace WebLib
             ViewDef View = ViewDef.Register("SysData.Table", "Tables");
 
             View.ClassType = "tp.SysDataView";
-            View.CssClasses.AddRange(new string[] { "tp-View", "tp-DeskView" });
+            View.AddCssClasses("tp-View tp-DeskView");   
 
             // tool-bar
             View.ToolBarButtons.Clear();
@@ -37,31 +37,41 @@ namespace WebLib
                 ViewToolBarButtonDef.ButtonClose,
             });
 
-            // PanelList   
-            ViewPanelListPanelDef ListPanel = View.AddPanelListPanel("List", "List");               // List (browse) panel
-            ViewPanelListPanelDef EditPanel = View.AddPanelListPanel("Edit", "Edit");               // Edit panel (contains a tab pager, i.e. its tabs is not empty)
 
-            // Edit TabControl pages
-            ViewTabPageDef DataPage = EditPanel.AddTabPage("Data", "Data");                     // the single tab page of the Edit pager    
+            // main TabControl
+            View.TabControl = new ViewTabControlDef();
+            View.TabControl.CssClasses.AddRange(new string[] { "MainContainer" });
  
+            ViewTabPageDef ListPage = View.AddTabPage("List", "List");                               // List (browse) panel
+            ViewTabPageDef EditPage = View.AddTabPage("Edit", "Edit");                               // Edit panel (contains a tab pager, i.e. its tabs is not empty)
 
+            ViewRowDef Row = ListPage.AddRow();
+            Row.AddCssClasses("ListGridContainer");
 
-            // the single row of the Data tab-page
-           
+            Row.SetGrid();
+            Row.Grid["Height"] = "100%";
+
+            // EditPage controls
+            EditPage.Accordion = new ViewAccordionDef();
+            EditPage.Accordion["AllowMultiExpand"] = true;
+            ViewAccordionPanelDef ControlsPanel = EditPage.Accordion.Add("Data", "Data");
+            ViewAccordionPanelDef FieldsPanel = EditPage.Accordion.Add("Fields", "Fields");
+ 
+            // controls    
             List<ViewControlDef> Controls = new List<ViewControlDef>();
-            Controls.Add(ViewControlDef.TextBox, "DataType", "DataType", "", new object { });
-            Controls.Add(ViewControlDef.TextBox, "DataName", "DataName", "", new object { });
-            Controls.Add(ViewControlDef.TextBox, "TitleKey", "TitleKey", "", new object { });
-            Controls.Add(ViewControlDef.TextBox, "Owner", "Owner", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "DataType", "DataType", "SysData", new object { });
+            Controls.Add(ViewControlDef.TextBox, "DataName", "DataName", "SysData", new object { });
+            Controls.Add(ViewControlDef.TextBox, "TitleKey", "TitleKey", "SysData", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Owner", "Owner", "SysData", new object { });
 
-            Controls.Add(ViewControlDef.TextBox, "Tag1", "Tag1", "", new object { });
-            Controls.Add(ViewControlDef.TextBox, "Tag2", "Tag2", "", new object { });
-            Controls.Add(ViewControlDef.TextBox, "Tag3", "Tag3", "", new object { });
-            Controls.Add(ViewControlDef.TextBox, "Tag4", "Tag4", "", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag1", "Tag1", "SysData", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag2", "Tag2", "SysData", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag3", "Tag3", "SysData", new object { });
+            Controls.Add(ViewControlDef.TextBox, "Tag4", "Tag4", "SysData", new object { });
 
             List<List<ViewControlDef>> ColumnControlLists = Controls.Split(View.ColumnSplit.Large);
 
-            ViewRowDef ControlsRow = DataPage.AddRow();
+            ViewRowDef ControlsRow = ControlsPanel.AddRow("");
             foreach (var ControlList in ColumnControlLists)
             {
                 ViewColumnDef Column = ControlsRow.AddColumn(ControlsRow.TableName); 
@@ -71,7 +81,7 @@ namespace WebLib
             }
 
 
-            ViewRowDef GridRow = DataPage.AddRow();
+            ViewRowDef GridRow = FieldsPanel.AddRow("");
             GridRow.SetGrid();
 
         }

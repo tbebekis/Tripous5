@@ -9,26 +9,31 @@ using Tripous.Data;
 
 namespace WebLib.Models
 {
- 
     /// <summary>
-    /// A model for a view.
+    /// A model for a row
     /// </summary>
-    public class ViewModel
+    public class ViewRowModel
     {
-         /* construction */
+
+        /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewModel(ViewDef Def)
+        public ViewRowModel(ViewDef ViewDef, ViewRowDef Def)
         {
-            this.Def = Def; 
+            this.ViewDef = ViewDef;
+            this.Def = Def;
+
         }
- 
+
         /* properties */
         /// <summary>
         /// The definition of the view
         /// </summary>
-        public ViewDef Def { get; } 
+        public ViewDef ViewDef { get; }
+        /// <summary>
+        /// The definition of the row.
+        /// </summary>
+        public ViewRowDef Def { get; }
     }
-    
 }

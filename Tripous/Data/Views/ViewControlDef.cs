@@ -143,7 +143,7 @@ namespace Tripous.Data
         /// <summary>
         /// Assigns properties of this instance from a specified <see cref="SqlBrokerFieldDef"/>
         /// </summary>
-        public void AssignField(SqlBrokerFieldDef FieldDef = null)
+        public void AssignFrom(SqlBrokerFieldDef FieldDef = null)
         {
             if (FieldDef != null)
             {
@@ -168,6 +168,8 @@ namespace Tripous.Data
         /// </summary>
         public override void AssignTo(Dictionary<string, object> DataSetup)
         {
+            base.AssignTo(DataSetup);
+
             if (!string.IsNullOrWhiteSpace(TypeName))
                 DataSetup["TypeName"] = TypeName;
 
@@ -195,18 +197,19 @@ namespace Tripous.Data
             // <div class="tp-CtrlRow" data-setup="{Text: 'Code', Control: { TypeName: 'TextBox', DataField: 'Code' } }"></div>
             // <div class="tp-CtrlRow" data-setup="{Text: 'Test', Control: { TypeName: 'ComboBox', DataField: '', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}], SelectedIndex: 0} }"></div>
 
+            Dictionary<string, object> Control = new Dictionary<string, object>();
+            AssignTo(Control);
+
             Dictionary<string, object> Result = null;
 
             if (TypeName == ViewControlDef.Grid)
-            {
-                Result = this.Properties;
+            {   
+                Result = Control;
             }
             else
             {
                 Result = new Dictionary<string, object>();
-                Dictionary<string, object> Control = new Dictionary<string, object>();
-                AssignTo(Control);
-
+ 
                 Result["Text"] = Title;
                 Result["Control"] = Control;
             }

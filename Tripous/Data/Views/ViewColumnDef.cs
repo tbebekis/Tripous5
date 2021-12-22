@@ -13,8 +13,12 @@ namespace Tripous.Data
     /// Represents a column in any ui container.
     /// <para>May contain: Controls.</para>
     /// </summary>
-    public class ViewColumnDef  
+    public class ViewColumnDef: ViewDefComponent
     {
+        /// <summary>
+        /// Constant. Default column and width classes
+        /// </summary>
+        public const string DefaultCssClasses = "tp-Col l-75 m-70 s-70 xs-100 ";
 
         /* construction */
         /// <summary>
@@ -22,6 +26,17 @@ namespace Tripous.Data
         /// </summary>
         public ViewColumnDef()
         {
+        }
+
+        /// <summary>
+        /// Returns the content of the <see cref="ViewDefComponent.CssClasses"/> list as text.
+        /// </summary>
+        public override string GetCssClassesText()
+        {
+            string Text = base.GetCssClassesText();
+            return !string.IsNullOrWhiteSpace(Text) ? Text : DefaultCssClasses;
+
+            
         }
 
         /// <summary>
@@ -41,14 +56,8 @@ namespace Tripous.Data
             Controls.Add(ControlDef);
             return ControlDef;
         }
-
-
-        /* properties */
-        /// <summary>
-        /// The data source name. When empty then it binds to its parent's source.
-        /// </summary>
-        public string TableName { get; set; }
  
+        /* properties */
         /// <summary>
         /// A list of control rows.  
         /// </summary>

@@ -11,28 +11,28 @@ namespace Tripous.Data
     /// <summary>
     /// Represents an accordeon control
     /// </summary>
-    public class ViewAccordeonDef : ViewDefContainer<ViewAccordeonPanelDef>
+    public class ViewAccordionDef : ViewDefContainer<ViewAccordionPanelDef>
     {
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewAccordeonDef()
+        public ViewAccordionDef()
         {
         }
     }
 
 
     /// <summary>
-    /// Represents a panel in a <see cref="ViewAccordeonDef"/>
+    /// Represents a panel in a <see cref="ViewAccordionDef"/>
     /// </summary>
-    public class ViewAccordeonPanelDef: ViewDefContainerPanel
+    public class ViewAccordionPanelDef: ViewDefContainerPanel
     {
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewAccordeonPanelDef()
+        public ViewAccordionPanelDef()
         {
         }
 

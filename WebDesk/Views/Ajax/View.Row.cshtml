@@ -1,13 +1,10 @@
 ﻿@model ViewRowModel
 @{
-    string ColumnCssClasses = !string.IsNullOrWhiteSpace(Model.Def.ColumnCssClasses) ? Model.Def.ColumnCssClasses : ViewRowDef.DefaultColumnCssClasses;
-    string CtrlRowCssClass;
-
+ 
     SqlBrokerDef BrokerDef = !string.IsNullOrWhiteSpace(Model.ViewDef.BrokerName) ? SqlBrokerDef.Find(Model.ViewDef.BrokerName) : null;
     SqlBrokerTableDef TableDef = BrokerDef != null && !string.IsNullOrWhiteSpace(Model.Def.TableName) ? BrokerDef.FindTable(Model.Def.TableName) : null;
     SqlBrokerFieldDef FieldDef;
-    string ControlDataSetupText = "";
-
+ 
     SqlBrokerFieldDef GetFieldDef(ViewControlDef ControlDef)
     {
         var Tuple = TableDef != null ? TableDef.FindAnyField(ControlDef.DataField) : null;
@@ -21,25 +18,27 @@
 }
 
 
-<div class="tp-Row">
+<div class="tp-Row @Html.Raw(Model.Def.GetCssClassesText())">
     @if (Model.Def.Grid != null)
     {
-        ControlDataSetupText = Model.Def.Grid.GetDataSetupText();
-        <div class="Grid" data-setup='@Html.Raw(ControlDataSetupText)'></div>
+        string GridDataSetupText = Model.Def.Grid.GetDataSetupText();
+        <div class="Grid @Html.Raw(Model.Def.Grid.GetCssClassesText())" data-setup='@Html.Raw(GridDataSetupText)'></div>
     }
     else if (Model.Def.Columns != null && Model.Def.Columns.Count > 0)
     {
         // columns
         foreach (var Col in Model.Def.Columns)
         {
-            <div class='@Html.Raw(ColumnCssClasses)'>
+ 
+            Col.AddCssClasses(Model.ViewDef.ColumnSplit.GetColumnCssClasses());
+            <div class='@Html.Raw(Col.GetCssClassesText())'>
                 @foreach (var Ctrl in Col.Controls)
                 {
-                    CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
+                    string CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
                     FieldDef = GetFieldDef(Ctrl);
                     if (FieldDef != null)
-                        Ctrl.AssignField(FieldDef);
-                    ControlDataSetupText = Ctrl.GetDataSetupText();
+                        Ctrl.AssignFrom(FieldDef);
+                    string ControlDataSetupText = Ctrl.GetDataSetupText();
                     <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
                 }
             </div>

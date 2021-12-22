@@ -9,26 +9,30 @@ using Tripous.Data;
 
 namespace WebLib.Models
 {
- 
     /// <summary>
-    /// A model for a view.
+    /// A model for an PanelList control
     /// </summary>
-    public class ViewModel
+    public class ViewPanelListModel
     {
-         /* construction */
+
+        /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewModel(ViewDef Def)
+        public ViewPanelListModel(ViewDef ViewDef, ViewPanelListDef Def)
         {
-            this.Def = Def; 
+            this.ViewDef = ViewDef;
+            this.Def = Def;
         }
- 
+
         /* properties */
         /// <summary>
         /// The definition of the view
         /// </summary>
-        public ViewDef Def { get; } 
+        public ViewDef ViewDef { get; }
+        /// <summary>
+        /// The definition associated to this model
+        /// </summary>
+        public ViewPanelListDef Def { get; }
     }
-    
 }

@@ -181,10 +181,9 @@ tp.Classes = {
 
     /* containers       ----------------------------------------------------------------- */
     Block: 'tp-Block',
-
-    Page: 'tp-Page',
+ 
     View: 'tp-View',
-    DataView: 'tp-DataView',
+    BrokerView: 'tp-BrokerView',
 
     Window: 'tp-Window',
     WindowCaption: 'tp-WindowCaption',
@@ -672,9 +671,7 @@ tp.Accordion = class extends tp.tpElement {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
  
-
     /* protected */
     /**
      * Finds and returns a clicked child element, if any, else returns null.
@@ -707,17 +704,16 @@ tp.Accordion = class extends tp.tpElement {
      * @returns {HTMLDivElement} Returns the newly created div element.
      */
     CreateChild(Title) {
-        let Result = this.OnChildCreating().elChild;
-
-        if (tp.IsEmpty(Result))
-            Result = this.Document.createElement('div');
+  
+       this.OnChildCreating();
+    
+       let Result = this.Document.createElement('div');
 
         // title
         let el = this.Document.createElement('div');
         Result.appendChild(el);
-        if (tp.IsString(Title) && !tp.IsBlank(Title))
-            el.innerHTML = Title;
-
+        el.innerHTML = tp.IsString(Title) && !tp.IsBlank(Title) ? Title : tp.NO_NAME;
+ 
         // content
         el = this.Document.createElement('div');
         Result.appendChild(el);
@@ -931,6 +927,39 @@ tp.Accordion = class extends tp.tpElement {
         if (el instanceof HTMLElement) {
             el.innerHTML = Text;
         }
+    }
+
+    /** Returns all the title elements
+     * @returns {HTMLElement[]} Returns all the title elements
+     * */
+    GetTitleElements() {
+        let ElementList = this.GetElementList();
+        let Result = [];
+
+        ElementList.forEach((item) => {
+            let List = tp.ChildHTMLElements(item);
+            if (List.length === 2) {
+                Result.push(List[0]);
+            }
+        });
+
+        return Result;
+    }
+    /** Returns all the panel elements
+     * @returns {HTMLElement[]} Returns all the title elements
+     * */
+    GetPanelElements() {
+        let ElementList = this.GetElementList();
+        let Result = [];
+
+        ElementList.forEach((item) => {
+            let List = tp.ChildHTMLElements(item);
+            if (List.length === 2) {
+                Result.push(List[1]);
+            }
+        });
+
+        return Result;
     }
 
     /* event triggers */
@@ -7326,8 +7355,7 @@ tp.Control = class extends tp.tpElement  {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-             
-
+ 
     /* static */
 
      /**
@@ -7446,11 +7474,7 @@ tp.Control = class extends tp.tpElement  {
             this.Bind();
         }
     }
-    /**
-    Get or sets the table name, a string value used for declarative data-binding.
-    @type {string}
-    */
-    TableName = "";
+
 
     /**
     Returns true if this instance is bound to a DataSource
@@ -7871,12 +7895,17 @@ tp.Control.prototype.fDataValueProperty = '';
  @protected
  @type {tp.DataSource}
  */
-tp.Control.prototype.fDataSource;
+tp.Control.prototype.fDataSource = null;
+/**
+Get or sets the table name, a string value used for declarative data-binding.
+@type {string}
+*/
+tp.Control.prototype.TableName = "";
 /** Field
 @protected
 @type {string}
 */
-tp.Control.prototype.fDataField;
+tp.Control.prototype.fDataField = "";
 /** Field
  @protected
  @type {boolean}
@@ -8291,7 +8320,6 @@ tp.TextBox = class extends tp.InputControl {
         }
         else {
             super.ProcessCreateParam(Name, Value, AvoidParams);
-            super.ProcessCreateParams
         }
     }
     /**
@@ -19245,8 +19273,47 @@ tp.SqlFilterControlLink = class {
 
 
 //---------------------------------------------------------------------------------------
-// page and view
+// view
 //---------------------------------------------------------------------------------------
+
+//#region tp.DataViewMode
+
+/**
+Standard modes/commands for data views.
+*/
+tp.DataViewMode = {
+    None: 0,
+    Home: 1,
+
+    List: 2,
+    Filters: 4,
+    Reports: 8,
+
+    First: 0x10,
+    Prior: 0x20,
+    Next: 0x40,
+    Last: 0x80,
+
+    Insert: 0x100,
+    Edit: 0x200,
+    Delete: 0x400,
+
+    Save: 0x800,
+    Cancel: 0x1000,
+
+    Close: 0x2000
+};
+Object.freeze(tp.DataViewMode);
+
+tp.DataViewCommandNames = [];
+(function () {
+    for (var PropName in tp.DataViewMode) {
+        if (tp.IsInteger(tp.DataViewMode[PropName])) {
+            tp.DataViewCommandNames.push(PropName);
+        }
+    }
+})();
+//#endregion
 
 //#region tp.View
 
@@ -19300,6 +19367,7 @@ tp.View = class extends tp.tpElement {
     InitializeFields() {
         super.InitializeFields();
         this.ViewName = tp.NextName('View');
+        this.DataSources = [];
     }
     /**
     Notification 
@@ -19430,7 +19498,13 @@ tp.View = class extends tp.tpElement {
     */
     InitializeView() { 
     }
- 
+    /** Closes and disposes the view
+    * */
+    CloseView() {
+        this.Dispose();
+    }
+
+
     /**
     Event trigger
     @protected
@@ -19466,6 +19540,8 @@ tp.View = class extends tp.tpElement {
     toString() {
         return this.ViewName;
     }
+
+    /* controls */
     /**
     Returns the controls. <br />
     Returns an array with all {@link tp.tpElement} objects existing on direct or nested child DOM elements, of the handle of this instance.
@@ -19474,7 +19550,197 @@ tp.View = class extends tp.tpElement {
     GetControls() {
         return tp.GetScriptObjects(this.Handle);
     }
+    /**
+    Returns a control belonging to this instance and bound to a specified field, if any, else null
+    @protected
+    @param {string | tp.DataColumn} v - The field name or the {@link tp.Control} Column
+    @returns {tp.Control} Returns the {@link tp.Control} control if found, or null.
+    */
+    FindControlByDataField(v) {
+        /** @type {tp.Control} */
+        let Control;  
+        let List = this.GetControls();
+        let FieldName = (v instanceof tp.DataColumn) ? v.Name : v;
 
+        for (var i = 0, ln = List.length; i < ln; i++) {
+            if (List[i] instanceof tp.Control) {
+                Control = List[i];
+                if (tp.IsSameText(FieldName, Control.DataField))
+                    return Control;
+            }
+        }
+        return null;
+    }
+    /**
+    Sets or un-sets the read-only flag to this view controls
+    @protected
+    @param {boolean} Flag A flag
+    */
+    ApplyReadOnlyEditToControls(Flag) {
+        /** @type {tp.Control} */
+        let c;
+        let List = this.GetControls();
+
+        List.forEach((item) => {
+            if (item instanceof tp.Control) {
+                c = item;
+                if ('DataColumn' in c && c.DataColumn instanceof tp.DataColumn && c.DataColumn.IsReadOnlyEdit === true) {
+                    c.ReadOnly = Flag === true;
+                }
+            }
+        }); 
+    }
+
+
+    /* data-binding */
+    /**
+    Finds and returns a {@link tp.DataSource} data-source by name, if any, else null. <br />
+    @protected
+    @param {string} SourceName The data-source by name
+    @returns {tp.DataSource} Returns a {@link tp.DataSource} data-source or null
+    */
+    GetDataSource(SourceName) {
+        let Result = null; 
+
+        if (tp.IsArray(this.DataSources)) {
+            Result = this.DataSources.find((item) => {
+                return tp.IsSameText(SourceName, item.Name);
+            });
+        }
+
+        return Result;        
+    }
+    /**
+    Calls the Update() method of all data-sources of this view
+    @protected
+    */
+    UpdateDataSources() {
+        if (tp.IsArray(this.DataSources)) {
+            this.DataSources.forEach((item) => { item.Update(); }); 
+        } 
+    }
+
+    /**
+     * Binds controls of the Edit part. <br />
+     * NOTE:  Do NOT call this method directly. <br />
+     * This method is called automatically the first time an an Insert() or Edit() is requested.
+     * @param {tp.tpElement[]} ComponentList The list of controls to bind
+     * @protected
+     */
+    BindControls(ComponentList) {
+        /** @type {tp.Control} */
+        let c;
+        ComponentList.forEach((item) => {
+            if (item instanceof tp.Control) {
+                c = item;
+                if (this.CanBindControl(c))
+                    this.BindControl(c);
+            }
+        }); 
+    }
+    /**
+    Returns true if a specified control can be bound to data
+    @protected
+    @param {tp.Control} Control A {@link tp.Control}
+    @returns {boolean} Returns true if a specified control can be bound to data
+    */
+    CanBindControl(Control) {
+        if (Control instanceof tp.Control && Control.DataBindMode !== tp.ControlBindMode.None /* && Control.IsDataBound !== true */) {
+            switch (Control.DataBindMode) {
+                case tp.ControlBindMode.Simple:
+                    return tp.IsString(Control.DataField) && !tp.IsBlank(Control.DataField);
+                case tp.ControlBindMode.List:
+                    return tp.IsString(Control.DataField) && !tp.IsBlank(Control.DataField);
+                case tp.ControlBindMode.Grid:
+                    return tp.IsString(Control.TableName) && !tp.IsBlank(Control.TableName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
+            }
+        }
+
+        return false;
+    }
+    /**
+    Binds a specified control to data
+    @protected
+    @param {tp.Control} Control A {@link tp.Control}
+    */
+    BindControl(Control) {
+
+        let DataSource = this.GetDataSource(Control.TableName);
+
+        if (tp.IsValid(DataSource)) {
+            Control.DataSource = DataSource;
+
+            if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
+                 if (tp.IsString(Control['ListSourceName']) && !tp.IsBlank(Control['ListSourceName'])) {
+                    let ListSource = this.GetDataSource(Control['ListSourceName']);
+                    if (tp.IsValid(ListSource))
+                        Control['ListSource'] = ListSource;
+                }
+            }
+
+            this.SetupControl(Control);
+        }
+
+    }
+    /**
+    Sets up a control after data-binding
+    @protected
+    @param {tp.Control} Control A {@link tp.Control}
+    */
+    SetupControl(Control) {
+
+        if ((Control.DataBindMode === tp.ControlBindMode.Simple) || (Control.DataBindMode === tp.ControlBindMode.List)) {
+            /** @type {tp.DataColumn} */
+            let Column = Control.DataColumn;
+            if (!tp.IsEmpty(Column)) {
+                if ('ReadOnly' in Control) {
+                    Control.ReadOnly = Column.ReadOnly || Column.IsReadOnly || Column.IsReadOnlyUI;
+                }
+                if ('MaxLength' in Control) {
+                    if (Column.MaxLength !== -1) {
+                        Control['MaxLength'] = Column.MaxLength;
+                    }
+                }
+                if ((Column.IsRequired === true) && ('Required' in Control)) {
+                    Control.Required = false;
+                    Control.Required = true;
+                }
+
+                if (Control instanceof tp.CheckBox) {
+                    Control.Text = Column.Title;
+                } else if (tp.IsElement(Control.elText)) {
+                    tp.val(Control.elText, Column.Title);
+                }
+
+                if (!Column.IsVisible) {
+                    /** @type {HTMLElement} */
+                    let CtrlRow = tp.Ui.GetCtrlRow(Control.Handle);
+                    if (tp.IsHTMLElement(CtrlRow))
+                        tp.Visible(CtrlRow, false);
+                }
+            }
+        } else if (tp.IsValid(tp.Grid) && Control.DataBindMode === tp.ControlBindMode.Grid) {
+            /** @type {tp.Grid} */
+            let Grid = Control;
+            /** @type {tp.DataTable} */
+            let Table = Grid.DataSource.Table;
+
+            let ReadOnlyColumns = [];
+            let VisibleColumns = [];
+
+            Table.Columns.forEach((Column) => {
+                if (Column.IsVisible)
+                    VisibleColumns.push(Column.Name);
+                if (Column.IsReadOnly || Column.IsReadOnlyUI)
+                    ReadOnlyColumns.push(Column.Name);
+            }); 
+
+            Grid.SetColumnListReadOnly(ReadOnlyColumns);
+            Grid.SetColumnListVisible(VisibleColumns);
+        }
+    }
+
+    
 
     /* static */
     /**
@@ -19546,6 +19812,13 @@ The ajax packet sent by server app when this view is created, if any.
 @type {object}
 */
 tp.View.prototype.Packet = {};
+/** Field
+ @protected
+ @type {tp.DataSource[]}
+ */
+tp.View.prototype.DataSources = [];
+
+
 
 tp.ViewTypes = {
     View: tp.View

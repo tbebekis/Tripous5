@@ -9,26 +9,30 @@ using Tripous.Data;
 
 namespace WebLib.Models
 {
- 
     /// <summary>
-    /// A model for a view.
+    /// A model for an Accordion control
     /// </summary>
-    public class ViewModel
+    public class ViewAccordionModel
     {
-         /* construction */
+
+        /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewModel(ViewDef Def)
+        public ViewAccordionModel(ViewDef ViewDef, ViewAccordionDef Def)
         {
-            this.Def = Def; 
+            this.ViewDef = ViewDef;
+            this.Def = Def;
         }
- 
+
         /* properties */
         /// <summary>
         /// The definition of the view
         /// </summary>
-        public ViewDef Def { get; } 
+        public ViewDef ViewDef { get; }
+        /// <summary>
+        /// The definition associated to this model
+        /// </summary>
+        public ViewAccordionDef Def { get; }
     }
-    
 }

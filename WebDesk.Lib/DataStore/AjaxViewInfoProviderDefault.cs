@@ -15,7 +15,7 @@ namespace WebLib
 
     internal class AjaxViewInfoProviderDefault: AjaxViewInfoProvider
     {
-        AjaxViewInfo GetDefaultDataViewInfo(AjaxRequest Request, AjaxPacket Packet, string BrokerName)
+        AjaxViewInfo GetDefaultBrokerViewInfo(AjaxRequest Request, AjaxPacket Packet, string BrokerName)
         {
             AjaxViewInfo Info = new AjaxViewInfo();
   
@@ -84,7 +84,7 @@ namespace WebLib
                 {
                     if (Sys.IsSameText(Parts[1], "Data"))
                     {
-                        Result = GetDefaultDataViewInfo(Request, Packet, Parts[2]);
+                        Result = GetDefaultBrokerViewInfo(Request, Packet, Parts[2]);
                     }
                     else if (Sys.IsSameText(Parts[1], "SysData"))
                     {

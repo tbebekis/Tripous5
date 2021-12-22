@@ -1,9 +1,9 @@
 ﻿@model ViewPanelListModel
 
-<div class='PanelList' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+<div class='PanelList @Html.Raw(Model.Def.GetCssClassesText())' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
     @foreach (var PanelDef in Model.Def.Items)
     {
-        <div>
+        <div class="@Html.Raw(PanelDef.GetCssClassesText())" data-setup='@Html.Raw(PanelDef.GetDataSetupText())'>
             @{
                 var ContainerPanelModel = new ViewContainerPanelModel(Model.ViewDef, PanelDef);
                 @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)

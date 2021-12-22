@@ -2,73 +2,22 @@
 @model ViewModel
 
 @{
-
-    ViewDef ViewDef = Model.Def;
-
     // The standard DataView contains 3 panels in a tp.PanelList with the following indexes:
     // 0 - Filter   (the container of the filter controls)
     // 1 - List     (the container of the List (browser) grid)
     // 2 - Edit     (the container of a TabPager with data entry controls)
 
-    string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(ViewDef.TextTop, ViewDef.TextSplitPercent);
+    string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.Def.TextTop, Model.Def.TextSplitPercent);
 }
 
-<div class="@Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(ViewDef.GetDataSetupText())'>
+<div class="@Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
 
-    @await Html.PartialAsync("View.ToolBar", ViewDef.ToolBarButtons)
+    @await Html.PartialAsync("View.ToolBar", Model.Def.ToolBarButtons)
 
-    @if (ViewDef.PanelList != null && ViewDef.PanelList.Contains("List") && ViewDef.PanelList.Contains("Edit"))
-    {
-        // is a typical data view with a panel list
-
-        <div class="PanelList">
-            @foreach (var PanelDef in ViewDef.PanelList.Items)
-            {
-                if (Sys.IsSameText(PanelDef.Name, "List"))
-                {
-                    <div data-setup="{ PanelMode: 'List' }">
-                        <div class="Grid" data-setup="{ Width:'100%', Height: '100%', ReadOnly: true }"></div>
-                    </div>
-                }
-                else
-                {
-                    <div data-setup="{ PanelMode: '@PanelDef.Name' }">
-                        @{
-                            var ContainerPanelModel = new ViewContainerPanelModel(ViewDef, PanelDef);
-                            @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)
-                        }
-                    </div>
-                }
-            }
-
-        </div>
+    @{
+        var ContainerPanelModel = new ViewContainerPanelModel(Model.Def, Model.Def);
+        @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)
     }
-    else if (ViewDef.PanelList != null)
-    {
-        var PanelListModel = new ViewPanelListModel(ViewDef, ViewDef.PanelList);
-        @await Html.PartialAsync("View.PanelList", PanelListModel)
-    }
-    else if (ViewDef.TabControl != null)
-    {
-        var TabControlModel = new ViewTabControlModel(ViewDef, ViewDef.TabControl);
-        @await Html.PartialAsync("View.TabControl", TabControlModel)
-    }
-    else if (ViewDef.Accordeon != null)
-    {
-        var AccordeonModel = new ViewAccordeonModel(ViewDef, ViewDef.Accordeon);
-        @await Html.PartialAsync("View.Accordeon", AccordeonModel)
-    }
-    else if (ViewDef.Rows != null && ViewDef.Rows.Count > 0)
-    {
-        foreach (var Row in ViewDef.Rows)
-        {
-            var RowsModel = new ViewRowModel(ViewDef, Row);
-            @await Html.PartialAsync("View.Row", Row)
-        }
-    }
-
- 
-
 </div>
 
 

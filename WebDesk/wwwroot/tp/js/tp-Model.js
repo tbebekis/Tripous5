@@ -849,7 +849,7 @@ tp.Broker = class extends tp.tpObject {
 tp.Broker.prototype.fInitialized = false;
 /** Field
 @private
-@type {tp.DataView}
+@type {tp.BrokerView}
 */
 tp.Broker.prototype.fView = null;
 /** Field
@@ -928,75 +928,36 @@ tp.Broker.prototype.GuidOids = true;
 //#endregion
 
 //---------------------------------------------------------------------------------------
-// DataView
+// BrokerView
 //---------------------------------------------------------------------------------------
-
-//#region tp.DataViewMode
-
-/**
-Standard data-view modes/commands
-*/
-tp.DataViewMode = {
-    None: 0,
-    Home: 1,
-
-    List: 2,
-    Filters: 4,
-    Reports: 8,
-
-    First: 0x10,
-    Prior: 0x20,
-    Next: 0x40,
-    Last: 0x80,
-
-    Insert: 0x100,
-    Edit: 0x200,
-    Delete: 0x400,
-
-    Save: 0x800,
-    Cancel: 0x1000,
-
-    Close: 0x2000
-};
-Object.freeze(tp.DataViewMode);
-
-tp.DataViewCommandNames = [];
-(function () {
-    for (var PropName in tp.DataViewMode) {
-        if (tp.IsInteger(tp.DataViewMode[PropName])) {
-            tp.DataViewCommandNames.push(PropName);
-        }
-    }
-})();
-//#endregion
-
-//#region tp.DataView
+ 
+//#region tp.BrokerView
 /**
 A data view represents a control container that automatically can create its controls from the provided markup
 and bind to data provided by data-tables of a broker. <br />
 Example markup
 <pre>
-    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Customer' }"> ... </div>
+    <div class="tp-View" data-setup="{ ClassType: tp.BrokerView, BrokerName: 'Customer' }"> ... </div>
     or
-    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerClass: tp.App.CustomerBroker }"> ... </div>
+    <div class="tp-View" data-setup="{ ClassType: tp.BrokerView, BrokerClass: tp.App.CustomerBroker }"> ... </div>
     or
-    <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Customer', BrokerClass: tp.App.CustomerBroker }"> ... </div>
+    <div class="tp-View" data-setup="{ ClassType: tp.BrokerView, BrokerName: 'Customer', BrokerClass: tp.App.CustomerBroker }"> ... </div>
 </pre>
 */
-tp.DataView = class extends tp.View {
+tp.BrokerView = class extends tp.View {
 
     /**
     Constructor <br />
     Example markup
     @example
     <pre>
-        <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerName: 'Customer' }">
+        <div class="tp-View" data-setup="{ ClassType: tp.BrokerView, BrokerName: 'Customer' }">
             ...
         </div>
 
         or
 
-        <div class="tp-View" data-setup="{ ClassType: tp.DataView, BrokerClass: tp.App.CustomerBroker }">
+        <div class="tp-View" data-setup="{ ClassType: tp.BrokerView, BrokerClass: tp.App.CustomerBroker }">
             ...
         </div>
     </pre>
@@ -1006,19 +967,14 @@ tp.DataView = class extends tp.View {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-
+ 
     /**
-    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
-    @type {tp.DataViewMode}
+    Gets or sets the data mode. One of the {@link tp.DataViewMode} constants.
+    @type {number}
     */
     get ViewMode() {
         return this.fViewMode;
     }
-    /**
-    Gets or sets the data mode. One of the {@link tp.DataMode} constants.
-    @type {tp.DataViewMode}
-    */
     set ViewMode(v) {
         if (this.fViewMode !== v) {
             this.fLastViewMode = this.fViewMode;
@@ -1082,8 +1038,8 @@ tp.DataView = class extends tp.View {
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.DataView';
-        this.fDefaultCssClasses = [tp.Classes.View, tp.Classes.DataView];
+        this.tpClass = 'tp.BrokerView';
+        this.fDefaultCssClasses = [tp.Classes.View, tp.Classes.BrokerView];
     }
     /**
     Initializes fields and properties just before applying the create params.      
@@ -1093,8 +1049,7 @@ tp.DataView = class extends tp.View {
     InitializeFields() {
         super.InitializeFields();
 
-        this.fName = tp.NextName('DataView');
-        this.DataSources = [];
+        this.fName = tp.NextName('BrokerView');
         this.Broker = null;
 
         this.fViewMode = tp.DataViewMode.None;
@@ -1118,7 +1073,7 @@ tp.DataView = class extends tp.View {
         super.InitializeView();
 
         this.CreateToolBar();
-        this.CreatePanelList();
+        this.CreateTabControl();
         this.CreateListGrid();
 
         this.CreateBroker();
@@ -1129,45 +1084,102 @@ tp.DataView = class extends tp.View {
         }
     }
 
-    /** Returns an array with the panels of the panel list
-     * @returns {HTMLElement[]}
-     * */
-    GetPanelListElements() { return tp.IsValid(this.PanelList) ? this.PanelList.GetPanels() : tp.ChildHTMLElements(this.GetViewPanelListElement()); }
+    /**
+    Sets the visible panel index in the panel list.
+    @protected
+    @param {number} PageIndex The panel index
+    */
+    SetVisiblePage(PageIndex) {
+        if (this.MainPager) {
+            this.MainPager.SelectedIndex = PageIndex;
+        }
+    }
+    /**
+     * Sets the visible panel of the main pager (a PanelList) by its 'PanelMode'.
+     * NOTE: Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * @param {string} PageName The panel mode to check for.
+     */
+    SetVisiblePageByName(PageName) {
+        let elPanel = this.FindPageByName(PageName);
+        let Index = -1;
+        if (elPanel) {
+            let Panels = this.GetTabPageElements();
+            Index = Panels.indexOf(elPanel);
+        }
+
+        if (Index >= 0) {
+            this.SetVisiblePage(Index);
+        }
+    }
+    /**
+     * Each panel of the main pager (a PanelList) MUST have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
+     * This function returns a panel found having a specified PanelMode, or null if not found.
+     * @param {string} PageName The panel mode to check for.
+     * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.
+     */
+    FindPageByName(PageName) {
+        if (tp.IsValid(this.MainPager)) {
+            let Panels = this.GetTabPageElements();
+
+            let i, ln, elPanel, Setup;
+
+            for (i = 0, ln = Panels.length; i < ln; i++) {
+                elPanel = Panels[i];
+                Setup = tp.GetDataSetupObject(elPanel);
+                if (tp.IsValid(Setup)) {
+                    if (PageName === Setup.Name) {
+                        return elPanel;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 
     /** Returns a DOM Element contained by this view.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
+    GetToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
     /** Returns a DOM Element contained by this view. Returns the main panel-list which in turn contains the three part panels: Brower, Edit and Filters.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewPanelListElement() { return tp.Select(this.Handle, '.PanelList'); }
-
+    GetTabControlElement() { return tp.Select(this.Handle, '.MainContainer'); }
+    /** Returns an array with the panels of the panel list
+     * @returns {HTMLElement[]}
+     * */
+    GetTabPageElements() {
+        if (tp.IsValid(this.MainPager)) {
+            let List = tp.ChildHTMLElements(this.GetTabControlElement());
+            if (List && List.length === 2) {
+                return tp.ChildHTMLElements(List[1])
+            }               
+        }
+        return [];
+    }
     /** Returns a DOM Element contained by this view. Returns the Filters panel, the container of the filter controls.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewFilterPanelElement() { return this.FindPanelByPanelMode('Filters'); }
+    GetFilterPageElement() { return this.FindPageByName('Filters'); }
     /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewListPanelElement() { return this.FindPanelByPanelMode('List'); }
+    GetListPageElement() { return this.FindPageByName('List'); }
     /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewEditPanelElement() { return this.FindPanelByPanelMode('Edit'); }
-
-
+    GetEditPageElement() { return this.FindPageByName('Edit'); }
     /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
      * @returns {HTMLElement} Returns a DOM Element contained by this view.
      *  */
-    GetViewListGridElement() { return tp.Select(this.GetViewListPanelElement(), '.Grid'); }
+    GetListGridElement() { return tp.Select(this.GetListPageElement(), '.Grid'); }
 
     /** Creates the toolbar of the view 
      @protected
      */
     CreateToolBar() {
         if (tp.IsEmpty(this.ToolBar)) {
-            let el = this.GetViewToolBarElement();
+            let el = this.GetToolBarElement();
             this.ToolBar = new tp.ToolBar(el);
             this.ToolBar.On('ButtonClick', this.AnyClick, this);
         }
@@ -1175,10 +1187,11 @@ tp.DataView = class extends tp.View {
     /** Creates the panel-list of the view, the one with the 3 panels: List, Edit and Filters panels.
      @protected
      */
-    CreatePanelList() {
-        if (tp.IsEmpty(this.PanelList)) {
-            let el = this.GetViewPanelListElement();
-            this.PanelList = new tp.PanelList(el);
+    CreateTabControl() {
+        if (tp.IsEmpty(this.MainPager)) {
+            let el = this.GetTabControlElement();
+            this.MainPager = new tp.TabControl(el);
+            this.MainPager.ShowTabBar(false);   // hide tab-bar 
         }
     }
     /**
@@ -1188,12 +1201,12 @@ tp.DataView = class extends tp.View {
     */
     CreateListGrid() {
         if (tp.IsEmpty(this.gridList)) {
-            let el = this.GetViewListGridElement();
+            let el = this.GetListGridElement();
             this.gridList = new tp.Grid(el);
         }
 
         if (tp.IsEmpty(this.gridList)) {
-            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetViewListPanelElement());
+            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
             this.gridList = o instanceof tp.Grid ? o : null;
         }
 
@@ -1210,16 +1223,16 @@ tp.DataView = class extends tp.View {
      * */
     CreateEditControls() {
         if (!this.EditControlsCreated) {
-            let el = this.GetViewEditPanelElement();
+            let el = this.GetEditPageElement();
             let ControlList = tp.Ui.CreateControls(el);
 
             let List = tp.ChildHTMLElements(el);
             if (List.length === 1) {
                 let o = tp.GetScriptObject(List[0]);
                 if (o instanceof tp.TabControl) {
-                    this.pagerEdit = o;
-                    if (this.pagerEdit.GetPageCount() === 1) {
-                        this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
+                    this.EditPager = o;
+                    if (this.EditPager.GetPageCount() === 1) {
+                        this.EditPager.ShowTabBar(false);   // hide tab-bar if we have only a single page
                     }
                 }
             }
@@ -1233,7 +1246,7 @@ tp.DataView = class extends tp.View {
     CreateFilterControls() {
 
         if (!tp.IsValid(this.SelectSqlListUi)) {
-            let elParent = this.FindPanelByPanelMode('Filters');
+            let elParent = this.FindPageByName('Filters');
             if (elParent) {
                 let el = tp.Div(elParent);
                 let CP = {};
@@ -1276,26 +1289,7 @@ tp.DataView = class extends tp.View {
         }
     }
 
-    /**
-    Returns a control belonging to this instance and bound to a specified field, if any, else null
-    @protected
-    @param {string | tp.DataColumn} v - The field name or the {@link tp.Control} Column
-    @returns {tp.Control} Returns the {@link tp.Control} control if found, or null.
-    */
-    FindControlByDataField(v) {
-        let Control; // tp.Control
-        let List = this.GetControls();
-        let FieldName = (v instanceof tp.DataColumn) ? v.Name : v;
-
-        for (var i = 0, ln = List.length; i < ln; i++) {
-            if (List[i] instanceof tp.Control) {
-                Control = List[i];
-                if (tp.IsSameText(FieldName, Control.DataField))
-                    return Control;
-            }
-        }
-        return null;
-    }
+    /* data-binding */
     /**
     Finds and returns a {@link tp.DataSource} data-source by name, if any, else null.
     @protected
@@ -1303,6 +1297,8 @@ tp.DataView = class extends tp.View {
     @returns {tp.DataSource} Returns a {@link tp.DataSource} data-source or null
     */
     GetDataSource(SourceName) {
+        let Result = null;
+
         if (!tp.IsEmpty(this.Broker)) {
             if (tp.IsSameText('Item', SourceName) || tp.IsBlank(SourceName)) {
                 SourceName = this.Broker.MainTableName;
@@ -1313,15 +1309,16 @@ tp.DataView = class extends tp.View {
             }
         }
 
-        var Table, DataSource;
-        var Result = tp.FirstOrDefault(this.DataSources, (item) => {
-            return tp.IsSameText(SourceName, item.Name);
-        });
+        if (tp.IsArray(this.DataSources)) {
+            Result = this.DataSources.find((item) => {
+                return tp.IsSameText(SourceName, item.Name);
+            });
+        } 
 
         if (tp.IsEmpty(Result) && !tp.IsEmpty(this.Broker)) {
-            Table = this.Broker.DataSet.FindTable(SourceName);
+            let Table = this.Broker.DataSet.FindTable(SourceName);
             if (!tp.IsEmpty(Table)) {
-                DataSource = new tp.DataSource(Table);
+                let DataSource = new tp.DataSource(Table);
                 this.DataSources.push(DataSource);
                 return DataSource;
             }
@@ -1329,166 +1326,8 @@ tp.DataView = class extends tp.View {
 
         return Result;
     }
-    /**
-    Returns the index of a data-source, if any, else -1.
-    @protected
-    @param {string} SourceName The data-source name
-    @returns {number} Returns the index of a data-source, if any, else -1.
-    */
-    IndexOfDataSource(SourceName) {
-        for (var i = 0, ln = this.DataSources.length; i < ln; i++) {
-            if (tp.IsSameText(SourceName, this.DataSources[i].Name)) {
-                return i;
-            }
-        }
+ 
 
-        return -1;
-    }
-
-
-    /**
-     * Binds controls of the Edit part. <br />
-     * NOTE:  Do NOT call this method directly. <br />
-     * This method is called automatically the first time an an Insert() or Edit() is requested.
-     * @param {tp.tpElement[]} ControlList The list of controls to bind
-     * @protected
-     */
-    BindControls(ControlList) {
-
-        var i, ln, Control;
-
-        for (i = 0, ln = ControlList.length; i < ln; i++) {
-            Control = ControlList[i];
-            if (this.CanBindControl(Control))
-                this.BindControl(Control);
-        }
-    }
-    /**
-    Returns true if a specified control can be bound to data
-    @protected
-    @param {tp.Control} Control A {@link tp.Control}
-    @returns {boolean} Returns true if a specified control can be bound to data
-    */
-    CanBindControl(Control) {
-        if (!tp.IsEmpty(Control) && (Control instanceof tp.Control) && (Control.DataBindMode !== tp.ControlBindMode.None) && !Control.IsDataBound) {
-            switch (Control.DataBindMode) {
-                case tp.ControlBindMode.Simple:
-                    return !tp.IsBlank(Control.DataField);
-                case tp.ControlBindMode.List:
-                    return !tp.IsBlank(Control.DataField);
-                case tp.ControlBindMode.Grid:
-                    return !tp.IsBlank(Control.TableName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
-            }
-        }
-
-        return false;
-    }
-    /**
-    Binds a specified control to data
-    @protected
-    @param {tp.Control} Control A {@link tp.Control}
-    */
-    BindControl(Control) {
-        Control.DataSource = this.GetDataSource(Control.TableName);
-
-        if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
-            let Column = Control.DataColumn;
-            if (!tp.IsBlank(Control['ListSourceName'])) {
-                var ListSource = this.GetDataSource(Control['ListSourceName']);
-                Control['ListSource'] = ListSource;
-            }
-        }
-
-        this.SetupControl(Control);
-    }
-    /**
-    Sets up a control after data-binding
-    @protected
-    @param {tp.Control} Control A {@link tp.Control}
-    */
-    SetupControl(Control) {
-        var i, ln,
-            CtrlRow,            // HTMLElement
-            Column,             // tp.DataColumn,
-            Grid,               // tp.Grid,
-            Table,              // tp.DataTable,
-            ReadOnlyColumns,    // string[],
-            VisibleColumns      // string[]
-            ;
-
-        if ((Control.DataBindMode === tp.ControlBindMode.Simple) || (Control.DataBindMode === tp.ControlBindMode.List)) {
-            Column = Control.DataColumn;
-            if (!tp.IsEmpty(Column)) {
-                if ('ReadOnly' in Control) {
-                    Control.ReadOnly = Column.ReadOnly || Column.IsReadOnly || Column.IsReadOnlyUI;
-                }
-                if ('MaxLength' in Control) {
-                    if (Column.MaxLength !== -1) {
-                        Control['MaxLength'] = Column.MaxLength;
-                    }
-                }
-                if ((Column.IsRequired === true) && ('Required' in Control)) {
-                    Control.Required = false;
-                    Control.Required = true;
-                }
-
-                if (Control instanceof tp.CheckBox) {
-                    Control.Text = Column.Title;
-                } else if (tp.IsElement(Control.elText)) {
-                    tp.val(Control.elText, Column.Title);
-                }
-
-                if (!Column.IsVisible) {
-                    CtrlRow = tp.Ui.GetCtrlRow(Control.Handle);
-                    if (tp.IsHTMLElement(CtrlRow))
-                        tp.Visible(CtrlRow, false);
-                }
-            }
-        } else if (Control.DataBindMode === tp.ControlBindMode.Grid) {
-            Grid = Control;
-            Table = Grid.DataSource.Table;
-
-            ReadOnlyColumns = [];
-            VisibleColumns = [];
-            for (i = 0, ln = Table.Columns.length; i < ln; i++) {
-                Column = Table.Columns[i];
-                if (Column.IsVisible)
-                    VisibleColumns.push(Column.Name);
-                if (Column.IsReadOnly || Column.IsReadOnlyUI)
-                    ReadOnlyColumns.push(Column.Name);
-            }
-
-            Grid.SetColumnListReadOnly(ReadOnlyColumns);
-            Grid.SetColumnListVisible(VisibleColumns);
-        }
-    }
-    /**
-    Sets or un-sets the read-only flag to this view controls
-    @protected
-    @param {boolean} Flag A flag
-    */
-    ApplyReadOnlyEditToControls(Flag) {
-        var i, ln,
-            Control;    // tp.Control;
-        var List = this.GetControls();
-
-        for (i = 0, ln = List.length; i < ln; i++) {
-            if (List[i] instanceof tp.Control) {
-                Control = List[i];
-                if (('DataColumn' in Control) && (Control.DataColumn instanceof tp.DataColumn) && (Control.DataColumn.IsReadOnlyEdit)) {
-                    Control.ReadOnly = Flag === true;
-                }
-            }
-        }
-    }
-    /**
-    Calls the Update() method of all data-sources of this view
-    @protected
-    */
-    UpdateDataSources() {
-        for (var i = 0, ln = this.DataSources.length; i < ln; i++)
-            this.DataSources[i].Update();
-    }
  
     /**
     Returns the Id (value of the primary key field) of the selected data-row of the List (browser) grid, if any, else null.
@@ -1511,61 +1350,7 @@ tp.DataView = class extends tp.View {
 
         return null;
     }
-
-
-    /**
-    Sets the visible panel index in the panel list.
-    @protected
-    @param {number} PanelIndex The panel index
-    */
-    SetVisiblePanel(PanelIndex) {
-        if (this.PanelList) {
-            this.PanelList.SelectedIndex = PanelIndex;
-        }
-    }
-    /**
-     * Sets the visible panel of the main pager (a PanelList) by its 'PanelMode'.
-     * NOTE: Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
-     * @param {string} PanelMode The panel mode to check for.
-     */
-    SetVisiblePanelByPanelMode(PanelMode) {
-        let elPanel = this.FindPanelByPanelMode(PanelMode);
-        let Index = -1;
-        if (elPanel) {
-            let Panels = this.PanelList.GetPanels();
-            Index = Panels.indexOf(elPanel);
-        }
-
-        if (Index >= 0) {
-            this.SetVisiblePanel(Index);
-        }
-    }
-    /**
-     * Each panel of the main pager (a PanelList) MUST have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
-     * This function returns a panel found having a specified PanelMode, or null if not found.
-     * @param {string} PanelMode The panel mode to check for.
-     * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.
-     */
-    FindPanelByPanelMode(PanelMode) {
-        if (tp.IsValid(this.PanelList)) {
-            let Panels = this.PanelList.GetPanels();
-
-            let i, ln, elPanel, Setup;
-
-            for (i = 0, ln = Panels.length; i < ln; i++) {
-                elPanel = Panels[i];
-                Setup = tp.GetDataSetupObject(elPanel);
-                if (tp.IsValid(Setup)) {
-                    if (PanelMode === Setup.PanelMode) {
-                        return elPanel;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
+ 
     /**
     Displays the main local menu
     @protected
@@ -1580,12 +1365,7 @@ tp.DataView = class extends tp.View {
         this.CreateFilterControls();
         this.ViewMode = tp.DataViewMode.Filters;
     }
-    /**
-    Closes the view and removes the view from the DOM.
-    @protected
-    */
-    CloseView() {
-    }
+
 
 
     /* action do methods */
@@ -2200,16 +1980,16 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
         switch (this.ViewMode) {
             case tp.DataViewMode.List:
             case tp.DataViewMode.Cancel:
-                this.SetVisiblePanelByPanelMode('List');
+                this.SetVisiblePageByName('List');
                 break;
 
             case tp.DataViewMode.Insert:
             case tp.DataViewMode.Edit:
-                this.SetVisiblePanelByPanelMode('Edit');
+                this.SetVisiblePageByName('Edit');
                 break;
 
             case tp.DataViewMode.Filters:
-                this.SetVisiblePanelByPanelMode('Filters');
+                this.SetVisiblePageByName('Filters');
                 break;
         }
 
@@ -2239,105 +2019,101 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
 };
 
 /* fields */
-/** Field
- @protected
- @type {tp.DataSource[]}
- */
-tp.DataView.prototype.DataSources = [];
+
 /** Field
  @protected
  @type {tp.Broker}
  */
-tp.DataView.prototype.Broker = null;
+tp.BrokerView.prototype.Broker = null;
 /** Field
  @protected
  @type {tp.DataSource}
  */
-tp.DataView.prototype.dsList = null;
+tp.BrokerView.prototype.dsList = null;
 /** Field
  @protected
  @type {tp.Grid}
  */
-tp.DataView.prototype.gridList = null;
+tp.BrokerView.prototype.gridList = null;
 /** Field
  @protected
  @type {string}
  */
-tp.DataView.prototype.BrokerName = '';
+tp.BrokerView.prototype.BrokerName = '';
 /** Field
  @protected
  @type {tp.DataTable}
  */
-tp.DataView.prototype.ftblItem = null;
+tp.BrokerView.prototype.ftblItem = null;
 /** Field
  @protected
  @type {tp.DataTable}
  */
-tp.DataView.prototype.ftblLines = null;
+tp.BrokerView.prototype.ftblLines = null;
 /** Field
  @protected
  @type {tp.DataTable}
  */
-tp.DataView.prototype.ftblSubLines = null;
+tp.BrokerView.prototype.ftblSubLines = null;
 /** Field. One of the  {@link tp.DataViewMode} constants
  @protected
  @type {number}
  */
-tp.DataView.prototype.fViewMode = tp.DataViewMode.None;
+tp.BrokerView.prototype.fViewMode = tp.DataViewMode.None;
 /** Field. One of the  {@link tp.DataViewMode} constants
  @protected
  @type {number}
  */
-tp.DataView.prototype.fLastViewMode = tp.DataViewMode.None;
+tp.BrokerView.prototype.fLastViewMode = tp.DataViewMode.None;
 /** Field
  @protected
  @type {tp.ToolBar}
  */
-tp.DataView.prototype.ToolBar = null;
+tp.BrokerView.prototype.ToolBar = null;
 /** Field
  @protected
- @type {tp.PanelList}
+ @type {tp.TabControl}
  */
-tp.DataView.prototype.PanelList = null;
+tp.BrokerView.prototype.MainPager = null;
 /** Field. The tab-control where edit part controls are reside
  @protected
  @type {tp.TabControl}
  */
-tp.DataView.prototype.pagerEdit = null;
+tp.BrokerView.prototype.EditPager = null;
 /** Field. 
  @protected
  @type {tp.SelectSqlListUi}
  */
-tp.DataView.prototype.SelectSqlListUi = null;
+tp.BrokerView.prototype.SelectSqlListUi = null;
 
 
 /** Field. A bit-field (set) build using the {@link tp.DataViewMode} constants
  @protected
  @type {number}
  */
-tp.DataView.prototype.ValidCommands = tp.DataViewMode.None;
+tp.BrokerView.prototype.ValidCommands = tp.DataViewMode.None;
 /** Field
  @protected
  @type {boolean}
  */
-tp.DataView.prototype.ForceSelect = false;
+tp.BrokerView.prototype.ForceSelect = false;
 
 /** Field
  @protected
  @type {string}
  */
-tp.DataView.prototype.LastSelectSqlText = '';
+tp.BrokerView.prototype.LastSelectSqlText = '';
 /** Field
  @protected
  @type {boolean}
  */
-tp.DataView.prototype.LastUseRowLimit = true;
+tp.BrokerView.prototype.LastUseRowLimit = true;
 
 /** Field
  @protected
  @type {boolean}
  */
-tp.DataView.prototype.EditControlsCreated = false;
+tp.BrokerView.prototype.EditControlsCreated = false;
 
 
 
@@ -2347,6 +2123,6 @@ The primary key field name. Defaults to Id
 @public
 @type {string}
  */
-tp.DataView.prototype.PrimaryKeyField = '';
+tp.BrokerView.prototype.PrimaryKeyField = '';
 
 //#endregion

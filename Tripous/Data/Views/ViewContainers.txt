@@ -2,16 +2,16 @@
 What a Container may contain
 -------------------------------------------
 View
-	PanelList | TabControl | Accordeon | Rows	
+	TabControl | Accordion | Rows	
 -------------------------------------------
 PanelListPanel
-	TabControl | Accordeon | Rows
+	TabControl | Accordion | Rows
 -------------------------------------------
 TabPage
-	TabControl | Accordeon | Rows
+	TabControl | Accordion | Rows
 -------------------------------------------
-AccordeonPanel
-	TabControl | Accordeon | Rows
+AccordionPanel
+	TabControl | Accordion | Rows
 -------------------------------------------
 Row
 	Grid (a single Grid) | Columns

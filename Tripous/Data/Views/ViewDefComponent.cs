@@ -45,7 +45,10 @@ namespace Tripous.Data
                 DataSetup["Title"] = Title;
 
             if (!string.IsNullOrWhiteSpace(TableName))
-                DataSetup["TableName"] = TableName; 
+                DataSetup["TableName"] = TableName;
+
+            if (CssClasses != null & CssClasses.Count > 0)
+                DataSetup["CssClasses"] = string.Join(" ", CssClasses.ToArray());
 
             foreach (var Entry in Properties)
                 DataSetup[Entry.Key] = Entry.Value;
@@ -57,10 +60,59 @@ namespace Tripous.Data
         {
             Dictionary<string, object> Temp = new Dictionary<string, object>();
             AssignTo(Temp);
-            string JsonText = Json.Serialize(Temp);
+            string JsonText = Json.Serialize(Temp, Json.CreateDefaultSettings(false));
             return JsonText;
         }
+        
+ 
+        /// <summary>
+        /// Adds one or more CSS classes to the <see cref="CssClasses"/> list.
+        /// <para>Css classes are specified as a list of space delimited strings. </para>
+        /// </summary>
+        public void AddCssClasses(string Text)
+        {
+            if (CssClasses == null)
+                CssClasses = new List<string>();
 
+            if (!string.IsNullOrWhiteSpace(Text))
+            {
+                string[] Parts = Text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (Parts != null && Parts.Length > 0)
+                {
+                    foreach (string CssClass in Parts)
+                        if (!string.IsNullOrWhiteSpace(CssClass) && !CssClasses.Contains(CssClass))
+                            CssClasses.Add(CssClass);
+                }
+            } 
+        }
+        /// <summary>
+        /// Removes one or more CSS classes from the <see cref="CssClasses"/> list.
+        /// <para>Css classes are specified as a list of space delimited strings. </para>
+        /// </summary>
+        public void RemoveCssClasses(string Text)
+        {
+            if (CssClasses == null)
+                CssClasses = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(Text))
+            {
+                string[] Parts = Text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (Parts != null && Parts.Length > 0)
+                {
+                    foreach (string CssClass in Parts)
+                        if (!string.IsNullOrWhiteSpace(CssClass) && !CssClasses.Contains(CssClass))
+                            CssClasses.Remove(CssClass);
+                }
+            } 
+        }
+        /// <summary>
+        /// Returns the content of the <see cref="CssClasses"/> list as text.
+        /// </summary>
+        public virtual string GetCssClassesText()
+        {
+            return CssClasses != null & CssClasses.Count > 0 ? string.Join(" ", CssClasses.ToArray()) : "";
+        }
+        
         /* properties */
         /// <summary>
         /// A unique name among all siblings. 
@@ -87,6 +139,11 @@ namespace Tripous.Data
         public string TableName { get; set; }
 
         /// <summary>
+        /// A list of css classes for the view
+        /// </summary>
+        public List<string> CssClasses { get; set; } = new List<string>();
+
+        /// <summary>
         /// Helper indexer for the Properties property.
         /// <para>Properties property is a Dictionary with properties of the data-setup attribute of this component. </para>
         /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
@@ -107,7 +164,7 @@ namespace Tripous.Data
 
 
     /// <summary>
-    /// Represents a container of view def component items suchs as PanelList, TabControl and Accordeon.
+    /// Represents a container of view def component items suchs as PanelList, TabControl and Accordion.
     /// </summary>
     public class ViewDefContainer<T>: ViewDefComponent where T: ViewDefComponent, new()
     {
@@ -132,7 +189,7 @@ namespace Tripous.Data
         public ViewDefContainer()
         {
         }
-
+ 
         /// <summary>
         /// Returns a <see cref="ViewPanelListPanelDef"/> found under a specified name, if any, else null.
         /// </summary>
@@ -162,13 +219,15 @@ namespace Tripous.Data
         /// A list of tabs. Could be empty. When not empty then this describes a TabControl (Pager) with child tab pages
         /// </summary>
         public List<T> Items { get; } = new List<T>();
+
+
     }
 
 
 
     /// <summary>
     /// Represents a panel in a container.
-    /// <para>Container could be a <see cref="ViewPanelListDef"/>, a <see cref="ViewTabControlDef"/> or a <see cref="ViewAccordeonDef"/> </para>
+    /// <para>Container could be a <see cref="ViewPanelListDef"/>, a <see cref="ViewTabControlDef"/> or a <see cref="ViewAccordionDef"/> </para>
     /// </summary>
     public class ViewDefContainerPanel : ViewDefComponent
     {
@@ -195,15 +254,15 @@ namespace Tripous.Data
             return Result;
         }
         /// <summary>
-        /// Adds and returns a <see cref="ViewAccordeonPanelDef"/>
+        /// Adds and returns a <see cref="ViewAccordionPanelDef"/>
         /// <para>NOTE: Creates the container if is null.</para>
         /// </summary>
-        public ViewAccordeonPanelDef AddGroup(string TitleKey, string Name = "")
+        public ViewAccordionPanelDef AddGroup(string TitleKey, string Name = "")
         {
-            if (Accordeon == null)
-                Accordeon = new ViewAccordeonDef();
+            if (Accordion == null)
+                Accordion = new ViewAccordionDef();
 
-            ViewAccordeonPanelDef Result = Accordeon.Add(TitleKey, Name);
+            ViewAccordionPanelDef Result = Accordion.Add(TitleKey, Name);
             return Result;
         }
         /// <summary>
@@ -230,7 +289,7 @@ namespace Tripous.Data
         /// <summary>
         /// An accordeon control
         /// </summary>
-        public ViewAccordeonDef Accordeon { get; set; }
+        public ViewAccordionDef Accordion { get; set; }
         /// <summary>
         /// A list of rows. Could be empty.
         /// <para>A row is a panel. It may contain a grid or columns with controls (control rows).</para>
