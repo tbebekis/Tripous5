@@ -137,9 +137,7 @@ namespace Tripous
                 throw new ArgumentException("EnumType is not a System.Enum");
 
             FieldInfo[] FieldInfo = EnumType.GetFields(BindingFlags.Static | BindingFlags.Public);
-
-
-
+ 
             List<object> List = new List<object>();
             for (int i = 0; i < FieldInfo.Length; i++)
             {

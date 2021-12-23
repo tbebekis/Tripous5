@@ -112,7 +112,28 @@ namespace Tripous.Data
         {
             return CssClasses != null & CssClasses.Count > 0 ? string.Join(" ", CssClasses.ToArray()) : "";
         }
-        
+        /// <summary>
+        /// Returns the content of the <see cref="Style"/> list as text, e.g <code>style="width: 100%; height: 200px; color: black;"</code>.
+        /// <para>The result text becomes the inline css style of the element this instance represents.</para>
+        /// </summary>
+        public virtual string GetCssStyleText()
+        {
+            string Result = "";
+            
+            if (Style != null && Style.Count > 0)
+            {
+                StringBuilder SB = new StringBuilder();
+
+                foreach (var Entry in Style)
+                    SB.Append($"{Entry.Key}: {Entry.Value}; ");
+
+                Result = $"style=\"{SB}\"";
+            }
+ 
+
+            return Result;
+        }
+
         /* properties */
         /// <summary>
         /// A unique name among all siblings. 
@@ -158,6 +179,10 @@ namespace Tripous.Data
         /// <para>NOTE: The data-setup of a control row has the form <code>{Text: 'xxx', Control: {Prop1: value, PropN: value}}</code> </para>
         /// </summary>
         public Dictionary<string, object> Properties { get; } = new Dictionary<string, object>();
+        /// <summary>
+        /// Dictionary with css style properties
+        /// </summary>
+        public Dictionary<string, object> Style { get; } = new Dictionary<string, object>();
     }
 
 

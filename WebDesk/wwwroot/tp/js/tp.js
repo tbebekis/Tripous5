@@ -4351,7 +4351,7 @@ tp.GetDataSetupObject = function (el) {
             }
         }
 
-        if (tp.SysConfig.DebugMode === false)
+        //if (tp.SysConfig.DebugMode === false)
             tp.RemoveAttribute(el, 'data-setup');
 
         el['__DataSetup'] = Result;
@@ -4359,6 +4359,8 @@ tp.GetDataSetupObject = function (el) {
 
     return Result;
 };
+
+
  
 
 
@@ -12462,8 +12464,12 @@ tp.tpElement = class extends tp.tpObject {
                 }
 
                 // name
-                if (!tp.IsEmpty(this.CreateParams.Name) && !tp.IsBlank(this.CreateParams.Name) && 'name' in el && tp.IsBlank(el['name']))
-                    el['name'] = this.CreateParams.Name;
+                if (tp.IsString(this.CreateParams.Name) && !tp.IsBlank(this.CreateParams.Name)) {
+                    if ('name' in el && tp.IsBlank(el['name']))
+                        el['name'] = this.CreateParams.Name;
+                    tp.Data(el, 'Name', this.CreateParams.Name);
+                }
+                   
 
                 // Html
                 if (!tp.IsEmpty(this.CreateParams.Html) && !tp.IsBlank(this.CreateParams.Html))
@@ -12536,7 +12542,7 @@ tp.tpElement = class extends tp.tpObject {
      @returns {string[]} Returns and array of property names the ProcessCreateParams() should NOT set
      */
     GetAvoidParams() {
-        return ['Id', 'Name', 'Handle', 'Parent', 'Html', 'CssClasses', 'CssText'];
+        return ['Id', 'Name',  'Handle', 'Parent', 'Html', 'CssClasses', 'CssText']; //
     }
     /**
      * Processes the this.CreateParams by applying its properties to the properties of this instance <br />
@@ -12977,38 +12983,35 @@ tp.tpElement = class extends tp.tpObject {
     GetControls() {
         return this.Handle ? tp.GetScriptObjects(this.Handle) : [];
     }
-    /**
-    Returns the first found direct or nested child tp.tpElement having a specified css class, if any, else null
-    @param {string} v - The css class
-    @param {string|HTMLElement} Optional. The parent element or selector to parent element.
-    @returns {tp.tpElement} The found tp.tpElement or null
-    */
-    FindControlByCssClass(v, elParent = null) {
  
-        if (!tp.IsValid(elParent))
-            elParent = this.Handle;
-
-        let List = tp.GetObjects(elParent);
- 
-        for (var i = 0, ln = List.length; i < ln; i++) {
-            if (List[i] instanceof tp.tpElement && List[i].HasClass(v))
-                return List[i];
-        }
-        return null;
-    }
     /**
     Returns a direct or nested child tp.tpElement having a id, if any, else null
     @param {string} v - The id
     @returns {tp.tpElement} The found tp.tpElement or null
     */
     FindControlById(v) {
-        var List = this.GetControls();
-        for (var i = 0, ln = List.length; i < ln; i++) {
-            if (tp.IsSameText(List[i].Id, v))
-                return List[i];
-        }
-        return null;
+        return tp.FindControlById(v, this.Handle);
     }
+    /**
+     Finds and returns a tp.Elemement contained by this container, by Name. If not found, then null is returned. <br />
+     The specified Name is compared against the name attribute (when the element has a name attribute)
+     and if not found, then it is compared against the data-Name attribute.
+     @param {string} Name - The Name to match
+     @returns {tp.tpElement} Returns the tp.tpElement or null.
+     */
+    FindControlByName(Name) {
+        return tp.FindControlByName(Name, this.Handle);
+    }
+    /**
+    Returns the first found direct or nested child tp.tpElement having a specified css class, if any, else null
+    @param {string} v - The css class
+    @param {string|HTMLElement} [ParentElementOrSelector=null] Optional. The parent element or selector to parent element.
+    @returns {tp.tpElement} The found tp.tpElement or null
+    */
+    FindControlByCssClass(v) {
+        return tp.FindControlByCssClass(v, this.Handle);
+    }
+
     /**
       Finds and returns a direct or nested child tp.Elemement contained by this instance, by a property. If not found, then null is returned
       @param {string} PropName The property to match
@@ -13494,6 +13497,49 @@ tp.FindControlById = function (Id, ParentElementOrSelector = null) {
     }
     return null;
 };
+/**
+ Finds and returns a tp.Elemement contained by a container, by Name. If not found, then null is returned. <br />
+ The specified Name is compared against the name attribute (when the element has a name attribute)
+ and if not found, then it is compared against the data-Name attribute.
+ @param {string} Name - The Name to match
+ @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
+ @returns {tp.tpElement} Returns the tp.tpElement or null.
+ */
+tp.FindControlByName = function (Name, ParentElementOrSelector = null) {
+    ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
+    let List = tp.GetScriptObjects(ParentElementOrSelector);
+    let Control, ControlName;
+
+    for (let i = 0, ln = List.length; i < ln; i++) {
+        Control = List[i];
+
+        if (tp.IsSameText(Control.Name, Name))
+            return Control;
+
+        ControlName = tp.Data(Control.Handle, 'Name');
+        if (tp.IsString(ControlName) && tp.IsSameText(ControlName, Name))
+            return Control;
+
+    }
+    return null;
+};
+/**
+Returns the first found direct or nested child tp.tpElement having a specified css class, if any, else null
+@param {string} v - The css class
+@param {string|HTMLElement} [ParentElementOrSelector=null] Optional. The parent element or selector to parent element.
+@returns {tp.tpElement} The found tp.tpElement or null
+*/
+tp.FindControlByCssClass = function (v, ParentElementOrSelector = null) {
+    ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
+
+    let List = tp.GetScriptObjects(ParentElementOrSelector);
+
+    for (let i = 0, ln = List.length; i < ln; i++) {
+        if (List[i] instanceof tp.tpElement && List[i].HasClass(v))
+            return List[i];
+    }
+    return null;
+}
 /**
  Finds and return a tp.Elemement contained by a container, by a property. If not found, then null is returned 
  @param {string} PropName - The property to match
@@ -16252,7 +16298,7 @@ tp.Urls.Culture = '/App/Culture';
 tp.IcoChars = {
     Insert: '+',    // '➕',
     Delete: '-',    // '➖',
-    Edit: '*',      // '✱',
+    Edit: '✎',      // '✱', * ✎
     Find:  '&#x1F50E;&#xFE0E;', // '🔎︎'  '🔍',
     LargeButtonDown: '&#9660;'
 };

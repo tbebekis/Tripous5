@@ -10,7 +10,7 @@
     string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.Def.TextTop, Model.Def.TextSplitPercent);
 }
 
-<div class="@Html.Raw(ControlWidthCssClasses)" data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+<div class="@Html.Raw(ControlWidthCssClasses)" @Html.Raw(Model.Def.GetCssStyleText()) data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
 
     @await Html.PartialAsync("View.ToolBar", Model.Def.ToolBarButtons)
 

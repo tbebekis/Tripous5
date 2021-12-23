@@ -340,7 +340,7 @@ namespace Tripous.Data
         /// </summary>
         public DataFieldDef AddTextBlob(string FieldName, bool Required = false, string TitleKey = null)
         {
-            return AddField(FieldName, DataFieldType.Memo, Required, TitleKey, null);
+            return AddField(FieldName, DataFieldType.TextBlob, Required, TitleKey, null);
         }
 
 

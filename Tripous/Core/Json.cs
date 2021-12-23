@@ -96,7 +96,13 @@ namespace Tripous
         {
             return Instance != null? JsonConvert.SerializeObject(Instance, Settings ?? DefaultSettings): string.Empty;
         }
-
+        /// <summary>
+        /// Converts Instance to a json string using the NewtonSoft json serializer.
+        /// </summary>
+        static public string Serialize(object Instance, bool Formatted)
+        {
+            return Serialize(Instance, CreateDefaultSettings(Formatted));
+        }
 
         /// <summary>
         /// Returns a specified json text as formatted for readability.

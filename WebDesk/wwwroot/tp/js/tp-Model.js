@@ -1206,7 +1206,7 @@ tp.BrokerView = class extends tp.View {
         }
 
         if (tp.IsEmpty(this.gridList)) {
-            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
+            let o = tp.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
             this.gridList = o instanceof tp.Grid ? o : null;
         }
 

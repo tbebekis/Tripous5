@@ -163,7 +163,7 @@ tp.DataType = {
      * "memo", "text", "clob"
      * @type {string}
      */
-    get Memo() { return "Memo"; },            
+    get TextBlob() { return "TextBlob"; },
  
     
 
@@ -186,7 +186,7 @@ tp.DataType = {
     @returns {string} Returns a json equivalent
     */
     TypeToJson(v) {
-        if (v === tp.DataType.String || v === tp.DataType.Memo)
+        if (v === tp.DataType.String || v === tp.DataType.TextBlob)
             return "string";
         if (v === tp.DataType.Integer || v === tp.DataType.Float || v === tp.DataType.Decimal)
             return "number";
@@ -222,7 +222,7 @@ tp.DataType = {
             || v === tp.DataType.DateTime
             || v === tp.DataType.Boolean
             || v === tp.DataType.Blob
-            || v === tp.DataType.Memo
+            || v === tp.DataType.TextBlob
             ;
 
     },
@@ -1816,7 +1816,7 @@ tp.Db = class {
 
                     return tp.ToDateTimeString(v, LocalDate === true ? '' : 'ISO');
                     break;
-                case tp.DataType.Memo: return Boolean(ForList) === true ? '[memo]' : v; // '[memo]';
+                case tp.DataType.TextBlob: return Boolean(ForList) === true ? '[memo]' : v; // '[memo]';
                 case tp.DataType.Blob: return Boolean(ForList) === true ? '[blob]' : v; //  '[blob]';
             }
         }
@@ -1875,7 +1875,7 @@ tp.Db = class {
                     }
                     return Info.Value;
 
-                case tp.DataType.Memo:
+                case tp.DataType.TextBlob:
                     return S;
 
             }
@@ -2610,11 +2610,7 @@ tp.DataTable = class extends tp.tpObject {
                 }
             }
         } else if (Column instanceof tp.DataColumn) {
-            for (i = 0, ln = this.Columns.length; i < ln; i++) {
-                if (this.Columns[i] === Column) {
-                    return i;
-                }
-            }
+            return this.Columns.indexOf(Column); 
         }
 
         return -1;
@@ -2987,6 +2983,37 @@ tp.DataTable = class extends tp.tpObject {
         }
     }
 
+    /** Creates new rows copying values from objects in a specified array of objects. <br />
+     * Each object in the array should have properties according to column names.
+     * @param {object[]} ObjectList The source object array. Each object should have properties according to column names.
+     * @param {string[]} [ExcludeFieldList] - Optional. An array of field names to be excluded from copying
+     */
+    FromObjectList(ObjectList, ExcludeFieldList = null) {
+        if (tp.IsArray(ObjectList)) {
+            let Row;
+            ObjectList.forEach((SourceObject) => {
+                Row = this.AddEmptyRow();
+                Row.FromObject(SourceObject, ExcludeFieldList);
+            });
+        }
+    }
+    /** Creates and returns an array of objects where each object is a Property/Value object. <br />
+     * Property is the name of a column and Value the corresponding value.
+     * @returns {object[]}
+     * */
+    ToObjectList() {
+        let Result = [];
+
+        let o;
+        this.Rows.forEach((Row) => {
+            o = Row.ToObject();
+            Result.push(o);
+        });
+
+        return Result;
+    }
+
+
     // event triggers
     /**
     Event trigger
@@ -3069,6 +3096,44 @@ tp.DataTable.prototype.fBatchCounter = 0;
 tp.DataTable.prototype.fPrimaryKeyField = '';
 tp.DataTable.prototype.fPrimaryKeyIndex = -1;
 tp.DataTable.prototype.fBindingSource = null; // tp.DataSource;
+
+
+/** Creates and returns a table from a specified array of objects by infering column names and data types from the first element in the array.
+ * @param {object[]} SourceList The source array of objects.
+ * @returns Returns a table.
+ */
+tp.DataTable.CreateFromList = function (SourceList) {
+ 
+    if (tp.IsArray(SourceList) && SourceList.length > 0) {
+        let o = SourceList[0];
+        let Table = new tp.DataTable();
+
+        // create columns
+        let DataType;
+        for (let Prop in o) {
+ 
+            if (tp.IsInteger(o[Prop]))
+                DataType = tp.DataType.Integer;
+            else if (tp.IsFloat(o[Prop]))
+                DataType = tp.DataType.Decimal;
+            else if (tp.IsDate(o[Prop]))
+                DataType = tp.DataType.DateTime;
+            else if (tp.IsBoolean(o[Prop]))
+                DataType = tp.DataType.Boolean;
+            else if (tp.IsString(o[Prop]))
+                DataType = tp.DataType.String;
+            else
+                tp.Throw('Cannot create a tp.DataTable from an array. DataType not supported');
+
+            Table.AddColumn(Prop, DataType);
+        }
+
+        Table.FromObjectList(SourceList);
+        return Table;
+    }
+
+    return null;
+};
 
 /* properties */
 
@@ -3645,14 +3710,44 @@ tp.DataRow = class {
     @param {tp.DataRow} SourceRow The source row
     @param {string[]} [ExcludeFieldList] - Optional. An array of field names to be excluded from copying
     */
-    CopyFromRow(SourceRow, ExcludeFieldList) {
-        ExcludeFieldList = ExcludeFieldList || [];
+    CopyFromRow(SourceRow, ExcludeFieldList = null) {
+        if (SourceRow instanceof tp.DataRow) {
+            ExcludeFieldList = ExcludeFieldList || [];
 
-        for (var i = 0, ln = this.Table.Columns.length; i < ln; i++) {
-            if (!tp.ListContainsText(ExcludeFieldList, this.Table.Columns[i].Name)) {
-                this.Set(i, SourceRow.Get(i));
+            for (let i = 0, ln = this.Table.Columns.length; i < ln; i++) {
+                if (!tp.ListContainsText(ExcludeFieldList, this.Table.Columns[i].Name)) {
+                    this.Set(i, SourceRow.Get(i));
+                }
             }
         }
+    }
+    /** Copies values from a specified object. <br />
+     * The specified object should have properties according to column names.
+     * @param {object} SourceObject The source object. Should have properties according to column names.
+     * @param {string[]} [ExcludeFieldList] - Optional. An array of field names to be excluded from copying
+     */
+    FromObject(SourceObject, ExcludeFieldList) {
+        if (tp.IsValid(SourceObject)) {
+            ExcludeFieldList = ExcludeFieldList || [];
+
+            for (let Prop in SourceObject) {
+                if (this.Table.ContainsColumn(Prop) && !tp.ListContainsText(ExcludeFieldList, Prop)) {
+                    this.Set(Prop, SourceObject[Prop]);
+                }
+            }
+        }
+    }
+    /** Creates and returns a Property/Value object where each Property is the name of a column and Value the corresponding value.
+     * @returns {object} Returns a Property/Value object where each Property is the name of a column and Value the corresponding value.
+     * */
+    ToObject() {
+        let Result = {};
+
+        this.Table.Columns.forEach((Column) => {
+            Result[Column.Name] = this.Get(Column);
+        });
+
+        return Result;
     }
 
     /**

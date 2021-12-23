@@ -1568,7 +1568,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
     */
     Show(Cell) {
         if (this.Column.DataType === tp.DataType.Unknown
-            || this.Column.DataType === tp.DataType.Memo
+            || this.Column.DataType === tp.DataType.TextBlob
             || this.Column.DataType === tp.DataType.Blob) {
             return;
         }
@@ -3497,8 +3497,7 @@ tp.Grid = class extends tp.Control  {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
-
-
+ 
     /* properties */
     /**
     Returns true if the grid is grouped (has grouped columns)
@@ -5896,10 +5895,7 @@ tp.Grid = class extends tp.Control  {
         if (tp.IsEmpty(this.DataSource)) {
             return;
         }
-
-        var self = this;
-        //let Args = new tp.ToolButtonClickEventArgs(Button); 
-
+ 
         this.Trigger('ToolBarButtonClick', Args);
 
         if (Args.Handled === false) {
@@ -5914,9 +5910,9 @@ tp.Grid = class extends tp.Control  {
                     if (!this.ReadOnly && this.Enabled && this.AllowUserToDeleteRows) {
                         Row = this.FocusedRow;
                         if (!tp.IsEmpty(Row)) {
-                            tp.YesNoBox('Delete selected row?', function (Args) {
+                            tp.YesNoBox('Delete selected row?', (Args) => {
                                 if (Args.Window.DialogResult === tp.DialogResult.Yes) {
-                                    self.DeleteRow(Row);
+                                    this.DeleteRow(Row);
                                 }
                             });
                         }

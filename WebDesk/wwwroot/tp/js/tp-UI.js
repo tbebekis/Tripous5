@@ -9145,6 +9145,12 @@ tp.ListControl = class extends tp.Control {
                 this.fListSource.RemoveDataListener(this.fListSourceListener);
             }
 
+            // could be an array of type 
+            // [{Id: 100, Name: 'All'}, {Id: 0, Name: 'No stops'}, {Id:1, Name: '1 stop'}, ... ... ]
+            if (tp.IsArray(v)) {
+                v = tp.DataTable.CreateFromList(v);
+            }
+
             if (v instanceof tp.DataTable) {
                 v = new tp.DataSource(v);
             }
@@ -19571,6 +19577,7 @@ tp.View = class extends tp.tpElement {
         }
         return null;
     }
+
     /**
     Sets or un-sets the read-only flag to this view controls
     @protected

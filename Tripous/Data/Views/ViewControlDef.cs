@@ -95,8 +95,6 @@ namespace Tripous.Data
                 }
             }
 
-            if (this.TypeName == Grid && !this.Properties.ContainsKey("Width"))
-                this.Properties["Width"] = "100%";
         }
 
         /* static */
@@ -124,7 +122,7 @@ namespace Tripous.Data
                 case DataFieldType.Boolean:
                     return CheckBox;
  
-                case DataFieldType.Memo:
+                case DataFieldType.TextBlob:
                     return Memo;
 
             }

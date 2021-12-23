@@ -645,6 +645,18 @@ tp.SysDataHandler = class {
         this.View = View;
         this.DataType = DataType;
     }
+
+    /** Called before the Edit() operation
+     * @param {string} Id
+     */
+    EditBefore(Id) {
+    }
+    /** Called after the Edit() operation
+     * @param {string} Id
+     * @param {tp.DataTable} tblData
+     */
+    EditAfter(Id, tblData) {
+    }
 };
 
 /**
@@ -659,10 +671,116 @@ tp.SysDataHandler.prototype.View = null;
 
 tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
-    constructor(View, DataType) {
+    constructor(View, DataType = 'Table') {
         super(View, DataType )
     }
 
+    /** A {@link tp.DataTable} for handling the fields of a table def.
+     @type {tp.DataTable}
+     */
+    tblFields = null;
+    /** A {@link tp.Grid} for handling the fields of a table def.
+     @type {tp.Grid}
+     */
+    gridFields = null;
+    /** A C# DataTableDef instance as it comes from server. <br />
+     <pre>
+        "Id": "{A2485753-8C03-4863-903C-5054E29F5330}",
+        "Name": "AppUser",
+        "TitleKey": "AppUser",
+        "Fields": [
+            {
+                "Id": "{0A28CC30-7971-4771-91AE-3F7616FFB480}",
+                "Name": "Id",
+                "TitleKey": "Id",
+                "IsPrimaryKey": true,
+                "DataType": "String",
+                "Length": 40,
+                "Required": true,
+                "DefaultValue": null,
+                "Unique": false,
+                "ForeignTableName": null,
+                "ForeignFieldName": null
+            },
+            ...
+        ]
+     </pre>
+     * @type {object}
+     */
+    TableDef = null;
+
+    /** Creates and assigns the tblFields.
+     * */
+    CreateFieldsTable() {
+        this.tblFields = new tp.DataTable();
+        this.tblFields.AddColumn('Id', tp.DataType.String, 40);
+        this.tblFields.AddColumn('Name', tp.DataType.String, 32);
+        this.tblFields.AddColumn('TitleKey', tp.DataType.String, 96);
+        this.tblFields.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
+        this.tblFields.AddColumn('DataType', tp.DataType.String, 40);
+        this.tblFields.AddColumn('Length', tp.DataType.Integer);
+        this.tblFields.AddColumn('Required', tp.DataType.Boolean);
+        this.tblFields.AddColumn('DefaultValue');
+        this.tblFields.AddColumn('Unique', tp.DataType.Boolean);
+        this.tblFields.AddColumn('ForeignTableName', tp.DataType.String, 32);
+        this.tblFields.AddColumn('ForeignFieldName', tp.DataType.String, 32);
+    }
+    /** Assigns the gridFields property and sets up the grid.
+     * */
+    SetupFieldsGrid() {
+        if (tp.IsEmpty(this.gridFields)) {
+            this.gridFields = this.View.FindControlByName('gridFields');
+            this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
+        }
+    }
+
+    /** Called before the Edit() operation of the View. <br />
+     * The View is about to load in its Edit part a SysData Item from server.
+     * @param {string} Id
+     */
+    EditBefore(Id) {
+    }
+    /** Called after the Edit() operation of the View <br />
+     * The View is just loaded in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @param {tp.DataTable} tblData
+     */
+    EditAfter(Id, tblData) {
+        this.tblFields = null;
+
+        let Text = tblData.Rows[0].Get('Data1');
+        let TableDef = eval("(" + Text + ")");
+        //log(TableDef);
+
+        let RowInfoList = TableDef.Fields;
+        if (tp.IsArray(RowInfoList)) {
+            this.CreateFieldsTable();
+            this.tblFields.FromObjectList(RowInfoList);
+            this.tblFields.AcceptChanges();
+        }
+
+        this.SetupFieldsGrid();
+        this.gridFields.DataSource = this.tblFields;
+        this.gridFields.BestFitColumns();
+    }
+    /** Event handler
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    GridFields_AnyButtonClick(Args) {
+        Args.Handled = true;
+
+        // EDW: see tp.Grid.OnToolBarButtonClick()
+        switch (Args.Command) {
+            case 'GridRowInsert':
+                break;
+            case 'GridRowEdit':
+                break;                
+            case 'GridRowDelete':
+                break;
+        }
+
+        tp.InfoNote('Clicked: ' + Args.Command);
+    }
 
 };
 
@@ -897,7 +1015,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
         }
 
         if (tp.IsEmpty(this.gridList)) {
-            let o = this.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
+            let o = tp.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
             this.gridList = o instanceof tp.Grid ? o : null;
         }
 
@@ -923,15 +1041,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
             this.gridList.On(tp.Events.DoubleClick, this.ListGrid_DoubleClick, this);
         }
 
-/*
-        if (this.gridList && !this.tblList) {
-            this.tblList = new tp.DataTable();
-            this.tblList.Assign(this.CreateParams.Packet.ListTable);
-
-            this.dsList = new tp.DataSource(this.tblList);
-            this.gridList.DataSource = this.dsList;
-        }
- */
+ 
     }
  
     /** Creates and binds the controls of the edit part, if not already created.
@@ -943,23 +1053,14 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
             if (tp.IsArray(ControlList)) {
                 ControlList.forEach((c) => {
-                    if (c instanceof tp.Accordion) {
-                        this.Accordion = c;
-                        this.Accordion.Expand(true, -1);
+                    if (c instanceof tp.TabControl) {
+                        this.pagerEdit = c;
+                        if (this.pagerEdit.GetPageCount() === 1) {
+                            this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
+                        }
                     }                       
                 });
-            }
-
-            let List = tp.ChildHTMLElements(el);
-            if (List.length === 1) {
-                let o = tp.GetScriptObject(List[0]);
-                if (o instanceof tp.TabControl) {
-                    this.pagerEdit = o;
-                    if (this.pagerEdit.GetPageCount() === 1) {
-                        this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
-                    }
-                }
-            }          
+            }     
    
         }
     }
@@ -1165,10 +1266,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
     ExecuteCustomCommand(Command) {
     }
 
-    // EDW: 1. Να οριστούν τα edit controls στο ViewDef (DataStore.Views -> RegisterView_SysData_Table() )
-    // 2. Να φτιαχτεί κλάση SysDataTypeHandler που θα χειρίζεται το Edit part κάθε ξεχωριστού DataType
-    // 3. Να γραφτούν οι Edit(), Insert() κλπ με 
-
+ 
 
     async ListSelect() {
         let Url = tp.Urls.SysDataSelectList;
@@ -1207,6 +1305,8 @@ tp.DeskSysDataView = class extends tp.DeskView {
                 Id: Id
             }
 
+            this.Handler.EditBefore(Id);
+
             let Args = await tp.Ajax.GetAsync(Url, Data);
  
             this.tblData = new tp.DataTable();
@@ -1217,7 +1317,9 @@ tp.DeskSysDataView = class extends tp.DeskView {
             this.DataSources.push(new tp.DataSource(this.tblData));
 
             let DataControlList = this.GetDataControlList();
-            this.BindControls(DataControlList); 
+            this.BindControls(DataControlList);
+
+            this.Handler.EditAfter(Id, this.tblData);
 
             this.ViewMode = tp.DataViewMode.Edit;
         }
@@ -1244,9 +1346,9 @@ tp.DeskSysDataView = class extends tp.DeskView {
      * */
     GetDataControlList() {
         let Result = [];
-        let PanelElementList = this.Accordion.GetPanelElements();
+        let ElementList = this.pagerEdit.GetPageElementList();
 
-        let List = tp.GetScriptObjects(PanelElementList[0]);
+        let List = tp.GetScriptObjects(ElementList[0]);
         List.forEach((c) => {
             if (c instanceof tp.Control && 'DataField' in c && tp.IsString(c.DataField) && !tp.IsBlank(c.DataField)) {
                 Result.push(c);
@@ -1350,11 +1452,11 @@ tp.DeskSysDataView.prototype.fLastViewMode = tp.DataViewMode.None;
 @type {boolean}
 */
 tp.DeskSysDataView.prototype.ForceSelect = false;
-/** The Accordion in the Edit part. The Accordion is the container of the edit controls. Its first panel contains the data-bound controls.
+/** The {@link tp.TabControl} in the Edit part. That control is the container of the edit controls. Its first page contains the data-bound controls.
 @protected
-@type {tp.Accordion}
+@type {tp.TabControl}
 */
-tp.DeskSysDataView.prototype.Accordion = null;
+tp.DeskSysDataView.prototype.pagerEdit = null;
 /** An object that handles a specific DataType, e.g. Table, Broker, Report, etc.
 @protected
 @type {tp.SysDataHandler}

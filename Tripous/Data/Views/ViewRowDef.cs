@@ -45,8 +45,6 @@ namespace Tripous.Data
                 TableName = TableName,
             };
 
-            this.Grid["Width"] = "100%";
-
             return this.Grid;
         }
 

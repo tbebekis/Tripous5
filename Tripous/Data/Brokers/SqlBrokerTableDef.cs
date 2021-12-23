@@ -792,7 +792,7 @@ namespace Tripous.Data
         /// </summary>
         public SqlBrokerFieldDef AddTextBlob(string Name, string TitleKey = "", FieldFlags Flags = FieldFlags.Memo)
         {
-            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.Memo, TitleKey, Flags);
+            SqlBrokerFieldDef Result = AddField(Name, DataFieldType.TextBlob, TitleKey, Flags);
             return Result;
         }
 

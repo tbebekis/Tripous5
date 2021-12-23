@@ -1475,6 +1475,7 @@ tp-SelectSqlListUi
     font-weight: normal;
     background-color: var(--BackColor);
     outline: none;
+    width: 100%;
     height: 200px;
 }
 

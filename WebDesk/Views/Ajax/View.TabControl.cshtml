@@ -1,6 +1,6 @@
 ﻿@model ViewTabControlModel
 
-<div class='TabControl @Html.Raw(Model.Def.GetCssClassesText())' data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+<div class='TabControl @Html.Raw(Model.Def.GetCssClassesText())' @Html.Raw(Model.Def.GetCssStyleText()) data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
     <div>
         @foreach (var PageDef in Model.Def.Items)
         {
@@ -10,7 +10,7 @@
     <div>
         @foreach (var PageDef in Model.Def.Items)
         {
-            <div class="@Html.Raw(PageDef.GetCssClassesText())" data-setup='@Html.Raw(PageDef.GetDataSetupText())'>
+            <div class="@Html.Raw(PageDef.GetCssClassesText())" @Html.Raw(PageDef.GetCssStyleText()) data-setup='@Html.Raw(PageDef.GetDataSetupText())'>
                 @{
                     var ContainerPanelModel = new ViewContainerPanelModel(Model.ViewDef, PageDef);
                     @await Html.PartialAsync("View.ContainerPanel", ContainerPanelModel)

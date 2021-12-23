@@ -18,11 +18,11 @@
 }
 
 
-<div class="tp-Row @Html.Raw(Model.Def.GetCssClassesText())">
+<div class="tp-Row @Html.Raw(Model.Def.GetCssClassesText())" @Html.Raw(Model.Def.GetCssStyleText())>
     @if (Model.Def.Grid != null)
     {
         string GridDataSetupText = Model.Def.Grid.GetDataSetupText();
-        <div class="Grid @Html.Raw(Model.Def.Grid.GetCssClassesText())" data-setup='@Html.Raw(GridDataSetupText)'></div>
+        <div class="Grid @Html.Raw(Model.Def.Grid.GetCssClassesText())" @Html.Raw(Model.Def.Grid.GetCssStyleText()) data-setup='@Html.Raw(GridDataSetupText)'></div>
     }
     else if (Model.Def.Columns != null && Model.Def.Columns.Count > 0)
     {
@@ -31,7 +31,7 @@
         {
  
             Col.AddCssClasses(Model.ViewDef.ColumnSplit.GetColumnCssClasses());
-            <div class='@Html.Raw(Col.GetCssClassesText())'>
+            <div class='@Html.Raw(Col.GetCssClassesText())' @Html.Raw(Col.GetCssStyleText())>
                 @foreach (var Ctrl in Col.Controls)
                 {
                     string CtrlRowCssClass = Ctrl.TypeName == ViewControlDef.CheckBox ? "tp-CheckBoxRow" : "tp-CtrlRow";
@@ -39,7 +39,7 @@
                     if (FieldDef != null)
                         Ctrl.AssignFrom(FieldDef);
                     string ControlDataSetupText = Ctrl.GetDataSetupText();
-                    <div class='@Html.Raw(CtrlRowCssClass)' data-setup='@Html.Raw(ControlDataSetupText)'></div>
+                    <div class='@Html.Raw(CtrlRowCssClass)' @Html.Raw(Ctrl.GetCssStyleText()) data-setup='@Html.Raw(ControlDataSetupText)'></div>
                 }
             </div>
         }
