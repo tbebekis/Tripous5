@@ -50,14 +50,26 @@ tp.Throw = function (Message) {
     Ex.name = 'Tripous Error';
     throw Ex;
 };
- 
+
+/** Array of errors to ignore  */
+tp.IgnoreErrorList = [
+'ResizeObserver loop limit exceeded'
+];
+
 /** global error handling */
 window.addEventListener("error", function (e) {
+
+    if (tp.IsString(e.message)) {
+        if (tp.IgnoreErrorList.indexOf(e.message) !== -1) {
+            e.stopImmediatePropagation();
+            return;
+        }
+    }
     if (tp.SysConfig.GlobalErrorHandling) {
         tp.ForceHideSpinner();
         tp.Logger.Error(e);
     }
-    return false;
+ 
 });
 
 /** global error handling */
@@ -466,7 +478,7 @@ tp.IsObject = function (v) { return tp.IsValid(v) && typeof v === 'object'; };
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
  */
-tp.IsArray = function (v) { return v instanceof Array || Object.prototype.toString.call(v) === '[object Array]'; };
+tp.IsArray = function (v) { return Array.isArray(v); }; //  v instanceof Array || Object.prototype.toString.call(v) === '[object Array]';
 /** Type checking function. Returns true if the specified value is a function.
  * @param {any} v The value to check
  * @returns {boolean} Returns true if the specified value passes the check.
