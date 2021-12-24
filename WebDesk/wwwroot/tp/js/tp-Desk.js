@@ -646,16 +646,27 @@ tp.SysDataHandler = class {
         this.DataType = DataType;
     }
 
+
+    /** Called before the Insert() operation
+    */
+    InsertItemBefore() {
+    }
+    /** Called after the Insert() operation
+     * @param {tp.DataTable} tblData
+     */
+    InsertItemAfter(tblData) {
+    }
+
     /** Called before the Edit() operation
      * @param {string} Id
      */
-    EditBefore(Id) {
+    EditItemBefore(Id) {
     }
     /** Called after the Edit() operation
      * @param {string} Id
      * @param {tp.DataTable} tblData
      */
-    EditAfter(Id, tblData) {
+    EditItemAfter(Id, tblData) {
     }
 };
 
@@ -710,8 +721,11 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     TableDef = null;
 
     /** Creates and assigns the tblFields.
+     * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
+     * @param {tp.DataTable} tblData
      * */
-    CreateFieldsTable() {
+    SetupFieldsTable(IsInsert, tblData) { 
+        // every time create the tblFields
         this.tblFields = new tp.DataTable();
         this.tblFields.AddColumn('Id', tp.DataType.String, 40);
         this.tblFields.AddColumn('Name', tp.DataType.String, 32);
@@ -724,6 +738,20 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         this.tblFields.AddColumn('Unique', tp.DataType.Boolean);
         this.tblFields.AddColumn('ForeignTableName', tp.DataType.String, 32);
         this.tblFields.AddColumn('ForeignFieldName', tp.DataType.String, 32);
+
+        if (IsInsert === false) {
+
+            // read the json from Data1 field and load the tblFields
+            let Text = tblData.Rows[0].Get('Data1');
+            let TableDef = eval("(" + Text + ")");
+            //log(TableDef);
+
+            let RowInfoList = TableDef.Fields;
+            if (tp.IsArray(RowInfoList)) {
+                this.tblFields.FromObjectList(RowInfoList);
+                this.tblFields.AcceptChanges();
+            }
+        }
     }
     /** Assigns the gridFields property and sets up the grid.
      * */
@@ -732,36 +760,99 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             this.gridFields = this.View.FindControlByName('gridFields');
             this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
         }
+
+        this.gridFields.DataSource = this.tblFields;
+        this.gridFields.BestFitColumns();
     }
 
+    /**
+     * 
+     * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
+     * @param {tp.DataRow} DataRow The {@link tp.DataRow} that is going to be edited.
+     */
+    CreateDialogContent(IsInsert, DataRow) {
+        let ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'IsPrimaryKey', 'Required', 'Unique'];
+        let EditableColumns = ['TitleKey', 'Length', 'DefaultValue'];
+        let Column,
+            RowClass,
+            Text,
+            TypeName,
+            DataField,
+            ReadOnly,
+            HtmlText,
+            ContentHtmlText;
+       
+        let HtmlRowList = [];
+
+        ColumnNames.forEach((ColumnName) => {
+            Column = this.tblFields.FindColumn(ColumnName);
+            RowClass = Column.DataType === tp.DataType.Boolean ? 'tp-CheckBoxRow' : 'tp-CtrlRow';
+            Text = Column.Title;
+            TypeName = ColumnName === 'DataType'? 'ComboBox': tp.DataTypeToUiType(Column.DataType);
+            DataField = Column.Name;
+            ReadOnly = IsInsert ||
+                (EditableColumns.indexOf(Column.Name) !== -1 || (tp.IsSameText(Column.Name, 'Required') && !DataRow.Get('IsPrimaryKey', false)));
+
+            // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+            HtmlText = `<div class="${RowClass}" data-setup="{Text: '${Text}', Control: { TypeName: '${TypeName}', DataField: '${DataField}', ReadOnly: ${ReadOnly} } }"></div>`;
+            HtmlRowList.push(HtmlText);
+        });
+
+ 
+
+        HtmlText = HtmlRowList.join('\n');
+
+        ContentHtmlText = `
+<div class="tp-Row">
+    <div class="tp-Col p-100 tp-Ctrls lc-75 mc-70 sc-70">
+        ${HtmlText}
+    </div>
+</div>
+`;
+
+        let elContent = tp.ContentWindow.GetContentElement(ContentHtmlText);
+        tp.Ui.CreateControls(elContent);
+        tp.ContentWindow.ShowAsync(true, 'Fields', elContent);
+
+        // EDW 
+        // Height in tp.Window and descendants and dialog boxes
+        // width of a Container, no more css media query classes
+        // arrange fields of tblFields in tp.ContentWindow
+        // pass a look-up table for the DataType field
+
+    }
+    EditFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+        if (tp.IsValid(Row)) {
+            this.CreateDialogContent(false, Row);
+        }
+    }
+
+    /** Called before the Insert() operation
+    */
+    InsertItemBefore() {
+    }
+    /** Called after the Insert() operation
+     * @param {tp.DataTable} tblData
+     */
+    InsertItemAfter(tblData) {
+        this.SetupFieldsTable(true, tblData);
+        this.SetupFieldsGrid();
+    }
     /** Called before the Edit() operation of the View. <br />
      * The View is about to load in its Edit part a SysData Item from server.
      * @param {string} Id
      */
-    EditBefore(Id) {
+    EditItemBefore(Id) {
     }
     /** Called after the Edit() operation of the View <br />
      * The View is just loaded in its Edit part a SysData Item from server.
      * @param {string} Id
      * @param {tp.DataTable} tblData
      */
-    EditAfter(Id, tblData) {
-        this.tblFields = null;
-
-        let Text = tblData.Rows[0].Get('Data1');
-        let TableDef = eval("(" + Text + ")");
-        //log(TableDef);
-
-        let RowInfoList = TableDef.Fields;
-        if (tp.IsArray(RowInfoList)) {
-            this.CreateFieldsTable();
-            this.tblFields.FromObjectList(RowInfoList);
-            this.tblFields.AcceptChanges();
-        }
-
+    EditItemAfter(Id, tblData) {
+        this.SetupFieldsTable(false, tblData);
         this.SetupFieldsGrid();
-        this.gridFields.DataSource = this.tblFields;
-        this.gridFields.BestFitColumns();
     }
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
@@ -772,14 +863,17 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         // EDW: see tp.Grid.OnToolBarButtonClick()
         switch (Args.Command) {
             case 'GridRowInsert':
+                tp.InfoNote('Clicked: ' + Args.Command);
                 break;
             case 'GridRowEdit':
+                this.EditFieldRow();
                 break;                
             case 'GridRowDelete':
+                tp.InfoNote('Clicked: ' + Args.Command);
                 break;
         }
 
-        tp.InfoNote('Clicked: ' + Args.Command);
+        
     }
 
 };
@@ -1266,8 +1360,6 @@ tp.DeskSysDataView = class extends tp.DeskView {
     ExecuteCustomCommand(Command) {
     }
 
- 
-
     async ListSelect() {
         let Url = tp.Urls.SysDataSelectList;
         let Data = {
@@ -1287,8 +1379,30 @@ tp.DeskSysDataView = class extends tp.DeskView {
     }
  
     async Insert() {
-        this.CreateEditControls();
-  
+        this.CreateEditControls();       
+
+        let Url = tp.Urls.SysDataSelectEmptyItem;
+
+        this.Handler.InsertItemBefore();
+
+        let Args = await tp.Ajax.GetAsync(Url);
+
+        this.tblData = new tp.DataTable();
+        this.tblData.Assign(Args.Packet);
+        this.tblData.Name = 'SysData';
+
+        if (this.tblData.RowCount === 0)
+            this.tblData.AddEmptyRow();
+
+        this.DataSources.length = 0;
+        this.DataSources.push(new tp.DataSource(this.tblData));
+
+        let DataControlList = this.GetDataControlList();
+        this.BindControls(DataControlList);
+
+        this.Handler.InsertItemAfter(this.tblData);
+
+        this.ViewMode = tp.DataViewMode.Insert;
     }
     async Edit() {
         this.CreateEditControls();
@@ -1298,14 +1412,12 @@ tp.DeskSysDataView = class extends tp.DeskView {
         if (tp.IsEmpty(Id)) {
             tp.ErrorNote('No selected row');
         } else {
-            //this.DoEditBefore();
-            //this.CheckCanEdit();
-            let Url = tp.Urls.SysDataSelectById;
+            let Url = tp.Urls.SysDataSelectItemById;
             let Data = {
                 Id: Id
             }
 
-            this.Handler.EditBefore(Id);
+            this.Handler.EditItemBefore(Id);
 
             let Args = await tp.Ajax.GetAsync(Url, Data);
  
@@ -1319,7 +1431,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
             let DataControlList = this.GetDataControlList();
             this.BindControls(DataControlList);
 
-            this.Handler.EditAfter(Id, this.tblData);
+            this.Handler.EditItemAfter(Id, this.tblData);
 
             this.ViewMode = tp.DataViewMode.Edit;
         }

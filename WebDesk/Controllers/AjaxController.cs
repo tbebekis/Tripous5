@@ -334,16 +334,28 @@ where
 
             return Json(Result);
         }
-        [HttpGet("/SysData/SelectById")]
-        public async Task<JsonResult> SysDataSelectById(string Id)
+        [HttpGet("/SysData/SelectItemById")]
+        public async Task<JsonResult> SysDataSelectItemById(string Id)
         {
             await Task.CompletedTask;
-
-            Type T = Id.GetType();
-
+ 
             HttpActionResult Result = new HttpActionResult();
 
             DataTable Table = SysData.SelectById(Id);
+            JsonDataTable JTable = new JsonDataTable(Table);
+            Result.SerializePacket(JTable);
+            Result.IsSuccess = true;
+
+            return Json(Result);
+        }
+        [HttpGet("/SysData/SelectEmptyItem")]
+        public async Task<JsonResult> SysDataSelectEmptyItem()
+        {
+            await Task.CompletedTask;
+ 
+            HttpActionResult Result = new HttpActionResult();
+
+            DataTable Table = SysData.CreateDataTable();
             JsonDataTable JTable = new JsonDataTable(Table);
             Result.SerializePacket(JTable);
             Result.IsSuccess = true;

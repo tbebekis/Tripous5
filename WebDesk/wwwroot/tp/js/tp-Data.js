@@ -197,6 +197,7 @@ tp.DataType = {
 
         return "string";
     },
+
     /** Returns the name (property name) of a DataType value
     @param {string} v - One of the DataType string constants
     @returns {string} Returns the name (property name) of the DataType value

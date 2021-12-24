@@ -22012,6 +22012,25 @@ tp.Ui.Types = {
 
 };
 
+/** Returns a property name (string) of {@link tp.Ui.Types} that maches a specified {@link tp.DataType} constant.
+ * @param {string} v One of the {@link tp.DataType} constants.
+ * @returns {string} Returns a property name (string) of {@link tp.Ui.Types} that maches a specified {@link tp.DataType} constant.
+ */
+tp.DataTypeToUiType = function (v) {
+    switch (v) { 
+        case tp.DataType.Integer: return "NumberBox";
+        case tp.DataType.Float: return "NumberBox";
+        case tp.DataType.Decimal: return "NumberBox";
+        case tp.DataType.Date: return "DateBox";
+        case tp.DataType.DateTime: return "DateBox";
+        case tp.DataType.Boolean: return "CheckBox";
+        case tp.DataType.Blob: return "ImageBox";
+        case tp.DataType.TextBlob: return "Memo";
+    }
+
+    return "TextBox";
+}
+
 /**
  * Creates all controls whose DOM elements are children of a certain parent, automatically. <br />
    Child DOM elements must have defined a proper css class, that is a css class registered with tp.Ui.Types, e.g. 'TextBox'

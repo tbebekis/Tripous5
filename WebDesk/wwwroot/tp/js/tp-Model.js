@@ -10,7 +10,8 @@ tp.Urls.BrokerCommit = '/Broker/Commit';
 tp.Urls.BrokerSelectList = '/Broker/SelectList';
 
 tp.Urls.SysDataSelectList = '/SysData/SelectList';
-tp.Urls.SysDataSelectById = '/SysData/SelectById';
+tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
+tp.Urls.SysDataSelectEmptyItem = '/SysData/SelectEmptyItem';
 
  
 //---------------------------------------------------------------------------------------

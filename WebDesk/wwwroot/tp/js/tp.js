@@ -4351,7 +4351,7 @@ tp.GetDataSetupObject = function (el) {
             }
         }
 
-        //if (tp.SysConfig.DebugMode === false)
+        if (tp.SysConfig.DebugMode === false)
             tp.RemoveAttribute(el, 'data-setup');
 
         el['__DataSetup'] = Result;
@@ -14554,7 +14554,7 @@ tp.WindowArgs.prototype.Y = 200;
 /** Window initial width. Ignored with small screens. */
 tp.WindowArgs.prototype.Width = 800;
 /** Window initial height. Ignored with small screens. */
-tp.WindowArgs.prototype.Height = 600;
+tp.WindowArgs.prototype.Height = 'auto';
 /** When true the window is initially centered in the viewport. */
 tp.WindowArgs.prototype.CenterScreen = true;
 /** Window caption text */
@@ -15391,7 +15391,7 @@ tp.ContentWindow.Show = function (Modal, Text, Content, CloseFunc = null, Creato
     Args.CloseFunc = CloseFunc;
     Args.Text = Text;
     Args.Width = 800;
-    Args.Height = 600;
+    Args.Height = 'auto';
     Args.ShowFooter = Modal;
     Args.Content = Content;
 

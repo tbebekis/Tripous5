@@ -1,16 +1,92 @@
-﻿        None: 0,
-        Hidden: 1,
-        ReadOnly: 2,
-        ReadOnlyUI: 4,
-        ReadOnlyEdit: 8,
-        Required: 0x10,
-        Boolean: 0x20,
-        Memo: 0x40,
-        HtmlMemo: 0x80,
-        Image: 0x100,
-        ImagePath: 0x200,
-        Searchable: 0x400,
-        Extra: 0x800,
-        ForeignKey: 0x1000,
-        NoInsertUpdate: 0x2000,
-        Localizable: 0x4000,
+﻿------------------------------------------------------------------
+Column Rename
+------------------------------------------------------------------
+MsSql           exec sp_rename N'dbo.TablName.FieldName', 'NewFieldName', 'COLUMN'
+Oracle          alter table TableName rename column FieldName to NewFieldName
+PostgreSQL      alter table TableName rename column FieldName to NewFieldName 
+Firebird        alter table TableName alter column FieldName to NewFieldName 
+MySql           alter table TableName rename column FieldName to NewFieldName 
+SQLite          alter table TableName rename column FieldName to NewFieldName           
+ 
+------------------------------------------------------------------
+Column Length 
+------------------------------------------------------------------
+MsSql           alter table TableName alter column FieldName nvarchar(NewLength)
+Oracle          alter table TableName modify FieldName nvarchar(NewLength)
+PostgreSQL      alter table TableName alter column FieldName nvarchar(NewLength)
+Firebird        alter table TableName alter column type nvarchar(NewLength)             ALTER TABLE t1 ALTER c1 TYPE char(90);
+MySql           alter table TableName modify column FieldName nvarchar(NewLength)
+SQLite          -
+
+------------------------------------------------------------------
+Column Required 
+------------------------------------------------------------------
+MsSql           update table TableName set FieldName = DefaultValue where FieldName is null; 
+                alter table TableName alter column FieldName nvarchar(Length) not null 
+Oracle          update table TableName set FieldName = DefaultValue where FieldName is null; 
+                alter table TableName modify FieldName nvarchar(Length) not null 
+PostgreSQL      alter table TableName alter column FieldName set default DefaultValue
+                alter table TableName alter column FieldName set not null   
+Firebird        update table TableName set FieldName = DefaultValue where FieldName is null 
+                alter table TableName alter FieldName set not null
+MySql           update table TableName set FieldName = DefaultValue where FieldName is null 
+                alter table TableName modify column FieldName nvarchar(NewLength) not null
+SQLite          -
+
+ 
+------------------------------------------------------------------
+Column Drop Default Value
+------------------------------------------------------------------
+MsSql           alter table TableName alter column FieldName drop default
+Oracle          alter table TableName alter column FieldName drop default
+PostgreSQL      alter table TableName alter column FieldName drop default
+Firebird        alter table TableName alter column FieldName drop default 
+MySql           alter table TableName alter FieldName drop default
+SQLite          -
+
+ 
+------------------------------------------------------------------
+Column Set Default Value
+------------------------------------------------------------------
+MsSql           alter table TableName add default DefaultValue for FieldName
+Oracle          alter table TableName modify FieldName default DefaultValue
+PostgreSQL
+Firebird        alter table TableName alter column FieldName set default DefaultValue
+MySql           alter table TableName alter FieldName set default DefaultValue
+SQLite          -
+------------------------------------------------------------------
+ 
+------------------------------------------------------------------
+MsSql
+Oracle
+PostgreSQL
+Firebird
+MySql
+SQLite
+------------------------------------------------------------------
+ 
+------------------------------------------------------------------
+MsSql
+Oracle
+PostgreSQL
+Firebird
+MySql
+SQLite
+------------------------------------------------------------------
+ 
+------------------------------------------------------------------
+MsSql
+Oracle
+PostgreSQL
+Firebird
+MySql
+SQLite
+------------------------------------------------------------------
+ 
+------------------------------------------------------------------
+MsSql
+Oracle
+PostgreSQL
+Firebird
+MySql
+SQLite
