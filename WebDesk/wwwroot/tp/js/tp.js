@@ -4573,7 +4573,7 @@ Removes a specified css class from an element.
 tp.RemoveClass = function (el, Name) {
     el = tp.Select(el);
 
-    if (tp.IsHTMLElement(el) && !tp.IsBlank(Name) && el.classList.contains(Name)) {
+    if (tp.IsHTMLElement(el) && tp.IsString(Name) && !tp.IsBlank(Name) && el.classList.contains(Name)) {
         el.classList.remove(Name);
     }
 };
@@ -4622,27 +4622,20 @@ Removes one or more css classes from an element.
 tp.RemoveClasses = function (el, ...Names) {
     el = tp.Select(el);
 
-    let i, ln;
-    if (tp.IsHTMLElement(el)) {
-        if (tp.IsArray(Names)) {
-            if (Names.length === 1) {
-                let S = Names[0];
-                if (!tp.IsBlank(S)) {
-                    var Parts = S.split(' ');
-                    for (i = 0, ln = Parts.length; i < ln; i++) {
-                        if (!tp.IsBlank(Parts[i]))
-                            tp.RemoveClass(el, Parts[i]);
-                    }
-                }
-
-            } else {
-                for (i = 0, ln = Names.length; i < ln; i++) {
-                    if (!tp.IsBlank(Names[i]))
-                        tp.RemoveClass(el, Names[i]);
-                }
-            }
+    let Remove = (Name) => {
+        if (tp.IsArray(Name)) {
+            Name.forEach(item => {
+                if (!tp.IsBlankString(item))
+                    Remove(item)
+            });
         }
-    }
+        else if (!tp.IsBlankString(Name)) {
+            tp.RemoveClass(el, Name);
+        }
+    };
+
+    Remove(Names);
+
 
 };
 /**
@@ -11075,6 +11068,113 @@ tp.AjaxRequest.ExecuteAsync = tp.AjaxRequest.Execute;
 // tpObject and tpElement
 //---------------------------------------------------------------------------------------
 
+//#region tp.SizeChart
+
+
+/** The width mode of a container element */
+tp.SizeMode = {
+    None: '',                    
+    XSmall: 'tp-XSmall',         
+    Small: 'tp-Small',           
+    Medium: 'tp-Medium',         
+    Large: 'tp-Large',           
+    XLarge: 'tp-XLarge'          
+};
+Object.freeze(tp.SizeMode);
+
+/** Array with size mode constants. 
+ * */
+tp.SizeModes = [tp.SizeMode.None, tp.SizeMode.XSmall, tp.SizeMode.Small, tp.SizeMode.Medium, tp.SizeMode.Large, tp.SizeMode.XLarge];
+
+/** Array with default width break-points.
+ * A {@link tp.SizeChart} copies this values to its Sizes property on construction.
+ * */
+tp.DefaultSizes = [ 
+    576,       // XSmall
+    768,       // Small
+    1050,      // Medium
+    1480       // Large
+               // XLarge - any greater width
+];
+
+/** A size chart helper. To be used with container classes as a helper in detecting size mode changes.
+ * A container uses this class in order to detect when its width changes from XSmall to Small, from Small to Medium, etc. etc.
+ * */
+tp.SizeChart = class {
+
+    /** Constructor.
+     * Assigns the size chart array from a specified source array.
+     * NOTE: The passed in array must contain 4 elements, namely for XSmall, Small, Medium and Large.
+     * @param {number[]} [Source] Optional. The source array
+     */
+    constructor(Source = null) {
+        this.Sizes = [];
+        this.Mode = tp.SizeMode.None;
+        tp.DefaultSizes.forEach(item => this.Sizes.push(item));
+        this.Assign(Source);
+    }
+
+    /** The current mode as is set by the IsModeChange() method. One of the {@link tp.SizeMode} constants according to a specified width
+     * @type {string}
+     */
+    Mode = tp.SizeMode.None;
+    /** The last size mode as it was before a change to mode property.
+     * @type {string}
+     */
+    LastMode = tp.SizeMode.None;
+
+    /** The actual size chart. Initially contains the values of the {@link tp.DefaultSizes}
+     * @type {number[]}
+     */
+    Sizes = [];
+
+    /** Returns true if a specified width indicates a width mode change for the container. Else false.
+     * @param {number} Width The width to use in detecting width mode change.
+     * @returns {boolean} Returns true if a specified width indicates a width mode change for the container. Else false.
+     */
+    IsModeChange(Width) {
+        let w, m;
+
+        let GetMode = () => {            
+            for (let i = 0, ln = this.Sizes.length; i < ln; i++) {
+                m = tp.SizeModes[i + 1];
+                w = this.Sizes[i];
+                if (Width <= w)
+                    return m;
+            }
+
+            return tp.SizeMode.XLarge;
+        };
+
+        if (tp.IsNumber(Width) && Width > 0) {
+            m = GetMode();
+            if (this.Mode !== m) {
+                this.LastMode = this.Mode;
+                this.Mode = m;
+                //log(`${this.Mode} ${Width}`);
+                return true;
+            }      
+        }
+
+        return false;
+    }
+    /** Assigns the size chart array from a specified source array.
+     * NOTE: The passed in array must contain 4 elements, namely for XSmall, Small, Medium and Large.
+     * @param {number[]} Source The source array
+     */
+    Assign(Source) {
+        if (tp.IsArray(Source) && Source.length > 0 && Source.length <= 4) {
+            for (let i = 0, ln = Source.length; i < ln; i++) {
+                this.Sizes[i] = Source[i];
+            }
+        }
+    }
+};
+
+
+//#endregion
+
+
 //#region tpObject
 
 /**
@@ -11270,10 +11370,10 @@ tp.tpObject = class {
     NOTE: If EventsEnabled is false, nothing happens.
     @example
     this.Trigger('OnSomething', { });
-    @param {string} EventName - The name one of the events this class supports.
+    @param {string} EventName The name one of the events this class supports.
     @param {tp.EventArgs|object} [Args=null] - Optional. The arguments to be passed to the listeners. Could be a plain javascript object or a tp.EventArgs instance.
 */
-    Trigger(EventName, Args) {
+    Trigger(EventName, Args = null) {
         if (this.EventsEnabled === true && this.fEvents && !tp.IsBlank(EventName)) {
             let sEventName = EventName;
             EventName = EventName.toUpperCase();
@@ -11935,9 +12035,7 @@ tp.tpElement = class extends tp.tpObject {
         if (this.Handle)
             this.Style.cssText = v;
     }
-
-
-
+ 
     /**
     Gets or sets the contentEditable attribute which controls whether the contents of the object are editable
     @type {boolean}
@@ -12041,23 +12139,7 @@ tp.tpElement = class extends tp.tpObject {
         if (this.Handle)
             this.Handle.scrollTop = v;
     }
-
-    /**
-    Returns the rectangle of an element relative to the Top/Left of its parent element.
-    @type {tp.Rect}
-    */
-    get OffsetRect() { return this.Handle ? tp.OffsetRect(this.Handle) : new tp.Rect(0, 0, 0, 0); }
-    /**
-    Returns the offset size (Width and Height) of the Element (that is an area including padding, border and scroll-bar, if visible, but not the margin).
-    @type {tp.Size}
-    */
-    get OffsetSize() {
-        if (this.Handle) {
-            return new tp.Size(this.Handle.offsetWidth, this.Handle.offsetHeight);
-        }
-        return new tp.Size(0, 0);
-    }
-
+ 
     /**
     Gets the computed style 
     @type {CSSStyleDeclaration}
@@ -12089,6 +12171,8 @@ tp.tpElement = class extends tp.tpObject {
                     this.fResizeDetector = new tp.ResizeDetector(this.Handle, this.OnElementSizeChanged, this, true);
                 else
                     this.fResizeDetector.Start();
+
+                this.OnElementSizeChanged(null);
             }
             else if (!tp.IsEmpty(this.fResizeDetector)) {
                 this.fResizeDetector.Stop();
@@ -12114,6 +12198,22 @@ tp.tpElement = class extends tp.tpObject {
         }
     }
 
+    /** Get the current width mode of this container.  One of the {@link tp.SizeMode} constants according to the width of this container.
+     * @type {string}
+     */
+    get SizeMode() {
+        return tp.IsValid(this.fSizeChart) ? this.fSizeChart.Mode : tp.SizeMode.None;
+    }
+    /** The actual size chart. Initially contains the values of the {@link tp.DefaultSizes}
+     * @type {number[]}
+     */
+    get SizeChart() { return tp.IsValid(this.fSizeChart) ? this.fSizeChart.Sizes : []; }
+    set SizeChart(v) {
+        if (tp.IsValid(this.fSizeChart))
+            this.fSizeChart.Assign(v);
+    }
+
+
 
     /* protected */
     /**
@@ -12136,6 +12236,8 @@ tp.tpElement = class extends tp.tpObject {
         this.fDeferHandleCreation = false;
         this.fAutoId = false;
         this.fEnabled = true;
+
+        this.fSizeChart = new tp.SizeChart();
     }
  
 
@@ -12151,8 +12253,35 @@ tp.tpElement = class extends tp.tpObject {
     @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
     OnElementSizeChanged(ResizeInfo) {
-        this.OnResized(ResizeInfo);
+        this.Trigger('ElementSizeChanged', ResizeInfo);
+        if (this.fSizeChart.IsModeChange(this.Handle.offsetWidth)) {
+
+            // adjust css classes
+            if (tp.DebugMode === true) {
+                tp.RemoveClasses(this.Handle, tp.SizeModes);
+                tp.AddClass(this.Handle, this.SizeMode);
+            }
+
+            // inform direct children
+            let List = this.GetControlList();
+            List.forEach(control => control.ParentSizeModeChanged(this.SizeMode));
+
+            this.OnSizeModeChanged();
+        }
     }
+    /** Notification.
+     * Called when width mode changes. <br />
+     * The size mode is returned by the SizeMode property.
+     * */
+    OnSizeModeChanged() {
+        this.Trigger('SizeModeChanged', { SizeMode: this.SizeMode });
+    }
+    /** Called by a parent container control to its direct child controls.
+     * @param {string} ParentSizeMode One of the {@link tp.SizeMode} constants.
+     * */
+    ParentSizeModeChanged(ParentSizeMode) {
+    }
+
     /**
     Handles any DOM event
     @param {Event} e The Event object
@@ -12275,14 +12404,7 @@ tp.tpElement = class extends tp.tpObject {
     Event trigger
     */
     OnVisibleChanged() { this.Trigger('VisibleChanged', {}); }
-    /**
-    Event trigger
-    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
-    */
-    OnResized(ResizeInfo) {
-        this.PropagateSize();
-        this.Trigger('Resized', ResizeInfo);
-    }
+
     /**
     Event trigger
     */
@@ -12748,59 +12870,7 @@ tp.tpElement = class extends tp.tpObject {
             this.OnAnyEvent(Args);
         }
     }
-
-    /**
-    Propagates the size change of this instance to its child controls and siblings
-    */
-    PropagateSize() {
-        if (this.Handle) {
-            this.ResizeControls();
-            var i, ln, o;
-            var List = this.GetElementList();
-            for (i = 0, ln = List.length; i < ln; i++) {
-                o = tp.GetObject(List[i]);
-                if (o instanceof tp.tpElement) {
-                    o.ParentSizeChanged();
-                }
-            }
-
-            if (this.InformSiblings && this.ParentHandle && this.ParentHandle instanceof HTMLElement) {
-                List = tp.ChildHTMLElements(this.ParentHandle);
-
-                for (i = 0, ln = List.length; i < ln; i++) {
-                    o = tp.GetObject(List[i]);
-                    if (o !== this && o instanceof tp.tpElement) {
-                        o.SiblingSizeChanged(this);
-                    }
-                }
-            }
-        }
-    }
-    /**
-    For inheritors to resize child controls
-    */
-    ResizeControls() { }
-
-    /**
-    Called becacuse the size of its parent is changed
-    */
-    ParentSizeChanged() {
-        this.UpdateSize();
-    }
-    /**
-    Called becacuse the size of one of its siblings is changed
-    @param {tp.tpElement} Sibling A sibling to this instance
-    */
-    SiblingSizeChanged(Sibling) {
-        this.UpdateSize();
-    }
-    /**
-     It may be called in any case where the size should be recalculated and applied. 
-     Inheritors should calculate and apply their new size, according to changes
-     */
-    UpdateSize() {
-        this.PropagateSize();
-    }
+ 
 
     /**
     Sets multiple properties of the style property of this element, at once, based on a specified object
@@ -12939,9 +13009,7 @@ tp.tpElement = class extends tp.tpObject {
     RemoveClasses(...Names) {
         tp.RemoveClasses(this.Handle, Names.join(' '));
     }
-
-
-
+ 
     /* z-index */
     /**
     Brings this element in front of all of its siblings (child elements in the same parent element). 
@@ -13362,16 +13430,16 @@ tp.tpElement.prototype.fResizeDetector = null;
  * @type {tp.Listener}
  * */
 tp.tpElement.prototype.fScreenResizeListener = null;         
-
+/** A size chart helper. To be used with container classes as a helper in detecting size changes.
+ * @type {tp.SizeChart}
+ * */
+tp.tpElement.prototype.fSizeChart = null;
 /* fields */
 /** The {@link Document} this element is part of.
  * @type {Document}
  */
 tp.tpElement.prototype.fDocument = tp.Doc;
-/** When true then this instance informs siblings when its size changes 
- * @type {boolean}
- * */
-tp.tpElement.prototype.InformSiblings = false;               
+   
 /** True after the Dispose() is called.
 * @type {boolean}
 * */
@@ -13385,7 +13453,8 @@ tp.tpElement.prototype.elText = null;
 /** HTMLSpanElement - span element, right after a control, with a required mark
  * @type {HTMLSpanElement}
  * */
-tp.tpElement.prototype.elRequiredMark = null;            
+tp.tpElement.prototype.elRequiredMark = null;
+
 
 /** Node type names array, used internally */
 tp.tpElement.StandardNodeTypes = [
@@ -13420,6 +13489,7 @@ tp.tpElement.StandardNodeTypes = [
     'progress',
     'video'
 ];
+
 
 
 /**
@@ -14826,7 +14896,7 @@ outline: none;
     }
     CenterInScreen() {
         var vpSize = tp.Viewport.GetSize();
-        var Size = this.OffsetSize;
+        var Size = new tp.Size(this.Handle.offsetWidth, this.Handle.offsetHeight); 
 
         this.X = Math.round(((vpSize.Width - Size.Width) / 2));
         this.Y = Math.round(((vpSize.Height - Size.Height) / 2));
@@ -15043,7 +15113,7 @@ flex-grow: 1;
 `;
         this.ContentWrapper = new tp.tpElement(null, CP);  
         this.ContentWrapper.IsElementResizeListener = true;
-        this.ContentWrapper.On('Resized', this.ContentResized, this);
+        this.ContentWrapper.On('ElementSizeChanged', this.ContentResized, this);
 
         // footer
         CP = new tp.CreateParams();
@@ -15089,7 +15159,7 @@ gap: 0.15em;
      * */
     Maximize() {
         if (!tp.Viewport.IsSmall && !this.IsMaximized) {
-            this.fLastRect = this.OffsetRect;  // save current position/size to restore later
+            this.fLastRect = tp.OffsetRect(this.Handle);  // save current position/size to restore later
 
             var h = window.innerHeight;
             if (this.Document.documentElement.scrollWidth > this.Document.documentElement.clientWidth) {
@@ -15204,7 +15274,6 @@ gap: 0.15em;
      * @param {tp.EventArgs} Args A tp.EventArgs object.
      */
     ContentResized(Args) {
-        this.ResizeControls();
         this.Trigger('ContentResized', {});
     }
     /**
@@ -16341,6 +16410,10 @@ tp.SysConfig.UseServerCultures = false;
 tp.SysConfig.DefaultConnection = "DEFAULT";
 tp.SysConfig.GlobalErrorHandling = false;
 
+ 
+Object.defineProperty(tp, 'DebugMode', {
+    get() { return tp.SysConfig.DebugMode === true; }
+});
 
 //#endregion
 

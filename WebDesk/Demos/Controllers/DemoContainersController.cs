@@ -74,5 +74,12 @@ namespace WebDesk.Controllers
         {
             return View();
         }
+        [Route("/demo/ElementSizeMode")]
+        public IActionResult ElementSizeMode()
+        {
+            return View();
+        }
+
+        
     }
 }

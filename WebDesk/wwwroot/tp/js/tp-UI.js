@@ -12,6 +12,7 @@ tp.Classes = {
     Small: 'tp-Small',
     Medium: 'tp-Medium',
     Large: 'tp-Large',
+    XLarge: 'tp-XLarge',
 
     /* states           ----------------------------------------------------------------- */
     Focused: 'tp-Focused',
@@ -1815,7 +1816,7 @@ tp.ImageSlider = class extends tp.tpElement {
     It always returns one of the {@link tp.ImageSizeMode} constants. Accepts either a tp.ImageSizeMode or the corresponding enum name string.
     @type {number}
     */
-    get SizeMode() {
+    get ImageMode() {
         var S = this.StyleProp('background-size');
         if (S === 'cover')
             return tp.ImageSizeMode.Crop;
@@ -1825,7 +1826,7 @@ tp.ImageSlider = class extends tp.tpElement {
             return tp.ImageSizeMode.Stretch;
         return tp.ImageSizeMode.Unknown;
     }
-    set SizeMode(v) {
+    set ImageMode(v) {
         if (tp.IsString(v)) {
             if (tp.IsSameText(v, 'Crop'))
                 v = tp.ImageSizeMode.Crop;
@@ -4133,7 +4134,7 @@ tp.MenuItem = class extends tp.MenuItemBase {
 
             if (this.Menu.IsMenu && this.Menu.Contains(this)) {
                 this.fListElement.style.left = '1px';
-                this.fListElement.style.top = tp.px(this.Menu.OffsetSize.Height - 4);
+                this.fListElement.style.top = tp.px(this.Menu.Handle.offsetHeight - 4);  
             } else {
                 this.fListElement.style.left = '100%';
                 tp.StyleProp(this.fListElement, 'margin-top', '2px');
@@ -5327,12 +5328,12 @@ tp.ItemBar = class extends tp.tpElement {
         this.RenderMode = tp.ItemBarRenderMode.Normal;
     }
     /**
-    Event trigger
-    @protected
+    Notification sent by tp.ResizeDetector when the size of this element changes.
+    This method is called only if this.IsElementResizeListener is true.
     @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnResized(ResizeInfo) {
-        super.OnResized(ResizeInfo);
+    OnElementSizeChanged(ResizeInfo) {
+        super.OnElementSizeChanged(ResizeInfo);
 
         let List;
         let ItemTotalWidth = 0;
@@ -5563,7 +5564,7 @@ tp.ItemBar = class extends tp.tpElement {
         if (this.RenderMode === tp.ItemBarRenderMode.NextPrev)
             this.Arrange();
         else
-            this.OnResized(null);
+            this.OnElementSizeChanged(null);
     }
 
     /** Returns true if a specified item is visible.
@@ -13840,7 +13841,7 @@ tp.ImageBox = class extends tp.Control {
     Gets or sets the size mode. It always returns one of the {@link tp.ImageSizeMode} constants. Accepts either a {@link tp.ImageSizeMode} or the corresponding enum name string.
     @type {tp.ImageSizeMode}
     */
-    get SizeMode() {
+    get ImageMode() {
         var S = this.StyleProp('background-size');
         if (S === 'cover')
             return tp.ImageSizeMode.Crop;
@@ -13850,7 +13851,7 @@ tp.ImageBox = class extends tp.Control {
             return tp.ImageSizeMode.Stretch;
         return tp.ImageSizeMode.Unknown;
     }
-    set SizeMode(v) {
+    set ImageMode(v) {
         if (tp.IsString(v)) {
             if (tp.IsSameText(v, 'Crop'))
                 v = tp.ImageSizeMode.Crop;
@@ -17896,14 +17897,13 @@ tp.LocatorBox = class extends tp.Control {
         super.OnHandleCreated();
     }
     /**
-    Event trigger
+    Notification sent by tp.ResizeDetector when the size of this element changes.
+    This method is called only if this.IsElementResizeListener is true.
     @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
-    @protected
-    @override
     */
-    OnResized(ResizeInfo) {
+    OnElementSizeChanged(ResizeInfo) {
         this.Layout();
-        super.OnResized(ResizeInfo);
+        super.OnElementSizeChanged(ResizeInfo);
     }
     /**
     Binds the control to its DataSource. It is called after the DataSource property is assigned. <br />
@@ -19322,10 +19322,7 @@ tp.DataViewCommandNames = [];
 //#endregion
 
 //#region tp.View
-
-
-
-
+ 
 /**
 A view represents a control container that automatically can create its controls from the provided markup. <br />
 Example markup
@@ -19832,6 +19829,118 @@ tp.ViewTypes = {
 };
 
 
+
+//#endregion
+
+
+//#region tp.Row tp.Col
+
+/** A responsive row */
+tp.Row = class extends tp.tpElement {
+    /**
+    Constructor <br />
+    Example markup:
+    <pre>
+        <div class='Row'></div>
+    </pre> 
+    Example of the produced markup.
+    <pre>
+        <div class='tp-Row'></div>
+    </pre>
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.Row';
+        this.fElementType = 'div';
+        this.fDefaultCssClasses = [tp.Classes.Row];
+    }
+    /**
+    Initializes fields and properties just before applying the create params.        
+    */
+    InitializeFields() {
+        super.InitializeFields();
+        this.IsElementResizeListener = true;
+    }
+};
+
+/** A responsive column */
+tp.Col = class extends tp.tpElement {
+    /**
+    Constructor <br />
+    Example markup:
+    <pre>
+        <div class='Col'></div>
+    </pre> 
+    Example of the produced markup.
+    <pre>
+        <div class='tp-Col'></div>
+    </pre>
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.Col';
+        this.fElementType = 'div';
+        this.fDefaultCssClasses = [tp.Classes.Col];
+    }
+    /**
+    Initializes fields and properties just before applying the create params.        
+    */
+    InitializeFields() {
+        super.InitializeFields();
+        this.WidthPercents = tp.Col.DefaultWidthPercents.map(w => w);
+    }
+
+    /** Called by a parent container control to its direct child controls.
+     * When parent size mode changes, this column adjusts its width properly.
+     * @param {string} ParentSizeMode One of the {@link tp.SizeMode} constants.
+     * */
+    ParentSizeModeChanged(ParentSizeMode) {
+        let Index = tp.SizeModes.indexOf(ParentSizeMode);
+        if (Index > 0) {
+            let w = this.WidthPercents[Index - 1];
+            this.Width = `${w}%`;
+        }
+    }
+};
+
+/** Array with percent widths to occupy from parent container according to width mode.
+ * There are always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes.
+ * This property is initialized in the InitializeFields() method with values from the {@link tp.Col.DefaultWidthPercents} array.
+ * @type {number[]}
+ */
+tp.Col.prototype.WidthPercents = [100, 100, 50, 33.33, 25];
+/** Array with the default percent widths to occupy from parent container according to width mode.
+ * There are always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes.
+ * This array provides the initial values to WidthPercents instance property.
+ * @type {number[]}
+ */
+tp.Col.DefaultWidthPercents = [100, 100, 50, 33.33, 33.33]; // [100, 100, 50, 33.33, 25];
 
 //#endregion
 
@@ -21562,6 +21671,7 @@ tp.SqlFilterBoxAsync = function (FilterDefs, SelectFunc, Table) {
 //---------------------------------------------------------------------------------------
 
 
+
 //#region  tp.Ui
 
 /**
@@ -21587,7 +21697,7 @@ tp.Ui = class {
     */
     static CreateElement(TypeName, ElementOrSelector) {
         let el = null;
-        let Type = this.Types[TypeName];
+        let Type = tp.Ui.Types[TypeName];
         if (tp.IsEmpty(Type)) {
             tp.Throw('Control type name not registered in tp.Ui.Types: ' + TypeName);
         }
@@ -21600,7 +21710,7 @@ tp.Ui = class {
         }
 
         var Result = new Type(el, null);            // tp.tpElement (or descendant) constructor
-        tp.RemoveClass(Result.Handle, TypeName);
+        //tp.RemoveClass(Result.Handle, TypeName);
         return Result;
     }
     /**
@@ -21608,7 +21718,7 @@ tp.Ui = class {
     Used in creating tp.tpElement instances that are NOT registered with tp.Ui.Types.  <br />
     The DOM element must have a markup like the following:
     <pre>
-        <div class="tp-Class" data-setup="{ClassType: tp.MyDataView, .... }"></div>
+        <div class="Class" data-setup="{ClassType: tp.MyDataView, .... }"></div>
     </pre>
     The ClassType property defines a class that is NOT registered with tp.Ui.Types.
     @private
@@ -21626,7 +21736,7 @@ tp.Ui = class {
                 if (tp.IsObject(o) && 'ClassType' in o) {
                     Type = o.ClassType;
                     Result = new Type(el, null);                // tp.tpElement (or descendant) constructor
-                    tp.RemoveClass(Result.Handle, 'tp-Class');
+                    tp.RemoveClass(Result.Handle, tp.Ui.Types.Class);
                 } 
             }
         }
@@ -21905,7 +22015,7 @@ tp.Ui = class {
         if (tp.IsElement(el) && tp.HasObject(el)) {
             if (tp.GetObject(el) instanceof tp.tpElement)
                 Result = tp.GetObject(el);
-        } else if (TypeName === 'tp-Class') {
+        } else if (TypeName === tp.Ui.Types.Class) {
             Result = this.CreateByClass(el);
         } else if (TypeName === 'tp-CtrlRow') {
             Result = this.CreateCtrlRow(el);
@@ -21944,8 +22054,9 @@ tp.Ui = class {
     }
 };
 
+//#endregion
 
-
+//#region  tp.Ui.Types
 // Firefox v.69 does NOT support static keyword in fields
 
 /**
@@ -21959,10 +22070,18 @@ tp.Ui.Types = {
     Used in creating tp.Element instances that are NOT registered with tp.Ui.Types. <br />
     Example markup
     <pre>
-        <div class="tp-Class" data-setup="{ClassType: tp.MyDataView, .... }"></div>
+        <div class="Class" data-setup="{ClassType: tp.MyDataView, .... }"></div>
     </pre>
+    @type {string}
     */
-    'tp-Class': 'tp-Class',
+    Class: 'tp-Class',
+
+    Row: tp.Row,
+    Col: tp.Col,
+
+    'tp-Row': tp.Row,
+    'tp-Col': tp.Col,
+
     'tp-CtrlRow': 'tp-CtrlRow',
     'tp-CheckBoxRow': 'tp-CheckBoxRow',
 
@@ -22011,6 +22130,8 @@ tp.Ui.Types = {
     TreeView: tp.TreeView,   
 
 };
+//#endregion
+
 
 /** Returns a property name (string) of {@link tp.Ui.Types} that maches a specified {@link tp.DataType} constant.
  * @param {string} v One of the {@link tp.DataType} constants.
@@ -22042,4 +22163,7 @@ tp.CreateContainerControls = function (ParentElementSelector = null, ExcludedTyp
     return tp.Ui.CreateControls(ParentElementSelector, ExcludedTypes);
 };
 
-//#endregion
+
+
+
+

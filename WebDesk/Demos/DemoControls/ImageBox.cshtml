@@ -9,7 +9,7 @@
     <p>An image control.</p>
     <p>It is <strong>NOT</strong> an <code>img</code> tag. </p>
     <p>It is a DIV element using the css background properties, i.e. background-image, background-size, and background-position. </p>
-    <p>Properties: Url, SizeMode. SizeMode is a tp.ImageSizeMode enum type with 3 values: Crop, Scale and Stretch. </p>
+    <p>Properties: Url, ImageMode. ImageMode is a tp.ImageSizeMode enum type with 3 values: Crop, Scale and Stretch. </p>
 </div>
 
 <br />
@@ -33,7 +33,7 @@
         cbo.On('SelectedIndexChanged', function () {
             var S = cbo.SelectedValue;
             if (!tp.IsBlank(S))
-                fi.SizeMode = parseInt(S);
+                fi.ImageMode = parseInt(S);
         });
     });
 

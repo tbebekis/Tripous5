@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "Element Size Mode";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <p>
+        Detects size changes in an HTMLElement and sends notifications to a listener function.
+    </p>
+    <p>
+        Uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API" target="_blank">ResizeObserver API</a>
+    </p>
+</div>
+
+<br />
+
+<style>
+    .tp-Row { 
+        height: auto;
+        width: 100%;
+        background-color: silver;
+    }
+</style>
+
+<div class="html-code2">
+    <div>
+        <button id="btn1" type="button">Button1</button>
+    </div>
+    <br />
+    <div>
+        <label for="edtWidth">width</label> &nbsp; <input id="edtWidth" type="text" value="450" />
+    </div>
+
+    <br />
+    <br />
+    <div>
+        <label id="lblLog"></label>
+    </div>
+
+    <br />
+    <br />
+    <div id='Row1' class="Row" data-setup="{ SizeChart: [400, 700, 1200, 1500] }">
+        <div id="Col1" class="Col" ></div>
+        <div id="Col2" class="Col" ></div>
+        <div id="Col3" class="Col" ></div>
+        <div id="Col4" class="Col" ></div>
+    </div>
+</div>
+
+
+<script class="js-code3">
+    let row;
+
+    tp.Ready(() => {
+        let ColList = tp.SelectAll(Row1, '.Col');
+        ColList.forEach((el) => {
+            let Col = new tp.Col(el);
+            Col.BackColor = tp.RandomColor();
+            Col.Height = tp.Random(50, 150);
+        });
+
+
+        row = new tp.Row(tp('#Row1'));
+        
+        row.On('ElementSizeChanged', () => {
+            lblLog.innerHTML = `Width: ${row.SizeMode} ${row.Handle.offsetWidth}`;
+        });
+
+         
+    });
+
+    btn1.addEventListener('click', (e) => {
+        let w = edtWidth.value;
+        Row1.style.width = w + 'px';
+    });
+</script>
+
+
+

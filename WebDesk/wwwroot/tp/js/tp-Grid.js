@@ -3181,7 +3181,7 @@ tp.GridViewportPanel = class extends tp.tpObject {
     @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
     OnElementSizeChanged(ResizeInfo) {
-        this.Trigger('Resized', ResizeInfo);
+        this.Trigger('ElementSizeChanged', ResizeInfo);
     }
 
     /* public */
@@ -3779,7 +3779,7 @@ tp.Grid = class extends tp.Control  {
 
         this.mnuAggregates.On('ItemClick', this.mnuAggregates_ItemClick, this);
 
-        this.pnlViewport.On('Resized', this.Viewport_OnResized, this);
+        this.pnlViewport.On('ElementSizeChanged', this.Viewport_OnElementSizeChanged, this);
         tp.On(this.pnlViewport.Handle, tp.Events.Scroll, this.FuncBind(this.Viewport_OnScroll));
 
         tp.On(this.pnlBottom.Handle, tp.Events.Scroll, this.FuncBind(this.Bottom_OnScroll));
@@ -5928,7 +5928,7 @@ tp.Grid = class extends tp.Control  {
     /**
     Event handler
     */
-    Viewport_OnResized() {
+    Viewport_OnElementSizeChanged() {
         //this.UpdateScrollHeight();
         //this.RenderNodes();
         //this.BuildGroups();

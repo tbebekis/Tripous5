@@ -815,8 +815,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         tp.ContentWindow.ShowAsync(true, 'Fields', elContent);
 
         // EDW 
-        // Height in tp.Window and descendants and dialog boxes
         // width of a Container, no more css media query classes
+        // Height in tp.Window and descendants and dialog boxes        
         // arrange fields of tblFields in tp.ContentWindow
         // pass a look-up table for the DataType field
 
@@ -859,8 +859,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      */
     GridFields_AnyButtonClick(Args) {
         Args.Handled = true;
-
-        // EDW: see tp.Grid.OnToolBarButtonClick()
+ 
         switch (Args.Command) {
             case 'GridRowInsert':
                 tp.InfoNote('Clicked: ' + Args.Command);
