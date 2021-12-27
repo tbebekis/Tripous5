@@ -9084,7 +9084,7 @@ tp.List = class extends Array {
     // or
     MyObject.On('OnSomething', this.HandlerFunc, this);
 
-    // or, if the caller is a tp.tpObject
+    // or, if the caller is a tp.Object
     MyObject.On('OnSomething', this.FuncBind(this.HandlerFunc));
 
     @param {string} EventName - Can be any event name this instance supports.
@@ -11081,7 +11081,7 @@ tp.AjaxRequest.ExecuteAsync = tp.AjaxRequest.Execute;
 //#endregion
 
 //---------------------------------------------------------------------------------------
-// tpObject and tp.Component
+// tp.Object and tp.Component
 //---------------------------------------------------------------------------------------
 
 //#region tp.SizeChart
@@ -11191,12 +11191,12 @@ tp.SizeChart = class {
 //#endregion
 
 
-//#region tpObject
+//#region tp.Object
 
 /**
 The ultimate base class.
 */
-tp.tpObject = class {
+tp.Object = class {
 
     /* construction */
     constructor() {
@@ -11240,7 +11240,7 @@ tp.tpObject = class {
     Initializes the 'static' and 'read-only' class fields, such as tpClass etc.
     */
     InitClass() {
-        this.tpClass = 'tp.tpObject';
+        this.tpClass = 'tp.Object';
         this.fJsonExcludes = ['tpClass', 'EventsEnabled'];
     }
     /**
@@ -11279,7 +11279,7 @@ tp.tpObject = class {
     /**
     Creates and returns an instance (object) of this class.
     @param {...Args}  Args A rest parameter
-    @returns {tp.tpObject} Returns a tp.tpObject.
+    @returns {tp.Object} Returns a {@link tp.Object}.
     */
     CreateInstance(...Args) {
         var Ctor = this.constructor;
@@ -11325,7 +11325,7 @@ tp.tpObject = class {
     // or
     MyObject.On('OnSomething', this.HandlerFunc, this);
 
-    // or, if the caller is a tp.tpObject
+    // or, if the caller is a tp.Object
     MyObject.On('OnSomething', this.FuncBind(this.HandlerFunc));
 
     @param {string} EventName - Can be any event name this instance supports.
@@ -11474,11 +11474,11 @@ tp.tpObject = class {
 };
 
 
-tp.tpObject.prototype.tpClass = '';                         // treat it as read-only class field (static)
-tp.tpObject.prototype.fEventsEnabledCounter = 0;
-tp.tpObject.prototype.fJsonExcludes = null;                 // string[]
-tp.tpObject.prototype.fEvents = null;                       // { [EventName: string]: Listener[]; }  
-tp.tpObject.prototype.fBinds = null;                        // { Func: Function, Bind: any } [] = null;
+tp.Object.prototype.tpClass = '';                         // treat it as read-only class field (static)
+tp.Object.prototype.fEventsEnabledCounter = 0;
+tp.Object.prototype.fJsonExcludes = null;                 // string[]
+tp.Object.prototype.fEvents = null;                       // { [EventName: string]: Listener[]; }  
+tp.Object.prototype.fBinds = null;                        // { Func: Function, Bind: any } [] = null;
 
 
 //#endregion
@@ -11573,7 +11573,7 @@ tp.Button = class extends tp.Component {
 
 Ofcourse it's insane.
 */
-tp.Component = class extends tp.tpObject {
+tp.Component = class extends tp.Object {
 
     /**
     Constructor
@@ -12171,7 +12171,7 @@ tp.Component = class extends tp.tpObject {
     */
     OnElementSizeChanged(ResizeInfo) {
         this.Trigger('ElementSizeChanged', ResizeInfo);
-        if (this.fSizeChart.IsModeChange(this.Handle.offsetWidth)) {
+        if (tp.IsValid(this.fSizeChart) && this.fSizeChart.IsModeChange(this.Handle.offsetWidth)) {
 
             // adjust css classes
             if (tp.DebugMode === true) {
@@ -12664,7 +12664,7 @@ tp.Component = class extends tp.tpObject {
     // or
     MyObject.On('SomethingHappened', this.HandlerFunc, this);
 
-    // or, if the caller is a tp.tpObject
+    // or, if the caller is a tp.Object
     MyObject.On('OnSomething', this.FuncBind(this.HandlerFunc));
 
     @param {string} EventName - Can be any event name this instance supports.
@@ -13383,22 +13383,22 @@ tp.Component.CreateMemo = function (Parent = null) {
 //#endregion
 
 
-//#region HTMLElement to tpObject and tp.Component association
+//#region HTMLElement to tp.Object and tp.Component association
 
-// HTMLElement to tp.tpObject association ---------------------------------------------------------------
+// HTMLElement to tp.Object association ---------------------------------------------------------------
 /**
 Returns the Tripous script object associated to a DOM element, if any or null.  
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el - The element to get the associated tripous script object from.
-@returns {tp.tpObject} Returns the Tripous script object associated to a DOM element, if any or null.
+@returns {tp.Object} Returns the Tripous script object associated to a DOM element, if any or null.
 */
 tp.GetObject = function (el) {
     if (tp.IsString(el))
         el = tp.Select(el);
 
     if (tp.IsElement(el)) {
-        if (el['tpObject']) //  && el['tpObject'] instanceof tp.tpObject
+        if (el['tpObject'])  
             return el['tpObject'];
     }
 
@@ -13409,7 +13409,7 @@ Associates a DOM element to a Tripous script object.
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el - The element to associate with the Tripous script object from.
-@param {tp.tpObject} v - The Tripous script object.
+@param {tp.Object} v - The Tripous script object.
 */
 tp.SetObject = function (el, v) {
     if (tp.IsString(el))
@@ -13431,7 +13431,7 @@ Returns an array with all tp.Element objects constructed/existing up on direct o
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} ParentElementOrSelector - Defaults to document. The container of controls. If null/undefined/empty the document is used.
-@returns {tp.tpObject[]} Returns an array with tp.tpObject objects constructed up on direct or nested elements of a parent element
+@returns {tp.Object[]} Returns an array with {@link tp.Object} objects constructed up on direct or nested elements of a parent element
 */
 tp.GetAllObjects = function (ParentElementOrSelector) {
     var elParent = null;
@@ -13442,7 +13442,8 @@ tp.GetAllObjects = function (ParentElementOrSelector) {
 
     elParent = elParent || document;
     var NodeList = tp.SelectAll(elParent, '.tp-Object');
-    var List = []; // tp.tpObject[]
+    /** @type {tp.Object[]} */
+    var List = [];  
     let o;
 
     if (!tp.IsEmpty(NodeList)) {
@@ -13456,12 +13457,12 @@ tp.GetAllObjects = function (ParentElementOrSelector) {
     return List;
 };
 /**
-Returns a tp.tpObject instance of a specified tp.tpObject class starting the search from a specified dom node/element and going all the parents up until the document.body is reached.
+Returns a {@link tp.Object} instance of a specified {@link tp.Object} class starting the search from a specified dom node/element and going all the parents up until the document.body is reached.
 Returns null if nothing is found. 
-NOTE: To be used from inside event handler methods in order to find the right tp.tpObject sender instance.
+NOTE: To be used from inside event handler methods in order to find the right {@link tp.Object} sender instance.
  * @param {Node} el - The element that plays the role of the starting point.
  * @param {object} ElementClass A {@link tp.Component} class or a descendant, to check for a match.
- * @returns {tp.tpObject} Returns a tp.tpObject or null
+ * @returns {tp.Object} Returns a {@link tp.Object} or null
  */
 tp.GetContainerByClass = function (el, ElementClass) {
 
@@ -14173,7 +14174,7 @@ Element mover and resizer  class. <br />
 @example
 let Dragger = new tp.Dragger(tp.DraggerMode.Both '.Box', '.Caption');
 */
-tp.Dragger = class extends tp.tpObject {
+tp.Dragger = class extends tp.Object {
 
     /**
     Constructor
@@ -14576,7 +14577,7 @@ Object.freeze(tp.DialogResult);
 
 //#region tp.WindowArgs
 /**
-Arguments for the tp.tpWindow constructor
+Arguments for the {@link tp.Window} constructor
 @class
 @extends tp.CreateParams
 */
@@ -14593,7 +14594,7 @@ tp.WindowArgs = class extends tp.CreateParams {
      * @type {number} 
      */
     get DialogResult() {
-        return this.Window instanceof tp.tpWindow ? this.Window.DialogResult : tp.DialogResult.None;
+        return this.Window instanceof tp.Window ? this.Window.DialogResult : tp.DialogResult.None;
     }
 };
 
@@ -14631,8 +14632,8 @@ tp.WindowArgs.prototype.Creator = null;
 /** Callback to call when the window closes. A function as function(Args: tp.WindowArgs) */
 tp.WindowArgs.prototype.CloseFunc = null;
 
-/** The tp.tpWindow window after the creation.
-@type {tp.tpWindow}
+/** The {@link tp.Window} window after the creation.
+@type {tp.Window}
 */
 tp.WindowArgs.prototype.Window = null;
 /** Element or selector with html content. An element that becomes the content of the window. 
@@ -14649,13 +14650,13 @@ tp.WindowArgs.prototype.AsModal = false;
 tp.WindowArgs.prototype.DefaultDialogResult = tp.DialogResult.Cancel;
 //#endregion
 
-//#region tp.tpWindow (🗖 🗗 🗕🗙      × _ □ )
+//#region tp.Window (🗖 🗗 🗕🗙      × _ □ )
 
 /**
 The ultimate ancestor of all windows and dialog boxes
 @class
 */
-tp.tpWindow = class extends tp.Component {
+tp.Window = class extends tp.Component {
     /**
     Constructor
     @param {tp.WindowArgs} Args - Setup options
@@ -14743,7 +14744,7 @@ outline: none;
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.tpWindow';
+        this.tpClass = 'tp.Window';
         this.fDefaultCssClasses = ['tp-Window'];
     }
     /**
@@ -14812,9 +14813,9 @@ outline: none;
         var zIndex = this.ZIndex;
         var Result = 0;
         var v;
-        for (var i = 0, ln = tp.tpWindow.Windows.length; i < ln; i++) {
-            if ((tp.tpWindow.Windows[i] !== this) && !tp.tpWindow.Windows[i].Modal) {
-                v = tp.tpWindow.Windows[i].ZIndex;
+        for (var i = 0, ln = tp.Window.Windows.length; i < ln; i++) {
+            if ((tp.Window.Windows[i] !== this) && !tp.Window.Windows[i].Modal) {
+                v = tp.Window.Windows[i].ZIndex;
                 Result = Math.max(Result, v);
             }
         }
@@ -15234,7 +15235,7 @@ gap: 0.15em;
         this.PassBackResult();
         this.Hide();
         this.Dispose();
-        tp.ListRemove(tp.tpWindow.Windows, this);
+        tp.ListRemove(tp.Window.Windows, this);
     }
 
     /* events */
@@ -15290,53 +15291,54 @@ gap: 0.15em;
 };
 
 /* static */
-tp.tpWindow.Windows = [];                         // tp.tpWindow[]
+/** @type {tp.Window[]} */
+tp.Window.Windows = [];                          
 
 /* protected */
-tp.tpWindow.prototype.fOverlay = null;            // tp.ScreenOverlay;
-tp.tpWindow.prototype.fDragger = null;            // tp.Dragger;
+tp.Window.prototype.fOverlay = null;            // tp.ScreenOverlay;
+tp.Window.prototype.fDragger = null;            // tp.Dragger;
 
-tp.tpWindow.prototype.fMaximizeButton = null;     // HTMLImageElement;
-tp.tpWindow.prototype.fRestoreButton = null;      // HTMLImageElement;
-tp.tpWindow.prototype.fCloseButton = null;        // HTMLImageElement;
+tp.Window.prototype.fMaximizeButton = null;     // HTMLImageElement;
+tp.Window.prototype.fRestoreButton = null;      // HTMLImageElement;
+tp.Window.prototype.fCloseButton = null;        // HTMLImageElement;
 
-tp.tpWindow.prototype.fLastRect = new tp.Rect(0, 0, 0, 0);
-tp.tpWindow.prototype.fMaximized = false;
+tp.Window.prototype.fLastRect = new tp.Rect(0, 0, 0, 0);
+tp.Window.prototype.fMaximized = false;
 
-tp.tpWindow.prototype.fModal = false;
-tp.tpWindow.prototype.fDialogResult = tp.DialogResult.None;
+tp.Window.prototype.fModal = false;
+tp.Window.prototype.fDialogResult = tp.DialogResult.None;
 
-//tp.tpWindow.prototype.fArgs = null;                // tp.WindowArgs;
+ 
 
-tp.tpWindow.prototype.Header = null;              // HTMLElement;
-tp.tpWindow.prototype.HeaderText = null;          // HTMLSpanElement;
-tp.tpWindow.prototype.HeaderButtonBar = null;     // HTMLElement;
-tp.tpWindow.prototype.Footer = null;              // HTMLElement;
+tp.Window.prototype.Header = null;              // HTMLElement;
+tp.Window.prototype.HeaderText = null;          // HTMLSpanElement;
+tp.Window.prototype.HeaderButtonBar = null;     // HTMLElement;
+tp.Window.prototype.Footer = null;              // HTMLElement;
 
 /** It always created by this base class
  * @type {@link tp.Component}
  * */
-tp.tpWindow.prototype.ContentWrapper = null;     
+tp.Window.prototype.ContentWrapper = null;     
 /** It may be created after a specific call to CreateContentElement()
  * @type {@link tp.Component}
  * */
-tp.tpWindow.prototype.Content = null;
+tp.Window.prototype.Content = null;
 
 /** 
  The "three-lines" icon as url-data.
  @static
  @type {string}
  */
-tp.tpWindow.ICON_ThreeLines = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAANCAYAAAB2HjRBAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAACxJREFUOE9jcHBw+E8uZiBXI0gfZZr////PQC4mWyPIQsqcPRpgpKW2gQttALaGnxXL5WQ1AAAAAElFTkSuQmCC';
+tp.Window.ICON_ThreeLines = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAANCAYAAAB2HjRBAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAACxJREFUOE9jcHBw+E8uZiBXI0gfZZr////PQC4mWyPIQsqcPRpgpKW2gQttALaGnxXL5WQ1AAAAAElFTkSuQmCC';
 //#endregion
 
 //#region  tp.ContentWindow
 /**
-A <code>tp.tpWindow</code> for displaying any type of html content. <br />
+A {@link tp.Window} for displaying any type of html content. <br />
 Use the <code>tp.ContentWindow.Show()</code>, or <code>ShowModal()</code> in order to pass the root element with the content to display.
-@extends tp.tpWindow
+@extends tp.Window
 */
-tp.ContentWindow = class extends tp.tpWindow {
+tp.ContentWindow = class extends tp.Window {
     /**
     Constructor 
     @param {tp.WindowArgs} Args - Setup options.
@@ -15354,7 +15356,7 @@ tp.ContentWindow = class extends tp.tpWindow {
         super.InitClass();
 
         this.tpClass = 'tp.ContentWindow';
-        this.fDefaultCssClasses = [tp.tpWindow.CSS_CLASS_Window];
+        this.fDefaultCssClasses = [tp.Window.CSS_CLASS_Window];
     }
     /**
     @override
@@ -15497,7 +15499,7 @@ tp.ContentWindow.ShowModalAsync = async function (Text, Content) {
 /**
 Internal class
 */
-tp.MessageDialog = class extends tp.tpWindow {
+tp.MessageDialog = class extends tp.Window {
 
     /**
      * Constructor
@@ -15694,7 +15696,7 @@ Displays a modal window with an iframe element
 @param {string} UrlOrHtmlContent - The url or the html content (text) to display
 @param {function} [CloseFunc=null] - Optional. Called when the window closes. A function as function (Args: tp.WindowArgs): void.
 @param {Object} [Creator=null] - Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns a tp.tpWindow window.
+@returns {tp.Window} Returns a {@link tp.Window} window.
 */
 tp.FrameBox = function (Text, UrlOrHtmlContent, CloseFunc = null, Creator = null) {
     let Args = new tp.WindowArgs();
@@ -15704,7 +15706,7 @@ tp.FrameBox = function (Text, UrlOrHtmlContent, CloseFunc = null, Creator = null
     Args.Width = 800;
     Args.Height = 600;
 
-    let box = new tp.tpWindow(Args);
+    let box = new tp.Window(Args);
     box.ShowModal();
 
 

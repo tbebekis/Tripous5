@@ -154,7 +154,7 @@ tp.BrokerEventArgs = class extends tp.EventArgs {
 The base broker class. A broker handles a tree of data-tables that make an entity (e.g. Customer and CustomerAddress tables)
 and the data operations (INSERT, UPDATE, DELETE, SELECT) for that tree.    
 */
-tp.Broker = class extends tp.tpObject {
+tp.Broker = class extends tp.Object {
 
     /**
     Constructor.

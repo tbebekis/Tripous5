@@ -27,7 +27,7 @@ Produced markup
     </div>
 </pre>
 */
-tp.GridColumn = class extends tp.tpObject {
+tp.GridColumn = class extends tp.Object {
 
     /**
     Constructor <br />
@@ -1484,7 +1484,7 @@ tp.GridColumn.prototype.fSummaryGroupCell;
 /**
 The base class for any inplace editor of the tp.Grid
 */
-tp.GridInplaceEditor = class extends tp.tpObject {
+tp.GridInplaceEditor = class extends tp.Object {
 
     /**
     Constructor.
@@ -2792,7 +2792,7 @@ tp.GridRootNode = class extends tp.GridNode {
 /**
  * Internal. The group panel.
  * */
-tp.GridGroupPanel = class extends tp.tpObject {
+tp.GridGroupPanel = class extends tp.Object {
 
     /**
      * Constructor
@@ -2940,7 +2940,7 @@ tp.GridGroupPanel = class extends tp.tpObject {
 
 /** Internal. The column panel 
  */
-tp.GridColumnPanel = class extends tp.tpObject {
+tp.GridColumnPanel = class extends tp.Object {
 
     /**
      * Constructor
@@ -3030,7 +3030,7 @@ tp.GridColumnPanel = class extends tp.tpObject {
 
 /** Internal. The filter panel
  */
-tp.GridFilterPanel = class extends tp.tpObject {
+tp.GridFilterPanel = class extends tp.Object {
 
     /**
      * Constructor
@@ -3119,7 +3119,7 @@ tp.GridFilterPanel = class extends tp.tpObject {
 //#region  tp.GridViewportPanel 
 /** Internal. The viewport panel
  */
-tp.GridViewportPanel = class extends tp.tpObject {
+tp.GridViewportPanel = class extends tp.Object {
 
     /**
      * Constructor
@@ -3218,7 +3218,7 @@ tp.GridViewportPanel.prototype.fResizeDetector = null;
 //#region  tp.GridSummariesPanel
 /** Internal. The summaries panel
  */
-tp.GridSummariesPanel = class extends tp.tpObject {
+tp.GridSummariesPanel = class extends tp.Object {
 
     /**
      * Constructor
@@ -3297,7 +3297,7 @@ tp.GridSummariesPanel = class extends tp.tpObject {
 
 /** Internal. The bottom panel
  */
-tp.GridBottomPanel = class extends tp.tpObject {
+tp.GridBottomPanel = class extends tp.Object {
     /**
      * Constructor
      * @param {tp.Grid} Grid The owner grid

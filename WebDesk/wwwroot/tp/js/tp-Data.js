@@ -2117,7 +2117,7 @@ tp.Db = class {
 /**
 A dataset mainly is a list of data tables
 */
-tp.DataSet = class extends tp.tpObject {
+tp.DataSet = class extends tp.Object {
     /**
     Constructor
     @param {string} [Name] - Optional. The name of the dataset
@@ -2281,7 +2281,7 @@ tp.DataSet.prototype.Name = "";
 /**
 Represents a data table
 */
-tp.DataTable = class extends tp.tpObject {
+tp.DataTable = class extends tp.Object {
 
     /**
     Constructor
@@ -3198,7 +3198,7 @@ tp.DataTable.prototype.AutoGenerateGuidKeys = true;
 /**
 Represents a data column
 */
-tp.DataColumn = class extends tp.tpObject {
+tp.DataColumn = class extends tp.Object {
     /**
     Constructor
     @param {string} [Name] - Optional. The column name (field name)
@@ -4292,7 +4292,7 @@ tp.IDataSourceListener = class {
 A base implementation of a {@link tp.IDataSourceListener} listener of datasource notifications
 @implements {tp.IDataSourceListener}
 */
-tp.DataSourceListener = class extends tp.tpObject {
+tp.DataSourceListener = class extends tp.Object {
 
 
     /**
@@ -4376,7 +4376,7 @@ Also the datasource implements the notion of the "current position" by informing
 It is also capable of sorting and filtering the data it provides.
 A control has to implement the {@link tp.IDataSourceListener} if it is to get notifications from the datasource
 */
-tp.DataSource = class extends tp.tpObject {
+tp.DataSource = class extends tp.Object {
 
     /**
     Constructor

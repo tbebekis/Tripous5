@@ -395,7 +395,7 @@ Type-guard function
 @param {any} v The object to check
 @returns {boolean} Returns true if the specified object provides a Command string property.
 */
-tp.HasCommandProperty = function (v) { return v instanceof tp.tpObject && 'Command' in v; };
+tp.HasCommandProperty = function (v) { return v instanceof tp.Object && 'Command' in v; };
 //#endregion
 
 //#region tp.ISelectedIndex
@@ -416,7 +416,7 @@ Type-guard function
 @param {any} v The object to check
 @returns {boolean} Returns true if the specified object provides a SelectedIndex numeric property.
 */
-tp.IsISelectedIndex = function (v) { return v instanceof tp.tpObject && 'SelectedIndex' in v; };
+tp.IsISelectedIndex = function (v) { return v instanceof tp.Object && 'SelectedIndex' in v; };
 //#endregion
 
 //#region tp.IDropDownBoxListener
@@ -1041,7 +1041,7 @@ tp.PanelList = class extends tp.Component {
     set Associate(v) {
         if (v !== this.fAssociate) {
 
-            if (this.fAssociate instanceof tp.tpObject && this.fSelectedIndexListener instanceof tp.Listener) {
+            if (this.fAssociate instanceof tp.Object && this.fSelectedIndexListener instanceof tp.Listener) {
                 this.fAssociate.Off('SelectedIndexChanged', this.fSelectedIndexListener);
             }
 
@@ -1056,7 +1056,7 @@ tp.PanelList = class extends tp.Component {
                     this.fAssociate = o;
             }
 
-            if (tp.IsISelectedIndex(this.fAssociate) && this.fAssociate instanceof tp.tpObject) {
+            if (tp.IsISelectedIndex(this.fAssociate) && this.fAssociate instanceof tp.Object) {
                 this.fAssociate.On('SelectedIndexChanged', this.Associate_SelectedIndexChanged, this);
                 this.SelectedIndex = this.Associate.SelectedIndex;
             }
@@ -3427,7 +3427,7 @@ tp.MenuItemList = class {
 /**
 Base class for the MenuItem and MenuSeparator
 */
-tp.MenuItemBase = class extends tp.tpObject {
+tp.MenuItemBase = class extends tp.Object {
 
     /**
     Constructor
@@ -5528,7 +5528,7 @@ tp.ItemBar = class extends tp.Component {
         let HtmlText =
             `<div class="${tp.Classes.Toggle}">
     <div class="${tp.Classes.Btn}">
-         <img class="${tp.Classes.Img}" src="${tp.tpWindow.ICON_ThreeLines}" />
+         <img class="${tp.Classes.Img}" src="${tp.Window.ICON_ThreeLines}" />
     </div>
     <div class="${tp.Classes.Text}"></div>    
 </div>`;
@@ -14670,7 +14670,7 @@ tp.ProgressBar = class extends tp.Component {
 Represents a tree-view node
 
 */
-tp.TreeNode = class extends tp.tpObject {
+tp.TreeNode = class extends tp.Object {
 
     /**
     Constructor  <br />       
@@ -16353,7 +16353,7 @@ The ListTable is used as a source by the locator. The locator locates the ListRo
 @implements {tp.IDataSourceListener}
 @implements {tp.IDropDownBoxListener} 
  * */
-tp.Locator = class extends tp.tpObject {
+tp.Locator = class extends tp.Object {
 
     /**
     Constructor
@@ -20229,7 +20229,7 @@ tp.CheckBoxRow.prototype.elText = null;
 /**
 A window for displaying a dataset.
 */
-tp.DataSetDialog = class extends tp.tpWindow {
+tp.DataSetDialog = class extends tp.Window {
 
     /**
     Constructor
@@ -20392,7 +20392,7 @@ tp.DataSetDialog.prototype.Grid;
 A row pick list dialog with a grid that allows the user to check/select multiple rows.
 If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
 */
-tp.MultiRowPickDialog = class extends tp.tpWindow {
+tp.MultiRowPickDialog = class extends tp.Window {
 
     /**
     Constructor
@@ -20650,7 +20650,7 @@ tp.MultiRowPickDialog.prototype.tblSource;
 A row pick dialog with a grid that allows the user to check/select a single row.
 If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
 */
-tp.SingleRowPickDialog = class extends tp.tpWindow {
+tp.SingleRowPickDialog = class extends tp.Window {
 
     /**
     Constructor
@@ -20912,7 +20912,7 @@ tp.SingleRowPickDialog.prototype.KeyFieldName = '';
 //#region tp.SqlFilterDialog
 
 /** A dialog box that displays and executes {@link tp.SqlFilterDef} filters. */
-tp.SqlFilterDialog = class extends tp.tpWindow {
+tp.SqlFilterDialog = class extends tp.Window {
     /**
     Constructor
     @param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Should contain a FilterDefs array property, of type {@link tp.SqlFilterDef},
@@ -21212,7 +21212,7 @@ When the close callback function (CloseFunc) is called, the Window.Args contain 
 @param {string} [Text] Optional. The caption title of the window
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.TableBox = function (Table, Text, CloseFunc, Creator) {
     Table = Table || new tp.DataTable('');
@@ -21273,7 +21273,7 @@ Mainly for debug purposes.
 @param {string} [Text] Optional. The caption title of the window
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.RowBox = function(Row, Text, CloseFunc, Creator) {
     Text = Text || 'Row box';
@@ -21328,7 +21328,7 @@ Displays a modal window with a grid displaying the tables of a dataset, and retu
 @param {string} [Text] Optional. The caption title of the window
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.DataSetBox = function(DataSet, Text, CloseFunc, Creator) {
     DataSet = DataSet || new tp.DataSet('');
@@ -21355,7 +21355,7 @@ tp.DataSetBox = function(DataSet, Text, CloseFunc, Creator) {
 Displays a modal window with a grid displaying the tables of a dataset, returns a promise. <br />
 @param {tp.DataSet} DataSet The {@link tp.DataSet} dataset to display in the grid
 @param {string} [Text] Optional. The caption title of the window
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.DataSetBoxAsync = function (DataSet, Text) {
     return new Promise((Resolve, Reject) => {
@@ -21372,7 +21372,7 @@ tp.DataSetBoxAsync = function (DataSet, Text) {
 Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns the window.
 If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
 @param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Must have (mandatory) a <code>tblSource: tp.DataTable</code> property. Optionally it may contain a <code>SelectedRows: tp.DataRow[]</code> and a <code>VisibleColumns: string[]</code> property.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowsBox1 = function (Args) {
     return tp.PickRowsBox(Args);
@@ -21387,7 +21387,7 @@ If the user clicks OK on the dialog, then the dialog SelectedRows array property
 @param {string} SourceKeyName A tblSource Key field name used to match with TargetKeyName
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowsBox2 = function (tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName, CloseFunc, Creator) {
     return tp.PickRowsBox(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName, CloseFunc, Creator);
@@ -21400,7 +21400,7 @@ If the user clicks OK on the dialog, then the dialog SelectedRows array property
 @param {tp.DataRow[]} SelectedRows A {@link tp.DataRow} array containing the tblSource rows that should be initially selected
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowsBox3 = function(tblSource, VisibleColumns, SelectedRows,  CloseFunc, Creator) {
     return tp.PickRowsBox(tblSource, VisibleColumns, SelectedRows, CloseFunc, Creator);
@@ -21426,7 +21426,8 @@ tp.PickRowsBox = function() {
         Creator             // Object
         ;
 
-    let Result = null;      // tp.tpWindow
+    /** @type {tp.Window} */
+    let Result = null;       
     let Case = 0;
 
     if (arguments.length === 1 && arguments[0] instanceof tp.WindowArgs) {
@@ -21611,7 +21612,7 @@ tp.PickRowsBoxAsync = function() {
 Displays a row pick dialog with a grid that allows the user to check/select a single row.
 If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
 @param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Must have (mandatory), at least, defined either a  <code>Table: tp.DataTable</code> or a <code>SqlText: string </code> or a <code>SelectSql: tp.SelectSql </code> property.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowBox1 = function (Args) {
     return tp.PickRowBox(Args);
@@ -21627,7 +21628,7 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {string} [Text] Optional. The caption title of the window
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowBox2 = function (Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text, CloseFunc, Creator) {
     return tp.PickRowBox(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text, CloseFunc, Creator);
@@ -21639,7 +21640,7 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {string} [Text] Optional. The caption title of the window
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowBox3 = function (SelectSql, Text, CloseFunc, Creator) {
     return tp.PickRowBox(SelectSql, Text, CloseFunc, Creator);
@@ -21652,7 +21653,7 @@ If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow prop
 @param {string} [Text] Optional. The caption title of the window
 @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
 @param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+@returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.PickRowBox4 = function (SqlText, VisibleColumns, Text, CloseFunc, Creator) {
     return tp.PickRowBox(SqlText, VisibleColumns, Text, CloseFunc, Creator);
@@ -21671,7 +21672,8 @@ tp.PickRowBox = function () {
         Creator             // Object
         ;
 
-    let Result = null;      // tp.tpWindow
+    /** @type {tp.Window} */
+    let Result = null;       
     let Case = 0;
 
 
@@ -21906,7 +21908,7 @@ tp.PickRowBoxAsync = function () {
  * @param {tp.DataTable} Table Optional. A {@link tp.DataTable} to display initially.
  * @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
  * @param {object} [Creator]  Optional. The context (this) for the callback function.
- * @returns {tp.tpWindow} Returns the {@link tp.tpWindow} window.
+ * @returns {tp.Window} Returns the {@link tp.Window} window.
  */
 tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table, CloseFunc, Creator) {
     let Args = new tp.WindowArgs();
