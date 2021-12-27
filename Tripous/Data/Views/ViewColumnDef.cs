@@ -18,7 +18,7 @@ namespace Tripous.Data
         /// <summary>
         /// Constant. Default column and width classes
         /// </summary>
-        public const string DefaultCssClasses = "tp-Col l-75 m-70 s-70 xs-100 ";
+        public const string DefaultCssClasses = "Col ";
 
         /* construction */
         /// <summary>
@@ -34,9 +34,7 @@ namespace Tripous.Data
         public override string GetCssClassesText()
         {
             string Text = base.GetCssClassesText();
-            return !string.IsNullOrWhiteSpace(Text) ? Text : DefaultCssClasses;
-
-            
+            return !string.IsNullOrWhiteSpace(Text) ? Text : DefaultCssClasses;            
         }
 
         /// <summary>

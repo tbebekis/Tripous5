@@ -490,7 +490,7 @@ tp.DeskViewPager = class extends tp.tpElement {
         TabItem.DeskView = View;
         View.TabItem = TabItem;
 
-        this.PageListContainer.AddControl(View);
+        this.PageListContainer.AddComponent(View);
         this.TabBar.AddItem(TabItem);
 
         this.TabBar.SelectedItem = TabItem;
@@ -557,7 +557,7 @@ tp.DeskViewPager = class extends tp.tpElement {
      * @returns {tp.View[]} Returns an array with {@link tp.View} items contained by this pager.
      * */
     GetViewList() {
-        let ResultList = this.PageListContainer.GetControlList();  
+        let ResultList = tp.GetComponentList(this.PageListContainer.Handle);
         return ResultList;
     }
     /** Finds and returns a contained view by a specified name, if any, else null/undefined.
@@ -757,7 +757,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * */
     SetupFieldsGrid() {
         if (tp.IsEmpty(this.gridFields)) {
-            this.gridFields = this.View.FindControlByName('gridFields');
+            this.gridFields = tp.FindComponentByName('gridFields', this.View.Handle);
             this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
         }
 
@@ -811,7 +811,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 `;
 
         let elContent = tp.ContentWindow.GetContentElement(ContentHtmlText);
-        tp.Ui.CreateControls(elContent);
+        tp.Ui.CreateContainerControls(elContent);
         tp.ContentWindow.ShowAsync(true, 'Fields', elContent);
 
         // EDW 
@@ -1108,7 +1108,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
         }
 
         if (tp.IsEmpty(this.gridList)) {
-            let o = tp.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
+            let o = tp.FindComponentByCssClass(tp.Classes.Grid, this.GetListPageElement());
             this.gridList = o instanceof tp.Grid ? o : null;
         }
 
@@ -1142,7 +1142,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
     CreateEditControls() {
         if (!tp.IsValid(this.pagerEdit)) {
             let el = this.GetEditPageElement();
-            let ControlList = tp.Ui.CreateControls(el);
+            let ControlList = tp.Ui.CreateContainerControls(el);
 
             if (tp.IsArray(ControlList)) {
                 ControlList.forEach((c) => {
@@ -1249,7 +1249,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
         if (tp.IsNumber(this.ValidCommands)) {
             if (this.ToolBar) {
 
-                let ControlList = this.ToolBar.GetControls(),
+                let ControlList = tp.GetAllComponents(this.ToolBar.Handle),
                     c,          // tp.tpElement,
                     Command,    // string
                     ViewMode    // integer
@@ -1459,7 +1459,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
         let Result = [];
         let ElementList = this.pagerEdit.GetPageElementList();
 
-        let List = tp.GetScriptObjects(ElementList[0]);
+        let List = tp.GetAllComponents(ElementList[0]);
         List.forEach((c) => {
             if (c instanceof tp.Control && 'DataField' in c && tp.IsString(c.DataField) && !tp.IsBlank(c.DataField)) {
                 Result.push(c);

@@ -105,9 +105,9 @@
         Table = CreateTable();
         DS = new tp.DataSource(Table);
 
-        edtId = tp.FindControlById('Id');
-        edtName = tp.FindControlById('Name');
-        cboCountry = tp.FindControlById('CountryId');
+        edtId = tp.FindComponentById('Id');
+        edtName = tp.FindComponentById('Name');
+        cboCountry = tp.FindComponentById('CountryId');
 
         cboCountry.ListSource = new tp.DataSource(tblCountry);
 

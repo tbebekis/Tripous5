@@ -10,7 +10,7 @@ namespace Tripous.Data
     /// <summary>
     /// 
     /// </summary>
-    public class ViewDef: ViewDefContainerPanel // ViewDefComponent
+    public class ViewDef: ViewDefContainerPanel  
     {
         static List<ViewDef> RegistryList = new List<ViewDef>();
 
@@ -24,11 +24,9 @@ namespace Tripous.Data
         /// <summary>
         /// Constructor. Creates a default view based on a broker descriptor.
         /// </summary>
-        public ViewDef(SqlBrokerDef Broker, UiSplit Split = null)
+        public ViewDef(SqlBrokerDef Broker, int MaxFieldsInColumn = 5)
         {
-            if (Split != null)
-                this.ColumnSplit = Split;
-
+ 
             this.Name = Broker.Name;
             this.BrokerName = Broker.Name;
 
@@ -65,7 +63,13 @@ namespace Tripous.Data
  
             // columns in the row
             var MainTable = Broker.MainTable;
-            List<List<SqlBrokerFieldDef>> ColumnFieldLists = MainTable.Fields.Split(this.ColumnSplit.Large);
+
+            List<SqlBrokerFieldDef> TableFieldList = new List<SqlBrokerFieldDef>();
+            foreach (var FieldDef in MainTable.Fields)
+                if (!FieldDef.IsHidden)
+                    TableFieldList.Add(FieldDef); 
+
+            List<List<SqlBrokerFieldDef>> ColumnFieldLists = TableFieldList.Split(MaxFieldsInColumn); 
 
             ViewColumnDef Column;
             ViewControlDef Control;
@@ -149,35 +153,7 @@ namespace Tripous.Data
             Def.TitleKey = TitleKey;
             return Register(Def);
         }
-
-        /// <summary>
-        /// Returns a string with css classes that control the widths of controls/titles in control rows. Examples
-        /// <para><c>tp-Ctrls lc-75 mc-70 sc-70</c></para>
-        /// <para><c>tp-Ctrls tp-TextTop</c></para>
-        /// </summary>
-        static public string GetCssClassesForControlWidths(bool TextTop, int TextSplitPercent)
-        {
-            // tp-Ctrls tp-TextTop
-            // tp-Ctrls lc-75 mc-70 sc-70
-            StringBuilder SB = new StringBuilder();
-            SB.Append("tp-Ctrls ");
-            if (TextTop)
-            {
-                SB.Append("tp-TextTop ");
-            }
-            else
-            {
-                // control widths in control rows
-                int LargePercent = 100 - TextSplitPercent;
-                int MediumPercent = LargePercent - 5;
-                int SmallPercent = MediumPercent - 3;
-
-                SB.Append($"lc-{LargePercent} mc-{MediumPercent} sc-{SmallPercent} ");
-            }
-
-            return SB.ToString();
-        }
-
+ 
         /* public */ 
         /// <summary>
         /// Adds and returns a <see cref="ViewToolBarButtonDef"/>
@@ -250,19 +226,7 @@ namespace Tripous.Data
         /// The broker name. When not set then it returns the Name.
         /// </summary>
         public string BrokerName { get; set; } 
-
-        /// <summary>
-        /// When true, then <see cref="TextSplitPercent"/> is not applied. Control labels go on top of each control.
-        /// </summary>
-        public bool TextTop { get; set; }
-        /// <summary>
-        /// Width percent of text in rows.
-        /// </summary>
-        public int TextSplitPercent { get; set; } = 35;
-        /// <summary>
-        /// Columns per screen size
-        /// </summary>
-        public UiSplit ColumnSplit { get; set; } = new UiSplit();
+ 
 
         /// <summary>
         /// Tool-bar buttons.

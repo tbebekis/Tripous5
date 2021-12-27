@@ -664,7 +664,7 @@ namespace Tripous.Data
                 Result = new SqlBrokerFieldDef() 
                 { 
                     Name = Name,
-                    TitleKey = TitleKey,
+                    TitleKey = !string.IsNullOrWhiteSpace(TitleKey)? TitleKey: Name,
                     DataType = DataType, 
                     Flags = Flags 
                 };

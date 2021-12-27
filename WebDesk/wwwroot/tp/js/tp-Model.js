@@ -1207,7 +1207,7 @@ tp.BrokerView = class extends tp.View {
         }
 
         if (tp.IsEmpty(this.gridList)) {
-            let o = tp.FindControlByCssClass(tp.Classes.Grid, this.GetListPageElement());
+            let o = tp.FindComponentByCssClass(tp.Classes.Grid, this.GetListPageElement());
             this.gridList = o instanceof tp.Grid ? o : null;
         }
 
@@ -1225,11 +1225,11 @@ tp.BrokerView = class extends tp.View {
     CreateEditControls() {
         if (!this.EditControlsCreated) {
             let el = this.GetEditPageElement();
-            let ControlList = tp.Ui.CreateControls(el);
+            let ControlList = tp.Ui.CreateContainerControls(el);
 
             let List = tp.ChildHTMLElements(el);
             if (List.length === 1) {
-                let o = tp.GetScriptObject(List[0]);
+                let o = tp.GetComponent(List[0]);
                 if (o instanceof tp.TabControl) {
                     this.EditPager = o;
                     if (this.EditPager.GetPageCount() === 1) {
@@ -1860,7 +1860,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
         if (tp.IsNumber(this.ValidCommands)) {
             if (this.ToolBar) {
 
-                let ControlList = this.ToolBar.GetControls(),
+                let ControlList = tp.GetAllComponents(this.ToolBar.Handle),
                     c,          // tp.tpElement,
                     Command,    // string
                     ViewMode    // integer

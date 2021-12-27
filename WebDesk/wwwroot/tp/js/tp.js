@@ -3908,6 +3908,22 @@ tp.HtmlToElement = function (HtmlText) {
 
 };
 
+/** Returns an array of all direct HTMLElement children of a specified parent HTMLElement
+ * @param {HTMLElement|string} ElementOrSelector The parent element.
+ * @returns {HTMLElement[]} Returns an array of all direct HTMLElement children of a specified parent HTMLElement
+ */
+tp.GetElementList = function (ElementOrSelector) {
+    let Result = [];
+    let el = tp(ElementOrSelector);
+    if (tp.IsHTMLElement(el)) {
+        for (let i = 0, ln = el.children.length; i < ln; i++) {
+            if (tp.IsHTMLElement(el.children[i]))
+                Result.push(el.children[i]);
+        }
+    }
+    return Result;
+};
+
 /**
 Safely removes an HTMLElement from the DOM, that is from its parent node, if any.
 @param {string|Node} ElementOrSelector The element to remove from DOM
@@ -11465,105 +11481,6 @@ tp.tpObject.prototype.fEvents = null;                       // { [EventName: str
 tp.tpObject.prototype.fBinds = null;                        // { Func: Function, Bind: any } [] = null;
 
 
-// tpObject association ---------------------------------------------------------------
-/**
-Returns the Tripous script object associated to a DOM element, if any or null.  
-NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
-Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
-@param {string|Node} el - The element to get the associated tripous script object from.
-@returns {tp.tpObject} Returns the Tripous script object associated to a DOM element, if any or null.
-*/
-tp.GetObject = function (el) {
-    if (tp.IsString(el))
-        el = tp.Select(el);
-
-    if (tp.IsElement(el)) {
-        if (el['tpObject']) //  && el['tpObject'] instanceof tp.tpObject
-            return el['tpObject'];
-    }
-
-    return null;
-};
-/**
-Associates a DOM element to a Tripous script object.
-NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
-Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
-@param {string|Node} el - The element to associate with the Tripous script object from.
-@param {tp.tpObject} v - The Tripous script object.
-*/
-tp.SetObject = function (el, v) {
-    if (tp.IsString(el))
-        el = tp.Select(el);
-
-    if (tp.IsElement(el))
-        el['tpObject'] = v;
-};
-/**
-Returns true if a specified DOM element is associated to a tp.tpElement
-NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
-Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
-@param {string|Node} el The element to check
-@returns {boolean} Returns true if a specified DOM element is associated to a tp.tpElement
-*/
-tp.HasObject = function (el) { return tp.GetObject(el) !== null; };
-/**
-Returns an array with all tp.Element objects constructed/existing up on child DOM elements of a specified parent element or the entire document. 
-NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
-Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
-@param {string|Node} ParentElementOrSelector - Defaults to document. The container of controls. If null/undefined/empty the document is used.
-@returns {tp.tpObject[]} Returns an array with tp.tpObject objects constructed up on elements of a parent element
-*/
-tp.GetObjects = function (ParentElementOrSelector) {
-    var elParent = null;
-
-    if (!tp.IsEmpty(ParentElementOrSelector)) {
-        elParent = tp.Select(ParentElementOrSelector);
-    }
-
-    elParent = elParent || document;
-    var NodeList = tp.SelectAll(elParent, '.tp-Object');
-    var List = []; // tp.tpObject[]
-    let o;
-
-    if (!tp.IsEmpty(NodeList)) {
-        for (var i = 0, ln = NodeList.length; i < ln; i++) {
-            o = tp.GetObject(NodeList[i]);
-            if (o)
-                List.push(o);
-        }
-    }
-
-    return List;
-};
-/**
-Returns a tp.tpObject instance of a specified tp.tpObject class starting the search from a specified dom node/element and going all the parents up until the document.body is reached.
-Returns null if nothing is found. 
-NOTE: To be used from inside event handler methods in order to find the right tp.tpObject sender instance.
- * @param {Node} el - The element that plays the role of the starting point.
- * @param {object} ElementClass A tp.tpElement class or a descendant, to check for a match.
- * @returns {tp.tpObject} Returns a tp.tpObject or null
- */
-tp.GetContainerByClass = function (el, ElementClass) {
-
-    let o;
-
-    while (true) {
-        if (el === el.ownerDocument.body)
-            return null;
-
-        if (el) {
-            o = tp.GetObject(o);
-
-            if (o instanceof ElementClass)
-                return o;
-        }
-
-        el = el.parentNode;
-    }
-
-};
-
-
 //#endregion
 
 //#region CreateParams
@@ -12263,7 +12180,7 @@ tp.tpElement = class extends tp.tpObject {
             }
 
             // inform direct children
-            let List = this.GetControlList();
+            let List = tp.GetComponentList(this.Handle); 
             List.forEach(control => control.ParentSizeModeChanged(this.SizeMode));
 
             this.OnSizeModeChanged();
@@ -13051,80 +12968,21 @@ tp.tpElement = class extends tp.tpObject {
         if (this.Handle)
             this.Handle.click();
     }
-
  
-    /* direct or nested tp.tpElement children */
-    /**
-    Returns an array with all tp.tpElement objects existing on direct or nested child DOM elements, of the handle of this instance. 
-    When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class and a new property, named tpObject
-    is created and attached to the DOM element object, pointing to the Tripous object.
-    @returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
-    */
-    GetControls() {
-        return this.Handle ? tp.GetScriptObjects(this.Handle) : [];
-    }
- 
-    /**
-    Returns a direct or nested child tp.tpElement having a id, if any, else null
-    @param {string} v - The id
-    @returns {tp.tpElement} The found tp.tpElement or null
-    */
-    FindControlById(v) {
-        return tp.FindControlById(v, this.Handle);
-    }
-    /**
-     Finds and returns a tp.Elemement contained by this container, by Name. If not found, then null is returned. <br />
-     The specified Name is compared against the name attribute (when the element has a name attribute)
-     and if not found, then it is compared against the data-Name attribute.
-     @param {string} Name - The Name to match
-     @returns {tp.tpElement} Returns the tp.tpElement or null.
-     */
-    FindControlByName(Name) {
-        return tp.FindControlByName(Name, this.Handle);
-    }
-    /**
-    Returns the first found direct or nested child tp.tpElement having a specified css class, if any, else null
-    @param {string} v - The css class
-    @param {string|HTMLElement} [ParentElementOrSelector=null] Optional. The parent element or selector to parent element.
-    @returns {tp.tpElement} The found tp.tpElement or null
-    */
-    FindControlByCssClass(v) {
-        return tp.FindControlByCssClass(v, this.Handle);
-    }
-
-    /**
-      Finds and returns a direct or nested child tp.Elemement contained by this instance, by a property. If not found, then null is returned
-      @param {string} PropName The property to match
-      @param {any} PropValue The value to match
-      @returns {tp.tpElement} Returns the tp.tpElement or null.
-     */
-    FindControlByProp(PropName, PropValue) {
-        return tp.FindControlByProp(PropName, PropValue, this.Handle);
-    }
  
     /* direct tp.tpElement children of this instance */
     /** Returns an array of all direct tp.tpElement children
      * @returns {tp.tpElement[]} Returns an array of all direct tp.tpElement children
      * */
-    GetControlList() {
-        let ResultList = [];
-        let List = this.GetElementList();
-        List.forEach((el) => {
-            let o = tp.GetScriptObject(el);
-            if (o)
-                ResultList.push(o);
-        });
-
-        return ResultList;
-    }
+    GetComponentList() { return tp.GetComponentList(this.Handle); }
     /**
     Returns the associated tp.tpElement of a direct child  (DOM element) found at a specified index, if any, else null
     @param {number} Index The index to use.
     @returns {tp.tpElement} Returns the associated tp.tpElement of a direct child  (DOM element) found at a specified index, if any, else null
     */
-    GetControlAt(Index) {
+    GetComponentAt(Index) {
         let el = this.GetElementAt(Index);
-        let o = tp.GetScriptObject(el);
+        let o = tp.GetComponent(el);
         return o;
     }
     /**
@@ -13132,7 +12990,7 @@ tp.tpElement = class extends tp.tpObject {
     @param {string|tp.tpElement} Child - A tp.tpElement instance or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. 
     @returns {tp.tpElement} Returns the newly added tp.tpElement.
     */
-    AddControl(Child) {
+    AddComponent(Child) {
         if (this.Handle) {
 
             if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
@@ -13153,7 +13011,7 @@ tp.tpElement = class extends tp.tpObject {
     @param {string|tp.tpElement} Child - A tp.tpElement instance or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
     @returns {tp.tpElement} Returns the newly inserted tp.tpElement.
     */
-    InsertControl(IndexOrNode, Child) {
+    InsertComponent(IndexOrNode, Child) {
 
         if (this.Handle) {
             if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
@@ -13187,7 +13045,7 @@ tp.tpElement = class extends tp.tpObject {
     Removes a child
     @param {tp.tpElement} Child The child to remove
     */
-    RemoveControl(Child) {
+    RemoveComponent(Child) {
         if (this.Handle) {
 
             let el = null;
@@ -13205,7 +13063,7 @@ tp.tpElement = class extends tp.tpObject {
 
     }
 
-    /* direct HTMLElement children */
+    /* direct HTMLElement children  of this element */
     /**
     Returns an array with the direct HTMLElement children of this element
     @returns {HTMLElement[]} Returns an array with the direct HTMLElement children of this element
@@ -13521,37 +13379,140 @@ tp.tpElement.CreateMemo = function (Parent = null) {
 
     return Result;
 };
+ 
+//#endregion
 
 
-// tp.tpElement association ---------------------------------------------------------------
+//#region HTMLElement to tpObject and tpElement association
+
+// HTMLElement to tp.tpObject association ---------------------------------------------------------------
 /**
 Returns the Tripous script object associated to a DOM element, if any or null.  
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el - The element to get the associated tripous script object from.
-@returns {tp.tpElement} Returns the Tripous script object associated to a DOM element, if any or null.
+@returns {tp.tpObject} Returns the Tripous script object associated to a DOM element, if any or null.
 */
-tp.GetScriptObject = function (el) {
-    let o = tp.GetObject(el);
-    return o instanceof tp.tpElement ? o : null;
+tp.GetObject = function (el) {
+    if (tp.IsString(el))
+        el = tp.Select(el);
+
+    if (tp.IsElement(el)) {
+        if (el['tpObject']) //  && el['tpObject'] instanceof tp.tpObject
+            return el['tpObject'];
+    }
+
+    return null;
 };
 /**
-Returns true if a specified DOM element is associated to a tp.tpElement.
+Associates a DOM element to a Tripous script object.
+NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
+Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
+@param {string|Node} el - The element to associate with the Tripous script object from.
+@param {tp.tpObject} v - The Tripous script object.
+*/
+tp.SetObject = function (el, v) {
+    if (tp.IsString(el))
+        el = tp.Select(el);
+
+    if (tp.IsElement(el))
+        el['tpObject'] = v;
+};
+/**
+Returns true if a specified DOM element is associated to a tp.tpElement
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el The element to check
 @returns {boolean} Returns true if a specified DOM element is associated to a tp.tpElement
 */
-tp.HasScriptObject = function (el) { return tp.GetScriptObject(el) !== null; };
+tp.HasObject = function (el) { return tp.GetObject(el) !== null; };
 /**
-Returns an array with all tp.Element objects constructed/existing up on child DOM elements of a specified parent element or the entire document.  
+Returns an array with all tp.Element objects constructed/existing up on direct or nested child DOM elements of a specified parent element or the entire document. 
+NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
+Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
+@param {string|Node} ParentElementOrSelector - Defaults to document. The container of controls. If null/undefined/empty the document is used.
+@returns {tp.tpObject[]} Returns an array with tp.tpObject objects constructed up on direct or nested elements of a parent element
+*/
+tp.GetAllObjects = function (ParentElementOrSelector) {
+    var elParent = null;
+
+    if (!tp.IsEmpty(ParentElementOrSelector)) {
+        elParent = tp.Select(ParentElementOrSelector);
+    }
+
+    elParent = elParent || document;
+    var NodeList = tp.SelectAll(elParent, '.tp-Object');
+    var List = []; // tp.tpObject[]
+    let o;
+
+    if (!tp.IsEmpty(NodeList)) {
+        for (var i = 0, ln = NodeList.length; i < ln; i++) {
+            o = tp.GetObject(NodeList[i]);
+            if (o)
+                List.push(o);
+        }
+    }
+
+    return List;
+};
+/**
+Returns a tp.tpObject instance of a specified tp.tpObject class starting the search from a specified dom node/element and going all the parents up until the document.body is reached.
+Returns null if nothing is found. 
+NOTE: To be used from inside event handler methods in order to find the right tp.tpObject sender instance.
+ * @param {Node} el - The element that plays the role of the starting point.
+ * @param {object} ElementClass A tp.tpElement class or a descendant, to check for a match.
+ * @returns {tp.tpObject} Returns a tp.tpObject or null
+ */
+tp.GetContainerByClass = function (el, ElementClass) {
+
+    let o;
+
+    while (true) {
+        if (el === el.ownerDocument.body)
+            return null;
+
+        if (el) {
+            o = tp.GetObject(o);
+
+            if (o instanceof ElementClass)
+                return o;
+        }
+
+        el = el.parentNode;
+    }
+
+};
+
+
+// HTMLElement to tp.tpElement association --------------------------------------------
+/**
+Returns the {@link tp.tpElement} Tripous script object associated to a DOM element, if any or null.  
+NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
+Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
+@param {string|Node} el - The element to get the associated tripous script object from.
+@returns {tp.tpElement} Returns the Tripous script object associated to a DOM element, if any or null.
+*/
+tp.GetComponent = function (el) {
+    let o = tp.GetObject(el);
+    return o instanceof tp.tpElement ? o : null;
+};
+/**
+Returns true if a specified DOM element is associated to a {@link tp.tpElement}.
+NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
+Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
+@param {string|Node} el The element to check
+@returns {boolean} Returns true if a specified DOM element is associated to a tp.tpElement
+*/
+tp.HasComponent = function (el) { return tp.GetComponent(el) !== null; };
+/**
+Returns an array with all {@link tp.tpElement} objects constructed/existing up on direct or nested child DOM elements of a specified parent element or the entire document.
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
-@returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
+@returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on direct or nested elements of a parent element
 */
-tp.GetScriptObjects = function (ParentElementOrSelector) {
-    let List = tp.GetObjects(ParentElementOrSelector);
+tp.GetAllComponents = function (ParentElementOrSelector) {
+    let List = tp.GetAllObjects(ParentElementOrSelector);
     let Result = [];        // tp.tpElement[]
 
     for (let i = 0, ln = List.length; i < ln; i++) {
@@ -13561,7 +13522,21 @@ tp.GetScriptObjects = function (ParentElementOrSelector) {
 
     return Result;
 };
+/** Returns an array of all direct tp.tpElement children of a specified parent HTMLElement.
+ * @param {HTMLElement|string} The parent HTMLElement
+ * @returns {tp.tpElement[]} Returns an array of all direct tp.tpElement children
+ * */
+tp.GetComponentList = function (ParentElementOrSelector) {
+    let ResultList = [];
+    let List = tp.GetElementList(ParentElementOrSelector);
+    List.forEach((el) => {
+        let o = tp.GetComponent(el);
+        if (o)
+            ResultList.push(o);
+    });
 
+    return ResultList;
+}
 
 /**
  Finds and returns a tp.Elemement contained by a container, by Id. If not found, then null is returned
@@ -13569,9 +13544,9 @@ tp.GetScriptObjects = function (ParentElementOrSelector) {
  @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
  @returns {tp.tpElement} Returns the tp.tpElement or null.
  */
-tp.FindControlById = function (Id, ParentElementOrSelector = null) {
+tp.FindComponentById = function (Id, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
-    var List = tp.GetScriptObjects(ParentElementOrSelector);
+    var List = tp.GetAllComponents(ParentElementOrSelector);
 
     for (var i = 0, ln = List.length; i < ln; i++) {
         if (tp.IsSameText(List[i].Id, Id))
@@ -13587,9 +13562,9 @@ tp.FindControlById = function (Id, ParentElementOrSelector = null) {
  @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
  @returns {tp.tpElement} Returns the tp.tpElement or null.
  */
-tp.FindControlByName = function (Name, ParentElementOrSelector = null) {
+tp.FindComponentByName = function (Name, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
-    let List = tp.GetScriptObjects(ParentElementOrSelector);
+    let List = tp.GetAllComponents(ParentElementOrSelector);
     let Control, ControlName;
 
     for (let i = 0, ln = List.length; i < ln; i++) {
@@ -13611,10 +13586,10 @@ Returns the first found direct or nested child tp.tpElement having a specified c
 @param {string|HTMLElement} [ParentElementOrSelector=null] Optional. The parent element or selector to parent element.
 @returns {tp.tpElement} The found tp.tpElement or null
 */
-tp.FindControlByCssClass = function (v, ParentElementOrSelector = null) {
+tp.FindComponentByCssClass = function (v, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
 
-    let List = tp.GetScriptObjects(ParentElementOrSelector);
+    let List = tp.GetAllComponents(ParentElementOrSelector);
 
     for (let i = 0, ln = List.length; i < ln; i++) {
         if (List[i] instanceof tp.tpElement && List[i].HasClass(v))
@@ -13629,9 +13604,9 @@ tp.FindControlByCssClass = function (v, ParentElementOrSelector = null) {
  @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
  @returns {tp.tpElement} Returns the tp.tpElement or null.
  */
-tp.FindControlByProp = function (PropName, PropValue, ParentElementOrSelector = null) {
+tp.FindComponentByProp = function (PropName, PropValue, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
-    var List = tp.GetScriptObjects(ParentElementOrSelector);
+    var List = tp.GetAllComponents(ParentElementOrSelector);
 
     for (var i = 0, ln = List.length; i < ln; i++) {
         if (List[i][PropName] === PropValue)
@@ -13641,7 +13616,7 @@ tp.FindControlByProp = function (PropName, PropValue, ParentElementOrSelector = 
 };
 
 
-// __tpInfo association ---------------------------------------------------------------
+// HTMLElement __tpInfo association ---------------------------------------------------------------
 /**
 In some cases Tripous script defines a __tpInfo property to some DOM elements and stores some additional information to it.
 This function returns that associated property.
@@ -13684,10 +13659,7 @@ This function returns true if a specified DOM element has defined a __tpInfo pro
 tp.HasElementInfo = function (el, InfoName = '__tpInfo') { return tp.GetElementInfo(el, InfoName) !== null; };
 
 
-
 // Command association -----------------------------------------------------------------
-
-
 /** Returns a command name out of a specified value, if any, else empty string.
  * @param {HTMLElement|Event|string|tp.EventArgs} v The value to get the command from. Could be:
  * 1. HTMLElement
@@ -13774,10 +13746,8 @@ tp.GetCommand = function (v) {
 
     return Result || '';
 };
-
-
-
 //#endregion
+
 
 //---------------------------------------------------------------------------------------
 // Element drag and resize, and resize detection

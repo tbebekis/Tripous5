@@ -77,7 +77,7 @@ namespace WebLib
             Controls.Add(ViewControlDef.TextBox, "Tag3", "Tag3", "SysData", new object { });
             Controls.Add(ViewControlDef.TextBox, "Tag4", "Tag4", "SysData", new object { });
 
-            List<List<ViewControlDef>> ColumnControlLists = Controls.Split(View.ColumnSplit.Large);
+            List<List<ViewControlDef>> ColumnControlLists = Controls.Split(4); 
 
             ViewRowDef ControlsRow = ControlsPanel.AddRow("");
             foreach (var ControlList in ColumnControlLists)

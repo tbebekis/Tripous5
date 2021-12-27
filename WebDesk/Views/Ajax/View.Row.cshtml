@@ -28,9 +28,7 @@
     {
         // columns
         foreach (var Col in Model.Def.Columns)
-        {
- 
-            Col.AddCssClasses(Model.ViewDef.ColumnSplit.GetColumnCssClasses());
+        { 
             <div class='@Html.Raw(Col.GetCssClassesText())' @Html.Raw(Col.GetCssStyleText())>
                 @foreach (var Ctrl in Col.Controls)
                 {

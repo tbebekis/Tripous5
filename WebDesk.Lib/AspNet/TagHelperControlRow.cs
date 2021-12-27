@@ -230,6 +230,19 @@ namespace WebLib.AspNet
 
         void RenderCheckBox()
         {
+            /* TODO: render check box as following.
+             * NOTE: We need the div around checkbox for positioning reasons.
+             * CAUTION: Add the value to checkbox AND the hidden input.
+             
+            <label class="tp-CheckBox" tabindex="0">
+			    <div><input type="checkbox"></div>			
+			    <span class="tp-RequiredMark">*</span>
+			    <span class="tp-Text">Both elements must have the same parent, but element2 does not have to be immediately preceded by element1.</span>
+		    </label>
+
+             */
+
+
             /*
                 <div class="tp-Row tp-CheckBoxRow">
 	                <label class="tp-CheckBox">
@@ -293,6 +306,22 @@ namespace WebLib.AspNet
         }
         void RenderInput(EditorType Kind)
         {
+
+            /* TODO: Render tp-CtrlRow as following:
+             
+            <div class="tp-CtrlRow" id="tp-CtrlRow-Code-2000">
+              <div class="tp-CText">
+                <label for="undefined">Code</label>
+                <span class="tp-RequiredMark" style="">*</span>
+              </div>
+              <div class="tp-Ctrl">
+                <input type="text" class="tp-TextBox tp-Object" tabindex="0" spellcheck="false" readonly="" maxlength="40" required="" style="text-align: left;">
+              </div>
+            </div>
+
+             */
+
+
             /*
              <div class="tp-CtrlRow tp-Row">
                 <div class="tp-CText">
@@ -304,7 +333,7 @@ namespace WebLib.AspNet
                 </div>
             </div>
             */
-            
+
             // text
             HtmlTag TextDiv = MainTag.Add("div", TextDivClasses);
 

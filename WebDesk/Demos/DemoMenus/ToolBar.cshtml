@@ -89,10 +89,10 @@
     function ToggleNoText() {
         NoText = !NoText;
  
-        let tb = tp.GetScriptObject('#tb1');
+        let tb = tp.GetComponent('#tb1');
         tb.SetNoText(NoText);
 
-        tb = tp.GetScriptObject('#tb2');
+        tb = tp.GetComponent('#tb2');
         tb.SetNoText(NoText);
     }
 
@@ -105,10 +105,10 @@
             IcoMode = tp.ButtonExIcoMode.Left;
         }
 
-        let tb = tp.GetScriptObject('#tb1');
+        let tb = tp.GetComponent('#tb1');
         tb.SetIcoMode(IcoMode);
 
-        tb = tp.GetScriptObject('#tb2');
+        tb = tp.GetComponent('#tb2');
         tb.SetIcoMode(IcoMode);
 
     }

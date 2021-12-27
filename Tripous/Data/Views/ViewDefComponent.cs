@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Tripous.Data
 {
-
     /// <summary>
     /// Base class for all view component defs
     /// </summary>
@@ -127,7 +126,8 @@ namespace Tripous.Data
                 foreach (var Entry in Style)
                     SB.Append($"{Entry.Key}: {Entry.Value}; ");
 
-                Result = $"style=\"{SB}\"";
+                if (SB.Length > 0)
+                    Result = $"style=\"{SB}\"";
             }
  
 
@@ -148,7 +148,7 @@ namespace Tripous.Data
         /// Gets the Title of this instance, used for display purposes. 
         /// <para>NOTE: The setter is fake. Do NOT use it.</para>
         /// </summary>    
-        public string Title
+        public virtual string Title
         {
             get { return !string.IsNullOrWhiteSpace(TitleKey) ? Res.GS(TitleKey, TitleKey) : (!string.IsNullOrWhiteSpace(Name)? Name: Sys.None); }
             set { }
@@ -184,141 +184,5 @@ namespace Tripous.Data
         /// </summary>
         public Dictionary<string, object> Style { get; } = new Dictionary<string, object>();
     }
-
-
-
-
-    /// <summary>
-    /// Represents a container of view def component items suchs as PanelList, TabControl and Accordion.
-    /// </summary>
-    public class ViewDefContainer<T>: ViewDefComponent where T: ViewDefComponent, new()
-    {
-        /// <summary>
-        /// Creates and returns a component item.
-        /// </summary>
-        protected virtual T CreateItem(string TitleKey, string Name = "")
-        {
-            T Result = new T()
-            {
-                TitleKey = TitleKey,
-                Name = Name,
-            };
-
-            return Result;
-        }
-
-        /* construction */
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public ViewDefContainer()
-        {
-        }
  
-        /// <summary>
-        /// Returns a <see cref="ViewPanelListPanelDef"/> found under a specified name, if any, else null.
-        /// </summary>
-        public T FindTabByName(string ComponentName)
-        {
-            return Items.FirstOrDefault(item => Sys.IsSameText(item.Name, ComponentName));
-        }
-        /// <summary>
-        /// Returns true if a <see cref="ViewPanelListPanelDef"/> found under a specified name.
-        /// </summary>
-        public bool Contains(string ComponentName)
-        {
-            return FindTabByName(ComponentName) != null;
-        }
-        /// <summary>
-        /// Adds and returns a <see cref="ViewPanelListPanelDef"/>
-        /// </summary>
-        public T Add(string TitleKey, string Name = "")
-        {
-            T Result = CreateItem(TitleKey, Name);
-            Items.Add(Result);
-            return Result;
-        }
-
-        /* properties */
-        /// <summary>
-        /// A list of tabs. Could be empty. When not empty then this describes a TabControl (Pager) with child tab pages
-        /// </summary>
-        public List<T> Items { get; } = new List<T>();
-
-
-    }
-
-
-
-    /// <summary>
-    /// Represents a panel in a container.
-    /// <para>Container could be a <see cref="ViewPanelListDef"/>, a <see cref="ViewTabControlDef"/> or a <see cref="ViewAccordionDef"/> </para>
-    /// </summary>
-    public class ViewDefContainerPanel : ViewDefComponent
-    {
-
-        /* construction */
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public ViewDefContainerPanel()
-        {
-        }
-
-        /* public */
-        /// <summary>
-        /// Adds and returns a <see cref="ViewTabPageDef"/>
-        /// <para>NOTE: Creates the container if is null.</para>
-        /// </summary>
-        public ViewTabPageDef AddTabPage(string TitleKey, string Name = "")
-        {
-            if (TabControl == null)
-                TabControl = new ViewTabControlDef();
-
-            ViewTabPageDef Result = TabControl.Add(TitleKey, Name); 
-            return Result;
-        }
-        /// <summary>
-        /// Adds and returns a <see cref="ViewAccordionPanelDef"/>
-        /// <para>NOTE: Creates the container if is null.</para>
-        /// </summary>
-        public ViewAccordionPanelDef AddGroup(string TitleKey, string Name = "")
-        {
-            if (Accordion == null)
-                Accordion = new ViewAccordionDef();
-
-            ViewAccordionPanelDef Result = Accordion.Add(TitleKey, Name);
-            return Result;
-        }
-        /// <summary>
-        /// Adds and returns a <see cref="ViewRowDef"/>
-        /// <para>NOTE: Creates the rows list if is null.</para>
-        /// </summary>
-        public ViewRowDef AddRow(string TableName = "")
-        {
-            if (Rows == null)
-                Rows = new List<ViewRowDef>();
-
-            ViewRowDef Result = new ViewRowDef();
-            Result.TableName = TableName;
-            Rows.Add(Result);
-            return Result;
-        }
-
-
-        /* properties */
-        /// <summary>
-        /// A tab control
-        /// </summary>
-        public ViewTabControlDef TabControl { get; set; }
-        /// <summary>
-        /// An accordeon control
-        /// </summary>
-        public ViewAccordionDef Accordion { get; set; }
-        /// <summary>
-        /// A list of rows. Could be empty.
-        /// <para>A row is a panel. It may contain a grid or columns with controls (control rows).</para>
-        /// </summary>
-        public List<ViewRowDef> Rows { get; set; }
-    }
 }

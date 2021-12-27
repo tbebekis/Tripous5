@@ -7,10 +7,11 @@
     // 1 - List     (the container of the List (browser) grid)
     // 2 - Edit     (the container of a TabPager with data entry controls)
 
-    string ControlWidthCssClasses = ViewDef.GetCssClassesForControlWidths(Model.Def.TextTop, Model.Def.TextSplitPercent);
+    string StyleText = Model.Def.GetCssStyleText();
+    string DataSetupText = Model.Def.GetDataSetupText();
 }
 
-<div class="@Html.Raw(ControlWidthCssClasses)" @Html.Raw(Model.Def.GetCssStyleText()) data-setup='@Html.Raw(Model.Def.GetDataSetupText())'>
+<div @(!string.IsNullOrWhiteSpace(StyleText)? Html.Raw(StyleText): null)  data-setup='@Html.Raw(DataSetupText)'>
 
     @await Html.PartialAsync("View.ToolBar", Model.Def.ToolBarButtons)
 

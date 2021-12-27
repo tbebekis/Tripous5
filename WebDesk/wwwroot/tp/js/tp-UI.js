@@ -6681,7 +6681,7 @@ tp.ToolBar = class extends tp.tpElement {
         this.Handle.appendChild(this.fRightAligner);
         this.fRightAligner.className = tp.Classes.FlexFill;
 
-        tp.Ui.CreateControls(this.Handle);
+        tp.Ui.CreateContainerControls(this.Handle);
  
     }
 
@@ -6743,7 +6743,7 @@ tp.ToolBar = class extends tp.tpElement {
     */
     SetIcoMode(v) {
         let o;
-        let List = this.GetControls();
+        let List = tp.GetAllComponents(this.Handle);
 
         for (let i = 0, ln = List.length; i < ln; i++) {
             o = List[i];
@@ -6759,7 +6759,7 @@ tp.ToolBar = class extends tp.tpElement {
     SetNoText(Flag) {
         Flag = Flag === true;
         let o;
-        let List = this.GetControls();
+        let List = tp.GetAllComponents(this.Handle);
 
         for (let i = 0, ln = List.length; i < ln; i++) {
             o = List[i];
@@ -6775,7 +6775,7 @@ tp.ToolBar = class extends tp.tpElement {
      * @returns {tp.ButtonEx | tp.tpElement}  Returns a child of this tool-bar having a specified command, if any, else null.
      */
     FindItemByCommand(Command) {
-        let List = this.GetControls();
+        let List = tp.GetAllComponents(this.Handle);
 
         let Result = List.find(item => {
             return tp.IsString(item.Command) && tp.IsSameText(item.Command, Command);                 
@@ -8664,7 +8664,7 @@ tp.Memo = class extends tp.Control {
 A check-box control. Is actually a label element surrounding a input[type=checkbox] element. <br />
 Example markup
 <pre>
-    <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
+    <label><div><input type="checkbox" /></div><span class='tp-Text'> This is the text of the checkbox</span></label>
 </pre>
 */
 tp.CheckBox = class extends tp.Control {
@@ -8758,7 +8758,7 @@ tp.CheckBox = class extends tp.Control {
         let el = tp.Select(this.Handle, 'input[type=checkbox]');
 
         if (!tp.IsHTMLElement(el)) {
-            this.Handle.innerHTML = "<input type='checkbox' />" + (this.Handle.innerHTML || '');
+            this.Handle.innerHTML = "<div><input type='checkbox' /></div>" + (this.Handle.innerHTML || '');
         }
 
         this.fCheckBox = tp.Select(this.Handle, 'input[type="checkbox"]');
@@ -19481,7 +19481,7 @@ tp.View = class extends tp.tpElement {
      * */
     AutocreateControls() {
         if (this.CreateParams.AutocreateControls === true) {
-            let List = this.GetControls();
+            let List = tp.GetAllComponents(this.Handle);
             if (List.length === 0)
                 tp.CreateContainerControls(this.Handle);
         }
@@ -19546,14 +19546,6 @@ tp.View = class extends tp.tpElement {
 
     /* controls */
     /**
-    Returns the controls. <br />
-    Returns an array with all {@link tp.tpElement} objects existing on direct or nested child DOM elements, of the handle of this instance.
-    @returns {tp.tpElement[]}  Returns an array with all {@link tp.tpElement} objects existing on direct or nested child DOM elements, of the handle of this instance.
-    */
-    GetControls() {
-        return tp.GetScriptObjects(this.Handle);
-    }
-    /**
     Returns a control belonging to this instance and bound to a specified field, if any, else null
     @protected
     @param {string | tp.DataColumn} v - The field name or the {@link tp.Control} Column
@@ -19562,7 +19554,7 @@ tp.View = class extends tp.tpElement {
     FindControlByDataField(v) {
         /** @type {tp.Control} */
         let Control;  
-        let List = this.GetControls();
+        let List = tp.GetAllComponents(this.Handle);
         let FieldName = (v instanceof tp.DataColumn) ? v.Name : v;
 
         for (var i = 0, ln = List.length; i < ln; i++) {
@@ -19583,7 +19575,7 @@ tp.View = class extends tp.tpElement {
     ApplyReadOnlyEditToControls(Flag) {
         /** @type {tp.Control} */
         let c;
-        let List = this.GetControls();
+        let List = tp.GetAllComponents(this.Handle);
 
         List.forEach((item) => {
             if (item instanceof tp.Control) {
@@ -19833,7 +19825,7 @@ tp.ViewTypes = {
 //#endregion
 
 
-//#region tp.Row tp.Col
+//#region tp.Row 
 
 /** A responsive row */
 tp.Row = class extends tp.tpElement {
@@ -19876,6 +19868,9 @@ tp.Row = class extends tp.tpElement {
     }
 };
 
+//#endregion
+
+//#region tp.Col
 /** A responsive column */
 tp.Col = class extends tp.tpElement {
     /**
@@ -19908,13 +19903,6 @@ tp.Col = class extends tp.tpElement {
         this.fElementType = 'div';
         this.fDefaultCssClasses = [tp.Classes.Col];
     }
-    /**
-    Initializes fields and properties just before applying the create params.        
-    */
-    InitializeFields() {
-        super.InitializeFields();
-        this.WidthPercents = tp.Col.DefaultWidthPercents.map(w => w);
-    }
 
     /** Called by a parent container control to its direct child controls.
      * When parent size mode changes, this column adjusts its width properly.
@@ -19925,22 +19913,311 @@ tp.Col = class extends tp.tpElement {
         if (Index > 0) {
             let w = this.WidthPercents[Index - 1];
             this.Width = `${w}%`;
+
+            let List = tp.GetComponentList(this.Handle);
+            List.forEach((item) => {
+                if (item instanceof tp.CtrlRow) {
+                    w = this.ControlWidthPercents[Index - 1];
+                    let p = `${w}%`;
+                    item.SetControlPercentWidth(p);
+                }
+            });
         }
     }
 };
 
-/** Array with percent widths to occupy from parent container according to width mode.
- * There are always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes.
- * This property is initialized in the InitializeFields() method with values from the {@link tp.Col.DefaultWidthPercents} array.
+/** Array with percent widths to occupy from parent container, i.e. a {@link tp.Row}, according to width mode. <br />
+ * NOTE: There are always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes.
  * @type {number[]}
  */
-tp.Col.prototype.WidthPercents = [100, 100, 50, 33.33, 25];
-/** Array with the default percent widths to occupy from parent container according to width mode.
- * There are always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes.
- * This array provides the initial values to WidthPercents instance property.
+tp.Col.prototype.WidthPercents = [100, 100, 50, 33.33, 33.33];
+/** Array with percent widths the Control part of {@link tp.CtrlRow} should occupy according to width mode of the parent container, i.e. a {@link tp.Row} <br />
+ * NOTE: There are always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes.
  * @type {number[]}
- */
-tp.Col.DefaultWidthPercents = [100, 100, 50, 33.33, 33.33]; // [100, 100, 50, 33.33, 25];
+ * */
+tp.Col.prototype.ControlWidthPercents = [100, 100, 60, 65, 65];
+
+//#endregion
+
+
+//#region tp.CtrlRow
+
+/** A responsive control row */
+tp.CtrlRow = class extends tp.tpElement {
+
+    /**
+    Constructor <br />
+    Example markup:
+    <pre>
+        <div class="tp-CtrlRow" data-setup="{Text: 'Trader', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"></div>
+    </pre> 
+    Example of the produced markup.
+    <pre>
+        <div class="tp-CtrlRow" id="row_2001">
+           <div class="tp-CText">
+            <label for="ctl_2001">TITLE GOES HERE</label>
+            <span class="tp-RequiredMark">*</span>
+           </div>
+           <div class="tp-Ctrl">
+            <input type="text" class="tp-TextBox" id="ctl_2001" name="NAME GOES HERE"  value="">
+           </div>
+        </div>
+    </pre>
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.CtrlRow';
+        this.fElementType = 'div';
+        this.fDefaultCssClasses = [tp.Classes.CtrlRow];
+    }
+    /**
+    Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
+    and AFTER options (CreateParams) processing <br />
+    Initialization steps:
+    <ul>
+        <li>Handle creation</li>
+        <li>Field initialization</li>
+        <li>Option processing</li>
+        <li>Completed notification</li>
+    </ul>
+    @protected
+    @override
+    */
+    OnInitializationCompleted() {
+        super.OnInitializationCompleted();
+
+        let Type,
+            TypeName,
+            DataField,
+            Setup,              // data-setup attribute
+            CP,
+            Prefix
+            ;
+
+
+        if (this.Handle.children.length === 0) {
+            Setup = tp.GetDataSetupObject(this.Handle);
+            Setup.Text = tp.IsString(Setup.Text) ? Setup.Text.trim() : '';
+            Setup.Control = tp.IsObject(Setup.Control) ? Setup.Control : {};
+
+            // get the constructor
+            TypeName = Setup.Control.TypeName;
+            Type = tp.Ui.Types[TypeName];
+            if (tp.IsEmpty(Type)) {
+                tp.Throw('Control type name not registered in tp.Ui.Types: ' + TypeName);
+            }
+
+            // prepare formatting
+            DataField = tp.IsString(Setup.Control.DataField) ? Setup.Control.DataField.trim() : '';
+
+            // Ids
+            Prefix = !tp.IsBlank(DataField) ? `${tp.Prefix}CtrlRow-${DataField}-` : `${tp.Prefix}CtrlRow-`;
+
+            if (tp.IsEmpty(this.Handle.Id) || tp.IsString(this.Handle.id) && tp.IsBlank(this.Handle.id))
+                this.Handle.id = tp.SafeId(Prefix);
+
+            if (tp.IsEmpty(Setup.Control.Id) || (tp.IsString(Setup.Control.Id) && tp.IsBlank(Setup.Control.Id)))
+                Setup.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
+
+            // Markup similar to following goes to the last div
+            // <input class="tp-TextBox" id="Name" name="Name" type="text" value="">
+            let InnerHTML =
+                `<div class="${tp.Classes.CText}">
+  <label for="${Setup.Control.Id}">${Setup.Text}</label>
+  <span class="${tp.Classes.RequiredMark}" style='display: none;'>*</span>
+</div>
+<div class="${tp.Classes.Ctrl}"></div>`;
+
+            tp.Html(this.Handle, InnerHTML);
+
+            this.elCtrlContainer = tp.Select(this.Handle, '.' + tp.Classes.Ctrl);
+            this.elTextContainer = tp.Select(this.Handle, '.' + tp.Classes.CText);
+            this.elRequiredMark = tp.Select(this.elTextContainer, '.' + tp.Classes.RequiredMark);
+            this.elText = tp.Select(this.elTextContainer, 'label');;
+
+            CP = Setup.Control;
+            CP.Parent = this.elCtrlContainer;
+            CP.elText = this.elText
+            CP.elRequiredMark = this.elRequiredMark
+
+            // call the constructor
+            this.Control = new Type(null, CP);
+
+        }
+    }
+    /** Sets the width of the Control part of the row to a specified percent.
+     * @param {string} Width The width to apply, e.g. '50%'
+     */
+    SetControlPercentWidth(Width) {
+        let el = tp.Select(this.Handle, '.' + tp.Classes.Ctrl);
+        if (tp.IsHTMLElement(el))
+            el.style.width = Width;
+    }
+};
+
+/** The control of this control row
+ * @type {tp.tpElement}
+ * */
+tp.CtrlRow.prototype.Control = null;
+/** Caption text container
+ * @type {HTMLDivElement}
+ * */
+tp.CtrlRow.prototype.elTextContainer = null;
+/** Control container
+ * @type {HTMLDivElement}
+ * */
+tp.CtrlRow.prototype.elCtrlContainer = null;
+/** Element with the required mark.
+ * @type {HTMLSpanElement}
+ * */
+tp.CtrlRow.prototype.elRequiredMark = null;
+/** Label with the caption text
+ * @type {HTMLLabelElement}
+ * */
+tp.CtrlRow.prototype.elText = null;
+
+//#endregion
+
+//#region tp.CheckBoxRow
+/** A responsive check-box control row */
+tp.CheckBoxRow = class extends tp.tpElement {
+
+    /**
+    Constructor <br />
+    Example markup:
+    <pre>
+        <div class="tp-CheckBoxRow" data-setup="{Text: 'Some caption here', Control: { TypeName: 'CheckBox', Id: 'Flag', DataField: 'Flag' } }"></div>
+    </pre> 
+    Example of the produced markup.
+    <pre>
+        <div class="tp-CheckBoxRow" id="control_row_IsCool-2001">
+          <label class="tp-CheckBox">
+            <input checked="checked" type="checkbox" >
+            <span class="tp-RequiredMark">*</span>
+            <span class="tp-Text">Yes, this is by design</span>
+          </label>
+        </div>
+    </pre>
+    @param {string|HTMLElement} [ElementOrSelector] - Optional.
+    @param {Object} [CreateParams] - Optional.
+    */
+    constructor(ElementOrSelector, CreateParams) {
+        super(ElementOrSelector, CreateParams);
+    }
+
+    /* overrides */
+    /**
+    Initializes the 'static' and 'read-only' class fields
+    @protected
+    @override
+    */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.CheckBoxRow';
+        this.fElementType = 'div';
+        this.fDefaultCssClasses = [tp.Classes.CheckBoxRow];
+    }
+    /**
+    Notification. Called by CreateHandle() after all creation and initialization processing is done, that is AFTER handle creation, AFTER field initialization
+    and AFTER options (CreateParams) processing <br />
+    Initialization steps:
+    <ul>
+        <li>Handle creation</li>
+        <li>Field initialization</li>
+        <li>Option processing</li>
+        <li>Completed notification</li>
+    </ul>
+    @protected
+    @override
+    */
+    OnInitializationCompleted() {
+        super.OnInitializationCompleted();
+
+        let Type = tp.CheckBox,
+            TypeName = 'CheckBox',
+            DataField,
+            Setup,              // data-setup attribute
+            CP,
+            Prefix
+            ;
+
+        if (this.Handle.children.length === 0) {
+            Setup = tp.GetDataSetupObject(this.Handle);
+            Setup.Text = tp.IsString(Setup.Text) ? Setup.Text.trim() : '';
+            Setup.Control = tp.IsObject(Setup.Control) ? Setup.Control : {};
+
+            // get the constructor
+            TypeName = Setup.Control.TypeName;
+            Type = tp.Ui.Types[TypeName];
+            if (tp.IsEmpty(Type)) {
+                Type = tp.CheckBox;
+            }
+
+            // prepare formatting
+            DataField = tp.IsString(Setup.Control.DataField) ? Setup.Control.DataField.trim() : '';
+
+            // Ids
+            Prefix = !tp.IsBlank(DataField) ? `${tp.Prefix}CheckBoxRow-${DataField}-` : `${tp.Prefix}CheckBoxRow-`;
+
+            if (tp.IsEmpty(this.Handle.Id) || tp.IsString(this.Handle.id) && tp.IsBlank(this.Handle.id))
+                this.Handle.id = tp.SafeId(Prefix);
+
+            if (tp.IsEmpty(Setup.Control.Id) || (tp.IsString(Setup.Control.Id) && tp.IsBlank(Setup.Control.Id)))
+                Setup.Control.Id = tp.SafeId(`${tp.Prefix}${TypeName}-`);
+
+            // <label><input type="checkbox" /><span class='tp-Text'> This is the text of the checkbox</span></label>
+            let InnerHTML =
+                `<label class="${tp.Classes.CheckBox}">
+    <input type="checkbox" />
+    <span class="${tp.Classes.RequiredMark}" style='display: none;'>*</span>
+    <span class="${tp.Classes.Text}">${Setup.Text}</span>
+</label>`;
+
+            tp.Html(this.Handle, InnerHTML);
+
+            this.elText = tp.Select(this.Handle, '.' + tp.Classes.Text);
+            this.elRequiredMark = tp.Select(this.Handle, '.' + tp.Classes.RequiredMark);
+
+            CP = Setup.Control;
+            CP.Parent = this.Handle;
+            CP.elText = this.elText;
+            CP.elRequiredMark = this.elRequiredMark;
+
+            // call the constructor
+            let el = tp.Select(this.Handle, `label.${tp.Classes.CheckBox}`);
+            this.Control = new Type(el, CP);
+
+        }
+    }
+
+};
+
+/** The control of this control row
+ * @type {tp.tpElement}
+ * */
+tp.CheckBoxRow.prototype.Control = null;
+/** Element with the required mark.
+ * @type {HTMLSpanElement}
+ * */
+tp.CheckBoxRow.prototype.elRequiredMark = null;
+/** Label with the caption text
+ * @type {HTMLLabelElement}
+ * */
+tp.CheckBoxRow.prototype.elText = null;
 
 //#endregion
 
@@ -19962,8 +20239,7 @@ tp.DataSetDialog = class extends tp.tpWindow {
         super(Args);
     }
 
-
-
+ 
     /* overrides */
     /**
     Override
@@ -21704,13 +21980,18 @@ tp.Ui = class {
 
         if (!tp.IsEmpty(ElementOrSelector)) {
             el = tp.Select(ElementOrSelector);
-            if (tp.IsHTMLElement(el) && tp.HasScriptObject(el)) {
-                return tp.GetScriptObject(el);
+            if (tp.IsHTMLElement(el) && tp.HasComponent(el)) {
+                return tp.GetComponent(el);
             }
         }
 
-        var Result = new Type(el, null);            // tp.tpElement (or descendant) constructor
-        //tp.RemoveClass(Result.Handle, TypeName);
+        let Result = new Type(el, null);            // tp.tpElement (or descendant) constructor
+
+        if (tp.SysConfig.DebugMode === false
+            && ['tp-Class', tp.Classes.Row, tp.Classes.Col, tp.Classes.CtrlRow, tp.Classes.CheckBoxRow].indexOf(TypeName) === -1) {
+                tp.RemoveClass(Result.Handle, TypeName);
+        }            
+
         return Result;
     }
     /**
@@ -21729,8 +22010,8 @@ tp.Ui = class {
         var Type, o, Result = null;
 
         if (tp.IsHTMLElement(el)) {
-            if (tp.HasScriptObject(el)) {
-                Result = tp.GetScriptObject(el);
+            if (tp.HasComponent(el)) {
+                Result = tp.GetComponent(el);
             } else {
                 o = tp.GetDataSetupObject(el);
                 if (tp.IsObject(o) && 'ClassType' in o) {
@@ -21752,13 +22033,13 @@ tp.Ui = class {
     </pre>
     Produced markup
     <pre>
-        <div class="tp-CtrlRow tp-Row" id="control_row_Name-2001">
+        <div class="tp-CtrlRow" id="row_2001">
            <div class="tp-CText">
-	        <label for="Name">Όνομα</label>
+	        <label for="ctl_2001">TITLE GOES HERE</label>
 	        <span class="tp-RequiredMark">*</span>
            </div>
            <div class="tp-Ctrl">
-	        <input class="tp-TextBox" id="Name" name="Name" type="text" value="">
+	        <input type="text" class="tp-TextBox" id="ctl_2001" name="NAME GOES HERE"  value="">
            </div>
         </div>
     </pre>
@@ -21941,26 +22222,26 @@ tp.Ui = class {
     @returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
     */
     static GetContainerControls(ParentElementOrSelector) {
-        return tp.GetScriptObjects(ParentElementOrSelector);
+        return tp.GetAllComponents(ParentElementOrSelector);
     }
 
     /* control creation */
     /**
      Creates all controls whose DOM elements are children of a certain parent, automatically. <br />
      Child DOM elements must have defined a proper css class, that is a css class registered with tp.Ui.Types, e.g. 'TextBox'      
-     @param {string | Node} [ParentElementSelector] - Optional. A selector for the parent. If null then the document.body is used.
+     @param {string | Node} [ContainerElementOrSelector] - Optional. A selector for the parent. If null then the document.body is used.
      @param {string[]} [ExcludedTypes] - Optional.  An array with type names to exclude.
      @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
      */
-    static CreateControls(ParentElementSelector = null, ExcludedTypes = null) {
+    static CreateContainerControls(ContainerElementOrSelector = null, ExcludedTypes = null) {
         var Result = [];
-        ParentElementSelector = ParentElementSelector || tp.Doc.body;
+        ContainerElementOrSelector = tp(ContainerElementOrSelector || tp.Doc.body);
         ExcludedTypes = ExcludedTypes || [];
 
         var List;
         for (let TypeName in this.Types) {
             if (ExcludedTypes.indexOf(TypeName) === -1) {
-                List = this.CreateControlsOfType(ParentElementSelector, TypeName);
+                List = this.CreateContainerControlsOfType(ContainerElementOrSelector, TypeName);
                 if (List.length > 0)
                     Result = Result.concat(List);
             }
@@ -21974,32 +22255,30 @@ tp.Ui = class {
     /**
      Creates controls of a specified control type, whose DOM elements are children of a certain parent, automatically. <br /> 
      Child DOM elements must have defined a proper css class, that is a css class registered with tp.Ui.Types, e.g. 'TextBox'              
-     @param {string | Node} ParentElementSelector - A selector for the parent. If null then the document.body is used.
+     @param {string | Node} ContainerElementOrSelector - A selector for the parent. If null then the document.body is used.
      @param {string} TypeName - The name of the control type. Must be registered with tp.Ui.Types
      @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
      */
-    static CreateControlsOfType(ParentElementSelector, TypeName) {
-        var Result = [];
-        ParentElementSelector = ParentElementSelector || tp.Doc.body;
-
-        var elParent = tp.Select(ParentElementSelector);
-        if (tp.IsHTMLElement(elParent)) {
+    static CreateContainerControlsOfType(ContainerElementOrSelector, TypeName) {
+        
+        let elContainer = tp(ContainerElementOrSelector || tp.Doc.body);
+ 
+        if (tp.IsHTMLElement(elContainer)) {
             var Selector, i, ln, el, o, List;
 
             Selector = '.' + TypeName;
-            List = tp.SelectAll(elParent, Selector);
+            List = tp.SelectAll(elContainer, Selector);
 
             for (i = 0, ln = List.length; i < ln; i++) {
                 el = List[i];
                 if (tp.IsHTMLElement(el)) {
-                    o = this.Create(TypeName, el);
-                    if (o)
-                        Result.push(o);
+                    o = this.Create(TypeName, el); 
                 }
 
             }
         }
 
+        let Result = tp.GetAllComponents(elContainer);
         return Result;
     }
     /**
@@ -22015,13 +22294,19 @@ tp.Ui = class {
         if (tp.IsElement(el) && tp.HasObject(el)) {
             if (tp.GetObject(el) instanceof tp.tpElement)
                 Result = tp.GetObject(el);
-        } else if (TypeName === tp.Ui.Types.Class) {
+        }
+        else if (TypeName === tp.Ui.Types.Class) {
             Result = this.CreateByClass(el);
-        } else if (TypeName === 'tp-CtrlRow') {
+        }
+            /*
+        else if (TypeName === 'tp-CtrlRow') {
             Result = this.CreateCtrlRow(el);
-        } else if (TypeName === 'tp-CheckBoxRow') {
+        }
+        else if (TypeName === 'tp-CheckBoxRow') {
             Result = this.CreateCheckBoxRow(el);
-        } else {
+        }
+            */
+        else {
             Result = this.CreateElement(TypeName, el);  // TypeName, ElementOrSelector
         }
 
@@ -22082,8 +22367,11 @@ tp.Ui.Types = {
     'tp-Row': tp.Row,
     'tp-Col': tp.Col,
 
-    'tp-CtrlRow': 'tp-CtrlRow',
-    'tp-CheckBoxRow': 'tp-CheckBoxRow',
+    'tp-CtrlRow': tp.CtrlRow,
+    'tp-CheckBoxRow': tp.CheckBoxRow,
+
+    'CtrlRow': tp.CtrlRow,
+    'CheckBoxRow': tp.CheckBoxRow,
 
     Element: tp.tpElement,
 
@@ -22160,7 +22448,7 @@ tp.DataTypeToUiType = function (v) {
  * @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
  */
 tp.CreateContainerControls = function (ParentElementSelector = null, ExcludedTypes = null) {
-    return tp.Ui.CreateControls(ParentElementSelector, ExcludedTypes);
+    return tp.Ui.CreateContainerControls(ParentElementSelector, ExcludedTypes);
 };
 
 

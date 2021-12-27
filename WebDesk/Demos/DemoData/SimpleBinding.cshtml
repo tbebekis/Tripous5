@@ -110,11 +110,11 @@
         Table = CreateTable();
         DS = new tp.DataSource(Table);
 
-        edtId = tp.FindControlById('Id');
-        edtName = tp.FindControlById('Name');
-        edtDate = tp.FindControlById('Date');
-        chFlag = tp.FindControlById('Flag');
-        edtMemo = tp.FindControlById('Memo');
+        edtId = tp.FindComponentById('Id');
+        edtName = tp.FindComponentById('Name');
+        edtDate = tp.FindComponentById('Date');
+        chFlag = tp.FindComponentById('Flag');
+        edtMemo = tp.FindComponentById('Memo');
  
         edtId.DataSource = DS;
         edtName.DataSource = DS;

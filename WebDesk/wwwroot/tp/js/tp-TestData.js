@@ -220,7 +220,7 @@ tp.TestData = class {
         //div.Y = 300;
         div.Width = 800;
 
-        var table = div.AddControl('table');
+        var table = div.AddComponent('table');
         table.StyleProp('border', '1px solid black');
         table.StyleProp('border-collapse', 'collapse');
 
@@ -228,9 +228,9 @@ tp.TestData = class {
         var td;
         var i, ln, k, kln;
 
-        var tr = table.AddControl('tr');
+        var tr = table.AddComponent('tr');
         for (i = 0, ln = Table.ColumnCount; i < ln; i++) {
-            th = tr.AddControl('th');
+            th = tr.AddComponent('th');
             th.StyleProp('border', '1px solid black');
             th.StyleProp('border-collapse', 'collapse');
             th.StyleProp('padding', '5px');
@@ -239,10 +239,10 @@ tp.TestData = class {
         }
 
         for (k = 0, kln = Table.RowCount; k < kln; k++) {
-            tr = table.AddControl('tr');
+            tr = table.AddComponent('tr');
 
             for (i = 0, ln = Table.ColumnCount; i < ln; i++) {
-                td = tr.AddControl('td');
+                td = tr.AddComponent('td');
                 td.StyleProp('border', '1px solid black');
                 td.StyleProp('border-collapse', 'collapse');
                 td.StyleProp('padding', '5px');
