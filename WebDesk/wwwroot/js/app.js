@@ -7,7 +7,7 @@ app.Resources = app.Resources || {};
 
 //#region app.Header
 /** Handles controls and operations of the header */
-app.Header = class extends tp.tpElement {
+app.Header = class extends tp.Component {
 
     /** Constructor
      * @param {string|HTMLElement} ElementOrSelector
@@ -49,7 +49,7 @@ app.Header = class extends tp.tpElement {
 
 //#region app.Footer
 /** Handles controls and operations of the footer */
-app.Footer = class extends tp.tpElement {
+app.Footer = class extends tp.Component {
 
     /** Constructor
      * @param {string|HTMLElement} ElementOrSelector

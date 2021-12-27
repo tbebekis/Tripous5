@@ -1861,7 +1861,7 @@ Retuns a {@link tp.BrokerAction} {@link Promise} or a null {@link Promise} if br
             if (this.ToolBar) {
 
                 let ControlList = tp.GetAllComponents(this.ToolBar.Handle),
-                    c,          // tp.tpElement,
+                    c,          // tp.Component,
                     Command,    // string
                     ViewMode    // integer
                     ;

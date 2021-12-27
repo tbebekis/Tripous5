@@ -484,7 +484,7 @@ EventArgs for events notifying about child creation
 tp.CreateChildEventArgs = class extends tp.EventArgs {
     /**
     Constructor 
-    @param {HTMLElement|tp.tpElement} Child The child element this event is about. Could be HTMLElement or tp.tpElement
+    @param {HTMLElement|tp.Component} Child The child element this event is about. Could be HTMLElement or {@link tp.Component}
     */
     constructor(Child) {
         super('', null);
@@ -492,7 +492,7 @@ tp.CreateChildEventArgs = class extends tp.EventArgs {
         this.elChild = null;
         this.tpChild = null;
 
-        if (Child instanceof tp.tpElement) {
+        if (Child instanceof tp.Component) {
             this.tpChild = Child;
             this.elChild = Child.Handle;
         }
@@ -510,8 +510,8 @@ Used when child is a single DOM element
 */
 tp.CreateChildEventArgs.prototype.elChild = null;
 /**
-Used when child is a single tp.tpElement
-@type {tp.tpElement}
+Used when child is a single tp.Component
+@type {tp.Component}
 */
 tp.CreateChildEventArgs.prototype.tpChild = null;
 /**
@@ -534,7 +534,7 @@ Example markup:
     </fieldset>
 </pre>
 */
-tp.GroupBox = class extends tp.tpElement {
+tp.GroupBox = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -643,7 +643,7 @@ Example markup <br />
 </pre>
 
 */
-tp.Accordion = class extends tp.tpElement {
+tp.Accordion = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -1006,7 +1006,7 @@ Example markup <br />
 </pre>
 @implements {tp.ISelectedIndex}
 */
-tp.PanelList = class extends tp.tpElement {
+tp.PanelList = class extends tp.Component {
 
 
     /**
@@ -1032,8 +1032,8 @@ tp.PanelList = class extends tp.tpElement {
     /**
     Gets or set the associate element, the element that controls the selected index of this panel list. <br />
     The Associate must provide a SelectedIndex property and perhaps a SelectedIndexChanged event. <br />
-    Setting accepts a string selector, a DOM element or a tp.tpElement.
-    @type {string|HTMLElement|tp.tpElement}
+    Setting accepts a string selector, a DOM element or a tp.Component.
+    @type {string|HTMLElement|tp.Component}
     */
     get Associate() {
         return this.fAssociate;
@@ -1242,7 +1242,7 @@ tp.PanelList.prototype.fSelectedIndexListener = null; //: tp.Listener;
 /**
 Represents a tab page, that is a child to a TabControl
 */
-tp.TabPage = class extends tp.tpElement {
+tp.TabPage = class extends tp.Component {
 
     /** Constructor.
     @param {string|HTMLElement} ElementOrSelector - Optional.
@@ -1304,7 +1304,7 @@ Example markup <br />
 </pre>
 @implements {tp.ISelectedIndex}
 */
-tp.TabControl = class extends tp.tpElement {
+tp.TabControl = class extends tp.Component {
     /**
     Constructor
     Example markup <br />
@@ -1751,7 +1751,7 @@ Example markup
 </pre>
 @implements {tp.ISelectedIndex}
 */
-tp.ImageSlider = class extends tp.tpElement {
+tp.ImageSlider = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -2117,7 +2117,7 @@ Example markup <br />
     </div>
 </pre>
 */
-tp.Splitter = class extends tp.tpElement {
+tp.Splitter = class extends tp.Component {
 
     /**
     Constructor.
@@ -2315,7 +2315,7 @@ Example markup: <br />
     </div>
 </pre>
 */
-tp.IFrame = class extends tp.tpElement {
+tp.IFrame = class extends tp.Component {
 
     /**
     Constructor
@@ -2521,7 +2521,7 @@ The initialization can be done by passing an object to the CreateParams paramete
     });
 </pre>
 */
-tp.DropDownBox = class extends tp.tpElement {
+tp.DropDownBox = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -4236,7 +4236,7 @@ tp.MenuSeparator = class extends tp.MenuItemBase {
 /**
 Base class for the {@link tp.Menu} (main menu) and {@link tp.ContextMenu} (local menu)
 */
-tp.MenuBase = class extends tp.tpElement {
+tp.MenuBase = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -4855,7 +4855,7 @@ Example markup
 </pre>
 
 */
-tp.SiteMenu = class extends tp.tpElement {
+tp.SiteMenu = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -5169,7 +5169,7 @@ The user defines just the <code>ResponsiveMode</code> and then the mode goes fro
  * Methods: AddItem(), InsertItem(), RemoveItemAt() <br />
  * Events: RenderModeChanged, SelectedIndexChanging, SelectedIndexChanged, ItemClicked
  * */
-tp.ItemBar = class extends tp.tpElement {
+tp.ItemBar = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -5915,7 +5915,7 @@ Example markup:
     <button>Button1</button>
 </pre>
 */
-tp.Button = class extends tp.tpElement {
+tp.Button = class extends tp.Component {
     /**
     Constructor <br />
     Example markup:
@@ -5964,7 +5964,7 @@ tp.ToolBarItemClickEventArgs = class extends tp.EventArgs {
 
     /**
     Constructor 
-    @param {tp.tpElement} Item - The clicked {@link tp.tpElement} item
+    @param {tp.Component} Item - The clicked {@link tp.Component} item
     @param {string} [Command] Optional
     */
     constructor(Item, Command = '') {
@@ -5978,7 +5978,7 @@ tp.ToolBarItemClickEventArgs = class extends tp.EventArgs {
 
     /**
     The item clicked.
-    @type {tp.tpElement}
+    @type {tp.Component}
     */
     Item = null;
 
@@ -5995,7 +5995,7 @@ Example markup:
     <div>Button1<div>
 </pre>
 */
-tp.ControlToolButton = class extends tp.tpElement {
+tp.ControlToolButton = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -6170,7 +6170,7 @@ tp.ControlToolButton.prototype.Tag = null;
 /**
 A control tool-bar. Used by the grid and some dialogs
 */
-tp.ControlToolBar = class extends tp.tpElement {
+tp.ControlToolBar = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -6330,7 +6330,7 @@ Produced markup
     </a>
 </pre>
 */
-tp.ButtonEx = class extends tp.tpElement {
+tp.ButtonEx = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -6626,7 +6626,7 @@ tp.ButtonEx.prototype.fImageUrl = '';
 /**
 A tool-bar
 */
-tp.ToolBar = class extends tp.tpElement {
+tp.ToolBar = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -6772,7 +6772,7 @@ tp.ToolBar = class extends tp.tpElement {
     /**
      * Returns a child of this tool-bar having a specified command, if any, else null.
      * @param {string} Command The command to look for, e.g. 'Execute'.
-     * @returns {tp.ButtonEx | tp.tpElement}  Returns a child of this tool-bar having a specified command, if any, else null.
+     * @returns {tp.ButtonEx | tp.Component}  Returns a child of this tool-bar having a specified command, if any, else null.
      */
     FindItemByCommand(Command) {
         let List = tp.GetAllComponents(this.Handle);
@@ -7346,7 +7346,7 @@ tp.AutocompleteList = class extends tp.DropDownBox {
 The ultimate ancestor class of controls.
 @implements {tp.IDataSourceListener}
 */
-tp.Control = class extends tp.tpElement  {
+tp.Control = class extends tp.Component  {
 
     /**
     Constructor
@@ -14596,7 +14596,7 @@ tp.ValueSlider.prototype.fValueList;
 /**
 A progress-bar control
 */
-tp.ProgressBar = class extends tp.tpElement {
+tp.ProgressBar = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -15325,7 +15325,7 @@ tp.TreeNode.prototype.fImageUrl;
 /**
 A tree-view control <br />
 */
-tp.TreeView = class extends tp.tpElement {
+tp.TreeView = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -18032,7 +18032,7 @@ tp.LocatorBox.prototype.fLayouting = false;
  * A filter descriptor is used in creating a filter item. <br />
  * A control link associates a Ui control and a filter item.
 * */
-tp.SelectSqlListUi = class extends tp.tpElement {
+tp.SelectSqlListUi = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -18321,7 +18321,7 @@ tp.SqlFilterConditions = class {
  * The CreateParams passed in the constructor MUST contain an array property named FilterDefs of type {@link tp.SqlFilterDef}.
  * NOTE: A {@link tp.SqlFilterDef} describes a single entry (search field condition) of a WHERE clause of a SELECT sql statement.
  * */
-tp.SqlFilterPanel = class extends tp.tpElement {
+tp.SqlFilterPanel = class extends tp.Component {
     /**
     Constructor <br />
     The passed-in HTML element is a DIV where to build the controls of the filter list. <br />
@@ -18865,15 +18865,15 @@ tp.SqlFilterControlLink = class {
     lblDateRange = null;
 
     /** The main input control of this filter. Used when UseRange of the filter def is false. 
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     edtBox = null;
     /** The 'from' input control of this filter. Used when UseRange of the filter def is true.
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     edtFrom = null;
     /** The 'to' input control of this filter. Used when UseRange of the filter def is true.
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     edtTo = null;
     /** A combo-box displaying  
@@ -19333,7 +19333,7 @@ Example markup
 </pre>
 @implements {tp.IBroadcasterListener}
 */
-tp.View = class extends tp.tpElement {
+tp.View = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -19620,7 +19620,7 @@ tp.View = class extends tp.tpElement {
      * Binds controls of the Edit part. <br />
      * NOTE:  Do NOT call this method directly. <br />
      * This method is called automatically the first time an an Insert() or Edit() is requested.
-     * @param {tp.tpElement[]} ComponentList The list of controls to bind
+     * @param {tp.Component[]} ComponentList The list of controls to bind
      * @protected
      */
     BindControls(ComponentList) {
@@ -19828,7 +19828,7 @@ tp.ViewTypes = {
 //#region tp.Row 
 
 /** A responsive row */
-tp.Row = class extends tp.tpElement {
+tp.Row = class extends tp.Component {
     /**
     Constructor <br />
     Example markup:
@@ -19872,7 +19872,7 @@ tp.Row = class extends tp.tpElement {
 
 //#region tp.Col
 /** A responsive column */
-tp.Col = class extends tp.tpElement {
+tp.Col = class extends tp.Component {
     /**
     Constructor <br />
     Example markup:
@@ -19943,7 +19943,7 @@ tp.Col.prototype.ControlWidthPercents = [100, 100, 60, 65, 65];
 //#region tp.CtrlRow
 
 /** A responsive control row */
-tp.CtrlRow = class extends tp.tpElement {
+tp.CtrlRow = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -20069,7 +20069,7 @@ tp.CtrlRow = class extends tp.tpElement {
 };
 
 /** The control of this control row
- * @type {tp.tpElement}
+ * @type {tp.Component}
  * */
 tp.CtrlRow.prototype.Control = null;
 /** Caption text container
@@ -20093,7 +20093,7 @@ tp.CtrlRow.prototype.elText = null;
 
 //#region tp.CheckBoxRow
 /** A responsive check-box control row */
-tp.CheckBoxRow = class extends tp.tpElement {
+tp.CheckBoxRow = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -20207,7 +20207,7 @@ tp.CheckBoxRow = class extends tp.tpElement {
 };
 
 /** The control of this control row
- * @type {tp.tpElement}
+ * @type {tp.Component}
  * */
 tp.CheckBoxRow.prototype.Control = null;
 /** Element with the required mark.
@@ -20615,7 +20615,7 @@ tp.MultiRowPickDialog.prototype.btnExcludeAll;
 tp.MultiRowPickDialog.prototype.btnShowIdColumns;
 /** Field
  * @field
- * @type {tp.tpElement}
+ * @type {tp.Component}
  */
 tp.MultiRowPickDialog.prototype.btnOK;
 /** Field
@@ -20863,7 +20863,7 @@ tp.SingleRowPickDialog.prototype.ToolBar = null;
 tp.SingleRowPickDialog.prototype.btnShowIdColumns = false;
 /** Field
  * @field
- * @type {tp.tpElement}
+ * @type {tp.Component}
  */
 tp.SingleRowPickDialog.prototype.btnOK = null;
 /** Field
@@ -21163,7 +21163,7 @@ tp.SqlFilterDialog.prototype.btnShowSql = false;
 tp.SqlFilterDialog.prototype.btnShowIdColumns = false;
 /** Field
  * @field
- * @type {tp.tpElement}
+ * @type {tp.Component}
  */
 tp.SqlFilterDialog.prototype.btnOK = null;
 /** Field
@@ -21965,11 +21965,11 @@ tp.Ui = class {
 
     /* private */
     /**
-    Creates and returns a tp.tpElement instance based on a registered type-name.
+    Creates and returns a tp.Component instance based on a registered type-name.
     @private
     @param {string} TypeName - The type-name. One of the tp.Ui.Types.
-    @param {string | Node} ElementOrSelector - The element up-on to create the {@link tp.tpElement} instance
-    @returns {tp.tpElement} Returns a {@link tp.tpElement} instance based on a registered type-name.
+    @param {string | Node} ElementOrSelector - The element up-on to create the {@link tp.Component} instance
+    @returns {tp.Component} Returns a {@link tp.Component} instance based on a registered type-name.
     */
     static CreateElement(TypeName, ElementOrSelector) {
         let el = null;
@@ -21985,7 +21985,7 @@ tp.Ui = class {
             }
         }
 
-        let Result = new Type(el, null);            // tp.tpElement (or descendant) constructor
+        let Result = new Type(el, null);            // tp.Component (or descendant) constructor
 
         if (tp.SysConfig.DebugMode === false
             && ['tp-Class', tp.Classes.Row, tp.Classes.Col, tp.Classes.CtrlRow, tp.Classes.CheckBoxRow].indexOf(TypeName) === -1) {
@@ -21995,16 +21995,16 @@ tp.Ui = class {
         return Result;
     }
     /**
-    Creates and returns a tp.tpElement. <br />
-    Used in creating tp.tpElement instances that are NOT registered with tp.Ui.Types.  <br />
+    Creates and returns a tp.Component. <br />
+    Used in creating tp.Component instances that are NOT registered with tp.Ui.Types.  <br />
     The DOM element must have a markup like the following:
     <pre>
         <div class="Class" data-setup="{ClassType: tp.MyDataView, .... }"></div>
     </pre>
     The ClassType property defines a class that is NOT registered with tp.Ui.Types.
     @private
-    @param {HTMLElement} el The DOM element upon to create the {@link tp.tpElement}
-    @returns {tp.tpElement} The newly created {@link tp.tpElement}
+    @param {HTMLElement} el The DOM element upon to create the {@link tp.Component}
+    @returns {tp.Component} The newly created {@link tp.Component}
     */
     static CreateByClass(el) {
         var Type, o, Result = null;
@@ -22016,7 +22016,7 @@ tp.Ui = class {
                 o = tp.GetDataSetupObject(el);
                 if (tp.IsObject(o) && 'ClassType' in o) {
                     Type = o.ClassType;
-                    Result = new Type(el, null);                // tp.tpElement (or descendant) constructor
+                    Result = new Type(el, null);                // tp.Component (or descendant) constructor
                     tp.RemoveClass(Result.Handle, tp.Ui.Types.Class);
                 } 
             }
@@ -22045,7 +22045,7 @@ tp.Ui = class {
     </pre>
     @private
     @param {HTMLElement}  elRow - The DOM element upon to create the control-row.
-    @returns {tp.tpElement} Returns the {@link tp.Control} of a control-row
+    @returns {tp.Component} Returns the {@link tp.Control} of a control-row
     */
     static CreateCtrlRow(elRow) {
 
@@ -22060,7 +22060,7 @@ tp.Ui = class {
             //elText,            // HTMLElement
             //elRequiredMark,     // HTMLSpanElement
             divCtrl,            // HTMLElement
-            Result = null;      // tp.tpElement
+            Result = null;      // tp.Component
 
         //tp.AddClass(elRow, tp.Classes.Row);
 
@@ -22135,7 +22135,7 @@ tp.Ui = class {
     </pre>
     @private
     @param  {HTMLElement} elRow - The DOM element upon to create the control-row.
-    @returns {tp.tpElement} Returns the {@link tp.Control} of a check-box control-row
+    @returns {tp.Component} Returns the {@link tp.Control} of a check-box control-row
     */
     static CreateCheckBoxRow(elRow) { 
 
@@ -22145,7 +22145,7 @@ tp.Ui = class {
             Setup,              // data-setup attribute
             CP,
             Prefix, 
-            Result = null;      // tp.tpElement  
+            Result = null;      // tp.Component
 
         //tp.AddClass(elRow, tp.Classes.Row);
 
@@ -22219,7 +22219,7 @@ tp.Ui = class {
     When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class and a new property, named tpObject
     is created and attached to the DOM element object, pointing to the Tripous object.
     @param {string | Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
-    @returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on elements of a parent element
+    @returns {tp.Component[]} Returns an array with tp.Element objects constructed up on elements of a parent element
     */
     static GetContainerControls(ParentElementOrSelector) {
         return tp.GetAllComponents(ParentElementOrSelector);
@@ -22231,7 +22231,7 @@ tp.Ui = class {
      Child DOM elements must have defined a proper css class, that is a css class registered with tp.Ui.Types, e.g. 'TextBox'      
      @param {string | Node} [ContainerElementOrSelector] - Optional. A selector for the parent. If null then the document.body is used.
      @param {string[]} [ExcludedTypes] - Optional.  An array with type names to exclude.
-     @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
+     @returns {tp.Component[]} Returns a list with all created controls for the parent.
      */
     static CreateContainerControls(ContainerElementOrSelector = null, ExcludedTypes = null) {
         var Result = [];
@@ -22257,7 +22257,7 @@ tp.Ui = class {
      Child DOM elements must have defined a proper css class, that is a css class registered with tp.Ui.Types, e.g. 'TextBox'              
      @param {string | Node} ContainerElementOrSelector - A selector for the parent. If null then the document.body is used.
      @param {string} TypeName - The name of the control type. Must be registered with tp.Ui.Types
-     @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
+     @returns {tp.Component[]} Returns a list with all created controls for the parent.
      */
     static CreateContainerControlsOfType(ContainerElementOrSelector, TypeName) {
         
@@ -22286,13 +22286,13 @@ tp.Ui = class {
      
      @param {string} TypeName - The name of the control type. Must be registered with tp.Ui.Types
      @param {HTMLElement} el - A HTMLElement upon to create the control
-     @returns {tp.tpElement} Returns the control it creates.
+     @returns {tp.Component} Returns the control it creates.
      */
     static Create(TypeName, el) {
-        var Result = null; // tp.tpElement
+        var Result = null; // tp.Component
 
         if (tp.IsElement(el) && tp.HasObject(el)) {
-            if (tp.GetObject(el) instanceof tp.tpElement)
+            if (tp.GetObject(el) instanceof tp.Component)
                 Result = tp.GetObject(el);
         }
         else if (TypeName === tp.Ui.Types.Class) {
@@ -22321,7 +22321,7 @@ tp.Ui = class {
 
     /**
     Fixes-up a list of just-created controls. That is resolves references etc.      
-    @param {tp.tpElement[]} List An array of tp.Element instances
+    @param {tp.Component[]} List An array of tp.Element instances
     */
     static FixupControls(List) {
         // not yet
@@ -22373,7 +22373,7 @@ tp.Ui.Types = {
     'CtrlRow': tp.CtrlRow,
     'CheckBoxRow': tp.CheckBoxRow,
 
-    Element: tp.tpElement,
+    Element: tp.Component,
 
     IFrame: tp.IFrame,
     Splitter: tp.Splitter,
@@ -22445,7 +22445,7 @@ tp.DataTypeToUiType = function (v) {
    Child DOM elements must have defined a proper css class, that is a css class registered with tp.Ui.Types, e.g. 'TextBox'
  * @param {string | Node} [ParentElementSelector] - Optional. A selector for the parent. If null then the document.body is used.
  * @param {string[]} [ExcludedTypes] - Optional.  An array with type names to exclude.
- * @returns {tp.tpElement[]} Returns a list with all created controls for the parent.
+ * @returns {tp.Component[]} Returns a list with all created controls for the parent.
  */
 tp.CreateContainerControls = function (ParentElementSelector = null, ExcludedTypes = null) {
     return tp.Ui.CreateContainerControls(ParentElementSelector, ExcludedTypes);

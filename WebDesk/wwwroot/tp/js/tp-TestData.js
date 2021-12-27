@@ -214,7 +214,7 @@ tp.TestData = class {
 
         alert('start');
 
-        var div = new tp.tpElement(ElementOrSelector);
+        var div = new tp.Component(ElementOrSelector);
 
         //div.Position = tp.Position.Absolute;
         //div.Y = 300;

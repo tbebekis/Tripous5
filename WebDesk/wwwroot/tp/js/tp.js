@@ -11081,7 +11081,7 @@ tp.AjaxRequest.ExecuteAsync = tp.AjaxRequest.Execute;
 //#endregion
 
 //---------------------------------------------------------------------------------------
-// tpObject and tpElement
+// tpObject and tp.Component
 //---------------------------------------------------------------------------------------
 
 //#region tp.SizeChart
@@ -11486,7 +11486,7 @@ tp.tpObject.prototype.fBinds = null;                        // { Func: Function,
 //#region CreateParams
 
 /**
-Represenst an initialization options list that is passed to a {@link tp.tpElement} constructor.
+Represenst an initialization options list that is passed to a {@link tp.Component} constructor.
 @class
 */
 tp.CreateParams = class {
@@ -11501,16 +11501,16 @@ tp.CreateParams = class {
     }
 };
 
-/** The parent of the <code>tp.tpElement</code> being initialized
- @type {HTMLElement|tp.tpElement}
+/** The parent of the {@link tp.Component} being initialized
+ @type {HTMLElement|tp.Component}
  @default null
  */
-tp.CreateParams.prototype.Parent = null;             // HTMLElement | tp.tpElement;
-/** The DOM element upon the new <code>tp.tpElement</code> is going to be constructed
+tp.CreateParams.prototype.Parent = null;             
+/** The DOM element upon the new {@link tp.Component} is going to be constructed
  @type {HTMLElement|string}
  @default null
  */
-tp.CreateParams.prototype.ElementOrSelector = null;   // string | HTMLElement;
+tp.CreateParams.prototype.ElementOrSelector = null;    
 /** The id of the new element
  @type {string}
  @default ''
@@ -11536,7 +11536,7 @@ tp.CreateParams.prototype.CssClasses = '';
  @default ''
  */
 tp.CreateParams.prototype.CssText = '';
-/** When no DOM element is passed to the <code>tp.tpElement</code> constructor a new DOM element is created by the constructor, by calling the <code>CreateHandle()</code> method. <br />
+/** When no DOM element is passed to the {@link tp.Component} constructor a new DOM element is created by the constructor, by calling the <code>CreateHandle()</code> method. <br />
 When this property is set to true, then the constructor does NOT call the <code>CreateHandle()</code> and it is the caller responsibility to call it at a later time.
  @type {boolean}
  @default false
@@ -11544,10 +11544,10 @@ When this property is set to true, then the constructor does NOT call the <code>
 tp.CreateParams.prototype.DeferHandleCreation = false;
 //#endregion
 
-//#region tpElement
+//#region tp.Component
 
 //---------------------------------------------------------------------------------------
-// tp.tpElement
+// tp.Component
 //---------------------------------------------------------------------------------------
 
 
@@ -11558,7 +11558,7 @@ should either belong to the derived class prototype, e.g. MyDerivedClass.prototy
 or provide a getter and setter function. <br />
 Example:
 
-tp.Button = class extends tp.tpElement {
+tp.Button = class extends tp.Component {
 
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
@@ -11573,7 +11573,7 @@ tp.Button = class extends tp.tpElement {
 
 Ofcourse it's insane.
 */
-tp.tpElement = class extends tp.tpObject {
+tp.Component = class extends tp.tpObject {
 
     /**
     Constructor
@@ -11711,13 +11711,13 @@ tp.tpElement = class extends tp.tpObject {
      * @type {string}
      */
     get NodeType() { return this.Handle && this.Handle.nodeName ? this.Handle.nodeName : ''; }
-    /** Gets or sets the parent tp.tpElement 
-     * @type {tp.tpElement}
+    /** Gets or sets the parent {@link tp.Component}
+     * @type {tp.Component}
      */
     get Parent() {
         var el = this.ParentHandle;
         let o = tp.GetObject(el);
-        return o instanceof tp.tpElement ? o : null;
+        return o instanceof tp.Component ? o : null;
     }
     set Parent(v) {
         this.SetParent(v);
@@ -12139,7 +12139,7 @@ tp.tpElement = class extends tp.tpObject {
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.tpElement';
+        this.tpClass = 'tp.Component';
 
         this.fElementType = 'div';
         this.fDisplayType = '';         // by default, either the css defined or block
@@ -12357,11 +12357,11 @@ tp.tpElement = class extends tp.tpObject {
     /* self handling */
     /**
     Sets the parent of this instance.
-    @param {tp.tpElement|HTMLElement} Parent - The parent
+    @param {tp.Component|HTMLElement} Parent - The parent
     */
     SetParent(Parent) {
         if (this.Handle) {
-            if (Parent instanceof tp.tpElement) {
+            if (Parent instanceof tp.Component) {
                 Parent = Parent.Handle;
             }
 
@@ -12374,11 +12374,11 @@ tp.tpElement = class extends tp.tpObject {
     }
     /**
     Appends this element to a parent
-    @param {tp.tpElement|HTMLElement} Parent - The parent
+    @param {tp.Component|HTMLElement} Parent - The parent
     */
     AppendTo(Parent) {
         if (this.Handle) {
-            if (Parent instanceof tp.tpElement && Parent.Handle) {
+            if (Parent instanceof tp.Component && Parent.Handle) {
                 Parent.Handle.appendChild(this.Handle);
                 this.OnParentChanged();
             } else if (tp.IsHTMLElement(Parent)) {
@@ -12389,11 +12389,11 @@ tp.tpElement = class extends tp.tpObject {
     }
     /**
     Inserts this instance to DOM, before a reference node.
-    @param {tp.tpElement|HTMLElement} RefNode - The reference node
+    @param {tp.Component|HTMLElement} RefNode - The reference node
     */
     InsertBefore(RefNode) {
         if (this.Handle) {
-            if (RefNode instanceof tp.tpElement && RefNode.ParentHandle) {
+            if (RefNode instanceof tp.Component && RefNode.ParentHandle) {
                 RefNode.ParentHandle.insertBefore(this.Handle, RefNode.Handle);
                 this.OnParentChanged();
             } else if (tp.IsHTMLElement(RefNode) && RefNode.parentNode) {
@@ -12405,12 +12405,12 @@ tp.tpElement = class extends tp.tpObject {
     /**
     Inserts this instance as a child to a parent, at a specified position
     @param {number} Index - The index among siblings.
-    @param {tp.tpElement|HTMLElement} Parent - The parent
+    @param {tp.Component|HTMLElement} Parent - The parent
     */
     InsertAt(Index, Parent) {
         if (this.Handle && Parent) {
             var elParent = null;
-            if (Parent instanceof tp.tpElement) {
+            if (Parent instanceof tp.Component) {
                 elParent = Parent.Handle;
             } else if (tp.IsElement(Parent)) {
                 elParent = Parent;
@@ -12456,7 +12456,7 @@ tp.tpElement = class extends tp.tpObject {
                 el = ElementOrSelector;
                 this.fFromMarkup = true;
             } else if (tp.IsString(ElementOrSelector) && !tp.IsBlank(ElementOrSelector)) {
-                if (tp.ListContainsText(tp.tpElement.StandardNodeTypes, ElementOrSelector)) {
+                if (tp.ListContainsText(tp.Component.StandardNodeTypes, ElementOrSelector)) {
                     el = this.Document.createElement(ElementOrSelector);
                 } else {
                     el = tp.Select(ElementOrSelector);
@@ -12534,7 +12534,7 @@ tp.tpElement = class extends tp.tpObject {
                 if (tp.IsEmpty(el.parentNode)) {
                     if (tp.IsElement(this.CreateParams.Parent)) {
                         this.CreateParams.Parent.appendChild(el);
-                    } else if (this.CreateParams.Parent instanceof tp.tpElement) {
+                    } else if (this.CreateParams.Parent instanceof tp.Component) {
                         this.CreateParams.Parent.Handle.appendChild(el);
                     }
                 }
@@ -12970,15 +12970,15 @@ tp.tpElement = class extends tp.tpObject {
     }
  
  
-    /* direct tp.tpElement children of this instance */
-    /** Returns an array of all direct tp.tpElement children
-     * @returns {tp.tpElement[]} Returns an array of all direct tp.tpElement children
+    /* direct {@link tp.Component} children of this instance */
+    /** Returns an array of all direct {@link tp.Component} children
+     * @returns {tp.Component[]} Returns an array of all direct {@link tp.Component} children
      * */
     GetComponentList() { return tp.GetComponentList(this.Handle); }
     /**
-    Returns the associated tp.tpElement of a direct child  (DOM element) found at a specified index, if any, else null
+    Returns the associated {@link tp.Component} of a direct child  (DOM element) found at a specified index, if any, else null
     @param {number} Index The index to use.
-    @returns {tp.tpElement} Returns the associated tp.tpElement of a direct child  (DOM element) found at a specified index, if any, else null
+    @returns {tp.Component} Returns the associated {@link tp.Component} of a direct child  (DOM element) found at a specified index, if any, else null
     */
     GetComponentAt(Index) {
         let el = this.GetElementAt(Index);
@@ -12986,40 +12986,40 @@ tp.tpElement = class extends tp.tpObject {
         return o;
     }
     /**
-    Adds a child tp.tpElement to this instance and returns the child.
-    @param {string|tp.tpElement} Child - A tp.tpElement instance or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc. 
-    @returns {tp.tpElement} Returns the newly added tp.tpElement.
+    Adds a child {@link tp.Component} to this instance and returns the child.
+    @param {string|tp.Component} Child - A {@link tp.Component} instance or any of the {@link tp.Component}.StandardNodeTypes, i.e. div, span, etc.
+    @returns {tp.Component} Returns the newly added {@link tp.Component}.
     */
     AddComponent(Child) {
         if (this.Handle) {
 
-            if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
+            if (tp.IsString(Child) && tp.ListContainsText(tp.Component.StandardNodeTypes, Child)) {
                 var el = this.Handle.ownerDocument.createElement(Child);
-                Child = new tp.tpElement(el);
+                Child = new tp.Component(el);
             }
 
-            if (Child instanceof tp.tpElement && Child.Handle) {
+            if (Child instanceof tp.Component && Child.Handle) {
                 this.Handle.appendChild(Child.Handle);
             }
         }
 
-        return Child instanceof tp.tpElement ? Child : null;
+        return Child instanceof tp.Component ? Child : null;
     }
     /**
-    Inserts a child tp.tpElement to this instance, at a specified child position, and returns the child.
+    Inserts a child {@link tp.Component} to this instance, at a specified child position, and returns the child.
     @param {number|Node} IndexOrNode - A number indicating the child position or an already existing child element
-    @param {string|tp.tpElement} Child - A tp.tpElement instance or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
-    @returns {tp.tpElement} Returns the newly inserted tp.tpElement.
+    @param {string|tp.Component} Child - A {@link tp.Component} instance or any of the {@link tp.Component}.StandardNodeTypes, i.e. div, span, etc.
+    @returns {tp.Component} Returns the newly inserted {@link tp.Component}.
     */
     InsertComponent(IndexOrNode, Child) {
 
         if (this.Handle) {
-            if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
+            if (tp.IsString(Child) && tp.ListContainsText(tp.Component.StandardNodeTypes, Child)) {
                 var el = this.Handle.ownerDocument.createElement(Child);
-                Child = new tp.tpElement(el);
+                Child = new tp.Component(el);
             }
 
-            if (Child instanceof tp.tpElement && Child.Handle) {
+            if (Child instanceof tp.Component && Child.Handle) {
                 var beforeElement = null;
 
                 if (tp.IsNumber(IndexOrNode) && IndexOrNode >= 0) {
@@ -13039,11 +13039,11 @@ tp.tpElement = class extends tp.tpObject {
             }
         }
 
-        return Child instanceof tp.tpElement ? Child : null;
+        return Child instanceof tp.Component ? Child : null;
     }
     /**
     Removes a child
-    @param {tp.tpElement} Child The child to remove
+    @param {tp.Component} Child The child to remove
     */
     RemoveComponent(Child) {
         if (this.Handle) {
@@ -13053,7 +13053,7 @@ tp.tpElement = class extends tp.tpObject {
             if (tp.IsString(Child))
                 el = tp.Select(Child);
 
-            if (Child instanceof tp.tpElement)
+            if (Child instanceof tp.Component)
                 el = Child.Handle;
 
             if (el instanceof HTMLElement && el.parentNode === this.Handle) {
@@ -13086,7 +13086,7 @@ tp.tpElement = class extends tp.tpObject {
     }
     /**
     Finds and returns the index of a direct child, if exists, else -1.
-    @param {string|HTMLElement|tp.tpElement} Child The child to find the index
+    @param {string|HTMLElement|tp.Component} Child The child to find the index
     @returns {number} Returns the index of a direct child, if exists, else -1.
     */
     IndexOfElement(Child) {
@@ -13097,7 +13097,7 @@ tp.tpElement = class extends tp.tpObject {
                 el = Child;
             } else if (tp.IsString(Child)) {
                 el = tp.Select(Child);
-            } else if (Child instanceof tp.tpElement) {
+            } else if (Child instanceof tp.Component) {
                 el = Child.Handle;
             }
 
@@ -13114,13 +13114,13 @@ tp.tpElement = class extends tp.tpObject {
     }
     /**
      Retuns true if a specified element is a direct child of this element.
-     @param {string|HTMLElement|tp.tpElement} Child The child to check
+     @param {string|HTMLElement|tp.Component} Child The child to check
      @return {boolean} Retuns true if a specified element is a direct child of this element.
      */
     IsChildElement(Child) { return this.IndexOfElement(Child) !== -1; }
     /**
     Adds a child HTMLElement to this instance and returns the child.
-    @param {string|HTMLElement} Child - A HTMLElement or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
+    @param {string|HTMLElement} Child - A HTMLElement or any of the {@link tp.Component}.StandardNodeTypes, i.e. div, span, etc.
     @returns {HTMLElement} Returns the newly added child HTMLElement
     */
     AddElement(Child) {
@@ -13128,7 +13128,7 @@ tp.tpElement = class extends tp.tpObject {
 
         if (this.Handle) {
 
-            if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
+            if (tp.IsString(Child) && tp.ListContainsText(tp.Component.StandardNodeTypes, Child)) {
                 Child = this.Handle.ownerDocument.createElement(Child);
             }
 
@@ -13144,7 +13144,7 @@ tp.tpElement = class extends tp.tpObject {
     /**
     Inserts a child HTMLElement to this instance, at a specified child position, and returns the child.
     @param {number|Node} IndexOrNode - A number indicating the child position or an already existing child element
-    @param {string|HTMLElement} Child - Child - A HTMLElement or any of the tp.tpElement.StandardNodeTypes, i.e. div, span, etc.
+    @param {string|HTMLElement} Child - Child - A HTMLElement or any of the {@link tp.Component}.StandardNodeTypes, i.e. div, span, etc.
     @returns {HTMLElement} Returns the newly added child HTMLElement
     */
     InsertElement(IndexOrNode, Child) {
@@ -13152,7 +13152,7 @@ tp.tpElement = class extends tp.tpObject {
 
         if (this.Handle) {
 
-            if (tp.IsString(Child) && tp.ListContainsText(tp.tpElement.StandardNodeTypes, Child)) {
+            if (tp.IsString(Child) && tp.ListContainsText(tp.Component.StandardNodeTypes, Child)) {
                 Child = this.Handle.ownerDocument.createElement(Child);
             }
 
@@ -13232,90 +13232,90 @@ or both.
 Finally the two CreateParams are merged into one and the values are passed to the properties of this instance, as long as property names match.
 @type {object|tp.CreateParams}
 */
-tp.tpElement.prototype.CreateParams = {};
+tp.Component.prototype.CreateParams = {};
 
 /** The css display property. By default, either the css defined or block 
  * @type {string}
  * */
-tp.tpElement.prototype.fDisplayType = '';
+tp.Component.prototype.fDisplayType = '';
 /** The element node type, e.g. div, etc.
  * @type {string}
  * */
-tp.tpElement.prototype.fElementType = '';
+tp.Component.prototype.fElementType = '';
 /** The element node sub-type of input elements, e.g. text, date, etc.
  * @type {string}
  * */
-tp.tpElement.prototype.fElementSubType = '';
+tp.Component.prototype.fElementSubType = '';
 /** Default css classes.
  * @type {string[]}
  * */
-tp.tpElement.prototype.fDefaultCssClasses = [];
+tp.Component.prototype.fDefaultCssClasses = [];
 /** When true the constructor does NOT create the handle (dom element)
  * @type {boolean}
  * */
-tp.tpElement.prototype.fDeferHandleCreation = '';
+tp.Component.prototype.fDeferHandleCreation = '';
 /** When true then the element gets an id attribute value automatically.
  * @type {boolean}
  * */
-tp.tpElement.prototype.fAutoId = false;
+tp.Component.prototype.fAutoId = false;
 
 // ------------------------------------------------------------
 /* instance fields */
 /** The {@link HTMLElement} this instance represents. */
-tp.tpElement.prototype.fHandle = null;
+tp.Component.prototype.fHandle = null;
 /** True when this element is enabled.
  * @type {boolean}
  * */
-tp.tpElement.prototype.fEnabled = true;                     
+tp.Component.prototype.fEnabled = true;                     
 /** True when the handle of this instance comes from the html markup, i.e. the dom element exists in markup and it is not dynamically created by code.
  * @type {boolean}
  * */
-tp.tpElement.prototype.fFromMarkup = false;
+tp.Component.prototype.fFromMarkup = false;
 /** Any tp.Element instances created from markup and having this instance as container (e.g. when this is an accordion item or a tab page, panel etc.)
  * @type {array}
  * */
-tp.tpElement.prototype.fChildMarkupControls = [];
+tp.Component.prototype.fChildMarkupControls = [];
 /** A list of DOM events this instance handles. 
  * Could be DOM event names, e.g. click or keydown, or one of the tp.Events constants.
  * @type {string[]|null}
  * */
-tp.tpElement.prototype.fHookedEvents = null;
+tp.Component.prototype.fHookedEvents = null;
 /** Detects size changes in an HTMLElement and sends notifications to a listener function.
  * @type {tp.ResizeDetector}
  * */
-tp.tpElement.prototype.fResizeDetector = null;
+tp.Component.prototype.fResizeDetector = null;
 /** The instance of a listener or null.
  * @type {tp.Listener}
  * */
-tp.tpElement.prototype.fScreenResizeListener = null;         
+tp.Component.prototype.fScreenResizeListener = null;         
 /** A size chart helper. To be used with container classes as a helper in detecting size changes.
  * @type {tp.SizeChart}
  * */
-tp.tpElement.prototype.fSizeChart = null;
+tp.Component.prototype.fSizeChart = null;
 /* fields */
 /** The {@link Document} this element is part of.
  * @type {Document}
  */
-tp.tpElement.prototype.fDocument = tp.Doc;
+tp.Component.prototype.fDocument = tp.Doc;
    
 /** True after the Dispose() is called.
 * @type {boolean}
 * */
-tp.tpElement.prototype.fIsDisposed = false;
+tp.Component.prototype.fIsDisposed = false;
 
 /** HTMLElement - label element, just before a control, with label text.
  * NOTE: It is an HTMLSpanElement in checkbox
  * @type {HTMLElement}
  * */
-tp.tpElement.prototype.elText = null;                      
+tp.Component.prototype.elText = null;                      
 /** HTMLSpanElement - span element, right after a control, with a required mark
  * @type {HTMLSpanElement}
  * */
-tp.tpElement.prototype.elRequiredMark = null;
+tp.Component.prototype.elRequiredMark = null;
 
 
 /** Node type names array, used internally */
-tp.tpElement.StandardNodeTypes = [
+tp.Component.StandardNodeTypes = [
     'main',
     'aside',
     'article',
@@ -13351,16 +13351,16 @@ tp.tpElement.StandardNodeTypes = [
 
 
 /**
-Creates, sets-up and returns a textarea tp.tpElement
-@param {HTMLElement|tp.tpElement} [Parent=null] - Optional.
-@returns {tp.tpElement} Returns a tp.tpElement.
+Creates, sets-up and returns a textarea {@link tp.Component}
+@param {HTMLElement|tp.Component} [Parent=null] - Optional.
+@returns {tp.Component} Returns a {@link tp.Component}.
 */
-tp.tpElement.CreateMemo = function (Parent = null) {
+tp.Component.CreateMemo = function (Parent = null) {
     let CP = new tp.CreateParams();
     CP.Parent = Parent;
     CP.CssClasses = 'tp-Memo';
 
-    let Result = new tp.tpElement('textarea', CP);
+    let Result = new tp.Component('textarea', CP);
 
     Result.SetAttributes({
         cols: 10,
@@ -13383,7 +13383,7 @@ tp.tpElement.CreateMemo = function (Parent = null) {
 //#endregion
 
 
-//#region HTMLElement to tpObject and tpElement association
+//#region HTMLElement to tpObject and tp.Component association
 
 // HTMLElement to tp.tpObject association ---------------------------------------------------------------
 /**
@@ -13419,11 +13419,11 @@ tp.SetObject = function (el, v) {
         el['tpObject'] = v;
 };
 /**
-Returns true if a specified DOM element is associated to a tp.tpElement
+Returns true if a specified DOM element is associated to a {@link tp.Component}
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el The element to check
-@returns {boolean} Returns true if a specified DOM element is associated to a tp.tpElement
+@returns {boolean} Returns true if a specified DOM element is associated to a {@link tp.Component}
 */
 tp.HasObject = function (el) { return tp.GetObject(el) !== null; };
 /**
@@ -13460,7 +13460,7 @@ Returns a tp.tpObject instance of a specified tp.tpObject class starting the sea
 Returns null if nothing is found. 
 NOTE: To be used from inside event handler methods in order to find the right tp.tpObject sender instance.
  * @param {Node} el - The element that plays the role of the starting point.
- * @param {object} ElementClass A tp.tpElement class or a descendant, to check for a match.
+ * @param {object} ElementClass A {@link tp.Component} class or a descendant, to check for a match.
  * @returns {tp.tpObject} Returns a tp.tpObject or null
  */
 tp.GetContainerByClass = function (el, ElementClass) {
@@ -13484,47 +13484,47 @@ tp.GetContainerByClass = function (el, ElementClass) {
 };
 
 
-// HTMLElement to tp.tpElement association --------------------------------------------
+// HTMLElement to tp.Component association --------------------------------------------
 /**
-Returns the {@link tp.tpElement} Tripous script object associated to a DOM element, if any or null.  
+Returns the {@link tp.Component} Tripous script object associated to a DOM element, if any or null.  
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el - The element to get the associated tripous script object from.
-@returns {tp.tpElement} Returns the Tripous script object associated to a DOM element, if any or null.
+@returns {tp.Component} Returns the Tripous script object associated to a DOM element, if any or null.
 */
 tp.GetComponent = function (el) {
     let o = tp.GetObject(el);
-    return o instanceof tp.tpElement ? o : null;
+    return o instanceof tp.Component ? o : null;
 };
 /**
-Returns true if a specified DOM element is associated to a {@link tp.tpElement}.
+Returns true if a specified DOM element is associated to a {@link tp.Component}.
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} el The element to check
-@returns {boolean} Returns true if a specified DOM element is associated to a tp.tpElement
+@returns {boolean} Returns true if a specified DOM element is associated to a {@link tp.Component}
 */
 tp.HasComponent = function (el) { return tp.GetComponent(el) !== null; };
 /**
-Returns an array with all {@link tp.tpElement} objects constructed/existing up on direct or nested child DOM elements of a specified parent element or the entire document.
+Returns an array with all {@link tp.Component} objects constructed/existing up on direct or nested child DOM elements of a specified parent element or the entire document.
 NOTE: When a Tripous script object is created upon a DOM element, that element is marked with the tp-Object css class.
 Also a new property, named tpObject, is created and attached to the DOM element object, pointing to the Tripous object.
 @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
-@returns {tp.tpElement[]} Returns an array with tp.Element objects constructed up on direct or nested elements of a parent element
+@returns {tp.Component[]} Returns an array with tp.Element objects constructed up on direct or nested elements of a parent element
 */
 tp.GetAllComponents = function (ParentElementOrSelector) {
     let List = tp.GetAllObjects(ParentElementOrSelector);
-    let Result = [];        // tp.tpElement[]
+    let Result = [];        
 
     for (let i = 0, ln = List.length; i < ln; i++) {
-        if (List[i] instanceof tp.tpElement)
+        if (List[i] instanceof tp.Component)
             Result.push(List[i]);
     }
 
     return Result;
 };
-/** Returns an array of all direct tp.tpElement children of a specified parent HTMLElement.
+/** Returns an array of all direct {@link tp.Component} children of a specified parent HTMLElement.
  * @param {HTMLElement|string} The parent HTMLElement
- * @returns {tp.tpElement[]} Returns an array of all direct tp.tpElement children
+ * @returns {tp.Component[]} Returns an array of all direct {@link tp.Component} children
  * */
 tp.GetComponentList = function (ParentElementOrSelector) {
     let ResultList = [];
@@ -13542,7 +13542,7 @@ tp.GetComponentList = function (ParentElementOrSelector) {
  Finds and returns a tp.Elemement contained by a container, by Id. If not found, then null is returned
  @param {string} Id - The Id to match
  @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
- @returns {tp.tpElement} Returns the tp.tpElement or null.
+ @returns {tp.Component} Returns the {@link tp.Component} or null.
  */
 tp.FindComponentById = function (Id, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
@@ -13560,7 +13560,7 @@ tp.FindComponentById = function (Id, ParentElementOrSelector = null) {
  and if not found, then it is compared against the data-Name attribute.
  @param {string} Name - The Name to match
  @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
- @returns {tp.tpElement} Returns the tp.tpElement or null.
+ @returns {tp.Component} Returns the {@link tp.Component} or null.
  */
 tp.FindComponentByName = function (Name, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
@@ -13581,10 +13581,10 @@ tp.FindComponentByName = function (Name, ParentElementOrSelector = null) {
     return null;
 };
 /**
-Returns the first found direct or nested child tp.tpElement having a specified css class, if any, else null
+Returns the first found direct or nested child {@link tp.Component} having a specified css class, if any, else null
 @param {string} v - The css class
 @param {string|HTMLElement} [ParentElementOrSelector=null] Optional. The parent element or selector to parent element.
-@returns {tp.tpElement} The found tp.tpElement or null
+@returns {tp.Component} The found {@link tp.Component} or null
 */
 tp.FindComponentByCssClass = function (v, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
@@ -13592,7 +13592,7 @@ tp.FindComponentByCssClass = function (v, ParentElementOrSelector = null) {
     let List = tp.GetAllComponents(ParentElementOrSelector);
 
     for (let i = 0, ln = List.length; i < ln; i++) {
-        if (List[i] instanceof tp.tpElement && List[i].HasClass(v))
+        if (List[i] instanceof tp.Component && List[i].HasClass(v))
             return List[i];
     }
     return null;
@@ -13602,7 +13602,7 @@ tp.FindComponentByCssClass = function (v, ParentElementOrSelector = null) {
  @param {string} PropName - The property to match
  @param {any} PropValue - The value to match
  @param {string|Node} [ParentElementOrSelector=null] - The container of controls. If null/undefined/empty the document is used.
- @returns {tp.tpElement} Returns the tp.tpElement or null.
+ @returns {tp.Component} Returns the {@link tp.Component} or null.
  */
 tp.FindComponentByProp = function (PropName, PropValue, ParentElementOrSelector = null) {
     ParentElementOrSelector = ParentElementOrSelector || tp.Doc.body;
@@ -14655,7 +14655,7 @@ tp.WindowArgs.prototype.DefaultDialogResult = tp.DialogResult.Cancel;
 The ultimate ancestor of all windows and dialog boxes
 @class
 */
-tp.tpWindow = class extends tp.tpElement {
+tp.tpWindow = class extends tp.Component {
     /**
     Constructor
     @param {tp.WindowArgs} Args - Setup options
@@ -14901,12 +14901,12 @@ outline: none;
     }
 
     /**
-     * Creates and appends a button in the footer element. Returns the tp.tpElement button.
+     * Creates and appends a button in the footer element. Returns the {@link tp.Component} button.
      * @param {string} Command The command of the button, if any, else null.
      * @param {string} Title The text of the button
      * @param {tp.DialogResult} [DialogResult=tp.DialogResult.None] Optional. For modal windows only. The dialog result to return when the button is clicked. One of the tp.DialogResult constants.
      * @param {boolean} [ToLeft=false] Optional. True places the button to the left of the footer, false to the right.
-     * @returns {tp.tpElement} Returns the tp.tpElement button.
+     * @returns {tp.Component} Returns the {@link tp.Component} button.
      */
     CreateFooterButton(Command, Title, DialogResult = tp.DialogResult.None, ToLeft = false) {
         let Style = `
@@ -14923,7 +14923,7 @@ line-height: inherit;
         CP.CssClasses = 'tp-Button';
         CP.CssText = Style;
 
-        var Result = new tp.tpElement('button', CP);
+        var Result = new tp.Component('button', CP);
 
         Result['Command'] = Command;
         Result['DialogResult'] = DialogResult;
@@ -14938,8 +14938,8 @@ line-height: inherit;
         return Result;
     }
     /**
-     * Creates the content element.
-     * @returns {tp.tpElement} Returns the tp.tpElement content element.
+     * Creates the content {@link tp.Component} element.
+     * @returns {tp.Component} Returns the {@link tp.Component} content element.
      * */
     CreateContentElement() {
         if (tp.IsEmpty(this.Content)) {
@@ -14957,7 +14957,7 @@ height: 100%;
             CP.CssText = Style;
 
             // content
-            this.Content = new tp.tpElement(null, CP); 
+            this.Content = new tp.Component(null, CP); 
 
 
         }
@@ -15081,7 +15081,7 @@ position: relative;
 display: block;
 flex-grow: 1;
 `;
-        this.ContentWrapper = new tp.tpElement(null, CP);  
+        this.ContentWrapper = new tp.Component(null, CP);  
         this.ContentWrapper.IsElementResizeListener = true;
         this.ContentWrapper.On('ElementSizeChanged', this.ContentResized, this);
 
@@ -15313,10 +15313,14 @@ tp.tpWindow.prototype.HeaderText = null;          // HTMLSpanElement;
 tp.tpWindow.prototype.HeaderButtonBar = null;     // HTMLElement;
 tp.tpWindow.prototype.Footer = null;              // HTMLElement;
 
-/** It always created by this base class */
-tp.tpWindow.prototype.ContentWrapper = null;      // tp.tpElement
-/** It may be created after a specific call to CreateContentElement() */
-tp.tpWindow.prototype.Content = null;             // tp.tpElement
+/** It always created by this base class
+ * @type {@link tp.Component}
+ * */
+tp.tpWindow.prototype.ContentWrapper = null;     
+/** It may be created after a specific call to CreateContentElement()
+ * @type {@link tp.Component}
+ * */
+tp.tpWindow.prototype.Content = null;
 
 /** 
  The "three-lines" icon as url-data.
@@ -15556,7 +15560,7 @@ resize: none;
 padding: 4px;
 `;
         CP.SpellCheck = false;
-        this.edtMemo = new tp.tpElement('textarea', CP);
+        this.edtMemo = new tp.Component('textarea', CP);
 
         this.edtMemo.SetAttributes({
             cols: 10,
@@ -15577,7 +15581,9 @@ padding: 4px;
 
 tp.MessageDialog.prototype.BoxType = '';
 tp.MessageDialog.prototype.MessageText = '';
-tp.MessageDialog.prototype.edtMemo = null;      // tp.tpElement
+/**
+ * @type {@link tp.Component} */
+tp.MessageDialog.prototype.edtMemo = null;      
 
 /* static */
 /**
@@ -15983,7 +15989,7 @@ tp.StaticFiles.UnLoadCssFiles = function (UrlList) {
 
 /** NotificationBox. Displays a notification message to the user.
  */
-NotificationBox = class extends tp.tpElement {
+NotificationBox = class extends tp.Component {
     /**
      * Constructor
      * @param {string} Message The message

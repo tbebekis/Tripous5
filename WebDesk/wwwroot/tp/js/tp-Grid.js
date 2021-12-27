@@ -1509,7 +1509,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
     }
     /**
     Returns the control (tp.Control perhaps) this inplace editor uses.
-    @type {tp.tpElement}
+    @type {tp.Component}
     */
     get Control() {
         return this.fControl;
@@ -1669,7 +1669,7 @@ tp.GridInplaceEditor = class extends tp.tpObject {
 tp.GridInplaceEditor.prototype.fColumn;
 /** Field
 * @protected
-* @type {tp.tpElement}
+* @type {tp.Component}
 */
 tp.GridInplaceEditor.prototype.fControl;
 
@@ -1849,7 +1849,7 @@ tp.GridInplaceEditorCheckBox = class extends tp.GridInplaceEditor {
     @override
     */
     CreateControl() {
-        this.fControl = new tp.tpElement(null, null);
+        this.fControl = new tp.Component(null, null);
         this.fControl.AddClass(tp.Classes.GridInplaceEditorCheckBox);
 
         this.fCheckBox = this.Column.Handle.ownerDocument.createElement('input');
@@ -2119,7 +2119,7 @@ tp.GridInplaceEditorLocator = class extends tp.GridInplaceEditor {
     CreateControl() {
 
         // control
-        this.fControl = new tp.tpElement(null, null);
+        this.fControl = new tp.Component(null, null);
         this.fControl.AddClass(tp.Classes.GridInplaceEditorLocator);
 
         // textbox

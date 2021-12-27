@@ -112,11 +112,11 @@ tp.AjaxRequest.CreateFromCommand = function (Cmd) {
 tp.DeskOptions = {
 
     /**Header
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     Header: null,
     /** Footer
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     Footer: null,
     /** MainMenu
@@ -165,11 +165,11 @@ tp.Desktop = class {
     CommandExecutors = [];
 
     /**Header
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     Header = null;
     /** Footer
-     * @type {tp.tpElement}
+     * @type {tp.Component}
      */
     Footer = null;
     /** MainMenu. A {@link tp.ItemBar} descendant. Displays drop-downs with menu items. Each menu-item contains a {@link tp.Command}
@@ -182,7 +182,7 @@ tp.Desktop = class {
     MainCommandExecutor = null;
     /** ViewPager. A composite control. Handles the tab-control-like Ui of creating, displaying and destroying views.
      * Contains the TabBar, a {@link tp.ItemBar}, with an item for each created page.
-     * Contains the PageList, a (@link tp.tpElement), with the created pages.
+     * Contains the PageList, a (@link tp.Component), with the created pages.
      * @type {tp.DeskViewPager}
      */
     ViewPager = null;
@@ -284,10 +284,10 @@ tp.DeskMainMenu = class extends tp.ItemBar {
      * @param {tp.EventArgs} Args
      */
     async MenuItemClicked(Args) {
-        /** @type {tp.tpElement} */
+        /** @type {tp.Component} */
         let E = Args.Sender;
 
-        if (E instanceof tp.tpElement) {
+        if (E instanceof tp.Component) {
             let Cmd = E.Cmd;
             await tp.Desk.ExecuteCommand(Cmd); 
         }
@@ -333,7 +333,7 @@ tp.DeskMainMenuBarItem = class {
                 let el = tp.Doc.createElement('div');
                 let Text = childCmd.Title ? childCmd.Title : childCmd.Name;
 
-                let E = new tp.tpElement(el, { Parent: this.elList, Text: Text });
+                let E = new tp.Component(el, { Parent: this.elList, Text: Text });
                 E.Cmd = childCmd;
                 E.On(tp.Events.Click, (Args) => {
                     DeskMainMenu.MenuItemClicked(Args);
@@ -408,7 +408,7 @@ tp.DeskCommandExecutor.ValidCommands = [];
 //#region tp.DeskViewPager
 
 /** A composite control. Handles the tab-control-like Ui of creating, displaying and destroying views  */
-tp.DeskViewPager = class extends tp.tpElement {
+tp.DeskViewPager = class extends tp.Component {
 
     /** Constructor
      * @param {string|HTMLElement} ElementOrSelector
@@ -442,7 +442,7 @@ tp.DeskViewPager = class extends tp.tpElement {
     * */
     CreateControls() { 
         this.TabBar = new tp.ItemBar(this.AddDivElement());
-        this.PageListContainer = new tp.tpElement(this.AddDivElement());
+        this.PageListContainer = new tp.Component(this.AddDivElement());
         this.PageListContainer.AddClass(tp.Classes.List);
  
         this.TabBar.On('SelectedIndexChanged', this.TabBar_SelectedIndexChanged, this);
@@ -457,7 +457,7 @@ tp.DeskViewPager = class extends tp.tpElement {
 
         // tab
         let elTab = tp.Doc.createElement('div');
-        let TabItem = new tp.tpElement(elTab);
+        let TabItem = new tp.Component(elTab);
         TabItem.Text = !tp.IsBlankString(Packet.ViewTitle) ? Packet.ViewTitle: Packet.ViewName;
 
         // view
@@ -501,7 +501,7 @@ tp.DeskViewPager = class extends tp.tpElement {
         return View;
     }
     /** Shows a specified view. 
-     * @param {tp.tpElement|number} ViewOrIndex The view instance or the view index
+     * @param {tp.Component|number} ViewOrIndex The view instance or the view index
      */
     ShowView(ViewOrIndex) {
         let TabList = this.TabBar.GetItemElementList();
@@ -592,7 +592,7 @@ tp.DeskViewPager = class extends tp.tpElement {
  * */
 tp.DeskViewPager.prototype.TabBar = null;
 /**
- * @type {tp.tpElement}
+ * @type {tp.Component}
  * */
 tp.DeskViewPager.prototype.PageListContainer = null;
 
@@ -1250,7 +1250,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
             if (this.ToolBar) {
 
                 let ControlList = tp.GetAllComponents(this.ToolBar.Handle),
-                    c,          // tp.tpElement,
+                    c,          // tp.Component,
                     Command,    // string
                     ViewMode    // integer
                     ;
