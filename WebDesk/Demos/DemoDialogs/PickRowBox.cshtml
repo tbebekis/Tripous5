@@ -7,16 +7,13 @@
 
 <div>
     <p>
-        The <code>tp.PickRowBoxAsync()</code> function displays a row pick list dialog box with a grid that allows the user to check/select a single row. Returns a Promise.  <br />
-        There are variations of this <code>tp.PickRowBoxAsync()</code> function that accept a <code>tp.DataTable</code>, a <code>tp.SelectSql</code> object, or a SELECT statement text. <br />
+        The <code>tp.PickRowBoxAsync(SqlTextOrSourceTable, WindowArgs = null)</code> function
+        displays a row pick list dialog box with a grid that allows the user to check/select a single row. Returns the dialog box.  <br />
     </p>
-    <ul>
-        <li><code>tp.PickRowBoxAsync1(Args)</code></li>
-        <li><code>tp.PickRowBoxAsync2(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text)</code></li>
-        <li><code>tp.PickRowBoxAsync3(SelectSql, Text)</code></li>
-        <li><code>tp.PickRowBoxAsync4(SqlText, VisibleColumns, Text)</code></li>
-    </ul>
-    <p>The <code>tp.WindowArgs</code> returned by this function, when the user clicks OK, contains the SelectedRow property with the selected <code>tp.DataRow</code> row.</p>
+    <p>
+        When the user clicks OK in the dialog box
+        the Args property of the returned dialog box contains the SelectedRow property with the selected <code>tp.DataRow</code> row.
+    </p>
 </div>
 
 <br />
@@ -30,16 +27,19 @@
 
 <script class="js-code">
     async function ShowDialog() {
-        var SqlText = 'select * from Trader';
-        var VisibleColumns = ['Code', 'Name'];
-        var Text = 'Select an item';
+        let SqlText = 'select * from Trader';
+        let VisibleColumns = ['Code', 'Name'];
+        let Text = 'Select an item';
 
-        let Args = await tp.PickRowBoxAsync4(SqlText, VisibleColumns, Text)
+        let Args = new tp.SingleRowPickDialogArgs();
+        Args.VisibleColumns = VisibleColumns;
+        Args.Text = Text;
 
-        let DialogResult = Args.DialogResult;
-        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-        if (!tp.IsEmpty(Args.SelectedRow)) {
-            S += ' \nSelected Row: ' + Args.SelectedRow.Get('Name');
+        let DialogBox = await tp.PickRowBoxAsync(SqlText, Args);
+ 
+        let S = tp.EnumNameOf(tp.DialogResult, Args.DialogResult);
+        if (DialogBox.DialogResult === tp.DialogResult.OK) {
+            S += ' \nSelected Row: ' + DialogBox.SelectedRow.Get('Name');
         }
 
         tp.InfoNote('DialogResult = ' + S);

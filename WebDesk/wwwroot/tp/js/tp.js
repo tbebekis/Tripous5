@@ -14635,6 +14635,8 @@ tp.WindowArgs.prototype.Movable = true;
 
 /** An object. Context for the CloseFunc */
 tp.WindowArgs.prototype.Creator = null;
+/** Callback to call when the window shows itself. A function as function(Window: tp.Window) */
+tp.WindowArgs.prototype.ShowFunc = null;
 /** Callback to call when the window closes. A function as function(Args: tp.WindowArgs) */
 tp.WindowArgs.prototype.CloseFunc = null;
 
@@ -14775,18 +14777,6 @@ outline: none;
         super.InitializeFields();
         this.fModal = false;
 
-    }
-    /**
-    Notification. Called by CreateHandle() after handle creation and field initialization but BEFORE options (CreateParams) processing <br />
-    Notification
-    Initialization steps:
-    - Handle creation
-    - Field initialization
-    - Option processing
-    - Completed notification
-    */
-    OnFieldsInitialized() {
-        super.OnFieldsInitialized();
     }
     /**
     Notification. Called by CreateHandle() after handle creation and field initialization and options (CreateParams) processing <br />
@@ -15196,10 +15186,7 @@ gap: 0.15em;
             this.DialogResult = this.Args.DefaultDialogResult;
         }
     }
-    /**
-     * Called when the window shows up.
-     * */
-    OnShow() { }
+
 
     /* public */
     /**
@@ -15219,6 +15206,8 @@ gap: 0.15em;
 
         this.Handle.focus();
         this.OnShow();
+
+        tp.Call(this.Args.ShowFunc, this.Args.Creator, this);
     }
     /**
     Hides the window
@@ -15241,10 +15230,27 @@ gap: 0.15em;
     Closes and disposes this instance.
     */
     Close() {
+        this.OnClose();
+
         this.PassBackResult();
-        this.Hide();
+        this.Hide();        
         this.Dispose();
         tp.ListRemove(tp.Window.Windows, this);
+    }
+
+    /* notifications */
+
+    /**
+     * Called when the window shows up.
+     * */
+    OnShow() {
+        this.Trigger('Showing');
+    }
+    /**
+     * Called when the window closes.
+     * */
+    OnClose() {
+        this.Trigger('Closing');
     }
 
     /* events */
@@ -15316,8 +15322,6 @@ tp.Window.prototype.fMaximized = false;
 
 tp.Window.prototype.fModal = false;
 tp.Window.prototype.fDialogResult = tp.DialogResult.None;
-
- 
 
 tp.Window.prototype.Header = null;              // HTMLElement;
 tp.Window.prototype.HeaderText = null;          // HTMLSpanElement;
@@ -15445,20 +15449,21 @@ tp.ContentWindow.GetContentElement = function (ElementOrSelectorOrHtmlText) {
 Displays a content window, either as modal or as non-modal.
 @static
 @param {boolean} Modal Flag
-@param {string} Text - The caption title of the window.
-@param {string|HTMLElement} Content - Element or selector with html content.
-@param {function} [CloseFunc=null] - Optional. Called when the window closes. A function as <code>function (Args: tp.WindowArgs): void</code>.
-@param {object} [Creator=null] - Optional. The context (this) for the callback function.
-@returns {tp.ContentWindow} Returns the <code>tp.ContentWindow</code> dialog box
+@param {string|HTMLElement} Content Element or selector with html content.
+@param {tp.WindowArgs} [WindowArgs=null] Optional.  
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow}  dialog box
 */
 tp.ContentWindow.Show = function (Modal, Content, WindowArgs = null) {
-    var Args = new tp.WindowArgs(WindowArgs);
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'Content Window';
+
+    Args = new tp.WindowArgs(Args);
     Args.ShowFooter = Modal;
     Args.Content = Content;
     Args.AsModal = Modal;
     Args.DefaultDialogResult = tp.DialogResult.Cancel;
 
-    var Result = new tp.ContentWindow(Args);
+    let Result = new tp.ContentWindow(Args);
     if (Modal)
         Result.ShowModal();
     else
@@ -15471,11 +15476,9 @@ tp.ContentWindow.Show = function (Modal, Content, WindowArgs = null) {
 /**
 Displays a content window, either as modal or as non-modal.
 @static
-@param {string} Text - The caption title of the window.
-@param {string|HTMLElement} Content - Element or selector with html content.
-@param {function} [CloseFunc=null] - Optional. Called when the window closes. A function as <code>function (Args: tp.WindowArgs): void</code>.
-@param {object} [Creator=null] - Optional. The context (this) for the callback function.
-@returns {tp.ContentWindow} Returns the <code>tp.ContentWindow</code> dialog box
+@param {string|HTMLElement} Content Element or selector with html content.
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow}  dialog box
 */
 tp.ContentWindow.ShowModal = function (Content, WindowArgs = null) {
     return tp.ContentWindow.Show(true, Content, WindowArgs);
@@ -15484,23 +15487,25 @@ tp.ContentWindow.ShowModal = function (Content, WindowArgs = null) {
 Displays a content window, either as modal or as non-modal, and returns a Promise.
 @static
 @param {boolean} Modal Flag
-@param {string} Text - The caption title of the window
-@param {string|HTMLElement} Content - Element or selector with html content
-@returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
+@param {string|HTMLElement} Content Element or selector with html content.
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow} dialog box
 */
 tp.ContentWindow.ShowAsync = async function (Modal, Content, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.ContentWindow.Show(Modal, Content, WindowArgs, (Args) => {
-            Resolve(Args);
-        });
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+        tp.ContentWindow.Show(Modal, Content, WindowArgs);
     });
 };
 /**
 Displays a content window, as modal, and returns a Promise.
 @static
-@param {string} Text - The caption title of the window
-@param {string|HTMLElement} Content - Element or selector with html content
-@returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
+@param {string|HTMLElement} Content Element or selector with html content.
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow} dialog box
 */
 tp.ContentWindow.ShowModalAsync = async function (Content, WindowArgs = null) {
     return tp.ContentWindow.ShowAsync(true, Content, WindowArgs);
@@ -15710,17 +15715,18 @@ tp.YesNoBoxAsync = async function (MessageText) {
 //#region  FrameBox functions
 /**
 Displays a modal window with an iframe element
-@param {string} Text - The caption title of the window
 @param {string} UrlOrHtmlContent - The url or the html content (text) to display
 @param {tp.WindowArgs} [WindowArgs=null] - Optional.  
 @returns {tp.Window} Returns a {@link tp.Window} window.
 */
-tp.FrameBox = function (Text, UrlOrHtmlContent, WindowArgs = null) {
-    let Args = new tp.WindowArgs(WindowArgs);
+tp.FrameBox = function (UrlOrHtmlContent, WindowArgs = null) {
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'Frame Box';
+
+    Args = new tp.WindowArgs(Args); 
  
     let Window = new tp.Window(Args);
     Window.ShowModal();
-
 
     let frame = Window.Document.createElement('iframe');
     Window.ContentWrapper.Handle.appendChild(frame);
@@ -15780,16 +15786,17 @@ tp.FrameBox = function (Text, UrlOrHtmlContent, WindowArgs = null) {
 };
 /**
 Displays a modal window with an iframe element and returns a promise
-@param {string} Text - The caption title of the window
 @param {string} UrlOrHtmlContent - The url or the html content (text) to display
 @param {tp.WindowArgs} [WindowArgs=null] - Optional.
-@returns {Promise} Returns a promise with the modal window Args (tp.WindowArgs)
+@returns {tp.Window} Returns a {@link tp.Window} window.
 */
-tp.FrameBoxAsync = function (Text, UrlOrHtmlContent, WindowArgs = null) {
+tp.FrameBoxAsync = function (UrlOrHtmlContent, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.FrameBox(Text, UrlOrHtmlContent, WindowArgs, (Args) => {
-            Resolve(Args);
-        });
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+        tp.FrameBox(UrlOrHtmlContent, WindowArgs);
     });
 };
 

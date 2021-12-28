@@ -7,7 +7,8 @@
 
 <div>
     <p>
-        The <code>function tp.RowBoxAsync(DataRow, Text)</code> displays a modal window with a grid showing extended information about a specified <code>tp.DataRow</code> data-row and returns a Promise. <br />
+        The <code>function tp.RowBoxAsync(DataRow, WindowArgs = null)</code> displays a modal window 
+        with a grid showing extended information about a specified <code>tp.DataRow</code> data-row and returns a Window in a Promise. <br />
         Mainly for debug purposes.
     </p>
 </div>
@@ -24,12 +25,10 @@
         var Data = tp.TestData.CreateTestDataTable(1);
         var Table = Data.Table;
         var Row = Table.Rows[0];
-
-        let Args = await tp.RowBoxAsync(Row);
-
-        let DialogResult = Args.DialogResult;
-        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-
+        //log(1);
+        let Window = await tp.RowBoxAsync(Row);
+        //log(2);
+        let S = tp.EnumNameOf(tp.DialogResult, Window.DialogResult);
         tp.InfoNote('DialogResult = ' + S);
     }
 

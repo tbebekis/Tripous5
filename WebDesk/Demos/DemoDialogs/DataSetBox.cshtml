@@ -16,18 +16,16 @@
 </div>
 
 <script class="js-code">
-    function ShowDialog() {
-        var DataSet = new tp.DataSet('DataSet1');
+    async function ShowDialog() {
+        let DataSet = new tp.DataSet('DataSet1');
 
         DataSet.AddTable(tp.TestData.CreateTestDataTable(10).Table);
         DataSet.AddTable(tp.TestData.tblCountries);
         DataSet.AddTable(tp.TestData.tblDepartments);
 
-        tp.DataSetBoxAsync(DataSet, { Height: 500})
-            .then(function (Args) {
-                let DialogResult = Args.DialogResult;
-                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-                tp.InfoNote('DialogResult = ' + S);
-            });
+        let DialogBox = await tp.DataSetBoxAsync(DataSet, { Height: 500 });
+
+        let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult);
+        tp.InfoNote('DialogResult = ' + S);
     }
 </script>

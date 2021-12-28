@@ -7,8 +7,8 @@
 
 <div>
     <p>
-        The tp.ContentWindow can display user defined content. The content is passed either as a css selector or as a HTMLElement. <br />
-        The tp.ContentWindow can be displayed either as a modal dialog or as a non-modal window. <br />
+        The <code>tp.ContentWindow</code> can display user defined content. The content is passed either as a css selector or as a HTMLElement. <br />
+        The <code>tp.ContentWindow</code> can be displayed either as a modal dialog or as a non-modal window. <br />
         When is modal it displays an OK and a Cancel button and when closes it returns the proper DialogResult.
     </p>
 </div>
@@ -37,10 +37,16 @@
 
 <script class="js-code">
     async function ShowContentDialog() {
-        let Args = await tp.ContentWindow.ShowModalAsync('#Content', { Text: 'Content Window'});
 
-        let DialogResult = Args.DialogResult;
-        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-        tp.InfoNote('DialogResult = ' + S); 
+        let WindowArgs = new tp.WindowArgs();
+        WindowArgs.ShowFunc = (Window) => {
+            log(Window);
+        };
+
+        let DialogBox = await tp.ContentWindow.ShowModalAsync('#Content', WindowArgs);
+ 
+        let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult);
+        tp.InfoNote('DialogResult = ' + S);
     }
+
 </script>

@@ -7,15 +7,13 @@
 
 <div>
     <p>
-        The <code>tp.PickRowsBoxAsync()</code> function displays a row pick list dialog box with a grid that allows the user to check/select multiple rows. Returns a Promise.  <br />
-        There are variations of this <code>tp.PickRowsBoxAsync()</code> function accepting different set of parameters.
+        The <code>tp.PickRowsBoxAsync(SqlTextOrSourceTable, WindowArgs = null)</code> function displays a row pick list dialog box 
+        with a grid that allows the user to check/select multiple rows. Returns the dialog box.  <br />
     </p>
-    <ul>
-        <li><code>tp.PickRowsBoxAsync1(Args)</code></li>
-        <li><code>tp.PickRowsBoxAsync2(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName)</code></li>
-        <li><code>tp.PickRowsBoxAsync3(tblSource, VisibleColumns, SelectedRows)</code></li>
-    </ul>
-    <p>The <code>tp.WindowArgs</code> returned by this function, when the user clicks OK, contains the SelectedRows array property with the selected <code>tp.DataRow</code> rows.</p>
+    <p>
+        When the user clicks OK in the dialog box
+        the Args property of the returned dialog box contains the SelectedRows array property with the selected <code>tp.DataRow</code> rows.
+    </p>
 </div>
 
 <br />
@@ -28,16 +26,21 @@
 <script class="js-code">
     async function ShowDialog() {
         let Data = tp.TestData.CreateTestDataTable(50);
-        let tblSource = Data.Table;
 
+        let tblSource = Data.Table;
         let VisibleColumns = [];
         let SelectedRows = [];
 
-        let Args = await tp.PickRowsBoxAsync3(tblSource, VisibleColumns, SelectedRows)
+        let Args = new tp.MultiRowPickDialogArgs();
+        Args.Source = tblSource;
+        Args.VisibleColumns = VisibleColumns;
+        Args.SelectedRows = SelectedRows;
 
-        let DialogResult = Args.DialogResult;
-        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-        S += ' \nSelected Rows Count: ' + Args.SelectedRows.length;
+        let DialogBox = await tp.PickRowsBoxAsync(tblSource, Args);
+ 
+        let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult);
+        if (DialogBox.DialogResult === tp.DialogResult.OK)
+            S += ' \nSelected Rows Count: ' + DialogBox.SelectedRows.length;
 
         tp.InfoNote('DialogResult = ' + S);
     }

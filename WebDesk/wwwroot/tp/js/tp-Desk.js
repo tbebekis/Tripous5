@@ -816,6 +816,9 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
             let DialogBox;
             let WindowArgs = new tp.WindowArgs({ Text: 'Fields', Width: 580, Height: 'auto' });
+            WindowArgs.ShowFunc = (Window) => {
+
+            };
             WindowArgs.CloseFunc = (Args) => {
                 let DialogResult = Args.DialogResult;
                 let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
@@ -824,9 +827,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
             tp.Ui.CreateContainerControls(elContent.parentElement);
             DialogBox = tp.ContentWindow.ShowModal(elContent, WindowArgs);
-            tp.StyleProp(elContent.parentElement, 'padding', '5px');
- 
- 
+            tp.StyleProp(elContent.parentElement, 'padding', '5px'); 
         }
 
         // EDW  

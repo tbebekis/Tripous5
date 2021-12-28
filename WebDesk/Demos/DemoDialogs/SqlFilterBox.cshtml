@@ -39,16 +39,12 @@
         FilterDef = tp.SqlFilterDef.Create('Name', 'Name');
         FilterDefs.push(FilterDef);
 
-        // A FilterDefs array, of type tp.SqlFilterDef
-        // An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a tp.DataTable.
-        let Args = await tp.SqlFilterBoxAsync(FilterDefs, SelectFunc);
-
-        let DialogResult = Args.DialogResult;  
-        let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
-
-        tp.InfoNote('DialogResult = ' + S);
-
-        log(Args);
+        // FilterDefs: A FilterDefs array, of type tp.SqlFilterDef
+        // SelectFunc: An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a tp.DataTable.
+        let DialogBox = await tp.SqlFilterBoxAsync(FilterDefs, SelectFunc, null, { Height: 400 });
+ 
+        let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult);
+        tp.InfoNote('DialogResult = ' + S); 
     }
 
 </script>

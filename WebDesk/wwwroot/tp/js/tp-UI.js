@@ -20385,6 +20385,60 @@ tp.DataSetDialog.prototype.DataSet;
 tp.DataSetDialog.prototype.Grid;
 //#endregion
 
+//#region tp.MultiRowPickDialogArgs
+/** Window arguments for the pick rows functions. */
+tp.MultiRowPickDialogArgs = class extends tp.WindowArgs {
+    /**
+    Constructor.
+    @param {object} [SourceArgs=null] Optional. The source arguments to copy from.
+    */
+    constructor(SourceArgs = null) {
+        super(SourceArgs);
+    }
+};
+
+/** A SELECT statement. If passed then it results in the tblSource.  
+ * If null or empty, then tblSource is mandatory.
+ * NOTE: Either SqlText or tblSource is required.
+ * @type {string}
+ */
+tp.MultiRowPickDialogArgs.prototype.SqlText = '';
+/** The {@link tp.DataTable} table to select rows from.  
+ * If null, then SqlText is mandatory.
+ *  NOTE: Either SqlText or tblSource is required.
+ * @type {tp.DataTable}
+ * */
+tp.MultiRowPickDialogArgs.prototype.tblSource = null;
+/** Optional. A {@link tp.DataRow} array containing tblSource rows that should be initially selected.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {tp.DataRow[]}
+ * */
+tp.MultiRowPickDialogArgs.prototype.SelectedRows = [];
+/** Optional. A tblSource Key field name used to match with TargetKeyName.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {string}
+ * */
+tp.MultiRowPickDialogArgs.prototype.SourceKeyName = '';
+/** Optional. The {@link tp.DataTable} table where selected rows are going to be inserted some how, at a later time.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {tp.DataTable}
+ * */
+tp.MultiRowPickDialogArgs.prototype.tblTarget = null;
+/** Optional. A tblTarget Key field name used to initially find what source rows are already selected in target.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {string}
+ * */
+tp.MultiRowPickDialogArgs.prototype.TargetKeyName = '';
+/** Optional. A list of column names that should be visible. If null/empty, then all columns are visible.
+ * @type {string[]}
+ * */
+tp.MultiRowPickDialogArgs.prototype.VisibleColumns = [];
+//#endregion
+
 //#region tp.MultiRowPickDialog
 /**
 A row pick list dialog with a grid that allows the user to check/select multiple rows.
@@ -20394,14 +20448,12 @@ tp.MultiRowPickDialog = class extends tp.Window {
 
     /**
     Constructor
-    @param {tp.WindowArgs} Args - Setup options
+    @param {tp.MultiRowPickDialogArgs} Args - Setup options
     */
     constructor(Args) {
         super(Args);
     }
-
-
-
+ 
     /* overrides */
     /**
     Override
@@ -20418,19 +20470,9 @@ tp.MultiRowPickDialog = class extends tp.Window {
     @protected
     @override
     */
-    CreateControls() {
+    async CreateControls() {
         super.CreateControls();
-
-        var i, ln, j, jln,
-            Column,         // tp.DataColumn,
-            SourceColumn,   // tp.DataColumn,
-            Row,            // tp.DataRow,
-            SourceRow;      // tp.DataRow;
-
-        this.tblSource = this.Args.tblSource;
-        this.SelectedRows = this.Args.SelectedRows || [];
-        this.VisibleColumns = this.Args.VisibleColumns || [];
-
+ 
         this.ContentWrapper.StyleProp('display', 'flex');
         this.ContentWrapper.StyleProp('flex-direction', 'column');
 
@@ -20449,36 +20491,8 @@ tp.MultiRowPickDialog = class extends tp.Window {
         this.btnOK = this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK, false);
         this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel, false);
 
-        // table
-        this.Table = new tp.DataTable('PickRows');
-        Column = this.Table.AddColumn('Include', tp.DataType.Boolean);
-        Column.Title = "+/-";
-
-        for (i = 0, ln = this.tblSource.Columns.length; i < ln; i++) {
-            SourceColumn = this.tblSource.Columns[i];
-            Column = SourceColumn.Clone();
-            this.Table.AddColumn(Column);
-        }
-
-        // copy the rows from tblSource to Table
-        for (i = 0, ln = this.tblSource.Rows.length; i < ln; i++) {
-            SourceRow = this.tblSource.Rows[i];
-            if (SourceRow.State !== tp.DataRowState.Deleted) {
-                Row = this.Table.AddEmptyRow();
-                Row.Set('Include', this.SelectedRows.indexOf(SourceRow) !== -1);        // check (include) initially SelectedRows
-                Row['SourceRow'] = SourceRow;
-
-                for (j = 0, jln = this.tblSource.Columns.length; j < jln; j++) {
-                    SourceColumn = this.tblSource.Columns[j];
-                    Row.Set(SourceColumn.Name, SourceRow.Get(SourceColumn.Name));
-                }
-            }
-        }
-
-
-        this.btnOK.Enabled = this.Table.Rows.length > 0;
-        this.btnIncludeAll.Enabled = this.btnOK.Enabled;
-        this.btnExcludeAll.Enabled = this.btnOK.Enabled;
+        // load data
+        await this.LoadDataAsync();
 
         // grid
         this.Grid = new tp.Grid();
@@ -20493,10 +20507,14 @@ tp.MultiRowPickDialog = class extends tp.Window {
         this.Grid.FilterVisible = true;
         this.Grid.FooterVisible = true;
 
+        this.Grid.On(tp.Events.Click, this.GridClick, this);
+ 
         this.Grid.DataSource = new tp.DataSource(this.Table);
 
+        // visible columns - if empty then all columns are visible
+        this.VisibleColumns = tp.IsArray(this.VisibleColumns)? this.VisibleColumns: [];
         let GridColumn; // tp.GridColumn;
-        for (i = 0, ln = this.Grid.ColumnCount; i < ln; i++) {
+        for (let i = 0, ln = this.Grid.ColumnCount; i < ln; i++) {
             GridColumn = this.Grid.ColumnByIndex(i);
             if (!tp.IsSameText('Include', GridColumn.Name)) {
                 GridColumn.ReadOnly = true;
@@ -20507,9 +20525,82 @@ tp.MultiRowPickDialog = class extends tp.Window {
         if (this.Table.Rows.length <= 1500)
             this.Grid.BestFitColumns();
 
-        this.Grid.Focus();
+        this.Grid.Focus();        
 
-        this.Grid.On(tp.Events.Click, this.GridClick, this);
+        // enable buttons
+        this.btnOK.Enabled = this.Table.Rows.length > 0;
+        this.btnIncludeAll.Enabled = this.btnOK.Enabled;
+        this.btnExcludeAll.Enabled = this.btnOK.Enabled;
+
+    }
+    /** Loads and prepares the data-tables.
+     * */
+    async LoadDataAsync() {
+
+        this.Text = !tp.IsBlankString(this.Args.Text) ? this.Args.Text : 'Multi-row Selection';
+
+        // SELECT the tblSource if needed
+        if (!tp.IsBlankString(this.SqlText)) {
+
+            tp.ShowSpinner(true);
+            try {
+                this.tblSource = await tp.Db.SelectAsync(this.SqlText, '');
+            }
+            finally {
+                tp.ForceHideSpinner();
+            }
+        }
+
+        // prepare SelectedRows
+        if (this.tblSource instanceof tp.DataTable
+            && this.tblTarget instanceof tp.DataTable
+            && !tp.IsBlankString(this.TargetKeyName)
+            && !tp.IsBlankString(this.SourceKeyName)) {
+
+            this.SelectedRows = [];
+
+            let TargetKeyIndex = tblTarget.IndexOfColumn(this.TargetKeyName);
+            let SourceKeyIndex = tblSource.IndexOfColumn(this.SourceKeyName);
+ 
+            for (let i = 0, ln = this.tblSource.Rows.length; i < ln; i++) {
+                let SourceRow = this.tblSource.Rows[i];
+                let v = SourceRow.Get(SourceKeyIndex);
+                let TargetRow = this.tblTarget.FindRow(TargetKeyIndex, v);
+                if (!tp.IsEmpty(TargetRow)) {
+                    this.SelectedRows.push(SourceRow);
+                }
+            }
+        }
+
+        if (!tp.IsArray(this.SelectedRows))
+            this.SelectedRows = [];
+
+        // table        
+        this.Table = new tp.DataTable('PickRows');
+        let Column = this.Table.AddColumn('Include', tp.DataType.Boolean);
+        Column.Title = "+/-";
+        let SourceColumn;
+
+        for (let i = 0, ln = this.tblSource.Columns.length; i < ln; i++) {
+            SourceColumn = this.tblSource.Columns[i];
+            Column = SourceColumn.Clone();
+            this.Table.AddColumn(Column);
+        }
+
+        // copy the rows from tblSource to Table
+        for (let i = 0, ln = this.tblSource.Rows.length; i < ln; i++) {
+            let SourceRow = this.tblSource.Rows[i];
+            if (SourceRow.State !== tp.DataRowState.Deleted) {
+                let Row = this.Table.AddEmptyRow();
+                Row.Set('Include', this.SelectedRows.indexOf(SourceRow) !== -1);        // check (include) initially SelectedRows
+                Row['SourceRow'] = SourceRow;
+
+                for (let j = 0, jln = this.tblSource.Columns.length; j < jln; j++) {
+                    SourceColumn = this.tblSource.Columns[j];
+                    Row.Set(SourceColumn.Name, SourceRow.Get(SourceColumn.Name));
+                }
+            }
+        }
 
     }
     /**
@@ -20623,24 +20714,97 @@ tp.MultiRowPickDialog.prototype.btnOK;
 tp.MultiRowPickDialog.prototype.Grid;
 /** Field
  * @field
- * @type {string[]}
- */
-tp.MultiRowPickDialog.prototype.VisibleColumns;
-/** Field
- * @field
- * @type {tp.DataRow[]}
- */
-tp.MultiRowPickDialog.prototype.SelectedRows;
-/** Field
- * @field
  * @type {tp.DataTable}
  */
 tp.MultiRowPickDialog.prototype.Table;
-/** Field
- * @field
- * @type {tp.DataTable}
+
+
+/** A SELECT statement. If passed then it results in the tblSource.  
+ * If null or empty, then tblSource is mandatory.
+ * NOTE: Either SqlText or tblSource is required.
+ * @type {string}
  */
-tp.MultiRowPickDialog.prototype.tblSource;
+tp.MultiRowPickDialog.prototype.SqlText = '';
+/** The {@link tp.DataTable} table to select rows from.  
+ * If null, then SqlText is mandatory.
+ *  NOTE: Either SqlText or tblSource is required.
+ * @type {tp.DataTable}
+ * */
+tp.MultiRowPickDialog.prototype.tblSource = null;
+/** Optional. A {@link tp.DataRow} array containing tblSource rows that should be initially selected.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {tp.DataRow[]}
+ * */
+tp.MultiRowPickDialog.prototype.SelectedRows = [];
+/** Optional. A tblSource Key field name used to match with TargetKeyName.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {string}
+ * */
+tp.MultiRowPickDialog.prototype.SourceKeyName = '';
+/** Optional. The {@link tp.DataTable} table where selected rows are going to be inserted some how, at a later time.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {tp.DataTable}
+ * */
+tp.MultiRowPickDialog.prototype.tblTarget = null;
+/** Optional. A tblTarget Key field name used to initially find what source rows are already selected in target.
+ * NOTE: When tblTarget, TargetKeyName and SourceKeyName are provided, SelectedRows array is populated automatically.
+ * Any row of the tblSource found to have a matching row in tblTarget, by comparing the values of the TargetKeyName and SourceKeyName fields, is added to SelectedRows array.
+ * @type {string}
+ * */
+tp.MultiRowPickDialog.prototype.TargetKeyName = '';
+/** Optional. A list of column names that should be visible. If null/empty, then all columns are visible.
+ * @type {string[]}
+ * */
+tp.MultiRowPickDialog.prototype.VisibleColumns = [];
+
+
+ 
+
+ 
+
+//#endregion
+
+//#region tp.SingleRowPickDialogArgs
+
+/** Window arguments for the pick single row functions. */
+tp.SingleRowPickDialogArgs = class extends tp.WindowArgs {
+    /**
+    Constructor.
+    @param {object} [SourceArgs=null] Optional. The source arguments to copy from.
+    */
+    constructor(SourceArgs = null) {
+        super(SourceArgs);
+    }
+};
+
+/** A SELECT statement. If passed then it results in the tblSource.  
+ * If null or empty, then tblSource is mandatory.
+ * NOTE: Either SqlText or tblSource is required.
+ * @type {string}
+ */
+tp.SingleRowPickDialogArgs.prototype.SqlText = '';
+/** The {@link tp.DataTable} table to select rows from.  
+ * If null, then SqlText is mandatory.
+ *  NOTE: Either SqlText or tblSource is required.
+ * @type {tp.DataTable}
+ * */
+tp.SingleRowPickDialogArgs.prototype.tblSource = null;
+/** Optional. If KeyValue and KeyFieldName are present, then the dialog positions the display grid to the KeyValue row.
+ * @type {any}
+ */
+tp.SingleRowPickDialogArgs.prototype.KeyValue = null;
+/** Optional. If KeyValue and KeyFieldName are present, then the dialog positions the display grid to the KeyValue row.
+ * @type {string}
+ */
+tp.SingleRowPickDialogArgs.prototype.KeyFieldName = '';
+/** A list of column names that should be visible. If null/empty, then all columns are visible.
+ * @type {string[]}
+ */
+tp.SingleRowPickDialogArgs.prototype.VisibleColumns = [];
+
 //#endregion
 
 //#region tp.SingleRowPickDialog
@@ -20658,8 +20822,6 @@ tp.SingleRowPickDialog = class extends tp.Window {
         super(Args);
     }
 
-
-
     /* overrides */
     /**
     Override
@@ -20676,15 +20838,8 @@ tp.SingleRowPickDialog = class extends tp.Window {
     @protected
     @override
     */
-    CreateControls() {
-        super.CreateControls(); 
-
-        this.Table = this.Args.Table;
-        this.VisibleColumns = this.Args.VisibleColumns || [];
-        this.SelectSql = this.Args.SelectSql;
-        this.SqlText = this.Args.SqlText;
-        this.KeyValue = this.Args.KeyValue;
-        this.KeyFieldName = this.Args.KeyFieldName;
+    async CreateControls() {
+        super.CreateControls();  
 
         this.ContentWrapper.StyleProp('display', 'flex');
         this.ContentWrapper.StyleProp('flex-direction', 'column');
@@ -20702,6 +20857,10 @@ tp.SingleRowPickDialog = class extends tp.Window {
         this.btnOK = this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK, false);
         this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel, false);
 
+        // load data
+        await this.LoadDataAsync();
+
+        // grid
         this.Grid = new tp.Grid();
         this.Grid.Parent = this.ContentWrapper;
         this.Args.Grid = this.Grid;
@@ -20714,96 +20873,56 @@ tp.SingleRowPickDialog = class extends tp.Window {
         this.Grid.GroupsVisible = true;
         this.Grid.FilterVisible = true;
         this.Grid.FooterVisible = false;
-
+ 
         this.Grid.On(tp.Events.DoubleClick, this.DoubleClick, this);
 
-/*
-         if (!tp.IsEmpty(this.Table)) {
-            this.SetGridDataSource(this.Table);
-        } else if (!tp.IsBlank(this.SqlText)) {
-            tp.ShowSpinner(true);
-            tp.Db.Select(this.SqlText, '')
-                .then((Table) => {
-                    this.SetGridDataSource(Table);
-                    tp.ShowSpinner(false);
-                });
-        } else if (!tp.IsEmpty(this.SelectSql)) {
-            tp.ShowSpinner(true);
-            tp.Db.Select(this.SelectSql.Text, this.SelectSql.ConnectionName)
-                .then((Table) => {
-                    this.SetGridDataSource(Table);
-                    tp.ShowSpinner(false);
-                });
-        }
- */
-        this.LoadDataAsync();
+        this.Grid.DataSource = new tp.DataSource(this.tblSource);
 
-    }
-
-    async LoadDataAsync() {
-        let Table = null;
-        if (!tp.IsEmpty(this.Table)) {
-            this.SetGridDataSource(this.Table);
-        } else if (!tp.IsBlank(this.SqlText)) {
-
-            tp.ShowSpinner(true);
-            try {
-                Table = await tp.Db.SelectAsync(this.SqlText, '');
-                this.SetGridDataSource(Table);
+        // visible columns - if empty then all columns are visible
+        this.VisibleColumns = tp.IsArray(this.VisibleColumns) ? this.VisibleColumns : [];
+        let GridColumn; // tp.GridColumn;
+        for (let i = 0, ln = this.Grid.ColumnCount; i < ln; i++) {
+            GridColumn = this.Grid.ColumnByIndex(i);
+            if (!tp.IsSameText('Include', GridColumn.Name)) {
+                GridColumn.ReadOnly = true;
+                GridColumn.Visible = this.VisibleColumns.length === 0 ? true : tp.ListContainsText(this.VisibleColumns, GridColumn.Name);
             }
-            finally {
-                tp.ForceHideSpinner();
-            } 
-                
-        } else if (!tp.IsEmpty(this.SelectSql)) {
-
-            tp.ShowSpinner(true);
-            try {
-                Table = await tp.Db.SelectAsync(this.SelectSql.Text, this.SelectSql.ConnectionName);
-                this.SetGridDataSource(Table);
-            } finally {
-                tp.ForceHideSpinner();
-            }           
-                
-        }
-    }
-
-    /* protected */
-    /**
-     * Sets a {@link tp.DataTable} as the datasource
-     * @protected
-     * @param {tp.DataTable} Table A {@link tp.DataTable} table to set as datasource
-     */
-    SetGridDataSource(Table) {
-
-        this.btnOK.Enabled = Table.Rows.length > 0;
-
-        // table setup
-        if (!tp.IsEmpty(this.SelectSql)) {
-            this.SelectSql.SetupTable(Table);
         }
 
-        this.Grid.DataSource = new tp.DataSource(Table);
-
-        // grid columns setup
-        if (!this.SelectSql && this.VisibleColumns.length > 0) {
-            this.Grid.SetColumnListVisible(this.VisibleColumns);
-        }
-
-        if (Table.Rows.length <= 1500)
+        if (this.tblSource.Rows.length <= 1500)
             this.Grid.BestFitColumns();
 
         this.Grid.Focus();
 
         // set the initially selected row
-        if (!tp.IsBlank(this.KeyFieldName)) {
-            var Row = Table.FindRow(this.KeyFieldName, this.KeyValue);
+        if (!tp.IsBlankString(this.KeyFieldName) && tp.IsValid(this.KeyValue)) {
+            var Row = this.Table.FindRow(this.KeyFieldName, this.KeyValue);
             if (!tp.IsEmpty(Row)) {
                 this.Grid.FocusedRow = Row;
             }
         }
-
+ 
+        // enable buttons
+        this.btnOK.Enabled = this.tblSource.Rows.length > 0;
     }
+
+    async LoadDataAsync() {
+        this.Text = !tp.IsBlankString(this.Args.Text) ? this.Args.Text : 'Single-row Selection';
+
+        // SELECT the tblSource if needed
+        if (!tp.IsBlankString(this.SqlText)) {
+
+            tp.ShowSpinner(true);
+            try {
+                this.tblSource = await tp.Db.SelectAsync(this.SqlText, '');
+            }
+            finally {
+                tp.ForceHideSpinner();
+            }
+        } 
+    }
+
+    /* protected */ 
     /** Sets the selected row
      * @protected
      * */
@@ -20812,7 +20931,7 @@ tp.SingleRowPickDialog = class extends tp.Window {
         if (!tp.IsEmpty(Row)) {
             this.SelectedRow = Row;
             this.Args.SelectedRow = Row;
-            this.Table = Row.Table;
+            this.tblSource = Row.Table;
             this.DialogResult = tp.DialogResult.OK;
         }
     }
@@ -20871,39 +20990,41 @@ tp.SingleRowPickDialog.prototype.btnOK = null;
 tp.SingleRowPickDialog.prototype.Grid = null;
 /** Field
  * @field
- * @type {string[]}
- */
-tp.SingleRowPickDialog.prototype.VisibleColumns = [];
-/** Field
- * @field
  * @type {tp.DataRow}
  */
 tp.SingleRowPickDialog.prototype.SelectedRow = null;
-/** Field
- * @field
- * @type {tp.DataTable}
- */
-tp.SingleRowPickDialog.prototype.Table = null;
-/** Field
- * @field
- * @type {tp.SelectSql}
- */
-tp.SingleRowPickDialog.prototype.SelectSql = null;
-/** Field
- * @field
+
+
+
+/** A SELECT statement. If passed then it results in the tblSource.  
+ * If null or empty, then tblSource is mandatory.
+ * NOTE: Either SqlText or tblSource is required.
  * @type {string}
- */ 
+ */
 tp.SingleRowPickDialog.prototype.SqlText = '';
-/** Field
+/** The {@link tp.DataTable} table to select rows from.  
+ * If null, then SqlText is mandatory.
+ *  NOTE: Either SqlText or tblSource is required.
+ * @type {tp.DataTable}
+ * */
+tp.SingleRowPickDialog.prototype.tblSource = null; 
+/** Optional. If KeyValue and KeyFieldName are present, then the dialog positions the display grid to the KeyValue row.
  * @field
  * @type {any}
  */
 tp.SingleRowPickDialog.prototype.KeyValue = null;
-/** Field
+/** Optional. If KeyValue and KeyFieldName are present, then the dialog positions the display grid to the KeyValue row.
  * @field
  * @type {string}
  */
 tp.SingleRowPickDialog.prototype.KeyFieldName = '';
+/** A list of column names that should be visible. If null/empty, then all columns are visible.
+ * @field
+ * @type {string[]}
+ */
+tp.SingleRowPickDialog.prototype.VisibleColumns = [];
+
+ 
 
 //#endregion
 
@@ -21207,31 +21328,34 @@ Displays a modal window with a grid and returns the window. <br />
 On return the Window.Args contains a Grid property that references the grid.
 When the close callback function (CloseFunc) is called, the Window.Args contain SelectedRow property that references the Grid.FocusedRow, if any, or null.
 @param {tp.DataTable} Table The {@link tp.DataTable} data table to display in the grid
-@param {string} [Text] Optional. The caption title of the window
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
+@param {tp.WindowArgs} [WindowArgs = null]  Optional.  
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow} window.
 */
-tp.TableBox = function (Table, Text, CloseFunc, Creator) {
+tp.TableBox = function (Table, WindowArgs = null) {   
+
+    /** @type {tp.WindowArgs}*/
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'Table Box';
+    Args.Height = Args.Height || 500;
+
     Table = Table || new tp.DataTable('');
 
-    if (tp.IsBlank(Text))
-        Text = tp.Format('{0} ({1})', Table.Name || 'Table', Table.RowCount);
+    if (tp.IsEmpty(Args.Text) || (tp.IsString(Args.Text) && tp.IsBlank(Args.Text)))
+        Args.Text = tp.Format('{0} ({1})', Table.Name || 'Table', Table.RowCount);
 
-    var Grid = new tp.Grid(null, null);
+    let Grid = new tp.Grid(null, null);
+ 
+    Args = new tp.WindowArgs(Args); 
 
-    let WindowArgs = {
-        Text: Text,
-        CloseFunc: CloseFunc,
-        Creator: Creator,
-        Height: 500
-    };
-    var Window = tp.ContentWindow.Show(true, Grid.Handle, WindowArgs, (Args) => {
-        Args.Grid = Grid;
-        Args.SelectedRow = Grid.FocusedRow;
-        if (tp.IsFunction(CloseFunc))
-            tp.Call(CloseFunc, Creator, Args);
-    }, Creator);
+    let Window = tp.ContentWindow.ShowModal(Grid.Handle, Args);
+
+    // on-closing handler
+    Window.On('Closing', (Args) => {
+        Window.Args.Grid = Grid;
+        Window.Args.SelectedRow = Grid.FocusedRow;
+        Window.SelectedRow = Grid.FocusedRow;
+    });
+
 
     Grid.Handle.style.position = 'absolute';
     Grid.Width = '100%';
@@ -21244,7 +21368,7 @@ tp.TableBox = function (Table, Text, CloseFunc, Creator) {
 
     Window.Args.Grid = Grid;
 
-    var DataSource = new tp.DataSource(Table);
+    let DataSource = new tp.DataSource(Table);
     Grid.DataSource = DataSource;
     if (Table.RowCount < 800) {
         Grid.BestFitColumns();
@@ -21255,17 +21379,21 @@ tp.TableBox = function (Table, Text, CloseFunc, Creator) {
     return Window;
 };
 /**
-Displays a modal window with a grid and returns a promise. <br />
-The Window.Args contains a Grid property that references the grid and a SelectedRow property that references the Grid.FocusedRow, if any, or null. 
+Displays a modal window with a grid and returns the window. <br />
+On return the Window.Args contains a Grid property that references the grid.
+When the close callback function (CloseFunc) is called, the Window.Args contain SelectedRow property that references the Grid.FocusedRow, if any, or null.
 @param {tp.DataTable} Table The {@link tp.DataTable} data table to display in the grid
-@param {string} [Text] Optional. The caption title of the window
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args. The Window.Args contains a Grid property that references the grid and a SelectedRow property that references the Grid.FocusedRow, if any, or null.
+@param {tp.WindowArgs} [WindowArgs = null]  Optional.
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow} window.
 */
-tp.TableBoxAsync = function (Table, Text) {
+tp.TableBoxAsync = function (Table, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.TableBox(Table, Text, (Args) => {
-            Resolve(Args);
-        });
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+
+        tp.TableBox(Table, WindowArgs);
     });
 };
 //#endregion
@@ -21275,13 +21403,14 @@ tp.TableBoxAsync = function (Table, Text) {
 Displays a modal window with a grid showing extended information about a specified data-row, and returns the window. <br />
 Mainly for debug purposes.
 @param {tp.DataRow} Row The {@link tp.DataRow} data row to display in the grid
-@param {string} [Text] Optional. The caption title of the window
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
+@param {tp.WindowArgs} [WindowArgs = null]  Optional.
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow} window.
 */
-tp.RowBox = function(Row, Text, CloseFunc, Creator) {
-    Text = Text || 'Single row selection';
+tp.RowBox = function (Row, WindowArgs = null) {  // , Text, CloseFunc, Creator
+    WindowArgs = WindowArgs || {};
+    WindowArgs.Text = WindowArgs.Text || 'Row Box';
+
+    let Args = new tp.WindowArgs(WindowArgs);
 
     var Column, // tp.DataColumn,
         Row2,   // tp.DataRow,
@@ -21308,20 +21437,23 @@ tp.RowBox = function(Row, Text, CloseFunc, Creator) {
         }
     }
 
-    return tp.TableBox(Table, Text, CloseFunc, Creator);
+    return tp.TableBox(Table, Args);
 };
 /**
 Displays a modal window with a grid showing extended information about a specified data-row and returns a promise. <br />
 Mainly for debug purposes.
 @param {tp.DataRow} Row The {@link tp.DataRow} data row to display in the grid
-@param {string} [Text] Optional. The caption title of the window
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
+@param {tp.WindowArgs} [WindowArgs = null]  Optional.
+@returns {tp.ContentWindow} Returns the {@link tp.ContentWindow} window.
 */
-tp.RowBoxAsync = function (Row, Text) {
+tp.RowBoxAsync = function (Row, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.RowBox(Row, Text, (Args) => {
-            Resolve(Args);
-        });
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+
+        tp.RowBox(Row, WindowArgs);
     });
 };
 //#endregion
@@ -21331,17 +21463,18 @@ tp.RowBoxAsync = function (Row, Text) {
 Displays a modal window with a grid displaying the tables of a dataset, and returns the window. <br /> 
 @param {tp.DataSet} DataSet The {@link tp.DataSet} dataset to display in the grid
 @param {tp.WindowArgs} [WindowArgs=null] Optional.  
-@returns {tp.Window} Returns the {@link tp.Window} window.
+@returns {tp.DataSetDialog} Returns the {@link tp.DataSetDialog} window.
 */
-tp.DataSetBox = function(DataSet, WindowArgs = null) {
-    DataSet = DataSet || new tp.DataSet('');
+tp.DataSetBox = function (DataSet, WindowArgs = null) {
+ 
+    WindowArgs = WindowArgs || {};
+    //WindowArgs.AsModal = true;
+    WindowArgs.DataSet = DataSet || new tp.DataSet('');;
 
     if (!tp.IsString(WindowArgs.Text) || tp.IsBlank(WindowArgs.Text))
-        WindowArgs.Text = tp.Format('{0} ({1})', DataSet.Name || 'DataSet', DataSet.Tables.length);
-
-    var Args = new tp.WindowArgs(WindowArgs);
-    Args.AsModal = true;
-    Args.DataSet = DataSet;
+        WindowArgs.Text = tp.Format('{0} ({1})', WindowArgs.DataSet.Name || 'DataSet', WindowArgs.DataSet.Tables.length);
+ 
+    let Args = new tp.WindowArgs(WindowArgs);
 
     var Window = new tp.DataSetDialog(Args);
     Window.ShowModal();
@@ -21352,546 +21485,96 @@ tp.DataSetBox = function(DataSet, WindowArgs = null) {
 Displays a modal window with a grid displaying the tables of a dataset, returns a promise. <br />
 @param {tp.DataSet} DataSet The {@link tp.DataSet} dataset to display in the grid
 @param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.Window} Returns the {@link tp.Window} window.
+@returns {tp.DataSetDialog} Returns the {@link tp.DataSetDialog} window.
 */
 tp.DataSetBoxAsync = function (DataSet, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.DataSetBox(DataSet, WindowArgs, (Args) => {
-            Resolve(Args);
-        });
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+        tp.DataSetBox(DataSet, WindowArgs);
     });
 };
 //#endregion
 
 //#region PickRowsBox
 
-/**
-Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns the window.
-If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
-@param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Must have (mandatory) a <code>tblSource: tp.DataTable</code> property. Optionally it may contain a <code>SelectedRows: tp.DataRow[]</code> and a <code>VisibleColumns: string[]</code> property.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowsBox1 = function (Args) {
-    return tp.PickRowsBox(Args);
-};
-/**
-Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns the window.
-If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
-@param {tp.DataTable} tblTarget The {@link tp.DataTable} table where selected rows are going to be inserted some how.
-@param {tp.DataTable} tblSource The {@link tp.DataTable} table where selected rows come from.
-@param {string[]} VisibleColumns A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {string} TargetKeyName A tblTarget Key field name used to initially find what source rows are already selected in target
-@param {string} SourceKeyName A tblSource Key field name used to match with TargetKeyName
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowsBox2 = function (tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName, CloseFunc, Creator) {
-    return tp.PickRowsBox(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName, CloseFunc, Creator);
-};
-/**
-Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns the window.
-If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
-@param {tp.DataTable} tblSource The {@link tp.DataTable} table where selected rows come from.
-@param {string[]} VisibleColumns A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {tp.DataRow[]} SelectedRows A {@link tp.DataRow} array containing the tblSource rows that should be initially selected
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowsBox3 = function(tblSource, VisibleColumns, SelectedRows,  CloseFunc, Creator) {
-    return tp.PickRowsBox(tblSource, VisibleColumns, SelectedRows, CloseFunc, Creator);
-};
+/** Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns the window.
+ * If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
+ * @param {tp.DataTable|string} SqlTextOrSourceTable Required. A SELECT statement or the {@link tp.DataTable} table to select rows from.
+ * @param {tp.MultiRowPickDialogArgs} [WindowArgs=null] Optional.
+ * @returns {tp.MultiRowPickDialog} Returns the {@link tp.MultiRowPickDialog} window.
+ */
+tp.PickRowsBox = function (SqlTextOrSourceTable, WindowArgs = null) {
+    let Args = WindowArgs || {};
+    if (tp.IsString(SqlTextOrSourceTable))
+        Args.SqlText = SqlTextOrSourceTable;
+    else if (SqlTextOrSourceTable instanceof tp.DataTable)
+        Args.tblSource = SqlTextOrSourceTable;
 
-tp.PickRowsBox = function() {
-    var i, ln,
-        v,
-        TargetKeyIndex,     // number,
-        SourceKeyIndex,     // number,
-        SourceRow,          // tp.DataRow,
-        Row                 // tp.DataRow
-        ;
+    Args = new tp.MultiRowPickDialogArgs(Args);
 
-    let Args,               // tp.WindowArgs,
-        tblTarget,          // tp.DataTable,
-        tblSource,          // tp.DataTable,
-        VisibleColumns,     // string[],
-        SelectedRows,       // tp.DataRow[],
-        TargetKeyName,      // string,
-        SourceKeyName,      // string,
-        CloseFunc,          // (Args: tp.WindowArgs) => void,
-        Creator             // Object
-        ;
-
-    /** @type {tp.Window} */
-    let Result = null;       
-    let Case = 0;
-
-    if (arguments.length === 1 && arguments[0] instanceof tp.WindowArgs) {
-        Case = 1;
-
-        Args = arguments[0];
-    } else if (arguments.length > 2) {
-        if (arguments[1] instanceof tp.DataTable) {
-            Case = 2;
-
-            tblTarget = arguments[0];
-            tblSource = arguments[1];
-            VisibleColumns = arguments[2];
-            TargetKeyName = arguments[3];
-            SourceKeyName = arguments[4];
-            CloseFunc = arguments.length > 5 ? arguments[5] : null;
-            Creator = arguments.length > 6 ? arguments[6] : null;
-        } else {
-            Case = 3;
-
-            tblSource = arguments[0];
-            VisibleColumns = arguments[1];
-            SelectedRows = arguments[2];
-            CloseFunc = arguments.length > 3 ? arguments[3] : null;
-            Creator = arguments.length > 4 ? arguments[4] : null;
-        }
-
-    }
-
-
-    switch (Case) {
-
-        case 1:
-            Result = new tp.MultiRowPickDialog(Args);
-            Result.ShowModal();
-            break;
-
-        case 2:
-            TargetKeyIndex = tblTarget.IndexOfColumn(TargetKeyName);
-            SourceKeyIndex = tblSource.IndexOfColumn(SourceKeyName);
-
-            for (i = 0, ln = tblSource.Rows.length; i < ln; i++) {
-                SourceRow = tblSource.Rows[i];
-                v = SourceRow.Get(SourceKeyIndex);
-                Row = tblTarget.FindRow(TargetKeyIndex, v);
-                if (!tp.IsEmpty(Row)) {
-                    SelectedRows.push(SourceRow);
-                }
-            }
-
-            Result = tp.PickRowsBox(tblSource, VisibleColumns, SelectedRows, CloseFunc, Creator);
-            break;
-
-        case 3:
-            Args = new tp.WindowArgs();
-            Args.Creator = Creator;
-            Args.CloseFunc = CloseFunc;
-            Args.Text = 'Multi-row Selection';
-
-            Args.tblSource = tblSource;
-            Args.VisibleColumns = VisibleColumns;
-            Args.SelectedRows = SelectedRows;
-
-            Result = tp.PickRowsBox(Args);
-
-            break;
-    }
-
-    return Result;
-};
-
-/**
-Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns a promise.
-If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
-@param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object.  Must have (mandatory) a <code>tblSource: tp.DataTable</code> property. Optionally it may contain a <code>SelectedRows: tp.DataRow[]</code> and a <code>VisibleColumns: string[]</code> property.
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowsBoxAsync1 = function (Args) {
-    return tp.PickRowsBoxAsync(Args);
-};
-/**
-Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns a promise.
-If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
-@param {tp.DataTable} tblTarget The {@link tp.DataTable} table where selected rows are going to be inserted some how.
-@param {tp.DataTable} tblSource The {@link tp.DataTable} table where selected rows come from.
-@param {string[]} VisibleColumns A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {string} TargetKeyName A tblTarget Key field name used to initially find what source rows are already selected in target
-@param {string} SourceKeyName A tblSource Key field name used to match with TargetKeyName
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowsBoxAsync2 = function (tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName) {
-    return tp.PickRowsBoxAsync(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName);
-};
-/**
-Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns a promise.
-If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
-@param {tp.DataTable} tblSource The {@link tp.DataTable} table where selected rows come from.
-@param {string[]} VisibleColumns A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {tp.DataRow[]} SelectedRows A {@link tp.DataRow} array containing the tblSource rows that should be initially selected
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowsBoxAsync3 = function (tblSource, VisibleColumns, SelectedRows) {
-    return tp.PickRowsBoxAsync(tblSource, VisibleColumns, SelectedRows);
-};
-
-tp.PickRowsBoxAsync = function() {
-    let Args,           // tp.WindowArgs,
-        tblTarget,      // tp.DataTable,
-        tblSource,      // tp.DataTable,
-        VisibleColumns, // string[],
-        SelectedRows,   // tp.DataRow[],
-        TargetKeyName,  // string,
-        SourceKeyName   // string
-        ;
-
-
-    let Result = Promise.resolve(new tp.WindowArgs());
-
-    let Case = 0;
-
-    if (arguments.length === 1 && arguments[0] instanceof tp.WindowArgs) {
-        Case = 1;
-
-        Args = arguments[0];
-    } else if (arguments.length > 2) {
-        if (arguments[1] instanceof tp.DataTable) {
-            Case = 2;
-
-            tblTarget = arguments[0];
-            tblSource = arguments[1];
-            VisibleColumns = arguments[2];
-            TargetKeyName = arguments[3];
-            SourceKeyName = arguments[4];
-        } else {
-            Case = 3;
-
-            tblSource = arguments[0];
-            VisibleColumns = arguments[1];
-            SelectedRows = arguments[2];
-        }
-
-    }
-
-    switch (Case) {
-
-        case 1:
-            Result = new Promise((Resolve, Reject) => {
-                Args.CloseFunc = (Args) => {
-                    Resolve(Args);
-                };
-                tp.PickRowsBox(Args);
-            });
-            break;
-
-        case 2:
-            Result = new Promise((Resolve, Reject) => {
-                tp.PickRowsBox(tblTarget, tblSource, VisibleColumns, TargetKeyName, SourceKeyName, (Args) => {
-                    Resolve(Args);
-                });
-            });
-
-            break;
-
-        case 3:
-            Result = new Promise((Resolve, Reject) => {
-                tp.PickRowsBox(tblSource, VisibleColumns, SelectedRows, (Args) => {
-                    Resolve(Args);
-                });
-            });
-
-            break;
-    }
+    let Result = new tp.MultiRowPickDialog(Args);
+    Result.ShowModal();
 
     return Result;
 
+}; 
+/** Displays a row pick list dialog with a grid that allows the user to check/select multiple rows. Returns the window.
+ * If the user clicks OK on the dialog, then the dialog SelectedRows array property contains the selected tp.DataRow rows.
+ * @param {tp.DataTable|string} SqlTextOrSourceTable Required. A SELECT statement or the {@link tp.DataTable} table to select rows from.
+ * @param {tp.MultiRowPickDialogArgs} [WindowArgs=null] Optional.
+ * @returns {tp.MultiRowPickDialog} Returns the {@link tp.MultiRowPickDialog} window.
+ */ 
+tp.PickRowsBoxAsync = async function (SqlTextOrSourceTable, WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+        tp.PickRowsBox(SqlTextOrSourceTable, WindowArgs);
+    });
 };
+ 
 //#endregion
 
 //#region PickRowBox
+ /** Displays a row pick dialog with a grid that allows the user to check / select a single row.
+ * If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
+ * @param {tp.DataTable|string} SqlTextOrSourceTable Required. A SELECT statement or the {@link tp.DataTable} table to select rows from.
+ * @param {tp.SingleRowPickDialogArgs} [WindowArgs=null] Optional.
+ * @returns {tp.SingleRowPickDialog} Returns the {@link tp.SingleRowPickDialog} window.
+ */
+tp.PickRowBox = function (SqlTextOrSourceTable, WindowArgs = null) {
+    let Args = WindowArgs || {};
+    if (tp.IsString(SqlTextOrSourceTable))
+        Args.SqlText = SqlTextOrSourceTable;
+    else if (SqlTextOrSourceTable instanceof tp.DataTable)
+        Args.tblSource = tblSource;
 
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Must have (mandatory), at least, defined either a  <code>Table: tp.DataTable</code> or a <code>SqlText: string </code> or a <code>SelectSql: tp.SelectSql </code> property.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowBox1 = function (Args) {
-    return tp.PickRowBox(Args);
-};
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {tp.DataTable} Table The table to display. If null, then SqlText is mandatory.
-@param {string[]} VisibleColumns  A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {any} [KeyValue] Optional. If KeyValue and KeyFieldName are present, then the form positions the display grid to the KeyValue row.
-@param {string} [KeyFieldName] Optional. If KeyValue and KeyFieldName are present, then the dialog positions the display grid to the KeyValue row.
-@param {string} SqlText Optional. The SELECT statement to execute. If null/empty, then Table is mandatory
-@param {string} [Text] Optional. The caption title of the window
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowBox2 = function (Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text, CloseFunc, Creator) {
-    return tp.PickRowBox(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text, CloseFunc, Creator);
-};
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {tp.SelectSql} SelectSql - The statement to be executed
-@param {string} [Text] Optional. The caption title of the window
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowBox3 = function (SelectSql, Text, CloseFunc, Creator) {
-    return tp.PickRowBox(SelectSql, Text, CloseFunc, Creator);
-};
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {string} SqlText The SELECT statement to execute.
-@param {string[]} VisibleColumns  A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {string} [Text] Optional. The caption title of the window
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
-@returns {tp.Window} Returns the {@link tp.Window} window.
-*/
-tp.PickRowBox4 = function (SqlText, VisibleColumns, Text, CloseFunc, Creator) {
-    return tp.PickRowBox(SqlText, VisibleColumns, Text, CloseFunc, Creator);
-};
+    Args = new tp.SingleRowPickDialogArgs(Args);
 
-tp.PickRowBox = function () {
-    let Args,               // tp.WindowArgs,
-        Table,              // tp.DataTable,
-        VisibleColumns,     // string[],
-        KeyValue,           // any,
-        KeyFieldName,       // string,
-        SqlText,            // string,
-        SelectSql,          // tp.SelectSql,
-        Text,               // string,
-        CloseFunc,          // (Args: tp.WindowArgs) => void,
-        Creator             // Object
-        ;
-
-    /** @type {tp.Window} */
-    let Result = null;       
-    let Case = 0;
-
-
-    if (arguments.length === 1 && arguments[0] instanceof tp.WindowArgs) {
-        Case = 1;
-
-        Args = arguments[0];
-    } else if (arguments.length > 0) {
-        if (arguments[0] instanceof tp.DataTable) {
-            Case = 2;
-
-            Table = arguments[0];
-            VisibleColumns = arguments[1];
-            KeyValue = arguments.length > 2 ? arguments[2] : null;
-            KeyFieldName = arguments.length > 3 ? arguments[3] : null;
-            SqlText = arguments.length > 4 ? arguments[4] : null;
-            Text = arguments.length > 5 ? arguments[5] : null;
-            CloseFunc = arguments.length > 6 ? arguments[6] : null;
-            Creator = arguments.length > 7 ? arguments[7] : null;
-        } else if (arguments[0] instanceof tp.SelectSql) {
-            Case = 3;
-
-            SelectSql = arguments[0];
-            Text = arguments.length > 1 ? arguments[1] : null;
-            CloseFunc = arguments.length > 2 ? arguments[2] : null;
-            Creator = arguments.length > 3 ? arguments[3] : null;
-        } else if (tp.IsString(arguments[0])) {
-            Case = 4;
-
-            SqlText = arguments[0];
-            VisibleColumns = arguments[1];
-            Text = arguments.length > 2 ? arguments[2] : null;
-            CloseFunc = arguments.length > 3 ? arguments[3] : null;
-            Creator = arguments.length > 4 ? arguments[4] : null;
-        }
-    }
-
-
-    switch (Case) {
-
-        case 1:
-            Result = new tp.SingleRowPickDialog(Args);
-            Result.ShowModal();
-            break;
-
-        case 2:
-            Args = new tp.WindowArgs();
-            Args.Creator = Creator;
-            Args.CloseFunc = CloseFunc;
-            Args.Text = Text || 'Single-row Selection';
-
-            Args.Table = Table;
-            Args.VisibleColumns = VisibleColumns;
-            Args.KeyValue = KeyValue;
-            Args.KeyFieldName = KeyFieldName;
-            Args.SqlText = SqlText;
-
-            Result = new tp.SingleRowPickDialog(Args);
-            Result.ShowModal();
-            break;
-
-        case 3:
-            Args = new tp.WindowArgs();
-            Args.Creator = Creator;
-            Args.CloseFunc = CloseFunc;
-            Args.Text = Text || 'Single-row Selection';
-
-            Args.SelectSql = SelectSql;
-
-            Result = new tp.SingleRowPickDialog(Args);
-            Result.ShowModal();
-            break;
-
-        case 4:
-            Args = new tp.WindowArgs();
-            Args.Creator = Creator;
-            Args.CloseFunc = CloseFunc;
-            Args.Text = Text || 'Single-row Selection';
-
-            Args.VisibleColumns = VisibleColumns;
-            Args.SqlText = SqlText;
-
-            Result = new tp.SingleRowPickDialog(Args);
-            Result.ShowModal();
-
-            break;
-    }
+    let Result = new tp.SingleRowPickDialog(Args);
+    Result.ShowModal();
 
     return Result;
+
 };
-
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {tp.WindowArgs} Args - A {@link tp.WindowArgs} arguments object. Must have (mandatory), at least, defined either a  <code>Table: tp.DataTable</code> or a <code>SqlText: string </code> or a <code>SelectSql: tp.SelectSql </code> property.
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowBoxAsync1 = function (Args) {
-    return tp.PickRowBoxAsync(Args);
-};
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {tp.DataTable} Table The table to display. If null, then SqlText is mandatory.
-@param {string[]} VisibleColumns A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {any} [KeyValue] If KeyValue and KeyFieldName are present, then the form position the display grid to the KeyValue row.
-@param {string} [KeyFieldName] If KeyValue and KeyFieldName are present, then the form position the display grid to the KeyValue row.
-@param {string} [SqlText] Optional. The SELECT statement to execute. If null/empty, then Table is mandatory
-@param {string} [Text] Optional. The caption title of the window
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowBoxAsync2 = function (Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text) {
-    return tp.PickRowBoxAsync(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text);
-};
-
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {tp.SelectSql} SelectSql The statement to be executed
-@param {string} [Text] Optional. The caption title of the window
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowBoxAsync3 = function (SelectSql, Text) {
-    return tp.PickRowBoxAsync(SelectSql, Text);
-};
-/**
-Displays a row pick dialog with a grid that allows the user to check/select a single row.
-If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
-@param {string} SqlText The SELECT statement to execute.
-@param {string[]} VisibleColumns - A list of column names that should be visible. If null/empty, then all columns are visible.
-@param {string} [Text] Optional. The caption title of the window
-@returns {tp.WindowArgs} Returns a promise with the modal window {@link tp.WindowArgs} Args.
-*/
-tp.PickRowBoxAsync4 = function(SqlText, VisibleColumns, Text) {
-    return tp.PickRowBoxAsync(SqlText, VisibleColumns, Text);
-};
-
-tp.PickRowBoxAsync = function () {
-    let Args,               // tp.WindowArgs,
-        Table,              // tp.DataTable,
-        VisibleColumns,     // string[],
-        KeyValue,           // any,
-        KeyFieldName,       // string,
-        SqlText,            // string,
-        SelectSql,          // tp.SelectSql,
-        Text                // string
-        ;
-
-    let Result = Promise.resolve(new tp.WindowArgs());
-    let Case = 0;
-
-
-    if (arguments.length === 1 && arguments[0] instanceof tp.WindowArgs) {
-        Case = 1;
-
-        Args = arguments[0];
-    } else if (arguments.length > 0) {
-        if (arguments[0] instanceof tp.DataTable) {
-            Case = 2;
-
-            Table = arguments[0];
-            VisibleColumns = arguments[1];
-            KeyValue = arguments.length > 2 ? arguments[2] : null;
-            KeyFieldName = arguments.length > 3 ? arguments[3] : null;
-            SqlText = arguments.length > 4 ? arguments[4] : null;
-            Text = arguments.length > 5 ? arguments[5] : null;
-        } else if (arguments[0] instanceof tp.SelectSql) {
-            Case = 3;
-
-            SelectSql = arguments[0];
-            Text = arguments.length > 1 ? arguments[1] : null;
-        } else if (tp.IsString(arguments[0])) {
-            Case = 4;
-
-            SqlText = arguments[0];
-            VisibleColumns = arguments[1];
-            Text = arguments.length > 2 ? arguments[2] : null;
-        }
-    }
-
-
-    switch (Case) {
-
-        case 1:
-            Result = new Promise((Resolve, Reject) => {
-                Args.CloseFunc = (Args) => {
-                    Resolve(Args);
-                };
-                tp.PickRowBox(Args);
-            });
-
-            break;
-
-        case 2:
-            Result = new Promise((Resolve, Reject) => {
-                tp.PickRowBox(Table, VisibleColumns, KeyValue, KeyFieldName, SqlText, Text, (Args) => {
-                    Resolve(Args);
-                });
-            });
-
-            break;
-
-        case 3:
-            Result = new Promise((Resolve, Reject) => {
-                tp.PickRowBox(SelectSql, Text, (Args) => {
-                    Resolve(Args);
-                });
-            });
-            break;
-
-        case 4:
-            Result = new Promise((Resolve, Reject) => {
-                tp.PickRowBox(SqlText, VisibleColumns, Text, (Args) => {
-                    Resolve(Args);
-                });
-            });
-
-            break;
-    }
-
-    return Result;
+ /** Displays a row pick dialog with a grid that allows the user to check / select a single row.
+ * If the user clicks OK on the dialog, then the dialog SelectedRow tp.DataRow property contains the selected tp.DataRow row.
+ * @param {tp.DataTable|string} SqlTextOrSourceTable Required. A SELECT statement or the {@link tp.DataTable} table to select rows from.
+ * @param {tp.SingleRowPickDialogArgs} [WindowArgs=null] Optional.
+ * @returns {tp.SingleRowPickDialog} Returns the {@link tp.SingleRowPickDialog} window.
+ */
+tp.PickRowBoxAsync = async function (SqlTextOrSourceTable, WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+        tp.PickRowBox(SqlTextOrSourceTable, WindowArgs);
+    });
 };
 //#endregion
 
@@ -21904,7 +21587,7 @@ tp.PickRowBoxAsync = function () {
  * @param {function} SelectFunc Required. An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
  * @param {tp.DataTable} [Table=null] Optional. A {@link tp.DataTable} to display initially.
  * @param {tp.WindowArgs} [WindowArgs=null] Optional.
- * @returns {tp.Window} Returns the {@link tp.Window} window.
+ * @returns {tp.SqlFilterDialog} Returns the {@link tp.SqlFilterDialog} window.
  */
 tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table = null, WindowArgs = null) {
     WindowArgs = WindowArgs || {};
@@ -21928,14 +21611,17 @@ tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table = null, WindowArgs = n
  * @param {function} SelectFunc Required. An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
  * @param {tp.DataTable} [Table=null] Optional. A {@link tp.DataTable} to display initially.
  * @param {tp.WindowArgs} [WindowArgs=null] Optional.
- * @returns {tp.WindowArgs} Returns the {@link tp.WindowArgs} of the dialog. If the user clicks OK, then the returned object contains the SelectedRow and the Table properties. 
+ * @returns {tp.SqlFilterDialog} Returns the {@link tp.SqlFilterDialog} window.
  */
 tp.SqlFilterBoxAsync = function (FilterDefs, SelectFunc, Table = null, WindowArgs = null) {
 
     let Result = new Promise((Resolve, Reject) => {
-        tp.SqlFilterBox(FilterDefs, SelectFunc, Table, WindowArgs, (Args) => {
-            Resolve(Args);
-        }); 
+        WindowArgs = WindowArgs || {};
+        WindowArgs.CloseFunc = (Args) => {
+            Resolve(Args.Window);
+        };
+
+        tp.SqlFilterBox(FilterDefs, SelectFunc, Table, WindowArgs); 
     });
 
     return Result;
