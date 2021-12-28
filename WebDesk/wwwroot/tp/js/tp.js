@@ -11105,7 +11105,7 @@ tp.SizeModes = [tp.SizeMode.None, tp.SizeMode.XSmall, tp.SizeMode.Small, tp.Size
 /** Array with default width break-points.
  * A {@link tp.SizeChart} copies this values to its Sizes property on construction.
  * */
-tp.DefaultSizes = [ 
+tp.DefaultBreakpoints = [ 
     576,       // XSmall
     768,       // Small
     1050,      // Medium
@@ -11124,9 +11124,9 @@ tp.SizeChart = class {
      * @param {number[]} [Source] Optional. The source array
      */
     constructor(Source = null) {
-        this.Sizes = [];
+        this.Breakpoints = [];
         this.Mode = tp.SizeMode.None;
-        tp.DefaultSizes.forEach(item => this.Sizes.push(item));
+        tp.DefaultBreakpoints.forEach(item => this.Breakpoints.push(item));
         this.Assign(Source);
     }
 
@@ -11139,10 +11139,13 @@ tp.SizeChart = class {
      */
     LastMode = tp.SizeMode.None;
 
-    /** The actual size chart. Initially contains the values of the {@link tp.DefaultSizes}
+    /** The actual size chart. Defines the size-mode breakpoints.
+     * Initially contains the values of the {@link tp.DefaultBreakpoints}.
+     * It always should have 4 number elements. 
+     * Each number is a width break-point corresponding to one of the first 4 supported size modes: XSmall, Small, Medium and Large.
      * @type {number[]}
      */
-    Sizes = [];
+    Breakpoints = [576, 768, 1050, 1480];
 
     /** Returns true if a specified width indicates a width mode change for the container. Else false.
      * @param {number} Width The width to use in detecting width mode change.
@@ -11152,9 +11155,9 @@ tp.SizeChart = class {
         let w, m;
 
         let GetMode = () => {            
-            for (let i = 0, ln = this.Sizes.length; i < ln; i++) {
+            for (let i = 0, ln = this.Breakpoints.length; i < ln; i++) {
                 m = tp.SizeModes[i + 1];
-                w = this.Sizes[i];
+                w = this.Breakpoints[i];
                 if (Width <= w)
                     return m;
             }
@@ -11181,7 +11184,7 @@ tp.SizeChart = class {
     Assign(Source) {
         if (tp.IsArray(Source) && Source.length > 0 && Source.length <= 4) {
             for (let i = 0, ln = Source.length; i < ln; i++) {
-                this.Sizes[i] = Source[i];
+                this.Breakpoints[i] = Source[i];
             }
         }
     }
@@ -12121,11 +12124,14 @@ tp.Component = class extends tp.Object {
     get SizeMode() {
         return tp.IsValid(this.fSizeChart) ? this.fSizeChart.Mode : tp.SizeMode.None;
     }
-    /** The actual size chart. Initially contains the values of the {@link tp.DefaultSizes}
+    /** The actual size chart. Defines the size-mode breakpoints.
+     * Initially contains the values of the {@link tp.DefaultBreakpoints}.
+     * It always should have 4 number elements.
+     * Each number is a width break-point corresponding to one of the first 4 supported size modes: XSmall, Small, Medium and Large.
      * @type {number[]}
      */
-    get SizeChart() { return tp.IsValid(this.fSizeChart) ? this.fSizeChart.Sizes : []; }
-    set SizeChart(v) {
+    get Breakpoints() { return tp.IsValid(this.fSizeChart) ? this.fSizeChart.Breakpoints : []; }
+    set Breakpoints(v) {
         if (tp.IsValid(this.fSizeChart))
             this.fSizeChart.Assign(v);
     }
@@ -15021,6 +15027,8 @@ position: relative;
 display: flex;
 align-items: stretch;
 height: ${tp.WindowSettings.CaptionHeight};
+min-height: ${tp.WindowSettings.CaptionHeight};
+max-height: ${tp.WindowSettings.CaptionHeight};
 border-bottom: ${tp.WindowSettings.Border};
 padding-right: 3px;
 user-select: none;
@@ -15081,6 +15089,7 @@ gap: 4px;
 position: relative;
 display: block;
 flex-grow: 1;
+overflow: auto;
 `;
         this.ContentWrapper = new tp.Component(null, CP);  
         this.ContentWrapper.IsElementResizeListener = true;
@@ -15454,7 +15463,22 @@ tp.ContentWindow.Show = function (Modal, Content, WindowArgs = null) {
         Result.ShowModal();
     else
         Result.Show();
+
+    Result.CenterInScreen();    
+
     return Result;
+};
+/**
+Displays a content window, either as modal or as non-modal.
+@static
+@param {string} Text - The caption title of the window.
+@param {string|HTMLElement} Content - Element or selector with html content.
+@param {function} [CloseFunc=null] - Optional. Called when the window closes. A function as <code>function (Args: tp.WindowArgs): void</code>.
+@param {object} [Creator=null] - Optional. The context (this) for the callback function.
+@returns {tp.ContentWindow} Returns the <code>tp.ContentWindow</code> dialog box
+*/
+tp.ContentWindow.ShowModal = function (Content, WindowArgs = null) {
+    return tp.ContentWindow.Show(true, Content, WindowArgs);
 };
 /**
 Displays a content window, either as modal or as non-modal, and returns a Promise.
@@ -17219,9 +17243,9 @@ tp.AddLanguagesFunc = null;
 
         // propagate an initial "size-mode-changed" from all containers to their children
         List = tp.GetAllComponents(tp.Doc.body);
-        List.forEach((component) => {
-            if (component.IsElementResizeListener === true) {
-                 component.OnSizeModeChanged();
+        List.forEach((item) => {
+            if (item.IsElementResizeListener === true) {
+                 item.OnSizeModeChanged();
             }               
         });
 

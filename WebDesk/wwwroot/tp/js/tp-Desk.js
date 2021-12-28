@@ -801,28 +801,38 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             HtmlText = `<div class="${RowClass}" data-setup="{Text: '${Text}', Control: { TypeName: '${TypeName}', DataField: '${DataField}', ReadOnly: ${ReadOnly} } }"></div>`;
             HtmlRowList.push(HtmlText);
         });
-
  
-
         HtmlText = HtmlRowList.join('\n');
 
         ContentHtmlText = `
-<div class="tp-Row">
-    <div class="tp-Col p-100 tp-Ctrls lc-75 mc-70 sc-70">
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
+    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
         ${HtmlText}
     </div>
 </div>
 `;
-
         let elContent = tp.ContentWindow.GetContentElement(ContentHtmlText);
-        tp.Ui.CreateContainerControls(elContent);
-        tp.ContentWindow.ShowAsync(true, elContent, { Text: 'Fields'});
+        if (tp.IsHTMLElement(elContent)) {
 
-        // EDW 
-        // width of a Container, no more css media query classes
-        // Height in tp.Window and descendants and dialog boxes        
+            let DialogBox;
+            let WindowArgs = new tp.WindowArgs({ Text: 'Fields', Width: 580, Height: 'auto' });
+            WindowArgs.CloseFunc = (Args) => {
+                let DialogResult = Args.DialogResult;
+                let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
+                tp.InfoNote(S);
+            };
+
+            tp.Ui.CreateContainerControls(elContent.parentElement);
+            DialogBox = tp.ContentWindow.ShowModal(elContent, WindowArgs);
+            tp.StyleProp(elContent.parentElement, 'padding', '5px');
+ 
+ 
+        }
+
+        // EDW  
         // arrange fields of tblFields in tp.ContentWindow
         // pass a look-up table for the DataType field
+        // test Asp.Net TagHelper
 
     }
     EditFieldRow() {

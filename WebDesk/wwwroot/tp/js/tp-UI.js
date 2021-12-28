@@ -22235,11 +22235,11 @@ tp.Ui = class {
      @returns {tp.Component[]} Returns a list with all created controls for the parent.
      */
     static CreateContainerControls(ContainerElementOrSelector = null, ExcludedTypes = null) {
-        var Result = [];
+        let Result = [];
         ContainerElementOrSelector = tp(ContainerElementOrSelector || tp.Doc.body);
         ExcludedTypes = ExcludedTypes || [];
 
-        var List;
+        let List;
         for (let TypeName in this.Types) {
             if (ExcludedTypes.indexOf(TypeName) === -1) {
                 List = this.CreateContainerControlsOfType(ContainerElementOrSelector, TypeName);
@@ -22251,6 +22251,18 @@ tp.Ui = class {
                 } 
             }
         }
+
+        if (tp.IsArray(List)) {
+            List.forEach((item) => {
+                if (item instanceof tp.Component) {
+                    if (item.IsElementResizeListener === true) {
+                        item.OnSizeModeChanged();
+                    }
+                }
+
+            });
+        }
+
 
         // fixup
         this.FixupControls(Result);
