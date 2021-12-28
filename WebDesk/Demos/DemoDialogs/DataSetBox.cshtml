@@ -6,7 +6,7 @@
 <h2>@ViewBag.Title</h2>
 
 <div>
-    <p>The <code>tp.DataSetBoxAsync(DataSet, Text)</code> displays a modal window with a grid displaying the tables of a <code>tp.DataSet</code>. Returns a Promise.</p>
+    <p>The <code>tp.DataSetBoxAsync(DataSet, WindowArgs)</code> displays a modal window with a grid displaying the tables of a <code>tp.DataSet</code>. Returns a Promise.</p>
 </div>
 
 <br />
@@ -23,7 +23,7 @@
         DataSet.AddTable(tp.TestData.tblCountries);
         DataSet.AddTable(tp.TestData.tblDepartments);
 
-        tp.DataSetBoxAsync(DataSet, 'This is the window caption')
+        tp.DataSetBoxAsync(DataSet, { Height: 500})
             .then(function (Args) {
                 let DialogResult = Args.DialogResult;
                 let S = tp.EnumNameOf(tp.DialogResult, DialogResult);

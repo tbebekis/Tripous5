@@ -111,8 +111,8 @@ namespace WebLib.AspNet
         const string SDefaultItem = "asp-default-item";
 
 
-        string DefaultRowClasses { get { return "tp-CtrlRow tp-Row"; } }
-        string DefaultCheckBoxRowClasses { get { return "tp-CheckBoxRow tp-Row"; } }
+        string DefaultRowClasses { get { return "tp-CtrlRow"; } }
+        string DefaultCheckBoxRowClasses { get { return "tp-CheckBoxRow"; } }
 
         string TextDivClasses { get { return "tp-CText"; } }
         string ControlDivClasses { get { return "tp-Ctrl"; } }
@@ -230,29 +230,16 @@ namespace WebLib.AspNet
 
         void RenderCheckBox()
         {
-            /* TODO: render check box as following.
-             * NOTE: We need the div around checkbox for positioning reasons.
-             * CAUTION: Add the value to checkbox AND the hidden input.
-             
-            <label class="tp-CheckBox" tabindex="0">
-			    <div><input type="checkbox"></div>			
-			    <span class="tp-RequiredMark">*</span>
-			    <span class="tp-Text">Both elements must have the same parent, but element2 does not have to be immediately preceded by element1.</span>
-		    </label>
-
-             */
-
-
-            /*
-                <div class="tp-Row tp-CheckBoxRow">
-	                <label class="tp-CheckBox">
-		                <span style="display: none;">*</span>
-		                <span class="tp-Text">TEXT GOES HERE</span>
-		                <input name="SAME_NAME" type="checkbox" value="1">
-		                <span class="checkmark"></span> 
-	                </label>
-                    <input name="SAME_NAME" type="hidden" value="0">
-                </div>
+            /*   
+            <div class="tp-CheckBoxRow tp-Object" id="tp-CheckBoxRow-Married-2000">
+                <label class="tp-CheckBox tp-Object" id="tp-CheckBox-2000" tabindex="0">
+                    <input name="SAME_NAME" type="checkbox" value="1">
+                    <span class="tp-RequiredMark">*</span>
+                    <span class="tp-Text">TEXT GOES HERE</span>
+                    <span class="checkmark"></span> 
+                </label>
+                <input name="SAME_NAME" type="hidden" value="0">
+            </div> 
             */
 
             HtmlTag SourceLabel = Generator.GenerateLabel(ViewContext, For.ModelExplorer, For.Name, null, null).Clone();
@@ -261,24 +248,23 @@ namespace WebLib.AspNet
 
             // label
             HtmlTag Label = MainTag.Add("label");
-            Label.Attribute("for", CheckBoxId);
+            //Label.Attribute("for", CheckBoxId);
             Label.Class(CheckBoxClasses);
+
+            // checkbox
+            HtmlTag Editor = Label.AddInput("checkbox");
 
             // required - so add the asterisk to the title text
             if (PropertyAttributes.OfType<RequiredAttribute>().FirstOrDefault() != null) // (For.Metadata.IsRequired)
             {
-                HtmlTag Mark = Label.Add("span", RequiredMarkClasses);
-                Mark.InnerHtml.Append("*");
+                HtmlTag RequiredMark = Label.Add("span", RequiredMarkClasses);
+                RequiredMark.InnerHtml.Append("*");
             }
 
             // label text
             HtmlTag tagText = Label.Add("span", "tp-Text");
-            tagText.InnerHtml.AppendHtml(InnerText);
+            tagText.InnerHtml.AppendHtml(InnerText);            
 
-
-            // checkbox
-            HtmlTag Editor = Label.AddInput("checkbox"); // HtmlTag.Input("checkbox");
-            //Label.Add(Editor);
             Editor.Attribute("id", CheckBoxId);
             Editor.Attribute("name", CheckBoxId);
             Editor.Attribute("value", IsBool(PropertyType) ? "true" : "1");
@@ -306,35 +292,20 @@ namespace WebLib.AspNet
         }
         void RenderInput(EditorType Kind)
         {
-
-            /* TODO: Render tp-CtrlRow as following:
-             
-            <div class="tp-CtrlRow" id="tp-CtrlRow-Code-2000">
-              <div class="tp-CText">
-                <label for="undefined">Code</label>
-                <span class="tp-RequiredMark" style="">*</span>
-              </div>
-              <div class="tp-Ctrl">
-                <input type="text" class="tp-TextBox tp-Object" tabindex="0" spellcheck="false" readonly="" maxlength="40" required="" style="text-align: left;">
-              </div>
-            </div>
-
-             */
-
-
+ 
             /*
-             <div class="tp-CtrlRow tp-Row">
-                <div class="tp-CText">
-                    <span>Id</span>
+                <div class="tp-CtrlRow tp-Row" id="control_row_UserId-2001">
+                    <div class="tp-CText">
+                        <label for="UserId">UserId</label>
+                        <span class="tp-RequiredMark">*</span>
+                    </div>
+                    <div class="tp-Ctrl">
+                        <input class="tp-TextBox" id="UserId" name="UserId" type="text" value="">
+                    </div>
                 </div>
-                <div class="tp-Ctrl">
-                    <input type="text" class="tp-TextBox tp-Object" id="Id" tabindex="0" name="Id" readonly="" style="text-align: right;">	
-                    <span class="tp-RequiredMark" >*</span>
-                </div>
-            </div>
             */
 
-            // text
+            // text DIV
             HtmlTag TextDiv = MainTag.Add("div", TextDivClasses);
 
             //HtmlTag Label = HtmlHelper.Label(For.Name).Clone();
@@ -344,11 +315,11 @@ namespace WebLib.AspNet
             // is required, so add the asterisk to the title text
             if (PropertyAttributes.OfType<RequiredAttribute>().FirstOrDefault() != null) // (For.Metadata.IsRequired)
             {
-                HtmlTag Mark = TextDiv.Add("span", RequiredMarkClasses);
-                Mark.InnerHtml.Append("*");
+                HtmlTag RequiredMark = TextDiv.Add("span", RequiredMarkClasses);
+                RequiredMark.InnerHtml.Append("*");
             }
 
-            // control
+            // control DIV
             HtmlTag ControlDiv = MainTag.Add("div", ControlDivClasses);
 
 
@@ -454,59 +425,54 @@ namespace WebLib.AspNet
     }
 
     /*
-    <div class="tp-Row">
-        <div class="tp-Col l-33 m-50 tp-Ctrls lc-75 mc-70 sc-70">
-            <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-            <div class="tp-CtrlRow" data-setup="{Text: 'Trader', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"></div>
-        </div>
-    </div> 
 
---------------------------------------------------------------------------
-<div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Id', DataField: 'Id', ReadOnly: true } }"></div>
+        <div class="tp-Row">
+            <div class="tp-Col l-33 m-50 tp-Ctrls lc-75 mc-70 sc-70">
+                <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+                <div class="tp-CtrlRow" data-setup="{Text: 'Trader', Control: { TypeName: 'TextBox', Id: 'Name', DataField: 'Name' } }"></div>
+            </div>
+        </div> 
 
-<div class="tp-CtrlRow tp-Row">
-	<div class="tp-CText">
-		<span>Id</span>
-	</div>
-	<div class="tp-Ctrl">
-		<input type="text" class="tp-TextBox tp-Object" id="Id" tabindex="0" name="Id" readonly="" style="text-align: right;">	
-		<span class="tp-RequiredMark" style="display: none;">*</span>
-	</div>
-</div>
---------------------------------------------------------------------------
-<div class="tp-CheckBoxRow" data-setup="{Text: 'Flag', Control: { Id: 'Flag', DataField: 'Flag' } }"></div>
-       
-<div class="tp-CheckBoxRow tp-Row">
-	<label class="tp-CheckBox tp-Object" id="Flag" tabindex="0">
-		<input type="checkbox">Flag
-	</label>
-	<span class="tp-RequiredMark" style="display: none;">*</span>
-</div>     
---------------------------------------------------------------------------
-<div class="tp-CtrlRow" data-setup="{Text: 'Memo', Control: { TypeName: 'Memo', Id: 'Memo', DataField: 'Memo', Height: 150 } }"></div>
 
-<div class="tp-CtrlRow tp-Row">
-	<div class="tp-CText">
-		<span>Memo</span>
-	</div>
-	<div class="tp-Ctrl">
-		<textarea class="tp-Memo tp-Object" id="Memo" tabindex="0" cols="2" style="height: 150px;"></textarea>
-		<span class="tp-RequiredMark" style="display: none;">*</span>
-	</div>
-</div>
---------------------------------------------------------------------------
+    --------------------------------------------------------------------------
+        <div class="tp-CtrlRow" data-setup="{Text: 'UserId', Control: { TypeName: 'TextBox', Id: 'UserId' DataField: 'UserId', ReadOnly: false } }"></div>
 
-    output.Attributes.SetAttribute("class", "m-1 p-1");
-    TagBuilder title = new TagBuilder("h1");
-    title.InnerHtml.Append(PrePost);
- 
-    TagBuilder container = new TagBuilder("div");
-    container.Attributes["class"] = "bg-info m-1 p-1";
-    container.InnerHtml.AppendHtml(title);
- 
-    if (AddHeader)
-        output.PreElement.SetHtmlContent(container);
-    if (AddFooter)
-        output.PostElement.SetHtmlContent(container);
-    */
+        <div class="tp-CtrlRow tp-Row" id="control_row_UserId-2001">
+            <div class="tp-CText">
+                <label for="UserId">UserId</label>
+                <span class="tp-RequiredMark">*</span>
+            </div>
+            <div class="tp-Ctrl">
+                <input class="tp-TextBox" id="UserId" name="UserId" type="text" value="">
+            </div>
+        </div> 
+
+    --------------------------------------------------------------------------
+        <div class="tp-CheckBoxRow" data-setup="{Text: 'Married', Control: { Id: 'Married', DataField: 'Married' } }"></div>
+
+        <div class="tp-CheckBoxRow tp-Object" id="tp-CheckBoxRow-Married-2000">
+            <label class="tp-CheckBox tp-Object" id="tp-CheckBox-2000" tabindex="0">
+                <input name="SAME_NAME" type="checkbox" value="1">
+                <span class="tp-RequiredMark" style="">*</span>
+                <span class="tp-Text">TEXT GOES HERE</span>
+                <span class="checkmark"></span> 
+            </label>
+            <input name="SAME_NAME" type="hidden" value="0">
+        </div> 
+
+    --------------------------------------------------------------------------
+
+        output.Attributes.SetAttribute("class", "m-1 p-1");
+        TagBuilder title = new TagBuilder("h1");
+        title.InnerHtml.Append(PrePost);
+
+        TagBuilder container = new TagBuilder("div");
+        container.Attributes["class"] = "bg-info m-1 p-1";
+        container.InnerHtml.AppendHtml(title);
+
+        if (AddHeader)
+            output.PreElement.SetHtmlContent(container);
+        if (AddFooter)
+            output.PostElement.SetHtmlContent(container);
+        */
 }

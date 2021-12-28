@@ -6,9 +6,13 @@
 
 @{
     var Settings = DataStore.GetSettings();
+    string IsAuthenticated = Lib.IsCookieAuthenticated ? "true" : "false";
 }
  
 <script>
+
+    tp.SysConfig.IsAuthenticated = @IsAuthenticated;
+
     tp.Ready(() => {
 
         tp.ScreenWidthsMax = {

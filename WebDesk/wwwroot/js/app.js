@@ -129,20 +129,23 @@ tp.AppInitializeBefore = function () {
     el = GetElement('.footer');
     tp.DeskOptions.Footer = new app.Footer(el);
 
-    // main menu
-    el = GetElement('.' + tp.Classes.DeskMainMenu);
-    tp.DeskOptions.MainMenu = new tp.DeskMainMenu(el);
+    if (tp.SysConfig.IsAuthenticated === true) {
+        // main menu
+        el = GetElement('.' + tp.Classes.DeskMainMenu);
+        tp.DeskOptions.MainMenu = new tp.DeskMainMenu(el);
 
-    // main command executor
-    tp.DeskOptions.MainCommandExecutor = new app.MainCommandExecutor();
+        // main command executor
+        tp.DeskOptions.MainCommandExecutor = new app.MainCommandExecutor();
 
-    // desk view main pager  
-    el = GetElement('.' + tp.Classes.DeskViewPager);
+        // desk view main pager  
+        el = GetElement('.' + tp.Classes.DeskViewPager);
 
-    tp.DeskOptions.ViewPager = new tp.DeskViewPager(el);
+        tp.DeskOptions.ViewPager = new tp.DeskViewPager(el);
 
-    // desktop
-    tp.Desk = new tp.Desktop(tp.DeskOptions);
+        // desktop
+        tp.Desk = new tp.Desktop(tp.DeskOptions);
+    }
+
 };
 
 

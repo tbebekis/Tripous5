@@ -386,6 +386,7 @@ button:not(.btn-test),
 .field-group {
     position: relative;
     margin: 0 0 30px 0;
+    width: 100%;
 }
 
 .field-group > .caption {

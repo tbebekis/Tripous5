@@ -3178,10 +3178,9 @@ tp.GridViewportPanel = class extends tp.Object {
     /**
     Notification sent by tp.ResizeDetector when the size of this element changes.
     This method is called only if this.IsElementResizeListener is true.
-    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnElementSizeChanged(ResizeInfo) {
-        this.Trigger('ElementSizeChanged', ResizeInfo);
+    OnElementSizeChanged() {
+        this.Trigger('ElementSizeChanged');
     }
 
     /* public */

@@ -5330,10 +5330,9 @@ tp.ItemBar = class extends tp.Component {
     /**
     Notification sent by tp.ResizeDetector when the size of this element changes.
     This method is called only if this.IsElementResizeListener is true.
-    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnElementSizeChanged(ResizeInfo) {
-        super.OnElementSizeChanged(ResizeInfo);
+    OnElementSizeChanged() {
+        super.OnElementSizeChanged();
 
         let List;
         let ItemTotalWidth = 0;
@@ -5564,7 +5563,7 @@ tp.ItemBar = class extends tp.Component {
         if (this.RenderMode === tp.ItemBarRenderMode.NextPrev)
             this.Arrange();
         else
-            this.OnElementSizeChanged(null);
+            this.OnElementSizeChanged();
     }
 
     /** Returns true if a specified item is visible.
@@ -17899,11 +17898,10 @@ tp.LocatorBox = class extends tp.Control {
     /**
     Notification sent by tp.ResizeDetector when the size of this element changes.
     This method is called only if this.IsElementResizeListener is true.
-    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnElementSizeChanged(ResizeInfo) {
+    OnElementSizeChanged() {
         this.Layout();
-        super.OnElementSizeChanged(ResizeInfo);
+        super.OnElementSizeChanged();
     }
     /**
     Binds the control to its DataSource. It is called after the DataSource property is assigned. <br />
@@ -20988,7 +20986,7 @@ tp.SqlFilterDialog = class extends tp.Window {
         this.FilterPanel.Height = '100%';
         this.FilterPanel.Width = '100%';
         this.FilterPanel.StyleProp('overflow', 'auto');
-        this.FilterPanel.StyleProp('padding', '2px');
+        this.FilterPanel.StyleProp('padding', '2px 2px 30px 2px');
 
         // grid
         this.Grid = new tp.Grid();
@@ -21221,7 +21219,14 @@ tp.TableBox = function (Table, Text, CloseFunc, Creator) {
         Text = tp.Format('{0} ({1})', Table.Name || 'Table', Table.RowCount);
 
     var Grid = new tp.Grid(null, null);
-    var Window = tp.ContentWindow.Show(true, Text, Grid.Handle, (Args) => {
+
+    let WindowArgs = {
+        Text: Text,
+        CloseFunc: CloseFunc,
+        Creator: Creator,
+        Height: 500
+    };
+    var Window = tp.ContentWindow.Show(true, Grid.Handle, WindowArgs, (Args) => {
         Args.Grid = Grid;
         Args.SelectedRow = Grid.FocusedRow;
         if (tp.IsFunction(CloseFunc))
@@ -21276,7 +21281,7 @@ Mainly for debug purposes.
 @returns {tp.Window} Returns the {@link tp.Window} window.
 */
 tp.RowBox = function(Row, Text, CloseFunc, Creator) {
-    Text = Text || 'Row box';
+    Text = Text || 'Single row selection';
 
     var Column, // tp.DataColumn,
         Row2,   // tp.DataRow,
@@ -21325,24 +21330,16 @@ tp.RowBoxAsync = function (Row, Text) {
 /**
 Displays a modal window with a grid displaying the tables of a dataset, and returns the window. <br /> 
 @param {tp.DataSet} DataSet The {@link tp.DataSet} dataset to display in the grid
-@param {string} [Text] Optional. The caption title of the window
-@param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
-@param {object} [Creator]  Optional. The context (this) for the callback function.
+@param {tp.WindowArgs} [WindowArgs=null] Optional.  
 @returns {tp.Window} Returns the {@link tp.Window} window.
 */
-tp.DataSetBox = function(DataSet, Text, CloseFunc, Creator) {
+tp.DataSetBox = function(DataSet, WindowArgs = null) {
     DataSet = DataSet || new tp.DataSet('');
 
-    if (tp.IsBlank(Text))
-        Text = tp.Format('{0} ({1})', DataSet.Name || 'DataSet', DataSet.Tables.length);
+    if (!tp.IsString(WindowArgs.Text) || tp.IsBlank(WindowArgs.Text))
+        WindowArgs.Text = tp.Format('{0} ({1})', DataSet.Name || 'DataSet', DataSet.Tables.length);
 
-    var Args = new tp.WindowArgs();
-    Args.Creator = Creator;
-    Args.CloseFunc = CloseFunc;
-    Args.Text = Text;
-    //Args.Width = 800;
-    //Args.Height = 600;
-
+    var Args = new tp.WindowArgs(WindowArgs);
     Args.AsModal = true;
     Args.DataSet = DataSet;
 
@@ -21354,12 +21351,12 @@ tp.DataSetBox = function(DataSet, Text, CloseFunc, Creator) {
 /**
 Displays a modal window with a grid displaying the tables of a dataset, returns a promise. <br />
 @param {tp.DataSet} DataSet The {@link tp.DataSet} dataset to display in the grid
-@param {string} [Text] Optional. The caption title of the window
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
 @returns {tp.Window} Returns the {@link tp.Window} window.
 */
-tp.DataSetBoxAsync = function (DataSet, Text) {
+tp.DataSetBoxAsync = function (DataSet, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.DataSetBox(DataSet, Text, (Args) => {
+        tp.DataSetBox(DataSet, WindowArgs, (Args) => {
             Resolve(Args);
         });
     });
@@ -21905,16 +21902,17 @@ tp.PickRowBoxAsync = function () {
  * If the user clicks OK on the dialog, then the returned Args contain a SelectedRow and a Table property.
  * @param {tp.SqlFilterDef[]} FilterDefs Required. The filters to display in the dialog
  * @param {function} SelectFunc Required. An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
- * @param {tp.DataTable} Table Optional. A {@link tp.DataTable} to display initially.
- * @param {Function} [CloseFunc] Optional. A function as <code>void (Args: tp.WindowArgs)</code>. Called when the window closes
- * @param {object} [Creator]  Optional. The context (this) for the callback function.
+ * @param {tp.DataTable} [Table=null] Optional. A {@link tp.DataTable} to display initially.
+ * @param {tp.WindowArgs} [WindowArgs=null] Optional.
  * @returns {tp.Window} Returns the {@link tp.Window} window.
  */
-tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table, CloseFunc, Creator) {
-    let Args = new tp.WindowArgs();
-    Args.Text = 'Filters';
-    Args.Creator = Creator;
-    Args.CloseFunc = CloseFunc;
+tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table = null, WindowArgs = null) {
+    WindowArgs = WindowArgs || {};
+    WindowArgs.Text = WindowArgs.Text || 'Filters';
+    WindowArgs.Width = WindowArgs.Width || 600;
+    WindowArgs.Height = WindowArgs.Height || 'auto';
+
+    let Args = new tp.WindowArgs(WindowArgs);
     Args.FilterDefs = FilterDefs;
     Args.SelectFunc = SelectFunc;
     Args.Table = Table;
@@ -21928,13 +21926,14 @@ tp.SqlFilterBox = function (FilterDefs, SelectFunc, Table, CloseFunc, Creator) {
  * If the user clicks OK on the dialog, then the returned Args contain a SelectedRow and a Table property.
  * @param {tp.SqlFilterDef[]} FilterDefs Required. The filters to display in the dialog
  * @param {function} SelectFunc Required. An async call-back function which is passed the WHERE clause the dialog generates, executes a SELECT, and returns a {@link tp.DataTable}.
- * @param {tp.DataTable} Table Optional. A {@link tp.DataTable} to display initially.
+ * @param {tp.DataTable} [Table=null] Optional. A {@link tp.DataTable} to display initially.
+ * @param {tp.WindowArgs} [WindowArgs=null] Optional.
  * @returns {tp.WindowArgs} Returns the {@link tp.WindowArgs} of the dialog. If the user clicks OK, then the returned object contains the SelectedRow and the Table properties. 
  */
-tp.SqlFilterBoxAsync = function (FilterDefs, SelectFunc, Table) {
+tp.SqlFilterBoxAsync = function (FilterDefs, SelectFunc, Table = null, WindowArgs = null) {
 
     let Result = new Promise((Resolve, Reject) => {
-        tp.SqlFilterBox(FilterDefs, SelectFunc, Table, (Args) => {
+        tp.SqlFilterBox(FilterDefs, SelectFunc, Table, WindowArgs, (Args) => {
             Resolve(Args);
         }); 
     });
@@ -22244,8 +22243,12 @@ tp.Ui = class {
         for (let TypeName in this.Types) {
             if (ExcludedTypes.indexOf(TypeName) === -1) {
                 List = this.CreateContainerControlsOfType(ContainerElementOrSelector, TypeName);
-                if (List.length > 0)
-                    Result = Result.concat(List);
+                if (List.length > 0) {
+                    List.forEach((item) => {
+                        if (Result.indexOf(item) === -1)
+                            Result.push(item);
+                    });
+                } 
             }
         }
 

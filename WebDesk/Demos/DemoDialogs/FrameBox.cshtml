@@ -8,8 +8,8 @@
 <div>
     <p>The functions  <br /></p>
     <ul class="no-style">
-        <li><code>tp.FrameBox(Text, UrlOrHtmlContent, CloseFunc = null, Creator = null)</code> and</li>
-        <li><code>tp.FrameBoxAsync(Text, UrlOrHtmlContent)</code></li>
+        <li><code>tp.FrameBox(Text, UrlOrHtmlContent, WindowArgs)</code> and</li>
+        <li><code>tp.FrameBoxAsync(Text, UrlOrHtmlContent, WindowArgs)</code></li>
     </ul>
     <p>both display a modal window with an iframe element. The second function returns a promise.</p>
 </div>
@@ -47,14 +47,14 @@
     async function FrameUrlDialog() {
         var el = tp.Select('#Url');
         var Url = el.value;
-        await tp.FrameBoxAsync('Display Url in a iframe', Url);
+        await tp.FrameBoxAsync('Display Url in a iframe', Url, {Width: 600, Height: 450});
         tp.InfoNote('Your dialog is closed.');
     }
 
     function FrameContentDialog() {
         var el = tp.Select('#Content');
         var Content = el.innerHTML;
-        tp.FrameBoxAsync('Display content in a iframe', Content)
+        tp.FrameBoxAsync('Display content in a iframe', Content, { Width: 600, Height: 450 })
             .then(function () { tp.InfoNote('Your dialog is closed.'); });
     }
 

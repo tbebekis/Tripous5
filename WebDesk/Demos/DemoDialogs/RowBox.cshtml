@@ -25,7 +25,7 @@
         var Table = Data.Table;
         var Row = Table.Rows[0];
 
-        let Args = await tp.RowBoxAsync(Row, 'This is the window caption');
+        let Args = await tp.RowBoxAsync(Row);
 
         let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);

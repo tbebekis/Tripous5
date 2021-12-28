@@ -37,7 +37,7 @@
 
 <script class="js-code">
     async function ShowContentDialog() {
-        let Args = await tp.ContentWindow.ShowModalAsync('Content Window', '#Content');
+        let Args = await tp.ContentWindow.ShowModalAsync('#Content', { Text: 'Content Window'});
 
         let DialogResult = Args.DialogResult;
         let S = tp.EnumNameOf(tp.DialogResult, DialogResult);

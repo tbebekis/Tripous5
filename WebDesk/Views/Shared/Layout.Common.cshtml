@@ -6,10 +6,15 @@
 
 @{
     var Settings = DataStore.GetSettings();
-    string Flag = "false"; // WSys.IsDevelopment ? "true" : "false";
+    string IsDevMode = WSys.IsDevelopment ? "true" : "false";
+
+    string IsAuthenticated = Lib.IsCookieAuthenticated ? "true" : "false";
 }
- 
+
 <script>
+
+    tp.SysConfig.IsAuthenticated = @IsAuthenticated;
+
     tp.Ready(() => {
 
         tp.ScreenWidthsMax = {
@@ -18,8 +23,8 @@
             Medium: 1200
         };
 
-        tp.SysConfig.GlobalErrorHandling = @Flag;
-        tp.SysConfig.DebugMode = @Flag;
+        tp.SysConfig.GlobalErrorHandling = @IsDevMode;
+        tp.SysConfig.DebugMode = @IsDevMode;
 
         tp.NotificationBoxSetup.ToTop = false;
         tp.NotificationBoxSetup.Height = 100;

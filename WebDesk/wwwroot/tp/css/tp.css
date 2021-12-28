@@ -560,8 +560,8 @@ max-width 	Rules applied for any browser width less than the value defined in th
 .tp-CtrlRow,
 .tp-CheckBoxRow {
     position: relative;
-    display: flex;   
-    padding-right: 6px;
+    display: flex; 
+    padding: 0 4px 0 0;
 }
 
 .tp-CtrlRow {

@@ -130,7 +130,11 @@ tp.DeskOptions = {
     /** ViewPager
      * @type {tp.DeskViewPager}
      */
-    ViewPager: null, 
+    ViewPager: null,
+    /** Is user authenticated
+     * @type {boolean}
+     */
+    IsAuthenticated: false,
 };
 
 /**
@@ -812,7 +816,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
         let elContent = tp.ContentWindow.GetContentElement(ContentHtmlText);
         tp.Ui.CreateContainerControls(elContent);
-        tp.ContentWindow.ShowAsync(true, 'Fields', elContent);
+        tp.ContentWindow.ShowAsync(true, elContent, { Text: 'Fields'});
 
         // EDW 
         // width of a Container, no more css media query classes

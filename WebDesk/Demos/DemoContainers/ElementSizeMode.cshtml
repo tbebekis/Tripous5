@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Element Size Mode";
+    ViewBag.Title = "Element Size Mode (i.e. element query)";
 }
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
@@ -7,11 +7,38 @@
 
 <div>
     <p>
-        Detects size changes in an HTMLElement and sends notifications to a listener function.
+        When a <code>tp.Component</code> instance is an <strong>element resize listener</strong> (by setting its <code>IsElementResizeListener</code> property to <code>true</code>),
+        it gets notifications when its size changes.
     </p>
     <p>
-        Uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API" target="_blank">ResizeObserver API</a>
+        When a <code>tp.Component</code> gets a notification about a size change it decides whether that size change dictates a <strong>SizeMode</strong> change too,
+        based on its <code>SizeChart</code> property which is a configurable number array containing <strong>4</strong> size breakpoint percents, one for each of the size modes it supports:
+        <ul>
+            <li>XSmall</li>
+            <li>Small</li>
+            <li>Medium</li>
+            <li>Large</li>
+        </ul>
     </p>
+    <p>There are <strong>5</strong> <strong>SizeMode</strong>s actually, but the <code>XLarge</code> mode needs no configuration since it is always a very big number. </p>
+    <p>
+        When an <strong>element resize listener</strong> <code>tp.Component</code> changes <strong>SizeMode</strong>, it calls the <code>ParentSizeModeChanged()</code>
+        of all of its direct <code>tp.Component</code> children, providing a chance to adapt to the <strong>SizeMode</strong> change.
+    </p>
+
+    <p>
+        The <code>tp.Row</code> class is a <code>tp.Component</code> with its <code>IsElementResizeListener</code> property set to <code>true</code>.
+        That is a <code>tp.Row</code> is an <strong>element resize listener</strong> and <strong>SizeMode</strong> change propagator.
+    </p>
+    <p>
+        The <code>tp.Col</code> class gets notified everytime its <code>tp.Row</code> parent detects a <strong>SizeMode</strong> change
+        and adjusts its width according to its <code>WidthPercents</code> number array property.
+        The <code>WidthPercents</code> contains <strong>5</strong> numbers, one for each of the 5 supported <strong>SizeMode</strong>s: XSmall, Small, Medium, Large and XLarge.
+    </p>
+    <p>
+        In short the parent <code>tp.Row</code> detects a <strong>SizeMode</strong>, propagates the change to its <code>tp.Col</code> children, and the <code>tp.Col</code> adjusts its width.
+    </p>
+ 
 </div>
 
 <br />
@@ -24,7 +51,7 @@
     }
 </style>
 
-<div class="html-code2">
+<div class="html-code">
     <div>
         <button id="btn1" type="button">Button1</button>
     </div>
@@ -41,16 +68,16 @@
 
     <br />
     <br />
-    <div id='Row1' class="Row" data-setup="{ SizeChart: [400, 700, 1200, 1500] }">
-        <div id="Col1" class="Col" ></div>
-        <div id="Col2" class="Col" ></div>
-        <div id="Col3" class="Col" ></div>
-        <div id="Col4" class="Col" ></div>
+    <div id='Row1' class="Row" data-setup="{ SizeChart: [400, 700, 1200, 1500] }" title="Row">
+        <div id="Col1" class="Col" title="Col" ></div>
+        <div id="Col2" class="Col" title="Col" ></div>
+        <div id="Col3" class="Col" title="Col" ></div>
+        <div id="Col4" class="Col" title="Col" ></div>
     </div>
 </div>
 
 
-<script class="js-code3">
+<script class="js-code">
     let row;
 
     tp.Ready(() => {

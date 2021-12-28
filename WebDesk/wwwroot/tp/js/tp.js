@@ -12089,7 +12089,7 @@ tp.Component = class extends tp.Object {
                 else
                     this.fResizeDetector.Start();
 
-                this.OnElementSizeChanged(null);
+                this.OnElementSizeChanged();
             }
             else if (!tp.IsEmpty(this.fResizeDetector)) {
                 this.fResizeDetector.Stop();
@@ -12167,22 +12167,10 @@ tp.Component = class extends tp.Object {
     /**
     Notification sent by tp.ResizeDetector when the size of this element changes.
     This method is called only if this.IsElementResizeListener is true.
-    @param {object} ResizeInfo An object of type <code>{Width: boolean, Height: boolean}</code>
     */
-    OnElementSizeChanged(ResizeInfo) {
-        this.Trigger('ElementSizeChanged', ResizeInfo);
+    OnElementSizeChanged() {
+        this.Trigger('ElementSizeChanged');
         if (tp.IsValid(this.fSizeChart) && this.fSizeChart.IsModeChange(this.Handle.offsetWidth)) {
-
-            // adjust css classes
-            if (tp.DebugMode === true) {
-                tp.RemoveClasses(this.Handle, tp.SizeModes);
-                tp.AddClass(this.Handle, this.SizeMode);
-            }
-
-            // inform direct children
-            let List = tp.GetComponentList(this.Handle); 
-            List.forEach(control => control.ParentSizeModeChanged(this.SizeMode));
-
             this.OnSizeModeChanged();
         }
     }
@@ -12192,6 +12180,16 @@ tp.Component = class extends tp.Object {
      * */
     OnSizeModeChanged() {
         this.Trigger('SizeModeChanged', { SizeMode: this.SizeMode });
+
+        // adjust css classes
+        if (tp.DebugMode === true) {
+            tp.RemoveClasses(this.Handle, tp.SizeModes);
+            tp.AddClass(this.Handle, this.SizeMode);
+        }
+
+        // inform direct children
+        let List = tp.GetComponentList(this.Handle);
+        List.forEach(control => control.ParentSizeModeChanged(this.SizeMode));
     }
     /** Called by a parent container control to its direct child controls.
      * @param {string} ParentSizeMode One of the {@link tp.SizeMode} constants.
@@ -14579,15 +14577,17 @@ Object.freeze(tp.DialogResult);
 /**
 Arguments for the {@link tp.Window} constructor
 @class
-@extends tp.CreateParams
 */
-tp.WindowArgs = class extends tp.CreateParams {
+tp.WindowArgs = class { // extends tp.CreateParams
     /**
     Constructor.
     @param {object} [SourceArgs=null] Optional. The source arguments to copy from.
     */
     constructor(SourceArgs = null) {
-        super(SourceArgs);
+        if (SourceArgs) {
+            for (let Prop in SourceArgs)
+                this[Prop] = SourceArgs[Prop];
+        }
     }
 
     /** Returns the dialog result, one of the constants of {@link tp.DialogResult}, after a modal dialog box closes.
@@ -14607,7 +14607,7 @@ tp.WindowArgs.prototype.Y = 200;
 /** Window initial width. Ignored with small screens. */
 tp.WindowArgs.prototype.Width = 800;
 /** Window initial height. Ignored with small screens. */
-tp.WindowArgs.prototype.Height = 'auto';
+tp.WindowArgs.prototype.Height = 500;
 /** When true the window is initially centered in the viewport. */
 tp.WindowArgs.prototype.CenterScreen = true;
 /** Window caption text */
@@ -15442,16 +15442,10 @@ Displays a content window, either as modal or as non-modal.
 @param {object} [Creator=null] - Optional. The context (this) for the callback function.
 @returns {tp.ContentWindow} Returns the <code>tp.ContentWindow</code> dialog box
 */
-tp.ContentWindow.Show = function (Modal, Text, Content, CloseFunc = null, Creator = null) {
-    var Args = new tp.WindowArgs();
-    Args.Creator = Creator;
-    Args.CloseFunc = CloseFunc;
-    Args.Text = Text;
-    Args.Width = 800;
-    Args.Height = 'auto';
+tp.ContentWindow.Show = function (Modal, Content, WindowArgs = null) {
+    var Args = new tp.WindowArgs(WindowArgs);
     Args.ShowFooter = Modal;
     Args.Content = Content;
-
     Args.AsModal = Modal;
     Args.DefaultDialogResult = tp.DialogResult.Cancel;
 
@@ -15470,9 +15464,9 @@ Displays a content window, either as modal or as non-modal, and returns a Promis
 @param {string|HTMLElement} Content - Element or selector with html content
 @returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
 */
-tp.ContentWindow.ShowAsync = async function (Modal, Text, Content) {
+tp.ContentWindow.ShowAsync = async function (Modal, Content, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.ContentWindow.Show(Modal, Text, Content, (Args) => {
+        tp.ContentWindow.Show(Modal, Content, WindowArgs, (Args) => {
             Resolve(Args);
         });
     });
@@ -15484,8 +15478,8 @@ Displays a content window, as modal, and returns a Promise.
 @param {string|HTMLElement} Content - Element or selector with html content
 @returns {Promise} Returns a Promise with the modal window Args (<code>tp.WindowArgs</code>)
 */
-tp.ContentWindow.ShowModalAsync = async function (Text, Content) {
-    return tp.ContentWindow.ShowAsync(true, Text, Content);
+tp.ContentWindow.ShowModalAsync = async function (Content, WindowArgs = null) {
+    return tp.ContentWindow.ShowAsync(true, Content, WindowArgs);
 };
 //#endregion
 
@@ -15632,7 +15626,7 @@ Displays an error modal dialog.
 */
 tp.ErrorBox = function (MessageText, CloseFunc = null, Creator = null) {
     if (tp.IsHtml(MessageText))
-        return tp.FrameBox('Error', MessageText, CloseFunc, Creator);
+        return tp.FrameBox('Error', MessageText, { CloseFunc: CloseFunc, Creator: Creator });
     else
         return tp.MessageDialog.Show(MessageText, 'Error', CloseFunc, Creator);
 };
@@ -15694,24 +15688,18 @@ tp.YesNoBoxAsync = async function (MessageText) {
 Displays a modal window with an iframe element
 @param {string} Text - The caption title of the window
 @param {string} UrlOrHtmlContent - The url or the html content (text) to display
-@param {function} [CloseFunc=null] - Optional. Called when the window closes. A function as function (Args: tp.WindowArgs): void.
-@param {Object} [Creator=null] - Optional. The context (this) for the callback function.
+@param {tp.WindowArgs} [WindowArgs=null] - Optional.  
 @returns {tp.Window} Returns a {@link tp.Window} window.
 */
-tp.FrameBox = function (Text, UrlOrHtmlContent, CloseFunc = null, Creator = null) {
-    let Args = new tp.WindowArgs();
-    Args.Creator = Creator;
-    Args.CloseFunc = CloseFunc;
-    Args.Text = Text;
-    Args.Width = 800;
-    Args.Height = 600;
-
-    let box = new tp.Window(Args);
-    box.ShowModal();
+tp.FrameBox = function (Text, UrlOrHtmlContent, WindowArgs = null) {
+    let Args = new tp.WindowArgs(WindowArgs);
+ 
+    let Window = new tp.Window(Args);
+    Window.ShowModal();
 
 
-    let frame = box.Document.createElement('iframe');
-    box.ContentWrapper.Handle.appendChild(frame);
+    let frame = Window.Document.createElement('iframe');
+    Window.ContentWrapper.Handle.appendChild(frame);
     tp.SetStyle(frame, {
         position: 'absolute',
         left: 0,
@@ -15728,7 +15716,7 @@ tp.FrameBox = function (Text, UrlOrHtmlContent, CloseFunc = null, Creator = null
     function FrameLoaded() {
         if (!IsContentLoaded) {
             tp.ForceHideSpinner();
-            box.Header.focus();
+            Window.Header.focus();
             IsContentLoaded = true;
         }
     }
@@ -15756,25 +15744,26 @@ tp.FrameBox = function (Text, UrlOrHtmlContent, CloseFunc = null, Creator = null
     }
 
 
-    let btn = box.CreateFooterButton('Close', 'Close', tp.DialogResult.Cancel);
+    let btn = Window.CreateFooterButton('Close', 'Close', tp.DialogResult.Cancel);
 
     btn.On(tp.Events.Click, (Args) => {
         var Button = Args.Sender;
         if (tp.IsNumber(Button['DialogResult']))
-            box.DialogResult = Button['DialogResult'];
+            Window.DialogResult = Button['DialogResult'];
     });
 
-    return box;
+    return Window;
 };
 /**
 Displays a modal window with an iframe element and returns a promise
 @param {string} Text - The caption title of the window
 @param {string} UrlOrHtmlContent - The url or the html content (text) to display
+@param {tp.WindowArgs} [WindowArgs=null] - Optional.
 @returns {Promise} Returns a promise with the modal window Args (tp.WindowArgs)
 */
-tp.FrameBoxAsync = function (Text, UrlOrHtmlContent) {
+tp.FrameBoxAsync = function (Text, UrlOrHtmlContent, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        tp.FrameBox(Text, UrlOrHtmlContent, (Args) => {
+        tp.FrameBox(Text, UrlOrHtmlContent, WindowArgs, (Args) => {
             Resolve(Args);
         });
     });
@@ -17198,6 +17187,7 @@ tp.AddLanguagesFunc = null;
     };
 
     let ReadyFunc = function () {
+        let List;
 
         if (tp.SysConfig.DebugMode === true)
             InitializeLogDiv();
@@ -17213,10 +17203,10 @@ tp.AddLanguagesFunc = null;
             tp.Call(tp.AppInitializeBefore);
  
         // call "ready listeners"
-        var list = tp.ReadyListeners;
-        var listener;
-        for (var i = 0, ln = list.length; i < ln; i++) {
-            listener = list[i];
+        List = tp.ReadyListeners;
+        let listener;
+        for (var i = 0, ln = List.length; i < ln; i++) {
+            listener = List[i];
             listener.Func.call(listener.Context);
         }
 
@@ -17225,7 +17215,15 @@ tp.AddLanguagesFunc = null;
 
         // call Main()
         if (tp.IsFunction(tp.Main))  
-            tp.Call(tp.Main); 
+            tp.Call(tp.Main);
+
+        // propagate an initial "size-mode-changed" from all containers to their children
+        List = tp.GetAllComponents(tp.Doc.body);
+        List.forEach((component) => {
+            if (component.IsElementResizeListener === true) {
+                 component.OnSizeModeChanged();
+            }               
+        });
 
     };
 
