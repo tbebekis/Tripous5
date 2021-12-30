@@ -44,35 +44,51 @@
 <br />
 
 <style>
-    .tp-Row { 
+    .tp-Row {
         height: auto;
         width: 100%;
         background-color: silver;
+    }
+ 
+    #Container {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        border: 1px solid gray;
+        height: 350px;
+        width: 100%;
+    }
+
+    #pnl1 {
+        position: relative;
+        overflow: auto;
+        background-color: lightcoral;
+    }
+
+    #pnl2 {
+        position: relative;
+        overflow: auto;
+        background-color: lightblue;
+        flex-grow: 1;
     }
 </style>
 
 <div class="html-code">
     <div>
-        <button id="btn1" type="button">Button1</button>
+        <p> <label id="lblBreakpoints"></label> </p>
+        <p> <label id="lblLog"></label> </p>
     </div>
     <br />
-    <div>
-        <label for="edtWidth">width</label> &nbsp; <input id="edtWidth" type="text" value="450" />
-    </div>
 
-    <br />
-    <br />
-    <div>
-        <label id="lblLog"></label>
-    </div>
-
-    <br />
-    <br />
-    <div id='Row1' class="Row" data-setup="{ SizeChart: [400, 700, 1200, 1500] }" title="Row">
-        <div id="Col1" class="Col" title="Col" ></div>
-        <div id="Col2" class="Col" title="Col" ></div>
-        <div id="Col3" class="Col" title="Col" ></div>
-        <div id="Col4" class="Col" title="Col" ></div>
+    <div id="Container">
+        <div id='pnl1' class="Row" data-setup="{ Breakpoints: [400, 700, 1200, 1500] }" title="Row - This is panel 1">
+            <div id="Col1" class="Col" title="Col"></div>
+            <div id="Col2" class="Col" title="Col"></div>
+            <div id="Col3" class="Col" title="Col"></div>
+            <div id="Col4" class="Col" title="Col"></div>
+        </div> 
+        <div class="tp-Splitter"></div>
+        <div id="pnl2">This is the panel 2</div>
     </div>
 </div>
 
@@ -81,7 +97,11 @@
     let row;
 
     tp.Ready(() => {
-        let ColList = tp.SelectAll(Row1, '.Col');
+        lblBreakpoints.innerHTML = tp.Data(pnl1, 'setup');
+
+        let Splitter = new tp.Splitter('.tp-Splitter');
+
+        let ColList = tp.SelectAll(pnl1, '.Col');
         ColList.forEach((el) => {
             let Col = new tp.Col(el);
             Col.BackColor = tp.RandomColor();
@@ -89,7 +109,8 @@
         });
 
 
-        row = new tp.Row(tp('#Row1'));
+        row = new tp.Row(tp(pnl1));
+        row.Width = '50%';
         
         row.On('ElementSizeChanged', () => {
             lblLog.innerHTML = `Width: ${row.SizeMode} ${row.Handle.offsetWidth}`;
@@ -98,10 +119,7 @@
          
     });
 
-    btn1.addEventListener('click', (e) => {
-        let w = edtWidth.value;
-        Row1.style.width = w + 'px';
-    });
+ 
 </script>
 
 

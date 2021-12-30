@@ -846,8 +846,8 @@ tp.Accordion = class extends tp.Component {
     @param {string} [Title] Optional. The title of the new child.
     @returns {HTMLElement} Returns the newly added child
     */
-    AddChild(Title)  {
-        return this.InsertChild(this.GetElementList().length, Title);
+    AddItem(Title)  {
+        return this.InsertItem(this.GetElementList().length, Title);
     }
     /**
     Inserts a child at a specified index and returns the child. A child is a div with two children divs, a title div and a content div.
@@ -855,7 +855,7 @@ tp.Accordion = class extends tp.Component {
     @param {string} [Title] Optional. The title of the new child.
     @returns {HTMLElement} Returns the newly added child
     */
-    InsertChild(Index, Title) {
+    InsertItem(Index, Title) {
         if (this.Handle) {
             var List = this.GetElementList();
 
@@ -882,7 +882,7 @@ tp.Accordion = class extends tp.Component {
     @param {number} Index The index to use
     @return {HTMLElement} Returns the title HTMLElement if found, else null
     */
-    TitleChildAt(Index) {
+    TitleElementAt(Index) {
         let el = this.GetElementAt(Index);
         if ((el instanceof HTMLElement) && el.children.length > 0) {
             return el.children[0];
@@ -896,7 +896,7 @@ tp.Accordion = class extends tp.Component {
     @param {number} Index The index to use
     @return {HTMLElement} Returns the title HTMLElement if found, else null
     */
-    ContentChildAt(Index)  {
+    ContentElementAt(Index)  {
         let el = this.GetElementAt(Index);
         if ((el instanceof HTMLElement) && el.children.length > 1) {
             return el.children[1];
@@ -911,7 +911,7 @@ tp.Accordion = class extends tp.Component {
     @return {string} Returns the title text of a child found at a specified index.
     */
     GetTitleAt(Index) {
-        let el = this.TitleChildAt(Index);
+        let el = this.TitleElementAt(Index);
         if (el instanceof HTMLElement) {
             return el.innerHTML;
         }
@@ -924,7 +924,7 @@ tp.Accordion = class extends tp.Component {
     @param {string} Text The title text.
     */
     SetTitleAt(Index, Text) {
-        let el = this.TitleChildAt(Index);
+        let el = this.TitleElementAt(Index);
         if (el instanceof HTMLElement) {
             el.innerHTML = Text;
         }
@@ -1089,7 +1089,7 @@ tp.PanelList = class extends tp.Component {
     get SelectedPanel() {
         let Index = this.SelectedIndex;
         if (Index >= 0) {
-            let Panels = this.GetPanels();
+            let Panels = this.GetPanelList();
             return Panels[Index];
         }
 
@@ -1097,7 +1097,7 @@ tp.PanelList = class extends tp.Component {
     }
     set SelectedPanel(v) {
         if (tp.IsElement(v)) {
-            let Panels = this.GetPanels();
+            let Panels = this.GetPanelList();
             let Index = Panels.indexOf(v);
             if (Index >= 0) {
                 this.SelectedIndex = Index;
@@ -1112,7 +1112,7 @@ tp.PanelList = class extends tp.Component {
      * @param {number} Index The index to set.
      */
     SetSelectedIndex(Index) {
-        let List = this.GetPanels();
+        let List = this.GetPanelList();
         if (tp.InRange(List, Index)) {
             for (var i = 0, ln = List.length; i < ln; i++) {
                 tp.RemoveClass(List[i], tp.Classes.Selected);
@@ -1173,15 +1173,15 @@ tp.PanelList = class extends tp.Component {
     Adds and returns a child. 
     @returns {HTMLElement} Returns the newly added child
     */
-    AddChild() {
-        return this.InsertChild(this.Count);
+    AddPanel() {
+        return this.InsertPanel(this.Count);
     }
     /**
     Inserts a child at a specified index and returns the child.  
     @param {number} Index The index to use.
     @returns {HTMLElement} Returns the newly added child
     */
-    InsertChild(Index)  {
+    InsertPanel(Index)  {
         if (this.Handle) {
             var List = this.GetElementList();
 
@@ -1205,7 +1205,7 @@ tp.PanelList = class extends tp.Component {
     Returns an array with the panel elements
     @returns {HTMLElement[]} Returns an array with the panel elements
     */
-    GetPanels()  {
+    GetPanelList()  {
         return this.GetElementList();
     }
 
@@ -2185,27 +2185,90 @@ tp.Splitter = class extends tp.Component {
     @override
     */
     OnInitializationCompleted() {
-        super.OnInitializationCompleted();
+        super.OnInitializationCompleted();        
 
-        this.SetHorizontal();
+        this.Panel1 = null;
+        this.Panel2 = null;
 
-        if (tp.IsString(this.Associate))
-            this.Associate = tp.Select(this.Associate);
-
-        if (!tp.IsHTMLElement(this.Associate) && tp.IsHTMLElement(this.ParentHandle)) {
+        // find the panels 
+        if (tp.IsHTMLElement(this.ParentHandle)) {
             let List = tp.ChildHTMLElements(this.ParentHandle);
-            let Index = List.indexOf(this.Handle);
-            if (Index > 0) {
-                this.Associate = List[Index - 1];
+            let Index;
+
+            Index = List.indexOf(this.Handle);
+
+            if (Index !== -1) {
+                let PanelIndex = Index - 1;
+
+                // panel 1
+                if (PanelIndex >= 0 && PanelIndex < Index) {
+                    this.Panel1 = List[PanelIndex];
+                }
+
+                // panel 2
+                if (this.UseBothPanels === true) {
+                    PanelIndex = Index + 1; 
+                    if (PanelIndex > Index && PanelIndex <= List.length - 1) {
+                        this.Panel2 = List[PanelIndex];
+                    }
+                }
             }
         }
 
-        this.AssociateMinSize = tp.IsEmpty(this.AssociateMinSize) ? 100 : this.AssociateMinSize;
-        this.AssociateMaxSize = tp.IsEmpty(this.AssociateMaxSize) ? 500 : this.AssociateMaxSize;
+        if (!tp.IsHTMLElement(this.Panel1))
+            tp.Throw('Splitter Panel1 is not found');
+
+        if (this.UseBothPanels === true && !tp.IsHTMLElement(this.Panel2))
+            tp.Throw('Splitter Panel2 is not found');
+
+        // min-max sizes
+        this.Panel1MinSize = tp.IsEmpty(this.Panel1MinSize) ? 100 : this.Panel1MinSize;
+        this.Panel1MaxSize = tp.IsEmpty(this.Panel1MaxSize) ? 500 : this.Panel1MaxSize;
+        this.Panel2MinSize = tp.IsEmpty(this.Panel2MinSize) ? 100 : this.Panel2MinSize;
 
         this.fDragContext = new tp.DragContext(this.Handle, this);
+
+        this.SetHorizontal();
     }
 
+    CanMoveSplitter() {
+        let Result = false;
+
+        let Flag = false;
+
+        // check panel existence
+        Flag = tp.IsHTMLElement(this.Panel1);
+        if (this.UseBothPanels === true)
+            Flag = Flag && tp.IsHTMLElement(this.Panel2);
+
+        // check panel sizes
+        if (Flag) {
+
+            Flag = false;
+
+            if (this.IsHorizontal) {
+                Flag = this.Panel1.offsetHeight > this.Panel1MinSize;
+
+                if (this.UseBothPanels === true)
+                    Flag = Flag && this.Panel2.offsetHeight > this.Panel2MinSize;
+                else
+                    Flag = Flag && this.Panel1.offsetHeight < this.Panel1MaxSize;
+            }
+            else {
+                Flag = this.Panel1.offsetWidth > this.Panel1MinSize;
+
+                if (this.UseBothPanels === true)
+                    Flag = Flag && this.Panel2.offsetWidth > this.Panel2MinSize;
+                else
+                    Flag = Flag && this.Panel1.offsetWidth < this.Panel1MaxSize;
+            }
+        }
+
+
+        Result = Flag;
+        return Result;
+    }
+    Counter = 1;
     /* public */
     /**
     Called by the tp.DragContext. The listener returns true for a dragging operation to start. <br />
@@ -2215,9 +2278,8 @@ tp.Splitter = class extends tp.Component {
     @returns {boolean} Returning true starts the dragging operation.
     */
     IsDragStart(e) {
-        return true;
+        return this.CanMoveSplitter();
     }
-
     /**
     Called by the tp.DragContext.
     @protected
@@ -2235,26 +2297,50 @@ tp.Splitter = class extends tp.Component {
     @param {MouseEvent} e A MouseEvent object.
     */
     DragMove(e) {
-        if (tp.IsHTMLElement(this.Associate)) {
+ 
+        //-------------------------------------------------------
+        let CanResizePanel = (MousePos) => {
+            let ParentSize;
+            let Plus = this.IsHorizontal ? this.Handle.offsetHeight : this.Handle.offsetWidth;
+            Plus += 5;
 
-            let P = tp.Mouse.ToElement(e, this.ParentHandle);
+            let Result = MousePos > this.Panel1MinSize + Plus;
+ 
+            if (Result) {
+                if (this.UseBothPanels === true) {
+                    ParentSize = this.IsHorizontal ? this.ParentHandle.offsetHeight : this.ParentHandle.offsetWidth;
+                    Result = ParentSize - MousePos > this.Panel2MinSize + Plus;
+                }
+                else {
+                    Result = MousePos > this.Panel1MaxSize + Plus;                       
+                }
+            } 
 
-            if (this.IsHorizontal) {
-                let Y = P.Y;
+            return Result;             
+        };
+        //-------------------------------------------------------
 
-                Y = Math.max(this.AssociateMinSize, Y);
-                Y = Math.min(this.AssociateMaxSize, Y);
+        let P = tp.Mouse.ToElement(e, this.ParentHandle);
+        let Pos;
 
-                this.Associate.style.height = Y + 'px';
-            } else {
-                let X = P.X;
+        if (this.IsHorizontal) {
+            Pos = P.Y;
 
-                X = Math.max(this.AssociateMinSize, X);
-                X = Math.min(this.AssociateMaxSize, X);
+            if (CanResizePanel(Pos)) {                
+                this.Panel1.style.height = Pos + 'px';
+                this.Panel1.style.minHeight = this.Panel1.style.height;
+            }                
 
-                this.Associate.style.width = X + 'px';
+        } else {
+            Pos = P.X; 
+
+            if (CanResizePanel(Pos)) {
+                this.Panel1.style.width = Pos + 'px';
+                this.Panel1.style.minWidth = this.Panel1.style.width;
             }
+                
         }
+ 
     }
     /**
     Called by the tp.DragContext.
@@ -2285,24 +2371,41 @@ tp.Splitter.prototype.fIsHorizontal = false;
  */
 tp.Splitter.prototype.fOldCursor = '';
 
+
+tp.Splitter.prototype.UseBothPanels = true;
+
+
 /**
  Public field.
  @public
  @type {HTMLElement}
  */
-tp.Splitter.prototype.Associate = null;
+tp.Splitter.prototype.Panel1 = null;
+/**
+ Public field.
+ @public
+ @type {HTMLElement}
+ */
+tp.Splitter.prototype.Panel2 = null;
+
 /**
  Public field.
  @public
  @type {number}
  */
-tp.Splitter.prototype.AssociateMinSize = 100;
+tp.Splitter.prototype.Panel1MinSize = 40;
 /**
  Public field.
  @public
  @type {number}
  */
-tp.Splitter.prototype.AssociateMaxSize = 500;
+tp.Splitter.prototype.Panel1MaxSize = 400;
+/**
+ Public field.
+ @public
+ @type {number}
+ */
+tp.Splitter.prototype.Panel2MinSize = 40;
 //#endregion  
 
 //#region tp.IFrame
@@ -2559,18 +2662,18 @@ tp.DropDownBox = class extends tp.Component {
         return this.fAssociate;
     }
     set Associate(v) {
+        let el = null;
         if (tp.IsString(v)) {
-            this.fAssociate = tp.Select(v);
+            el = tp.Select(v);
         } else if (tp.IsHTMLElement(v)) {
-            this.fAssociate = v;
+            el = v;
         }
 
-        let Style = this.GetComputedStyle();
-        if (Style.width !== 'auto') {
-            if (tp.IsHTMLElement(this.Associate)) {
-                this.Width = this.Associate.getBoundingClientRect().width;
-            }
+        if (el !== this.fAssociate) {
+            this.fAssociate = el;
+            this.fIsFirstOpen = true;
         }
+
     }
     /**
     Gets or sets the owner, an object that gets notified regarding dropdown box stage changes. <br />
@@ -2718,48 +2821,45 @@ tp.DropDownBox = class extends tp.Component {
 
             if (tp.IsEmpty(this.ParentHandle)) {
                 tp.Doc.body.appendChild(this.Handle);                
-            } 
-            
-            this.Handle.style.font = 'inherit';
-            this.Position = 'fixed';            
-
-            if (this.fIsFirstOpen === true) {
-                let Style = this.GetComputedStyle();
-                if (Style.width !== 'auto')
-                    this.Width = this.Associate.getBoundingClientRect().width;
-                this.fIsFirstOpen = false;
             }
 
             this.OnOwnerEvent(tp.DropDownBoxStage.Opening);
- 
-            this.AddClass(tp.Classes.Visible);
 
+            this.AddClass(tp.Classes.Visible);
             this.UpdateTop();
 
-            this.ZIndex = tp.MaxZIndexOf(tp.Doc.body);
+            if (this.fIsFirstOpen === true) {
+                let Style = this.GetComputedStyle();
+
+                if (Style.position != 'fixed')
+                    this.Position = 'fixed';
+
+                if (Style.width !== 'auto')
+                    this.Width = this.Associate.getBoundingClientRect().width;
+
+                this.fIsFirstOpen = false;
+            }
 
             this.OnOwnerEvent(tp.DropDownBoxStage.Opened);
 
             // reposition if outside of viewport
-            if (tp.IsSameText('fixed', this.Position)) {
-                let Size = tp.Viewport.GetSize();
-                let Rect = tp.BoundingRect(this.Handle);      // location (relative to viewport) and size of this instance
- 
-                if (Rect.Bottom > Size.Height) {
-                    this.Y = Rect.Y - Rect.Height;
-                }
+            let Size = tp.Viewport.GetSize();
+            let Rect = tp.BoundingRect(this.Handle);      // location (relative to viewport) and size of this instance
 
-                if (Rect.Right > Size.Width) {
-                    this.X = Size.Width - Rect.Width;
-                }
-            }              
+            if (Rect.Bottom > Size.Height) {
+                this.Y = Rect.Y - Rect.Height;
+            }
+
+            if (Rect.Right > Size.Width) {
+                this.X = Size.Width - Rect.Width;
+            }
 
             setTimeout(() => {
                 window.addEventListener('scroll', this.FuncBind(this.Window_Scroll));
                 document.addEventListener('click', this.FuncBind(this.Document_Click), true);
             }, 0);
 
-
+            this.ZIndex = tp.MaxZIndexOf(tp.Doc.body);
         }
     }
     /**
@@ -2805,7 +2905,6 @@ tp.DropDownBox = class extends tp.Component {
             P = tp.ToViewport(this.Associate);
             this.X = P.X;
             this.Y = P.Y + R.height;
-
         }
     }
 };
@@ -2894,8 +2993,7 @@ tp.VirtualScroller = class  {
 
         this.RowCache = {};
         this.RowList = RowList || [];
-
-        //this.fViewport.style.cssFloat = 'left';
+       
         this.fViewport.style.overflow = 'auto';
 
         this.fContainer.style.position = 'relative';
@@ -14042,15 +14140,7 @@ tp.RadioGroup = class extends tp.Control {
         }
 
         tp.AddClass(this.fContainer, tp.Classes.List);
-        let o = {
-            position: 'absolute',
-            overflow: 'auto',
-            left: '6px',            
-            top: '10px',   
-            right: '6px',
-            bottom: '6px'
-        };
-        tp.SetStyle(this.fContainer, o);
+
 
         if (tp.IsEmpty(this.fContainer.parentNode))
             this.Handle.appendChild(this.fContainer);
@@ -16383,11 +16473,6 @@ tp.Locator = class extends tp.Object {
         // this listbox is displayed by the drop-down box
         this.fListBox = new tp.ListBox();
         this.fListBox.ParentHandle = this.fDropDownBox.Handle;
-        this.fListBox.Position = 'absolute';
-        this.fListBox.Width = '100%';
-        this.fListBox.Height = '100%';
-        this.fListBox.Handle.style.border = 'none';
-
         this.fListBox.On(tp.Events.Click, this.ListBox_Click, this);
     }
 
@@ -17220,7 +17305,7 @@ tp.Locator = class extends tp.Object {
                 if (tp.IsBlankString(S)) this.ClearDataValue();
 
                 else {
-                    this.OnBoxKeyEvent(LocatorLin, Box, FieldDef);
+                    this.OnBoxKeyEvent(LocatorLink, Box, FieldDef);
                 }
             }
         }
@@ -17239,7 +17324,7 @@ tp.Locator = class extends tp.Object {
             let c = String.fromCharCode(KeyCode);
 
             if (c === '*') {
-                this.OnBoxKeyEvent(LocatorLin, Box, FieldDef);
+                this.OnBoxKeyEvent(LocatorLink, Box, FieldDef);
             }
         }
 
@@ -18200,7 +18285,7 @@ tp.SelectSqlListUi = class extends tp.Component {
         let PanelInfo = elOption.PanelInfo;
 
         if (!tp.IsValid(PanelInfo.Panel)) {
-            let el = this.PanelList.AddChild();
+            let el = this.PanelList.AddPanel();
             let CP = {
                 SelectSql: PanelInfo.SelectSql,
                 FilterDefs: PanelInfo.SelectSql.Filters

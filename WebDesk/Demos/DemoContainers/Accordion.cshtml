@@ -14,13 +14,18 @@
 
 <br />
 
-<div>
-    <button id="btn1" onclick="AddChild()">AddChild</button> <br />
-</div>
 
-<br />
 
 <div class="html-code">
+    <div>
+        <button id="btn1" onclick="AddItem()">Add Item</button>
+    </div>
+    <br />
+    <div>
+        <label>Allow Multi Expand: &nbsp; <input id="chAllowMultiExpand" type="checkbox" onchange="AllowMultiExpandChanged()" /> </label>
+    </div>
+    <br />
+
     <div id="Control" class="tp-Accordion" data-setup="{AllowMultiExpand: false}">
         <div>
             <div><span style="font-weight: bold;">Item 1</span></div>
@@ -47,12 +52,16 @@
         ctrl = new tp.Accordion('#Control');
     });
 
-    function AddChild() {
+    function AddItem() {
         Counter++;
-        var el = ctrl.AddChild('Item ' + Counter);
+        var el = ctrl.AddItem('Item ' + Counter);
 
-        el = ctrl.ContentChildAt(ctrl.Count - 1);
+        el = ctrl.ContentElementAt(ctrl.Count - 1);
         el.innerHTML = 'This content belongs to item ' + Counter;
+    }
+
+    function AllowMultiExpandChanged() {
+        ctrl.AllowMultiExpand = chAllowMultiExpand.checked;
     }
 </script>
 

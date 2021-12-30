@@ -7,9 +7,19 @@
 
 <div>
     <p>
-        A splitter bar. <br />
+        The <code>tp.Splitter</code> is just a splitter bar. <br />        
+    </p>
+
+    <p>
         Place the splitter bar between two divs and let it auto-config. <br />
-        Or define a sibling div as the Associate. <br />
+    </p>
+
+    <p>
+        You may define the <code>Panel1MinSize</code> constraint. 
+        And if <code>UseBothPanels</code> is set to <code>false</code>, (<code>true</code> is the default), then you may define the <code>Panel1MaxSize</code> constraint too.
+    </p>
+    <p>
+        If <code>UseBothPanels</code> is set to <code>true</code>, the default, then you may define the <code>Panel2MinSize</code> constraint too.
     </p>
 </div>
 
@@ -23,52 +33,55 @@
 
 <style>
     #Container {
+        position: relative;
+        display: flex;
+        flex-direction: row;
         border: 1px solid gray;
-        height: 250px;
+        height: 450px;
         width: 100%;
     }
 
-    #A {
+    #pnl1 {
+        position: relative;
         background-color: lightcoral;
     }
 
-    #B {
+    #pnl2 {
+        position: relative;
         background-color: lightblue;
         flex-grow: 1;
     }
 </style>
 
 <div class="html-code">
-    <div id="Container" style="display: flex;">
-        <div id="A">This is the A panel</div>
+    <div id="Container">
+        <div id="pnl1">This is the panel 1</div>
         <div class="tp-Splitter"></div>
-        <div id="B">This is the B panel</div>
+        <div id="pnl2">This is the panel 2</div>
     </div>
 </div>
 
 
 <script class="js-code">
-    var Container, A, B, Splitter;
+    let Splitter;
 
-    tp.Ready(function () {
-        Container = tp.Select('#Container');
-        A = tp.Select('#A');
-        B = tp.Select('#B');
+    tp.Ready(function () { 
         Splitter = new tp.Splitter('.tp-Splitter');
         AdjustSplitter();
     });
 
     function AdjustSplitter() {
-        var o;
+        let o;
+
         if (Splitter.IsHorizontal) {
             tp.SetStyle(Container, { 'flex-direction': 'column', });
-            o = { height: '200px', width: '', };
+            o = { height: '150px', width: '', }; 
         } else {
-            tp.SetStyle(Container, { 'flex-direction': '', });
-            o = { height: '', width: '200px', };
+            tp.SetStyle(Container, { 'flex-direction': 'row', });
+            o = { height: '', width: '150px', };            
         }
 
-        tp.SetStyle(A, o);
+        tp.SetStyle(pnl1, o);
 
     }
 

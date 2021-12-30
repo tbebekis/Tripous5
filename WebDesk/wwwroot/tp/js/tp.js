@@ -4223,7 +4223,7 @@ tp.StyleProp = function (el, Name, v = null) {
     el = tp.Select(el);
     if (tp.IsHTMLElement(el) && tp.IsString(Name)) {
         if (tp.IsEmpty(v)) {                        // get
-            var Style = tp.GetComputedStyle(el);
+            let Style = tp.GetComputedStyle(el);
             return Style.getPropertyValue(Name);
         } else {                                    // set  
             if (Name in el.style) {
@@ -11672,7 +11672,7 @@ tp.Component = class extends tp.Object {
     /** Returns the number of direct HTMLElement children of this element 
      * @type {number}
      */
-    get Count() { return this.Handle ? tp.ChildHTMLElements(this.Handle).length : 0; }
+    get Count() { return this.GetElementList().length; }
 
     /**
     The actual dom element (HTMLElement). The handle of this instance.
@@ -14082,17 +14082,19 @@ tp.DragContext = class {
     get IsDisposed() { return this.fIsDisposed; }
 
     /* private */
+    UpdateMouseInfo(e) {
+        if (tp.IsEmpty(this.fMouseInfo))
+            this.fMouseInfo = new tp.MouseInfo(e);
+        else
+            this.fMouseInfo.Update(e);
+    }
     /**
      * Event handler
      * @param {MouseEvent} e The mouse event
      */
     OnMouseDown(e) {
         if (tp.Mouse.IsLeft(e)) {
-
-            if (tp.IsEmpty(this.fMouseInfo))
-                this.fMouseInfo = new tp.MouseInfo(e);
-            else
-                this.fMouseInfo.Update(e);
+            this.UpdateMouseInfo(e);
 
             this.fIsMouseDown = true;
             this.fDragging = this.fListener.IsDragStart(e);
@@ -14101,6 +14103,7 @@ tp.DragContext = class {
                 this.fListener.DragStart(e);
             }
 
+            //log(`${e.type} - MouseDown: ${this.fIsMouseDown} - Dragging: ${this.Dragging}`);
         }
     }
     /**
@@ -14108,20 +14111,11 @@ tp.DragContext = class {
      * @param {MouseEvent} e The mouse event
      */
     OnMouseMove(e) {
-        if (this.fIsMouseDown) {
-            this.fMouseInfo.Update(e);
-
-            if (!this.Dragging) {
-                this.fDragging = this.fListener.IsDragStart(e);
-
-                if (this.Dragging) {
-                    this.fListener.DragStart(e);
-                }
-            }
-
-            if (this.Dragging) {
-                this.fListener.DragMove(e);
-            }
+        if (this.fIsMouseDown && this.Dragging) {
+            this.UpdateMouseInfo(e);
+            this.fListener.DragMove(e);
+ 
+            //log(`${e.type} - MouseDown: ${this.fIsMouseDown} - Dragging: ${this.Dragging}`);
         }
     }
     /**
@@ -14129,11 +14123,14 @@ tp.DragContext = class {
      * @param {MouseEvent} e The mouse event
      */
     OnMouseUp(e) {
-        this.fIsMouseDown = false;
-        if (this.Dragging) {
-            this.fMouseInfo.Update(e);
-            this.fDragging = false;
-            this.fListener.DragEnd(e);
+        if (this.fIsMouseDown) {
+            this.fIsMouseDown = false;
+            if (this.Dragging) {
+                this.UpdateMouseInfo(e);
+                this.fDragging = false;
+                this.fListener.DragEnd(e);
+            }
+            //log(`${e.type} - MouseDown: ${this.fIsMouseDown} - Dragging: ${this.Dragging}`);
         }
     }
 
@@ -14142,14 +14139,14 @@ tp.DragContext = class {
      * Event handler
      * @param {Event} e The event
      */
-    handleEvent(e) {
+    handleEvent(e) {       
         if (tp.IsSameText('mousedown', e.type)) {
             this.OnMouseDown(e);
         } else if (tp.IsSameText('mousemove', e.type)) {
             this.OnMouseMove(e);
         } else if (tp.IsSameText('mouseup', e.type)) {
             this.OnMouseUp(e);
-        }
+        } 
     }
     /**
     Disposes off the system resources used by this instance. After this call this instance is no more usable.
@@ -14157,6 +14154,8 @@ tp.DragContext = class {
     Dispose() {
         if (this.fIsDisposed === false) {
             this.fElement.removeEventListener('mousedown', this);
+            this.fElement.ownerDocument.removeEventListener('mousemove', this);
+            this.fElement.ownerDocument.removeEventListener('mouseup', this);
             this.fElement = null;
             this.fIsDisposed = true;
         }

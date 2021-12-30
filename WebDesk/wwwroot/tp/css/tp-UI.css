@@ -22,7 +22,7 @@ fieldset.tp-GroupBox legend {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
     overflow: hidden;
 }
 
@@ -299,24 +299,22 @@ tab control
 ---------------------------------------------------------------------------------------*/
  
 .tp-Splitter {
+    position: relative;
     background-color: gray;
 }
 
 .tp-Splitter.tp-Vertical {
     width: 5px;
+    min-width: 5px;
     cursor: col-resize;
 }
 
 .tp-Splitter.tp-Horizontal {
     height: 5px;
+    min-height: 5px;
     cursor: row-resize;
 }
 
-@media (max-width: 991px) {
-    .tp-Splitter {
-        display: none;
-    }
-}
 
 /*---------------------------------------------------------------------------------------
  frame (tp.IFrame)
@@ -331,18 +329,30 @@ tab control
 ---------------------------------------------------------------------------------------*/
  
 .tp-DropDownBox {
-    display: none;
     position: fixed;
+    display: none;    
     cursor: default;
     border: var(--Border);
     background-color: var(--BackColor);
     width: 90px;
     min-width: 40px;
+    padding: 0 1px 1px;
+    font: inherit;
 }
 
 .tp-DropDownBox.tp-Visible {
-    display: block; /*  display: inline-block; */
+    display: block;  
     min-height: 20px;
+}
+
+.tp-DropDownBox > :first-child {
+    position: absolute;
+    left: 0;
+    top: 0; 
+    width: 100%;
+    height: 100%;  
+    overflow: auto;   
+    border: none;
 }
 
 /*---------------------------------------------------------------------------------------
@@ -829,7 +839,7 @@ label {
  input - tp-TextBox
 ---------------------------------------------------------------------------------------*/
  
-input {
+input[type=text] {
     position: relative;
     padding: var(--TextPadding);
 }
@@ -857,7 +867,11 @@ textarea.tp-Memo {
 /*---------------------------------------------------------------------------------------
  check-box - a label element sourrounding a input[type=checkbox] element
 ---------------------------------------------------------------------------------------*/
- 
+ input[type=checkbox] {
+      vertical-align: middle;
+ }
+
+
 /* check-box - it is a label */
 .tp-CheckBox {
     position: relative;  
@@ -870,7 +884,6 @@ textarea.tp-Memo {
  /*   checkbox */
  .tp-CheckBox [type=checkbox] {
    position: relative; 
-   vertical-align: middle;
    cursor: pointer;
    line-height: 1.4em;
  } 
@@ -1200,27 +1213,31 @@ table.tp-Calendar td.tp-Marked {
 /*---------------------------------------------------------------------------------------
  radio-group
 ---------------------------------------------------------------------------------------*/
- 
+input[type=radio] {
+   vertical-align: middle;
+}
+
 .tp-RadioGroup {
     position: relative;
     border: var(--Border);
 }
 
-.tp-RadioGroup .tp-List {
+.tp-RadioGroup > .tp-List {
     position: absolute;
-    overflow: auto;
-    left: 6px;
-    /* top: 24px; */
-    top: 2px;
+    display: flex;
+    flex-direction: column;
+    top: 10px;    
     right: 6px;
     bottom: 6px;
+    left: 6px; 
+    overflow: auto;
 }
 
-.tp-RadioGroup legend {
+.tp-RadioGroup > legend {
     padding: 0 4px;
 }
 
-.tp-RadioGroup label {
+.tp-RadioGroup  > .tp-List > label {
     display: flex;
     align-items: center;
 }
@@ -1844,7 +1861,7 @@ input[type=text].tp-Grid-InplaceEditor {
 } 
 
 .tp-Accordion > * > :nth-child(1) {
-    background-color: whitesmoke;
+    background-color: white;
     border: 1px solid lightgray;
 }
  
