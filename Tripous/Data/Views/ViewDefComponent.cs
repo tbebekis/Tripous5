@@ -38,10 +38,15 @@ namespace Tripous.Data
         public virtual void AssignTo(Dictionary<string, object> DataSetup)
         {
             if (!string.IsNullOrWhiteSpace(Name))
+            {
                 DataSetup["Name"] = Name;
+            }
+                
 
             if (!string.IsNullOrWhiteSpace(Title))
+            {
                 DataSetup["Title"] = Title;
+            }                
 
             if (!string.IsNullOrWhiteSpace(TableName))
                 DataSetup["TableName"] = TableName;
@@ -137,6 +142,7 @@ namespace Tripous.Data
         /* properties */
         /// <summary>
         /// A unique name among all siblings. 
+        /// <para>This unique identifier is used by the serialization system.</para>
         /// </summary>
         public string Name { get; set; }
 

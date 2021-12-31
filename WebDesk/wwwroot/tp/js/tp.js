@@ -12921,14 +12921,14 @@ tp.Component = class extends tp.Object {
     @param {...Names} Names - Rest parameter. One or more css class names.
     */
     AddClasses(...Names) {
-        tp.AddClasses(this.Handle, Names.join(' '));
+        tp.AddClasses(this.Handle, Names);
     }
     /**
     Removes one or more css classes from an element.
     @param {...Names} Names - Rest parameter. One or more css class names.
     */
     RemoveClasses(...Names) {
-        tp.RemoveClasses(this.Handle, Names.join(' '));
+        tp.RemoveClasses(this.Handle, Names);
     }
  
     /* z-index */

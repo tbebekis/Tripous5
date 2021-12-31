@@ -1,44 +1,14 @@
 ﻿ 
 
-html {
-	/* 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-	 Verdana, Geneva, Arial, Helvetica, sans-serif; Verdana, Arial, sans-serif; */
-    font-family: 'Segoe UI', Tahoma, Verdana, Arial, sans-serif; 
-    font-size: 13px;
-}
-
-body {
-    position: relative;
-    min-height: 100vh;
-    background-color: WhiteSmoke;
-    line-height: 1.2em;
-    zoom: 1;
-    margin: 0 0;
+body { 
     padding: 25px;
     font-family: 'Segoe UI', Tahoma, Verdana, Arial, sans-serif; 
-}
- 
-.tp-Page {
-    padding: 20px;
-    outline: none;
-}
- 
-
-input,
-select,
-textarea,
-button,
-label,
-legend {
-    font: inherit;
 }
 
 ul.no-style li,
 ol.no-style li {
     list-style-type: none;
 }
- 
-
 
 .Ace-Pager .tab-page > .ace_editor {
     position: absolute;

@@ -1,0 +1,160 @@
+﻿
+
+@{
+    ViewBag.Title = "DOM Elements";
+}
+
+<partial name="~/Demos/Shared/_Index.cshtml" />
+<h2>@ViewBag.Title</h2>
+
+<p>This page is used in checking the css styling the <code>tp.css</code> file applies to some of the standard HTML elements.</p>
+ 
+<h1 style="background-color: antiquewhite; padding: 6px;">  <a href="https://www.w3schools.com/html/html_form_input_types.asp" target="_blank">Inputs</a> </h1>
+
+<div>
+    <table>
+        <tr> <td>button        </td> <td><input type="button" value="Button" /> </td> </tr>
+        <tr> <td>submit        </td> <td><input type="submit" value="Submit" /> </td> </tr>
+        <tr> <td>reset         </td> <td><input type="reset" value="Reset" /> </td> </tr>
+
+        <tr> <td>checkbox      </td> <td><input type="checkbox" value="" /> </td> </tr>
+        <tr> <td>radio         </td> <td><input type="radio" value="" /> </td> </tr>
+
+        <tr> <td>text          </td> <td><input type="text" value="TextBox" /> </td> </tr>
+        <tr> <td>email         </td> <td><input type="email" value="Email" /> </td> </tr>
+        <tr> <td>password      </td> <td><input type="password" value="" /> </td> </tr>
+        <tr> <td>search        </td> <td><input type="search" value="Search" /> </td> </tr>
+        <tr> <td>url           </td> <td><input type="url" value="Url" /> </td> </tr>
+        <tr> <td>tel           </td> <td><input type="tel" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}" /> </td> </tr>
+
+        <tr> <td>number        </td> <td><input type="number" value="" /> </td> </tr>
+
+        <tr> <td>date          </td> <td><input type="date" value="" /> </td> </tr>
+        <tr> <td>datetime-local</td> <td><input type="datetime-local" value="" /></td> </tr>
+        <tr> <td>time          </td> <td><input type="time" value="" /> </td> </tr>
+        <tr> <td>week          </td> <td><input type="week" value="" /> </td> </tr>
+        <tr> <td>month         </td> <td><input type="month" value="" /> </td> </tr>
+
+        <tr> <td>file          </td> <td><input type="file" value="" /> </td> </tr>
+        <tr> <td>image         </td> <td><input type="image" src="data:image/png;base64,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" /> </td> </tr>
+
+        <tr> <td>range         </td> <td><input type="range" value="" /> </td> </tr>
+        <tr> <td>color         </td> <td><input type="color" value="" /> </td> </tr>
+
+        <tr> <td>textarea      </td> <td><textarea style="width: 100%"> </textarea> </td> </tr>
+
+        <tr>
+            <td>select </td>
+            <td>
+                <select>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                    <option value="4">Four</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>select with size </td>
+            <td>
+                <select size="4" style="height: auto">
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                    <option value="4">Four</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr> <td>         </td> <td> </td> </tr>
+
+    </table>
+</div>
+
+
+<br />
+<h1 style="background-color: antiquewhite; padding: 6px;">Other elements</h1>
+
+<h3>button</h3>
+<div><button>Button</button> </div>
+<br />
+<br />
+
+<h3>img</h3>
+<img alt="alt text" width="100" height="100" src="data:image/png;base64,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">
+<br />
+<br />
+
+<h3>nav and anchor</h3>
+<nav>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank">HTML</a> <br />
+    <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank">CSS</a> <br />
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">JavaScript</a>
+</nav>
+<br />
+<br />
+
+<h3>ordered list</h3>
+<ol>
+    <li>one</li>
+    <li>two</li>
+    <li>thre</li>
+</ol>
+<br />
+
+<h3>un-ordered list</h3>
+<ul>
+    <li>one</li>
+    <li>two</li>
+    <li>thre</li>
+</ul>
+<br />
+
+<h3>progress</h3>
+<progress value="32" max="100"> 32% </progress>
+<br />
+
+<h3>fieldset</h3>
+<fieldset style="height: 100px">
+    <legend>Fieldset</legend>
+
+
+</fieldset>
+<br />
+
+<h3>blockquote</h3>
+<blockquote>
+    JavaScript (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
+    While it is most well-known as the scripting language for Web pages, many non-browser environments also use it, such as Node.js, Apache CouchDB and Adobe Acrobat.
+    JavaScript is a prototype-based, multi-paradigm, single-threaded, dynamic language, supporting object-oriented,
+    imperative, and declarative (e.g. functional programming) styles. Read more about JavaScript.
+</blockquote>
+<br />
+
+<h3>pre</h3>
+<pre>
+    let Counter = 0;
+    for (let i = 0, ln = 5; i < ln; i++) {
+        Counter++;
+    }
+</pre>
+<br />
+
+<h3>hr</h3>
+<hr />
+<br />
+
+
+<div style="height: 100px">
+
+</div>
+
+<script>
+    tp.Ready(function () {
+
+    });
+
+
+
+</script>

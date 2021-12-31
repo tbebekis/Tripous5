@@ -8,57 +8,7 @@
 ---------------------------------------------------------------------------------------*/
 
 
-html {
-    font-family: Arial, Tahoma, 'Segoe UI', Verdana, sans-serif;
-    font-size: 14px;
-}
 
-body {
-    position: relative;
-    display: flex; 
-    flex-direction: column;
-    min-height: 100vh;
-    max-height: 100vh;
-    background-color: var(--White);
-    zoom: 1;
-    -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
-
-    cursor: default;
-
-    user-select: none;
-} 
-
-
-button:focus {
-    outline: thin dotted;
-} 
-
-input,
-select,
-textarea,
-label,
-legend {
-    font: inherit;
-    line-height: 1.7;
-}
-
-a {
-    color: inherit;
-    cursor: pointer;
-}
-
-select {
-    height: 2.15em;
-}
-
-select > option {
-    line-height: 1.7;
-}
-
-script {
-    display: none;
-}
 
 
 /*---------------------------------------------------------------------------------------
@@ -77,39 +27,6 @@ script {
     padding-left: 0;
     padding-right: 0;
 } 
-
-.tp-SqlFilter-Ctrl input[type=text], 
-.tp-SqlFilter-Ctrl input[type=number], 
-.tp-SqlFilter-Ctrl input[type=date], 
-.tp-SqlFilter-Ctrl select,
-
-.tp-CtrlRow input[type=text], 
-.tp-CtrlRow input[type=email], 
-.tp-CtrlRow input[type=password], 
-.tp-CtrlRow input[type=number], 
-.tp-CtrlRow input[type=date], 
-.tp-CtrlRow input[type=tel], 
-.tp-CtrlRow select {
-    border: 1px solid var(--Gray);
-}
-
-
-.tp-SqlFilter-Ctrl input[type=text]:focus, 
-.tp-SqlFilter-Ctrl input[type=number]:focus, 
-.tp-SqlFilter-Ctrl input[type=date]:focus, 
-.tp-SqlFilter-Ctrl select:focus,
-
-.tp-CtrlRow input[type=text]:focus,
-.tp-CtrlRow input[type=email]:focus,
-.tp-CtrlRow input[type=password]:focus,
-.tp-CtrlRow input[type=number]:focus,
-.tp-CtrlRow input[type=date]:focus,
-.tp-CtrlRow input[type=tel]:focus,
-.tp-CtrlRow textarea:focus,
-.tp-CtrlRow select:focus {
-    border: 1px solid var(--GrayDarkDeep);
-} 
-
  
 /* background color on hover */
 .tp-CheckBox:hover input ~ .checkmark {
@@ -200,64 +117,7 @@ button:not(.btn-test),
     text-decoration-skip-ink: none;
     text-underline-offset: 1px;
 }
-
-/*---------------------------------------------------------------------------------------
-  tab bar
-
-.tab-container {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    flex-grow: 1;
-}
-
-.tab-container > .btn-to-left,
-.tab-container > .btn-to-right {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    font-size: 1.5em;
-    white-space: nowrap;
-    min-width: 40px;
-}
-
-.tab-container > .tab-bar {
-    position: relative;
-    display: flex; 
-    align-items: center; 
-    flex-grow: 1;
-    overflow: hidden;
-    min-height: 40px;
-}
-
-.tab-container > .tab-bar > .tab-item {
-    position: relative;
-    display: block; 
-    cursor: pointer;
-    padding: 0 1em 0 0;
-    white-space: nowrap;
-    height: 100%;
-}
-
-.tab-container > .tab-bar > .tab-item:hover {    
-    text-decoration: underline var(--HoverColor) solid; 
-    text-decoration-thickness: 3px;
-    text-decoration-skip-ink: none;
-    text-underline-offset: 3px;
-}
-
-.tab-container > .tab-bar > .tab-item.tp-Selected {    
-    text-decoration: underline var(--White) solid; 
-    text-decoration-thickness: 3px;
-    text-decoration-skip-ink: none;
-    text-underline-offset: 3px;
-}
-
-.tab-container > .tab-bar > .tab-item > .tp-Text {
-    position: relative;
-}
----------------------------------------------------------------------------------------*/
+ 
 
  
 

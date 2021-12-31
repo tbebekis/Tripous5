@@ -90,3 +90,68 @@ PostgreSQL
 Firebird
 MySql
 SQLite
+
+
+
+
+
+
+ <table> 
+  <tr> <td>button        </td> <td><input type="button" value="Button" /> </td> </tr>
+  <tr> <td>submit        </td> <td><input type="submit" value="Submit" /> </td> </tr>
+  <tr> <td>reset         </td> <td><input type="reset" value="Reset" /> </td> </tr>
+ 
+  <tr> <td>text          </td> <td><input type="text" value="TextBox" /> </td> </tr>
+  <tr> <td>email         </td> <td><input type="email" value="Email" /> </td> </tr>
+  <tr> <td>password      </td> <td><input type="password" value="" /> </td> </tr>
+  <tr> <td>search        </td> <td><input type="search" value="Search" /> </td> </tr>
+  <tr> <td>url           </td> <td><input type="url" value="Url" /> </td> </tr>
+  <tr> <td>tel           </td> <td><input type="tel" value="Tel" /> </td> </tr>
+ 
+  <tr> <td>number        </td> <td><input type="number" value="" /> </td> </tr>
+ 
+  <tr> <td>checkbox      </td> <td><input type="checkbox" value="" /> </td> </tr>
+  <tr> <td>radio         </td> <td><input type="radio" value="" /> </td> </tr>
+ 
+  <tr> <td>date          </td> <td><input type="date" value="" /> </td> </tr>
+  <tr> <td>datetime-local</td> <td><input type="datetime-local" value="" /></td> </tr>
+  <tr> <td>time          </td> <td><input type="time" value="" /> </td> </tr>
+  <tr> <td>week          </td> <td><input type="week" value="" /> </td> </tr>
+  <tr> <td>month         </td> <td><input type="month" value="" /> </td> </tr>
+ 
+  <tr> <td>file          </td> <td><input type="file" value="" /> </td> </tr>
+  <tr> <td>image         </td> <td><input type="image" value="" /> </td> </tr>
+ 
+  <tr> <td>range         </td> <td><input type="range" value="" /> </td> </tr>
+  <tr> <td>color         </td> <td><input type="color" value="" /> </td> </tr>
+ 
+</table> 
+
+
+    button                 <input type="button" value="Button" /> 
+    submit                 <input type="submit" value="Submit" /> 
+    reset                  <input type="reset" value="Reset" /> 
+
+    text                   <input type="text" value="TextBox" /> 
+    email                  <input type="email" value="Email" /> 
+    password               <input type="password" value="" /> 
+    search                 <input type="search" value="Search" /> 
+    url                    <input type="url" value="Url" /> 
+    tel                    <input type="tel" value="Tel" /> 
+
+    number                 <input type="number" value="" /> 
+
+    checkbox               <input type="checkbox" value="" /> 
+    radio                  <input type="radio" value="" /> 
+
+    date                   <input type="date" value="" /> 
+    datetime-local         <input type="datetime-local" value="" /> 
+    time                   <input type="time" value="" /> 
+    week                   <input type="week" value="" /> 
+    month                  <input type="month" value="" /> 
+
+    file                   <input type="file" value="" /> 
+    image                  <input type="image" value="" /> 
+
+    range                  <input type="range" value="" /> 
+    color                  <input type="color" value="" /> 

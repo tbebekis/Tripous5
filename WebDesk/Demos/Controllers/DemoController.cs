@@ -25,6 +25,11 @@ namespace WebDesk.Controllers
             return View();
         }
 
+        [Route("/demo/DomElements")]
+        public IActionResult DomElements()
+        {
+            return View();
+        }
         [Route("/demo/TabIndexAndFocus")]
         public IActionResult TabIndexAndFocus()
         {

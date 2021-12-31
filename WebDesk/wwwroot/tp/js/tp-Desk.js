@@ -451,45 +451,47 @@ tp.DeskViewPager = class extends tp.Component {
  
         this.TabBar.On('SelectedIndexChanged', this.TabBar_SelectedIndexChanged, this);
     }
-
+ 
     /** Creates and adds a view and a tab-item, based on a packet from the server.
      * @param {object} Packet
      */
     async AddView(Packet) {
-        /** @type {tp.View} */
-        let View = null;
+        let el = tp.HtmlToElement(Packet.HtmlText);
+        let DataSetup = tp.GetDataSetupObject(el);
+ 
+        let View = await tp.View.CreateView(el, DataSetup, Packet);
+
+        View.On('Disposing', (Args) => {
+ 
+            // we have to wait for the page to be complete its Dispose() operation. 
+            setTimeout(() => {
+                let View = Args.Sender;
+
+                let Index = this.TabBar.IndexOfItem(View.TabItem.Handle);
+                this.TabBar.RemoveItemAt(Index);
+
+                let List = this.GetViewList();
+ 
+                let NewIndex = Index - 1;
+                let NewIndex2 = Index + 1;
+                if (NewIndex >= 0 && NewIndex <= List.length - 1) {
+                    this.TabBar.SelectedIndex = NewIndex;
+                }
+                else if (NewIndex2 >= 0 && NewIndex2 <= List.length - 1) {
+                    this.TabBar.SelectedIndex = NewIndex;
+                }
+                else {
+                    this.TabBar.SelectedIndex = List.length > 0 ? List.length - 1 : -1;
+                }
+
+            }, 0);
+ 
+        });
 
         // tab
         let elTab = tp.Doc.createElement('div');
         let TabItem = new tp.Component(elTab);
-        TabItem.Text = !tp.IsBlankString(Packet.ViewTitle) ? Packet.ViewTitle: Packet.ViewName;
-
-        // view
-        let elView = tp.HtmlToElement(Packet.HtmlText);
-        let DataSetup = tp.GetDataSetupObject(elView);
-
-        if (tp.IsArray(DataSetup.CSS)) {
-            await tp.StaticFiles.LoadCssFiles(DataSetup.CSS);
-        }
-
-        if (tp.IsArray(DataSetup.JS)) {
-            await tp.StaticFiles.LoadJavascriptFiles(DataSetup.JS);
-        }
-
-        if (tp.IsString(DataSetup['ClassType'])) {
-            DataSetup.ClassType = eval(DataSetup.ClassType);
-        }
-
-        if (!tp.IsFunction(DataSetup.ClassType))
-            tp.Throw('No class to create a view');
-
-        let CreateParams = {
-            ViewName: Packet.ViewName,
-            Packet: Packet
-        };
-
-        View = new DataSetup.ClassType(elView, CreateParams);
-        View.On('Disposing', this.AnyView_Disposing, this);
+        TabItem.Text = DataSetup.ViewTitle;
 
         TabItem.DeskView = View;
         View.TabItem = TabItem;
@@ -497,10 +499,7 @@ tp.DeskViewPager = class extends tp.Component {
         this.PageListContainer.AddComponent(View);
         this.TabBar.AddItem(TabItem);
 
-        this.TabBar.SelectedItem = TabItem;
-
-        if (View instanceof tp.View)
-            View.OnAfterConstruction();
+        this.TabBar.SelectedItem = TabItem; 
 
         return View;
     }
@@ -521,42 +520,7 @@ tp.DeskViewPager = class extends tp.Component {
         tp.AddClass(View.TabItem.Handle, tp.Classes.Selected);
         View.Handle.style.display = '';
     }
-    /** Event handler. Called when any view is about to be destroyed.
-     * @param {tp.EventArgs} Args
-     */
-    AnyView_Disposing(Args) {
-        let View = Args.Sender;
-
-        let Index = this.TabBar.IndexOfItem(View.TabItem.Handle);
-        this.TabBar.RemoveItemAt(Index);
-
-        if (tp.IsArray(View.CreateParams.CSS)) {
-            tp.StaticFiles.UnLoadCssFiles(View.CreateParams.CSS);
-        }
-
-        if (tp.IsArray(View.CreateParams.JS)) {
-            tp.StaticFiles.UnLoadJavascriptFiles(View.CreateParams.JS);
-        }
-
-        // we have to wait for the page to be complete its Dispose() operation. 
-        setTimeout(() => {
-            let List = this.GetViewList();
-
-            let NewIndex = Index - 1;
-            let NewIndex2 = Index + 1;
-            if (NewIndex >= 0 && NewIndex <= List.length - 1) {
-                this.TabBar.SelectedIndex = NewIndex;
-            }
-            else if (NewIndex2 >= 0 && NewIndex2 <= List.length - 1) {
-                this.TabBar.SelectedIndex = NewIndex;
-            }
-            else {
-                this.TabBar.SelectedIndex = List.length > 0 ? List.length - 1 : -1;
-            }
-
-        }, 0);
-    }
-
+ 
     /** Returns an array with {@link tp.View} items contained by this pager.
      * @returns {tp.View[]} Returns an array with {@link tp.View} items contained by this pager.
      * */
@@ -963,7 +927,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
     InitializeView() {
         super.InitializeView();
 
-        this.DataType = this.CreateParams.Packet.DataType
+        this.DataType = this.CreateParams.DataType
         switch (this.DataType) {
             case 'Table':
                 this.Handler = new tp.SysDataHandlerTable(this, this.DataType);

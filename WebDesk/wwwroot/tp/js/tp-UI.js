@@ -288,10 +288,13 @@ tp.Classes = {
     RangeLabel: 'tp-RangeLabel',
 
     Calendar: 'tp-Calendar',
-    CalendarHeaderRow: 'tp-CalendarHeaderRow',
-    CalendarDaysRow: 'tp-CalendarDaysRow',
-    CalendarWeekRow: 'tp-CalendarWeekRow',
-    CalendarDateCell: 'tp-CalendarDateCell',
+    CalendarHeaderRow: 'tp-HeaderRow',
+    CalendarYearCell: 'tp-Year',
+    CalendarMonthCell: 'tp-Month',
+    CalendarDaysRow: 'tp-DaysRow',
+    CalendarWeekRow: 'tp-WeekRow',
+    CalendarDateCell: 'tp-DateCell',
+
 
     LocatorBox: 'tp-LocatorBox',
 
@@ -3120,6 +3123,7 @@ tp.VirtualScroller = class  {
                     el.style.position = 'absolute';
                     el.style.top = (Index * this.RowHeight) + 'px';
                     el.style.height = this.RowHeight + 'px';
+                    el.style.width = '100%';
 
                     this.fContainer.appendChild(el);
                     this.RowCache[Index] = el;
@@ -9853,7 +9857,7 @@ tp.ListControl = class extends tp.Control {
      */
     ItemRenderFunc(Row, RowIndex) {
         var Result = this.Document.createElement('div');
-        Result.className = tp.Classes.Item + ' ' + tp.Classes.UnSelectable;
+        Result.className = tp.Classes.Item; // + ' ' + tp.Classes.UnSelectable;
 
         // -1 = still focusable by code,  0 = tab order relative to element's position in document, > 0 according to tab-order
         Result.tabIndex = -1;
@@ -11210,7 +11214,7 @@ tp.CheckListControl = class extends tp.Control {
      */
     ItemRenderFunc(Row, RowIndex) {
         var Result = this.Document.createElement('label');
-        Result.className = tp.Classes.Item + ' ' + tp.Classes.UnSelectable;
+        Result.className = tp.Classes.Item; // + ' ' + tp.Classes.UnSelectable;
 
         let cb = this.Document.createElement('input');
         cb.type = 'checkbox';
@@ -11976,7 +11980,7 @@ tp.CheckComboBox = class extends tp.CheckListControl {
             this.fLabels.push(elItem);
 
             if (this.IsOpen) {
-                this.fDropDownBox.UpdateTop();
+                setTimeout(() => { this.fDropDownBox.UpdateTop(); }, 0);
             }
         }
 
@@ -13204,23 +13208,31 @@ tp.Calendar = class extends tp.Control {
     */
     OnFieldsInitialized() {
         super.OnFieldsInitialized();
-
+ 
         this.fWeekRows = [];
         this.fDayCells = [];
 
-        var i, ln, j, jln, el;
+        let i, ln, j, jln, el, S;
         this.Attribute('border', 0);
 
         // table    : rows
         // row      : rowIndex cells
-        // cell     : cellIndex colSpan rowSpan
+        // cell     : cellIndex colSpan rowSpan 
 
-        var S = tp.Trim(tp.Calendar.Markup);
-        S = tp.Replace(S, 'Header', tp.Classes.CalendarHeaderRow);
-        S = tp.Replace(S, 'Days', tp.Classes.CalendarDaysRow);
-        S = tp.Replace(S, 'Week', tp.Classes.CalendarWeekRow);
+        let HtmlText = `                                                                 
+<tbody>                                                                                    
+<tr class="${tp.Classes.CalendarHeaderRow}"><th></th><th></th><th colspan="3"></th><th></th><th></th></tr>
+<tr class="${tp.Classes.CalendarDaysRow}"><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr>
+<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</tbody>                                                                                   
+`;
 
-        this.Html = S;
+        this.Html = tp.Trim(HtmlText);
  
         // rows
         this.fDateRow = this.elTable.rows[0]; // HTMLTableRowElement
@@ -13243,6 +13255,12 @@ tp.Calendar = class extends tp.Control {
 
         this.fPrevMonthCell.innerHTML = '&#9668;';
         this.fNextMonthCell.innerHTML = '&#9658;';
+
+        tp.AddClass(this.fPrevYearCell, tp.Classes.CalendarYearCell);
+        tp.AddClass(this.fNextYearCell, tp.Classes.CalendarYearCell);
+
+        tp.AddClass(this.fPrevMonthCell, tp.Classes.CalendarMonthCell);
+        tp.AddClass(this.fNextMonthCell, tp.Classes.CalendarMonthCell);
 
         // day literals
         this.fDaysRow.cells[6].innerHTML = tp.DayNames[0].substring(0, 3);
@@ -13416,18 +13434,6 @@ tp.Calendar = class extends tp.Control {
 
 
 
-tp.Calendar.Markup = '                                                                      \
-<tbody>                                                                                     \
-<tr class="Header"><th></th><th></th><th colspan="3"></th><th></th><th></th></tr>             \
-<tr class="Days"><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr>       \
-<tr class="Week"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      \
-<tr class="Week"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      \
-<tr class="Week"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      \
-<tr class="Week"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      \
-<tr class="Week"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      \
-<tr class="Week"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      \
-</tbody>                                                                                    \
-';
 
 
 
@@ -19538,6 +19544,7 @@ tp.View = class extends tp.Component {
     @override
     */
     DoDispose() {
+ 
         tp.Broadcaster.Remove(this);
         super.DoDispose();
     }
@@ -19821,71 +19828,18 @@ tp.View = class extends tp.Component {
 
     
 
-    /* static */
-    /**
-    Creates and returns a view. The class type of the view is controlled by the provided markup or the passed in CreateParams parameter.
-    Example markup
-    @example
-    <pre>
-        <div class="tp-View" data-setup="{ TypeName: 'View', .... }"> ... </div>
-        or
-        <div class="tp-View" data-setup="{ ClassType: tp.MyDataViewClass, .... }"> ... </div>
-    </pre>
-    @param {string | HTMLElement} ElementOrSelector - The html element of the view
-    @param {object} [CreateParams] Optional. The create params object
-    @returns {tp.View} Returns the newly created {@link tp.View} view.
-    */
-    static CreateView(ElementOrSelector, CreateParams) {
 
-        // <div class="tp-View" data-setup="{ TypeName: 'View', .... }"></div>
-        // or
-        // <div class="tp-View" data-setup="{ ClassType: tp.MyDataViewClass, .... }"> </div>
-
-        let TypeName = 'View';
-        let Type = tp.View = null;
-        let CP = null;
-        let el = tp.Select(ElementOrSelector);
-
-        if (el) {
-
-            if (!tp.IsEmpty(CreateParams)) {
-                CP = CreateParams;
-            } else {
-                CP = tp.Data(el, 'setup');
-                if (!tp.IsBlank(CP))
-                    CP = eval("(" + CP + ")");
-            }
-
-            if (!tp.IsEmpty(CP) && 'TypeName' in CP && !tp.IsBlank(CP['TypeName'])) {
-                TypeName = CP['TypeName'];
-
-                if (TypeName in tp.ViewTypes)
-                    Type = tp.ViewTypes[TypeName];
-
-            } else if (!tp.IsEmpty(CP) && 'ClassType' in CP && !tp.IsEmpty(CP['ClassType'])) {
-                Type = CP.ClassType;
-            }
-
-            if (Type) {
-                if (tp.IsString(Type)) {
-                    let Code = `new ${Type}(el, CP)`;
-                    return eval(Code);
-                }
-                else {
-                    return new Type(el, CP);
-                }
-            }
-
-        }
-
-        return null;
-    }
 };
 /** 
 Gets or sets the name of the view 
 @type {string}
 */
 tp.View.prototype.ViewName = '[no view name]';
+/** 
+Gets or sets the title (caption) of the view
+@type {string}
+*/
+tp.View.prototype.ViewTitle = '[no view title]';
 /**
 The ajax packet sent by server app when this view is created, if any.
 @type {object}
@@ -19903,7 +19857,123 @@ tp.ViewTypes = {
     View: tp.View
 };
 
+/* static */
+/**
+Creates and returns a view. The class type of the view is controlled by the provided markup or the passed in CreateParams parameter. <br />
+NOTE: Use this function for creating views instead of calling a specific constructor, especially when the markup of the view comes from the server after an Ajax call. <br />
+This function handles the dynamic loading of javascript and css files needed by the view. <br />
+Example markup  
+<pre>
+    <div class="tp-View" data-setup="{ TypeName: 'View', .... }"> ... </div>
+    or
+    <div class="tp-View" data-setup="{ ClassType: tp.MyDataViewClass, .... }"> ... </div>
+</pre>
+<br />
+Example CreateParams <br />
+<pre>
+{
+    "ClassType":"tp.DeskDataView",
+    "BrokerClass":"tp.Broker",
+    "BrokerName":"Trader",
+    "ViewName":"Ui.Data.Trader-2001",
+    "ViewTitle":"Trader",
+    "Name":"Trader",
+    "Title":"Trader",
+    "CssClasses":"tp-View tp-DeskView"
+}
+</pre>
+@param {string|HTMLElement} ElementOrSelectorOrHtmlText An HTMLElement or a Selector or HTML markup text.
+@param {object} CreateParams The create params object
+@param {object} [Packet=null] The Packet object as it comes from the server or null.
+@returns {tp.View} Returns the newly created {@link tp.View} view.
+*/
+tp.View.CreateView = async function(ElementOrSelectorOrHtmlText, CreateParams, Packet = null) {
 
+    // <div class="tp-View" data-setup="{ TypeName: 'View', .... }"></div>
+    // or
+    // <div class="tp-View" data-setup="{ ClassType: tp.MyDataViewClass, .... }"> </div>
+
+    
+    let el = null;
+ 
+
+    let Type = null;
+    let View = null;
+
+    //log(CreateParams);
+    //log(Packet);
+
+    // view element
+    if (tp.IsElement(ElementOrSelectorOrHtmlText)) {
+        el = ElementOrSelectorOrHtmlText;
+    }
+    else if (tp.IsHtml(ElementOrSelectorOrHtmlText)) {
+        el = tp.HtmlToElement(ElementOrSelectorOrHtmlText);
+    }
+    else if (tp.IsString(ElementOrSelectorOrHtmlText)) {
+        el = tp(ElementOrSelectorOrHtmlText);
+    }
+
+    if (!tp.IsHTMLElement(el))
+        tp.Throw('Cannot create view. No Element, HtmlText or Selector is passed');
+
+
+    // create params
+    CreateParams = tp.IsValid(CreateParams) ? CreateParams : tp.GetDataSetupObject(el);
+
+    if (tp.IsEmpty(CreateParams))
+        tp.Throw('Cannot create view. No data-setup attribute found');
+
+
+    // static files
+    if (tp.IsArray(CreateParams.CSS)) {
+        await tp.StaticFiles.LoadCssFiles(CreateParams.CSS);
+    }
+
+    if (tp.IsArray(CreateParams.JS)) {
+        await tp.StaticFiles.LoadJavascriptFiles(CreateParams.JS);
+    }
+
+    // view class type
+    if (!tp.IsBlankString(CreateParams['TypeName'])) {
+        if (CreateParams.TypeName in tp.ViewTypes)
+            Type = tp.ViewTypes[CreateParams.TypeName];
+        else
+            Type = eval(CreateParams.TypeName);            // dangerous - TypeName must be a string name of a registered class, NOT a class, e.g. 'DataView' NOT 'tp.DataView'
+    }
+    else if (tp.IsString(CreateParams['ClassType'])) {
+        Type = eval(CreateParams.ClassType);
+    }
+    else if (tp.IsFunction(CreateParams['ClassType'])) {
+        Type = CreateParams.ClassType;
+    }
+ 
+    if (!tp.IsFunction(Type))
+        tp.Throw('Cannot create view. No class to create a view');
+
+
+    // create the view object
+    CreateParams.Packet = Packet;
+    View = new Type(el, CreateParams);
+
+     // unload static files
+    View.On('Disposing', (Args) => {
+        let View = Args.Sender;
+
+        if (tp.IsArray(View.CreateParams.CSS)) {
+            tp.StaticFiles.UnLoadCssFiles(View.CreateParams.CSS);
+        }
+
+        if (tp.IsArray(View.CreateParams.JS)) {
+            tp.StaticFiles.UnLoadJavascriptFiles(View.CreateParams.JS);
+        }
+    });
+
+    if (View instanceof tp.View)
+        View.OnAfterConstruction();
+
+    return View;
+}
 
 //#endregion
 

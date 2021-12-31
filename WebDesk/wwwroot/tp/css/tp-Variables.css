@@ -1,44 +1,20 @@
 
 
 :root {
-    /* Fonts */
-    --FontXS: 10px;
-    --FontS: 12px;
-    --Font: 13px;
-    --FontM: 18px;
-    --FontL: 24px;
-    --FontXL: 30px;
-    --FontFamily: Tahoma; /* , Geneva, Verdana, Arial, Helvetica, sans-serif; */
-
     /* Font colors */
     --FontColor: #777;
     --FontColor1: white;
-    --FontColor2: #444;
-    --FontColor3: #eee;
-    --FontColor4: #aaa;
-    --FontColor5: #5c5b5b;
-    --ButtonFontColor: white;
-    --SuccessFontColor: #4bb07a;
-    --ErrorFontColor: #e4444c;
-    --ValidFontColor: #4bb07a;
-    --RequiredFontColor: #e4444c;
-    --WarningFontColor: #e4444c;
-    --LinkFontColor: #444;
-    --LinkHoverFontColor: #B80709;
-    --DiscountFontColor: #4ab2f1;
-    --FirstItemFontColor: #e4444c;
-    --LastItemFontColor: #4bb07a;
+    --FontColor2: #444; 
 
     /* Background colors */
     --BackColor: white;
     --BackColor1: black;
     --BackColor2: #e6e6e6;
     --BackColor3: #bbb;
-    --BackColor4: #888;
-    --BackColor5: #333;
-    --ContentColor: var(--BackColor3);
+ 
     --BackGreen: green;
     --BackRed: red;
+
     --NotificationColor: #4bb07a;
     --SuccessColor: #4bb07a;
     --ErrorColor: #e4444c;
@@ -49,29 +25,18 @@
     --SelectedListItemColor: lightblue;
     --MarkColor: var(--BackGreen);
     --FocusColor: #4ab2f1;
-    --FooterBackColor: #535353;
-    --FooterBackColor2: #a5a5a5;
-
-    /* Button background colors */
-    --ButtonColor: #808080;
-    --ButtonHoverColor: #aaa;
-    --SelectedButtonColor: #333;
-
+ 
     /* Misc colors */
-    --BorderColor: #ccc;
-    --BorderColor2: #aaa;
-    --BorderColor3: #4d4d4d;
+    /* --BorderColor: #ccc; */
     --ShadowColor: rgba(0,0,0,0.25);
-    --SpinnerColor: #034F84;
-
+ 
     /* Miscs */
     --GridDropTargetOutline: var(--SelectedColor) double thick;
-    --Border: 1px solid var(--BorderColor);
+    --Border: 1px solid #ccc;
     --ButtonPadding: 0 5px;
     --TextPadding: 2px 4px;
-    --WindowCaptionHeight: var(--Font) * 2.4;
-    
-    /* --LineHeight: 1.8; */
+ 
+    --ControlLineHeight: 1.5;
     /* --ControlHeight: 2em; */
  
 

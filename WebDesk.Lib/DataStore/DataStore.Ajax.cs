@@ -25,13 +25,9 @@ using WebLib.Models;
 
 namespace WebLib
 {
-
-
-
-
+ 
     static public partial class DataStore
     {
-
         /// <summary>
         /// Prepares and returns an <see cref="HttpActionResult"/> for a Ui request
         /// </summary>
@@ -50,15 +46,7 @@ namespace WebLib
 
             if (ViewInfo == null)
                 Sys.Throw($"No View Info for requested view. Operation: {Request.OperationName}");
-
-            // set the ViewName if empty
-            string ViewName = Packet["ViewName"] as string;
-            if (string.IsNullOrWhiteSpace(ViewName))
-            {
-                ViewName = Request.IsSingleInstance ? Request.OperationName : Names.Next(Request.OperationName);
-                Packet["ViewName"] = ViewName;
-            }
-
+ 
             // set the HtmlText if empty
             string HtmlText = Packet["HtmlText"] as string;
             if (string.IsNullOrWhiteSpace(HtmlText) && !string.IsNullOrWhiteSpace(ViewInfo.RazorViewNameOrPath))

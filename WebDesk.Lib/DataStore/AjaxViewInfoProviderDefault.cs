@@ -28,17 +28,15 @@ namespace WebLib
                 ViewDef = new ViewDef(BrokerDef);
             }
 
+            ViewDef.ViewName = Request.IsSingleInstance ? Request.OperationName : Names.Next(Request.OperationName);
             ViewDef.ClassType = "tp.DeskDataView";
             ViewDef.BrokerClass = "tp.Broker";
-            ViewDef.BrokerName = BrokerName;
-
+            ViewDef.BrokerName = BrokerName;            
+ 
             ViewModel ViewModel = new ViewModel(ViewDef);
 
             Info.RazorViewNameOrPath = "View";
             Info.Model = ViewModel;
-
-            Packet["ViewName"] = Request.OperationName;
-            Packet["ViewTitle"] = ViewDef.Title;
 
             return Info;
         }
@@ -51,8 +49,9 @@ namespace WebLib
             if (ViewDef == null)
                 Sys.Throw($"ViewDef not found: {ViewDefName}");
 
-            ViewDef.ClassType = "tp.DeskSysDataView";
-            ViewDef["DataType"] = DataType;
+            ViewDef.ViewName = Request.IsSingleInstance ? Request.OperationName : Names.Next(Request.OperationName);
+            ViewDef.ClassType = "tp.DeskSysDataView";            
+            ViewDef["DataType"] = DataType;            
 
             ViewModel ViewModel = new ViewModel(ViewDef);
 
@@ -60,10 +59,6 @@ namespace WebLib
             Info.Model = ViewModel;
 
             Info.ViewData["DataType"] = DataType;
-
-            Packet["ViewName"] = Request.OperationName;
-            Packet["ViewTitle"] = ViewDef.Title;
-            Packet["DataType"] = DataType; 
  
             return Info;
         }

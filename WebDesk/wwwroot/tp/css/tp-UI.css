@@ -722,17 +722,7 @@ tab control
     background-color: var(--SelectedColor);
 }
 
-/*---------------------------------------------------------------------------------------
- button - tp-Button
----------------------------------------------------------------------------------------*/
  
-button {
-    position: relative;
-    text-decoration: none;
-    padding: 0 15px;    
-    min-height: 1.9em;
-}
-
 /*---------------------------------------------------------------------------------------
  button-ex
 ---------------------------------------------------------------------------------------*/
@@ -824,60 +814,31 @@ button {
 .tp-AutocompleteList .tp-List .tp-Item.tp-Selected {
     background-color: var(--SelectedListItemColor);
 }
-
-/*---------------------------------------------------------------------------------------
- label - tp-Label
----------------------------------------------------------------------------------------*/
  
-label {
-    position: relative;
-    padding: var(--TextPadding);
-    user-select: text;
-}
-
 /*---------------------------------------------------------------------------------------
- input - tp-TextBox
+text box
 ---------------------------------------------------------------------------------------*/
- 
-input[type=text] {
+.tp-TextBox {
     position: relative;
-    padding: var(--TextPadding);
-}
-
-
-input.tp-TextBox {
-    border: var(--Border);
 }
 
 /*---------------------------------------------------------------------------------------
  textarea - tp-Memo
 ---------------------------------------------------------------------------------------*/
 
-textarea.tp-Memo {
+.tp-Memo {
     position: relative;
-    border: var(--Border);
-    padding: var(--TextPadding);
-    /* white-space: pre; disable this because we want just the vertical scroll bar*/
-    overflow: auto;
-    resize: none;
-    box-sizing: border-box;
-    min-height: 6em;
 }
 
 /*---------------------------------------------------------------------------------------
  check-box - a label element sourrounding a input[type=checkbox] element
 ---------------------------------------------------------------------------------------*/
- input[type=checkbox] {
-      vertical-align: middle;
- }
 
 
 /* check-box - it is a label */
 .tp-CheckBox {
-    position: relative;  
 	display: block;	
 	cursor: pointer;  
-	user-select: none;  
     min-height: 32px; /* to fit the check-box */
 }
  
@@ -988,7 +949,7 @@ number box - tp-NumberBox
     background-color: var(--BackColor);
 }
 
-.tp-ListControl .tp-List .tp-Item {
+.tp-ListControl > .tp-List > .tp-Item {
     display: flex;
     align-items: center;
     width: 100%;
@@ -1000,16 +961,16 @@ number box - tp-NumberBox
     white-space: nowrap;
 }
 
-.tp-ListControl .tp-List .tp-Item.tp-Selected {
+.tp-ListControl > .tp-List > .tp-Item.tp-Selected {
     background-color: var(--SelectedListItemColor);
 }
 
-.tp-ListControl .tp-List .tp-Item:focus {
+.tp-ListControl > .tp-List > .tp-Item:focus {
     outline: thin dotted;
     background-color: lightblue;
 }
 
-.tp-ListControl .tp-List .tp-Item:hover {
+.tp-ListControl > .tp-List > .tp-Item:hover {
     outline: thin dotted;
     background-color: var(--HoverColor);
 }
@@ -1053,15 +1014,6 @@ number box - tp-NumberBox
  HtmlComboBox HtmlListBox
 ---------------------------------------------------------------------------------------*/
  
-select.tp-HtmlComboBox {
-    height: 2.2em;
-    border: var(--Border);
-    padding: 2px 4px;
-}
-
-select.tp-HtmlListBox {
-    border: var(--Border);
-}
 
 /*---------------------------------------------------------------------------------------
  check combo box
@@ -1128,8 +1080,6 @@ select.tp-HtmlListBox {
 /*---------------------------------------------------------------------------------------
  calendar
 ---------------------------------------------------------------------------------------*/
- 
-
 table.tp-Calendar {
     position: relative;
     cursor: default;
@@ -1143,8 +1093,8 @@ table.tp-Calendar {
 
 table.tp-Calendar th,
 table.tp-Calendar td {
-    width: 30px;
-    height: 26px;
+    min-width: 28px;
+    min-height: 28px;
     text-align: center;
     vertical-align: middle;
     border: var(--Border);
@@ -1161,14 +1111,25 @@ table.tp-Calendar td.tp-Selected {
 table.tp-Calendar td.tp-Marked {
     outline: 2px solid var(--MarkColor);
 }
-
-/* .tp-CalendarHeaderRow { } */
-
-.tp-CalendarDaysRow {
+ 
+.tp-Calendar  .tp-Year {
     font-size: 10px;
 }
 
-/* .tp-CalendarWeekRow { } */
+.tp-Calendar  .tp-Month {
+    font-size: 9px;
+}
+
+.tp-Calendar .tp-DaysRow { 
+    font-size: 10px;
+}
+
+.tp-Calendar .tp-WeekRow { 
+    font-size: 12px;
+}
+
+
+ 
 
 /*---------------------------------------------------------------------------------------
  date-box
@@ -1213,13 +1174,9 @@ table.tp-Calendar td.tp-Marked {
 /*---------------------------------------------------------------------------------------
  radio-group
 ---------------------------------------------------------------------------------------*/
-input[type=radio] {
-   vertical-align: middle;
-}
 
 .tp-RadioGroup {
     position: relative;
-    border: var(--Border);
 }
 
 .tp-RadioGroup > .tp-List {
@@ -1242,9 +1199,7 @@ input[type=radio] {
     align-items: center;
 }
 
-.tp-RadioGroup label input[type=radio] {
-    margin-right: 4px;
-}
+
 
 .tp-RadioButtonList {
     position: relative;
@@ -1455,7 +1410,6 @@ tp-SelectSqlListUi
     align-items: center;
     gap: 0.2em;
 }
-
  
 .tp-SqlFilterRow > .tp-SqlFilter-Ctrl > * {
     width: 50%;

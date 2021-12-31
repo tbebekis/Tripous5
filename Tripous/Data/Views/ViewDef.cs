@@ -14,6 +14,9 @@ namespace Tripous.Data
     {
         static List<ViewDef> RegistryList = new List<ViewDef>();
 
+        string fViewName;
+ 
+
         /* construction */
         /// <summary>
         /// Constructor
@@ -200,6 +203,12 @@ namespace Tripous.Data
         /// </summary>
         public override void AssignTo(Dictionary<string, object> DataSetup)
         {
+            if (!string.IsNullOrWhiteSpace(ViewName))
+                DataSetup["ViewName"] = ViewName;
+
+            if (!string.IsNullOrWhiteSpace(ViewTitle))
+                DataSetup["ViewTitle"] = ViewTitle;
+
             if (!string.IsNullOrWhiteSpace(ClassType))
                 DataSetup["ClassType"] = ClassType;
 
@@ -211,7 +220,7 @@ namespace Tripous.Data
 
             if (AutocreateControls)
                 DataSetup["AutocreateControls"] = AutocreateControls;
-
+ 
             if (JS != null & JS.Count > 0)
                 DataSetup["JS"] = JS;
 
@@ -234,6 +243,25 @@ namespace Tripous.Data
         public List<ViewToolBarButtonDef> ToolBarButtons { get; } = new List<ViewToolBarButtonDef>();
 
         /* data-setup properties */
+        /// <summary>
+        /// An identifier of this view.
+        /// <para>Used by systems like the javascript Desktop in identifying the views by name.</para>
+        /// </summary>
+        public string ViewName
+        {
+            get { return !string.IsNullOrWhiteSpace(fViewName) ? fViewName : Name; }
+            set { fViewName = value; }
+        }
+        /// <summary>
+        /// The title (caption) of the view.
+        /// <para>Used by systems like the javascript Desktop when displaying a view in a tab control or in a dialog box.</para>
+        /// </summary>
+        public string ViewTitle
+        {
+            get { return this.Title; }
+            set { this.Title = value; }
+        }
+
         /// <summary>
         /// Returns the javascript class name of a view class to be used when creating the view object in javascript.
         /// </summary>
