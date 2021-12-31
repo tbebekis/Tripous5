@@ -1,4 +1,4 @@
-﻿@import "Variables.css";
+﻿/* @import "Variables.css"; */
 
 /*---------------------------------------------------------------------------------------
   Global
@@ -79,6 +79,10 @@
     border: none;
 }
 
+button {
+    font-size: 13px;
+}
+/*
 button:not(.btn-test),
 .button:not(.btn-test) {
     position: relative;
@@ -88,6 +92,9 @@ button:not(.btn-test),
     font-weight: bold;
 }
  
+
+*/
+
 .buttons.tp-CtrlRow {
     position: relative;
     display: flex;
@@ -123,9 +130,9 @@ button:not(.btn-test),
 
 
 /*---------------------------------------------------------------------------------------
-  header
+  tp-Header
 ---------------------------------------------------------------------------------------*/
-.header {
+.tp-Header {
     position: relative;
     display: flex; 
     flex-direction:column;
@@ -133,7 +140,7 @@ button:not(.btn-test),
     color: var(--White);   
 }
 
-.header .tool-bar-zone {
+.tp-Header .tool-bar-zone {
     position: relative;
     display: flex; 
     align-items: center; 
@@ -141,7 +148,7 @@ button:not(.btn-test),
     padding: 0 1em;
 }
 
-.header .tool-bar-zone > .inner {
+.tp-Header .tool-bar-zone > .inner {
     position: relative;
     display: flex;
     align-items: center;
@@ -207,7 +214,7 @@ button:not(.btn-test),
 /*---------------------------------------------------------------------------------------
   footer
 ---------------------------------------------------------------------------------------*/
-.footer {
+.tp-Footer {
     position: relative;
     display: flex; 
     min-height: 2.5em;

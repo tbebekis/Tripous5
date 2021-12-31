@@ -111,6 +111,9 @@ body {
 ---------------------------------------------------------------------------------------*/
  
 button,
+input,
+textarea,
+select,
 label,
 legend,
 optgroup {
@@ -122,8 +125,6 @@ button,
 input,
 textarea,
 select {
-    font: inherit;
-    line-height: var(--ControlLineHeight);
     border: var(--Border);
     padding: var(--TextPadding);
 }
@@ -278,10 +279,12 @@ textarea {
 }
  
 input[type=checkbox] {
+    cursor: pointer;  
     vertical-align: middle;
 } 
 
 input[type=radio] {
+   cursor: pointer;  
    vertical-align: middle;
 }
 

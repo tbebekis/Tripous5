@@ -122,11 +122,11 @@ tp.AppInitializeBefore = function () {
     };
 
     // header
-    el = GetElement('.header');
+    el = GetElement('header');
     tp.DeskOptions.Header = new app.Header(el);
 
     // footer
-    el = GetElement('.footer');
+    el = GetElement('footer');
     tp.DeskOptions.Footer = new app.Footer(el);
 
     if (tp.SysConfig.IsAuthenticated === true) {

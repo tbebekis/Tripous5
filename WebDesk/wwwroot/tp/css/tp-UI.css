@@ -1,4 +1,4 @@
-@import "tp-Variables.css";
+/* @import "tp-Variables.css"; */
 
 /*---------------------------------------------------------------------------------------
  tp-GroupBox - fieldset
@@ -836,15 +836,13 @@ text box
 /* check-box - it is a label */
 .tp-CheckBox {
 	display: block;	
-	cursor: pointer;  
-    min-height: 32px; /* to fit the check-box */
+    cursor: pointer;
+    /* min-height: 32px;  to fit the check-box */
 }
  
  /*   checkbox */
  .tp-CheckBox [type=checkbox] {
-   position: relative; 
-   cursor: pointer;
-   line-height: 1.4em;
+   position: relative;    
  } 
 
 .tp-CheckBox > .tp-Text {
@@ -1078,19 +1076,19 @@ number box - tp-NumberBox
 /*---------------------------------------------------------------------------------------
  calendar
 ---------------------------------------------------------------------------------------*/
-table.tp-Calendar {
+table.tp-CalendarBox {
     position: relative;
     cursor: default;
     table-layout: fixed;
     background-color: var(--BackColor);
     border: var(--Border);
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 12px;
     font-family: Arial;
 }
 
-table.tp-Calendar th,
-table.tp-Calendar td {
+table.tp-CalendarBox th,
+table.tp-CalendarBox td {
     min-width: 28px;
     min-height: 28px;
     text-align: center;
@@ -1098,31 +1096,31 @@ table.tp-Calendar td {
     border: var(--Border);
 }
 
-table.tp-Calendar td.tp-Inactive {
+table.tp-CalendarBox td.tp-Inactive {
     color: lightgray;
 }
 
-table.tp-Calendar td.tp-Selected {
+table.tp-CalendarBox td.tp-Selected {
     outline: 2px solid var(--FocusColor);
 }
 
-table.tp-Calendar td.tp-Marked {
+table.tp-CalendarBox td.tp-Marked {
     outline: 2px solid var(--MarkColor);
 }
  
-.tp-Calendar  .tp-Year {
+.tp-CalendarBox  .tp-Year {
     font-size: 10px;
 }
 
-.tp-Calendar  .tp-Month {
+.tp-CalendarBox  .tp-Month {
     font-size: 9px;
 }
 
-.tp-Calendar .tp-DaysRow { 
+.tp-CalendarBox .tp-DaysRow { 
     font-size: 10px;
 }
 
-.tp-Calendar .tp-WeekRow { 
+.tp-CalendarBox .tp-WeekRow { 
     font-size: 12px;
 }
 

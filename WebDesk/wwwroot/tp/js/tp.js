@@ -13543,6 +13543,11 @@ tp.GetComponentList = function (ParentElementOrSelector) {
     return ResultList;
 }
 
+
+
+
+
+
 /**
  Finds and returns a tp.Elemement contained by a container, by Id. If not found, then null is returned
  @param {string} Id - The Id to match
@@ -14632,11 +14637,13 @@ tp.WindowArgs.prototype.ResizeEdges = tp.Edge.All;                              
 /** True indicates a movable (draggable) window */
 tp.WindowArgs.prototype.Movable = true;
 
-/** An object. Context for the CloseFunc */
+/** An object. Context for the ShowFunc and CloseFunc */
 tp.WindowArgs.prototype.Creator = null;
-/** Callback to call when the window shows itself. A function as function(Window: tp.Window) */
+/** Callback to be called after the window shows itself (i.e. OnShown()). 
+ * A function as function(Window: tp.Window) */
 tp.WindowArgs.prototype.ShowFunc = null;
-/** Callback to call when the window closes. A function as function(Args: tp.WindowArgs) */
+/** Callback to be called when the window is about to close (i.e. OnClosing()). 
+ * A function as function(Window: tp.Window) */
 tp.WindowArgs.prototype.CloseFunc = null;
 
 /** The {@link tp.Window} window after the creation.
@@ -14905,19 +14912,25 @@ outline: none;
      * @returns {tp.Component} Returns the {@link tp.Component} button.
      */
     CreateFooterButton(Command, Title, DialogResult = tp.DialogResult.None, ToLeft = false) {
-        let Style = `
-position: relative;
-text-decoration: none;
-padding: 0 15px;
-line-height: inherit;
-`;
+
 
         let CP = new tp.CreateParams();
         CP.Id = tp.SafeId('tp-Window-FooterButton');
         CP.Text = Title;
         CP.Width = 70;
         CP.CssClasses = 'tp-Button';
+
+        /*
+                let Style = `
+        position: relative;
+        text-decoration: none;
+        padding: 0 15px;
+        line-height: inherit;
+        `;
+
         CP.CssText = Style;
+         */
+ 
 
         var Result = new tp.Component('button', CP);
 
@@ -15118,10 +15131,9 @@ gap: 0.15em;
 
     /**
      * Used with modal windows.
-     * Passes the results back to the caller code. Results could an object, an array or anything.
+     * Can be used in passing the results back to the caller code. 
      * */
-    PassBackResult() {
-        tp.Call(this.Args.CloseFunc, this.Args.Creator, this.Args);
+    PassBackResult() { 
     }
     /**
      * Maximizes the window.
@@ -15195,6 +15207,8 @@ gap: 0.15em;
         if (this.Modal) {
             this.fOverlay.Visible = true;
         }
+        this.OnShowing();
+
         this.Visible = true;
 
         if (tp.IsEmpty(this.Header)) {
@@ -15204,7 +15218,8 @@ gap: 0.15em;
         }
 
         this.Handle.focus();
-        this.OnShow();
+
+        this.OnShown();
 
         tp.Call(this.Args.ShowFunc, this.Args.Creator, this);
     }
@@ -15229,10 +15244,15 @@ gap: 0.15em;
     Closes and disposes this instance.
     */
     Close() {
-        this.OnClose();
+        tp.Call(this.Args.CloseFunc, this.Args.Creator, this);
+
+        this.OnClosing();
 
         this.PassBackResult();
-        this.Hide();        
+        this.Hide();
+
+        this.OnClosed();
+
         this.Dispose();
         tp.ListRemove(tp.Window.Windows, this);
     }
@@ -15240,16 +15260,28 @@ gap: 0.15em;
     /* notifications */
 
     /**
-     * Called when the window shows up.
+     * Called when the window is about to shows itself
      * */
-    OnShow() {
+    OnShowing() {
         this.Trigger('Showing');
     }
     /**
-     * Called when the window closes.
+     * Called when the window shows up.
      * */
-    OnClose() {
+    OnShown() {
+        this.Trigger('Shown');
+    }
+    /**
+     * Called when the window is about to close.
+     * */
+    OnClosing() {
         this.Trigger('Closing');
+    }
+    /**
+     * Called when the window closes and before Dispose() is called.
+     * */
+    OnClosed() {
+        this.Trigger('Closed');
     }
 
     /* events */
@@ -15493,9 +15525,13 @@ Displays a content window, either as modal or as non-modal, and returns a Promis
 tp.ContentWindow.ShowAsync = async function (Modal, Content, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+     
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
+
         tp.ContentWindow.Show(Modal, Content, WindowArgs);
     });
 };
@@ -15792,9 +15828,13 @@ Displays a modal window with an iframe element and returns a promise
 tp.FrameBoxAsync = function (UrlOrHtmlContent, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
+
         tp.FrameBox(UrlOrHtmlContent, WindowArgs);
     });
 };

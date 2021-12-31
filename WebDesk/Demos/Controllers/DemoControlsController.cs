@@ -125,8 +125,8 @@ namespace WebDesk.Controllers
             return View();
         }
 
-        [Route("/demo/Calendar")]
-        public IActionResult Calendar()
+        [Route("/demo/CalendarBox")]
+        public IActionResult CalendarBox()
         {
             return View();
         }

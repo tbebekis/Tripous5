@@ -609,28 +609,35 @@ tp.DeskDataView = class extends tp.BrokerView {
 //#region tp.DeskSysDataView Handlers
 
 tp.SysDataHandler = class {
+
+    /** Constructor
+     * @param {tp.View} View The view that calls and owns this handler
+     * @param {string} DataType The SysData DataType this handler can handle.
+     */
     constructor(View, DataType) {
         this.View = View;
         this.DataType = DataType;
     }
 
 
-    /** Called before the Insert() operation
+    /** Called before the Insert() operation of the owner View.
     */
     InsertItemBefore() {
     }
-    /** Called after the Insert() operation
+    /** Called after the Insert() operation of the owner View.
      * @param {tp.DataTable} tblData
      */
     InsertItemAfter(tblData) {
     }
 
-    /** Called before the Edit() operation
+    /** Called before the Edit() operation of the owner View.
+     * The View is about to load in its Edit part a SysData Item from server.
      * @param {string} Id
      */
     EditItemBefore(Id) {
     }
-    /** Called after the Edit() operation
+    /** Called after the Edit() operation of the owner View.
+     * The View is just loaded in its Edit part a SysData Item from server.
      * @param {string} Id
      * @param {tp.DataTable} tblData
      */
@@ -650,6 +657,10 @@ tp.SysDataHandler.prototype.View = null;
 
 tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
+    /** Constructor
+     * @param {tp.View} View The view that calls and owns this handler
+     * @param {string} DataType The SysData DataType this handler can handle.
+     */
     constructor(View, DataType = 'Table') {
         super(View, DataType )
     }
@@ -727,6 +738,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         if (tp.IsEmpty(this.gridFields)) {
             this.gridFields = tp.FindComponentByName('gridFields', this.View.Handle);
             this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
+            this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
         }
 
         this.gridFields.DataSource = this.tblFields;
@@ -738,7 +750,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
      * @param {tp.DataRow} DataRow The {@link tp.DataRow} that is going to be edited.
      */
-    CreateDialogContent(IsInsert, DataRow) {
+    async ShowEditDialog(IsInsert, DataRow) {
         let ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'IsPrimaryKey', 'Required', 'Unique'];
         let EditableColumns = ['TitleKey', 'Length', 'DefaultValue'];
         let Column,
@@ -781,50 +793,52 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             let DialogBox;
             let WindowArgs = new tp.WindowArgs({ Text: 'Fields', Width: 580, Height: 'auto' });
             WindowArgs.ShowFunc = (Window) => {
+                tp.StyleProp(elContent.parentElement, 'padding', '5px');
 
+                tp.GetAllComponents(elContent);
             };
-            WindowArgs.CloseFunc = (Args) => {
-                let DialogResult = Args.DialogResult;
+            WindowArgs.CloseFunc = (Window) => {
+                let DialogResult = Window.DialogResult;
                 let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
                 tp.InfoNote(S);
             };
 
             tp.Ui.CreateContainerControls(elContent.parentElement);
-            DialogBox = tp.ContentWindow.ShowModal(elContent, WindowArgs);
-            tp.StyleProp(elContent.parentElement, 'padding', '5px'); 
+            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);
+           
         }
 
         // EDW  
-        // arrange fields of tblFields in tp.ContentWindow
+        // data-bind
         // pass a look-up table for the DataType field
-        // test Asp.Net TagHelper
+ 
 
     }
-    EditFieldRow() {
+    async EditFieldRow() {
         let Row = this.gridFields.FocusedRow;
         if (tp.IsValid(Row)) {
-            this.CreateDialogContent(false, Row);
+            await this.ShowEditDialog(false, Row);
         }
     }
 
-    /** Called before the Insert() operation
+    /** Called before the Insert() operation of the owner View.
     */
     InsertItemBefore() {
     }
-    /** Called after the Insert() operation
+    /** Called after the Insert() operation of the owner View.
      * @param {tp.DataTable} tblData
      */
     InsertItemAfter(tblData) {
         this.SetupFieldsTable(true, tblData);
         this.SetupFieldsGrid();
     }
-    /** Called before the Edit() operation of the View. <br />
+    /** Called before the Edit() operation of the owner View. <br />
      * The View is about to load in its Edit part a SysData Item from server.
      * @param {string} Id
      */
     EditItemBefore(Id) {
     }
-    /** Called after the Edit() operation of the View <br />
+    /** Called after the Edit() operation of the owner View. <br />
      * The View is just loaded in its Edit part a SysData Item from server.
      * @param {string} Id
      * @param {tp.DataTable} tblData
@@ -853,7 +867,15 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
         
     }
-
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    GridFields_DoubleClick(Args) {
+        Args.Handled = true;
+        this.EditFieldRow();
+    }
 };
 
 //#endregion
@@ -1375,6 +1397,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.DataSources.length = 0;
         this.DataSources.push(new tp.DataSource(this.tblData));
 
+        // EDW
         let DataControlList = this.GetDataControlList();
         this.BindControls(DataControlList);
 

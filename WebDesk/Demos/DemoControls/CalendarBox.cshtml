@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Calendar";
+    ViewBag.Title = "CalendarBox";
 }
 
 <partial name="~/Demos/Shared/_Index.cshtml" />
@@ -19,7 +19,7 @@
 <br />
 
 <div class="html-code">
-    <table id="Calendar" data-setup="{ Date: '2000-11-18'}"></table>
+    <table id="CalendarBox" data-setup="{ Date: '2000-11-18'}"></table>
 </div>
 
 <br />
@@ -30,8 +30,8 @@
     var c;
 
     tp.Ready(function () {
-        c = tp.Select('#Calendar');
-        c = new tp.Calendar(c);
+        c = tp.Select('#CalendarBox');
+        c = new tp.CalendarBox(c);
     });
 
 

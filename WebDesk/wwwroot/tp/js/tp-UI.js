@@ -50,7 +50,6 @@ tp.Classes = {
 
     Edit: 'tp-Edit',
  
-
     Viewport: 'tp-Viewport',
     Container: 'tp-Container',
 
@@ -213,11 +212,6 @@ tp.Classes = {
     SqlFilterCtrl: 'tp-SqlFilter-Ctrl',
     SqlFilterDateRangeSelector: 'tp-SqlFilter-DateRangeSelector',
  
-
-    
-    
-
- 
     /* menus                ----------------------------------------------------------------- */
     Menu: 'tp-Menu',
     ContextMenu: 'tp-ContextMenu',
@@ -278,13 +272,13 @@ tp.Classes = {
     ValueSlider: 'tp-ValueSlider',
     RangeLabel: 'tp-RangeLabel',
 
-    Calendar: 'tp-Calendar',
-    CalendarHeaderRow: 'tp-HeaderRow',
-    CalendarYearCell: 'tp-Year',
-    CalendarMonthCell: 'tp-Month',
-    CalendarDaysRow: 'tp-DaysRow',
-    CalendarWeekRow: 'tp-WeekRow',
-    CalendarDateCell: 'tp-DateCell',
+    CalendarBox: 'tp-CalendarBox',
+    CalendarBoxHeaderRow: 'tp-HeaderRow',
+    CalendarBoxYearCell: 'tp-Year',
+    CalendarBoxMonthCell: 'tp-Month',
+    CalendarBoxDaysRow: 'tp-DaysRow',
+    CalendarBoxWeekRow: 'tp-WeekRow',
+    CalendarBoxDateCell: 'tp-DateCell',
 
 
     LocatorBox: 'tp-LocatorBox',
@@ -6914,29 +6908,29 @@ Object.freeze(tp.ControlBindMode);
 
 //#endregion
 
-//#region  tp.CalenderClickChangeType
+//#region  tp.CalenderBoxClickChangeType
 /**
 Indicates the type of date change that happened in a tp.Calender because of a mouse click.
 @class
 @enum {number}
 */
-tp.CalenderClickChangeType = {
+tp.CalenderBoxClickChangeType = {
     Date: 1,
     Month: 2,
     Year: 4
 };
-Object.freeze(tp.CalenderClickChangeType);
+Object.freeze(tp.CalenderBoxClickChangeType);
 //#endregion
 
-//#region  tp.CalendarClickChangeEventArgs
+//#region  tp.CalendarBoxClickChangeEventArgs
 /**
-Used by the tp.Calendar OnClickChange() event trigger method.
+Used by the tp.CalendarBox OnClickChange() event trigger method.
 Notifies listeners about the type of date change that happened in a tp.Calender because of a mouse click.
 */
-tp.CalendarClickChangeEventArgs = class extends tp.EventArgs {
+tp.CalendarBoxClickChangeEventArgs = class extends tp.EventArgs {
     /**
     Constructor.
-    @param {tp.CalenderClickChangeType} ChangeType - Denotes the type of date change that happened in a {@link tp.Calender} because of a mouse click. One of the {@link tp.CalenderClickChangeType} constants.
+    @param {tp.CalenderBoxClickChangeType} ChangeType - Denotes the type of date change that happened in a {@link tp.Calender} because of a mouse click. One of the {@link tp.CalenderBoxClickChangeType} constants.
     */
     constructor(ChangeType) {
         super('ClickChange', null, null);
@@ -6944,10 +6938,10 @@ tp.CalendarClickChangeEventArgs = class extends tp.EventArgs {
     }
 
     /**
-    Denotes the type of date change that happened in a {@link tp.Calender} because of a mouse click. One of the {@link tp.CalenderClickChangeType} constants.
-    @type {tp.CalenderClickChangeType}
+    Denotes the type of date change that happened in a {@link tp.Calender} because of a mouse click. One of the {@link tp.CalenderBoxClickChangeType} constants.
+    @type {tp.CalenderBoxClickChangeType}
     */
-    ChangeType = tp.CalenderClickChangeType.Date;
+    ChangeType = tp.CalenderBoxClickChangeType.Date;
 };
 //#endregion
 
@@ -13071,7 +13065,7 @@ tp.HtmlDateBox = class extends tp.InputControl {
 //#endregion
 
 
-//#region  tp.Calendar
+//#region  tp.CalendarBox
 /**
 A calendar control. <br />
 Example markup
@@ -13079,7 +13073,7 @@ Example markup
     <table data-setup="{ Date: '2000-11-18'}"></table>
 </pre>
 */
-tp.Calendar = class extends tp.Control {
+tp.CalendarBox = class extends tp.Control {
 
     /**
     Constructor <br />
@@ -13142,9 +13136,9 @@ tp.Calendar = class extends tp.Control {
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.Calendar';
+        this.tpClass = 'tp.CalendarBox';
         this.fElementType = 'table';
-        this.fDefaultCssClasses = [tp.Classes.Calendar];
+        this.fDefaultCssClasses = [tp.Classes.CalendarBox];
 
         // data-bind
         this.fDataBindMode = tp.ControlBindMode.Simple;
@@ -13212,14 +13206,14 @@ tp.Calendar = class extends tp.Control {
 
         let HtmlText = `                                                                 
 <tbody>                                                                                    
-<tr class="${tp.Classes.CalendarHeaderRow}"><th></th><th></th><th colspan="3"></th><th></th><th></th></tr>
-<tr class="${tp.Classes.CalendarDaysRow}"><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr>
-<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
-<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
-<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
-<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
-<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
-<tr class="${tp.Classes.CalendarWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr class="${tp.Classes.CalendarBoxHeaderRow}"><th></th><th></th><th colspan="3"></th><th></th><th></th></tr>
+<tr class="${tp.Classes.CalendarBoxDaysRow}"><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr>
+<tr class="${tp.Classes.CalendarBoxWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarBoxWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarBoxWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarBoxWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarBoxWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>      
+<tr class="${tp.Classes.CalendarBoxWeekRow}"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 </tbody>                                                                                   
 `;
 
@@ -13247,11 +13241,11 @@ tp.Calendar = class extends tp.Control {
         this.fPrevMonthCell.innerHTML = '&#9668;';
         this.fNextMonthCell.innerHTML = '&#9658;';
 
-        tp.AddClass(this.fPrevYearCell, tp.Classes.CalendarYearCell);
-        tp.AddClass(this.fNextYearCell, tp.Classes.CalendarYearCell);
+        tp.AddClass(this.fPrevYearCell, tp.Classes.CalendarBoxYearCell);
+        tp.AddClass(this.fNextYearCell, tp.Classes.CalendarBoxYearCell);
 
-        tp.AddClass(this.fPrevMonthCell, tp.Classes.CalendarMonthCell);
-        tp.AddClass(this.fNextMonthCell, tp.Classes.CalendarMonthCell);
+        tp.AddClass(this.fPrevMonthCell, tp.Classes.CalendarBoxMonthCell);
+        tp.AddClass(this.fNextMonthCell, tp.Classes.CalendarBoxMonthCell);
 
         // day literals
         this.fDaysRow.cells[6].innerHTML = tp.DayNames[0].substring(0, 3);
@@ -13268,8 +13262,6 @@ tp.Calendar = class extends tp.Control {
             }
         }
 
-
-
         this.Date = new Date();
     }
     /**
@@ -13281,7 +13273,7 @@ tp.Calendar = class extends tp.Control {
     OnAnyDOMEvent(e) {
         var Item = null;
         var Type = tp.Events.ToTripous(e.type);
-        var ChangeType = null; // tp.CalenderClickChangeType
+        var ChangeType = null; // tp.CalenderBoxClickChangeType
 
         if (Type === tp.Events.Click) {
 
@@ -13290,38 +13282,38 @@ tp.Calendar = class extends tp.Control {
                 this.fMonth = v.getMonth();
                 this.fYear = v.getFullYear();
                 this.Update();
-                ChangeType = tp.CalenderClickChangeType.Date;
+                ChangeType = tp.CalenderBoxClickChangeType.Date;
             } else if (this.fPrevYearCell === e.target) {
                 this.fYear--;
                 this.Update();
-                ChangeType = tp.CalenderClickChangeType.Year;
+                ChangeType = tp.CalenderBoxClickChangeType.Year;
             } else if (this.fNextYearCell === e.target) {
                 this.fYear++;
                 this.Update();
-                ChangeType = tp.CalenderClickChangeType.Year;
+                ChangeType = tp.CalenderBoxClickChangeType.Year;
             } else if (this.fPrevMonthCell === e.target) {
                 this.fMonth--;
-                ChangeType = tp.CalenderClickChangeType.Month;
+                ChangeType = tp.CalenderBoxClickChangeType.Month;
                 if (this.fMonth < 0) {
                     this.fMonth = 11;
                     this.fYear--;
-                    ChangeType = tp.CalenderClickChangeType.Year;
+                    ChangeType = tp.CalenderBoxClickChangeType.Year;
                 }
                 this.Update();
             } else if (this.fNextMonthCell === e.target) {
                 this.fMonth++;
-                ChangeType = tp.CalenderClickChangeType.Month;
+                ChangeType = tp.CalenderBoxClickChangeType.Month;
                 if (this.fMonth > 11) {
                     this.fMonth = 0;
                     this.fYear++;
-                    ChangeType = tp.CalenderClickChangeType.Year;
+                    ChangeType = tp.CalenderBoxClickChangeType.Year;
                 }
                 this.Update();
 
             } else if (e.target instanceof HTMLTableCellElement && this.fDayCells.indexOf(e.target) !== -1) {
                 let Info = tp.GetElementInfo(e.target);
                 this.Date = new Date(Info.Date.getTime());
-                ChangeType = tp.CalenderClickChangeType.Date;
+                ChangeType = tp.CalenderBoxClickChangeType.Date;
             }
 
 
@@ -13389,7 +13381,7 @@ tp.Calendar = class extends tp.Control {
             tp.SetElementInfo(this.fDayCells[i], { Date: DT2 });
 
 
-            this.fDayCells[i].className = tp.Classes.CalendarDateCell;
+            this.fDayCells[i].className = tp.Classes.CalendarBoxDateCell;
             if (!tp.DateBetween(DT2, FirstDate, LastDate)) {
                 this.fDayCells[i].className += ' ' + tp.Classes.Inactive;
             }
@@ -13414,10 +13406,10 @@ tp.Calendar = class extends tp.Control {
     }
     /**
     Event trigger. Notifies listeners about the type of date change that happened in a tp.Calender because of a mouse click.
-    @param {tp.CalenderClickChangeType} ChangeType - Denotes the type of date change that happened in a tp.Calender because of a mouse click. One of the {@link tp.CalenderClickChangeType} constants.
+    @param {tp.CalenderBoxClickChangeType} ChangeType - Denotes the type of date change that happened in a tp.Calender because of a mouse click. One of the {@link tp.CalenderBoxClickChangeType} constants.
     */
     OnClickChange(ChangeType) {
-        let Args = new tp.CalendarClickChangeEventArgs(ChangeType);
+        let Args = new tp.CalendarBoxClickChangeEventArgs(ChangeType);
         this.Trigger('ClickChange', Args);
     }
 
@@ -13432,67 +13424,67 @@ tp.Calendar = class extends tp.Control {
  @protected
  @type {Date}
  */
-tp.Calendar.prototype.fDate;
+tp.CalendarBox.prototype.fDate;
 /** Field
  @protected
  @type {HTMLTableElement}
  */
-tp.Calendar.prototype.elTable;
+tp.CalendarBox.prototype.elTable;
 /** Field
  @protected
  @type {HTMLTableRowElement}
  */
-tp.Calendar.prototype.fDateRow;
+tp.CalendarBox.prototype.fDateRow;
 /** Field
  @protected
  @type {HTMLTableRowElement}
  */
-tp.Calendar.prototype.fDaysRow;
+tp.CalendarBox.prototype.fDaysRow;
 /** Field
  @protected
  @type {HTMLTableRowElement[]}
  */
-tp.Calendar.prototype.fWeekRows;
+tp.CalendarBox.prototype.fWeekRows;
 /** Field
  @protected
  @type {HTMLTableCellElement[]}
  */
-tp.Calendar.prototype.fDayCells;
+tp.CalendarBox.prototype.fDayCells;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.Calendar.prototype.fPrevYearCell;
+tp.CalendarBox.prototype.fPrevYearCell;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.Calendar.prototype.fPrevMonthCell;
+tp.CalendarBox.prototype.fPrevMonthCell;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.Calendar.prototype.fCurDateCell;
+tp.CalendarBox.prototype.fCurDateCell;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.Calendar.prototype.fNextMonthCell;
+tp.CalendarBox.prototype.fNextMonthCell;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.Calendar.prototype.fNextYearCell;
+tp.CalendarBox.prototype.fNextYearCell;
 /** Field
  @protected
  @type {number}
  */
-tp.Calendar.prototype.fYear;
+tp.CalendarBox.prototype.fYear;
 /** Field
  @protected
  @type {number}
  */
-tp.Calendar.prototype.fMonth;
+tp.CalendarBox.prototype.fMonth;
 
 
 //#endregion
@@ -13665,7 +13657,7 @@ tp.DateBox = class extends tp.Control {
         //this.fDropDownBox.StyleProp('border', 'none');
         this.fDropDownBox.Dragger.Active = false;
 
-        this.fCalendar = new tp.Calendar();
+        this.fCalendar = new tp.CalendarBox();
         this.fCalendarSize = tp.SizeOf(this.fCalendar.Handle);
         this.fDropDownBox.Handle.appendChild(this.fCalendar.Handle);
 
@@ -13732,7 +13724,7 @@ tp.DateBox = class extends tp.Control {
                 if (e.currentTarget === this.Document) {
 
                     if (tp.ContainsEventTarget(this.fCalendar.Handle, e.target) && (e.target instanceof Node)) {
-                        // Calendar click, let the  Calendar_OnClickChange() handle it.
+                        // CalendarBox click, let the  Calendar_OnClickChange() handle it.
                     } else if (e.target === this.fTextBox) {
                         this.fDropDownBox.Close();
                     } else if (e.target === this.fButton) {
@@ -13759,10 +13751,10 @@ tp.DateBox = class extends tp.Control {
     }
     /**
     Notification from Calender because of a click.
-    @param {tp.CalendarClickChangeEventArgs} Args The {@link tp.CalendarClickChangeEventArgs} arguments
+    @param {tp.CalendarBoxClickChangeEventArgs} Args The {@link tp.CalendarBoxClickChangeEventArgs} arguments
     */
     Calendar_OnClickChange(Args) {
-        if (tp.Bf.In(tp.CalenderClickChangeType.Date, Args.ChangeType)) {
+        if (tp.Bf.In(tp.CalenderBoxClickChangeType.Date, Args.ChangeType)) {
             this.Date = this.fCalendar.Date;
 
             this.fDropDownBox.Close();
@@ -13878,7 +13870,7 @@ tp.DateBox.prototype.fButton;
 tp.DateBox.prototype.fDropDownBox;
 /** Field
  * @protected
- * @type {tp.Calendar}
+ * @type {tp.CalendarBox}
  */
 tp.DateBox.prototype.fCalendar;
 /** Field
@@ -19650,22 +19642,14 @@ tp.View = class extends tp.Component {
 
     /**
     Sets or un-sets the read-only flag to this view controls
+    A data control is associated to a {tp.DataColumn} and the data-column provides the <code>IsReadOnlyEdit</code> boolean property.
+    This function should be called in edit operations (not insert) in order to apply the specified flag to those "read-only-edit" data  controls.
     @protected
     @param {boolean} Flag A flag
     */
     ApplyReadOnlyEditToControls(Flag) {
-        /** @type {tp.Control} */
-        let c;
-        let List = tp.GetAllComponents(this.Handle);
-
-        List.forEach((item) => {
-            if (item instanceof tp.Control) {
-                c = item;
-                if ('DataColumn' in c && c.DataColumn instanceof tp.DataColumn && c.DataColumn.IsReadOnlyEdit === true) {
-                    c.ReadOnly = Flag === true;
-                }
-            }
-        }); 
+        let ComponentList = tp.GetAllComponents(this.Handle);
+        tp.ApplyReadOnlyEditToDataControls(Flag, ComponentList);
     }
 
 
@@ -19705,121 +19689,9 @@ tp.View = class extends tp.Component {
      * @protected
      */
     BindControls(ComponentList) {
-        /** @type {tp.Control} */
-        let c;
-        ComponentList.forEach((item) => {
-            if (item instanceof tp.Control) {
-                c = item;
-                if (this.CanBindControl(c))
-                    this.BindControl(c);
-            }
-        }); 
+        tp.BindDataControls(ComponentList, (SourceName) => { return this.GetDataSource(SourceName); });
     }
-    /**
-    Returns true if a specified control can be bound to data
-    @protected
-    @param {tp.Control} Control A {@link tp.Control}
-    @returns {boolean} Returns true if a specified control can be bound to data
-    */
-    CanBindControl(Control) {
-        if (Control instanceof tp.Control && Control.DataBindMode !== tp.ControlBindMode.None /* && Control.IsDataBound !== true */) {
-            switch (Control.DataBindMode) {
-                case tp.ControlBindMode.Simple:
-                    return tp.IsString(Control.DataField) && !tp.IsBlank(Control.DataField);
-                case tp.ControlBindMode.List:
-                    return tp.IsString(Control.DataField) && !tp.IsBlank(Control.DataField);
-                case tp.ControlBindMode.Grid:
-                    return tp.IsString(Control.TableName) && !tp.IsBlank(Control.TableName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
-            }
-        }
-
-        return false;
-    }
-    /**
-    Binds a specified control to data
-    @protected
-    @param {tp.Control} Control A {@link tp.Control}
-    */
-    BindControl(Control) {
-
-        let DataSource = this.GetDataSource(Control.TableName);
-
-        if (tp.IsValid(DataSource)) {
-            Control.DataSource = DataSource;
-
-            if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
-                 if (tp.IsString(Control['ListSourceName']) && !tp.IsBlank(Control['ListSourceName'])) {
-                    let ListSource = this.GetDataSource(Control['ListSourceName']);
-                    if (tp.IsValid(ListSource))
-                        Control['ListSource'] = ListSource;
-                }
-            }
-
-            this.SetupControl(Control);
-        }
-
-    }
-    /**
-    Sets up a control after data-binding
-    @protected
-    @param {tp.Control} Control A {@link tp.Control}
-    */
-    SetupControl(Control) {
-
-        if ((Control.DataBindMode === tp.ControlBindMode.Simple) || (Control.DataBindMode === tp.ControlBindMode.List)) {
-            /** @type {tp.DataColumn} */
-            let Column = Control.DataColumn;
-            if (!tp.IsEmpty(Column)) {
-                if ('ReadOnly' in Control) {
-                    Control.ReadOnly = Column.ReadOnly || Column.IsReadOnly || Column.IsReadOnlyUI;
-                }
-                if ('MaxLength' in Control) {
-                    if (Column.MaxLength !== -1) {
-                        Control['MaxLength'] = Column.MaxLength;
-                    }
-                }
-                if ((Column.IsRequired === true) && ('Required' in Control)) {
-                    Control.Required = false;
-                    Control.Required = true;
-                }
-
-                if (Control instanceof tp.CheckBox) {
-                    Control.Text = Column.Title;
-                } else if (tp.IsElement(Control.elText)) {
-                    tp.val(Control.elText, Column.Title);
-                }
-
-                if (!Column.IsVisible) {
-                    /** @type {HTMLElement} */
-                    let CtrlRow = tp.Ui.GetCtrlRow(Control.Handle);
-                    if (tp.IsHTMLElement(CtrlRow))
-                        tp.Visible(CtrlRow, false);
-                }
-            }
-        } else if (tp.IsValid(tp.Grid) && Control.DataBindMode === tp.ControlBindMode.Grid) {
-            /** @type {tp.Grid} */
-            let Grid = Control;
-            /** @type {tp.DataTable} */
-            let Table = Grid.DataSource.Table;
-
-            let ReadOnlyColumns = [];
-            let VisibleColumns = [];
-
-            Table.Columns.forEach((Column) => {
-                if (Column.IsVisible)
-                    VisibleColumns.push(Column.Name);
-                if (Column.IsReadOnly || Column.IsReadOnlyUI)
-                    ReadOnlyColumns.push(Column.Name);
-            }); 
-
-            Grid.SetColumnListReadOnly(ReadOnlyColumns);
-            Grid.SetColumnListVisible(VisibleColumns);
-        }
-    }
-
-    
-
-
+ 
 };
 /** 
 Gets or sets the name of the view 
@@ -21535,8 +21407,11 @@ When the close callback function (CloseFunc) is called, the Window.Args contain 
 tp.TableBoxAsync = function (Table, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
 
         tp.TableBox(Table, WindowArgs);
@@ -21595,8 +21470,11 @@ Mainly for debug purposes.
 tp.RowBoxAsync = function (Row, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
 
         tp.RowBox(Row, WindowArgs);
@@ -21636,9 +21514,13 @@ Displays a modal window with a grid displaying the tables of a dataset, returns 
 tp.DataSetBoxAsync = function (DataSet, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
+
         tp.DataSetBox(DataSet, WindowArgs);
     });
 };
@@ -21676,9 +21558,13 @@ tp.PickRowsBox = function (SqlTextOrSourceTable, WindowArgs = null) {
 tp.PickRowsBoxAsync = async function (SqlTextOrSourceTable, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
+
         tp.PickRowsBox(SqlTextOrSourceTable, WindowArgs);
     });
 };
@@ -21716,9 +21602,13 @@ tp.PickRowBox = function (SqlTextOrSourceTable, WindowArgs = null) {
 tp.PickRowBoxAsync = async function (SqlTextOrSourceTable, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
+
         tp.PickRowBox(SqlTextOrSourceTable, WindowArgs);
     });
 };
@@ -21763,8 +21653,11 @@ tp.SqlFilterBoxAsync = function (FilterDefs, SelectFunc, Table = null, WindowArg
 
     let Result = new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
-        WindowArgs.CloseFunc = (Args) => {
-            Resolve(Args.Window);
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
         };
 
         tp.SqlFilterBox(FilterDefs, SelectFunc, Table, WindowArgs); 
@@ -22255,7 +22148,7 @@ tp.Ui.Types = {
     HtmlNumberBox: tp.HtmlNumberBox,
     HtmlDateBox: tp.HtmlDateBox,
 
-    Calendar: tp.Calendar,
+    CalendarBox: tp.CalendarBox,
     DateBox: tp.DateBox,
     ImageBox: tp.ImageBox,
 
@@ -22301,6 +22194,171 @@ tp.CreateContainerControls = function (ParentElementSelector = null, ExcludedTyp
 };
 
 
+//---------------------------------------------------------------------------------------
+// Data-bindable Controls
+//---------------------------------------------------------------------------------------
+ 
+/** Returns an array with all data-bindable {@tp.Control} objects that are direct or nested DOM elements in a specified parent element or the entire document.
+ * @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
+ * @returns {tp.Control[]} Returns an array with all data-bindable {@tp.Control} objects that are direct or nested DOM elements in a specified parent element or the entire document.
+ */
+tp.GetAllDataControls = function (ParentElementOrSelector) {
+    let Result = [];
+    let List = tp.GetAllComponents(ParentElementOrSelector);
+    List.forEach((c) => {
+        if (c instanceof tp.Control && 'DataField' in c && tp.IsString(c.DataField) && !tp.IsBlank(c.DataField)) {
+            Result.push(c);
+        }
+    });
+    return Result;
+};
+/** Binds all data-bindable {@tp.Control} objects that are direct or nested DOM elements in a specified parent element or the entire document.
+ * @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
+ * @param {function} GetDataSourceFunc A call-back <code>function GetDataSource(DataSourceName)</code> which finds and returns a data-source by a specified name.
+ */
+tp.BindAllDataControls = function (ParentElementOrSelector, GetDataSourceFunc) {
+    let ComponentList = tp.GetAllDataControls(ParentElementOrSelector);
+    tp.BindDataControls(ComponentList, GetDataSourceFunc);
+};
+/**
+ * Binds data-bindable {@tp.Control} objects passed in a specified array. <br />
+ * @param {tp.Component[]} ComponentList The list of controls to bind
+ * @param {function} GetDataSourceFunc A call-back <code>function GetDataSource(DataSourceName)</code> which finds and returns a data-source by a specified name.
+ */
+tp.BindDataControls = function (ComponentList, GetDataSourceFunc) {
 
+    /** @type {tp.Control} */
+    let c;
+    ComponentList.forEach((item) => {
+        if (item instanceof tp.Control) {
+            c = item;
+            if (tp.CanBindDataControl(c))
+                tp.BindDataControl(c, GetDataSourceFunc);
+        }
+    });
+};
+/**
+ * Returns true if a specified data-bindable {@tp.Control} object can be bound to data
+ * @param {tp.Control} Control A {@link tp.Control}
+ * @returns {boolean} Returns true if a specified control can be bound to data
+ */
+tp.CanBindDataControl = function (Control) {
+    if (Control instanceof tp.Control && Control.DataBindMode !== tp.ControlBindMode.None /* && Control.IsDataBound !== true */) {
+        switch (Control.DataBindMode) {
+            case tp.ControlBindMode.Simple:
+                return tp.IsString(Control.DataField) && !tp.IsBlank(Control.DataField);
+            case tp.ControlBindMode.List:
+                return tp.IsString(Control.DataField) && !tp.IsBlank(Control.DataField);
+            case tp.ControlBindMode.Grid:
+                return tp.IsString(Control.TableName) && !tp.IsBlank(Control.TableName) && !tp.HasClass(Control.Handle, tp.Classes.Grid);
+        }
+    }
 
+    return false;
+};
+/** Binds a specified data-bindable {@tp.Control} object to a data-source
+ * @param {tp.Control} Control A {@link tp.Control}
+ * @param {function} GetDataSourceFunc A call-back <code>function GetDataSource(DataSourceName)</code> which finds and returns a data-source by a specified name.
+ */
+tp.BindDataControl = function (Control, GetDataSourceFunc) {
+    let DataSource = GetDataSourceFunc(Control.TableName);
+
+    if (DataSource instanceof tp.DataTable)
+        DataSource = new tp.DataSource(DataSource);
+
+    if (!(DataSource instanceof tp.DataSource))
+        tp.Throw('Cannot bind controls. No data-source specified');
+
+    if (tp.IsValid(DataSource)) {
+        Control.DataSource = DataSource;
+
+        if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
+            if (tp.IsString(Control['ListSourceName']) && !tp.IsBlank(Control['ListSourceName'])) {
+                let ListSource = GetDataSource(Control['ListSourceName']);
+                if (tp.IsValid(ListSource))
+                    Control['ListSource'] = ListSource;
+            }
+        }
+
+        tp.SetupDataControl(Control);
+    }
+
+};
+/** Sets up a data-bindable {@tp.Control} object after data-binding
+ * @param {tp.Control} Control A {@link tp.Control}
+ */
+tp.SetupDataControl = function (Control) {
+
+    if ((Control.DataBindMode === tp.ControlBindMode.Simple) || (Control.DataBindMode === tp.ControlBindMode.List)) {
+        /** @type {tp.DataColumn} */
+        let Column = Control.DataColumn;
+        if (!tp.IsEmpty(Column)) {
+            if ('ReadOnly' in Control) {
+                Control.ReadOnly = Column.ReadOnly || Column.IsReadOnly || Column.IsReadOnlyUI;
+            }
+            if ('MaxLength' in Control) {
+                if (Column.MaxLength !== -1) {
+                    Control['MaxLength'] = Column.MaxLength;
+                }
+            }
+            if ((Column.IsRequired === true) && ('Required' in Control)) {
+                Control.Required = false;
+                Control.Required = true;
+            }
+
+            if (Control instanceof tp.CheckBox) {
+                Control.Text = Column.Title;
+            } else if (tp.IsElement(Control.elText)) {
+                tp.val(Control.elText, Column.Title);
+            }
+
+            if (!Column.IsVisible) {
+                /** @type {HTMLElement} */
+                let CtrlRow = tp.Ui.GetCtrlRow(Control.Handle);
+                if (tp.IsHTMLElement(CtrlRow))
+                    tp.Visible(CtrlRow, false);
+            }
+        }
+    } else if (tp.IsValid(tp.Grid) && Control.DataBindMode === tp.ControlBindMode.Grid) {
+        /** @type {tp.Grid} */
+        let Grid = Control;
+        /** @type {tp.DataTable} */
+        let Table = Grid.DataSource.Table;
+
+        let ReadOnlyColumns = [];
+        let VisibleColumns = [];
+
+        Table.Columns.forEach((Column) => {
+            if (Column.IsVisible)
+                VisibleColumns.push(Column.Name);
+            if (Column.IsReadOnly || Column.IsReadOnlyUI)
+                ReadOnlyColumns.push(Column.Name);
+        });
+
+        Grid.SetColumnListReadOnly(ReadOnlyColumns);
+        Grid.SetColumnListVisible(VisibleColumns);
+    }
+};
+/** Sets or un-sets the read-only flag to all data-bindable {@tp.Control} objects passed in a specified array of object.
+ * A data control is associated to a {tp.DataColumn} and the data-column provides the <code>IsReadOnlyEdit</code> boolean property.
+ * This function should be called in edit operations (not insert) in order to apply the specified flag to those "read-only-edit" data controls.
+ * @param {tp.Component[]} ComponentList The list of controls to operate on
+ * @param {boolean} Flag A flag
+ */
+tp.ApplyReadOnlyEditToDataControls = function (Flag, ComponentList) {
+    if (tp.IsArray(ComponentList)) {
+        /** @type {tp.Control} */
+        let c;
+
+        ComponentList.forEach((item) => {
+            if (item instanceof tp.Control) {
+                c = item;
+                if ('DataColumn' in c && c.DataColumn instanceof tp.DataColumn && c.DataColumn.IsReadOnlyEdit === true) {
+                    c.ReadOnly = Flag === true;
+                }
+            }
+        });
+    }
+
+}
 

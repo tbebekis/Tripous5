@@ -1328,8 +1328,6 @@ tp.BrokerView = class extends tp.View {
         return Result;
     }
  
-
- 
     /**
     Returns the Id (value of the primary key field) of the selected data-row of the List (browser) grid, if any, else null.
     @protected
