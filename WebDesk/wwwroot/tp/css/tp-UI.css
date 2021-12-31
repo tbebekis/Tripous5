@@ -416,7 +416,6 @@ tab control
 
 /* menu-item text */ 
 .tp-MenuItem > :nth-child(2) {
-    /* tp-FlexText */
     position: relative;
     display: flex;
     align-items: center;
@@ -432,7 +431,6 @@ tab control
 
 /* menu-item arrow ico */ 
 .tp-MenuItem > :nth-child(3) {
-    /* tp-FlexText */
     position: relative;
     display: flex;
     align-items: center;
@@ -1287,7 +1285,6 @@ table.tp-Calendar td.tp-Marked {
 /* text */ 
 .tp-TreeView .tp-Node > .tp-Strip > :nth-child(3),
 .tp-TreeView .tp-Leaf > .tp-Strip > :nth-child(3) {
-    /* tp-FlexText */
     position: relative;
     display: flex;
     align-items: center;

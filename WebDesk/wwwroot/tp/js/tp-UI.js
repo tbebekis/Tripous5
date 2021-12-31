@@ -157,15 +157,6 @@ tp.Classes = {
     BorderRight: 'tp-BorderRight',
     BorderBottom: 'tp-BorderBottom',
 
-    /* flex             ----------------------------------------------------------------- */
-    FlexWrap: 'tp-FlexWrap',
-    FlexNoWrap: 'tp-FlexNoWrap',
-    FlexRowReverse: 'tp-FlexRowReverse',
-    FlexColumnReverse: 'tp-FlexColumnReverse',
-    FlexCenterH: 'tp-FlexCenterH',
-    FlexCenterV: 'tp-FlexCenterV',
-    FlexCenter: 'tp-FlexCenter',
-
     /* layout           ----------------------------------------------------------------- */
     Limiter: 'tp-Limiter',
     Col: 'tp-Col',                             // a responsive column, actually a parent class where child could be any s, m or l combination 

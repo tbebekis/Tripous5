@@ -309,45 +309,7 @@ script {
 /*---------------------------------------------------------------------------------------
   Flex
 ---------------------------------------------------------------------------------------*/
-
-.tp-Flex {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-} 
-
-.tp-FlexCenter {
-    position: relative;
-    display: flex;
-    justify-content:center;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.tp-FlexCenterH {
-    position: relative;
-    display: flex; 
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.tp-FlexCenterV {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-}
- 
-.tp-FlexNoWrap {
-    position: relative;
-    display: flex;
-}
-
-.tp-FlexColumn {
-    flex-direction: column;
-}
-
-.tp-FlexText {
+ .tp-FlexText {
     position: relative;
     display: flex;
     align-items: center;
@@ -359,23 +321,7 @@ script {
 .tp-FlexFill {
     position: relative;
     flex-grow: 1; 
-}
-
-.tp-FlexPic {
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
 } 
-
-.tp-FlexPic img {             
-    max-width: 100%;
-    max-height: 100%;
-}
-
-.tp-PicPad8 { 
-    padding: 8px; 
-
-}
  
 /*---------------------------------------------------------------------------------------
   Responsive
