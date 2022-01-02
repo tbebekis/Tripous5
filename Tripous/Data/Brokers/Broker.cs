@@ -330,7 +330,7 @@ namespace Tripous.Data
         /// Commits changes after an insert or edit. Valid with master brokers only.
         /// <para>Returns the row id of the tblItem commited row.</para>
         /// </summary>
-        public object Commit(bool Reselect)
+        public object Commit(bool Reselect = false)
         {
             DataMode OldState = State;
             try

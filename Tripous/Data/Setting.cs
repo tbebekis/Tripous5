@@ -18,7 +18,7 @@ namespace Tripous.Data
     /// </summary>
     public class Setting
     {
-
+        string fTitleKey;
 
         /// <summary>
         /// Returns the value as a specific type, according to <see cref="DataType"/>.
@@ -374,12 +374,16 @@ where
         /// <summary>
         /// The data-type
         /// </summary>
-        public SettingDataType DataType { get; set; } 
+        public SettingDataType DataType { get; set; }
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public string TitleKey { get; set; }
+        public string TitleKey
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitleKey) ? fTitleKey : Id; }
+            set { fTitleKey = value; }
+        }
         /// <summary>
         /// Gets the Title of this instance, used for display purposes. 
         /// <para>NOTE: The setter is fake. Do NOT use it.</para>

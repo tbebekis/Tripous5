@@ -70,9 +70,9 @@ from
             Table.Add("Code", 40, "Code", FieldFlags.Required | FieldFlags.Searchable | FieldFlags.ReadOnlyUI).SetCodeProviderName(CodeProviderDef.Simple6_3);
             Table.Add("Name", 96, "Trader", FieldFlags.Required | FieldFlags.Searchable);
             Table.AddDate("BirthDate", "BirthDate", FieldFlags.Searchable);
-            Table.AddDecimal("Salary", 2, "Salary", FieldFlags.Required | FieldFlags.Searchable);
+            Table.AddDecimal("Salary", 2, "Salary", FieldFlags.Required | FieldFlags.Searchable).SetDefaultValue("0");
             Table.AddTextBlob("Notes");
-            Table.AddBoolean("Married", "Married", FieldFlags.Required | FieldFlags.Searchable);
+            Table.AddBoolean("Married", "Married", FieldFlags.Required | FieldFlags.Searchable).SetDefaultValue("0");
 
         }
 

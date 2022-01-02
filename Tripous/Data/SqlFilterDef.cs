@@ -24,7 +24,7 @@ namespace Tripous.Data
         static public readonly List<string> ValidAggregateFunctions = new List<string>(new string[] { "", "count", "avg", "sum", "max", "min" });
         string fAggregateFunc;
         SqlFilterEnum fSqlFilterEnum;
-
+        string fTitleKey;
 
         /// <summary>
         /// It is used when the data type of the criterion is either <see cref="SqlFilterMode.EnumConst"/> or <see cref="SqlFilterMode.EnumQuery"/>
@@ -170,7 +170,11 @@ namespace Tripous.Data
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public string TitleKey { get; set; }
+        public string TitleKey
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitleKey) ? fTitleKey : FieldPath; }
+            set { fTitleKey = value; }
+        }
         /// <summary>
         /// Gets the Title of this instance, used for display purposes. 
         /// <para>NOTE: The setter is fake. Do NOT use it.</para>

@@ -38,7 +38,15 @@ tp.Command = class {
     /** The text title of this instance, used for display purposes.
      * @type {string}
      * */
-    Title = '';
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
 
     /** Icon key
      * @type {string}
@@ -82,6 +90,8 @@ tp.Command = class {
         return this.Type === 'Ui' || tp.StartsWith(this.Name, 'Ui.', true);
     }
 };
+
+tp.Command.prototype.fTitle = '';
 
 //#endregion
  

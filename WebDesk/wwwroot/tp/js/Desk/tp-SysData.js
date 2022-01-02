@@ -1,6 +1,16 @@
 ﻿//#region DataTableDef
+
+/** Database table definition
+ * */
 tp.DataTableDef = class {
+
+    /** Constructor.
+     * Assigns this instance's properties from a specified source, if not null.
+     * @param {objec} Source Optional.
+     */
     constructor(Source = null) {
+        this.fTitle = '';
+        this.fTitleKey = '';
         this.Fields = [];
         this.UniqueConstraints = [];
 
@@ -14,11 +24,21 @@ tp.DataTableDef = class {
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
-    Title = '';
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
     /** A resource Key used in returning a localized version of Title
      * @type {string}
      */
-    TitleKey = '';
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
 
     /** The list of fields
      * @type {tp.DataFieldDef[]}
@@ -52,10 +72,66 @@ tp.DataTableDef = class {
         if (tp.IsArray(Source.UniqueConstraints))
             this.UniqueConstraints = Source.UniqueConstraints;
     }
+
+    /** Loads this instance's fields from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load fields from.
+     */
+    FieldsFromDataTable(Table) {
+        this.Fields.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let FieldDef = new tp.DataFieldDef();
+                this.Fields.push(FieldDef);
+                FieldDef.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's fields to a {@link tp.DataTable} and returns the table.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    FieldsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = new tp.DataTable();
+            Table.Name = 'Fields';
+
+            Table.AddColumn('Id', tp.DataType.String, 40);
+            Table.AddColumn('Name', tp.DataType.String, 32);
+            Table.AddColumn('TitleKey', tp.DataType.String, 96);
+            Table.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
+            Table.AddColumn('DataType', tp.DataType.String, 40);
+            Table.AddColumn('Length', tp.DataType.Integer);
+            Table.AddColumn('Required', tp.DataType.Boolean);
+            Table.AddColumn('DefaultValue');
+            Table.AddColumn('Unique', tp.DataType.Boolean);
+            Table.AddColumn('ForeignTableName', tp.DataType.String, 32);
+            Table.AddColumn('ForeignFieldName', tp.DataType.String, 32);
+        }           
+ 
+        this.Fields.forEach((FieldDef) => {
+            let Row = Table.AddEmptyRow();
+            FieldDef.ToDataRow(Row);
+        });        
+
+        return Table;
+    }
 };
 
+tp.DataTableDef.prototype.fTitle = '';
+tp.DataTableDef.prototype.fTitleKey = '';
+
+/** Database table field definition
+ * */
 tp.DataFieldDef = class {
+
+    /** Constructor.
+     * Assigns this instance's properties from a specified source, if not null.
+     * @param {objec} Source Optional.
+     */
     constructor(Source = null) {
+        this.fTitle = '';
+        this.fTitleKey = '';
+
         this.Assign(Source);
     }
 
@@ -66,11 +142,21 @@ tp.DataFieldDef = class {
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
-    Title = '';
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
     /** A resource Key used in returning a localized version of Title
      * @type {string}
      */
-    TitleKey = '';
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
 
     /** True when the field is a primary key
      * @type {boolean}
@@ -131,7 +217,46 @@ tp.DataFieldDef = class {
         this.ForeignTableName = Source.ForeignTableName || '';
         this.ForeignFieldName = Source.ForeignFieldName || '';
     }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            this.Name = Row.Get('Name', '');
+            this.Title = Row.Get('Title', '');
+            this.TitleKey = Row.Get('TitleKey', '');
+            this.IsPrimaryKey = Row.Get('IsPrimaryKey', false);
+            this.DataType = Row.Get('DataType', tp.DataType.String);
+            this.Length = Row.Get('Length', 0);
+            this.Required = Row.Get('Required', false);
+            this.DefaultValue = Row.Get('DefaultValue', null);
+            this.Unique = Row.Get('Unique', false);
+            this.ForeignTableName = Row.Get('ForeignTableName', '');
+            this.ForeignFieldName = Row.Get('ForeignFieldName', '');
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
+        Row.Set('Title', this.Title);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('IsPrimaryKey', this.IsPrimaryKey);
+        Row.Set('DataType', this.DataType);
+        Row.Set('Length', this.Length);
+        Row.Set('Required', this.Required);
+        Row.Set('DefaultValue', this.DefaultValue);
+        Row.Set('Unique', this.Unique);
+        Row.Set('ForeignTableName', this.ForeignTableName);
+        Row.Set('ForeignFieldName', this.ForeignFieldName);
+    }
 };
+
+tp.DataFieldDef.prototype.fTitle = '';
+tp.DataFieldDef.prototype.fTitleKey = '';
+
 //#endregion
 
 //#region SysDataHandler
@@ -244,44 +369,24 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @type {object}
      */
     TableDef = null;
-
+ 
     /** Creates and assigns the tblFields.
      * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
      * @param {tp.DataTable} tblData
      * */
     SetupFieldsTable(IsInsert, tblData) {
-        // every time create the tblFields
-        this.tblFields = new tp.DataTable();
-        this.tblFields.Name = 'Fields';
+        let TableDef = new tp.DataTableDef();
 
-        this.tblFields.AddColumn('Id', tp.DataType.String, 40);
-        this.tblFields.AddColumn('Name', tp.DataType.String, 32);
-        this.tblFields.AddColumn('TitleKey', tp.DataType.String, 96);
-        this.tblFields.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
-        this.tblFields.AddColumn('DataType', tp.DataType.String, 40);
-        this.tblFields.AddColumn('Length', tp.DataType.Integer);
-        this.tblFields.AddColumn('Required', tp.DataType.Boolean);
-        this.tblFields.AddColumn('DefaultValue');
-        this.tblFields.AddColumn('Unique', tp.DataType.Boolean);
-        this.tblFields.AddColumn('ForeignTableName', tp.DataType.String, 32);
-        this.tblFields.AddColumn('ForeignFieldName', tp.DataType.String, 32);
-
+        // read the json from Data1 field and load the tblFields
         if (IsInsert === false) {
-
-            // read the json from Data1 field and load the tblFields
             let Text = tblData.Rows[0].Get('Data1');
-            let TableDef = eval("(" + Text + ")");
-            //log(TableDef);
-
-            //let DTD = new tp.DataTableDef(TableDef);
-            //log(DTD);
-
-            let RowInfoList = TableDef.Fields;
-            if (tp.IsArray(RowInfoList)) {
-                this.tblFields.FromObjectList(RowInfoList);
-                this.tblFields.AcceptChanges();
-            }
+            //log(Text);
+            let Source = eval("(" + Text + ")");
+            TableDef.Assign(Source);
         }
+
+        this.tblFields = TableDef.FieldsToDataTable();
+        this.tblFields.AcceptChanges();
     }
     /** Assigns the gridFields property and sets up the grid.
      * */
@@ -413,6 +518,17 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
                 });
             };
             //----------------------------------------------------- 
+            /** Callback to be called just before a modal window is about to set its DialogResult property. <br />
+             *  Returning false from the call-back cancels the setting of the property and the closing of the modal window. <br />
+             * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
+             * @param {tp.Window} Window
+             * @param {number} DialogResult One of the {@link tp.DialogResult} constants
+             * */
+            WindowArgs.CanSetDialogResultFunc = (Window, DialogResult) => {
+                // EDW: validate user input in dialog box
+                return true;
+            };
+            //----------------------------------------------------- 
             /**  Callback to be called when the dialog is about to close (i.e. OnClosing())
              * @param {tp.Window} Window
              */
@@ -498,9 +614,15 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @param {tp.DataTable} tblData
      */
     CommitItemBefore(tblData) {
-        // EDW:
-        // Add a FromTable(), ToTable() to tp.DataTableDef
-        // Load a tp.DataTableDef from tblData and tblFields
+        let Row = tblData.Rows[0];
+
+        let TableDef = new tp.DataTableDef();
+        TableDef.Name = Row.Get('DataName', '');
+        TableDef.TitleKey = Row.Get('TitleKey', '');
+        TableDef.FieldsFromDataTable(this.tblFields);
+
+        let JsonText = tp.ToJson(TableDef, true);
+        log(JsonText)
     }
 
     /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
@@ -1125,7 +1247,8 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.Handler.CommitItemBefore(this.tblData);
 
         // default values
-        v = Row.Get('TitleKey', '');
+        let Row = this.tblData.Rows[0];
+        let v = Row.Get('TitleKey', '');
         if (!tp.IsValid(v) || tp.IsBlankString(v))
             Row.Set('TitleKey', Row.Get('DataName', ''));
 

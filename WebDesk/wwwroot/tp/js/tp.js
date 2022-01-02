@@ -7766,6 +7766,15 @@ tp.DropDownHandler = function (Button, List, CssClass = 'tp-Visible') {
         //}
     });
 };
+
+/** Serializes a specified object to json text. 
+ * The result text can be formatted, according to a specified flag.
+ * @param {object} o The object to serialize.
+ * @param {boolean} [Formatted=true] Optional. When true the json text is formatted.
+ */
+tp.ToJson = function (o, Formatted = true) {
+    return Formatted === true ? JSON.stringify(o, null, " ") : JSON.stringify(o);    
+}
 //#endregion
 
 
@@ -14675,6 +14684,12 @@ tp.WindowArgs.prototype.Creator = null;
 /** Callback to be called after the window shows itself (i.e. OnShown()). 
  * A function as function(Window: tp.Window) */
 tp.WindowArgs.prototype.ShowFunc = null;
+/** Callback to be called just before a modal window is about to set its DialogResult property. <br />
+ *  A function as function(Window: tp.Window, DialogResult: tp.DialogResult): boolean <br />
+ *  Returning false from the call-back cancels the setting of the property and the closing of the modal window. <br />
+ * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
+ * */
+tp.WindowArgs.prototype.CanSetDialogResultFunc = null;
 /** Callback to be called when the window is about to close (i.e. OnClosing()). 
  * A function as function(Window: tp.Window) */
 tp.WindowArgs.prototype.CloseFunc = null;
@@ -14777,7 +14792,8 @@ outline: none;
         if (this.Modal === true
             && tp.IsNumber(v)
             && v !== this.DialogResult
-            && v !== tp.DialogResult.None) {
+            && v !== tp.DialogResult.None
+            && this.CanSetDialogResult(v) === true) {
             this.fDialogResult = v;
             this.Close();
         }
@@ -15162,6 +15178,19 @@ gap: 0.15em;
         }
     }
 
+ 
+    /** Called just before a modal window is about to set its DialogResult property. <br />
+     * Returning false cancels the setting of the property and the closing of the modal window. <br />
+     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
+     * @param {any} DialogResult
+     */
+    CanSetDialogResult(DialogResult) {
+        if (tp.IsFunction(this.Args.CanSetDialogResultFunc)) {
+            return tp.Call(this.Args.CanSetDialogResultFunc, this.Args.Creator, this, DialogResult);
+        }
+
+        return true;
+    }
     /**
      * Used with modal windows.
      * Can be used in passing the results back to the caller code. 

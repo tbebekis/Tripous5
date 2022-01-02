@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 namespace Tripous.Data 
 {
     /// <summary>
-    /// Table definition
+    /// Database table definition
     /// </summary>
     public class DataTableDef
     {
- 
+
+        string fTitleKey;
 
         /* construction */
         /// <summary>
@@ -207,6 +208,7 @@ namespace Tripous.Data
 
             Dest.DataType = "Table";
             Dest.DataName = this.Name;
+            Dest.TitleKey = this.TitleKey;
             Dest.Owner = Owner;
 
             Dest.Data1 = Json.Serialize(this);
@@ -361,7 +363,11 @@ namespace Tripous.Data
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
-        public string TitleKey { get; set; }
+        public string TitleKey
+        {
+            get { return !string.IsNullOrWhiteSpace(fTitleKey) ? fTitleKey : Name; }
+            set { fTitleKey = value; }
+        }
         /// <summary>
         /// Gets the Title of this instance, used for display purposes. 
         /// <para>NOTE: The setter is fake. Do NOT use it.</para>

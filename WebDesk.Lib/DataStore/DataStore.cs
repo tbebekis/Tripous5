@@ -164,6 +164,25 @@ namespace WebLib
             Table = Json.FromJson<DataTableDef>(JsonText);
             Table.Check();
         }
+        static void AddTestData()
+        {
+            // add Traders
+            string SqlText = "select count(Id) as Result from Trader";
+            int Count = SqlStore.IntegerResult(SqlText, 0);
+            if (Count == 0)
+            {
+                string[] Traders = { "Jules Verne", "Robert Heinlein", "Isaac Asimov", "William Gibson", "Arthur Clarke" };
+                SqlBroker Broker = SqlBroker.Create("Trader", true, false);
+
+                foreach (string TraderName in Traders)
+                {
+                    Broker.Insert();
+                    Broker.Row["Name"] = TraderName;
+                    Broker.Commit();
+                }
+ 
+            }
+        }
 
         /// <summary>
         /// Initializer
@@ -192,6 +211,8 @@ namespace WebLib
                 RegisterViews();
 
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
+
+                AddTestData();
             }
 
            

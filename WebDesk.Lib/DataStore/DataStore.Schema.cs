@@ -222,7 +222,7 @@ create table {TableName} (
             if (TableExists(TableName))
                 return;       
 
-            DataTableDef Table = new DataTableDef() { Name = TableName };
+            DataTableDef Table = new DataTableDef() { Name = TableName, TitleKey = TableName };
 
             Table.AddId();
             Table.AddString("UserId", 96, true);
@@ -290,7 +290,7 @@ insert into {TableName} (
             if (TableExists(TableName))
                 return;
 
-            DataTableDef Table = new DataTableDef() { Name = TableName };
+            DataTableDef Table = new DataTableDef() { Name = TableName, TitleKey = TableName };
 
             Table.AddId();
             Table.AddString("Code", 40, true).SetUnique();
