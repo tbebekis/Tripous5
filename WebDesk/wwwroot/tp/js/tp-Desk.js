@@ -606,7 +606,9 @@ tp.DeskDataView = class extends tp.BrokerView {
 
 //#endregion
 
-//#region tp.DeskSysDataView Handlers
+
+
+//#region SysDataHandler
 
 tp.SysDataHandler = class {
 
@@ -654,6 +656,9 @@ tp.SysDataHandler.prototype.DataType = 'Table';
  */
 tp.SysDataHandler.prototype.View = null;
 
+//#endregion
+
+//#region SysDataHandlerTable
 
 tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
@@ -706,6 +711,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     SetupFieldsTable(IsInsert, tblData) { 
         // every time create the tblFields
         this.tblFields = new tp.DataTable();
+        this.tblFields.Name = 'Fields';
+
         this.tblFields.AddColumn('Id', tp.DataType.String, 40);
         this.tblFields.AddColumn('Name', tp.DataType.String, 32);
         this.tblFields.AddColumn('TitleKey', tp.DataType.String, 96);
@@ -745,41 +752,78 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         this.gridFields.BestFitColumns();
     }
 
-    /**
-     * 
-     * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
-     * @param {tp.DataRow} DataRow The {@link tp.DataRow} that is going to be edited.
+    /** Creates and returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
+     * The row is either empty, on insert, or a clone of a tblFields row, on edit.
+     * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFields row, on edit.
+     * @returns Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
      */
-    async ShowEditDialog(IsInsert, DataRow) {
-        let ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'IsPrimaryKey', 'Required', 'Unique'];
+    CreateEditTable(SourceRow = null) {
+        let IsInsert = tp.IsEmpty(SourceRow);
         let EditableColumns = ['TitleKey', 'Length', 'DefaultValue'];
-        let Column,
-            RowClass,
-            Text,
-            TypeName,
-            DataField,
-            ReadOnly,
-            HtmlText,
-            ContentHtmlText;
-       
+
+        let Result = this.tblFields.Clone();
+        Result.Name = 'Fields';
+
+        if (tp.IsEmpty(SourceRow)) {
+            Result.AddEmptyRow();
+        }
+        else {
+            Result.AddRow(SourceRow.Data);
+        }
+
+        Result.Columns.forEach((column) => {
+            if (column.Name === 'Name')
+                column.MaxLength = 32;
+ 
+            column.ReadOnly = !(IsInsert || (EditableColumns.indexOf(column.Name) !== -1));
+
+        });
+
+        return Result;
+    }
+
+    /** Displays an edit dialog box for editing an existing or new row of the tblFields.
+     * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
+     * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
+     * @param {tp.DataTable} Table The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
+     */
+    async ShowEditDialog(Table) {
+        let ContentHtmlText;
+        let HtmlText;        
         let HtmlRowList = [];
 
+        let DataSource = new tp.DataSource(Table);
+        let ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'IsPrimaryKey', 'Required', 'Unique'];
+ 
+        // prepare HTML text for each column in tblFields
         ColumnNames.forEach((ColumnName) => {
-            Column = this.tblFields.FindColumn(ColumnName);
-            RowClass = Column.DataType === tp.DataType.Boolean ? 'tp-CheckBoxRow' : 'tp-CtrlRow';
-            Text = Column.Title;
-            TypeName = ColumnName === 'DataType'? 'ComboBox': tp.DataTypeToUiType(Column.DataType);
-            DataField = Column.Name;
-            ReadOnly = IsInsert ||
-                (EditableColumns.indexOf(Column.Name) !== -1 || (tp.IsSameText(Column.Name, 'Required') && !DataRow.Get('IsPrimaryKey', false)));
+            let Column = this.tblFields.FindColumn(ColumnName);
+            let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+
+            let Text = Column.Title;
+            let Ctrl = {
+                TypeName: Column.Name === 'DataType' ? 'ComboBox' : tp.DataTypeToUiType(Column.DataType),
+                TableName: Column.Table.Name,
+                DataField: Column.Name
+            };
+
+            if (ColumnName === 'DataType') {
+                Ctrl.ListOnly = true;
+                Ctrl.ListValueField = 'Id';
+                Ctrl.ListDisplayField = 'Name';
+                Ctrl.ListSourceName = 'DataType';
+            }
 
             // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-            HtmlText = `<div class="${RowClass}" data-setup="{Text: '${Text}', Control: { TypeName: '${TypeName}', DataField: '${DataField}', ReadOnly: ${ReadOnly} } }"></div>`;
+            HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
             HtmlRowList.push(HtmlText);
         });
- 
+
+
+        // join html text for all control rows
         HtmlText = HtmlRowList.join('\n');
 
+        // content
         ContentHtmlText = `
 <div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
     <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
@@ -788,38 +832,79 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 </div>
 `;
         let elContent = tp.ContentWindow.GetContentElement(ContentHtmlText);
-        if (tp.IsHTMLElement(elContent)) {
 
+        // show the dialog
+        if (tp.IsHTMLElement(elContent)) {
             let DialogBox;
-            let WindowArgs = new tp.WindowArgs({ Text: 'Fields', Width: 580, Height: 'auto' });
+
+            let BodyWidth = tp.Doc.body.offsetWidth
+            let w = BodyWidth <= 580 ? BodyWidth - 6 : 580;
+
+            let WindowArgs = new tp.WindowArgs({ Text: 'Fields', Width: w, Height: 'auto' });
+
+            //----------------------------------------------------- 
+            /** Callback to be called after the dialog shows itself (i.e. OnShown())
+             * @param {tp.Window} Window
+             */
             WindowArgs.ShowFunc = (Window) => {
                 tp.StyleProp(elContent.parentElement, 'padding', '5px');
 
-                tp.GetAllComponents(elContent);
+                // force tp-Cols to adjust
+                Window.BroadcastSizeModeChanged();
+
+                // bind dialog controls
+                tp.BindAllDataControls(elContent, (DataSourceName) => {
+                    if (DataSourceName === 'Fields')
+                        return DataSource;
+
+                    if (DataSourceName === 'DataType') {
+                        let Result = new tp.DataSource(tp.DataType.ToLookupTable());
+                        return Result;
+                    }
+
+                    return null;
+                }); 
             };
+            //----------------------------------------------------- 
+            /**  Callback to be called when the dialog is about to close (i.e. OnClosing())
+             * @param {tp.Window} Window
+             */
             WindowArgs.CloseFunc = (Window) => {
                 let DialogResult = Window.DialogResult;
                 let S = tp.EnumNameOf(tp.DialogResult, DialogResult);
                 tp.InfoNote(S);
             };
+            //----------------------------------------------------- 
 
             tp.Ui.CreateContainerControls(elContent.parentElement);
-            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);
-           
+            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);           
         }
-
-        // EDW  
-        // data-bind
-        // pass a look-up table for the DataType field
  
-
     }
+    /** Called when inserting a single row of the tblFields and displays the edit dialog 
+     */
+    async InsertFieldRow() {
+        let tblEdit = this.CreateEditTable(null);
+        await this.ShowEditDialog(tblEdit);
+        // EDW: insert the row from tblEdit to a new row of the tblFields
+    }
+    /** Called when editing a single row of the tblFields and displays the edit dialog 
+     */
     async EditFieldRow() {
         let Row = this.gridFields.FocusedRow;
         if (tp.IsValid(Row)) {
-            await this.ShowEditDialog(false, Row);
+            if (Row.Get('IsPrimaryKey', false) === true) {
+                tp.ErrorNote('Editing Primary Key is not allowed.');
+            }
+            else {
+                let tblEdit = this.CreateEditTable(Row);
+                await this.ShowEditDialog(tblEdit);
+                // EDW: copy the row from tblEdit to the tblFields
+            }
+
         }
     }
+
 
     /** Called before the Insert() operation of the owner View.
     */
@@ -855,7 +940,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
  
         switch (Args.Command) {
             case 'GridRowInsert':
-                tp.InfoNote('Clicked: ' + Args.Command);
+                this.InsertFieldRow();
                 break;
             case 'GridRowEdit':
                 this.EditFieldRow();
@@ -1458,16 +1543,9 @@ tp.DeskSysDataView = class extends tp.DeskView {
      * @returns {tp.Control[]}  Returns the list of data controls.
      * */
     GetDataControlList() {
-        let Result = [];
+        
         let ElementList = this.pagerEdit.GetPageElementList();
-
-        let List = tp.GetAllComponents(ElementList[0]);
-        List.forEach((c) => {
-            if (c instanceof tp.Control && 'DataField' in c && tp.IsString(c.DataField) && !tp.IsBlank(c.DataField)) {
-                Result.push(c);
-            }
-        });
-
+        let Result = tp.GetAllDataControls(ElementList[0]);     // controls bound to SysData table are in the first page only
         return Result;
     }
 

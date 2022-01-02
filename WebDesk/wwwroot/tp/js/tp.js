@@ -12202,6 +12202,17 @@ tp.Component = class extends tp.Object {
      * */
     ParentSizeModeChanged(ParentSizeMode) {
     }
+    /** Broadcasts a 'SizeModeChanged' to all direct and nested components
+     * */
+    BroadcastSizeModeChanged() {
+        this.OnSizeModeChanged();
+        let List = tp.GetAllComponents(this.Handle);
+        List.forEach((item) => {
+            if (item.IsElementResizeListener === true) {
+                item.OnSizeModeChanged();
+            }
+        });
+    }
 
     /**
     Handles any DOM event

@@ -19843,13 +19843,30 @@ tp.View.CreateView = async function(ElementOrSelectorOrHtmlText, CreateParams, P
 
 //#region tp.Row 
 
-/** A responsive row */
+/** A responsive row. <br />
+ *  Its <code>IsElementResizeListener</code> property is set to true in order to send <code>ParentSizeModeChanged()</code> notifications to its columns. <br />
+ *  Its <code>Breakpoints</code> array property is analogous to a media query and it must always contain 4 breakpoint number values: XSmal, Small, Medium and Large.
+    Example markup:
+    <pre>
+         <div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
+            <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+            </div>
+        </div>
+    </pre>
+    Example of the produced markup.
+    <pre>
+        <div class='tp-Row'></div>
+    </pre>
+ */
 tp.Row = class extends tp.Component {
     /**
     Constructor <br />
     Example markup:
     <pre>
-        <div class='Row'></div>
+         <div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
+            <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+            </div>
+        </div>
     </pre> 
     Example of the produced markup.
     <pre>
@@ -19887,13 +19904,28 @@ tp.Row = class extends tp.Component {
 //#endregion
 
 //#region tp.Col
-/** A responsive column */
+/** A responsive column. <br />
+ * The <code>WidthPercents</code> array property contains always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes
+ * and indicates what percent widths to occupy from parent container, i.e. a {@link tp.Row}, according to width mode. <br />
+ * The <code>ControlWidthPercents</code> array property contains always 5 elements, corresponding to XSmall, Small, Medium, Large and XLarge width modes
+ * and indicates what percent widths the Control part of a {@link tp.CtrlRow} should occupy according to width mode of the parent container, i.e. a {@link tp.Row}
+     Example markup:
+    <pre>
+        <div class="Col" data-setup='WidthPercents: [100, 100, 50, 33.33, 33.33], {ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+        </div>
+    </pre>
+    Example of the produced markup.
+    <pre>
+        <div class='tp-Col'></div>
+    </pre> 
+ */
 tp.Col = class extends tp.Component {
     /**
     Constructor <br />
     Example markup:
     <pre>
-        <div class='Col'></div>
+        <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+        </div>
     </pre> 
     Example of the produced markup.
     <pre>
@@ -20104,6 +20136,30 @@ tp.CtrlRow.prototype.elRequiredMark = null;
  * @type {HTMLLabelElement}
  * */
 tp.CtrlRow.prototype.elText = null;
+
+/** Assembles and returns HTML markup text for a control row or check-box control row, along with a data-setup attribute.
+ * Example:
+ * <pre>
+ *  <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+ * </pre>
+ * @param {boolean} IsCheckBox When true creates a check-box row.
+ * @param {string} Text The caption of the row. The Text part of the data-setup object.
+ * @param {object} Ctrl The Control part of the data-setup object.
+ * @returns {string} Returns HTML markup text for a control row or check-box control row, along with a data-setup attribute.
+ */
+tp.CtrlRow.GetHtml = function (IsCheckBox, Text, Ctrl) {
+    // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+
+    let RowClass = IsCheckBox === true ? 'tp-CheckBoxRow' : 'tp-CtrlRow';
+    o = {
+        Text: Text,
+        Control: Ctrl
+    };
+    let DataSetupText = JSON.stringify(o);
+
+    let Result = `<div class='${RowClass}' data-setup='${DataSetupText}' ></div>`;
+    return Result;
+};
 
 //#endregion
 
@@ -22261,27 +22317,43 @@ tp.CanBindDataControl = function (Control) {
  * @param {function} GetDataSourceFunc A call-back <code>function GetDataSource(DataSourceName)</code> which finds and returns a data-source by a specified name.
  */
 tp.BindDataControl = function (Control, GetDataSourceFunc) {
-    let DataSource = GetDataSourceFunc(Control.TableName);
 
-    if (DataSource instanceof tp.DataTable)
-        DataSource = new tp.DataSource(DataSource);
+    if (Control instanceof tp.Control) {
+        let DataField = Control.DataField;
 
-    if (!(DataSource instanceof tp.DataSource))
-        tp.Throw('Cannot bind controls. No data-source specified');
+        if (tp.IsString(DataField) && !tp.IsBlank(DataField)) {
 
-    if (tp.IsValid(DataSource)) {
-        Control.DataSource = DataSource;
+            // get the data-source
+            let DataSource = GetDataSourceFunc(Control.TableName);
 
-        if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource']) && !tp.IsEmpty(Control.DataColumn)) {
-            if (tp.IsString(Control['ListSourceName']) && !tp.IsBlank(Control['ListSourceName'])) {
-                let ListSource = GetDataSource(Control['ListSourceName']);
-                if (tp.IsValid(ListSource))
-                    Control['ListSource'] = ListSource;
+            if (DataSource instanceof tp.DataTable)
+                DataSource = new tp.DataSource(DataSource);
+
+            if (!(DataSource instanceof tp.DataSource))
+                tp.Throw('Cannot bind controls. No data-source specified');
+
+            // bind
+            if (tp.IsValid(DataSource)) {
+
+                // look-up
+                if ((Control.DataBindMode === tp.ControlBindMode.List) && tp.IsEmpty(Control['ListSource'])) {  
+                    if (tp.IsString(Control['ListSourceName']) && !tp.IsBlank(Control['ListSourceName'])) {
+                        let ListSource = GetDataSourceFunc(Control['ListSourceName']);
+                        if (tp.IsValid(ListSource))
+                            Control['ListSource'] = ListSource;
+                    }
+                }
+
+                Control.DataSource = DataSource;
+
+                // setup
+                tp.SetupDataControl(Control);
             }
         }
-
-        tp.SetupDataControl(Control);
     }
+        
+
+
 
 };
 /** Sets up a data-bindable {@tp.Control} object after data-binding

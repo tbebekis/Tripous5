@@ -181,6 +181,43 @@ tp.DataType = {
     get Blob() { return "B"; }, // = "B";          // {"blob", "bin", "binary"}
  */
 
+
+    /** Returns the values of the properties of this type as a {@link tp.DataTable}
+     * @returns {tp.DataTable} Returns the values of the properties of this type as a {@link tp.DataTable}
+     * */
+    ToLookupTable() {
+        let Result = new tp.DataTable();
+
+        Result.AddColumn('Id');
+        Result.AddColumn('Name');
+
+        for (let Prop in tp.DataType) {
+            if (!tp.IsFunction(tp.DataType[Prop])) {
+                Result.AddRow(Prop, Prop);
+            }
+        }
+        Result.AcceptChanges();
+        return Result;
+    },
+    /** Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * @returns {object[]} Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * */
+    ToList() {
+        let Result = [];
+
+        for (let Prop in tp.DataType) {
+            if (!tp.IsFunction(tp.DataType[Prop])) {
+                let o = {
+                    Id: Prop,
+                    Name: Prop
+                };
+
+                Result.push(o);
+            }
+        }
+
+        return Result;
+    },
     /** Converts a DataType value to json string
     @param {string} v - One of the DataType string constants
     @returns {string} Returns a json equivalent
@@ -4688,7 +4725,6 @@ tp.DataSource = class extends tp.Object {
 
 
     /* private - event handlers */
-
     /** Event handler.
      @private
      @param {tp.DataTableEventArgs} Args The passed arguments.
