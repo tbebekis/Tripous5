@@ -183,16 +183,19 @@ tp.DataType = {
 
 
     /** Returns the values of the properties of this type as a {@link tp.DataTable}
+     * @type {string[]} ExcludeTypes Array containing {@link tp.DataType} constants to exclude.
      * @returns {tp.DataTable} Returns the values of the properties of this type as a {@link tp.DataTable}
      * */
-    ToLookupTable() {
+    ToLookupTable(ExcludeTypes = [tp.DataType.Unknown]) {
         let Result = new tp.DataTable();
+
+        ExcludeTypes = tp.IsArray(ExcludeTypes) ? ExcludeTypes : [];
 
         Result.AddColumn('Id');
         Result.AddColumn('Name');
 
         for (let Prop in tp.DataType) {
-            if (!tp.IsFunction(tp.DataType[Prop])) {
+            if (ExcludeTypes.indexOf(Prop) < 0 && !tp.IsFunction(tp.DataType[Prop])) {
                 Result.AddRow(Prop, Prop);
             }
         }
@@ -200,13 +203,16 @@ tp.DataType = {
         return Result;
     },
     /** Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * @type {string[]} ExcludeTypes Array containing {@link tp.DataType} constants to exclude.
      * @returns {object[]} Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
      * */
-    ToList() {
+    ToList(ExcludeTypes = [tp.DataType.Unknown]) {
         let Result = [];
 
+        ExcludeTypes = tp.IsArray(ExcludeTypes) ? ExcludeTypes : [];
+
         for (let Prop in tp.DataType) {
-            if (!tp.IsFunction(tp.DataType[Prop])) {
+            if (ExcludeTypes.indexOf(Prop) < 0 && !tp.IsFunction(tp.DataType[Prop])) {
                 let o = {
                     Id: Prop,
                     Name: Prop
@@ -2765,6 +2771,31 @@ tp.DataTable = class extends tp.Object {
             Column.Visible = tp.ListContainsText(ColumnNames, Column.Name);
         }
     }
+
+    /**
+    Sets a column's ReadOnly according to a specified flag
+    @param {string | number | tp.DataColumn} Column - Could be a number (index), a string (field name) or a data column
+    @param {boolean} Flag - True to make a visible column.
+    */
+    SetColumnReadOnly(Column, Flag) {
+        var Col = this.FindColumn(Column);
+        if (Col)
+            Col.ReadOnly = Flag;
+    }
+    /**
+    Sets column ReadOnly according to an array of column names. Each column in the array becomes visible, where the rest become invisible.
+    @param {string[]} ColumnNames A list of column names
+    */
+    SetColumnListReadOnly(ColumnNames) {
+        var Column, i, ln;
+
+        for (i = 0, ln = this.Columns.length; i < ln; i++) {
+            Column = this.Columns[i];
+            Column.ReadOnly = tp.ListContainsText(ColumnNames, Column.Name);
+        }
+    }
+
+
 
     /**
     Sets all rows to Unchaged state and empties the Deleted cache.

@@ -22,6 +22,8 @@ namespace WebLib
             View.ClassType = "tp.SysDataView";
             View.AddCssClasses("tp-View tp-DeskView");
 
+            View.JS.Add("/tp/js/Desk/tp-SysData.js");
+
             // tool-bar
             View.ToolBarButtons.Clear();
             View.ToolBarButtons.AddRange(new ViewToolBarButtonDef[]

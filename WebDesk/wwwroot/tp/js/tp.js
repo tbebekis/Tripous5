@@ -2588,6 +2588,8 @@ True if a specified array or array-like object contains an item with a certain v
 @see {@link http://kangax.github.io/compat-table/es5/|kangax tables}
 */
 tp.ListContains = function (List, v) {
+    return List.indexOf(v) < 0;
+/*
     var i = List.length;
     while (i--) {
         if (List[i] === v) {
@@ -2595,6 +2597,7 @@ tp.ListContains = function (List, v) {
         }
     }
     return false;
+ */
 };
 /**
 True if a specified array or array-like object contains an item with a certain string value (case insensitive match). 
@@ -11039,6 +11042,25 @@ tp.AjaxRequest = class {
      * @type {object}
      */
     Params = {};
+
+    /** Returns true if this is a Ui request.
+     * @returns {boolean} Returns true if this is a Ui request.
+     * */
+    IsUiRequest() {
+        return tp.IsValid(this.Params) && 'Type' in this.Params && tp.IsSameText(this.Params.Type, 'Ui');
+    }
+    /** Returns true if this is a Proc request.
+     * @returns {boolean} Returns true if this is a Ui request.
+     * */
+    IsProcRequest() {
+        return tp.IsValid(this.Params) && 'Type' in this.Params && tp.IsSameText(this.Params.Type, 'Proc');
+    }
+    /** Returns true if this is a Ui request with IsSingleInstance set to true.
+     * @returns {boolean} Returns true if this is a Ui request.
+     * */
+    IsSingleInstance() {
+        return this.IsUiRequest() && tp.IsValid(this.Params) && 'IsSingleInstance' in this.Params && this.Params.IsSingleInstance === true;
+    }
 };
 /** Id counter.
  * @param {number}  

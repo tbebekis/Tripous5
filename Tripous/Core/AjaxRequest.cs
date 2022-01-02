@@ -58,7 +58,7 @@ namespace Tripous
         /// Returns true when this is a Proc request.
         /// </summary>
         [JsonIgnore]
-        public bool IsSingleInstance { get => ParamsContainsKey("IsSingleInstance") && Sys.IsSameText(Params["IsSingleInstance"].ToString(), RequestTypeProc); }
+        public bool IsSingleInstance { get => ParamsContainsKey("IsSingleInstance") && Convert.ToBoolean(Params["IsSingleInstance"]); }
 
         /// <summary>
         /// The string literal that classifies a request as a Ui request.

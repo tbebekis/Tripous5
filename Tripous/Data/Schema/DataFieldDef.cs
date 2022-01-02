@@ -139,10 +139,6 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// Database Id
-        /// </summary>
-        public string Id { get; set; } = Sys.GenId(true);
-        /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
         public string Name { get; set; }

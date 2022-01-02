@@ -1,0 +1,141 @@
+
+/*---------------------------------------------------------------------------------------
+  desktop
+---------------------------------------------------------------------------------------*/
+.tp-Desk {
+    position: relative;
+    display: flex; 
+    flex-grow: 1;
+} 
+
+.tp-Accordion > * > :nth-child(1) {
+    background-color: white;
+    border: 1px solid lightgray;
+}
+ 
+/*---------------------------------------------------------------------------------------
+main menu bar items
+---------------------------------------------------------------------------------------*/
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem  {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    padding: 0 8px;
+    height: 100%;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem:hover {
+    text-decoration: underline var(--HoverColor) solid; 
+    text-decoration-thickness: 3px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-Text {
+    position: relative;
+}
+ 
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background-color: var(--GrayLight);
+    color: var(--Black);
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List.tp-Visible {
+    display: block;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List > * {
+    display: flex;
+    min-height: 2em;
+    align-items: center;
+    padding: 0 0.9em 0 0.6em;
+}
+
+.tp-Desk-MainMenu > .tp-ItemList > .tp-BarItem > .tp-List > *:hover {
+    border-left: 4px solid var(--HoverColor);
+    padding-left: 6px;   
+}
+
+
+/*---------------------------------------------------------------------------------------
+  desk view main pager - The pager that shows the views
+---------------------------------------------------------------------------------------*/
+.tp-Desk-ViewPager {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+ 
+/* page tabs */
+.tp-Desk-ViewPager > .tp-ItemBar {
+    background-color: var(--Color1);
+    color: var(--White);
+}
+
+.tp-Desk-ViewPager > .tp-ItemBar > .tp-ItemList > *  {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    padding: 0 8px;
+    height: 100%;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.tp-Desk-ViewPager > .tp-ItemBar > .tp-ItemList > *:hover {
+    text-decoration: underline var(--HoverColor) solid; 
+    text-decoration-thickness: 3px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+}
+
+.tp-Desk-ViewPager > .tp-ItemBar > .tp-ItemList > *.tp-Selected {    
+    text-decoration: underline var(--White) solid; 
+    text-decoration-thickness: 3px;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 3px;
+}
+
+/* page list */
+.tp-Desk-ViewPager > .tp-List {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    width: 100%;
+}
+
+ 
+.tp-Desk .pager-container.main-pager > .top-zone {
+    background-color: var(--Color4);
+    color: var(--White);  
+}
+/*---------------------------------------------------------------------------------------
+ desk view
+---------------------------------------------------------------------------------------*/
+
+.tp-DeskView {
+    flex-direction: column; 
+    padding: 6px 2%;
+    gap: 6px;
+}
+
+.tp-Row.ListGridContainer {
+    height: 100%;
+}
+
+ 
