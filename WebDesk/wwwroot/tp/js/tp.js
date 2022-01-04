@@ -725,23 +725,6 @@ Invokes a constructor and returns the new instance
 */
 tp.CreateInstance = function (Ctor, ...args) {
     return new Ctor(args);
-    /*
-         switch (args.length) {
-            case 0: return new Ctor();
-            case 1: return new Ctor(args[0]);
-            case 2: return new Ctor(args[0], args[1]);
-            case 3: return new Ctor(args[0], args[1], args[2]);
-            case 4: return new Ctor(args[0], args[1], args[2], args[3]);
-            case 5: return new Ctor(args[0], args[1], args[2], args[3], args[4]);
-            case 6: return new Ctor(args[0], args[1], args[2], args[3], args[4], args[5]);
-            case 7: return new Ctor(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            case 8: return new Ctor(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-    
-            default:
-                throw 'Unsupported number of Constructor arguments';
-        }
-     */
-
 };
 //#endregion
 
@@ -974,6 +957,33 @@ tp.HasProperty = function (o, Key) {
 tp.HasWritableProperty = function (o, Key) {
     let PI = tp.GetPropertyInfo(o, Key);
     return PI.IsProperty == true && (PI.IsWritable === true || PI.HasSetter === true  );
+};
+
+/** Returns an array with all property names of an object, walking down to its hierarchy.
+ * An optional call-back may exclude any of the passed property, by name.
+ * NOTE: Functions are excluded. Properties starting with __ are also excluded.
+ * @param {object} o The object to operate on
+ * @param {function} [CanGetPropFunc=null] Optional. A <code>function CanGetPropFunc(PropName): boolean </code>. Returning false excludes the property.
+ * @returns {string[]} Returns an array with all property names of an object, walking down to its hierarchy.
+ */
+tp.GetPropertyNames = function (o, CanGetPropFunc = null) {
+    let Result = [];
+    CanGetPropFunc = CanGetPropFunc || function (Prop) { return true; };
+    let List;
+
+    do {
+        List = Object.getOwnPropertyNames(o);
+
+        List.forEach((prop) => {
+            if (typeof o[prop] !== 'function' && !prop.startsWith('__') && Result.indexOf(prop) === -1 && CanGetPropFunc(prop)) {
+                Result.push(prop);
+            }
+        });
+
+    }
+    while (o = Object.getPrototypeOf(o));
+
+    return Result;
 };
 //#endregion
 
@@ -2588,7 +2598,8 @@ True if a specified array or array-like object contains an item with a certain v
 @see {@link http://kangax.github.io/compat-table/es5/|kangax tables}
 */
 tp.ListContains = function (List, v) {
-    return List.indexOf(v) < 0;
+    let Index = List.indexOf(v);
+    return Index >= 0;
 /*
     var i = List.length;
     while (i--) {
@@ -3766,6 +3777,48 @@ tp.Break = function (ParentOrSelector) {
         tp.Append(ParentOrSelector, '');
 };
 
+/** Indicates what is the value attribute of an element according to its node type: 
+ * value, checked, innerHTML, selectedIndex or textContent */
+tp.ElementValueType = {
+    Unknown: 0,
+    Value: 1,
+    Checked: 2,
+    InnerHtml: 4,
+    TextContent: 8,
+    SelectedIndex: 0x10,
+    
+};
+/** Returns one of the {@link tp.ElementValueType} indicating what is the value attribute of an element according to its node type: 
+ * value, checked, innerHTML, selectedIndex or textContent
+ * @param {string|Element}  el - A selector or an element
+ * @returns {number} Returns one of the {@link tp.ElementValueType} indicating what is the value attribute of an element according to its node type: 
+ * value, checked, innerHTML, selectedIndex or textContent
+ */
+tp.GetElementValueType = function (el) {
+    let Result = tp.ElementValueType.Unknown;
+
+    el = tp.Select(el);
+
+    if (el) {
+        let NodeName = el.nodeName.toLowerCase();
+
+        if (NodeName === 'input')  
+            Result = el.type === 'checkbox' || el.type === 'radio' ? tp.ElementValueType.Checked : tp.ElementValueType.Value;
+        else if (NodeName === 'textarea')
+            Result = tp.ElementValueType.Value;
+        else if (NodeName === 'button')
+            Result = tp.ElementValueType.InnerHtml;
+        else if (NodeName === 'select')
+            Result = tp.ElementValueType.SelectedIndex;
+        else if ('textContent' in el)
+            Result = tp.ElementValueType.TextContent;
+        else
+            Result = tp.ElementValueType.InnerHtml;
+    }
+
+    return Result;
+};
+
 /**
 Gets or sets the value of an element. 
 To be used mainly with input, select and textarea elements.
@@ -3775,6 +3828,104 @@ NOTE: Passing both arguments, sets the value of an element.
 @returns {any} If a value is not specified then the function returns the element's value, else returns the passed value.
 */
 tp.val = function (el, v = null) {
+    let ValueType = tp.GetElementValueType(el);
+
+    if (ValueType !== tp.ElementValueType.Unknown) {
+
+        el = tp.Select(el);
+
+        if (el) {
+
+            // get
+            if (tp.IsEmpty(v)) {
+                switch (ValueType) {
+                    case tp.ElementValueType.Value: return el.value;
+                    case tp.ElementValueType.Checked: return el.checked;
+                    case tp.ElementValueType.InnerHtml: return el.innerHTML;
+                    case tp.ElementValueType.TextContent: return el.textContent;
+                    case tp.ElementValueType.SelectedIndex: return tp.InRange(el.options, el.selectedIndex) ? el.options[el.selectedIndex].value : null;
+                }
+            }
+            // set
+            else {
+
+                switch (ValueType) {
+                    case tp.ElementValueType.Value:
+                        el.value = v;
+                        break;
+                    case tp.ElementValueType.Checked:
+                        el.checked = Boolean(v);
+                        break;
+                    case tp.ElementValueType.InnerHtml:
+                        el.innerHTML = v;
+                        break;
+                    case tp.ElementValueType.TextContent:
+                        el.textContent = v;
+                        break;
+                    case tp.ElementValueType.SelectedIndex:
+                        let Flag = false;
+                        for (i = 0, ln = el.options.length; i < ln; i++) {
+                            if (el.options[i].value === v) {
+                                el.selectedIndex = i;
+                                Flag = true;
+                                break;
+                            }
+                        }
+
+                        if (!Flag && tp.IsNumber(v) && tp.InRange(el.options, v)) {
+                            el.selectedIndex = v;
+                        }
+                        break;
+                }
+
+                return v;
+            }
+        }
+    }
+
+    return null;
+};
+/**
+Clears the value of an element. 
+To be used mainly with input, select and textarea elements.
+ @param   {string|Element}  el - A selector or an element
+*/
+tp.ClearValue = function (el) {
+    let ValueType = tp.GetElementValueType(el);
+
+    if (ValueType !== tp.ElementValueType.Unknown) {
+        el = tp.Select(el);
+        if (el) {
+            switch (ValueType) {
+                case tp.ElementValueType.Value:
+                    el.value = '';
+                    break;
+                case tp.ElementValueType.Checked:
+                    el.checked = false;
+                    break;
+                case tp.ElementValueType.InnerHtml:
+                    el.innerHTML = '';
+                    break;
+                case tp.ElementValueType.TextContent:
+                    el.textContent = '';
+                    break;
+                case tp.ElementValueType.SelectedIndex:
+                    el.selectedIndex = -1;
+                    break;
+            }
+        }
+    }
+};
+
+/**
+Gets or sets the value of an element. 
+To be used mainly with input, select and textarea elements.
+NOTE: Passing both arguments, sets the value of an element.
+@param {string|Element}  el - A selector or an element
+@param {any} [v=null] - The value to set to the element. If null then the function returns the element's value
+@returns {any} If a value is not specified then the function returns the element's value, else returns the passed value.
+*/
+tp.val2 = function (el, v = null) {
     el = tp.Select(el);
     if (!el) return null;
 
@@ -3837,7 +3988,7 @@ Clears the value of an element.
 To be used mainly with input, select and textarea elements.
  @param   {string|Element}  el - A selector or an element
 */
-tp.ClearValue = function (el) {
+tp.ClearValue2 = function (el) {
     el = tp.Select(el);
     if (!el) return;
 
@@ -3865,6 +4016,7 @@ tp.ClearValue = function (el) {
         el.innerHTML = '';
     }
 };
+
 /**
  Gets or sets the inner html of an element.  
  NOTE: Passing both arguments, sets the value of an element.
@@ -4391,9 +4543,7 @@ tp.GetDataSetupObject = function (el) {
     return Result;
 };
 
-
  
-
 
 /**
 Gets or sets the value of a data-role attribute of an element  
@@ -4535,7 +4685,14 @@ Gets or sets the readonly attribute of an input or textarea element.
 tp.ReadOnly = function (el, v = null) {
     el = tp.Select(el);
 
-    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    if (el instanceof HTMLInputElement && el.type === 'checkbox') {
+        if (tp.IsEmpty(v)) { // get
+            return el.disabled;
+        } else {
+            el.disabled = v === true;
+        }
+    }
+    else if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
         if (tp.IsEmpty(v)) { // get
             return el.readOnly;
         } else {
@@ -11293,12 +11450,20 @@ tp.Object = class {
     @return {object} Returns a plain object having all the properties and values of this instance. JSON.stringify() uses that returned object instead of this instance when serializing.
     */
     toJSON() {
-        var Result = {};
+        let Result = {};
 
+        let PropNamesList = tp.GetPropertyNames(this, (Prop) => { return this.CanSerialize(Prop); });
+
+        PropNamesList.forEach((Prop) => {
+            Result[Prop] = this[Prop];
+        });
+
+/*
         for (var Prop in this) {
             if (this.CanSerialize(Prop))
                 Result[Prop] = this[Prop];
         }
+ */
 
         return Result;
     }
@@ -11804,12 +11969,7 @@ tp.Component = class extends tp.Object {
         if (tp.IsString(v) && this.Handle)
             this.Handle.title = v;
     }
-    /**
-    Gets or sets a boolean value indicating whether the element may be checked for spelling errors.
-    @type {boolean}
-    */
-    get SpellCheck() { return this.Handle ? this.Handle.spellcheck : false; }
-    set SpellCheck(v) { this.Handle.spellcheck = v === true; }
+
     /**
     Gets or sets the defaultValue attribute if applicable
     @type {string}
@@ -16151,10 +16311,10 @@ NotificationBox = class extends tp.Component {
         <div id='${CaptionId}'>
             <div>${Title}</div>
             <div style='flex-grow: 1;' ></div>
-            <div id='${btnCloseId}' ">✖</div> 
+            <div id='${btnCloseId}' >✖</div>
         </div>
         <div id='${ContentId}' >
-            <textarea id='${edtMessageId}' > </textarea> 
+            <textarea id='${edtMessageId}' spellcheck='false' autocorrect='off' > </textarea>
         </div>
 `;
         elBox.innerHTML = Html;

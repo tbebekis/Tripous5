@@ -2864,11 +2864,11 @@ tp.DataTable = class extends tp.Object {
     /**
     Creates and returns a new row. The new row is NOT added to the rows. The new row can be added with an explicit call to AddRow(). <br />
     NOTE: If AutoGenerateGuidKeys is true and a PrimaryKeyField is defined, then the value of that field is set to a new GUID string.
-    @param {any[]} [Data] - Optional. The data array
+    @param {any[]} [Data = null] - Optional. The data array
     @returns {tp.DataRow} Returns a data row
     */
-    NewRow(Data) {
-        var Row = new tp.DataRow(this, Data);
+    NewRow(Data = null) { 
+        let Row = new tp.DataRow(this, Data);
         return Row;
     }
     /**
@@ -3602,11 +3602,11 @@ tp.DataRow = class {
     Constructor
     NOTE: If table AutoGenerateGuidKeys is true and a PrimaryKeyField is defined in the table, then the value of that field is set to a new GUID string.
     @param {tp.DataTable} Table - The owner table
-    @param {any[]} [Data] - Optional. A javascript array of values
+    @param {any[]} [Data=null] - Optional. A javascript array of values
     */
-    constructor(Table, Data) {
+    constructor(Table, Data = null) {
         this.Table = Table;
-        this.Data = Data || [];
+        this.Data = tp.IsArray(Data) ? Data.map(item => item): [];
         this.Data.length = Table.Columns.length;
 
         if (!this.Table.Batch)
@@ -3671,22 +3671,26 @@ tp.DataRow = class {
     @param {any} v - The value to set
     */
     SetByIndex(Index, v) {
-        if (this.Table.Batch) {
-            this.Data[Index] = v;
-        } else {
-            var Column = this.Table.Columns[Index];
-            var OldValue = this.Data[Index];
-            var NewValue = v;
+        let OldValue = this.Data[Index];
+        let NewValue = v;
 
-            /* send notification */
-            this.Table.OnRowModifying(this, Column, OldValue, NewValue);
-            this.Data[Index] = NewValue;
-            this.Table.OnRowModified(this, Column, OldValue, NewValue);
+        if (OldValue !== NewValue) {
+            if (this.Table.Batch) {
+                this.Data[Index] = NewValue;
+            } else {
+                let Column = this.Table.Columns[Index];
+
+                /* send notification */
+                this.Table.OnRowModifying(this, Column, OldValue, NewValue);
+                this.Data[Index] = NewValue;
+                this.Table.OnRowModified(this, Column, OldValue, NewValue);
+            }
+
+            if (this.State === tp.DataRowState.Unchanged) {
+                this.State = tp.DataRowState.Modified;
+            }
         }
 
-        if (this.State === tp.DataRowState.Unchanged) {
-            this.State = tp.DataRowState.Modified;
-        }
     }
     /**
     Returns the value of a column by column name

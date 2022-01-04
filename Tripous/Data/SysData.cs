@@ -201,6 +201,15 @@ where
             return Row != null;
         }
         /// <summary>
+        /// Selects a row specified by Id and then creates, loads and returns an item.
+        /// </summary>
+        static public SysDataItem SelectItemById(object Id)
+        {
+            SysDataItem Item = new SysDataItem();
+            Select(Id, Item);
+            return Item;
+        }
+        /// <summary>
         /// Loads Item by selecting Item.DataType and Item.DataName from the system data table.
         /// <para>WARNING: Normally this returns a single row, since there is a unique contraint
         /// regarding DataType and DataName.</para>

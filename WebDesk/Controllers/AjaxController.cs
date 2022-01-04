@@ -341,13 +341,27 @@ where
  
             HttpActionResult Result = new HttpActionResult();
 
-            DataTable Table = SysData.SelectById(Id);
-            JsonDataTable JTable = new JsonDataTable(Table);
-            Result.SerializePacket(JTable);
+            //DataTable Table = SysData.SelectById(Id);
+            //JsonDataTable JTable = new JsonDataTable(Table);
+            //Result.SerializePacket(JTable);
+
+            SysDataItem Item = SysData.SelectItemById(Id);
+            Result.SerializePacket(Item);
+
             Result.IsSuccess = true;
 
             return Json(Result);
         }
+        [HttpPost("/SysData/SysDataSaveItem")]
+        public async Task<JsonResult> SysDataSaveItem([FromBody] SysDataItem Item)
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+            Result.IsSuccess = true;
+            return Json(Result);
+        }
+
         [HttpGet("/SysData/SelectEmptyItem")]
         public async Task<JsonResult> SysDataSelectEmptyItem()
         {

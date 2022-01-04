@@ -8290,6 +8290,26 @@ tp.TextBox = class extends tp.InputControl {
         if (this.Handle instanceof HTMLInputElement)
             this.Handle.placeholder = v;
     }
+
+    /**
+    Gets or sets a boolean value indicating whether the element may be checked for spelling errors.
+    @type {boolean}
+    */
+    get SpellCheck() { return this.Handle ? this.Handle.spellcheck : false; }
+    set SpellCheck(v) { this.Handle.spellcheck = v === true; }
+    /**
+    Gets or sets a boolean value indicating whether autocomplete functionality is on or not. Defaults to false.
+    @type {boolean}
+    */
+    get Autocomplete() {
+        return this.Handle instanceof HTMLInputElement ? this.Handle.autocomplete === 'on' : false;
+    }
+    set Autocomplete(v) {
+        if (this.Handle instanceof HTMLInputElement)
+            this.Handle.autocomplete = v === true ? 'on' : 'off';
+    }
+
+
     /**
     Gets or sets a regular expression that an <input> element's value is checked against
     @type {string}
@@ -8393,6 +8413,7 @@ tp.TextBox = class extends tp.InputControl {
     InitializeFields() {
         super.InitializeFields();
         this.SpellCheck = false;
+        this.Autocomplete = false;
     }
     /**
      * Processes an entry of the this.CreateParams.
@@ -8527,6 +8548,31 @@ tp.Memo = class extends tp.Control {
     }
 
     /**
+    Gets or sets a boolean value indicating whether spelling and grammar check is on or not. Defaults to false.
+    @type {boolean}
+    */
+    get SpellCheck() {
+        return this.Handle instanceof HTMLTextAreaElement ? this.Handle.spellcheck : false;
+    }
+    set SpellCheck(v) {
+        if (this.Handle instanceof HTMLTextAreaElement)
+            this.Handle.spellcheck = v === true;
+    }
+    /**
+    Gets or sets a boolean value indicating whether autocomplete functionality is on or not. Defaults to false.
+    @type {boolean}
+    */
+    get Autocomplete() {
+        return this.Handle instanceof HTMLTextAreaElement ? this.Handle.autocomplete === 'on' : false;
+    }
+    set Autocomplete(v) {
+        if (this.Handle instanceof HTMLTextAreaElement)
+            this.Handle.autocomplete = v === true? 'on': 'off';
+    }
+
+    //autocomplete
+
+    /**
     Gets or sets the start position of the selected text
     @type {number}
     */
@@ -8634,9 +8680,12 @@ tp.Memo = class extends tp.Control {
     */
     InitializeFields() {
         super.InitializeFields();
+
         this.Cols = 20;
         this.Rows = 2;
+
         this.SpellCheck = false;
+        this.Autocomplete = false;
     }
     /**
     Event trigger. Called right after the read-only property is changed
@@ -8882,6 +8931,7 @@ tp.CheckBox = class extends tp.Control {
 
         super.OnInitializationCompleted();
     }
+
     /**
     Handles any DOM event
     @protected
@@ -8968,6 +9018,16 @@ tp.CheckBox = class extends tp.Control {
         if (!this.ReadingDataValue) {
             this.Trigger('ValueChanged', {});
         }
+    }
+    /**
+    Event trigger. Called right after the read-only property is changed
+    @protected
+    @override
+    */
+    OnReadOnlyChanged() {
+        if (this.fCheckBox instanceof HTMLInputElement)
+            tp.ReadOnly(this.fCheckBox, this.ReadOnly);
+        super.OnReadOnlyChanged();
     }
 };
 

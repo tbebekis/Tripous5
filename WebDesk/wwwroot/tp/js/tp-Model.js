@@ -9,9 +9,7 @@ tp.Urls.BrokerDelete = '/Broker/Delete';
 tp.Urls.BrokerCommit = '/Broker/Commit';
 tp.Urls.BrokerSelectList = '/Broker/SelectList';
 
-tp.Urls.SysDataSelectList = '/SysData/SelectList';
-tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
-tp.Urls.SysDataSelectEmptyItem = '/SysData/SelectEmptyItem';
+
 
  
 //---------------------------------------------------------------------------------------

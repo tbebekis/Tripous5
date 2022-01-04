@@ -1,26 +1,24 @@
-﻿//#region DataTableDef
+﻿tp.Urls.SysDataSelectList = '/SysData/SelectList';
+tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
+tp.Urls.SysDataSelectEmptyItem = '/SysData/SelectEmptyItem';
+tp.Urls.SysDataSaveItem = '/SysData/SysDataSaveItem';
 
-/** Database table definition
- * */
-tp.DataTableDef = class {
 
+//#region SysDataItem
+tp.SysDataItem = class extends tp.Object {
     /** Constructor.
      * Assigns this instance's properties from a specified source, if not null.
      * @param {objec} Source Optional.
      */
     constructor(Source = null) {
+        super();
+
         this.fTitle = '';
         this.fTitleKey = '';
-        this.Fields = [];
-        this.UniqueConstraints = [];
 
         this.Assign(Source);
     }
 
-    /** A name unique among all instances of this type
-     * @type {string}
-     */
-    Name = '';
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -40,16 +38,233 @@ tp.DataTableDef = class {
         this.fTitleKey = v;
     }
 
-    /** The list of fields
-     * @type {tp.DataFieldDef[]}
-     */
-    Fields = [];
-    /** For multi-field unique constraints.
-     * Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2
-     * @type {string[]}
-     */
-    UniqueConstraints = [];
 
+    /** Assigns this instance's properties from a specified source.
+     * @param {objec} Source
+     */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+
+        this.DataType = Source.DataType || '';
+        this.DataName = Source.DataName || '';
+
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        this.Notes = Source.Notes || '';
+        this.Owner = Source.Owner || '';        
+
+        this.Tag1 = Source.Tag1 || '';
+        this.Tag2 = Source.Tag2 || '';
+        this.Tag3 = Source.Tag3 || '';
+        this.Tag4 = Source.Tag4 || '';
+
+        this.Data1 = Source.Data1 || '';
+        this.Data2 = Source.Data2 || '';
+        this.Data3 = Source.Data3 || '';
+        this.Data4 = Source.Data4 || '';
+    }
+
+    /** Assigns this instance's properties from a specified {@link tp.DataRow}.
+     * @param {tp.DataRow} Row The row to load from.
+     */
+    FromDataRow(Row) {
+        this.DataName = Row.Get('DataName', '');
+        this.DataType = Row.Get('DataType', '');
+
+        this.Title = Row.Get('Title', '');
+        this.TitleKey = Row.Get('TitleKey', '');
+
+        this.Notes = Row.Get('Notes', '');
+        this.Owner = Row.Get('Owner', '');
+
+        this.Tag1 = Row.Get('Tag1', '');
+        this.Tag2 = Row.Get('Tag2', '');
+        this.Tag3 = Row.Get('Tag3', '');
+        this.Tag4 = Row.Get('Tag4', '');
+
+        this.Data1 = Row.Get('Data1', '');
+        this.Data2 = Row.Get('Data2', '');
+        this.Data3 = Row.Get('Data3', '');
+        this.Data4 = Row.Get('Data4', '');
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}.
+     * @param {tp.DataRow} Row The row to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('DataName', this.DataName);
+        Row.Set('DataType', this.DataType);
+   
+        Row.Set('Title', this.Title);
+        Row.Set('TitleKey', this.TitleKey);
+
+        Row.Set('Notes', this.Notes);
+        Row.Set('Owner', this.Owner);
+  
+        Row.Set('Tag1', this.Tag1 );
+        Row.Set('Tag2', this.Tag2 );
+        Row.Set('Tag3', this.Tag3 );
+        Row.Set('Tag4', this.Tag4 );
+  
+        Row.Set('Data1', this.Data1);
+        Row.Set('Data2', this.Data2);
+        Row.Set('Data3', this.Data3);
+        Row.Set('Data4', this.Data4);
+    }
+
+    /** Assigns this instance's properties from the first {@link tp.DataRow} row of a specified {@link tp.DataTable}.
+     * @param {tp.DataTable} Table
+     */
+    FromDataTable(Table) {
+        this.FromDataRow(Table.Rows[0]);
+    }
+    /** Saves this instance's properties to a {@link tp.DataRow} of a specified {@link tp.DataTable}.
+     * A boolean parameter controls whether to add a new row or use the first row of the table.
+     * @param {tp.DataTable} [Table=null] Optional. If null a new {@link tp.DataTable} is created.
+     * @param {boolean} [AddRow=true] Optional. If true, the default, adds a new row and saves this instance to that row. Else uses the first row of the table.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable}
+     */
+    ToDataTable(Table = null, AddRow = true) {
+        if (tp.IsEmpty(Table)) {
+            Table = tp.SysDataItem.CreateTable();
+            AddRow = true;
+        }
+
+        let Row = AddRow === true ? Table.AddEmptyRow(): Table.Rows[0];
+        this.ToDataRow(Row);
+
+        return Table;
+    }
+};
+
+tp.SysDataItem.prototype.fTitle = '';
+tp.SysDataItem.prototype.fTitleKey = '';
+
+/** The data type, i.e. Report, Broker, Table, etc.
+ * NOTE: The pair DataType + DataName must be unique among all SysData items.
+ * @type {string}
+ * */
+tp.SysDataItem.prototype.DataType = '';
+/** The data name, i.e. Report.Customer, Broker.Customer, etc.
+ * NOTE: The pair DataType + DataName must be unique among all SysData items.
+ * @type {string}
+ * */
+tp.SysDataItem.prototype.DataName = '';
+
+/** Notes
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Notes = '';
+/** A string indicating the owner of the entry in the table.
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Owner = '';
+
+/** A user defined string tag.
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Tag1 = '';
+/** A user defined string tag.
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Tag2 = '';
+/** A user defined string tag.
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Tag3 = '';
+/** A user defined string tag.
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Tag4 = '';
+
+/** Text blob data
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Data1 = '';
+/** Text blob data
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Data2 = '';
+/** Text blob data
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Data3 = '';
+/** Text blob data
+ * @type {string}
+ */
+tp.SysDataItem.prototype.Data4 = '';
+
+tp.SysDataItem.CreateTable = function () {
+    let Table = new tp.DataTable('SysData');
+
+    Table.AddColumn('Id', tp.DataType.String, 40);
+
+    Table.AddColumn('DataType', tp.DataType.String, 96);
+    Table.AddColumn('DataName', tp.DataType.String, 96);
+
+    Table.AddColumn('TitleKey', tp.DataType.String, 96);
+    Table.AddColumn('Notes', tp.DataType.String, 255);
+
+    Table.AddColumn('Owner', tp.DataType.String, 96);
+
+    Table.AddColumn('Tag1', tp.DataType.String, 96);
+    Table.AddColumn('Tag2', tp.DataType.String, 96);
+    Table.AddColumn('Tag3', tp.DataType.String, 96);
+    Table.AddColumn('Tag4', tp.DataType.String, 96);
+
+    Table.AddColumn('Data1', tp.DataType.TextBlob);
+    Table.AddColumn('Data2', tp.DataType.TextBlob);
+    Table.AddColumn('Data3', tp.DataType.TextBlob);
+    Table.AddColumn('Data4', tp.DataType.TextBlob); 
+
+    return Table;
+};
+
+//#endregion
+
+
+
+//#region DataTableDef
+
+/** Database table definition
+ * */
+tp.DataTableDef = class extends tp.Object {
+
+    /** Constructor.
+     * Assigns this instance's properties from a specified source, if not null.
+     * @param {objec} Source Optional.
+     */
+    constructor(Source = null) {
+        super();
+
+        this.fTitle = '';
+        this.fTitleKey = '';
+        this.Fields = [];
+        this.UniqueConstraints = [];
+
+        this.Assign(Source);
+    }
+ 
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+ 
     /** Assigns this instance's properties from a specified source.
      * @param {objec} Source
      */
@@ -95,7 +310,6 @@ tp.DataTableDef = class {
             Table = new tp.DataTable();
             Table.Name = 'Fields';
 
-            Table.AddColumn('Id', tp.DataType.String, 40);
             Table.AddColumn('Name', tp.DataType.String, 32);
             Table.AddColumn('TitleKey', tp.DataType.String, 96);
             Table.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
@@ -117,28 +331,43 @@ tp.DataTableDef = class {
     }
 };
 
+
+
 tp.DataTableDef.prototype.fTitle = '';
 tp.DataTableDef.prototype.fTitleKey = '';
 
+/** A name unique among all instances of this type
+ * @type {string}
+ */
+tp.DataTableDef.prototype.Name = '';
+/** The list of fields
+ * @type {tp.DataFieldDef[]}
+ */
+tp.DataTableDef.prototype.Fields = [];
+/** For multi-field unique constraints.
+ * Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2
+ * @type {string[]}
+ */
+tp.DataTableDef.prototype.UniqueConstraints = [];
+
+
 /** Database table field definition
  * */
-tp.DataFieldDef = class {
+tp.DataFieldDef = class extends tp.Object {
 
     /** Constructor.
      * Assigns this instance's properties from a specified source, if not null.
      * @param {objec} Source Optional.
      */
     constructor(Source = null) {
+        super();
+
         this.fTitle = '';
         this.fTitleKey = '';
 
         this.Assign(Source);
     }
-
-    /** A name unique among all instances of this type
-     * @type {string}
-     */
-    Name = '';
+ 
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -157,45 +386,7 @@ tp.DataFieldDef = class {
     set TitleKey(v) {
         this.fTitleKey = v;
     }
-
-    /** True when the field is a primary key
-     * @type {boolean}
-     */
-    IsPrimaryKey = false;
-    /** The data-type of the field. One of the {@link tp.DataType} constants.
-     * @type {string}
-     */
-    DataType = tp.DataType.Unknown;
-    /** Field length. Applicable to varchar fields only.
-     * @type {number}
-     */
-    Length = 0;
-    /** True when the field is NOT nullable.
-     * NOTE: when true then produces 'not null'
-     * @type {boolean}
-     */
-    Required = false;
-    /** The default expression, if any. E.g. 0, or ''. Defaults to null.
-     * NOTE:  e.g. produces default 0, or default ''
-     * @type {object}
-     */
-    DefaultValue = null;
-    /** When true denotes a field upon which a unique constraint is applied
-     * @type {boolean}
-     */
-    Unique = false;
-
-    /** When not empty is the name of a foreign table which this field references.
-     * NOTE: Used in creating a foreign key constraint.
-     * @type {string}
-     */
-    ForeignTableName = '';
-    /** When not empty is the name of a foreign field which this field references.
-     * NOTE: Used in creating a foreign key constraint.
-     * @type {string}
-     */
-    ForeignFieldName = '';
-
+ 
     /** Assigns this instance's properties from a specified source.
      * @param {objec} Source
      */
@@ -256,6 +447,48 @@ tp.DataFieldDef = class {
 
 tp.DataFieldDef.prototype.fTitle = '';
 tp.DataFieldDef.prototype.fTitleKey = '';
+
+/** A name unique among all instances of this type
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.Name = '';
+/** True when the field is a primary key
+ * @type {boolean}
+ */
+tp.DataFieldDef.prototype.IsPrimaryKey = false;
+/** The data-type of the field. One of the {@link tp.DataType} constants.
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.DataType = tp.DataType.Unknown;
+/** Field length. Applicable to varchar fields only.
+ * @type {number}
+ */
+tp.DataFieldDef.prototype.Length = 0;
+/** True when the field is NOT nullable.
+ * NOTE: when true then produces 'not null'
+ * @type {boolean}
+ */
+tp.DataFieldDef.prototype.Required = false;
+/** The default expression, if any. E.g. 0, or ''. Defaults to null.
+ * NOTE:  e.g. produces default 0, or default ''
+ * @type {object}
+ */
+tp.DataFieldDef.prototype.DefaultValue = null;
+/** When true denotes a field upon which a unique constraint is applied
+ * @type {boolean}
+ */
+tp.DataFieldDef.prototype.Unique = false;
+
+/** When not empty is the name of a foreign table which this field references.
+ * NOTE: Used in creating a foreign key constraint.
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.ForeignTableName = '';
+/** When not empty is the name of a foreign field which this field references.
+ * NOTE: Used in creating a foreign key constraint.
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.ForeignFieldName = '';
 
 //#endregion
 
@@ -346,12 +579,10 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     gridFields = null;
     /** A C# DataTableDef instance as it comes from server. <br />
      <pre>
-        "Id": "{A2485753-8C03-4863-903C-5054E29F5330}",
         "Name": "AppUser",
         "TitleKey": "AppUser",
         "Fields": [
             {
-                "Id": "{0A28CC30-7971-4771-91AE-3F7616FFB480}",
                 "Name": "Id",
                 "TitleKey": "Id",
                 "IsPrimaryKey": true,
@@ -380,7 +611,6 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         // read the json from Data1 field and load the tblFields
         if (IsInsert === false) {
             let Text = tblData.Rows[0].Get('Data1');
-            //log(Text);
             let Source = eval("(" + Text + ")");
             TableDef.Assign(Source);
         }
@@ -404,46 +634,56 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     /** Creates and returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
      * The row is either empty, on insert, or a clone of a tblFields row, on edit.
      * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @returns Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
+     * @returns {tp.DataTable} Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
      */
     CreateEditTable(SourceRow = null) {
+        let FieldRow;
         let IsInsert = tp.IsEmpty(SourceRow);
-        let EditableColumns = ['TitleKey', 'Length', 'DefaultValue'];
+        let EditableColumns = IsInsert || SourceRow.State === tp.DataRowState.Added ?
+            ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultValue', 'Unique', 'ForeignTableName', 'ForeignFieldName']:
+            ['TitleKey', 'Length', 'Required', 'DefaultValue'];       
 
-        let Result = this.tblFields.Clone();
-        Result.Name = 'Fields';
+        // create the tblField, used in editing a single field
+        let tblField = this.tblFields.Clone();
+        tblField.Name = 'Field';
 
-        if (tp.IsEmpty(SourceRow)) {
-            Result.AddEmptyRow();
+        // add the single row in tblField
+        FieldRow = tblField.AddEmptyRow();
+
+        if (IsInsert) {
+            FieldRow.Set('DataType', tp.DataType.String);
+            FieldRow.Set('Length', 0);
+            FieldRow.Set('IsPrimaryKey', false);
+            FieldRow.Set('Required', false);
+            FieldRow.Set('Unique', false);
         }
         else {
-            Result.AddRow(SourceRow.Data);
+            FieldRow.CopyFromRow(SourceRow);
         }
 
-        Result.Columns.forEach((column) => {
+        tblField.Columns.forEach((column) => {
             if (column.Name === 'Name')
-                column.MaxLength = 32;
-
-            column.ReadOnly = !(IsInsert || (EditableColumns.indexOf(column.Name) !== -1));
-
+                column.MaxLength = 30;
+ 
+            column.ReadOnly = EditableColumns.indexOf(column.Name) < 0;
         });
 
-        return Result;
+        return tblField;
     }
 
     /** Displays an edit dialog box for editing an existing or new row of the tblFields.
      * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
      * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
      * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
-     * @param {tp.DataTable} Table The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
+     * @param {tp.DataTable} tblField The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
      */
-    async ShowEditDialog(IsInsert, Table) {
+    async ShowEditDialog(IsInsert, tblField) {
         let DialogBox = null;
         let ContentHtmlText;
         let HtmlText;
         let HtmlRowList = [];
 
-        let DataSource = new tp.DataSource(Table);
+        let DataSource = new tp.DataSource(tblField);
         let ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'Required', 'Unique'];
 
 
@@ -455,7 +695,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             let Text = Column.Title;
             let Ctrl = {
                 TypeName: Column.Name === 'DataType' ? 'ComboBox' : tp.DataTypeToUiType(Column.DataType),
-                TableName: Column.Table.Name,
+                TableName: tblField.Name,
                 DataField: Column.Name
             };
 
@@ -492,7 +732,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             let BodyWidth = tp.Doc.body.offsetWidth
             let w = BodyWidth <= 580 ? BodyWidth - 6 : 580;
 
-            let WindowArgs = new tp.WindowArgs({ Text: 'Fields', Width: w, Height: 'auto' });
+            let WindowArgs = new tp.WindowArgs({ Text: 'Edit Field', Width: w, Height: 'auto' });
 
             //----------------------------------------------------- 
             /** Callback to be called after the dialog shows itself (i.e. OnShown())
@@ -506,7 +746,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
                 // bind dialog controls
                 tp.BindAllDataControls(elContent, (DataSourceName) => {
-                    if (DataSourceName === 'Fields')
+                    if (DataSourceName === 'Field')
                         return DataSource;
 
                     if (DataSourceName === 'DataType') {
@@ -525,7 +765,30 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
              * @param {number} DialogResult One of the {@link tp.DialogResult} constants
              * */
             WindowArgs.CanSetDialogResultFunc = (Window, DialogResult) => {
-                // EDW: validate user input in dialog box
+                if (DialogResult === tp.DialogResult.OK) {
+                
+                    let Row = tblField.Rows[0];
+
+                    // TitleKey
+                    let v = Row.Get('Name', '');
+                    if (tp.IsBlank(v)) {
+                        tp.WarningNote('Name is required');
+                        return false;
+                    }
+
+                    // Length
+                    v = Row.Get('DataType', '');
+                    if (v === tp.DataType.String) {
+                        v = Row.Get('Length', 0);
+                        if (v <= 0) {
+                            tp.WarningNote('Invalid Length');
+                            return false;
+                        }
+                    }
+
+
+                }
+                
                 return true;
             };
             //----------------------------------------------------- 
@@ -533,7 +796,11 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
              * @param {tp.Window} Window
              */
             WindowArgs.CloseFunc = (Window) => {
-                //
+                let Row = tblField.Rows[0];
+                let v = Row.Get('TitleKey', '');
+                if (tp.IsBlank(v)) {
+                    Row.Set('TitleKey', Row.Get('Name', ''));
+                }
             };
             //----------------------------------------------------- 
 
@@ -549,8 +816,9 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         let tblField = this.CreateEditTable(null);
         let DialogBox = await this.ShowEditDialog(true, tblField);
         if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let FieldRow = tblField.Rows[0];
             let Row = this.tblFields.AddEmptyRow();
-            Row.CopyFromRow(tblField.Rows[0]);
+            Row.CopyFromRow(FieldRow);
         }
     }
     /** Called when editing a single row of the tblFields and displays the edit dialog 
@@ -566,7 +834,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
                 let DialogBox = await this.ShowEditDialog(false, tblField);
 
                 if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                    Row.CopyFromRow(tblField.Rows[0]);
+                    let FieldRow = tblField.Rows[0];
+                    Row.CopyFromRow(FieldRow);
                 }
             }
         }
@@ -622,7 +891,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         TableDef.FieldsFromDataTable(this.tblFields);
 
         let JsonText = tp.ToJson(TableDef, true);
-        log(JsonText)
+        Row.Set('Data1', JsonText);
     }
 
     /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
@@ -630,12 +899,27 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @returns {boolean} Returns true if commit is allowed, else false.
      */
     CanCommitItem(tblData) {
+        let Result = true;
+
         if (tp.IsEmpty(this.tblFields) || this.tblFields.RowCount <= 1) {
             tp.WarningNote('Cannot save changes.\nNo fields defined in the table');
-            return false;
+            Result = false;
         }
 
-        return true;
+        let Row = tblData.Rows[0];
+        let v = Row.Get('DataName', '');
+
+        if (tp.IsBlankString(v)) {
+            tp.WarningNote('Cannot save changes.\nNo Table Name (DataName)');
+            Result = false;
+        }
+
+        if (tp.IsString(v) && v.includes(' ')) {
+            tp.WarningNote('Cannot save changes.\nTable Name (DataName) cannot contain spaces');
+            Result = false;
+        }
+
+        return Result;
     }
 
     /** Event handler
@@ -1219,9 +1503,12 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
             let Args = await tp.Ajax.GetAsync(Url, Data);
 
-            this.tblData = new tp.DataTable();
-            this.tblData.Assign(Args.Packet);
-            this.tblData.Name = 'SysData';
+            //this.tblData = new tp.DataTable();
+            //this.tblData.Assign(Args.Packet);
+            //this.tblData.Name = 'SysData';
+
+            let Item = new tp.SysDataItem(Args.Packet);
+            this.tblData = Item.ToDataTable();
 
             this.tblData.SetColumnListReadOnly(['DataType', 'Owner']);
 
@@ -1240,17 +1527,30 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
     }
     async Commit() {
-        // checks
-        if (!this.CanCommit())
-            return;
-
-        this.Handler.CommitItemBefore(this.tblData);
 
         // default values
         let Row = this.tblData.Rows[0];
         let v = Row.Get('TitleKey', '');
         if (!tp.IsValid(v) || tp.IsBlankString(v))
             Row.Set('TitleKey', Row.Get('DataName', ''));
+
+        // checks
+        if (!this.CanCommit())
+            return;
+
+        this.Handler.CommitItemBefore(this.tblData);
+
+        let Item = new tp.SysDataItem();
+        Item.FromDataTable(this.tblData);
+
+        let Url = tp.Urls.SysDataSaveItem;
+ 
+
+        let Args = await tp.Ajax.PostModelAsync(Url, Item);
+
+        // EDW: 1. Save the Item in database (AjaxController.SysDataSaveItem())
+        // 2. Remove the AjaxController.SysDataSelectEmptyItem() from C# and this.Insert()
+
 
     }
 
