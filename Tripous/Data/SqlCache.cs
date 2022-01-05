@@ -42,7 +42,7 @@ namespace Tripous.Data
 
             if (!Cache.ContainsKey(ConnectionName))
             {
-                ConnectionStatements = Cache[ConnectionName];
+                ConnectionStatements = new Dictionary<string, DataTable>();
                 Cache[ConnectionName] = ConnectionStatements;
             }
             else

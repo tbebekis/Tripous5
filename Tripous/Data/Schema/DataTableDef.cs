@@ -67,11 +67,17 @@ namespace Tripous.Data
             return IdentifierName;
         }
 
+
+        /// <summary>
+        /// Creates or alters a specified table in the database.
+        /// <para>When only the new definition is passed a new database table is created.</para>
+        /// <para>When both the new and the old definitions are passed, the function compares their fields and adds, drops or alters columns accordingly.</para>
+        /// </summary>
         static public void CreateOrAlterTable(DataTableDef NewTableDef, DataTableDef OldTableDef = null)
         {
             void Throw(string Text)
             {
-                Sys.Throw($"Cannot alter {OldTableDef.Name} table. {Text}");
+                Sys.Throw($"Cannot create or alter table: {OldTableDef.Name}.\n{Text}");
             }
 
             string SqlText;
@@ -102,7 +108,7 @@ namespace Tripous.Data
                 // drop column
                 foreach (var OldField in OldTableDef.Fields)
                 {
-                    var NewField = NewTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Name, OldField.Name));
+                    var NewField = NewTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Id, OldField.Id));
                     if (OldField == null)
                     {
                         SqlText = Provider.DropColumnSql(TableName, OldField.Name);
@@ -113,31 +119,81 @@ namespace Tripous.Data
                 
                 foreach (var NewField in NewTableDef.Fields)
                 {
-                    var OldField = OldTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Name, NewField.Name));
+                    var OldField = OldTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Id, NewField.Id));
 
                     // add column
                     if (OldField == null)
                     {
-                        SqlText = Provider.AddColumnSql(TableName, NewField.Name, NewField.GetDefText(false));
+                        SqlText = Provider.AddColumnSql(TableName, NewField.Name, NewField.GetDefText());
                         SqlTextList.Add(SqlText);
                     }
-
-                    if (OldField != null)
+                    else
                     {
+                        // rename column
+                        if (!Sys.IsSameText(NewField.Name, OldField.Name))
+                        {
+                            SqlText = Provider.RenameColumnSql(TableName, OldField.Name, NewField.Name);
+                            SqlTextList.Add(SqlText);
+                        }
+
+                        // column length
+                        if (NewField.DataType == DataFieldType.String && NewField.Length != OldField.Length)
+                        {
+                            if (NewField.Length < OldField.Length)
+                                Throw($"Column: {NewField.Name}. Reducing string column length is not permitted.");
+
+                            SqlText = Provider.SetColumnLengthSql(TableName, NewField.Name, NewField.GetDefText());
+                            SqlTextList.Add(SqlText);
+                        }
+
+                        // set/drop not null
                         if (NewField.Required != OldField.Required)
                         {
+                            // set not null
                             if (NewField.Required)
                             {
-                                // EDW
-                                SqlText = Provider.SetNotNullSql(TableName, NewField.Name, NewField.GetDefText(false));
+                                if (string.IsNullOrWhiteSpace(NewField.DefaultValue))
+                                    Throw($"Column: {NewField.Name}. Cannot set a column to not null. No default value.");
+
+                                SqlText = Provider.SetDefaultBeforeNotNullUpdateSql(TableName, NewField.Name, NewField.DefaultValue);
+                                SqlTextList.Add(SqlText);
+ 
+                                SqlText = Provider.SetNotNullSql(TableName, NewField.Name, NewField.GetDataTypeDefText());
+                                SqlTextList.Add(SqlText);
+                            }
+                            // drop not null
+                            else
+                            {
+                                SqlText = Provider.DropNotNullSql(TableName, NewField.Name, NewField.GetDataTypeDefText());
+                                SqlTextList.Add(SqlText);
+                            }
+                        }
+
+                        // set/drop default
+                        if (!Sys.IsSameText(NewField.DefaultValue, OldField.DefaultValue))
+                        {
+                            // drop default
+                            if (!string.IsNullOrWhiteSpace(OldField.DefaultValue))
+                            {
+                                SqlText = Provider.DropColumnDefaultSql(TableName, OldField.Name);
+                                SqlTextList.Add(SqlText);
+                            }                            
+ 
+                            // set default
+                            if (!string.IsNullOrWhiteSpace(NewField.DefaultValue))
+                            {
+                                SqlText = Provider.SetColumnDefaultSql(TableName, NewField.Name, NewField.DefaultValue);
                                 SqlTextList.Add(SqlText);
                             }
                         }
                     }
                 }
 
-
-
+                if (SqlTextList.Count > 0)
+                    SqlStore.ExecSql(SqlTextList);
+                else
+                    Throw("Nothing changed");
+                    
 
 
             }
@@ -159,7 +215,7 @@ namespace Tripous.Data
              
             void Throw(string Text)
             {
-                Sys.Throw($"Definition of {Name} table is invalid. {Text}");
+                Sys.Throw($"Definition of {Name} table is invalid.\n{Text}");
             }
 
             // table            
@@ -174,6 +230,16 @@ namespace Tripous.Data
                 Throw($"No fields.");
 
             Fields.ForEach(item => CheckIsValidDatabaseObjectIdentifier(item.Name));
+
+            // duplicate field names
+            List<string> FieldNames = new List<string>();
+            Fields.ForEach(item =>
+            {
+                string FieldName = item.Name.ToLowerInvariant();
+                if (FieldNames.Contains(FieldName))
+                    Throw($"Duplicate column name: {item.Name}");
+            });
+
 
             int Count = Fields.Count(item => item.IsPrimaryKey);
             //if (Count == 0)
@@ -190,16 +256,14 @@ namespace Tripous.Data
             if (Count > 1)
                 Throw($"Fields without data type.");
 
-            Count = Fields.Count(item => string.IsNullOrWhiteSpace(item.Name));
-            if (Count > 1)
-                Throw($"Fields without Name.");
+ 
 
             Fields.ForEach((item) => {
                 bool Flag = (string.IsNullOrWhiteSpace(item.ForeignTableName) && string.IsNullOrWhiteSpace(item.ForeignFieldName))
                             || (!string.IsNullOrWhiteSpace(item.ForeignTableName) && !string.IsNullOrWhiteSpace(item.ForeignFieldName));
 
                 if (!Flag)
-                    Throw($"Foreign Key constraint not fully defined in Field: {item.Name}");
+                    Throw($"Foreign Key constraint not fully defined in column: {item.Name}");
             });
 
  
@@ -434,8 +498,12 @@ namespace Tripous.Data
             if (!UniqueConstraints.Contains(FieldNames))
                 UniqueConstraints.Add(FieldNames);
         }
-        
+
         /* properties */
+        /// <summary>
+        /// A GUID string. 
+        /// </summary>
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>

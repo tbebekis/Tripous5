@@ -6,7 +6,8 @@
 
 @{
     var Settings = DataStore.GetSettings();
-    string IsDevMode = WSys.IsDevelopment ? "true" : "false";
+    string IsDevMode = WSys.IsDevMode ? "true" : "false";
+    string GlobalErrorHandling = "true";
 
     string IsAuthenticated = Lib.IsCookieAuthenticated ? "true" : "false";
 }
@@ -23,7 +24,7 @@
             Medium: 1200
         };
 
-        tp.SysConfig.GlobalErrorHandling = @IsDevMode;
+        tp.SysConfig.GlobalErrorHandling = @GlobalErrorHandling;
         tp.SysConfig.DebugMode = @IsDevMode;
 
         tp.NotificationBoxSetup.ToTop = false;

@@ -66,7 +66,7 @@ namespace Test.WinApp
         /// <summary>
         /// Loads database configuration settings.
         /// </summary>
-        static void ConnectDatabases()
+        static void LoadConnectionStrings()
         {
             SysConfig.SqlConnectionsFolder = typeof(App).Assembly.GetFolder();
             SqlConnectionInfoList ConnectionInfoList = new SqlConnectionInfoList();
@@ -178,7 +178,7 @@ namespace Test.WinApp
             Db.Initialize();
 
             RegisterDbProviderFactories();
-            ConnectDatabases();
+            LoadConnectionStrings();
             CreateDatabases();
 
             RegisterSchemas();

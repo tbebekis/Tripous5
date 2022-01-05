@@ -33,6 +33,12 @@ namespace WebDesk.Controllers
     [AllowAnonymous] // <<<<<< This is here just for the demos to work. Remove it in production.
     public class AjaxController : ControllerMvc, IAjaxController
     {
+        string GetExceptionText(Exception e)
+        {
+            //string Result = WApp.DevMode ? Sys.ExceptionText(e) : e.Message;
+            string Result = e.Message;
+            return Result;
+        }
         DataTable SelectTable(string SqlText, string ConnectionName)
         {
             SqlStore Store = SqlStores.CreateSqlStore(ConnectionName);
@@ -68,7 +74,18 @@ namespace WebDesk.Controllers
         public async Task<JsonResult> AjaxExecute([FromBody] AjaxRequest R)
         {
             await Task.CompletedTask;
-            HttpActionResult Result = DataStore.AjaxExecute(this, R);
+
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                Result = DataStore.AjaxExecute(this, R);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = GetExceptionText(e);
+            }
+
             return Json(Result);
         }
        
@@ -89,7 +106,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return Json(Result);
@@ -102,7 +119,6 @@ namespace WebDesk.Controllers
             HttpActionResult Result = new HttpActionResult();
             try
             {
-
                 string Name, SqlText, ConnectionName;
                 JsonDataSet JDataSet = new JsonDataSet();
 
@@ -125,7 +141,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
 
@@ -151,7 +167,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return Json(Result);
@@ -173,7 +189,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return this.Json(Result);
@@ -194,7 +210,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return this.Json(Result);
@@ -214,7 +230,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return this.Json(Result);
@@ -235,7 +251,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return this.Json(Result);
@@ -259,7 +275,7 @@ namespace WebDesk.Controllers
             }
             catch (Exception e)
             {
-                Result.ErrorText = Sys.ExceptionText(e);
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return this.Json(Result);
@@ -326,11 +342,17 @@ where
             await Task.CompletedTask;
 
             HttpActionResult Result = new HttpActionResult(); 
-
-            DataTable Table = DataStore.SysDataSelectList(DataType, NoBlobs);
-            JsonDataTable JTable = new JsonDataTable(Table);
-            Result.SerializePacket(JTable);
-            Result.IsSuccess = true;
+            try
+            {
+                DataTable Table = DataStore.SysDataSelectList(DataType, NoBlobs);
+                JsonDataTable JTable = new JsonDataTable(Table);
+                Result.SerializePacket(JTable);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = GetExceptionText(e);
+            }
 
             return Json(Result);
         }
@@ -338,12 +360,18 @@ where
         public async Task<JsonResult> SysDataSelectItemById(string Id)
         {
             await Task.CompletedTask;
- 
-            HttpActionResult Result = new HttpActionResult();
-            SysDataItem Item = DataStore.SysDataSelectItemById(Id);
-            Result.SerializePacket(Item);
 
-            Result.IsSuccess = true;
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                SysDataItem Item = DataStore.SysDataSelectItemById(Id);
+                Result.SerializePacket(Item);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = GetExceptionText(e);
+            }
 
             return Json(Result);
         }
@@ -360,7 +388,7 @@ where
             }
             catch (Exception e)
             {
-                Result.ErrorText = e.Message;
+                Result.ErrorText = GetExceptionText(e);
             }
 
             return Json(Result);
@@ -376,10 +404,17 @@ where
 
             HttpActionResult Result = new HttpActionResult();
 
-            Command[] MenuItems = DataStore.GetMainMenu();
-            Result.SerializePacket(MenuItems);
-            Result.IsSuccess = true;
-
+            try
+            {
+                Command[] MenuItems = DataStore.GetMainMenu();
+                Result.SerializePacket(MenuItems);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = GetExceptionText(e);
+            }
+ 
             return Json(Result);
         }
         #endregion

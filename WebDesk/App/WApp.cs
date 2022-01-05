@@ -97,10 +97,7 @@ namespace WebDesk
             S = Sys.UrlCombine(S, FileName);
             return S;
         }
-
-
-
-
+ 
         /* properties */
         /// <summary>
         /// Returns true when in debug mode, i.e. the DEBUG constant is defined.

@@ -43,9 +43,7 @@ namespace Tripous.Data
             // alter table {TableName} rename column {ColumnName} to {NewColumnName}   
             return $"alter table {TableName} rename column {ColumnName} to {NewColumnName}    ";
         }
-
  
-
         /* public */
         /// <summary>
         /// Returns true if the database represented by the specified database exists, by checking the connection.

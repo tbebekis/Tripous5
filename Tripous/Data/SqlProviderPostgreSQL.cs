@@ -56,21 +56,19 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string SetNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetNotNullSql(string TableName, string ColumnName, string DataType)
         {
-            // update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
-            // alter table {TableName} alter column {ColumnName} set not null   
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            // update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
+            // alter table {TableName} alter column {ColumnName} set not null  
             return $"alter table {TableName} alter column {ColumnName} set not null";
         }
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string DropNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        public override string DropNotNullSql(string TableName, string ColumnName, string DataType)
         {
-            // alter table {TableName} alter {ColumnName} drop not null
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} alter {ColumnName} drop not null";
+            // alter table {TableName} alter column {ColumnName} drop not null 
+            return $"alter table {TableName} alter column {ColumnName} drop not null";
         }
 
         /// <summary>

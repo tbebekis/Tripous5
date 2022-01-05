@@ -96,21 +96,21 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string SetNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetNotNullSql(string TableName, string ColumnName, string DataType)
         {
-            // update table TableName set ColumnName = DefaultValue where ColumnName is null;
-            // alter table TableName alter column ColumnName ColumnDef
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+            // update TableName set ColumnName = DefaultValue where ColumnName is null;
+            // alter table TableName alter column ColumnName DataType
+            DataType = ReplaceDataTypePlaceholders(DataType);
+            return $"alter table {TableName} alter column {ColumnName} {DataType}";
         }
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string DropNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        public override string DropNotNullSql(string TableName, string ColumnName, string DataType)
         {
-            // alter table TableName alter column ColumnName ColumnDef
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+            // alter table {TableName} alter column {ColumnName} {DataType} null
+            DataType = ReplaceDataTypePlaceholders(DataType);
+            return $"alter table {TableName} alter column {ColumnName} {DataType} null";
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Tripous.Data
         /// </summary>
         public override string SetColumnDefaultSql(string TableName, string ColumnName, string DefaultExpression)
         {
-            // alter table TableName add default DefaultValue for ColumnName
+            // alter table {TableName} add default {DefaultExpression} for {ColumnName}
             return $"alter table {TableName} add default {DefaultExpression} for {ColumnName}";
         }
         /// <summary>

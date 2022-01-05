@@ -98,17 +98,21 @@ tp.ExceptionText = function (e) {
 
             o.Name = e.error && e.error.name ? e.error.name : '';
             o.Message = e.message;
-            o.Type = e.type ? e.type : '';
-            o.Number = e.error && e.error.number ? e.error.number : null;
-            o.File = e.filename;
-            o.Line = e.lineno;
-            o.Col = e.colno;
-            o.Stack = e.error && e.error.stack ? e.error.stack : '';
+
+            if (tp.SysConfig.DebugMode === true) {
+                o.Type = e.type ? e.type : '';
+                o.Number = e.error && e.error.number ? e.error.number : null;
+                o.File = e.filename;
+                o.Line = e.lineno;
+                o.Col = e.colno;
+                o.Stack = e.error && e.error.stack ? e.error.stack : '';
+            }
 
             if (e instanceof PromiseRejectionEvent) {
                 if (!tp.IsEmpty(e.reason)) {
                     if (e.reason instanceof Error) {
-                        o.Stack = e.reason.stack;
+                        if (tp.SysConfig.DebugMode === true)
+                            o.Stack = e.reason.stack;
                     } else {
                         o.Reason = e.reason.toString();
                     }
@@ -454,8 +458,9 @@ tp.Logger.DisplayNotificationBoxes = true;
 
 
 //---------------------------------------------------------------------------------------
-// tp functions
+// Functions
 //---------------------------------------------------------------------------------------
+
 
 //#region Type checking
 /** Type checking function. Returns true if the specified value is null or undefined.
@@ -10634,13 +10639,13 @@ tp.AjaxResponseDefaultHandler = function (Args) {
         return tp.IsString(Text) && !tp.IsBlank(Text) ? Text : "Unknown error";
     }
 
-    if (Args.Result === false)
+    if (Args.Result !== true)
         throw `Ajax network error: ${ErrorText(Args.ErrorText)}`;  
 
     let o = JSON.parse(Args.ResponseText);
     Args.ResponseData = o;
 
-    if (!tp.IsEmpty(o) && o.IsSuccess === false)
+    if (!tp.IsEmpty(o) && o.IsSuccess !== true)
         throw `Ajax operation error: ${ErrorText(o.ErrorText)}`;
 
     if (tp.IsValid(Args.ResponseData)) {
@@ -12410,7 +12415,7 @@ tp.Component = class extends tp.Object {
     OnSizeModeChanged() {
         this.Trigger('SizeModeChanged', { SizeMode: this.SizeMode });
 
-        // adjust css classes
+        // in debug mode put the size-mode css classes in order to be visible to programmer
         if (tp.DebugMode === true) {
             tp.RemoveClasses(this.Handle, tp.SizeModes);
             tp.AddClass(this.Handle, this.SizeMode);

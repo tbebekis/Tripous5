@@ -696,7 +696,7 @@ namespace WebLib.AspNet
         /// <summary>
         /// True when is development environment.
         /// </summary>
-        static public bool IsDevelopment { get { return HostEnvironment == null? true: HostEnvironment.IsDevelopment(); } }
+        static public bool IsDevMode { get { return HostEnvironment == null? true: HostEnvironment.IsDevelopment(); } }
 
 
         /// <summary>

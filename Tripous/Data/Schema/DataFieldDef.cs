@@ -65,17 +65,16 @@ namespace Tripous.Data
         {
             return DataTypeToString(this.DataType);
         }
-        /// <summary>
-        /// Returns the field definition text.
-        /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>
-        /// </summary>
-        public string GetDefText(bool IncludeColumnName = false)
-        {
 
+        /// <summary>
+        /// Returns the definition text for the data-type, e.g. @NVARCHAR(96)
+        /// </summary>
+        public string GetDataTypeDefText()
+        {
             string sDataType;
             if (IsPrimaryKey)
             {
-                sDataType = DataType == DataFieldType.String ? $"@NVARCHAR({Length})    @NOT_NULL primary key" : "@PRIMARY_KEY";
+                sDataType = DataType == DataFieldType.String ? $"@NVARCHAR({Length}) @NOT_NULL primary key" : "@PRIMARY_KEY";
             }
             else if (DataType == DataFieldType.String)
             {
@@ -86,16 +85,38 @@ namespace Tripous.Data
                 sDataType = DataTypeToString(DataType);
             }
 
+            return sDataType;
+        }
+        /// <summary>
+        /// Returns the definition text for the null/not null constraint, e.g. not null
+        /// </summary>
+        public string GetNullDefText()
+        {
             string sNull = string.Empty;
             if (!IsPrimaryKey)
                 sNull = Required ? SqlProvider.CNOT_NULL : SqlProvider.CNULL;
 
+            return sNull;
+        }
+        /// <summary>
+        /// Returns the definition text for the default constraint, e.g. '' or 0
+        /// </summary>
+        public string GetDefaultDefText()
+        {
             string sDefault = !string.IsNullOrWhiteSpace(DefaultValue) ? $"default {DefaultValue}" : string.Empty;
-
-            string Result = IncludeColumnName? 
-                $"{Name} {sDataType} {sDefault} {sNull}": 
-                $"{sDataType} {sDefault} {sNull}";
-
+            return sDefault;
+        }
+        
+        /// <summary>
+        /// Returns the field definition text.
+        /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>
+        /// </summary>
+        public string GetDefText()
+        {
+            string sDataType = GetDataTypeDefText();
+            string sNull = GetNullDefText();
+            string sDefault = GetDefaultDefText();
+            string Result = $"{Name} {sDataType} {sDefault} {sNull}" ;
             return Result;
         }
 
@@ -150,6 +171,11 @@ namespace Tripous.Data
         }
 
         /* properties */
+        /// <summary>
+        /// A GUID string. We need this in comparing two instances of <see cref="DataTableDef"/> 
+        /// for fields with the same Id but different Name, for column renaming.
+        /// </summary>
+        public string Id { get; set; } = Sys.GenId(true);
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>

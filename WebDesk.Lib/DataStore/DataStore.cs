@@ -79,21 +79,23 @@ namespace WebLib
         /// <summary>
         /// Loads database configuration settings.
         /// </summary>
-        static void ConnectDatabases()
+        static void LoadConnectionStrings()
         {
             SysConfig.SqlConnectionsFolder = typeof(DataStore).Assembly.GetFolder();
             SqlConnectionInfoList ConnectionInfoList = new SqlConnectionInfoList();
 
-            // normalize databas path
-            SqlConnectionInfo DefaultConnectionInfo = ConnectionInfoList.SqlConnections.FirstOrDefault(item => Sys.IsSameText(item.Name, "Default"));
-            string CS = DefaultConnectionInfo.ConnectionString;
-            ConnectionStringBuilder CSB = new ConnectionStringBuilder(CS);
-            string Database = CSB.Database;
-            Database = Path.GetFileName(Database);
-            string Folder = typeof(DataStore).Assembly.GetFolder();
-            Database = Path.Combine(Folder, Database);
-            CSB["Data Source"] = Database;
-            DefaultConnectionInfo.ConnectionString = CSB.ConnectionString;
+            /*
+                        // normalize databas path
+                        SqlConnectionInfo DefaultConnectionInfo = ConnectionInfoList.SqlConnections.FirstOrDefault(item => Sys.IsSameText(item.Name, "Default"));
+                        string CS = DefaultConnectionInfo.ConnectionString;
+                        ConnectionStringBuilder CSB = new ConnectionStringBuilder(CS);
+                        string Database = CSB.Database;
+                        Database = Path.GetFileName(Database);
+                        string Folder = typeof(DataStore).Assembly.GetFolder();
+                        Database = Path.Combine(Folder, Database);
+                        CSB["Data Source"] = Database;
+                        DefaultConnectionInfo.ConnectionString = CSB.ConnectionString; 
+             */
 
             Db.Connections = ConnectionInfoList.SqlConnections;
 
@@ -197,7 +199,7 @@ namespace WebLib
                 Register(new AjaxViewInfoProviderDefault());
 
                 RegisterDbProviderFactories();
-                ConnectDatabases();
+                LoadConnectionStrings();
                 CreateDatabases();
 
                 SqlStore = SqlStores.CreateDefaultSqlStore();

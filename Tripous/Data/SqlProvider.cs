@@ -641,20 +641,20 @@ namespace Tripous.Data
         /// </summary>
         public virtual string SetDefaultBeforeNotNullUpdateSql(string TableName, string ColumnName, string DefaultValue)
         {
-            return $"update table {TableName} set {ColumnName} = {DefaultValue} where {ColumnName} is null";
+            return $"update {TableName} set {ColumnName} = {DefaultValue} where {ColumnName} is null";
         }
        
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public virtual string SetNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        public virtual string SetNotNullSql(string TableName, string ColumnName, string DataType)
         {
             throw new NotSupportedException("setting column to not null not supported");
         }
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public virtual string DropNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        public virtual string DropNotNullSql(string TableName, string ColumnName, string DataType)
         {
             throw new NotSupportedException("dropping column not null not supported");
         }

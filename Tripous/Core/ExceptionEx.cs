@@ -79,10 +79,9 @@ namespace Tripous
         public override string ToString()
         {
             StringBuilder SB = new StringBuilder();
-            SB.AppendLine(this.GetType().Name);
-
-            AddDataDictionaryTo(this, SB);
+ 
             SB.Append(base.ToString());
+            AddDataDictionaryTo(this, SB);
 
             return SB.ToString();
         }

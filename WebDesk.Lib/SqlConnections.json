@@ -2,9 +2,20 @@
     "SqlConnections": [
         {
             "Name": "Default",
+            "Provider": "MsSql",
+            "ConnectionString": "Data Source=teo5; Initial Catalog=WebDesk; Integrated Security=SSPI;",
+            "CommandTimeoutSeconds": 300
+        }
+    ],
+    "NotUsedConnections": [
+        {
+            "Name": "Default",
             "Provider": "SQLite",
             "ConnectionString": "Data Source=[AppPath]\\WebDesk.db3",
-            "CommandTimeoutSeconds":  300
+            "CommandTimeoutSeconds": 300
         }
+
     ]
+ 
+
 }

@@ -5,9 +5,9 @@ add             alter table {TableName} add {ColumnName} {ColumnDef}
 drop            alter table {TableName} drop column {ColumnName}
 rename          exec sp_rename N'{TableName}.{ColumnName}', '{NewColumnName}', 'COLUMN'
 length          alter table {TableName} alter column {ColumnName} {ColumnDef}
-set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
-                alter table {TableName} alter column {ColumnName} {ColumnDef}
-drop not null   alter table {TableName} alter column {ColumnName} {ColumnDef}
+set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
+                alter table {TableName} alter column {ColumnName} {DataType} not null
+drop not null   alter table {TableName} alter column {ColumnName} {DataType} null
 set default     alter table {TableName} add default {DefaultExpression} for {ColumnName}
 drop default    alter table {TableName} alter column {ColumnName} drop default
 ------------------------------------------------------------------
@@ -17,9 +17,9 @@ add             alter table {TableName} add {ColumnName} {ColumnDef}
 drop            alter table {TableName} drop column {ColumnName}
 rename          alter table {TableName} rename column {ColumnName} to {NewColumnName}
 length          alter table {TableName} modify {ColumnName} {ColumnDef}
-set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
-                alter table {TableName} modify {ColumnName} {ColumnDef}
-drop not null   alter table {TableName} modify {ColumnName} {ColumnDef}
+set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
+                alter table {TableName} modify {ColumnName} {DataType} not null
+drop not null   alter table {TableName} modify {ColumnName} {DataType} null
 set default     alter table {TableName} modify {ColumnName} default {DefaultExpression}
 drop default    alter table {TableName} alter column {ColumnName} drop default
 ------------------------------------------------------------------
@@ -29,7 +29,7 @@ add             alter table {TableName} add {ColumnName} {ColumnDef}
 drop            alter table {TableName} drop {ColumnName}
 rename          alter table {TableName} alter column {ColumnName} to {NewColumnName} 
 length          alter table {TableName} alter column {ColumnName} type {ColumnDef}             ALTER TABLE t1 ALTER c1 TYPE char(90);
-set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
+set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
                 alter table {TableName} alter {ColumnName} set not null                                 ALTER TABLE t1 ALTER c1 { DROP | SET } [NOT] NULL;
 drop not null   alter table {TableName} alter {ColumnName} drop not null 
 set default     alter table {TableName} alter column {ColumnName} set default {DefaultExpression}
@@ -41,7 +41,7 @@ add             alter table {TableName} add {ColumnName} {ColumnDef}
 drop            alter table {TableName} drop column {ColumnName}
 rename          alter table {TableName} rename column {ColumnName} to {NewColumnName} 
 length          alter table {TableName} alter column {ColumnName} {ColumnDef}
-set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
+set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
                 alter table {TableName} alter column {ColumnName} set not null   
 drop not null   alter table {TableName} alter column {ColumnName} drop not null 
 set default     alter table {TableName} alter column {ColumnName} set default {DefaultExpression}
@@ -53,9 +53,9 @@ add             alter table {TableName} add {ColumnName} {ColumnDef}
 drop            alter table {TableName} drop column {ColumnName}
 rename          alter table {TableName} rename column {ColumnName} to {NewColumnName} 
 length          alter table {TableName} modify column {ColumnName} {ColumnDef}
-set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
-                alter table {TableName} modify column {ColumnName} {ColumnDef}
-drop not null   alter table {TableName} modify column {ColumnName} {ColumnDef}
+set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
+                alter table {TableName} modify column {ColumnName} {DataType} not null
+drop not null   alter table {TableName} modify column {ColumnName} {DataType} null
 set default     alter table {TableName} alter {ColumnName} set default {DefaultExpression}
 drop default    alter table {TableName} alter {ColumnName} drop default
 

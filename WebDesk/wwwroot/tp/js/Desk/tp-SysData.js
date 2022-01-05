@@ -237,6 +237,7 @@ tp.DataTableDef = class extends tp.Object {
     constructor(Source = null) {
         super();
 
+        this.Id = tp.Guid(true);
         this.fTitle = '';
         this.fTitleKey = '';
         this.Fields = [];
@@ -244,7 +245,11 @@ tp.DataTableDef = class extends tp.Object {
 
         this.Assign(Source);
     }
- 
+
+    /** A GUID string
+     * @type {string}
+     */
+    Id = '';
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -271,6 +276,7 @@ tp.DataTableDef = class extends tp.Object {
         if (!tp.IsValid(Source))
             return;
 
+        this.Id = Source.Id || tp.Guid(true);
         this.Name = Source.Name || '';
         this.Title = Source.Title || '';
         this.TitleKey = Source.TitleKey || '';
@@ -309,6 +315,7 @@ tp.DataTableDef = class extends tp.Object {
             Table = new tp.DataTable();
             Table.Name = 'Fields';
 
+            Table.AddColumn('Id', tp.DataType.String, 40);
             Table.AddColumn('Name', tp.DataType.String, 32);
             Table.AddColumn('TitleKey', tp.DataType.String, 96);
             Table.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
@@ -361,12 +368,17 @@ tp.DataFieldDef = class extends tp.Object {
     constructor(Source = null) {
         super();
 
+        this.Id = tp.Guid(true);
         this.fTitle = '';
         this.fTitleKey = '';
 
         this.Assign(Source);
     }
- 
+
+    /** A GUID string
+     * @type {string}
+     */
+    Id = '';
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -393,6 +405,7 @@ tp.DataFieldDef = class extends tp.Object {
         if (!tp.IsValid(Source))
             return;
 
+        this.Id = Source.Id || tp.Guid(true);
         this.Name = Source.Name || '';
         this.Title = Source.Title || '';
         this.TitleKey = Source.TitleKey || '';
@@ -413,6 +426,7 @@ tp.DataFieldDef = class extends tp.Object {
      */
     FromDataRow(Row) {
         if (Row instanceof tp.DataRow) {
+            this.Id = Row.Get('Id', '');
             this.Name = Row.Get('Name', '');
             this.Title = Row.Get('Title', '');
             this.TitleKey = Row.Get('TitleKey', '');
@@ -430,6 +444,7 @@ tp.DataFieldDef = class extends tp.Object {
      * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
      */
     ToDataRow(Row) {
+        Row.Set('Id', this.Id);
         Row.Set('Name', this.Name);
         Row.Set('Title', this.Title);
         Row.Set('TitleKey', this.TitleKey);
@@ -624,6 +639,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             this.gridFields = tp.FindComponentByName('gridFields', this.View.Handle);
             this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
             this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
+ 
         }
 
         this.gridFields.DataSource = this.tblFields;
@@ -683,8 +699,11 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         let HtmlRowList = [];
 
         let DataSource = new tp.DataSource(tblField);
-        let ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'Required', 'Unique'];
+        let ColumnNames = IsInsert === true ?
+            ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'Required', 'Unique'] :
+            ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'Required'];
 
+ 
 
         // prepare HTML text for each column in tblFields
         ColumnNames.forEach((ColumnName) => {
@@ -1480,13 +1499,11 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.tblData = Item.ToDataTable();
 
         this.tblData.SetColumnListReadOnly(['DataType', 'Owner']);
+        let Row = this.tblData.RowCount === 0 ? this.tblData.AddEmptyRow() : this.tblData.Rows[0];
 
-        if (this.tblData.RowCount === 0) {
-            let Row = this.tblData.AddEmptyRow();
-            Row.Set('DataType', this.DataType);
-            Row.Set('Owner', 'App');
-            Row.Set('Tag4', 'Custom');
-        }
+        Row.Set('DataType', this.DataType);
+        Row.Set('Owner', 'App');
+        Row.Set('Tag4', 'Custom');
 
         this.DataSources.length = 0;
         this.DataSources.push(new tp.DataSource(this.tblData));
@@ -1557,11 +1574,13 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
         let Url = tp.Urls.SysDataSaveItem;
  
-
         let Args = await tp.Ajax.PostModelAsync(Url, Item);
 
-        // EDW: 1. Save the Item in database (AjaxController.SysDataSaveItem())
- 
+        if (Args.ResponseData.IsSuccess === true) {
+            tp.SuccessNote('OK');
+        }
+
+        this.ViewMode = tp.DataViewMode.List;
     }
 
 

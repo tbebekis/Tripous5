@@ -16,15 +16,24 @@ namespace WebLib
         {
             string JsonText = Item.Data1;
             DataTableDef NewTableDef = Json.Deserialize<DataTableDef>(JsonText);
+
+            SysDataItem OldItem = null;
             DataTableDef OldTableDef = null;
 
             object Id = SysData.SelectId(Item.DataType, Item.DataName);
             if (!Sys.IsNull(Id))
             {
-                SysDataItem OldItem = SysData.SelectItemById(Id);
-                JsonText = OldItem.Data1;
-                OldTableDef = Json.Deserialize<DataTableDef>(JsonText);
+                OldItem = SysData.SelectItemById(Id);
+                if (OldItem != null)
+                {
+                    JsonText = OldItem.Data1;
+                    OldTableDef = Json.Deserialize<DataTableDef>(JsonText);
+                }               
             }
+
+            DataTableDef.CreateOrAlterTable(NewTableDef, OldTableDef);
+
+            SysData.Save(Item);
         }
 
         /// <summary>

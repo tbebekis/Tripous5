@@ -144,20 +144,7 @@ namespace WebLib
                 new { Name = "Unique"},
                 new { Name = "ForeignTableName"},
                 new { Name = "ForeignFieldName"},
-            };
-
-            /*
-                        Columns: [
-                            { Name: 'Code' },
-                            { Name: 'Name' },
-                            { Name: 'Age' },
-                            { Name: 'DepartmentId', Text: 'Department', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblDepartment },
-                            { Name: 'Salary' },
-                            { Name: 'Married' },
-                            { Name: 'CountryId', Text: 'Country', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblCountry },
-                            { Name: 'EntryDate', Text: 'Entry Date' },
-                        ], 
-             */
+            }; 
 
             GridRow.Grid.Style["height"] = "100%";
         }

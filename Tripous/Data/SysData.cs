@@ -201,13 +201,12 @@ where
             return Row != null;
         }
         /// <summary>
-        /// Selects a row specified by Id and then creates, loads and returns an item.
+        /// Selects a row specified by Id and then creates, loads and returns an item. Returns null if item not exists.
         /// </summary>
         static public SysDataItem SelectItemById(object Id)
         {
-            SysDataItem Item = new SysDataItem();
-            Select(Id, Item);
-            return Item;
+            SysDataItem Item = new SysDataItem();            
+            return Select(Id, Item)? Item: null;
         }
         /// <summary>
         /// Loads Item by selecting Item.DataType and Item.DataName from the system data table.

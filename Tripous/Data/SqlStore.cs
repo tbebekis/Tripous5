@@ -543,7 +543,7 @@ namespace Tripous.Data
         {
             ExecSql(Transaction, SqlText, null);
         }
-
+ 
         /// <summary>
         /// Transactioned. Creates a DbTransaction, executes SqlText inside that transaction and commits.
         /// <para></para>
@@ -590,7 +590,7 @@ namespace Tripous.Data
         /// <summary>
         /// Executes a list of executable statements inside a single transaction
         /// </summary>
-        public virtual void ExecSql(string[] SqlTextList)
+        public virtual void ExecSql(IEnumerable<string> SqlTextList)
         {
             using (DbTransaction transaction = this.BeginTransaction())
             {
@@ -788,7 +788,6 @@ namespace Tripous.Data
                             "{0}.ID = '-100000000'",
                             "{0}.CODE = '00000000'",
                             "{0}.NAME = '00000000'",
-                            "{0}.ID = -100000000",
                             "1 > 2"
                           };
 
