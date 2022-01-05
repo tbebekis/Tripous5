@@ -183,14 +183,14 @@ Object.freeze(tp.NotificationType);
  */
 tp.NotificationBoxSetup = {
     Information: {
-        Title: 'Information2',
+        Title: 'Information',
         BackColor: '#FFFFD7',
         BorderColor: '#FFEB3B'
     },
     Warning: {
         Title: 'Warning',
-        BackColor: '#E7FFE7',
-        BorderColor: '#4CAF50'
+        BackColor: '#E7FFE7',  
+        BorderColor: '#4CAF50'   
     },
     Error: {
         Title: 'Error',
@@ -1732,6 +1732,11 @@ tp.LineBreaksToHtml = function (v) {
 
     return v;
 };
+/** Replaces line breaks (\r\n, \r and \n) with a specifed separator string and returns the new string.
+ * @param {string} v The string to operate on
+ * @param {string} sep The separator that replaces the line breaks.
+ * @returns {string} Replaces line breaks (\r\n, \r and \n) with a specifed separator string and returns the new string.
+ */
 tp.ReplaceLineBreaks = function (v, sep) {
     if (!tp.IsBlank(v)) {
         v = tp.ReplaceAll(v, '\r\n', sep);
@@ -1812,6 +1817,33 @@ tp.SetLength = function SetLength(v, NewLength) {
     return v;
 };
 
+/** Returns true if a specified string is a valid identifier name
+ * @param {string} v The string to check.
+ * @param {string} [PlusValidChars=''] Optional. User defined valid characters, other than the first character, e.g. '$'.
+ * @returns {boolean} Returns true if a specified string is a valid table name
+ */
+tp.IsValidIdentifier = function(v, PlusValidChars = '') {
+    if (!tp.IsString(v) || tp.IsBlank(v))
+        return false;
+
+    PlusValidChars = tp.IsString(PlusValidChars) ? PlusValidChars : '';
+
+    let SLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let SNumbers = "0123456789";
+    let SStartLetters = SLetters + '_';
+    let SValidChars = SLetters + SNumbers + PlusValidChars + '_';
+
+    for (let i = 0, ln = v.length; i < ln; i++) {
+        c = v.charAt(i);
+        if ((i === 0) && !SStartLetters.includes(c))
+            return false;
+
+        if (!SValidChars.includes(c))
+            return false;
+    }
+
+    return true;
+}
 
 /** Used as the return value by number convertion functions 
  */

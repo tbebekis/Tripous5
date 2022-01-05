@@ -32,6 +32,62 @@ namespace Tripous.Data
         {
         }
 
+        /* alter column */
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string RenameColumnSql(string TableName, string ColumnName, string NewColumnName)
+        {
+            // alter table {TableName} rename column {ColumnName} to {NewColumnName} 
+            return $"alter table {TableName} rename column {ColumnName} to {NewColumnName} ";
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // alter table {TableName} modify column {ColumnName} {ColumnDef}
+            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            return $"alter table {TableName} modify column {ColumnName} {ColumnDef}";
+        }
+
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string SetNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
+            // alter table {TableName} modify column {ColumnName} {ColumnDef}
+            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            return $"alter table {TableName} modify column {ColumnName} {ColumnDef}";
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string DropNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // alter table {TableName} modify column {ColumnName} {ColumnDef}
+            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            return $"alter table {TableName} modify column {ColumnName} {ColumnDef}";
+        }
+
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string SetColumnDefaultSql(string TableName, string ColumnName, string DefaultExpression)
+        {
+            // alter table {TableName} alter {ColumnName} set default {DefaultExpression}
+            return $"alter table {TableName} alter {ColumnName} set default {DefaultExpression}";
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string DropColumnDefaultSql(string TableName, string ColumnName)
+        {
+            // alter table {TableName} alter {ColumnName} drop default
+            return $@"alter table {TableName} alter {ColumnName} drop default";
+        }
+
         /* methods */
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.

@@ -17,6 +17,7 @@ namespace Tripous.Data
         bool fRequired;
         DataFieldType fDataType;
         int fLength;
+        string fName;
         string fTitleKey;
 
         /* construction */
@@ -50,6 +51,14 @@ namespace Tripous.Data
         }
 
         /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
+        /// <summary>
         /// Returns the string representation of a field data type.
         /// </summary>
         public string DataTypeToString()
@@ -60,7 +69,7 @@ namespace Tripous.Data
         /// Returns the field definition text.
         /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>
         /// </summary>
-        public string GetDefText()
+        public string GetDefText(bool IncludeColumnName = false)
         {
 
             string sDataType;
@@ -83,7 +92,9 @@ namespace Tripous.Data
 
             string sDefault = !string.IsNullOrWhiteSpace(DefaultValue) ? $"default {DefaultValue}" : string.Empty;
 
-            string Result = $"{Name} {sDataType} {sDefault} {sNull}";
+            string Result = IncludeColumnName? 
+                $"{Name} {sDataType} {sDefault} {sNull}": 
+                $"{sDataType} {sDefault} {sNull}";
 
             return Result;
         }
@@ -142,7 +153,15 @@ namespace Tripous.Data
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return fName; }
+            set
+            {
+                DataTableDef.CheckIsValidDatabaseObjectIdentifier(value);
+                fName = value;
+            }
+        }
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>

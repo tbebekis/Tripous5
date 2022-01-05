@@ -1,94 +1,76 @@
 ﻿------------------------------------------------------------------
-Column Rename
+        MsSql 
 ------------------------------------------------------------------
-MsSql           exec sp_rename N'dbo.TablName.FieldName', 'NewFieldName', 'COLUMN'
-Oracle          alter table TableName rename column FieldName to NewFieldName
-PostgreSQL      alter table TableName rename column FieldName to NewFieldName 
-Firebird        alter table TableName alter column FieldName to NewFieldName 
-MySql           alter table TableName rename column FieldName to NewFieldName 
-SQLite          alter table TableName rename column FieldName to NewFieldName           
- 
+add             alter table {TableName} add {ColumnName} {ColumnDef} 
+drop            alter table {TableName} drop column {ColumnName}
+rename          exec sp_rename N'{TableName}.{ColumnName}', '{NewColumnName}', 'COLUMN'
+length          alter table {TableName} alter column {ColumnName} {ColumnDef}
+set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
+                alter table {TableName} alter column {ColumnName} {ColumnDef}
+drop not null   alter table {TableName} alter column {ColumnName} {ColumnDef}
+set default     alter table {TableName} add default {DefaultExpression} for {ColumnName}
+drop default    alter table {TableName} alter column {ColumnName} drop default
 ------------------------------------------------------------------
-Column Length 
+        Oracle
 ------------------------------------------------------------------
-MsSql           alter table TableName alter column FieldName nvarchar(NewLength)
-Oracle          alter table TableName modify FieldName nvarchar(NewLength)
-PostgreSQL      alter table TableName alter column FieldName nvarchar(NewLength)
-Firebird        alter table TableName alter column type nvarchar(NewLength)             ALTER TABLE t1 ALTER c1 TYPE char(90);
-MySql           alter table TableName modify column FieldName nvarchar(NewLength)
-SQLite          -
+add             alter table {TableName} add {ColumnName} {ColumnDef} 
+drop            alter table {TableName} drop column {ColumnName}
+rename          alter table {TableName} rename column {ColumnName} to {NewColumnName}
+length          alter table {TableName} modify {ColumnName} {ColumnDef}
+set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
+                alter table {TableName} modify {ColumnName} {ColumnDef}
+drop not null   alter table {TableName} modify {ColumnName} {ColumnDef}
+set default     alter table {TableName} modify {ColumnName} default {DefaultExpression}
+drop default    alter table {TableName} alter column {ColumnName} drop default
+------------------------------------------------------------------
+        Firebird
+------------------------------------------------------------------
+add             alter table {TableName} add {ColumnName} {ColumnDef} 
+drop            alter table {TableName} drop {ColumnName}
+rename          alter table {TableName} alter column {ColumnName} to {NewColumnName} 
+length          alter table {TableName} alter column {ColumnName} type {ColumnDef}             ALTER TABLE t1 ALTER c1 TYPE char(90);
+set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
+                alter table {TableName} alter {ColumnName} set not null                                 ALTER TABLE t1 ALTER c1 { DROP | SET } [NOT] NULL;
+drop not null   alter table {TableName} alter {ColumnName} drop not null 
+set default     alter table {TableName} alter column {ColumnName} set default {DefaultExpression}
+drop default    alter table {TableName} alter column {ColumnName} drop default
+------------------------------------------------------------------
+        PostgreSQL
+------------------------------------------------------------------
+add             alter table {TableName} add {ColumnName} {ColumnDef} 
+drop            alter table {TableName} drop column {ColumnName}
+rename          alter table {TableName} rename column {ColumnName} to {NewColumnName} 
+length          alter table {TableName} alter column {ColumnName} {ColumnDef}
+set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
+                alter table {TableName} alter column {ColumnName} set not null   
+drop not null   alter table {TableName} alter column {ColumnName} drop not null 
+set default     alter table {TableName} alter column {ColumnName} set default {DefaultExpression}
+drop default    alter table {TableName} alter column {ColumnName} drop default
+------------------------------------------------------------------
+        MySql
+------------------------------------------------------------------
+add             alter table {TableName} add {ColumnName} {ColumnDef} 
+drop            alter table {TableName} drop column {ColumnName}
+rename          alter table {TableName} rename column {ColumnName} to {NewColumnName} 
+length          alter table {TableName} modify column {ColumnName} {ColumnDef}
+set not null    update table {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
+                alter table {TableName} modify column {ColumnName} {ColumnDef}
+drop not null   alter table {TableName} modify column {ColumnName} {ColumnDef}
+set default     alter table {TableName} alter {ColumnName} set default {DefaultExpression}
+drop default    alter table {TableName} alter {ColumnName} drop default
 
 ------------------------------------------------------------------
-Column Required 
+    SQLite
 ------------------------------------------------------------------
-MsSql           update table TableName set FieldName = DefaultValue where FieldName is null; 
-                alter table TableName alter column FieldName nvarchar(Length) not null 
-Oracle          update table TableName set FieldName = DefaultValue where FieldName is null; 
-                alter table TableName modify FieldName nvarchar(Length) not null 
-PostgreSQL      alter table TableName alter column FieldName set default DefaultValue
-                alter table TableName alter column FieldName set not null   
-Firebird        update table TableName set FieldName = DefaultValue where FieldName is null 
-                alter table TableName alter FieldName set not null
-MySql           update table TableName set FieldName = DefaultValue where FieldName is null 
-                alter table TableName modify column FieldName nvarchar(NewLength) not null
-SQLite          -
+add             alter table {TableName} add {ColumnName} {ColumnDef} 
+drop            alter table {TableName} drop column {ColumnName}
+rename          alter table {TableName} rename column {ColumnName} to {NewColumnName}   
+length          -
+set not null    -
+drop not null    
+set default     -
+drop default    -
 
  
-------------------------------------------------------------------
-Column Drop Default Value
-------------------------------------------------------------------
-MsSql           alter table TableName alter column FieldName drop default
-Oracle          alter table TableName alter column FieldName drop default
-PostgreSQL      alter table TableName alter column FieldName drop default
-Firebird        alter table TableName alter column FieldName drop default 
-MySql           alter table TableName alter FieldName drop default
-SQLite          -
-
- 
-------------------------------------------------------------------
-Column Set Default Value
-------------------------------------------------------------------
-MsSql           alter table TableName add default DefaultValue for FieldName
-Oracle          alter table TableName modify FieldName default DefaultValue
-PostgreSQL
-Firebird        alter table TableName alter column FieldName set default DefaultValue
-MySql           alter table TableName alter FieldName set default DefaultValue
-SQLite          -
-------------------------------------------------------------------
- 
-------------------------------------------------------------------
-MsSql
-Oracle
-PostgreSQL
-Firebird
-MySql
-SQLite
-------------------------------------------------------------------
- 
-------------------------------------------------------------------
-MsSql
-Oracle
-PostgreSQL
-Firebird
-MySql
-SQLite
-------------------------------------------------------------------
- 
-------------------------------------------------------------------
-MsSql
-Oracle
-PostgreSQL
-Firebird
-MySql
-SQLite
-------------------------------------------------------------------
- 
-------------------------------------------------------------------
-MsSql
-Oracle
-PostgreSQL
-Firebird
-MySql
-SQLite
-
+  
  

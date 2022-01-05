@@ -147,11 +147,14 @@ namespace Tripous.Data
                     if (IndexNamesList.ContainsText(IndexName))
                         return;
                 }
-                else if (SqlText.StartsWith("alter table", StringComparison.InvariantCultureIgnoreCase)
+                /*
+                 else if (SqlText.StartsWith("alter table", StringComparison.InvariantCultureIgnoreCase)
                     && SqlText.ToLower().Contains("column"))
                 {
                     SqlText = Store.Provider.NormalizeAlterTableColumnSql(SqlText);
-                }
+                }                
+                 */
+
 
                 Process(SqlText);
             }

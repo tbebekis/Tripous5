@@ -576,92 +576,8 @@ namespace Tripous.Data
 
             return SqlText;
         }
-        /// <summary>
-        /// Parses and normalizes SqlText as a valid alter table add-drop-rename column statement.
-        /// <example>Supported statements and statement format
-        /// <code>
-        /// alter table TABLE_NAME add column COLUMN_NAME column_def
-        /// alter table TABLE_NAME alter column COLUMN_NAME column_def
-        /// alter table TABLE_NAME drop column COLUMN_NAME
-        /// alter table TABLE_NAME rename column COLUMN_NAME to NEW_COLUMN_NAME 
-        /// </code>
-        /// </example>
-        /// </summary>
-        public virtual string NormalizeAlterTableColumnSql(string SqlText)
-        {
-
-            if (!string.IsNullOrWhiteSpace(SqlText))
-            {
-                List<string> List = new List<string>();
-                string[] Words = SqlText.Split(' ');
-
-                foreach (string Word in Words)
-                {
-                    if (Word.Trim().Length > 0)
-                        List.Add(Word.Trim());
-                }
-
-                // alter table TABLE_NAME add column COLUMN_NAME column_def
-                // alter table TABLE_NAME alter column COLUMN_NAME column_def
-                // alter table TABLE_NAME drop column COLUMN_NAME
-                // alter table TABLE_NAME rename column COLUMN_NAME to NEW_COLUMN_NAME
-
-                if (List.Count > 5)
-                {
-                    if ((string.Compare("alter", List[0], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        && (string.Compare("table", List[1], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        && (string.Compare("column", List[4], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        )
-                    {
-                        AlterColumnType AlterType = AlterColumnType.None;
-
-                        string TableName = List[2];
-                        string ColumnName = List[5];
-                        string ColumnDef = string.Empty;
-
-                        if (string.Compare("add", List[3], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        {
-                            AlterType = AlterColumnType.Add;
-                            for (int i = 6; i < List.Count; i++)
-                                ColumnDef += List[i] + " ";
-                        }
-                        else if (string.Compare("alter", List[3], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        {
-                            AlterType = AlterColumnType.Alter;
-                            for (int i = 6; i < List.Count; i++)
-                                ColumnDef += List[i] + " ";
-                        }
-                        else if (string.Compare("drop", List[3], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        {
-                            AlterType = AlterColumnType.Drop;
-                        }
-                        else if (string.Compare("rename", List[3], StringComparison.InvariantCultureIgnoreCase) == 0)
-                        {
-                            AlterType = AlterColumnType.Rename;
-
-                            for (int i = 7; i < List.Count; i++)
-                                ColumnDef += List[i] + " ";
-                        }
-
-                        return this.GetAlterTableColumnSql(AlterType, TableName, ColumnName, ColumnDef);
-
-                    }
-
-                }
-
-
-            }
-
-            return string.Empty;
-        }
-        /// <summary>
-        /// Returns an Sql statement for altering a table column
-        /// </summary>
-        public virtual string GetAlterTableColumnSql(AlterColumnType AlterType, string TableName, string ColumnName, string ColumnDef)
-        {
-            Sys.NotYet("GetAlterTableColumnSql()");
-            return "";
-        }
+ 
+ 
         /// <summary>
         /// Applies the specified RowLimit to the specified SelectSql according to the server technology.
         /// </summary>
@@ -677,7 +593,87 @@ namespace Tripous.Data
                 RowLimit = Db.DefaultRowLimit;
             return RowLimit;
         }
- 
+
+        /* alter column */
+        /// <summary>
+        /// Returns true if this provider supports a specified <see cref="AlterColumnType"/>
+        /// </summary>
+        public virtual bool SupportsAlterColumnType(AlterColumnType AlterType)
+        {
+            return Bf.In(AlterType, SupportedAlterColumnTypes);
+        }
+        
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string AddColumnSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // alter table TableName add ColumnName ColumnDef 
+            return $"alter table {TableName} add {ColumnName} {ColumnDef}";
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string DropColumnSql(string TableName, string ColumnName)
+        {
+            // alter table TableName drop ColumnName
+            return $"alter table {TableName} drop {ColumnName}";
+        }
+        
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string RenameColumnSql(string TableName, string ColumnName, string NewColumnName)
+        {
+            throw new NotSupportedException("rename column not supported");
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            throw new NotSupportedException("altering column length not supported");
+        }
+
+        /// <summary>
+        /// Returns an "UPDATE" statement for setting the default value to a column when it is null, i.e. where ColumnName is null.
+        /// <para>To be used before setting a "not null" constraint to a column.</para>
+        /// </summary>
+        public virtual string SetDefaultBeforeNotNullUpdateSql(string TableName, string ColumnName, string DefaultValue)
+        {
+            return $"update table {TableName} set {ColumnName} = {DefaultValue} where {ColumnName} is null";
+        }
+       
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string SetNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            throw new NotSupportedException("setting column to not null not supported");
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string DropNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            throw new NotSupportedException("dropping column not null not supported");
+        }
+        
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string SetColumnDefaultSql(string TableName, string ColumnName, string DefaultExpression)
+        {
+            throw new NotSupportedException("setting column default expression not supported");
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public virtual string DropColumnDefaultSql(string TableName, string ColumnName)
+        {
+            throw new NotSupportedException("dropping column default expression not supported");
+        }
+
         /* generators */
         /// <summary>
         /// Returns true if the GeneratorName exists in a database.
@@ -1116,9 +1112,7 @@ namespace Tripous.Data
                 Parameter.ParameterName = PrefixToGlobal(Parameter.ParameterName);
         }
 
-
-
-
+ 
         /// <summary>
         /// Creates and returns a connection string. The various conStrXXXX formats
         /// are used as string formats. 
@@ -1245,10 +1239,15 @@ namespace Tripous.Data
         /// Returns true if the database server supports generators/sequencers
         /// </summary>
         public virtual bool SupportsGenerators { get; } = false;
- 
+
         /// <summary>
-    /// Keys used in connection string by this provider
-    /// </summary>
+        /// Returns a set (bit-field) of the supported <see cref="AlterColumnType"/>s.
+        /// </summary>
+        public virtual AlterColumnType SupportedAlterColumnTypes { get; } = (AlterColumnType)Bf.All(typeof(AlterColumnType));
+
+        /// <summary>
+        /// Keys used in connection string by this provider
+        /// </summary>
         public virtual string[] ServerKeys { get; } = { };
         /// <summary>
         /// Keys used in connection string by this provider
@@ -1262,7 +1261,9 @@ namespace Tripous.Data
         /// Keys used in connection string by this provider
         /// </summary>
         public virtual string[] PasswordKeys { get; } = { };
- 
+
+
+
         /// <summary>
         /// The PrimaryKey text
         /// </summary>

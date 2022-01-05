@@ -1,7 +1,6 @@
 ﻿tp.Urls.SysDataSelectList = '/SysData/SelectList';
 tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
-tp.Urls.SysDataSelectEmptyItem = '/SysData/SelectEmptyItem';
-tp.Urls.SysDataSaveItem = '/SysData/SysDataSaveItem';
+tp.Urls.SysDataSaveItem = '/SysData/SaveItem';
 
 
 //#region SysDataItem
@@ -893,6 +892,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         let JsonText = tp.ToJson(TableDef, true);
         Row.Set('Data1', JsonText);
     }
+ 
 
     /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
      * @param {tp.DataTable} tblData
@@ -913,9 +913,9 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             tp.WarningNote('Cannot save changes.\nNo Table Name (DataName)');
             Result = false;
         }
-
-        if (tp.IsString(v) && v.includes(' ')) {
-            tp.WarningNote('Cannot save changes.\nTable Name (DataName) cannot contain spaces');
+ 
+        if (tp.IsString(v) && !tp.IsValidIdentifier(v, '$')) {
+            tp.WarningNote('Cannot save changes.\nTable Name should start with _ or letter \nand cannot contain spaces, special characters and punctuation.');
             Result = false;
         }
 
@@ -1433,6 +1433,23 @@ tp.DeskSysDataView = class extends tp.DeskView {
     */
     ExecuteCustomCommand(Command) {
     }
+ 
+    /** Returns true if can commit changes, else false.
+     * @returns {boolean} Returns true if can commit changes, else false.
+     * */
+    CanCommit() {
+        if (!this.Handler.CanCommitItem(this.tblData))
+            return false;
+
+        let Row = this.tblData.Rows[0];
+        let v = Row.Get('DataName', '');
+        if (!tp.IsValid(v) || tp.IsBlankString(v)) {
+            tp.ErrorNote('Cannot save changes.\nNo value in field: DataName');
+            return false;
+        }
+
+        return true;
+    }
 
     async ListSelect() {
         let Url = tp.Urls.SysDataSelectList;
@@ -1451,21 +1468,16 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.ForceSelect = false;
         this.ViewMode = tp.DataViewMode.List;
     }
-
+ 
     async Insert() {
-        this.CreateEditControls();
-
-        let Url = tp.Urls.SysDataSelectEmptyItem;
+        this.CreateEditControls();        
 
         this.pagerEdit.SelectedIndex = 0;
 
         this.Handler.InsertItemBefore();
 
-        let Args = await tp.Ajax.GetAsync(Url);
-
-        this.tblData = new tp.DataTable();
-        this.tblData.Assign(Args.Packet);
-        this.tblData.Name = 'SysData';
+        let Item = new tp.SysDataItem();
+        this.tblData = Item.ToDataTable();
 
         this.tblData.SetColumnListReadOnly(['DataType', 'Owner']);
 
@@ -1549,31 +1561,11 @@ tp.DeskSysDataView = class extends tp.DeskView {
         let Args = await tp.Ajax.PostModelAsync(Url, Item);
 
         // EDW: 1. Save the Item in database (AjaxController.SysDataSaveItem())
-        // 2. Remove the AjaxController.SysDataSelectEmptyItem() from C# and this.Insert()
-
-
+ 
     }
 
 
-    CreateEditTable() {
 
-    }
-    /** Returns true if can commit changes, else false.
-     * @returns {boolean} Returns true if can commit changes, else false.
-     * */
-    CanCommit() {
-        if (!this.Handler.CanCommitItem(this.tblData))
-            return false;
-
-        let Row = this.tblData.Rows[0];
-        let v = Row.Get('DataName', '');
-        if (!tp.IsValid(v) || tp.IsBlankString(v)) {
-            tp.ErrorNote('Cannot save changes.\nNo value in field: DataName');
-            return false;
-        }
-
-        return true;
-    }
 
     /* data-binding */
     /**

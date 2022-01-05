@@ -22,9 +22,7 @@ namespace Tripous.Data
         public SchemaVersion()
         { 
         }
-
-
-
+ 
         /* public */
         /// <summary>
         /// Adds a table

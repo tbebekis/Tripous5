@@ -139,7 +139,7 @@ namespace WebDesk.Controllers
         /// Action
         /// </summary>
         [Route("/Broker/Initialize")]
-        public JsonResult Initialize(string BrokerName)
+        public JsonResult BrokerInitialize(string BrokerName)
         {
             HttpActionResult Result = new HttpActionResult();
             try
@@ -161,7 +161,7 @@ namespace WebDesk.Controllers
         /// Action
         /// </summary>
         [Route("/Broker/Insert")]
-        public JsonResult Insert(string BrokerName)
+        public JsonResult BrokerInsert(string BrokerName)
         {
             HttpActionResult Result = new HttpActionResult();
             try
@@ -182,7 +182,7 @@ namespace WebDesk.Controllers
         /// Action
         /// </summary>
         [Route("/Broker/Edit")]
-        public JsonResult Edit(string BrokerName, string Id)
+        public JsonResult BrokerEdit(string BrokerName, string Id)
         {
             HttpActionResult Result = new HttpActionResult();
             try
@@ -203,7 +203,7 @@ namespace WebDesk.Controllers
         /// Action
         /// </summary>
         [Route("/Broker/Delete")]
-        public JsonResult Delete(string BrokerName, string Id)
+        public JsonResult BrokerDelete(string BrokerName, string Id)
         {
             HttpActionResult Result = new HttpActionResult();
             try
@@ -223,7 +223,7 @@ namespace WebDesk.Controllers
         /// Action
         /// </summary>
         [Route("/Broker/Commit")]
-        public JsonResult Commit([FromBody] JsonBroker Packet)
+        public JsonResult BrokerCommit([FromBody] JsonBroker Packet)
         {
             HttpActionResult Result = new HttpActionResult();
             try
@@ -246,7 +246,7 @@ namespace WebDesk.Controllers
         /// the SelectList of the broker.
         /// </summary>
         [Route("/Broker/SelectList")]
-        public JsonResult SelectList(string BrokerName, string SqlText, bool UseRowLimit)
+        public JsonResult BrokerSelectList(string BrokerName, string SqlText, bool UseRowLimit)
         {
             HttpActionResult Result = new HttpActionResult();
             try
@@ -327,7 +327,7 @@ where
 
             HttpActionResult Result = new HttpActionResult(); 
 
-            DataTable Table = SysData.Select(DataType, NoBlobs);
+            DataTable Table = DataStore.SysDataSelectList(DataType, NoBlobs);
             JsonDataTable JTable = new JsonDataTable(Table);
             Result.SerializePacket(JTable);
             Result.IsSuccess = true;
@@ -340,42 +340,32 @@ where
             await Task.CompletedTask;
  
             HttpActionResult Result = new HttpActionResult();
-
-            //DataTable Table = SysData.SelectById(Id);
-            //JsonDataTable JTable = new JsonDataTable(Table);
-            //Result.SerializePacket(JTable);
-
-            SysDataItem Item = SysData.SelectItemById(Id);
+            SysDataItem Item = DataStore.SysDataSelectItemById(Id);
             Result.SerializePacket(Item);
 
             Result.IsSuccess = true;
 
             return Json(Result);
         }
-        [HttpPost("/SysData/SysDataSaveItem")]
+        [HttpPost("/SysData/SaveItem")]
         public async Task<JsonResult> SysDataSaveItem([FromBody] SysDataItem Item)
         {
             await Task.CompletedTask;
 
             HttpActionResult Result = new HttpActionResult();
-            Result.IsSuccess = true;
-            return Json(Result);
-        }
-
-        [HttpGet("/SysData/SelectEmptyItem")]
-        public async Task<JsonResult> SysDataSelectEmptyItem()
-        {
-            await Task.CompletedTask;
- 
-            HttpActionResult Result = new HttpActionResult();
-
-            DataTable Table = SysData.CreateDataTable();
-            JsonDataTable JTable = new JsonDataTable(Table);
-            Result.SerializePacket(JTable);
-            Result.IsSuccess = true;
+            try
+            {
+                DataStore.SysDataSaveItem(Item);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = e.Message;
+            }
 
             return Json(Result);
         }
+
         #endregion
 
         #region Desk

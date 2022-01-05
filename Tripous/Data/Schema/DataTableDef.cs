@@ -12,6 +12,7 @@ namespace Tripous.Data
     public class DataTableDef
     {
 
+        string fName;
         string fTitleKey;
 
         /* construction */
@@ -22,15 +23,15 @@ namespace Tripous.Data
         {
         }
 
-
+        /* static */
         /// <summary>
-        /// Validates a specified database object identifier an throws an exception if it is invalid.
+        /// Validates a specified database object identifier and throws an exception if it is invalid.
         /// </summary>
         static public void CheckIsValidDatabaseObjectIdentifier(string Name)
         {
             void Throw(string Text)
             {
-                Sys.Throw($"{Name} is not a valid database object identifier. {Text}");
+                Sys.Throw($"Identifier name {Name} is not a valid database object identifier. {Text}");
             }
 
             if (string.IsNullOrWhiteSpace(Name))
@@ -48,12 +49,108 @@ namespace Tripous.Data
                     Throw("Special characters, except $ and _ are not allowed");
             }
 
-            if (Name.Length > 32)
-                Throw("Exceeds 32 character length");
+            if (Name.Length > IdentifierMaxLength)
+                Throw($"Identifier name {Name} exceeds max allowed length: {DataTableDef.IdentifierMaxLength}");
 
+        }
+        /// <summary>
+        /// Forces a specified identifier name, such as Table or Field name, to have a valid max length.
+        /// </summary>
+        static public string EnsureIdentifierValidLength(string IdentifierName)
+        {
+            if (!string.IsNullOrWhiteSpace(IdentifierName))
+            {
+                if (IdentifierName.Length > IdentifierMaxLength)
+                    IdentifierName = IdentifierName.Substring(0, IdentifierMaxLength);
+            }
+
+            return IdentifierName;
+        }
+
+        static public void CreateOrAlterTable(DataTableDef NewTableDef, DataTableDef OldTableDef = null)
+        {
+            void Throw(string Text)
+            {
+                Sys.Throw($"Cannot alter {OldTableDef.Name} table. {Text}");
+            }
+
+            string SqlText;
+
+            NewTableDef.Check();
+
+            // is create table
+            if (OldTableDef == null)
+            {
+                SqlText = NewTableDef.GetDefText();
+                SchemaVersion SV = new SchemaVersion();
+                SV.AddTable(SqlText);
+                SV.Execute();
+            }
+            // is alter table columns
+            else
+            {
+                if (!Sys.IsSameText(NewTableDef.Name, OldTableDef.Name))
+                    Throw("Altering table name is not allowed.");
+
+                string TableName = OldTableDef.Name;
+ 
+                SqlStore SqlStore = SqlStores.Default;
+                SqlProvider Provider = SqlStore.Provider;
+
+                List<string> SqlTextList = new List<string>();
+
+                // drop column
+                foreach (var OldField in OldTableDef.Fields)
+                {
+                    var NewField = NewTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Name, OldField.Name));
+                    if (OldField == null)
+                    {
+                        SqlText = Provider.DropColumnSql(TableName, OldField.Name);
+                        SqlTextList.Add(SqlText);
+                    }
+                }
+
+                
+                foreach (var NewField in NewTableDef.Fields)
+                {
+                    var OldField = OldTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Name, NewField.Name));
+
+                    // add column
+                    if (OldField == null)
+                    {
+                        SqlText = Provider.AddColumnSql(TableName, NewField.Name, NewField.GetDefText(false));
+                        SqlTextList.Add(SqlText);
+                    }
+
+                    if (OldField != null)
+                    {
+                        if (NewField.Required != OldField.Required)
+                        {
+                            if (NewField.Required)
+                            {
+                                // EDW
+                                SqlText = Provider.SetNotNullSql(TableName, NewField.Name, NewField.GetDefText(false));
+                                SqlTextList.Add(SqlText);
+                            }
+                        }
+                    }
+                }
+
+
+
+
+
+            }
         }
 
         /* public */
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        public override string ToString()
+        {
+            return this.Name;
+        }
         /// <summary>
         /// Throws an exception if this instance is not a valid one.
         /// </summary>
@@ -105,15 +202,7 @@ namespace Tripous.Data
                     Throw($"Foreign Key constraint not fully defined in Field: {item.Name}");
             });
 
-            // unique constraints
-           // Count = UniqueConstraints.Count(item => string.IsNullOrWhiteSpace(item.FieldName));
-           // if (Count > 1)
-           //     Throw($"Unique constraints without FieldName.");
-
-            // foreign key constraints
-            //Count = ForeignKeys.Count(item => string.IsNullOrWhiteSpace(item.FieldName) || string.IsNullOrWhiteSpace(item.ForeignTableName) || string.IsNullOrWhiteSpace(item.ForeignFieldName));
-            //if (Count > 1)
-            //    Throw($"Foreign key constraints not fully defined.");
+ 
         }
         /// <summary>
         /// Returns the table definition text.
@@ -121,16 +210,7 @@ namespace Tripous.Data
         /// </summary>
         public string GetDefText()
         {
-            string EnsureValidLength(string S)
-            {
-                if (!string.IsNullOrWhiteSpace(S))
-                {
-                    if (S.Length > 32)
-                        S = S.Substring(0, 32);
-                }
 
-                return S;
-            }
 
             StringBuilder SB = new StringBuilder();
 
@@ -155,7 +235,7 @@ namespace Tripous.Data
             {
                 if (Field.Unique)
                 {
-                    sName = EnsureValidLength($"UC{Index}_{Name}");
+                    sName = EnsureIdentifierValidLength($"UC{Index}_{Name}");
                     sDef = $",constraint {sName} unique ({Field.Name})";
                     SB.AppendLine("  " + sDef);
                     Index++;
@@ -164,7 +244,7 @@ namespace Tripous.Data
             // multi-field unique constraints
             foreach (string UCFields in UniqueConstraints)
             {
-                sName = EnsureValidLength($"UC{Index}_{Name}");
+                sName = EnsureIdentifierValidLength($"UC{Index}_{Name}");
                 sDef = $",constraint {sName} unique ({UCFields})";
                 SB.AppendLine("  " + sDef);
                 Index++;
@@ -176,7 +256,7 @@ namespace Tripous.Data
             {
                 if (!string.IsNullOrWhiteSpace(Field.ForeignTableName) && !string.IsNullOrWhiteSpace(Field.ForeignFieldName))
                 {
-                    sName = EnsureValidLength($"FC{Index}_{Name}");
+                    sName = EnsureIdentifierValidLength($"FC{Index}_{Name}");
                     sDef = $",constraint {sName} foreign key ({Field.Name}) references {Field.ForeignTableName} ({Field.ForeignFieldName})";
                     SB.AppendLine("  " + sDef);
                     Index++;
@@ -359,7 +439,15 @@ namespace Tripous.Data
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return fName; }
+            set
+            {
+                CheckIsValidDatabaseObjectIdentifier(value);
+                fName = value;
+            }
+        }
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
         /// </summary>
@@ -387,6 +475,11 @@ namespace Tripous.Data
         /// <para>Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2</para>
         /// </summary>
         public List<string> UniqueConstraints { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Max length for all identifier names such as Table, Field and Constraint names.
+        /// </summary>
+        static public int IdentifierMaxLength { get; set; } = 30;
  
     }
 

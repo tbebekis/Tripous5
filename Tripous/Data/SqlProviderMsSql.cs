@@ -74,6 +74,71 @@ namespace Tripous.Data
             return Result;
         }
 
+        /* alter column */
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string RenameColumnSql(string TableName, string ColumnName, string NewColumnName)
+        {
+            // exec sp_rename N'TableName.ColumnName', 'NewColumnName', 'COLUMN'
+            return $"exec sp_rename N'{TableName}.{ColumnName}', '{NewColumnName}', 'COLUMN'"; 
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // alter table TableName alter column ColumnName ColumnDef
+            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+        }
+
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string SetNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // update table TableName set ColumnName = DefaultValue where ColumnName is null;
+            // alter table TableName alter column ColumnName ColumnDef
+            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string DropNotNullSql(string TableName, string ColumnName, string ColumnDef)
+        {
+            // alter table TableName alter column ColumnName ColumnDef
+            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
+            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+        }
+
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string SetColumnDefaultSql(string TableName, string ColumnName, string DefaultExpression)
+        {
+            // alter table TableName add default DefaultValue for ColumnName
+            return $"alter table {TableName} add default {DefaultExpression} for {ColumnName}";
+        }
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string DropColumnDefaultSql(string TableName, string ColumnName)
+        { 
+            return $@"
+declare @ConstraintName nvarchar(100);
+
+select @ConstraintName = OBJECT_NAME([default_object_id]) 
+from SYS.COLUMNS
+where [object_id] = OBJECT_ID('{TableName}') AND [name] = '{ColumnName}';
+
+exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
+";
+        }
+ 
+
+        /* miscs */
         /// <summary>
         /// Returns the current date and time of the database server
         /// </summary>
@@ -111,21 +176,7 @@ namespace Tripous.Data
 
             SelectSql.Select = S;
         }
-        /// <summary>
-        /// Returns an Sql statement for altering a table column
-        /// </summary>
-        public override string GetAlterTableColumnSql(AlterColumnType AlterType, string TableName, string ColumnName, string ColumnDef)
-        {
-            switch (AlterType)
-            {
-                case AlterColumnType.Add: return string.Format("alter table {0} add {1} {2}", TableName, ColumnName, ColumnDef);
-                case AlterColumnType.Alter: return string.Format("alter table {0} alter column {1} {2}", TableName, ColumnName, ColumnDef);
-                case AlterColumnType.Drop: return string.Format("alter table {0} drop column {1}", TableName, ColumnName);
-                case AlterColumnType.Rename: return string.Format("aexec sp_rename @objname = '{0}.{1}', @newname = '{2}', @objtype = 'COLUMN' ", TableName, ColumnName, ColumnDef);
-            }
 
-            return base.GetAlterTableColumnSql(AlterType, TableName, ColumnName, ColumnDef);
-        }
         /// <summary>
         /// Concatenates two strings.
         /// <para>Example: SELECT FirstName || ' ' || LastName As FullName FROM Customers </para>

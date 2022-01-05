@@ -34,6 +34,18 @@ namespace Tripous.Data
         {
         }
 
+        /* alter column */
+        /// <summary>
+        /// Returns an "alter column" SQL statement.
+        /// </summary>
+        public override string RenameColumnSql(string TableName, string ColumnName, string NewColumnName)
+        {
+            // alter table {TableName} rename column {ColumnName} to {NewColumnName}   
+            return $"alter table {TableName} rename column {ColumnName} to {NewColumnName}    ";
+        }
+
+ 
+
         /* public */
         /// <summary>
         /// Returns true if the database represented by the specified database exists, by checking the connection.
@@ -98,21 +110,7 @@ limit {RowLimit}";
 
         }
 
-        /// <summary>
-        /// Returns an Sql statement for altering a table column
-        /// </summary>
-        public override string GetAlterTableColumnSql(AlterColumnType AlterType, string TableName, string ColumnName, string ColumnDef)
-        {
-            switch (AlterType)
-            {
-                case AlterColumnType.Add: return string.Format("alter table {0} add column {1} {2}", TableName, ColumnName, ColumnDef);
-                    // NOT SUPPORTED case AlterColumnType.Alter:  
-                    // NOT SUPPORTED case AlterColumnType.Drop: return "";
-                    // NOT SUPPORTED case AlterColumnType.Rename: return "";
-            }
 
-            return base.GetAlterTableColumnSql(AlterType, TableName, ColumnName, ColumnDef);
-        }
         /// <summary>
         /// Attempts to set a generator/sequencer or identity column to Value.
         /// <para>VERY DANGEROOUS.</para>
@@ -234,6 +232,11 @@ limit {RowLimit}";
         public override bool SupportsGenerators { get; } = false;
 
         /// <summary>
+        /// Returns a set (bit-field) of the supported <see cref="AlterColumnType"/>s.
+        /// </summary>
+        public override AlterColumnType SupportedAlterColumnTypes { get; } = AlterColumnType.Add | AlterColumnType.Drop | AlterColumnType.Rename;
+
+        /// <summary>
         /// Keys used in connection string by this provider
         /// </summary>
         public override string[] ServerKeys { get; } = new string[] { };
@@ -249,7 +252,7 @@ limit {RowLimit}";
         /// Keys used in connection string by this provider
         /// </summary>
         public override string[] PasswordKeys { get; } = new string[] { };
-
+ 
         /// <summary>
         /// The PrimaryKey text
         /// </summary>

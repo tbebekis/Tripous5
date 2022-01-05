@@ -6,8 +6,9 @@ namespace Tripous.Data
 {
 
     /// <summary>
-    /// Indicates the type of alteration to be done in a column
+    /// Indicates the type of alteration to be done in a table column
     /// </summary>
+    [Flags]
     public enum AlterColumnType
     {
         /// <summary>
@@ -15,20 +16,37 @@ namespace Tripous.Data
         /// </summary>
         None = 0,
         /// <summary>
-        /// Add
+        /// Add Column
         /// </summary>
         Add = 1,
         /// <summary>
-        /// Alter
+        /// Drop Column
         /// </summary>
-        Alter = 2,
+        Drop = 2,
         /// <summary>
-        /// Drop
-        /// </summary>
-        Drop = 3,
-        /// <summary>
-        /// Rename
+        /// Rename Column
         /// </summary>
         Rename = 4,
+        /// <summary>
+        /// Set Column Length
+        /// </summary>
+        Length = 8,
+        /// <summary>
+        /// Set Column to not null
+        /// </summary>
+        NotNull = 0x10,
+        /// <summary>
+        /// Drop not null from Column
+        /// </summary>
+        DropNotNull = 0x20,
+        /// <summary>
+        /// Set Column default value
+        /// </summary>
+        Default = 0x40,
+        /// <summary>
+        /// Drop Column default value
+        /// </summary>
+        DropDefault = 0x80,
+
     }
 }
