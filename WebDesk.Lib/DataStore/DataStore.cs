@@ -153,8 +153,7 @@ namespace WebLib
             Table.AddString("Code", 40, true, null, "''");
             Table.AddString("Name", 96, false).Unique = true;
             Table.AddString("CustomerId", 40, true).SetForeignKey("Customer.Id");
-            Table.AddField("Date", DataFieldType.DateTime, false);
- 
+            Table.AddField("Date", DataFieldType.DateTime, false); 
 
             string DefText = Table.GetDefText();
 

@@ -140,12 +140,13 @@ namespace WebLib
                 new { Name = "DataType", ListValueField = "Id", ListDisplayField = "Name", ListSource = DataTypeList },
                 new { Name = "Length"},
                 new { Name = "Required"},
-                new { Name = "DefaultValue"},
+                new { Name = "DefaultExpression"},
                 new { Name = "Unique"},
-                new { Name = "ForeignTableName"},
-                new { Name = "ForeignFieldName"},
-            }; 
-
+                new { Name = "UniqueConstraintName"},
+                new { Name = "ForeignKey"},
+                new { Name = "ForeignKeyConstraintName"},
+            };
+ 
             GridRow.Grid.Style["height"] = "100%";
         }
 

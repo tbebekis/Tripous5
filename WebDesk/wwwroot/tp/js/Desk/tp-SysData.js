@@ -287,8 +287,14 @@ tp.DataTableDef = class extends tp.Object {
             });
         }
 
-        if (tp.IsArray(Source.UniqueConstraints))
-            this.UniqueConstraints = Source.UniqueConstraints;
+        if (tp.IsArray(Source.UniqueConstraints)) {
+            this.UniqueConstraints = [];
+            Source.UniqueConstraints.forEach((item) => {
+                let UC = new tp.UniqueConstraintDef(item);
+                this.UniqueConstraints.push(UC);
+            });
+        }
+ 
     }
 
     /** Loads this instance's fields from a specified {@link tp.DataTable}
@@ -314,16 +320,18 @@ tp.DataTableDef = class extends tp.Object {
             Table.Name = 'Fields';
 
             Table.AddColumn('Id', tp.DataType.String, 40);
-            Table.AddColumn('Name', tp.DataType.String, 32);
+            Table.AddColumn('Name', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
             Table.AddColumn('TitleKey', tp.DataType.String, 96);
             Table.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
             Table.AddColumn('DataType', tp.DataType.String, 40);
             Table.AddColumn('Length', tp.DataType.Integer);
             Table.AddColumn('Required', tp.DataType.Boolean);
-            Table.AddColumn('DefaultValue');
+            Table.AddColumn('DefaultExpression', tp.DataType.String, 80);
             Table.AddColumn('Unique', tp.DataType.Boolean);
-            Table.AddColumn('ForeignTableName', tp.DataType.String, 32);
-            Table.AddColumn('ForeignFieldName', tp.DataType.String, 32);
+            Table.AddColumn('UniqueConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+            Table.AddColumn('ForeignKey', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+            Table.AddColumn('ForeignKeyConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+
         }           
  
         this.Fields.forEach((FieldDef) => {
@@ -395,7 +403,32 @@ tp.DataFieldDef = class extends tp.Object {
     set TitleKey(v) {
         this.fTitleKey = v;
     }
- 
+
+    /** When true denotes a field upon which a unique constraint is applied
+     * @type {boolean}
+     */
+    get Unique() { return this.fUnique; }
+    set Unique(v) {
+        if (this.fUnique != v) {
+            if (v === true && tp.IsBlankString(this.UniqueConstraintName))
+                this.UniqueConstraintName = "UC_" + tp.GenerateRandomString(tp.SysConfig.DbIdentifierMaxLength - 3);
+
+            this.fUnique = v;
+        }
+    }
+    /** A string of the form <code>TableName.ColumnName</code> for creating a foreign key constraint on this field.
+     * @type {string}
+     */
+    get ForeignKey() { return this.fForeignKey; }
+    set ForeignKey(v) {
+        if (this.fForeignKey != v) {
+            if (!tp.IsBlankString(v) && tp.IsBlankString(this.ForeignKeyConstraintName))
+                this.ForeignKeyConstraintName = "FC_" + tp.GenerateRandomString(tp.SysConfig.DbIdentifierMaxLength - 3);
+
+            this.fForeignKey = v;
+        }
+    }
+
     /** Assigns this instance's properties from a specified source.
      * @param {objec} Source
      */
@@ -412,11 +445,12 @@ tp.DataFieldDef = class extends tp.Object {
         this.DataType = Source.DataType;
         this.Length = Source.Length;
         this.Required = Source.Required === true;
-        this.DefaultValue = Source.DefaultValue;
+        this.DefaultExpression = Source.DefaultExpression || null;
+        this.UniqueConstraintName = Source.UniqueConstraintName || '';
         this.Unique = Source.Unique === true;
 
-        this.ForeignTableName = Source.ForeignTableName || '';
-        this.ForeignFieldName = Source.ForeignFieldName || '';
+        this.ForeignKeyConstraintName = Source.ForeignKeyConstraintName || '';
+        this.ForeignKey = Source.ForeignKey || '';
     }
 
     /** Loads this instance's properties from a specified {@link tp.DataRow}
@@ -432,10 +466,11 @@ tp.DataFieldDef = class extends tp.Object {
             this.DataType = Row.Get('DataType', tp.DataType.String);
             this.Length = Row.Get('Length', 0);
             this.Required = Row.Get('Required', false);
-            this.DefaultValue = Row.Get('DefaultValue', null);
+            this.DefaultExpression = Row.Get('DefaultExpression', null);
+            this.UniqueConstraintName = Row.Get('UniqueConstraintName', '');
             this.Unique = Row.Get('Unique', false);
-            this.ForeignTableName = Row.Get('ForeignTableName', '');
-            this.ForeignFieldName = Row.Get('ForeignFieldName', '');
+            this.ForeignKeyConstraintName = Row.Get('ForeignKeyConstraintName', '');
+            this.ForeignKey = Row.Get('ForeignKey', '');
         }
     }
     /** Saves this instance's properties to a specified {@link tp.DataRow}
@@ -450,10 +485,11 @@ tp.DataFieldDef = class extends tp.Object {
         Row.Set('DataType', this.DataType);
         Row.Set('Length', this.Length);
         Row.Set('Required', this.Required);
-        Row.Set('DefaultValue', this.DefaultValue);
+        Row.Set('DefaultExpression', this.DefaultExpression);
         Row.Set('Unique', this.Unique);
-        Row.Set('ForeignTableName', this.ForeignTableName);
-        Row.Set('ForeignFieldName', this.ForeignFieldName);
+        Row.Set('UniqueConstraintName', this.UniqueConstraintName);
+        Row.Set('ForeignKey', this.ForeignKey);
+        Row.Set('ForeignKeyConstraintName', this.ForeignKeyConstraintName);
     }
 };
 
@@ -485,22 +521,71 @@ tp.DataFieldDef.prototype.Required = false;
  * NOTE:  e.g. produces default 0, or default ''
  * @type {object}
  */
-tp.DataFieldDef.prototype.DefaultValue = null;
+tp.DataFieldDef.prototype.DefaultExpression = null;
 /** When true denotes a field upon which a unique constraint is applied
  * @type {boolean}
  */
-tp.DataFieldDef.prototype.Unique = false;
+tp.DataFieldDef.prototype.fUnique = false;
+/** The unique constraint name to create when Unique is set to true.
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.UniqueConstraintName = '';
+/** A string of the form <code>TableName.ColumnName</code> for creating a foreign key constraint on this field.
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.fForeignKey = '';
+/** When not null/empty indicates that this field has a foreign key constraint.
+ * @type {string}
+ */
+tp.DataFieldDef.prototype.ForeignKeyConstraintName = '';
 
-/** When not empty is the name of a foreign table which this field references.
- * NOTE: Used in creating a foreign key constraint.
+
+/** For table-wise unique constraints, possibly on multiple fields.
+ * */
+tp.UniqueConstraintDef = class extends tp.Object {
+    /** Constructor.
+     * Assigns this instance's properties from a specified source, if not null.
+     * @param {objec} Source Optional.
+     */
+    constructor(Source = null) {
+        super();
+
+        this.Name = '';
+        this.Assign(Source);
+    }
+    /** A proper string, e.g. <code>Field1, Field2</code>
+     * @type {string}
+     */
+    get FieldNames() { return this.fFieldNames; }
+    set FieldNames(v) {
+        if (this.fFieldNames != v) {
+            if (!tp.IsBlankString(v) && tp.IsBlankString(this.Name))
+                this.Name = "UC_" + tp.GenerateRandomString(tp.SysConfig.DbIdentifierMaxLength - 3);
+
+            this.fFieldNames = v;
+        }
+    }
+
+    /** Assigns this instance's properties from a specified source.
+     * @param {objec} Source
+     */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+ 
+        this.FieldNames = Source.FieldNames || '';
+        this.Name = Source.Name || ''; 
+    }
+
+};
+/** The constraint name
  * @type {string}
  */
-tp.DataFieldDef.prototype.ForeignTableName = '';
-/** When not empty is the name of a foreign field which this field references.
- * NOTE: Used in creating a foreign key constraint.
+tp.UniqueConstraintDef.prototype.Name = '';
+/** A proper string, e.g. <code>Field1, Field2</code>
  * @type {string}
  */
-tp.DataFieldDef.prototype.ForeignFieldName = '';
+tp.UniqueConstraintDef.prototype.fFieldNames = '';
 
 //#endregion
 
@@ -601,20 +686,25 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     gridFields = null;
     /** A C# DataTableDef instance as it comes from server. <br />
      <pre>
-        "Name": "AppUser",
-        "TitleKey": "AppUser",
-        "Fields": [
+          "Id": "{41B448A5-4D07-479A-8CDE-450C7B6288CC}",
+          "Name": "Trader",
+          "TitleKey": "Trader",
+          "Title": "Trader",
+          "Fields": [
             {
-                "Name": "Id",
-                "TitleKey": "Id",
-                "IsPrimaryKey": true,
-                "DataType": "String",
-                "Length": 40,
-                "Required": true,
-                "DefaultValue": null,
-                "Unique": false,
-                "ForeignTableName": null,
-                "ForeignFieldName": null
+              "Id": "{E1579D46-FB77-4449-BFDC-F6DD18E5BE97}",
+              "Name": "Id",
+              "TitleKey": "Id",
+              "Title": "Id",
+              "IsPrimaryKey": true,
+              "DataType": "String",
+              "Length": 40,
+              "Required": true,
+              "DefaultExpression": null,
+              "Unique": false,
+              "UniqueConstraintName": null,
+              "ForeignKey": null,
+              "ForeignKeyConstraintName": null
             },
             ...
         ]
@@ -634,6 +724,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         if (IsInsertField === false) {
             let Text = tblData.Rows[0].Get('Data1');
             let Source = eval("(" + Text + ")");
+            log(Source);
             TableDef.Assign(Source);
         }
 
@@ -646,8 +737,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         if (tp.IsEmpty(this.gridFields)) {
             this.gridFields = tp.FindComponentByName('gridFields', this.View.Handle);
             this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
-            this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
- 
+            this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this); 
         }
 
         this.gridFields.DataSource = this.tblFields;
@@ -702,13 +792,13 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
         // inserting a Table
         if (this.IsInsertItem) {
-            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'Required', 'Unique'];
+            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
             EditableColumns = ColumnNames;
         }
         // editing a Table
         else {
-            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'Required'];
-            EditableColumns = ['TitleKey', 'Length', 'Required', 'DefaultValue'];
+            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
+            EditableColumns = ['Name', 'TitleKey', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
         }
 
         let DataSource = new tp.DataSource(tblField);
@@ -1549,9 +1639,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
             let Args = await tp.Ajax.GetAsync(Url, Data);
 
-            //this.tblData = new tp.DataTable();
-            //this.tblData.Assign(Args.Packet);
-            //this.tblData.Name = 'SysData';
+            log(Args.Packet);
 
             let Item = new tp.SysDataItem(Args.Packet);
             this.tblData = Item.ToDataTable();

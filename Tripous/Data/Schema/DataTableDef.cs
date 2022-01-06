@@ -428,14 +428,14 @@ namespace Tripous.Data
         /// <summary>
         ///  Creates, adds and returns a field.
         /// </summary>
-        public DataFieldDef AddField(string FieldName, DataFieldType DataType, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddField(string FieldName, DataFieldType DataType, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
             DataFieldDef Result = new DataFieldDef();
             Result.Name = FieldName;
             Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
             Result.DataType = DataType;
             Result.Required = Required;
-            Result.DefaultExpression = DefaultValue;
+            Result.DefaultExpression = DefaultExpression;
             Fields.Add(Result);
             return Result;
         }
@@ -443,7 +443,7 @@ namespace Tripous.Data
         /// <summary>
         ///  Creates, adds and returns a string (nvarchar) field.
         /// </summary>
-        public DataFieldDef AddString(string FieldName, int Length = 96, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddString(string FieldName, int Length = 96, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
             DataFieldDef Result = new DataFieldDef();
             Result.Name = FieldName;
@@ -451,51 +451,51 @@ namespace Tripous.Data
             Result.DataType = DataFieldType.String;
             Result.Length = Length;
             Result.Required = Required;
-            Result.DefaultExpression = DefaultValue;
+            Result.DefaultExpression = DefaultExpression;
             Fields.Add(Result);
             return Result;
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddInteger(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddInteger(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.Integer, Required, TitleKey, DefaultValue);
+            return AddField(FieldName, DataFieldType.Integer, Required, TitleKey, DefaultExpression);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddFloat(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddFloat(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.Float, Required, TitleKey, DefaultValue);
+            return AddField(FieldName, DataFieldType.Float, Required, TitleKey, DefaultExpression);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddDecimal(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddDecimal(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.Decimal, Required, TitleKey, DefaultValue);
+            return AddField(FieldName, DataFieldType.Decimal, Required, TitleKey, DefaultExpression);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddDateTime(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddDateTime(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.DateTime, Required, TitleKey, DefaultValue);
+            return AddField(FieldName, DataFieldType.DateTime, Required, TitleKey, DefaultExpression);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddDate(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddDate(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.Date, Required, TitleKey, DefaultValue);
+            return AddField(FieldName, DataFieldType.Date, Required, TitleKey, DefaultExpression);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>
-        public DataFieldDef AddBoolean(string FieldName, bool Required = false, string TitleKey = null, string DefaultValue = null)
+        public DataFieldDef AddBoolean(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.Boolean, Required, TitleKey, DefaultValue);
+            return AddField(FieldName, DataFieldType.Boolean, Required, TitleKey, DefaultExpression);
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.

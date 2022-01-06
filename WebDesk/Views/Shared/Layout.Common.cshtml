@@ -26,7 +26,8 @@
 
         tp.SysConfig.GlobalErrorHandling = @GlobalErrorHandling;
         tp.SysConfig.DebugMode = @IsDevMode;
-
+        tp.SysConfig.DbIdentifierMaxLength = @DataTableDef.IdentifierMaxLength.ToString();
+ 
         tp.NotificationBoxSetup.ToTop = false;
         tp.NotificationBoxSetup.Height = 100;
 

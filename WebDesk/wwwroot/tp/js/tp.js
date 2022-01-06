@@ -2076,6 +2076,29 @@ tp.Guid = function (UseBrackets = false) {
     UseBrackets = UseBrackets || false;
     return !UseBrackets ? Result : "{" + Result + "}";
 };
+/** Creates and returns a random string of a specified length, picking characters from a specified set of characters.
+ * @param {number} Length The length or the string to create
+ * @param {string} CharSet The set of characters to pick from.
+ * @returns {string} Returns a random string of a specified length, picking characters from a specified set of characters.
+ */
+tp.GenerateRandomString = function (Length, CharSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') {
+    if (tp.IsBlank(CharSet))
+        CharSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    let Buffer = [];
+    let Index, c;
+
+    for (let i = 0, ln = Length; i < ln; i++) {
+        Index = tp.Random(0, CharSet.length - 1);
+        c = CharSet.charAt(Index);
+        Buffer.push(c);
+    }
+
+    let Result = Buffer.join('');
+    return Result;
+
+
+};
 /**
 Creates and returns a function from a string
 @param {string} v - The function source code
@@ -16705,6 +16728,7 @@ tp.SysConfig.UseServerStringResources = false;
 tp.SysConfig.UseServerCultures = false;
 tp.SysConfig.DefaultConnection = "DEFAULT";
 tp.SysConfig.GlobalErrorHandling = false;
+tp.SysConfig.DbIdentifierMaxLength = 30;
 
  
 Object.defineProperty(tp, 'DebugMode', {
