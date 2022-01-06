@@ -19,6 +19,8 @@ namespace Tripous.Data
         int fLength;
         string fName;
         string fTitleKey;
+        bool fUnique;
+        string fForeignKey;
 
         /* construction */
         /// <summary>
@@ -103,7 +105,7 @@ namespace Tripous.Data
         /// </summary>
         public string GetDefaultDefText()
         {
-            string sDefault = !string.IsNullOrWhiteSpace(DefaultValue) ? $"default {DefaultValue}" : string.Empty;
+            string sDefault = !string.IsNullOrWhiteSpace(DefaultExpression) ? $"default {DefaultExpression}" : string.Empty;
             return sDefault;
         }
         
@@ -121,20 +123,23 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// Defines a foreign key upon this field. Returns this.
+        /// Defines a foreign key upon this field and a foreign table and field specified by string of the form <code>TableName.ColumnName</code>. Returns this.
         /// </summary>
-        public DataFieldDef SetForeign(string TableName, string FieldName = "Id")
+        public DataFieldDef SetForeignKey(string Value, string ConstraintName = "")
         {
-            this.ForeignTableName = TableName;
-            this.ForeignFieldName = FieldName;
+            this.ForeignKey = Value;
+            if (!string.IsNullOrWhiteSpace(ConstraintName))
+                this.ForeignKeyConstraintName = ConstraintName; 
             return this;
         }
         /// <summary>
         /// Sets the value of a property and returns this instance.
         /// </summary>
-        public DataFieldDef SetUnique(bool Value = true)
+        public DataFieldDef SetUnique(bool Value, string ConstraintName = "")
         {
             this.Unique = Value;
+            if (!string.IsNullOrWhiteSpace(ConstraintName))
+                this.UniqueConstraintName = ConstraintName; 
             return this;
         }
         /// <summary>
@@ -148,9 +153,9 @@ namespace Tripous.Data
         /// <summary>
         /// Sets the value of a property and returns this instance.
         /// </summary>
-        public DataFieldDef SetDefaultValue(string Value = null)
+        public DataFieldDef SetDefaultExpression(string Value = null)
         {
-            this.DefaultValue = Value;
+            this.DefaultExpression = Value;
             return this;
         }
         /// <summary>
@@ -254,23 +259,52 @@ namespace Tripous.Data
         /// The default expression, if any. E.g. 0, or ''. Defaults to null.
         /// <para>NOTE:  e.g. produces default 0, or default '' </para>
         /// </summary>
-        public string DefaultValue { get; set; }
+        public string DefaultExpression { get; set; }
 
         /// <summary>
-        /// When true denotes a field upon which a unique constraint is applied
+        /// When true indicates that the field has a unique constraint.
         /// </summary>
-        public bool Unique { get; set; }
+        public bool Unique 
+        {
+            get { return fUnique; }
+            set
+            {
+                if (fUnique != value)
+                {
+                    if (value && string.IsNullOrWhiteSpace(UniqueConstraintName))
+                        UniqueConstraintName = "UC_" + Sys.GenerateRandomString(DataTableDef.IdentifierMaxLength - 3);
+
+                    fUnique = value;
+                }
+            }
+        }
+        /// <summary>
+        /// The unique constraint name to create when <see cref="Unique"/> is set to true.
+        /// </summary>
+        public string UniqueConstraintName { get; set; }
 
         /// <summary>
-        /// When not empty is the name of a foreign table which this field references.
-        /// <para>NOTE: Used in creating a foreign key constraint.</para>
+        /// A string of the form <code>TableName.ColumnName</code> for creating a foreign key constraint on this field.
         /// </summary>
-        public string ForeignTableName { get; set; }
+        public string ForeignKey
+        {
+            get { return fForeignKey; }
+            set
+            {
+                if (fForeignKey != value )
+                {
+                    if (!string.IsNullOrWhiteSpace(value) && string.IsNullOrWhiteSpace(ForeignKeyConstraintName))
+                        ForeignKeyConstraintName = "FC_" + Sys.GenerateRandomString(DataTableDef.IdentifierMaxLength - 3);
+
+                    fForeignKey = value;
+                }
+            }
+        }
+ 
         /// <summary>
-        /// When not empty is the name of a foreign field which this field references.  
-        /// <para>NOTE: Used in creating a foreign key constraint.</para>
+        /// When not null/empty indicates that this field has a foreign key constraint.
         /// </summary>
-        public string ForeignFieldName { get; set; }
+        public string ForeignKeyConstraintName { get; set; }
     }
 
 

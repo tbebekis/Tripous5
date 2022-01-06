@@ -293,11 +293,11 @@ insert into {TableName} (
             DataTableDef Table = new DataTableDef() { Name = TableName, TitleKey = TableName };
 
             Table.AddId();
-            Table.AddString("Code", 40, true).SetUnique();
-            Table.AddString("Name", 96, true).SetUnique();
-            Table.AddBoolean("Married", true).SetDefaultValue("0");
+            Table.AddString("Code", 40, true).SetUnique(true);
+            Table.AddString("Name", 96, true).SetUnique(true);
+            Table.AddBoolean("Married", true).SetDefaultExpression("0");
             Table.AddDate("BirthDate", false);
-            Table.AddDecimal("Salary", true).SetDefaultValue("0");
+            Table.AddDecimal("Salary", true).SetDefaultExpression("0");
             Table.AddTextBlob("Notes", false);
             
 

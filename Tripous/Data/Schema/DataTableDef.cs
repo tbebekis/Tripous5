@@ -152,10 +152,10 @@ namespace Tripous.Data
                             // set not null
                             if (NewField.Required)
                             {
-                                if (string.IsNullOrWhiteSpace(NewField.DefaultValue))
+                                if (string.IsNullOrWhiteSpace(NewField.DefaultExpression))
                                     Throw($"Column: {NewField.Name}. Cannot set a column to not null. No default value.");
 
-                                SqlText = Provider.SetDefaultBeforeNotNullUpdateSql(TableName, NewField.Name, NewField.DefaultValue);
+                                SqlText = Provider.SetDefaultBeforeNotNullUpdateSql(TableName, NewField.Name, NewField.DefaultExpression);
                                 SqlTextList.Add(SqlText);
  
                                 SqlText = Provider.SetNotNullSql(TableName, NewField.Name, NewField.GetDataTypeDefText());
@@ -170,19 +170,19 @@ namespace Tripous.Data
                         }
 
                         // set/drop default
-                        if (!Sys.IsSameText(NewField.DefaultValue, OldField.DefaultValue))
+                        if (!Sys.IsSameText(NewField.DefaultExpression, OldField.DefaultExpression))
                         {
                             // drop default
-                            if (!string.IsNullOrWhiteSpace(OldField.DefaultValue))
+                            if (!string.IsNullOrWhiteSpace(OldField.DefaultExpression))
                             {
                                 SqlText = Provider.DropColumnDefaultSql(TableName, OldField.Name);
                                 SqlTextList.Add(SqlText);
                             }                            
  
                             // set default
-                            if (!string.IsNullOrWhiteSpace(NewField.DefaultValue))
+                            if (!string.IsNullOrWhiteSpace(NewField.DefaultExpression))
                             {
-                                SqlText = Provider.SetColumnDefaultSql(TableName, NewField.Name, NewField.DefaultValue);
+                                SqlText = Provider.SetColumnDefaultSql(TableName, NewField.Name, NewField.DefaultExpression);
                                 SqlTextList.Add(SqlText);
                             }
                         }
@@ -207,6 +207,24 @@ namespace Tripous.Data
         {
             return this.Name;
         }
+
+        /// <summary>
+        /// Creates, adds and returns a unique constraint.
+        /// <para>Used when a unique constraint is required on more than a single field, by adding a proper string, e.g. Field1, Field2</para>
+        /// </summary>
+        public UniqueConstraintDef AddUniqueConstraint(string FieldNames, string ConstraintName = "")
+        {
+            UniqueConstraintDef Result = new UniqueConstraintDef();
+            Result.FieldNames = FieldNames;
+            if (!string.IsNullOrWhiteSpace(ConstraintName))
+                Result.Name = ConstraintName;
+
+            UniqueConstraints.Add(Result);
+
+            return Result;
+        }
+ 
+
         /// <summary>
         /// Throws an exception if this instance is not a valid one.
         /// </summary>
@@ -218,7 +236,7 @@ namespace Tripous.Data
                 Sys.Throw($"Definition of {Name} table is invalid.\n{Text}");
             }
 
-            // table            
+            // table name           
             if (string.IsNullOrWhiteSpace(Name))
                 Sys.Throw($"Table definition without Name");
 
@@ -229,41 +247,53 @@ namespace Tripous.Data
             if (Fields == null || Fields.Count == 0)
                 Throw($"No fields.");
 
-            Fields.ForEach(item => CheckIsValidDatabaseObjectIdentifier(item.Name));
+            // valid identifiers: field Name and constraints
+            Fields.ForEach((field) => {
+                CheckIsValidDatabaseObjectIdentifier(field.Name);
+                
+                if (field.Unique)
+                    CheckIsValidDatabaseObjectIdentifier(field.UniqueConstraintName);
+
+                if (!string.IsNullOrWhiteSpace(field.ForeignKey))
+                    CheckIsValidDatabaseObjectIdentifier(field.ForeignKeyConstraintName);
+            });
 
             // duplicate field names
             List<string> FieldNames = new List<string>();
-            Fields.ForEach(item =>
+            Fields.ForEach(field =>
             {
-                string FieldName = item.Name.ToLowerInvariant();
+                string FieldName = field.Name.ToLowerInvariant();
                 if (FieldNames.Contains(FieldName))
-                    Throw($"Duplicate column name: {item.Name}");
+                    Throw($"Duplicate column name: {field.Name}");
             });
 
 
-            int Count = Fields.Count(item => item.IsPrimaryKey);
+            // compound primary key
+            int Count = Fields.Count(field => field.IsPrimaryKey);
             //if (Count == 0)
             //    Throw($"No primary key.");
 
             if (Count > 1)
                 Throw($"Compound primary keys not supported.");
 
-            DataFieldDef F = Fields.FirstOrDefault(item => item.IsPrimaryKey);
+            // primary key data-type
+            DataFieldDef F = Fields.FirstOrDefault(field => field.IsPrimaryKey);
             if (!(F.DataType == DataFieldType.String || F.DataType == DataFieldType.Integer))
                 Throw($"Not supported data-type for primary key: {F.DataType.ToString()}");
 
+            // field data-type
             Count = Fields.Count(item => item.DataType == DataFieldType.Unknown);
             if (Count > 1)
-                Throw($"Fields without data type.");
-
+                Throw($"Columns without data type.");
  
 
-            Fields.ForEach((item) => {
-                bool Flag = (string.IsNullOrWhiteSpace(item.ForeignTableName) && string.IsNullOrWhiteSpace(item.ForeignFieldName))
-                            || (!string.IsNullOrWhiteSpace(item.ForeignTableName) && !string.IsNullOrWhiteSpace(item.ForeignFieldName));
-
-                if (!Flag)
-                    Throw($"Foreign Key constraint not fully defined in column: {item.Name}");
+            Fields.ForEach((field) => {
+                if (!string.IsNullOrWhiteSpace(field.ForeignKey))
+                {
+                    string[] Parts = field.ForeignKey.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    if (Parts == null || Parts.Length != 2)
+                        Throw($"Foreign Key constraint not fully defined in column: {field.Name}");
+                } 
             });
 
  
@@ -275,57 +305,50 @@ namespace Tripous.Data
         public string GetDefText()
         {
 
-
             StringBuilder SB = new StringBuilder();
 
             SB.AppendLine($"create table {Name} (");
 
+            string sName;
             string sDef;
 
+            // columns
             for (int i = 0; i < Fields.Count; i++)
             {
                 sDef = i > 0 ? "," + Fields[i].GetDefText() : Fields[i].GetDefText();
-
                 SB.AppendLine("  " + sDef);
             }
-
-
-            // unique constraints
-            string sName;
-            int Index = 0;
-
+ 
             // single-field unique constraints
-            foreach (DataFieldDef Field in Fields)
-            {
-                if (Field.Unique)
+            Fields.ForEach((field) => {
+                if (field.Unique)
                 {
-                    sName = EnsureIdentifierValidLength($"UC{Index}_{Name}");
-                    sDef = $",constraint {sName} unique ({Field.Name})";
+                    sName = EnsureIdentifierValidLength(field.UniqueConstraintName);
+                    sDef = $",constraint {sName} unique ({field.Name})";
                     SB.AppendLine("  " + sDef);
-                    Index++;
                 }
-            }
+            });
+
             // multi-field unique constraints
-            foreach (string UCFields in UniqueConstraints)
-            {
-                sName = EnsureIdentifierValidLength($"UC{Index}_{Name}");
-                sDef = $",constraint {sName} unique ({UCFields})";
+            UniqueConstraints.ForEach((constraint) => {
+                sName = EnsureIdentifierValidLength(constraint.Name);
+                sDef = $",constraint {sName} unique ({constraint.FieldNames})";
                 SB.AppendLine("  " + sDef);
-                Index++;
-            }
+            });
 
             // foreign key constraints
-            Index = 0;
-            foreach (DataFieldDef Field in Fields)
-            {
-                if (!string.IsNullOrWhiteSpace(Field.ForeignTableName) && !string.IsNullOrWhiteSpace(Field.ForeignFieldName))
+            Fields.ForEach((field) => {
+                if (!string.IsNullOrWhiteSpace(field.ForeignKey))
                 {
-                    sName = EnsureIdentifierValidLength($"FC{Index}_{Name}");
-                    sDef = $",constraint {sName} foreign key ({Field.Name}) references {Field.ForeignTableName} ({Field.ForeignFieldName})";
+                    string[] Parts = field.ForeignKey.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    string ForeignTableName = Parts[0];
+                    string ForeignFieldName = Parts[1];
+
+                    sName = EnsureIdentifierValidLength(field.ForeignKeyConstraintName);
+                    sDef = $",constraint {sName} foreign key ({field.Name}) references {ForeignTableName} ({ForeignFieldName})";
                     SB.AppendLine("  " + sDef);
-                    Index++;
                 }
-            }
+            });
 
  
             SB.AppendLine(")");
@@ -412,7 +435,7 @@ namespace Tripous.Data
             Result.TitleKey = !string.IsNullOrWhiteSpace(TitleKey) ? TitleKey : FieldName;
             Result.DataType = DataType;
             Result.Required = Required;
-            Result.DefaultValue = DefaultValue;
+            Result.DefaultExpression = DefaultValue;
             Fields.Add(Result);
             return Result;
         }
@@ -428,7 +451,7 @@ namespace Tripous.Data
             Result.DataType = DataFieldType.String;
             Result.Length = Length;
             Result.Required = Required;
-            Result.DefaultValue = DefaultValue;
+            Result.DefaultExpression = DefaultValue;
             Fields.Add(Result);
             return Result;
         }
@@ -490,14 +513,7 @@ namespace Tripous.Data
         }
 
 
-        /// <summary>
-        /// Used when a unique constraint is required on more than a single field, by adding a proper string, e.g. Field1, Field2
-        /// </summary>
-        public void AddUniqueConstraint(string FieldNames)
-        {
-            if (!UniqueConstraints.Contains(FieldNames))
-                UniqueConstraints.Add(FieldNames);
-        }
+
 
         /* properties */
         /// <summary>
@@ -542,7 +558,7 @@ namespace Tripous.Data
         /// For multi-field unique constraints.
         /// <para>Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2</para>
         /// </summary>
-        public List<string> UniqueConstraints { get; set; } = new List<string>();
+        public List<UniqueConstraintDef> UniqueConstraints { get; set; } = new List<UniqueConstraintDef>();
 
         /// <summary>
         /// Max length for all identifier names such as Table, Field and Constraint names.
@@ -552,7 +568,43 @@ namespace Tripous.Data
     }
 
 
+    /// <summary>
+    /// For table-wise unique constraints, possibly on multiple fields.
+    /// </summary>
+    public class UniqueConstraintDef
+    {
+        string fFieldNames;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public UniqueConstraintDef()
+        {
+        }
+
+        /// <summary>
+        /// The constraint name
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// A proper string, e.g. <code>Field1, Field2</code>
+        /// </summary>
+        public string FieldNames
+        {
+            get { return fFieldNames; }
+            set
+            {
+                if (fFieldNames != value)
+                {
+                    if (!string.IsNullOrWhiteSpace(value) && string.IsNullOrWhiteSpace(Name))
+                        Name = "UC_" + Sys.GenerateRandomString(DataTableDef.IdentifierMaxLength - 3);
+
+                    fFieldNames = value;
+                }
+            }
+        }
+    }
 
 
- 
+
 }

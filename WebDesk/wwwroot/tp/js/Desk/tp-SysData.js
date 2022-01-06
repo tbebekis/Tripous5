@@ -222,8 +222,6 @@ tp.SysDataItem.CreateTable = function () {
 
 //#endregion
 
-
-
 //#region DataTableDef
 
 /** Database table definition
@@ -506,6 +504,8 @@ tp.DataFieldDef.prototype.ForeignFieldName = '';
 
 //#endregion
 
+
+
 //#region SysDataHandler
 
 tp.SysDataHandler = class {
@@ -519,6 +519,14 @@ tp.SysDataHandler = class {
         this.DataType = DataType;
     }
 
+    /** Returns true if the owner {@link tp.View}  is in insert mode
+     * @type {boolean}
+     * */
+    get IsInsertItem() { return this.View.ViewMode === tp.DataViewMode.Insert; }
+    /** Returns true if the owner {@link tp.View}  is in edit mode
+     * @type {boolean}
+     * */
+    get IsEditItem() { return this.View.ViewMode === tp.DataViewMode.Edit; }
 
     /** Called before the Insert() operation of the owner View.
     */
@@ -616,14 +624,14 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     TableDef = null;
  
     /** Creates and assigns the tblFields.
-     * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
+     * @param {boolean} IsInsertField True when is an Insert Field operation. False when is an Edit Field operation.
      * @param {tp.DataTable} tblData
      * */
-    SetupFieldsTable(IsInsert, tblData) {
+    SetupFieldsTable(IsInsertField, tblData) {
         let TableDef = new tp.DataTableDef();
 
         // read the json from Data1 field and load the tblFields
-        if (IsInsert === false) {
+        if (IsInsertField === false) {
             let Text = tblData.Rows[0].Get('Data1');
             let Source = eval("(" + Text + ")");
             TableDef.Assign(Source);
@@ -651,12 +659,9 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFields row, on edit.
      * @returns {tp.DataTable} Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
      */
-    CreateEditTable(SourceRow = null) {
+    CreateEditFieldTable(SourceRow = null) {
         let FieldRow;
-        let IsInsert = tp.IsEmpty(SourceRow);
-        let EditableColumns = IsInsert || SourceRow.State === tp.DataRowState.Added ?
-            ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultValue', 'Unique', 'ForeignTableName', 'ForeignFieldName']:
-            ['TitleKey', 'Length', 'Required', 'DefaultValue'];       
+        let IsInsertField = tp.IsEmpty(SourceRow);    
 
         // create the tblField, used in editing a single field
         let tblField = this.tblFields.Clone();
@@ -665,7 +670,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         // add the single row in tblField
         FieldRow = tblField.AddEmptyRow();
 
-        if (IsInsert) {
+        if (IsInsertField) {
             FieldRow.Set('DataType', tp.DataType.String);
             FieldRow.Set('Length', 0);
             FieldRow.Set('IsPrimaryKey', false);
@@ -674,14 +679,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         }
         else {
             FieldRow.CopyFromRow(SourceRow);
-        }
-
-        tblField.Columns.forEach((column) => {
-            if (column.Name === 'Name')
-                column.MaxLength = 30;
- 
-            column.ReadOnly = EditableColumns.indexOf(column.Name) < 0;
-        });
+        } 
 
         return tblField;
     }
@@ -689,22 +687,41 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     /** Displays an edit dialog box for editing an existing or new row of the tblFields.
      * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
      * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @param {boolean} IsInsert True when is an Insert operation. False when is an Edit operation.
+     * @param {boolean} IsInsertField True when is an Insert Field operation. False when is an Edit Field operation.
      * @param {tp.DataTable} tblField The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
      */
-    async ShowEditDialog(IsInsert, tblField) {
+    async ShowEditFieldDialog(IsInsertField, tblField) {
         let DialogBox = null;
         let ContentHtmlText;
         let HtmlText;
         let HtmlRowList = [];
 
+        
+        let ColumnNames = [];       // Visible Controls
+        let EditableColumns = []    // Editable Controls
+
+        // inserting a Table
+        if (this.IsInsertItem) {
+            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'Required', 'Unique'];
+            EditableColumns = ColumnNames;
+        }
+        // editing a Table
+        else {
+            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'Required'];
+            EditableColumns = ['TitleKey', 'Length', 'Required', 'DefaultValue'];
+        }
+
         let DataSource = new tp.DataSource(tblField);
-        let ColumnNames = IsInsert === true ?
-            ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'ForeignTableName', 'ForeignFieldName', 'Required', 'Unique'] :
-            ['Name', 'TitleKey', 'DataType', 'Length', 'DefaultValue', 'Required'];
 
- 
+        // Editable Controls
+        tblField.Columns.forEach((column) => {
+            if (column.Name === 'Name')
+                column.MaxLength = 30;
 
+            column.ReadOnly = EditableColumns.indexOf(column.Name) < 0;
+        });
+
+        // Visible Controls
         // prepare HTML text for each column in tblFields
         ColumnNames.forEach((ColumnName) => {
             let Column = this.tblFields.FindColumn(ColumnName);
@@ -831,8 +848,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     /** Called when inserting a single row of the tblFields and displays the edit dialog 
      */
     async InsertFieldRow() {
-        let tblField = this.CreateEditTable(null);
-        let DialogBox = await this.ShowEditDialog(true, tblField);
+        let tblField = this.CreateEditFieldTable(null);
+        let DialogBox = await this.ShowEditFieldDialog(true, tblField);
         if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
             let FieldRow = tblField.Rows[0];
             let Row = this.tblFields.AddEmptyRow();
@@ -848,8 +865,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
                 tp.WarningNote('Editing Primary Key is not allowed.');
             }
             else {
-                let tblField = this.CreateEditTable(Row);
-                let DialogBox = await this.ShowEditDialog(false, tblField);
+                let tblField = this.CreateEditFieldTable(Row);
+                let DialogBox = await this.ShowEditFieldDialog(false, tblField);
 
                 if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
                     let FieldRow = tblField.Rows[0];

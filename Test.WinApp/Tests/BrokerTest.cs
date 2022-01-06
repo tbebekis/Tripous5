@@ -29,7 +29,7 @@ namespace Test.WinApp
 
             Table = new DataTableDef() { Name = "Address" };
             Table.AddId();
-            Table.AddString("CustomerId", 40, true).SetForeign("Customer", "Id");
+            Table.AddString("CustomerId", 40, true).SetForeignKey("Customer.Id");
             Table.AddString("StreetAddress", 96, true);
             Table.AddString("City", 96, false);
 

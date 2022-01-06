@@ -294,6 +294,26 @@ namespace Tripous
             return Text.IsValidMobilePhone(ValidLengths);
         }
 
+        /// <summary>
+        /// Creates and returns a random string of a specified length, picking characters from a specified set of characters.
+        /// </summary>
+        static public string GenerateRandomString(int Length, string CharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+        {
+            if (string.IsNullOrWhiteSpace(CharSet))
+                CharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            char[] Buffer = new char[Length];
+            Random R = new Random();
+
+            for (int i = 0; i < Buffer.Length; i++)
+            {
+                Buffer[i] = CharSet[R.Next(CharSet.Length)];
+            }
+
+            string Result = new string(Buffer);
+            return Result;
+        }
+
         /* passwords */
         /// <summary>
         /// Generates and returns a password of a specified length.
