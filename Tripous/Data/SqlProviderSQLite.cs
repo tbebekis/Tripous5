@@ -43,7 +43,38 @@ namespace Tripous.Data
             // alter table {TableName} rename column {ColumnName} to {NewColumnName}   
             return $"alter table {TableName} rename column {ColumnName} to {NewColumnName}    ";
         }
- 
+
+        /* constraints */
+        /// <summary>
+        /// Returns an "alter table" SQL statement for adding a unique constraint
+        /// </summary>
+        public override string AddUniqueConstraintSql(string TableName, string ColumnName, string ConstraintName)
+        {
+            return $"alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})";
+        }
+        /// <summary>
+        /// Returns an "alter table" SQL statement for dropping a unique constraint
+        /// </summary>
+        public override string DropUniqueConstraintSql(string TableName, string ConstraintName)
+        {
+            return $"drop index {ConstraintName}";
+        }
+
+        /// <summary>
+        /// Returns an "alter table" SQL statement for adding a foreign key constraint
+        /// </summary>
+        public override string AddForeignKeySql(string TableName, string ColumnName, string ForeignTableName, string ForeignColumnName, string ConstraintName)
+        {
+            throw new NotSupportedException("adding a foreign key is not supported");
+        }
+        /// <summary>
+        /// Returns an "alter table" SQL statement for dropping a foreign key constraint
+        /// </summary>
+        public override string DropForeignKeySql(string TableName, string ConstraintName)
+        {
+            throw new NotSupportedException("dropping a foreign key is not supported");
+        }
+
         /* public */
         /// <summary>
         /// Returns true if the database represented by the specified database exists, by checking the connection.
@@ -107,7 +138,6 @@ limit {RowLimit}";
                 SelectSql.From += S;
 
         }
-
 
         /// <summary>
         /// Attempts to set a generator/sequencer or identity column to Value.
@@ -230,9 +260,9 @@ limit {RowLimit}";
         public override bool SupportsGenerators { get; } = false;
 
         /// <summary>
-        /// Returns a set (bit-field) of the supported <see cref="AlterColumnType"/>s.
+        /// Returns a set (bit-field) of the supported <see cref="AlterTableType"/>s.
         /// </summary>
-        public override AlterColumnType SupportedAlterColumnTypes { get; } = AlterColumnType.Add | AlterColumnType.Drop | AlterColumnType.Rename;
+        public override AlterTableType SupportedAlterTableTypes { get; } = AlterTableType.ColumnAddOrDrop | AlterTableType.ColumnRename | AlterTableType.TableUniqueConstraint;
 
         /// <summary>
         /// Keys used in connection string by this provider

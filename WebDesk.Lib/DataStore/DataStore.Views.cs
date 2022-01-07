@@ -93,67 +93,10 @@ namespace WebLib
             return View;
 
         }
-        static void RegisterView_SysData_Table()
-        {
-            Type T = typeof(DataFieldType);
-            string[] DataTypeNames = Enum.GetNames(T);
  
-            List<object> DataTypeList = new List<object>();
-            for (int i = 1; i < DataTypeNames.Length; i++)
-                DataTypeList.Add(new { Id = DataTypeNames[i], Name = DataTypeNames[i] });
-
-            //string ListSource = Json.Serialize(DataTypeList, false);
-
-            // view
-            ViewDef View = CreateSysDataViewDef("Table", "Tables");
-            ViewTabPageDef EditPage = View.TabControl.FindTabByName("Edit");
-
-            ViewTabPageDef FieldsPage = EditPage.TabControl.Add("Fields", "Fields");
- 
-            ViewRowDef GridRow = FieldsPage.AddRow("");
-            GridRow.Style["height"] = "100%";
-            GridRow.SetGrid();
-            GridRow.Grid.Name = "gridFields";
- 
-            //GridRow.Grid["ReadOnly"] = false;
-            GridRow.Grid["ToolBarVisible"] = true; 
-            GridRow.Grid["GroupsVisible"] = false;
-            GridRow.Grid["FilterVisible"] = false;
-            GridRow.Grid["FooterVisible"] = false;
-            GridRow.Grid["GroupFooterVisible"] = false;
-            
-            GridRow.Grid["ButtonInsertVisible"] = true;  
-            GridRow.Grid["ButtonEditVisible"] = true;
-            GridRow.Grid["ButtonDeleteVisible"] = true;
-            GridRow.Grid["ConfirmDelete"] = true;
-
-            GridRow.Grid["AllowUserToAddRows"] = true;
-            GridRow.Grid["AllowUserToDeleteRows"] = true;
-            GridRow.Grid["AutoGenerateColumns"] = false;
-
-            //  { Name: 'CountryId', Text: 'Country', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tblCountry },
-
-            GridRow.Grid["Columns"] = new object[] { 
-                new { Name = "Name"},
-                new { Name = "TitleKey"},
-                new { Name = "IsPrimaryKey"},
-                new { Name = "DataType", ListValueField = "Id", ListDisplayField = "Name", ListSource = DataTypeList },
-                new { Name = "Length"},
-                new { Name = "Required"},
-                new { Name = "DefaultExpression"},
-                new { Name = "Unique"},
-                new { Name = "UniqueConstraintName"},
-                new { Name = "ForeignKey"},
-                new { Name = "ForeignKeyConstraintName"},
-            };
- 
-            GridRow.Grid.Style["height"] = "100%";
-        }
-
-
         static void RegisterViews()
         {
-            RegisterView_SysData_Table();
+            CreateSysDataViewDef("Table", "Tables");
         }
     }
 }

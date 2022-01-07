@@ -108,7 +108,42 @@ namespace Tripous.Data
             string sDefault = !string.IsNullOrWhiteSpace(DefaultExpression) ? $"default {DefaultExpression}" : string.Empty;
             return sDefault;
         }
-        
+
+        /// <summary>
+        /// Returns the definition text of the unique constraint, if defined, else empty string.
+        /// <para>CAUTION: For use with a CREATE TABLE statement only. </para>
+        /// <para>NOTE: All databases support unique constraint in the CREATE TABLE statement.</para>
+        /// </summary>
+        public string GetUniqueConstraintDefText()
+        {
+            string Result = "";
+            if (this.Unique)
+            {
+                string sName = DataTableDef.EnsureIdentifierValidLength(this.UniqueConstraintName);
+                Result = $"constraint {sName} unique ({this.Name})";
+            }
+            return Result;         
+        }
+        /// <summary>
+        /// Returns the definition text of the foreign key constraint, if defined, else empty string.
+        /// <para>CAUTION: For use with a CREATE TABLE statement only.</para>
+        /// <para>NOTE: All databases support foreign key constraint in the CREATE TABLE statement.</para>
+        /// </summary>
+        public string GetForeignKeyConstraintDefText()
+        {
+            string Result = "";
+            if (!string.IsNullOrWhiteSpace(this.ForeignKey))
+            {
+                string ForeignTableName;
+                string ForeignFieldName;
+                DataTableDef.SplitForeignKey(this.ForeignKey, out ForeignTableName, out ForeignFieldName);
+ 
+                string sName = DataTableDef.EnsureIdentifierValidLength(this.ForeignKeyConstraintName);
+                Result = $"constraint {sName} foreign key ({this.Name}) references {ForeignTableName} ({ForeignFieldName})";
+            }
+            return Result;
+        }
+
         /// <summary>
         /// Returns the field definition text.
         /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>

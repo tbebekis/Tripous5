@@ -596,11 +596,11 @@ namespace Tripous.Data
 
         /* alter column */
         /// <summary>
-        /// Returns true if this provider supports a specified <see cref="AlterColumnType"/>
+        /// Returns true if this provider supports a specified <see cref="AlterTableType"/>
         /// </summary>
-        public virtual bool SupportsAlterColumnType(AlterColumnType AlterType)
+        public virtual bool SupportsAlterTableType(AlterTableType AlterType)
         {
-            return Bf.In(AlterType, SupportedAlterColumnTypes);
+            return Bf.In(AlterType, SupportedAlterTableTypes);
         }
         
         /// <summary>
@@ -672,6 +672,37 @@ namespace Tripous.Data
         public virtual string DropColumnDefaultSql(string TableName, string ColumnName)
         {
             throw new NotSupportedException("dropping column default expression not supported");
+        }
+
+        /* constraints */
+        /// <summary>
+        /// Returns an "alter table" SQL statement for adding a unique constraint
+        /// </summary>
+        public virtual string AddUniqueConstraintSql(string TableName, string ColumnName, string ConstraintName)
+        {
+            return $"alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})";
+        }
+        /// <summary>
+        /// Returns an "alter table" SQL statement for dropping a unique constraint
+        /// </summary>
+        public virtual string DropUniqueConstraintSql(string TableName, string ConstraintName)
+        {
+            return $"alter table {TableName} drop constraint {ConstraintName}";
+        }
+    
+        /// <summary>
+        /// Returns an "alter table" SQL statement for adding a foreign key constraint
+        /// </summary>
+        public virtual string AddForeignKeySql(string TableName, string ColumnName, string ForeignTableName, string ForeignColumnName, string ConstraintName)
+        {
+            return $"alter table {TableName} add constraint {ConstraintName} foreign key ({ColumnName}) references {ForeignTableName} ({ForeignColumnName})";
+        }
+        /// <summary>
+        /// Returns an "alter table" SQL statement for dropping a foreign key constraint
+        /// </summary>
+        public virtual string DropForeignKeySql(string TableName, string ConstraintName)
+        {
+            return $"alter table {TableName} drop constraint {ConstraintName}";
         }
 
         /* generators */
@@ -1241,9 +1272,9 @@ namespace Tripous.Data
         public virtual bool SupportsGenerators { get; } = false;
 
         /// <summary>
-        /// Returns a set (bit-field) of the supported <see cref="AlterColumnType"/>s.
+        /// Returns a set (bit-field) of the supported <see cref="AlterTableType"/>s.
         /// </summary>
-        public virtual AlterColumnType SupportedAlterColumnTypes { get; } = (AlterColumnType)Bf.All(typeof(AlterColumnType));
+        public virtual AlterTableType SupportedAlterTableTypes { get; } = (AlterTableType)Bf.All(typeof(AlterTableType));
 
         /// <summary>
         /// Keys used in connection string by this provider

@@ -1334,7 +1334,6 @@ tp.TabControl = class extends tp.Component {
         this.TabBar.ResponsiveMode = v;
     }
 
-
     /**
     Gets or sets the selected page index
     @type {number}
@@ -1368,7 +1367,6 @@ tp.TabControl = class extends tp.Component {
             this.SelectedIndex = Index;
         }
     }
-
 
     /* private */
     /**
@@ -1427,7 +1425,6 @@ tp.TabControl = class extends tp.Component {
 
         return Result;
     }
-
     /** Creates child controls of this instance. Called in construction sequence.
      * @private
      * */
@@ -1475,8 +1472,6 @@ tp.TabControl = class extends tp.Component {
             elTab.TabPage = TabPage;
         }
     }
-
-
 
     /* overrides */
     /**

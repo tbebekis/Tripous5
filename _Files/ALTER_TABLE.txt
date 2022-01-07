@@ -1,4 +1,6 @@
-﻿------------------------------------------------------------------
+﻿https://www.techonthenet.com/
+
+------------------------------------------------------------------
         MsSql 
 ------------------------------------------------------------------
 add             alter table {TableName} add {ColumnName} {ColumnDef} 
@@ -10,6 +12,12 @@ set not null    update {TableName} set {ColumnName} = {DefaultExpression} where 
 drop not null   alter table {TableName} alter column {ColumnName} {DataType} null
 set default     alter table {TableName} add default {DefaultExpression} for {ColumnName}
 drop default    alter table {TableName} alter column {ColumnName} drop default
+
+add unique      alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})
+drop unique     alter table {TableName} drop constraint {ConstraintName}
+
+add foreign     alter table {TableName} add constraint {ConstraintName} foreign key ({ColumnName}) references {ForeignTableName} ({ForeignColumnName})
+drop foreign    alter table {TableName} drop constraint {ConstraintName}
 ------------------------------------------------------------------
         Oracle
 ------------------------------------------------------------------
@@ -22,6 +30,12 @@ set not null    update {TableName} set {ColumnName} = {DefaultExpression} where 
 drop not null   alter table {TableName} modify {ColumnName} {DataType} null
 set default     alter table {TableName} modify {ColumnName} default {DefaultExpression}
 drop default    alter table {TableName} alter column {ColumnName} drop default
+
+add unique      alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})
+drop unique     alter table {TableName} drop constraint {ConstraintName}
+
+add foreign     alter table {TableName} add constraint {ConstraintName} foreign key ({ColumnName}) references {ForeignTableName} ({ForeignColumnName})
+drop foreign    alter table {TableName} drop constraint {ConstraintName} 
 ------------------------------------------------------------------
         Firebird
 ------------------------------------------------------------------
@@ -34,6 +48,12 @@ set not null    update {TableName} set {ColumnName} = {DefaultExpression} where 
 drop not null   alter table {TableName} alter {ColumnName} drop not null 
 set default     alter table {TableName} alter column {ColumnName} set default {DefaultExpression}
 drop default    alter table {TableName} alter column {ColumnName} drop default
+                 
+add unique      alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})
+drop unique     alter table {TableName} drop constraint {ConstraintName}
+                 
+add foreign     alter table {TableName} add constraint {ConstraintName} foreign key ({ColumnName}) references {ForeignTableName} ({ForeignColumnName})
+drop foreign    alter table {TableName} drop constraint {ConstraintName}
 ------------------------------------------------------------------
         PostgreSQL
 ------------------------------------------------------------------
@@ -46,6 +66,12 @@ set not null    update {TableName} set {ColumnName} = {DefaultExpression} where 
 drop not null   alter table {TableName} alter column {ColumnName} drop not null 
 set default     alter table {TableName} alter column {ColumnName} set default {DefaultExpression}
 drop default    alter table {TableName} alter column {ColumnName} drop default
+
+add unique      alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})
+drop unique     alter table {TableName} drop constraint {ConstraintName}
+
+add foreign     alter table {TableName} add constraint {ConstraintName} foreign key ({ColumnName}) references {ForeignTableName} ({ForeignColumnName})
+drop foreign    alter table {TableName} drop constraint {ConstraintName}  
 ------------------------------------------------------------------
         MySql
 ------------------------------------------------------------------
@@ -59,6 +85,11 @@ drop not null   alter table {TableName} modify column {ColumnName} {DataType} nu
 set default     alter table {TableName} alter {ColumnName} set default {DefaultExpression}
 drop default    alter table {TableName} alter {ColumnName} drop default
 
+add unique      alter table {TableName} add constraint {ConstraintName} unique ({ColumnName})
+drop unique     alter table {TableName} drop index {ConstraintName}    
+
+add foreign     alter table {TableName} add constraint {ConstraintName} foreign key ({ColumnName}) references {ForeignTableName} ({ForeignColumnName})
+drop foreign    alter table {TableName} drop foreign key {ConstraintName}
 ------------------------------------------------------------------
     SQLite
 ------------------------------------------------------------------
@@ -71,6 +102,11 @@ drop not null
 set default     -
 drop default    -
 
+add unique      create unique index {ConstraintName} on {TableName}({ColumnName});
+drop unique     drop index {ConstraintName}
+
+add foreign     
+drop foreign    
  
   
  

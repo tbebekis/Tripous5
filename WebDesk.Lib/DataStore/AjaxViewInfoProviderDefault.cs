@@ -62,8 +62,7 @@ namespace WebLib
  
             return Info;
         }
-
-
+ 
         public override AjaxViewInfo GetViewInfo(AjaxRequest Request, AjaxPacket Packet)
         {
             AjaxViewInfo Result = null;

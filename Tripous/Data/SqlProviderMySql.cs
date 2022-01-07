@@ -88,6 +88,24 @@ namespace Tripous.Data
             return $@"alter table {TableName} alter {ColumnName} drop default";
         }
 
+        /* constraints */
+ 
+        /// <summary>
+        /// Returns an "alter table" SQL statement for dropping a unique constraint
+        /// </summary>
+        public override string DropUniqueConstraintSql(string TableName, string ConstraintName)
+        {
+            return $"alter table {TableName} drop index {ConstraintName}";
+        }
+ 
+        /// <summary>
+        /// Returns an "alter table" SQL statement for dropping a foreign key constraint
+        /// </summary>
+        public override string DropForeignKeySql(string TableName, string ConstraintName)
+        {
+            return $"alter table {TableName} drop foreign key {ConstraintName}";
+        }
+
         /* methods */
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.

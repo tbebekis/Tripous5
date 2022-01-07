@@ -67,6 +67,16 @@ namespace Tripous.Data
             return IdentifierName;
         }
 
+        /// <summary>
+        /// Splits a specified foreign key string of the form <code>TableName.ColumnName</code> and returns its two parts: ForeignTableName and ForeignColumnName
+        /// </summary>
+        static public void SplitForeignKey(string ForeignKey, out string ForeignTableName, out string ForeignColumnName)
+        {
+            string[] Parts = ForeignKey.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            ForeignTableName = Parts[0];
+            ForeignColumnName = Parts[1];
+        }
+
 
         /// <summary>
         /// Creates or alters a specified table in the database.
@@ -75,6 +85,8 @@ namespace Tripous.Data
         /// </summary>
         static public void CreateOrAlterTable(DataTableDef NewTableDef, DataTableDef OldTableDef = null)
         {
+            // EDW: Test alter table with various databases
+
             void Throw(string Text)
             {
                 Sys.Throw($"Cannot create or alter table: {OldTableDef.Name}.\n{Text}");
@@ -99,34 +111,72 @@ namespace Tripous.Data
                     Throw("Altering table name is not allowed.");
 
                 string TableName = OldTableDef.Name;
- 
+                string ForeignTableName;
+                string ForeignFieldName;
+
                 SqlStore SqlStore = SqlStores.Default;
                 SqlProvider Provider = SqlStore.Provider;
 
+ 
                 List<string> SqlTextList = new List<string>();
+  
 
                 // drop column
+                // ------------------------------------------------------------------------------------------------
                 foreach (var OldField in OldTableDef.Fields)
                 {
                     var NewField = NewTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Id, OldField.Id));
                     if (OldField == null)
                     {
+                        if (OldField.Unique && Provider.SupportsAlterTableType(AlterTableType.TableUniqueConstraint))
+                        {
+                            SqlText = Provider.DropUniqueConstraintSql(TableName, OldField.UniqueConstraintName);
+                            SqlTextList.Add(SqlText);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(OldField.ForeignKey) && Provider.SupportsAlterTableType(AlterTableType.TableForeignKeyConstraint))
+                        {
+                            SqlText = Provider.DropForeignKeySql(TableName, OldField.ForeignKeyConstraintName);
+                            SqlTextList.Add(SqlText);
+                        }
+
                         SqlText = Provider.DropColumnSql(TableName, OldField.Name);
                         SqlTextList.Add(SqlText);
                     }
                 }
 
-                
+
+
+ 
                 foreach (var NewField in NewTableDef.Fields)
                 {
                     var OldField = OldTableDef.Fields.FirstOrDefault(item => Sys.IsSameText(item.Id, NewField.Id));
 
-                    // add column
+                    // add new column
+                    // ------------------------------------------------------------------------------------------------
                     if (OldField == null)
                     {
                         SqlText = Provider.AddColumnSql(TableName, NewField.Name, NewField.GetDefText());
                         SqlTextList.Add(SqlText);
+
+                        // new column constraints
+                        if (NewField.Unique && Provider.SupportsAlterTableType(AlterTableType.TableUniqueConstraint))
+                        {
+                            SqlText = Provider.AddUniqueConstraintSql(TableName, NewField.Name, NewField.UniqueConstraintName);
+                            SqlTextList.Add(SqlText);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(NewField.ForeignKey) && Provider.SupportsAlterTableType(AlterTableType.TableForeignKeyConstraint))
+                        {
+                            SplitForeignKey(NewField.ForeignKey, out ForeignTableName, out ForeignFieldName);
+
+                            SqlText = Provider.AddForeignKeySql(TableName, NewField.Name, ForeignTableName, ForeignFieldName, NewField.ForeignKeyConstraintName);
+                            SqlTextList.Add(SqlText);
+                        }
                     }
+
+                    // alter column
+                    // ------------------------------------------------------------------------------------------------
                     else
                     {
                         // rename column
@@ -136,7 +186,7 @@ namespace Tripous.Data
                             SqlTextList.Add(SqlText);
                         }
 
-                        // column length
+                        // alter column length
                         if (NewField.DataType == DataFieldType.String && NewField.Length != OldField.Length)
                         {
                             if (NewField.Length < OldField.Length)
@@ -186,6 +236,42 @@ namespace Tripous.Data
                                 SqlTextList.Add(SqlText);
                             }
                         }
+
+                        // unique constraint
+                        if (NewField.Unique != OldField.Unique && Provider.SupportsAlterTableType(AlterTableType.TableUniqueConstraint))
+                        {
+                            if (OldField.Unique)
+                            {
+                                SqlText = Provider.DropUniqueConstraintSql(TableName, OldField.UniqueConstraintName);
+                                SqlTextList.Add(SqlText);
+                            }
+
+                            if (NewField.Unique)
+                            {
+                                SqlText = Provider.AddUniqueConstraintSql(TableName, NewField.Name, NewField.UniqueConstraintName);
+                                SqlTextList.Add(SqlText);
+                            }
+                        }
+
+
+                        // foreign key constraint
+                        if (NewField.ForeignKey != OldField.ForeignKey && Provider.SupportsAlterTableType(AlterTableType.TableForeignKeyConstraint))
+                        {
+                            if (!string.IsNullOrWhiteSpace(OldField.ForeignKey))
+                            {
+                                SqlText = Provider.DropForeignKeySql(TableName, OldField.ForeignKeyConstraintName);
+                                SqlTextList.Add(SqlText);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(NewField.ForeignKey))
+                            {
+                                SplitForeignKey(NewField.ForeignKey, out ForeignTableName, out ForeignFieldName);
+
+                                SqlText = Provider.AddForeignKeySql(TableName, NewField.Name, ForeignTableName, ForeignFieldName, NewField.ForeignKeyConstraintName);
+                                SqlTextList.Add(SqlText);
+                            }
+                        }
+
                     }
                 }
 
@@ -304,49 +390,43 @@ namespace Tripous.Data
         /// </summary>
         public string GetDefText()
         {
-
+            string sDef;
             StringBuilder SB = new StringBuilder();
 
             SB.AppendLine($"create table {Name} (");
 
-            string sName;
-            string sDef;
-
             // columns
             for (int i = 0; i < Fields.Count; i++)
             {
-                sDef = i > 0 ? "," + Fields[i].GetDefText() : Fields[i].GetDefText();
-                SB.AppendLine("  " + sDef);
+                sDef = Fields[i].GetDefText();
+
+                if (i == 0)
+                    SB.AppendLine($"  {sDef}");
+                else
+                    SB.AppendLine($"  ,{sDef}");
             }
  
             // single-field unique constraints
             Fields.ForEach((field) => {
                 if (field.Unique)
                 {
-                    sName = EnsureIdentifierValidLength(field.UniqueConstraintName);
-                    sDef = $",constraint {sName} unique ({field.Name})";
-                    SB.AppendLine("  " + sDef);
+                    sDef = field.GetUniqueConstraintDefText();
+                    SB.AppendLine($"  ,{sDef}");
                 }
             });
 
             // multi-field unique constraints
             UniqueConstraints.ForEach((constraint) => {
-                sName = EnsureIdentifierValidLength(constraint.Name);
-                sDef = $",constraint {sName} unique ({constraint.FieldNames})";
-                SB.AppendLine("  " + sDef);
+                sDef = constraint.GetDefText();
+                SB.AppendLine($"  ,{sDef}");
             });
 
             // foreign key constraints
             Fields.ForEach((field) => {
                 if (!string.IsNullOrWhiteSpace(field.ForeignKey))
                 {
-                    string[] Parts = field.ForeignKey.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                    string ForeignTableName = Parts[0];
-                    string ForeignFieldName = Parts[1];
-
-                    sName = EnsureIdentifierValidLength(field.ForeignKeyConstraintName);
-                    sDef = $",constraint {sName} foreign key ({field.Name}) references {ForeignTableName} ({ForeignFieldName})";
-                    SB.AppendLine("  " + sDef);
+                    sDef = field.GetForeignKeyConstraintDefText();
+                    SB.AppendLine($"  ,{sDef}");
                 }
             });
 
@@ -603,6 +683,18 @@ namespace Tripous.Data
                 }
             }
         }
+
+
+        /// <summary>
+        /// Returns the definition text.
+        /// </summary>
+        public string GetDefText()
+        { 
+            string sName = DataTableDef.EnsureIdentifierValidLength(this.Name);
+            string Result = $"constraint {sName} unique ({this.Name})";
+            return Result;
+        }
+
     }
 
 
