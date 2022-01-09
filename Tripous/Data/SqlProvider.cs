@@ -606,10 +606,10 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public virtual string AddColumnSql(string TableName, string ColumnName, string ColumnDef)
+        public virtual string AddColumnSql(string TableName, string ColumnDef)
         {
             // alter table TableName add ColumnName ColumnDef 
-            return $"alter table {TableName} add {ColumnName} {ColumnDef}";
+            return $"alter table {TableName} add {ColumnDef}";
         }
         /// <summary>
         /// Returns an "alter column" SQL statement.
@@ -630,7 +630,7 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public virtual string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        public virtual string SetColumnLengthSql(string TableName, string ColumnName, string DataType, string Required, string DefaultExpression)
         {
             throw new NotSupportedException("altering column length not supported");
         }
@@ -639,9 +639,9 @@ namespace Tripous.Data
         /// Returns an "UPDATE" statement for setting the default value to a column when it is null, i.e. where ColumnName is null.
         /// <para>To be used before setting a "not null" constraint to a column.</para>
         /// </summary>
-        public virtual string SetDefaultBeforeNotNullUpdateSql(string TableName, string ColumnName, string DefaultValue)
+        public virtual string SetDefaultBeforeNotNullUpdateSql(string TableName, string ColumnName, string DefaultExpression, bool IsString)
         {
-            return $"update {TableName} set {ColumnName} = {DefaultValue} where {ColumnName} is null";
+            return $"update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null";
         }
        
         /// <summary>
@@ -1257,6 +1257,14 @@ namespace Tripous.Data
         /// The template for a connection string
         /// </summary>
         public virtual string ConnectionStringTemplate { get; } = ""; 
+        /// <summary>
+        /// Super user name
+        /// </summary>
+        public virtual string SuperUser { get; } = "";
+        /// <summary>
+        /// Super user password
+        /// </summary>
+        public virtual string SuperUserPassword { get; } = "";
 
         /// <summary>
         /// Returns true if the database server supports transactions

@@ -86,11 +86,10 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string DataType, string Required, string DefaultExpression)
         {
-            // alter table TableName alter column ColumnName ColumnDef
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+            // alter table {TableName} alter column {ColumnName} {DataType} {Required}
+            return $"alter table {TableName} alter column {ColumnName} {DataType} {Required}";
         }
 
         /// <summary>
@@ -99,9 +98,8 @@ namespace Tripous.Data
         public override string SetNotNullSql(string TableName, string ColumnName, string DataType)
         {
             // update TableName set ColumnName = DefaultValue where ColumnName is null;
-            // alter table TableName alter column ColumnName DataType
-            DataType = ReplaceDataTypePlaceholders(DataType);
-            return $"alter table {TableName} alter column {ColumnName} {DataType}";
+            //  alter table {TableName} alter column {ColumnName} {DataType} not null
+            return $"alter table {TableName} alter column {ColumnName} {DataType} not null";
         }
         /// <summary>
         /// Returns an "alter column" SQL statement.
@@ -109,7 +107,6 @@ namespace Tripous.Data
         public override string DropNotNullSql(string TableName, string ColumnName, string DataType)
         {
             // alter table {TableName} alter column {ColumnName} {DataType} null
-            DataType = ReplaceDataTypePlaceholders(DataType);
             return $"alter table {TableName} alter column {ColumnName} {DataType} null";
         }
 
@@ -287,7 +284,15 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// The template for a connection string
         /// </summary>
         public override string ConnectionStringTemplate { get; } = "Data Source={0}; Initial Catalog={1}; User ID={2}; Password={3};";
-        
+        /// <summary>
+        /// Super user name
+        /// </summary>
+        public override string SuperUser { get; } = "sa";
+        /// <summary>
+        /// Super user password
+        /// </summary>
+        public override string SuperUserPassword { get; } = "";
+
         /// <summary>
         /// Returns true if the database server supports transactions
         /// </summary>

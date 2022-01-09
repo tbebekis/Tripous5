@@ -44,11 +44,10 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string DataType, string Required, string DefaultExpression)
         {
-            // alter table {TableName} modify column {ColumnName} {ColumnDef}
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} modify column {ColumnName} {ColumnDef}";
+            // alter table {TableName} modify column {ColumnName} {DataType} {Required}
+            return $"alter table {TableName} modify column {ColumnName} {DataType} {Required}";
         }
 
         /// <summary>
@@ -58,7 +57,6 @@ namespace Tripous.Data
         {
             // update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
             // alter table {TableName} modify column {ColumnName} {DataType} not null
-            DataType = ReplaceDataTypePlaceholders(DataType);
             return $"alter table {TableName} modify column {ColumnName} {DataType} not null";
         }
         /// <summary>
@@ -67,7 +65,6 @@ namespace Tripous.Data
         public override string DropNotNullSql(string TableName, string ColumnName, string DataType)
         {
             // alter table {TableName} modify column {ColumnName} {DataType} null
-            DataType = ReplaceDataTypePlaceholders(DataType);
             return $"alter table {TableName} modify column {ColumnName} {DataType} null";
         }
 
@@ -264,7 +261,16 @@ limit 0, {RowLimit}";
         /// <summary>
         /// The template for a connection string
         /// </summary>
-        public override string ConnectionStringTemplate { get; } = @"Server={0}; Database={1}; Uid={2}; Pwd={3};";
+        public override string ConnectionStringTemplate { get; } = @"Server={0}; Database={1}; User Id={2}; Password={3};";
+        /// <summary>
+        /// Super user name
+        /// </summary>
+        public override string SuperUser { get; } = "root";
+        /// <summary>
+        /// Super user password. 
+        /// <para>NOTE: No super user default password.</para>
+        /// </summary>
+        public override string SuperUserPassword { get; } = "";
 
         /// <summary>
         /// Returns true if the database server supports transactions
@@ -290,11 +296,11 @@ limit 0, {RowLimit}";
         /// <summary>
         /// Keys used in connection string by this provider
         /// </summary>
-        public override string[] UserNameKeys { get; } = new string[] { "Uid" };
+        public override string[] UserNameKeys { get; } = new string[] { "User Id" };
         /// <summary>
         /// Keys used in connection string by this provider
         /// </summary>
-        public override string[] PasswordKeys { get; } = new string[] { "Pwd" };
+        public override string[] PasswordKeys { get; } = new string[] { "Password" };
 
         /// <summary>
         /// The PrimaryKey text

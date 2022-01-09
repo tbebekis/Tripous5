@@ -6,7 +6,7 @@
 add             alter table {TableName} add {ColumnName} {ColumnDef} 
 drop            alter table {TableName} drop column {ColumnName}
 rename          exec sp_rename N'{TableName}.{ColumnName}', '{NewColumnName}', 'COLUMN'
-length          alter table {TableName} alter column {ColumnName} {ColumnDef}
+length          alter table {TableName} alter column {ColumnName} {DataType} {Required}
 set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
                 alter table {TableName} alter column {ColumnName} {DataType} not null
 drop not null   alter table {TableName} alter column {ColumnName} {DataType} null
@@ -24,7 +24,7 @@ drop foreign    alter table {TableName} drop constraint {ConstraintName}
 add             alter table {TableName} add {ColumnName} {ColumnDef} 
 drop            alter table {TableName} drop column {ColumnName}
 rename          alter table {TableName} rename column {ColumnName} to {NewColumnName}
-length          alter table {TableName} modify {ColumnName} {ColumnDef}
+length          alter table {TableName} modify {ColumnName} {DataType} {Required}
 set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
                 alter table {TableName} modify {ColumnName} {DataType} not null
 drop not null   alter table {TableName} modify {ColumnName} {DataType} null
@@ -42,7 +42,7 @@ drop foreign    alter table {TableName} drop constraint {ConstraintName}
 add             alter table {TableName} add {ColumnName} {ColumnDef} 
 drop            alter table {TableName} drop {ColumnName}
 rename          alter table {TableName} alter column {ColumnName} to {NewColumnName} 
-length          alter table {TableName} alter column {ColumnName} type {ColumnDef}             ALTER TABLE t1 ALTER c1 TYPE char(90);
+length          alter table {TableName} alter column {ColumnName} type {DataType} {Required}             ALTER TABLE t1 ALTER c1 TYPE char(90);
 set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
                 alter table {TableName} alter {ColumnName} set not null                                 ALTER TABLE t1 ALTER c1 { DROP | SET } [NOT] NULL;
 drop not null   alter table {TableName} alter {ColumnName} drop not null 
@@ -60,7 +60,7 @@ drop foreign    alter table {TableName} drop constraint {ConstraintName}
 add             alter table {TableName} add {ColumnName} {ColumnDef} 
 drop            alter table {TableName} drop column {ColumnName}
 rename          alter table {TableName} rename column {ColumnName} to {NewColumnName} 
-length          alter table {TableName} alter column {ColumnName} {ColumnDef}
+length          alter table {TableName} alter column {ColumnName} type {DataType}  
 set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
                 alter table {TableName} alter column {ColumnName} set not null   
 drop not null   alter table {TableName} alter column {ColumnName} drop not null 
@@ -78,7 +78,7 @@ drop foreign    alter table {TableName} drop constraint {ConstraintName}
 add             alter table {TableName} add {ColumnName} {ColumnDef} 
 drop            alter table {TableName} drop column {ColumnName}
 rename          alter table {TableName} rename column {ColumnName} to {NewColumnName} 
-length          alter table {TableName} modify column {ColumnName} {ColumnDef}
+length          alter table {TableName} modify column {ColumnName} {DataType} {Required}
 set not null    update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null 
                 alter table {TableName} modify column {ColumnName} {DataType} not null
 drop not null   alter table {TableName} modify column {ColumnName} {DataType} null

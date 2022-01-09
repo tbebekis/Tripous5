@@ -46,11 +46,10 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string DataType, string Required, string DefaultExpression)
         {
-            // alter table {TableName} alter column {ColumnName} {ColumnDef}
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} alter column {ColumnName} {ColumnDef}";
+            // alter table {TableName} alter column {ColumnName} type {DataType}  
+            return $"alter table {TableName} alter column {ColumnName} type {DataType} ";
         }
 
         /// <summary>
@@ -88,11 +87,22 @@ namespace Tripous.Data
             return $@"alter table {TableName} alter column {ColumnName} drop default";
         }
 
- 
+
 
         /* methods */
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.
+        /// <para> By default databases are stored in <code>C:\Program Files\PostgreSQL\{VERSION}\data</code> or<code>/var/lib/pgsql/data</code></para>
+        /// <para>The<code>postgresql.conf</code> contains a "data_directory" entry which defines where databases are stored.</para>
+        /// <para>Also the <code>pg_env.bat</code> sets that "data_directory" with the PGDATA environment variable, e.g. <code>C:\Program Files\PostgreSQL\{VERSION}\data</code> </para>
+        /// <para>Inside that "data" folder there is a "data/base" folder which is where the databases can be found.</para>
+        /// <para>Inside that "base" folder there is a folder for each database. The folder name of a database is the OID of the database returned when executing 
+        /// <code>SELECT* FROM pg_catalog.pg_database</code> in the postgres database.</para>
+        /// <para>WARNING: It seems that database names are case-sensitive, with a twist. A connection string as
+        /// <code>"Server=localhost; Database=MyDataBase; User Id=postgres; Password=password;"</code>
+        /// results to a "mydatabase" in the <code>pg_catalog.pg_database</code> after creating the database. </para>
+        /// <para>After that the server cannot find a database named "MyDataBase" and you get the "PostgreSQL 3D000: database does not exist" error.</para>
+        /// <para>CAUTION: Always define database name in lower case in the connection string.</para>
         /// </summary>
         public override bool CreateDatabase(string ConnectionString)
         {
@@ -102,7 +112,9 @@ namespace Tripous.Data
             {
                 ConnectionStringBuilder CSB = new ConnectionStringBuilder(ConnectionString);
                 string DatabaseName = CSB.Database;
-                string CS = CSB.RemoveDatabaseEntry();
+
+                CSB["Database"] = "postgres";
+                string CS = CSB.ConnectionString;
 
                 using (var Con = OpenConnection(CS))
                 {
@@ -246,6 +258,15 @@ limit {RowLimit}";
         /// The template for a connection string
         /// </summary>
         public override string ConnectionStringTemplate { get; } = @"Server={0}; Database={1}; User Id={2}; Password={3};";
+        /// <summary>
+        /// Super user name
+        /// </summary>
+        public override string SuperUser { get; } = "postgres";
+        /// <summary>
+        /// Super user password.
+        /// <para>NOTE: No super user default password.</para>
+        /// </summary>
+        public override string SuperUserPassword { get; } = "";
 
         /// <summary>
         /// Returns true if the database server supports transactions

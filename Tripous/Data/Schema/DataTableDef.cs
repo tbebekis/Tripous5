@@ -119,6 +119,13 @@ namespace Tripous.Data
 
  
                 List<string> SqlTextList = new List<string>();
+                void AddSql(string Text)
+                {
+                    Text = Provider.ReplaceDataTypePlaceholders(Text);
+
+                    if (!SqlTextList.Contains(Text))
+                        SqlTextList.Add(Text);
+                }
   
 
                 // drop column
@@ -131,17 +138,17 @@ namespace Tripous.Data
                         if (OldField.Unique && Provider.SupportsAlterTableType(AlterTableType.TableUniqueConstraint))
                         {
                             SqlText = Provider.DropUniqueConstraintSql(TableName, OldField.UniqueConstraintName);
-                            SqlTextList.Add(SqlText);
+                            AddSql(SqlText);
                         }
 
                         if (!string.IsNullOrWhiteSpace(OldField.ForeignKey) && Provider.SupportsAlterTableType(AlterTableType.TableForeignKeyConstraint))
                         {
                             SqlText = Provider.DropForeignKeySql(TableName, OldField.ForeignKeyConstraintName);
-                            SqlTextList.Add(SqlText);
+                            AddSql(SqlText);
                         }
 
                         SqlText = Provider.DropColumnSql(TableName, OldField.Name);
-                        SqlTextList.Add(SqlText);
+                        AddSql(SqlText);
                     }
                 }
 
@@ -156,14 +163,14 @@ namespace Tripous.Data
                     // ------------------------------------------------------------------------------------------------
                     if (OldField == null)
                     {
-                        SqlText = Provider.AddColumnSql(TableName, NewField.Name, NewField.GetDefText());
-                        SqlTextList.Add(SqlText);
+                        SqlText = Provider.AddColumnSql(TableName, NewField.GetDefText(IncludeName: true));
+                        AddSql(SqlText);
 
                         // new column constraints
                         if (NewField.Unique && Provider.SupportsAlterTableType(AlterTableType.TableUniqueConstraint))
                         {
                             SqlText = Provider.AddUniqueConstraintSql(TableName, NewField.Name, NewField.UniqueConstraintName);
-                            SqlTextList.Add(SqlText);
+                            AddSql(SqlText);
                         }
 
                         if (!string.IsNullOrWhiteSpace(NewField.ForeignKey) && Provider.SupportsAlterTableType(AlterTableType.TableForeignKeyConstraint))
@@ -171,7 +178,7 @@ namespace Tripous.Data
                             SplitForeignKey(NewField.ForeignKey, out ForeignTableName, out ForeignFieldName);
 
                             SqlText = Provider.AddForeignKeySql(TableName, NewField.Name, ForeignTableName, ForeignFieldName, NewField.ForeignKeyConstraintName);
-                            SqlTextList.Add(SqlText);
+                            AddSql(SqlText);
                         }
                     }
 
@@ -179,22 +186,8 @@ namespace Tripous.Data
                     // ------------------------------------------------------------------------------------------------
                     else
                     {
-                        // rename column
-                        if (!Sys.IsSameText(NewField.Name, OldField.Name))
-                        {
-                            SqlText = Provider.RenameColumnSql(TableName, OldField.Name, NewField.Name);
-                            SqlTextList.Add(SqlText);
-                        }
 
-                        // alter column length
-                        if (NewField.DataType == DataFieldType.String && NewField.Length != OldField.Length)
-                        {
-                            if (NewField.Length < OldField.Length)
-                                Throw($"Column: {NewField.Name}. Reducing string column length is not permitted.");
-
-                            SqlText = Provider.SetColumnLengthSql(TableName, NewField.Name, NewField.GetDefText());
-                            SqlTextList.Add(SqlText);
-                        }
+                        string ColumnName = OldField.Name;
 
                         // set/drop not null
                         if (NewField.Required != OldField.Required)
@@ -203,19 +196,19 @@ namespace Tripous.Data
                             if (NewField.Required)
                             {
                                 if (string.IsNullOrWhiteSpace(NewField.DefaultExpression))
-                                    Throw($"Column: {NewField.Name}. Cannot set a column to not null. No default value.");
+                                    Throw($"Column: {ColumnName}. Cannot set a column to not null. No default value.");
 
-                                SqlText = Provider.SetDefaultBeforeNotNullUpdateSql(TableName, NewField.Name, NewField.DefaultExpression);
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.SetDefaultBeforeNotNullUpdateSql(TableName, ColumnName, NewField.DefaultExpression, NewField.DataType == DataFieldType.String);
+                                AddSql(SqlText);
  
-                                SqlText = Provider.SetNotNullSql(TableName, NewField.Name, NewField.GetDataTypeDefText());
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.SetNotNullSql(TableName, ColumnName, NewField.GetDataTypeDefText());
+                                AddSql(SqlText);
                             }
                             // drop not null
                             else
                             {
-                                SqlText = Provider.DropNotNullSql(TableName, NewField.Name, NewField.GetDataTypeDefText());
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.DropNotNullSql(TableName, ColumnName, NewField.GetDataTypeDefText());
+                                AddSql(SqlText);
                             }
                         }
 
@@ -225,15 +218,41 @@ namespace Tripous.Data
                             // drop default
                             if (!string.IsNullOrWhiteSpace(OldField.DefaultExpression))
                             {
-                                SqlText = Provider.DropColumnDefaultSql(TableName, OldField.Name);
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.DropColumnDefaultSql(TableName, ColumnName);
+                                AddSql(SqlText);
                             }                            
  
                             // set default
                             if (!string.IsNullOrWhiteSpace(NewField.DefaultExpression))
                             {
-                                SqlText = Provider.SetColumnDefaultSql(TableName, NewField.Name, NewField.DefaultExpression);
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.SetColumnDefaultSql(TableName, ColumnName, NewField.DefaultExpression);
+                                AddSql(SqlText);
+                            }
+                        }
+
+                        // alter column length
+                        if (NewField.DataType == DataFieldType.String && NewField.Length != OldField.Length)
+                        {
+                            if (NewField.Length < OldField.Length)
+                                Throw($"Column: {ColumnName}. Reducing string column length is not permitted.");
+
+                            // Firebird refuses to enlarge the length of a unique column.
+                            // so drop the unique constraint...
+                            if (OldField.Unique)
+                            {
+                                SqlText = Provider.DropUniqueConstraintSql(TableName, OldField.UniqueConstraintName);
+                                AddSql(SqlText);
+                            }
+
+                            // ... set the new length
+                            SqlText = Provider.SetColumnLengthSql(TableName, ColumnName, NewField.GetDataTypeDefText(), NewField.GetNullDefText(), NewField.DefaultExpression);
+                            AddSql(SqlText);
+
+                            // ... and restore the constraint
+                            if (OldField.Unique)
+                            {
+                                SqlText = Provider.AddUniqueConstraintSql(TableName, ColumnName, OldField.UniqueConstraintName);
+                                AddSql(SqlText);
                             }
                         }
 
@@ -243,13 +262,13 @@ namespace Tripous.Data
                             if (OldField.Unique)
                             {
                                 SqlText = Provider.DropUniqueConstraintSql(TableName, OldField.UniqueConstraintName);
-                                SqlTextList.Add(SqlText);
+                                AddSql(SqlText);
                             }
 
                             if (NewField.Unique)
                             {
-                                SqlText = Provider.AddUniqueConstraintSql(TableName, NewField.Name, NewField.UniqueConstraintName);
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.AddUniqueConstraintSql(TableName, ColumnName, NewField.UniqueConstraintName);
+                                AddSql(SqlText);
                             }
                         }
 
@@ -260,28 +279,37 @@ namespace Tripous.Data
                             if (!string.IsNullOrWhiteSpace(OldField.ForeignKey))
                             {
                                 SqlText = Provider.DropForeignKeySql(TableName, OldField.ForeignKeyConstraintName);
-                                SqlTextList.Add(SqlText);
+                                AddSql(SqlText);
                             }
 
                             if (!string.IsNullOrWhiteSpace(NewField.ForeignKey))
                             {
                                 SplitForeignKey(NewField.ForeignKey, out ForeignTableName, out ForeignFieldName);
 
-                                SqlText = Provider.AddForeignKeySql(TableName, NewField.Name, ForeignTableName, ForeignFieldName, NewField.ForeignKeyConstraintName);
-                                SqlTextList.Add(SqlText);
+                                SqlText = Provider.AddForeignKeySql(TableName, ColumnName, ForeignTableName, ForeignFieldName, NewField.ForeignKeyConstraintName);
+                                AddSql(SqlText);
                             }
+                        }
+
+                        // rename column - must be last in the statement list
+                        if (!Sys.IsSameText(NewField.Name, OldField.Name))
+                        {
+                            SqlText = Provider.RenameColumnSql(TableName, OldField.Name, NewField.Name);
+                            AddSql(SqlText);
                         }
 
                     }
                 }
 
-                if (SqlTextList.Count > 0)
-                    SqlStore.ExecSql(SqlTextList);
-                else
+                if (SqlTextList.Count == 0)
+                {
                     Throw("Nothing changed");
-                    
-
-
+                }
+                else
+                {
+                    SqlStore.ExecSql(SqlTextList);
+                }         
+ 
             }
         }
 
@@ -319,7 +347,7 @@ namespace Tripous.Data
              
             void Throw(string Text)
             {
-                Sys.Throw($"Definition of {Name} table is invalid.\n{Text}");
+                Sys.Throw($"Table: {Name}. Invalid definition.\n{Text}");
             }
 
             // table name           
@@ -350,7 +378,7 @@ namespace Tripous.Data
             {
                 string FieldName = field.Name.ToLowerInvariant();
                 if (FieldNames.Contains(FieldName))
-                    Throw($"Duplicate column name: {field.Name}");
+                    Throw($"Column: {field.Name}. Duplicate column name");
             });
 
 
@@ -374,11 +402,23 @@ namespace Tripous.Data
  
 
             Fields.ForEach((field) => {
+                if (field.DataType == DataFieldType.String && field.Length <= 0)
+                    Throw($"Column: {field.Name}. Invalid string column length.");
+
+                //if (field.Required && string.IsNullOrWhiteSpace(field.DefaultExpression))
+                //    Throw($"Column: {field.Name}. Cannot set a column to not null. No default value.");
+
+                if (field.Unique && string.IsNullOrWhiteSpace(field.UniqueConstraintName))
+                    Throw($"Column: {field.Name}. Cannot set a column to unique. No unique constraint name.");
+
                 if (!string.IsNullOrWhiteSpace(field.ForeignKey))
                 {
                     string[] Parts = field.ForeignKey.Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
                     if (Parts == null || Parts.Length != 2)
-                        Throw($"Foreign Key constraint not fully defined in column: {field.Name}");
+                        Throw($"Column: {field.Name}. Foreign key constraint not fully defined in column");
+
+                    if (field.Unique && string.IsNullOrWhiteSpace(field.ForeignKeyConstraintName))
+                        Throw($"Column: {field.Name}. Cannot set foreign key. No foreign key constraint name.");
                 } 
             });
 
@@ -398,7 +438,7 @@ namespace Tripous.Data
             // columns
             for (int i = 0; i < Fields.Count; i++)
             {
-                sDef = Fields[i].GetDefText();
+                sDef = Fields[i].GetDefText(IncludeName: true);
 
                 if (i == 0)
                     SB.AppendLine($"  {sDef}");

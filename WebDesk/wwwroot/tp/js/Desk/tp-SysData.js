@@ -403,6 +403,8 @@ tp.DataFieldDef = class extends tp.Object {
     set TitleKey(v) {
         this.fTitleKey = v;
     }
+ 
+
 
     /** When true denotes a field upon which a unique constraint is applied
      * @type {boolean}
@@ -854,12 +856,14 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         // inserting a Table
         if (this.IsInsertItem) {
             ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
-            EditableColumns = ColumnNames;
+            EditableColumns = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
         }
         // editing a Table
         else {
             ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
-            EditableColumns = ['Name', 'TitleKey', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
+            EditableColumns = IsInsertField === true ?
+                ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique']:
+                ['Name', 'TitleKey', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
         }
 
         let DataSource = new tp.DataSource(tblField);
@@ -1748,7 +1752,8 @@ tp.DeskSysDataView = class extends tp.DeskView {
             tp.SuccessNote('OK');
         }
 
-        this.ViewMode = tp.DataViewMode.List;
+        this.ForceSelect = true;
+        this.ViewMode = tp.DataViewMode.Edit;
     }
 
 

@@ -21,6 +21,7 @@ namespace Tripous.Data
         string fTitleKey;
         bool fUnique;
         string fForeignKey;
+ 
 
         /* construction */
         /// <summary>
@@ -148,12 +149,12 @@ namespace Tripous.Data
         /// Returns the field definition text.
         /// <para>WARNING: The returned text must be passed through <see cref="SqlProvider.ReplaceDataTypePlaceholders"/> method, for the final result.</para>
         /// </summary>
-        public string GetDefText()
+        public string GetDefText(bool IncludeName)
         {
             string sDataType = GetDataTypeDefText();
             string sNull = GetNullDefText();
             string sDefault = GetDefaultDefText();
-            string Result = $"{Name} {sDataType} {sDefault} {sNull}" ;
+            string Result = IncludeName? $"{Name} {sDataType} {sDefault} {sNull}" : $"{sDataType} {sDefault} {sNull}";
             return Result;
         }
 
@@ -295,6 +296,7 @@ namespace Tripous.Data
         /// <para>NOTE:  e.g. produces default 0, or default '' </para>
         /// </summary>
         public string DefaultExpression { get; set; }
+ 
 
         /// <summary>
         /// When true indicates that the field has a unique constraint.

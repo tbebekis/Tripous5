@@ -51,16 +51,12 @@ namespace Tripous.Data
         /// <para>NOTE: Firebird column size changes by using the "type" keyword, NOT a full column definition.</para>
         /// <para>Example: <code>alter table TableName alter ColumnName type varchar(100)</code> </para>
         /// </summary>
-        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string DataType, string Required, string DefaultExpression)
         {
             // ALTER TABLE t1 ALTER c1 TYPE char(90);
-            // alter table {TableName} alter column {ColumnName} type {ColumnDef}
+            // alter table {TableName} alter column {ColumnName} type {DataType} {Required}   
 
-            int Index = ColumnDef.IndexOf(')');
-            ColumnDef = ColumnDef.Substring(0, Index + 1);
-
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} alter column {ColumnName} type {ColumnDef}";
+            return $"alter table {TableName} alter column {ColumnName} type {DataType}";
         }
 
         /// <summary>
@@ -146,21 +142,40 @@ namespace Tripous.Data
         /// </summary>
         public override string ReplaceDataTypePlaceholders(string SqlText)
         {
-            SqlText = SqlText.Replace("  ", " ");
+            // NO
+            // 
+            // see: https://ib-aid.com/download/docs/firebird-language-reference-2.5/fblangref25-ddl-tbl.html#fblangref25-ddl-tbl-create
 
-            int Plus = CNVARCHAR.Length;
-            int Index = SqlText.IndexOf(CNVARCHAR, 0);
-            int Pos;
-            while (Index != -1)
-            {
-                Pos = SqlText.IndexOf(')', Index + Plus);
-                if (Pos == -1)
-                    throw new ApplicationException("Invalid create table statement");
+            /* NO, do NOT add the "CHARACTER SET UTF8"
+               Collation name is the last entry in a Column Def, just after the Column Constraint.
+               see: https://ib-aid.com/download/docs/firebird-language-reference-2.5/fblangref25-ddl-tbl.html#fblangref25-ddl-tbl-create 
 
-                SqlText = SqlText.Insert(Pos + 1, " CHARACTER SET UTF8 ");  // CHARACTER SET UNICODE_FSS
+                <regular_col_def> ::=
+                  colname {<datatype> | domainname}
+                  [DEFAULT {literal | NULL | <context_var>}]
+                  [NOT NULL]
+                  [<col_constraint>]
+                  [COLLATE collation_name] 
+             */
 
-                Index = SqlText.IndexOf(CNVARCHAR, Pos);
-            }
+            /*
+                SqlText = SqlText.Replace("  ", " ");
+
+                int Plus = CNVARCHAR.Length;
+                int Index = SqlText.IndexOf(CNVARCHAR, 0);
+                int Pos;
+                while (Index != -1)
+                {
+                    Pos = SqlText.IndexOf(')', Index + Plus);
+                    if (Pos == -1)
+                        throw new ApplicationException("Invalid create table statement");
+
+                    SqlText = SqlText.Insert(Pos + 1, " CHARACTER SET UTF8 ");  // CHARACTER SET UNICODE_FSS
+
+                    Index = SqlText.IndexOf(CNVARCHAR, Pos);
+                }          
+             */
+
 
             return base.ReplaceDataTypePlaceholders(SqlText);
         }
@@ -316,9 +331,18 @@ namespace Tripous.Data
         public override char ObjectEndDelimiter { get; } = '"';
 
         /// <summary>
-        /// The template for a connection string
+        /// The template for a connection string.
+        /// <para>WARNING: Database without a path goes to C:\Windows\System32 folder by default. </para>
         /// </summary>
         public override string ConnectionStringTemplate { get; } = @"DataSource={0}; Database={1}; User={2}; Password={3}; Charset=UTF8;";
+        /// <summary>
+        /// Super user name
+        /// </summary>
+        public override string SuperUser { get; } = "SYSDBA";
+        /// <summary>
+        /// Super user password
+        /// </summary>
+        public override string SuperUserPassword { get; } = "masterkey";
 
         /// <summary>
         /// Returns true if the database server supports transactions

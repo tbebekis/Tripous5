@@ -42,11 +42,10 @@ namespace Tripous.Data
         /// <summary>
         /// Returns an "alter column" SQL statement.
         /// </summary>
-        public override string SetColumnLengthSql(string TableName, string ColumnName, string ColumnDef)
+        public override string SetColumnLengthSql(string TableName, string ColumnName, string DataType, string Required, string DefaultExpression)
         {
-            // alter table {TableName} modify {ColumnName} {ColumnDef}
-            ColumnDef = ReplaceDataTypePlaceholders(ColumnDef);
-            return $"alter table {TableName} modify {ColumnName} {ColumnDef}";
+            // alter table {TableName} modify {ColumnName} {DataType} {Required}
+            return $"alter table {TableName} modify {ColumnName} {DataType} {Required}";
         }
 
         /// <summary>
@@ -56,7 +55,6 @@ namespace Tripous.Data
         {
             // update {TableName} set {ColumnName} = {DefaultExpression} where {ColumnName} is null; 
             // alter table {TableName} modify {ColumnName} {DataType} not null
-            DataType = ReplaceDataTypePlaceholders(DataType);
             return $"alter table {TableName} modify {ColumnName} {DataType} not null";
         }
         /// <summary>
@@ -65,7 +63,6 @@ namespace Tripous.Data
         public override string DropNotNullSql(string TableName, string ColumnName, string DataType)
         {
             // alter table {TableName} modify {ColumnName} {DataType} null
-            DataType = ReplaceDataTypePlaceholders(DataType);
             return $"alter table {TableName} modify {ColumnName} {DataType} null";
         }
 
@@ -120,13 +117,7 @@ namespace Tripous.Data
 
             SelectSql.Where = S;
         }
-
-
-
-
-
-
-
+ 
         /// <summary>
         /// Quotes and formats a date value as a string, properly for use with an Sql statement
         /// </summary>
@@ -286,6 +277,14 @@ namespace Tripous.Data
         /// The template for a connection string
         /// </summary>
         public override string ConnectionStringTemplate { get; } = @"Data Source={0}; User Id={1}; Password={2};";
+        /// <summary>
+        /// Super user name
+        /// </summary>
+        public override string SuperUser { get; } = "sysdba";
+        /// <summary>
+        /// Super user password
+        /// </summary>
+        public override string SuperUserPassword { get; } = "oracle";
 
         /// <summary>
         /// Returns true if the database server supports transactions

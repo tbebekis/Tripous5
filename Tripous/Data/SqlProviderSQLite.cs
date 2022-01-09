@@ -245,6 +245,16 @@ limit {RowLimit}";
         /// The template for a connection string
         /// </summary>
         public override string ConnectionStringTemplate { get; } = @"Data Source=""{0}"";";
+        /// <summary>
+        /// Super user name.
+        /// <para>NOTE: No super user.</para>
+        /// </summary>
+        public override string SuperUser { get; } = "";
+        /// <summary>
+        /// Super user password.
+        /// <para>NOTE: No super user password.</para>
+        /// </summary>
+        public override string SuperUserPassword { get; } = "";
 
         /// <summary>
         /// Returns true if the database server supports transactions
