@@ -29,6 +29,13 @@ namespace Tripous
         {
             return !string.IsNullOrWhiteSpace(Key) && Params != null && Params.ContainsKey(Key) && Params[Key] != null;
         }
+        /// <summary>
+        /// Returns a param under a specified key, if any, else null.
+        /// </summary>
+        public object GetParam(string Key)
+        {
+            return ParamsContainsKey(Key) ? Params[Key] : null;
+        }
 
         /* properties */
         /// <summary>
@@ -44,6 +51,11 @@ namespace Tripous
         /// </summary>
         public Dictionary<string, object> Params { get; set; } = new Dictionary<string, object>();
 
+        /// <summary>
+        /// Returns true when this request contains <see cref="Command"/> information.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsCommandRequest { get => ParamsContainsKey("CommandId") || ParamsContainsKey("CommandName"); }
         /// <summary>
         /// Returns true when this is a Ui request.
         /// </summary>

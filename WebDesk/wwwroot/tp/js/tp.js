@@ -994,68 +994,7 @@ tp.GetPropertyNames = function (o, CanGetPropFunc = null) {
 
 //#region Merging objects
 
-/**
-Merges properties and functions of objects in the Sources array to the Dest object. 
-CAUTION: No overload. All argument must have values. 
-@param {object} Dest - The destination object. It is returned as the Result of the function.
-@param {object|any[]} Sources - The source object or an array of source objects (or arrays)
-@param {boolean} [DeepMerge=true] - When DeepMerge is true, then source properties that are objects and arrays, are deeply copied to Dest. If false then only their referencies are copied to Dest.
-@param {boolean} [PropsOnly=false] -  When PropsOnly is true, source functions are not copied to Dest.
-@returns {object|any[]} - Returns the Dest object.
-*/
-tp.Merge = function (Dest, Sources, DeepMerge = true, PropsOnly = false) {
-    var Flag = tp.IsObject(Dest) || tp.IsArray(Dest);
 
-    if (!Flag) {
-        return Dest;
-    }
-
-    if (!tp.IsArray(Sources)) {
-        let x = Sources;
-        Sources = [];
-        Sources.push(x);
-    }
-
-    var Source;
-    var SourceProp;
-    var DestProp;
-    var Copy;
-
-    for (var i = 0, ln = Sources.length; i < ln; i++) {
-        Source = Sources[i];
-        if (!tp.IsEmpty(Source) && Dest !== Source) {
-            for (var PropName in Source) {
-                SourceProp = Source[PropName];
-
-                if (tp.IsFunction(SourceProp) && PropsOnly)
-                    continue;
-
-                if (tp.IsSimple(SourceProp)) {
-                    Dest[PropName] = SourceProp;
-                } else if (SourceProp && SourceProp !== Dest) {
-                    if (!DeepMerge) {
-                        Dest[PropName] = SourceProp;
-                    } else {
-                        DestProp = Dest[PropName];
-                        if (tp.IsObject(SourceProp)) {
-                            DestProp = DestProp && tp.IsPlainObject(DestProp) ? DestProp : {};
-                            Dest[PropName] = tp.Merge(DestProp, [SourceProp], DeepMerge, PropsOnly);
-                        } else if (tp.IsArray(SourceProp)) {
-                            DestProp = DestProp && tp.IsArray(DestProp) ? DestProp : [];
-                            Dest[PropName] = tp.Merge(DestProp, [SourceProp], DeepMerge, PropsOnly);
-                        } else {
-                            if (PropName !== 'constructor') {
-                                Dest[PropName] = SourceProp;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return Dest;
-};
 /**
 Merges properties ONLY of objects in the Sources array to the Dest object. 
 CAUTION: No overload. All argument must have values. 
@@ -1065,33 +1004,78 @@ CAUTION: No overload. All argument must have values.
 @returns {object|any[]} - Returns the Dest object.
 */
 tp.MergeProps = function (Dest, Sources, DeepMerge = true) {
-    return tp.Merge(Dest, Sources, DeepMerge, true);
+
+    if (tp.IsEmpty(Dest))
+        return null;
+
+    if (tp.IsValid(Sources)) {
+
+        if (!tp.IsArray(Sources)) {
+            let x = Sources;
+            Sources = [];
+            Sources.push(x);
+        }
+
+        Sources.forEach((Source) => {
+            if (tp.IsValid(Source)) {
+
+                let PropNameList = tp.GetPropertyNames(Source);
+
+                PropNameList.forEach((PropName) => {
+                    let v = Source[PropName];
+
+                    if (v !== Dest) {
+                        if (tp.IsSimple(v)) {
+                            Dest[PropName] = v;
+                        }
+                        else {
+                            if (!DeepMerge) {
+                                Dest[PropName] = v;
+                            }
+                            else {
+                                let DestValue = Dest[PropName];
+                                if (tp.IsArray(v)) {
+                                    DestValue = DestValue && tp.IsArray(DestValue) ? DestValue : [];
+                                    Dest[PropName] = tp.MergeProps(DestValue, [v], DeepMerge);
+                                }
+                                else if (tp.IsObject(v)) {
+                                    DestValue = DestValue && tp.IsPlainObject(DestValue) ? DestValue : {};
+                                    Dest[PropName] = tp.MergeProps(DestValue, [v], DeepMerge);
+                                }
+                                else if (PropName !== 'constructor') {
+                                    Dest[PropName] = v;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+        });
+    }
+ 
+
+
+    return Dest; 
 };
 /**
-Merges properties ONLY of objects in the Sources array to the Dest object.  
+Merges properties ONLY of objects in the Sources array to the Dest object. Returns the Dest.
 It does a deep merge, that is source properties that are objects and arrays, are deeply copied to Dest.
 @param {object} Dest - The destination object. It is returned as the Result of the function.
 @param {object|any[]} Sources - The source object or an array of source objects (or arrays)
 @returns {object|any[]} - Returns the Dest object.
 */
 tp.MergePropsDeep = function (Dest, Sources) {
-    return tp.Merge(Dest, Sources, true, true);
+    return tp.MergeProps(Dest, Sources, true);
 };
 /**
-Merges OWN properties ONLY of the Source object to the Dest object. Return the Dest.
+Merges properties ONLY of the Source object to the Dest object. Returns the Dest.
 @param {object} Dest - The destination object. It is returned as the Result of the function.
-@param {object} Source - The source object or an array of source objects (or arrays)
+@param {object|any[]} Sources - The source object or an array of source objects (or arrays)
 @returns {object} - Returns the Dest object.
 */
-tp.MergeQuick = function (Dest, Source) {
-    if (!tp.IsEmpty(Dest) && !tp.IsEmpty(Source)) {
-        for (var i in Source) {
-            if (Source.hasOwnProperty(i) && !tp.IsFunction(Source[i])) {
-                Dest[i] = Source[i];
-            }
-        }
-    }
-    return Dest;
+tp.MergePropsShallow = function (Dest, Sources) {
+    return tp.MergeProps(Dest, Sources, false);
 };
 
 //#endregion
@@ -2768,7 +2752,7 @@ tp.ListClone = function (List, Deep = true) {
             if (tp.IsSimple(item)) {
                 Result.push(item);
             } else {
-                o = tp.Merge({}, item, true, true);
+                o = tp.MergePropsDeep({}, item);
                 Result.push(o);
             }
         }
@@ -4590,7 +4574,7 @@ tp.GetDataSetupObject = function (el) {
             if (el.id in tp.GlobalCreateParams) {
                 let o = tp.GlobalCreateParams[el.id];
 
-                tp.MergeQuick(Result, o);
+                tp.MergePropsShallow(Result, o);
             }
         }
 
@@ -6001,7 +5985,7 @@ tp.EventArgs = class {
             if (arguments[0] instanceof Event) {
                 this.e = arguments[0];
             } else if (arguments[0] instanceof Object) {
-                tp.MergeQuick(this, arguments[0]);
+                tp.MergePropsShallow(this, arguments[0]);
             }
         } else {
             if (arguments.length > 0)
@@ -11517,14 +11501,7 @@ tp.Object = class {
         PropNamesList.forEach((Prop) => {
             Result[Prop] = this[Prop];
         });
-
-/*
-        for (var Prop in this) {
-            if (this.CanSerialize(Prop))
-                Result[Prop] = this[Prop];
-        }
- */
-
+ 
         return Result;
     }
 
@@ -11755,7 +11732,7 @@ tp.CreateParams = class {
     */
     constructor(Source = null) {
         if (Source) {
-            tp.MergeQuick(this, Source);
+            tp.MergePropsShallow(this, Source);
         }
     }
 };
@@ -12752,7 +12729,7 @@ tp.Component = class extends tp.Object {
                 // create params
                 this.CreateParams = this.CreateParams || {};                  // options passed in to the constructor
                 let DataSetup = tp.GetDataSetupObject(el);                    // options defined in a data-* (data-setup) attribute, as javascript object
-                this.CreateParams = tp.MergeQuick(this.CreateParams, DataSetup);
+                this.CreateParams = tp.MergePropsShallow(this.CreateParams, DataSetup);
 
                 // css classes  
                 if (tp.IsArray(this.fDefaultCssClasses) && this.fDefaultCssClasses.length > 0) {
@@ -17001,7 +16978,7 @@ tp.Culture = class {
     */
     constructor(Source = null) {
         if (Source) {
-            tp.MergeQuick(this, Source);
+            tp.MergePropsShallow(this, Source);
         }
     }
 

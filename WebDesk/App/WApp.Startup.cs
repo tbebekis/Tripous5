@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -58,7 +59,7 @@ namespace WebDesk
     /// </summary>
     static internal partial class WApp
     {
-        static List<IPlugin> PluginList = new List<IPlugin>();
+        static internal List<IPlugin> PluginList = new List<IPlugin>();
         static IDisposable AppSettingsChangeToken;
         static WebAppContext AppContext = new WebAppContext();
  
@@ -160,6 +161,7 @@ namespace WebDesk
         /// </summary>
         static void InitializeApplication()
         {
+
             try
             {
                 // ● initialize libraries

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Http; 
 
@@ -31,6 +32,11 @@ namespace WebLib
         /// Maps a source to a destination object.
         /// </summary>
         TDestination MapTo<TSource, TDestination>(TSource Source, TDestination Dest) where TSource : class where TDestination : class;
+
+        /// <summary>
+        /// Calls all plugins to add commands for the main menu of the application
+        /// </summary>
+        void AddPluginMainMenuCommands(List<Command> CommandList);
  
         /* properties */
         /// <summary>

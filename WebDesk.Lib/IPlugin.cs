@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Tripous;
+
 namespace WebLib
 {
  
@@ -25,5 +27,10 @@ namespace WebLib
         /// <para>or the passed in Configurator object which in the current implementantion is an AutoMapper.IMapperConfigurationExpression instance </para>
         /// </summary>
         void AddObjectMaps(object Configurator);
+
+        /// <summary>
+        /// Calls a plugin to add commands for the main menu of the application
+        /// </summary>
+        void AddMainMenuCommands(List<Command> CommandList);
     }
 }

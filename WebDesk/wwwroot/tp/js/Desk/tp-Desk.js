@@ -73,7 +73,7 @@ tp.Command = class {
             this.IsSingleInstance = Source.IsSingleInstance === true;
             this.Params = {};
             if (Source.Params)
-                tp.MergeQuick(this.Params, Source.Params);
+                tp.MergePropsShallow(this.Params, Source.Params);
 
             this.Items = [];
 
@@ -106,11 +106,13 @@ tp.Command.prototype.fTitle = '';
 tp.AjaxRequest.CreateFromCommand = function (Cmd) {
  
     let Params = {
+        CommandId: Cmd.Id,
+        CommandName: Cmd.Name,
         Type: Cmd.Type,
         IsSingleInstance: Cmd.IsSingleInstance === true
     };
     if (Cmd.Params)
-        Params = tp.MergeQuick(Params, Cmd.Params);
+        Params = tp.MergePropsShallow(Params, Cmd.Params);
 
     let Result = new tp.AjaxRequest(Cmd.Name, Params);
     return Result;
@@ -165,7 +167,7 @@ tp.Desktop = class {
         tp.Desk = this;
 
         this.Options = Options || {};
-        tp.MergeQuick(this, this.Options);
+        tp.MergePropsShallow(this, this.Options);
 
         this.CommandExecutors = [];
         this.RegisterCommandExecutor(this.MainCommandExecutor);

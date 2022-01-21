@@ -82,34 +82,34 @@ namespace WebLib
 
             Command BarItem = new Command() { TitleKey = "File Kai Ase Re File" };
             Result.Add(BarItem);
-            BarItem.Add("New");
-            BarItem.Add("Open");
-            BarItem.Add("Exit");
+            BarItem.AddUi("New");
+            BarItem.AddUi("Open");
+            BarItem.AddUi("Exit");
 
             BarItem = new Command() { TitleKey = "Edit kai Edit" };
             Result.Add(BarItem);
-            BarItem.Add("Cut");
-            BarItem.Add("Copy");
-            BarItem.Add("Paste");
-            BarItem.Add("Delete");
+            BarItem.AddUi("Cut");
+            BarItem.AddUi("Copy");
+            BarItem.AddUi("Paste");
+            BarItem.AddUi("Delete");
 
             BarItem = new Command() { TitleKey = "View Ki Apanw Tourla" };
             Result.Add(BarItem);
-            BarItem.Add("Document");
-            BarItem.Add("Image");
-            BarItem.Add("Table");
-            BarItem.Add("Window");
+            BarItem.AddUi("Document");
+            BarItem.AddUi("Image");
+            BarItem.AddUi("Table");
+            BarItem.AddUi("Window");
 
             BarItem = new Command() { TitleKey = "Project Apisteyto" };
             Result.Add(BarItem);
-            BarItem.Add("Run");
-            BarItem.Add("Debug");
+            BarItem.AddUi("Run");
+            BarItem.AddUi("Debug");
 
             BarItem = new Command() { TitleKey = "Extensions" };
             Result.Add(BarItem);
-            BarItem.Add("One");
-            BarItem.Add("Two");
-            BarItem.Add("Three");
+            BarItem.AddUi("One");
+            BarItem.AddUi("Two");
+            BarItem.AddUi("Three");
 
  
 

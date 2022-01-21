@@ -67,9 +67,29 @@ namespace WebLib
         {
             HttpActionResult Result = null;
 
-            if (R.IsUiRequest)
+            object CmdResult = null;
+
+            if (R.IsCommandRequest)
             {
-                Result = Result = GetHtmlView(Controller, R);
+                string S = R.GetParam("CommandName") as string;
+                if (!string.IsNullOrWhiteSpace(S))
+                    CmdResult = Command.ExecuteByName(S);
+
+                if (CmdResult == null)
+                {
+                    S = R.GetParam("CommandId") as string;
+                    if (!string.IsNullOrWhiteSpace(S))
+                        CmdResult = Command.ExecuteById(S);
+                } 
+            }
+
+            if (CmdResult != null)
+            {
+                Result = HttpActionResult.SetPacket(CmdResult, true);
+            }
+            else if (R.IsUiRequest)
+            {
+                Result = GetHtmlView(Controller, R);
             }
 
             if (Result == null)

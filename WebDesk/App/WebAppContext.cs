@@ -65,7 +65,16 @@ namespace WebDesk
         {
             return ObjectMapper.MapTo<TSource, TDestination>(Source, Dest);
         }
- 
+
+        /// <summary>
+        /// Calls all plugins to add commands for the main menu of the application
+        /// </summary>
+        public void AddPluginMainMenuCommands(List<Command> CommandList)
+        {
+            foreach (var Plugin in WApp.PluginList)
+                Plugin.AddMainMenuCommands(CommandList);
+        }
+
         /// <summary>
         /// Returns the application settings
         /// </summary>

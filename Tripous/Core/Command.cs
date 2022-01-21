@@ -20,34 +20,7 @@ namespace Tripous
         static List<ICommandExecutor> Executors = new List<ICommandExecutor>();
 
         string fTitleKey;
-
-        internal class Setup
-        {
-            Command Cmd;
-
-            public Setup(Command Cmd)
-            {
-                this.Cmd = Cmd;
-            }
-            /// <summary>
-            /// A name unique among all commands.
-            /// </summary>
-            public string Name => Cmd.Name;
-            /// <summary>
-            /// The command type. What a command does when it is called.
-            /// </summary>
-            public CommandType Type => Cmd.Type;
-            /// <summary>
-            /// True when this is a single instance Ui command.
-            /// </summary>
-            public bool IsSingleInstance => Cmd.IsSingleInstance;
-            /// <summary>
-            /// User defined parameters
-            /// </summary>
-            public Dictionary<string, object> Params => Cmd.Params;
-        }
-
-        Setup fSetup;
+ 
 
         /* construction */
         /// <summary>
@@ -74,10 +47,12 @@ namespace Tripous
             lock (syncLock)
                 Executors.Remove(Executor);
         }
+    
         /// <summary>
         /// Finds the right executor and uses it to execute a specified command.
+        /// Returns the command result if an executor handles the specified command. Else null.
         /// </summary>
-        static public void Execute(Command Cmd, Dictionary<string, object> Args)
+        static public object Execute(Command Cmd, Dictionary<string, object> Args = null)
         {
             lock (syncLock)
             {
@@ -85,51 +60,101 @@ namespace Tripous
                 {
                     if (Executor.CanExecute(Cmd))
                     {
-                        Executor.Execute(Cmd, Args);
-                        return;
+                        return Executor.Execute(Cmd, Args);
                     }
                 }
+
+                return null;
+            }
+        }
+        /// <summary>
+        /// Finds the right executor and uses it to execute a specified command.
+        /// Returns the command result if an executor handles the specified command. Else null.
+        /// </summary>
+        static public object ExecuteByName(string Name, Dictionary<string, object> Args = null)
+        {
+            lock (syncLock)
+            {
+                foreach (ICommandExecutor Executor in Executors)
+                {
+                    if (Executor.CanExecuteByName(Name))
+                    {
+                        return Executor.ExecuteByName(Name, Args);
+                    }
+                }
+
+                return null;
+            }
+        }
+        /// <summary>
+        /// Finds the right executor and uses it to execute a specified command.
+        /// Returns the command result if an executor handles the specified command. Else null.
+        /// </summary>
+        static public object ExecuteById(string Id, Dictionary<string, object> Args = null)
+        {
+            lock (syncLock)
+            {
+                foreach (ICommandExecutor Executor in Executors)
+                {
+                    if (Executor.CanExecuteById(Id))
+                    {
+                        return Executor.ExecuteById(Id, Args);
+                    }
+                }
+
+                return null;
             }
         }
 
         /// <summary>
-        /// Serializes this instance in order to properly used as a data-* html attribute.
-        /// </summary>
-        public string SerializeSetup()
-        {
-            if (this.fSetup == null)
-                fSetup = new Setup(this);
-
-            string JsonText = Json.Serialize(fSetup);
-            return JsonText;
-        }
-        /// <summary>
         /// Adds a child command
         /// </summary>
-        public void Add(Command Cmd)
+        public Command Add(Command Cmd)
         {
             if (Items == null)
                 Items = new List<Command>();
             Items.Add(Cmd);
+
+            return Cmd;
         }
         /// <summary>
-        /// Adds a Ui child command
+        /// Adds a child command as a Ui command
         /// </summary>
-        public Command Add(CommandType Type, string Name, string TitleKey = "")
+        public Command AddUi(Command Cmd)
+        {
+            Cmd.Type = CommandType.Ui;
+            return Add(Cmd);
+        }
+        /// <summary>
+        /// Adds a child command as a Proc command
+        /// </summary>
+        public Command AddProc(Command Cmd)
+        {
+            Cmd.Type = CommandType.Proc;
+            return Add(Cmd); 
+        }
+
+        /// <summary>
+        /// Adds a child command as a Ui command
+        /// </summary>
+        public Command AddUi(string Name, string TitleKey = "")
         {
             if (string.IsNullOrWhiteSpace(TitleKey))
                 TitleKey = Name;
 
-            Command Result = new Command() { Type = Type, Name = Name, TitleKey = TitleKey};
-            Add(Result);
-            return Result;
+            Command Result = new Command() { Type = CommandType.Ui , Name = Name, TitleKey = TitleKey };
+            return Add(Result);
         }
         /// <summary>
-        /// Adds a Ui child command
+        /// Adds a child command as a Proc command
         /// </summary>
-        public Command Add(string Name, string TitleKey = "")
+        public Command AddProc(string Name, string TitleKey = "")
         {
-            return Add(CommandType.Ui, Name, TitleKey);
+            if (string.IsNullOrWhiteSpace(TitleKey))
+                TitleKey = Name;
+
+            Command Result = new Command() { Type = CommandType.Proc, Name = Name, TitleKey = TitleKey };
+            return Add(Result);
         }
 
         /* properties */
