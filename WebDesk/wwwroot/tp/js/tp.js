@@ -11224,7 +11224,12 @@ tp.Async.All = async function (ShowSpinner, List, Func, Context = null) {
 //#endregion
 
 //#region tp.AjaxRequest
-/** Represents an ajax request */
+/** Represents an ajax request. 
+ * An AJAX request could be either a Ui or a Proc request.  
+ * A Ui request may set the an IsSingleInstanceflag indicating that the Ui may exist only once.
+ * A Proc request may or may not return a packet.  
+ * A requester may optionally set the CommandId and/or CommandName properties.
+ * */
 tp.AjaxRequest = class {
 
     /**
@@ -11253,24 +11258,25 @@ tp.AjaxRequest = class {
      */
     Params = {};
 
-    /** Returns true if this is a Ui request.
-     * @returns {boolean} Returns true if this is a Ui request.
-     * */
-    IsUiRequest() {
-        return tp.IsValid(this.Params) && 'Type' in this.Params && tp.IsSameText(this.Params.Type, 'Ui');
-    }
-    /** Returns true if this is a Proc request.
-     * @returns {boolean} Returns true if this is a Ui request.
-     * */
-    IsProcRequest() {
-        return tp.IsValid(this.Params) && 'Type' in this.Params && tp.IsSameText(this.Params.Type, 'Proc');
-    }
-    /** Returns true if this is a Ui request with IsSingleInstance set to true.
-     * @returns {boolean} Returns true if this is a Ui request.
-     * */
-    IsSingleInstance() {
-        return this.IsUiRequest() && tp.IsValid(this.Params) && 'IsSingleInstance' in this.Params && this.Params.IsSingleInstance === true;
-    }
+    /** The request type. Ui or Proc.
+     * A Ui request returns HTML.
+     * A Proc request may or may not return a packet.
+     * @type {string}
+     */
+    Type = 'Ui';
+    /** True when this is a single instance Ui request.
+     @type {boolean}
+     */
+    IsSingleInstance = false;
+
+    /**  A requester may optionally set the command Id of this request
+     @type {string}
+     */
+    CommandId = '';
+    /**  A requester may optionally set the command name of this request
+     @type {string}
+     */
+    CommandName = ''; 
 };
 /** Id counter.
  * @param {number}  

@@ -31,7 +31,7 @@ namespace WebDesk.Controllers
     /// <para>NOTE: All AJAX calls should be handled by this controller.</para>
     /// </summary>
     [AllowAnonymous] // <<<<<< This is here just for the demos to work. Remove it in production.
-    public class AjaxController : ControllerMvc, IAjaxController
+    public class AjaxController : ControllerMvc, IViewToStringConverter
     {
         string GetExceptionText(Exception e)
         {
@@ -54,7 +54,7 @@ namespace WebDesk.Controllers
         /// Renders a partial view to a string.
         /// <para>See AjaxController.MiniSearch() for an example.</para>
         /// </summary>
-        string IAjaxController.ViewToString(string ViewName, object Model, IDictionary<string, object> PlusViewData)
+        string IViewToStringConverter.ViewToString(string ViewName, object Model, IDictionary<string, object> PlusViewData)
         {
             return this.RenderPartialViewToString(ViewName, Model, PlusViewData);
         }
@@ -62,7 +62,7 @@ namespace WebDesk.Controllers
         /// Renders a partial view to a string.
         /// <para>See AjaxController.MiniSearch() for an example.</para>
         /// </summary>
-        string IAjaxController.ViewToString(string ViewName, IDictionary<string, object> PlusViewData)
+        string IViewToStringConverter.ViewToString(string ViewName, IDictionary<string, object> PlusViewData)
         {
             return this.RenderPartialViewToString(ViewName, PlusViewData);
         }

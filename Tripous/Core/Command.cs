@@ -37,7 +37,7 @@ namespace Tripous
         static public void Register(ICommandExecutor Executor)
         {
             lock (syncLock)
-                Executors.Add(Executor);
+                Executors.Insert(0, Executor);
         }
         /// <summary>
         /// Unregisters  a command executor.
@@ -122,7 +122,7 @@ namespace Tripous
         /// </summary>
         public Command AddUi(Command Cmd)
         {
-            Cmd.Type = CommandType.Ui;
+            Cmd.Type = RequestType.Ui;
             return Add(Cmd);
         }
         /// <summary>
@@ -130,7 +130,7 @@ namespace Tripous
         /// </summary>
         public Command AddProc(Command Cmd)
         {
-            Cmd.Type = CommandType.Proc;
+            Cmd.Type = RequestType.Proc;
             return Add(Cmd); 
         }
 
@@ -142,7 +142,7 @@ namespace Tripous
             if (string.IsNullOrWhiteSpace(TitleKey))
                 TitleKey = Name;
 
-            Command Result = new Command() { Type = CommandType.Ui , Name = Name, TitleKey = TitleKey };
+            Command Result = new Command() { Type = RequestType.Ui , Name = Name, TitleKey = TitleKey };
             return Add(Result);
         }
         /// <summary>
@@ -153,7 +153,7 @@ namespace Tripous
             if (string.IsNullOrWhiteSpace(TitleKey))
                 TitleKey = Name;
 
-            Command Result = new Command() { Type = CommandType.Proc, Name = Name, TitleKey = TitleKey };
+            Command Result = new Command() { Type = RequestType.Proc, Name = Name, TitleKey = TitleKey };
             return Add(Result);
         }
 
@@ -165,7 +165,7 @@ namespace Tripous
         /// <summary>
         /// The command type. What a command does when it is called.
         /// </summary>
-        public CommandType Type { get; set; }
+        public RequestType Type { get; set; }
         /// <summary>
         /// A name unique among all commands.
         /// </summary>

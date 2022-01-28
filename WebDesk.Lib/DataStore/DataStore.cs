@@ -32,7 +32,7 @@ namespace WebLib
     static public partial class DataStore
     {
 
-        static List<IAjaxViewInfoProvider> AjaxViewInfoProviders = new List<IAjaxViewInfoProvider>();
+ 
 
         /// <summary>
         /// English language
@@ -195,7 +195,7 @@ namespace WebLib
                 DataStore.App = App;
 
                 Logger.Add(new DataLogListener());
-                Register(new AjaxViewInfoProviderDefault());
+                AjaxRequest.Register(new AjaxRequestDefaultHandler()); 
 
                 RegisterDbProviderFactories();
                 LoadConnectionStrings();
@@ -233,21 +233,7 @@ namespace WebLib
 
 
         /* public */
-        /// <summary>
-        /// Registers a specified ajax view information provider
-        /// </summary>
-        static public void Register(IAjaxViewInfoProvider Provider)
-        {
-            if (!AjaxViewInfoProviders.Contains(Provider))
-                AjaxViewInfoProviders.Add(Provider);
-        }
-        /// <summary>
-        /// Unregisters a specified ajax view information provider
-        /// </summary>
-        static public void Unregister(IAjaxViewInfoProvider Provider)
-        {
-            AjaxViewInfoProviders.Remove(Provider);
-        }
+
 
         /// <summary>
         /// Returns the list of languages this web-site supports
@@ -384,12 +370,12 @@ where
         {
             List<Command> Result = new List<Command>();
 
-            Command BarItem = new Command() { TitleKey = "System", Type = Tripous.CommandType.Ui, Id = "{E7DACAFA-CA45-4238-84F9-D87A121A0CC2}" };
+            Command BarItem = new Command() { TitleKey = "System", Type = Tripous.RequestType.Ui, Id = "{E7DACAFA-CA45-4238-84F9-D87A121A0CC2}" };
             Result.Add(BarItem);
             //BarItem.Add("Ui.SysData.Table", "Tables").IsSingleInstance = true;
             BarItem.AddUi(new Command() { Name = "Ui.SysData.Table", TitleKey = "Tables", IsSingleInstance = true, Id = "{5F61B877-031F-4FA4-954E-80BB27363E6D}" });
 
-            BarItem = new Command() { TitleKey = "Admin", Type = Tripous.CommandType.Ui, Id = "{AB6BCF40-D5D6-488F-8FBA-A366AE0EDAE0}" };
+            BarItem = new Command() { TitleKey = "Admin", Type = Tripous.RequestType.Ui, Id = "{AB6BCF40-D5D6-488F-8FBA-A366AE0EDAE0}" };
             Result.Add(BarItem);
             //BarItem.Add("Ui.Data.Trader", "Traders").IsSingleInstance = true;
             BarItem.AddUi(new Command() { Name = "Ui.Data.Trader", TitleKey = "Traders", IsSingleInstance = true, Id = "{0337F29D-7D5C-422A-89AE-98307B1BE951}" });

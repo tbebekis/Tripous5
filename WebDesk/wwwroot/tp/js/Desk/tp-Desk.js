@@ -105,16 +105,17 @@ tp.Command.prototype.fTitle = '';
  */
 tp.AjaxRequest.CreateFromCommand = function (Cmd) {
  
-    let Params = {
-        CommandId: Cmd.Id,
-        CommandName: Cmd.Name,
-        Type: Cmd.Type,
-        IsSingleInstance: Cmd.IsSingleInstance === true
+    let Params = { 
     };
+
     if (Cmd.Params)
         Params = tp.MergePropsShallow(Params, Cmd.Params);
 
     let Result = new tp.AjaxRequest(Cmd.Name, Params);
+    Result.Type = Cmd.Type;
+    Result.IsSingleInstance = Cmd.IsSingleInstance === true;
+    Result.CommandId = Cmd.Id;
+    Result.CommandName = Cmd.Name;
     return Result;
 };
 //#endregion

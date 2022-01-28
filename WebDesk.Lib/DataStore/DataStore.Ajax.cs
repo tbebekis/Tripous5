@@ -28,73 +28,19 @@ namespace WebLib
  
     static public partial class DataStore
     {
-        /// <summary>
-        /// Prepares and returns an <see cref="HttpActionResult"/> for a Ui request
-        /// </summary>
-        static HttpActionResult GetHtmlView(IAjaxController Controller, AjaxRequest Request)
-        {
-            AjaxPacket Packet = new AjaxPacket(Request.OperationName);
- 
-            // find a view info provider that handles this Ui request
-            AjaxViewInfo ViewInfo = null;
-            foreach (var ViewInfoProvider in AjaxViewInfoProviders)
-            {
-                ViewInfo = ViewInfoProvider.GetViewInfo(Request, Packet);
-                if (ViewInfo != null)
-                    break;
-            }
 
-            if (ViewInfo == null)
-                Sys.Throw($"No View Info for requested view. Operation: {Request.OperationName}");
- 
-            // set the HtmlText if empty
-            string HtmlText = Packet["HtmlText"] as string;
-            if (string.IsNullOrWhiteSpace(HtmlText) && !string.IsNullOrWhiteSpace(ViewInfo.RazorViewNameOrPath))
-            {
-                HtmlText = Controller.ViewToString(ViewInfo.RazorViewNameOrPath, ViewInfo.Model, ViewInfo.ViewData);
-                Packet["HtmlText"] = HtmlText;
-            }
-
-            // return the result
-            HttpActionResult Result = HttpActionResult.SetPacket(Packet.GetPacketObject(), true);
-            return Result;
-        }
 
         /// <summary>
         /// Executes a request coming from an ajax call to ajax controller and returns the result.
         /// </summary>
-        static public HttpActionResult AjaxExecute(IAjaxController Controller, AjaxRequest R)
+        static public HttpActionResult AjaxExecute(IViewToStringConverter Controller, AjaxRequest Request)
         {
-            HttpActionResult Result = null;
+            AjaxResponse Response = AjaxRequest.Process(Request, Controller);
 
-            object CmdResult = null;
+            if (Response == null)
+                Sys.Throw($"Ajax Operation not supported: {Request.OperationName}");
 
-            if (R.IsCommandRequest)
-            {
-                string S = R.GetParam("CommandName") as string;
-                if (!string.IsNullOrWhiteSpace(S))
-                    CmdResult = Command.ExecuteByName(S);
-
-                if (CmdResult == null)
-                {
-                    S = R.GetParam("CommandId") as string;
-                    if (!string.IsNullOrWhiteSpace(S))
-                        CmdResult = Command.ExecuteById(S);
-                } 
-            }
-
-            if (CmdResult != null)
-            {
-                Result = HttpActionResult.SetPacket(CmdResult, true);
-            }
-            else if (R.IsUiRequest)
-            {
-                Result = GetHtmlView(Controller, R);
-            }
-
-            if (Result == null)
-                Sys.Throw($"Ajax Operation not supported: {R.OperationName}");
-
+            HttpActionResult Result = HttpActionResult.SetPacket(Response.GetPacketObject(), true);
             return Result;
         }
 

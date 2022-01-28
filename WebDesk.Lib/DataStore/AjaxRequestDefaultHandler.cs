@@ -13,12 +13,16 @@ using WebLib.Models;
 namespace WebLib
 {
 
-    internal class AjaxViewInfoProviderDefault: AjaxViewInfoProvider
+    /// <summary>
+    /// Represents an object that processes an <see cref="AjaxRequest"/> and returns an <see cref="AjaxResponse"/>
+    /// </summary>
+    internal class AjaxRequestDefaultHandler: IAjaxRequestHandler
     {
-        AjaxViewInfo GetDefaultBrokerViewInfo(AjaxRequest Request, AjaxPacket Packet, string BrokerName)
+
+        AjaxViewInfo GetDefaultBrokerViewInfo(AjaxRequest Request, string BrokerName)
         {
             AjaxViewInfo Info = new AjaxViewInfo();
-  
+
             ViewDef ViewDef = ViewDef.Find(BrokerName);
 
             // no view definition, construct a default one.
@@ -31,8 +35,8 @@ namespace WebLib
             ViewDef.ViewName = Request.IsSingleInstance ? Request.OperationName : Names.Next(Request.OperationName);
             ViewDef.ClassType = "tp.DeskDataView";
             ViewDef.BrokerClass = "tp.Broker";
-            ViewDef.BrokerName = BrokerName;            
- 
+            ViewDef.BrokerName = BrokerName;
+
             ViewModel ViewModel = new ViewModel(ViewDef);
 
             Info.RazorViewNameOrPath = "View";
@@ -40,7 +44,7 @@ namespace WebLib
 
             return Info;
         }
-        AjaxViewInfo GetDefaultSysDataViewInfo(AjaxRequest Request, AjaxPacket Packet, string DataType)
+        AjaxViewInfo GetDefaultSysDataViewInfo(AjaxRequest Request, string DataType)
         {
             AjaxViewInfo Info = new AjaxViewInfo();
 
@@ -50,8 +54,8 @@ namespace WebLib
                 Sys.Throw($"ViewDef not found: {ViewDefName}");
 
             ViewDef.ViewName = Request.IsSingleInstance ? Request.OperationName : Names.Next(Request.OperationName);
-            ViewDef.ClassType = "tp.DeskSysDataView";            
-            ViewDef["DataType"] = DataType;            
+            ViewDef.ClassType = "tp.DeskSysDataView";
+            ViewDef["DataType"] = DataType;
 
             ViewModel ViewModel = new ViewModel(ViewDef);
 
@@ -59,11 +63,11 @@ namespace WebLib
             Info.Model = ViewModel;
 
             Info.ViewData["DataType"] = DataType;
- 
+
             return Info;
         }
- 
-        public override AjaxViewInfo GetViewInfo(AjaxRequest Request, AjaxPacket Packet)
+
+        AjaxViewInfo GetViewInfo(AjaxRequest Request)
         {
             AjaxViewInfo Result = null;
 
@@ -78,16 +82,48 @@ namespace WebLib
                 {
                     if (Sys.IsSameText(Parts[1], "Data"))
                     {
-                        Result = GetDefaultBrokerViewInfo(Request, Packet, Parts[2]);
+                        Result = GetDefaultBrokerViewInfo(Request, Parts[2]);
                     }
                     else if (Sys.IsSameText(Parts[1], "SysData"))
                     {
-                        Result = GetDefaultSysDataViewInfo(Request, Packet, Parts[2]);
-                    } 
+                        Result = GetDefaultSysDataViewInfo(Request, Parts[2]);
+                    }
                 }
 
             }
+
+            return Result;
+        }
+
  
+
+        /// <summary>
+        /// Processes an <see cref="AjaxRequest"/> and if it handles the request returns an <see cref="AjaxResponse"/>. Else returns null.
+        /// </summary>
+        public AjaxResponse Process(AjaxRequest Request, IViewToStringConverter ViewToStringConverter)
+        {
+            AjaxResponse Result = null;
+
+            // it is a razor view request
+            if (Request.Type == RequestType.Ui)
+            {
+                // find a view info provider that handles this Ui request
+                AjaxViewInfo ViewInfo = GetViewInfo(Request);
+                if (ViewInfo != null)
+                {
+                    Result = new AjaxResponse(Request.OperationName);
+
+                    // set the HtmlText if empty
+                    string HtmlText = Result["HtmlText"] as string;
+                    if (string.IsNullOrWhiteSpace(HtmlText) && !string.IsNullOrWhiteSpace(ViewInfo.RazorViewNameOrPath))
+                    {
+                        HtmlText = ViewToStringConverter.ViewToString(ViewInfo.RazorViewNameOrPath, ViewInfo.Model, ViewInfo.ViewData);
+                        Result["HtmlText"] = HtmlText;
+                    }
+                }
+
+            }
+
             return Result;
         }
     }

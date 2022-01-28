@@ -4,24 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebLib
+namespace Tripous
 {
 
     /// <summary>
-    /// Represents the sole ajax controller
+    /// Represents an object that processes a razor view and returns the result HTML.
     /// </summary>
-    public interface IAjaxController
+    public interface IViewToStringConverter
     {
         /// <summary>
         /// Renders a partial view to a string.
-        /// <para>See AjaxController.MiniSearch() for an example.</para>
         /// </summary>
         string ViewToString(string ViewName, object Model, IDictionary<string, object> PlusViewData = null);
         /// <summary>
         /// Renders a partial view to a string.
-        /// <para>See AjaxController.MiniSearch() for an example.</para>
         /// </summary>
         string ViewToString(string ViewName, IDictionary<string, object> PlusViewData = null);
-
     }
 }

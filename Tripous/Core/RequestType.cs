@@ -10,17 +10,17 @@ using Newtonsoft.Json.Converters;
 namespace Tripous
 {
     /// <summary>
-    /// The command type. What a command does when it is called.
+    /// The request type.  Ui or Proc.  
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum CommandType
+    public enum RequestType
     {
         /// <summary>
-        /// Displays a Ui. The command's Tag is the name of Ui View
+        /// Requests a Ui. 
         /// </summary>
         Ui = 0,
         /// <summary>
-        /// Executes a procedure. The command's Tag is the name procedure
+        /// Request the execution of a procedure. 
         /// </summary>
         Proc = 1,
     }
