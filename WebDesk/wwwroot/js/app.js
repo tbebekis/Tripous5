@@ -73,7 +73,9 @@ app.MainCommandExecutor = class extends tp.DeskCommandExecutor {
 
         this.ValidCommands = [
             'Ui.SysData.Table',
-            'Ui.Data.Trader'
+            'Ui.SysData.Broker',
+            'Ui.Data.Trader',
+            
         ];
     } 
  

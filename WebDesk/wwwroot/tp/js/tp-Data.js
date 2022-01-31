@@ -3589,6 +3589,10 @@ tp.DataColumn = class extends tp.Object {
 
  
 };
+
+
+
+
 //#endregion  
 
 //#region tp.DataRow

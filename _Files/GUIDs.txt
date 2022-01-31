@@ -1,7 +1,7 @@
 ﻿To use a GUID from this file just CUT the string
 or copy and delete the string.
 -----------------------------------------------------------------------------------------
-{67014D07-BB5A-46F5-AF4E-222A6FE31F9C}
+
 {9F96E953-6474-41DF-9E85-4A8C1FF77BD4}
 {29200627-7A60-4F1E-A3F5-BF77CAA49416}
 {6936C62C-8DC2-4337-B84E-8943077CF2E5}

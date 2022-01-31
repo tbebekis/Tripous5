@@ -97,6 +97,7 @@ namespace WebLib
         static void RegisterViews()
         {
             CreateSysDataViewDef("Table", "Tables");
+            CreateSysDataViewDef("Broker", "Brokers");
         }
     }
 }

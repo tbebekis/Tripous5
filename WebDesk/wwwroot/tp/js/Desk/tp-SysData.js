@@ -615,6 +615,8 @@ tp.SysDataHandler = class {
      * */
     get IsEditItem() { return this.View.ViewMode === tp.DataViewMode.Edit; }
 
+    /* overridables */
+
     /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
     * */
     CreateEditControls() {
@@ -649,7 +651,6 @@ tp.SysDataHandler = class {
      */
     CommitItemBefore(tblSysDataItem) {
     }
-
     /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      * @returns {boolean} Returns true if commit is allowed, else false.
@@ -677,10 +678,9 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
     /** Constructor
      * @param {tp.View} View The view that calls and owns this handler
-     * @param {string} DataType The SysData DataType this handler can handle.
      */
-    constructor(View, DataType = 'Table') {
-        super(View, DataType)
+    constructor(View) {
+        super(View, 'Table')
     }
 
     /** A {@link tp.DataTable} for handling the fields of a table def.
@@ -720,7 +720,9 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      */
     TableDef = null;
 
+    /* overrides */
     /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
+     * @override
     * */
     CreateEditControls() {
         if (this.View.pagerEdit.GetPageCount() === 1) {
@@ -730,7 +732,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             tp.Data(FieldsPage.Handle, 'Name', 'Fields');
 
             // add a tp.Row to the tab page
-            let Row = new tp.Row(null, {Height: '100%'});
+            let Row = new tp.Row(null, { Height: '100%' });
             FieldsPage.AddComponent(Row);
 
             // add a DIV for the gridFields tp.Grid in the row
@@ -776,9 +778,93 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
             this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
         }
-        
+
     }
 
+    /** Called before the Insert() operation of the owner View.
+     * @override
+    */
+    InsertItemBefore() {
+    }
+    /** Called after the Insert() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    InsertItemAfter(tblSysDataItem) {
+        this.SetupFieldsTableAndGrid(true, tblSysDataItem);
+
+        let Row = this.tblFields.AddEmptyRow();
+        Row.Set('Name', 'Id');
+        Row.Set('TitleKey', 'Id');
+        Row.Set('IsPrimaryKey', true);
+        Row.Set('DataType', tp.DataType.String);
+        Row.Set('Length', 40);
+        Row.Set('Required', true);
+
+    }
+
+    /** Called before the Edit() operation of the owner View. <br />
+     * The View is about to load in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @override
+     */
+    EditItemBefore(Id) {
+    }
+    /** Called after the Edit() operation of the owner View. <br />
+     * The View is just loaded in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    EditItemAfter(Id, tblSysDataItem) {
+        this.SetupFieldsTableAndGrid(false, tblSysDataItem);
+    }
+
+    /** Called before the Commit() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    CommitItemBefore(tblSysDataItem) {
+        let Row = tblSysDataItem.Rows[0];
+
+        let TableDef = new tp.DataTableDef();
+        TableDef.Name = Row.Get('DataName', '');
+        TableDef.TitleKey = Row.Get('TitleKey', '');
+        TableDef.FieldsFromDataTable(this.tblFields);
+
+        let JsonText = tp.ToJson(TableDef, true);
+        Row.Set('Data1', JsonText);
+    }
+    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @returns {boolean} Returns true if commit is allowed, else false.
+     * @override
+     */
+    CanCommitItem(tblSysDataItem) {
+        let Result = true;
+
+        if (tp.IsEmpty(this.tblFields) || this.tblFields.RowCount <= 1) {
+            tp.WarningNote('Cannot save changes.\nNo fields defined in the table');
+            Result = false;
+        }
+
+        let Row = tblSysDataItem.Rows[0];
+        let v = Row.Get('DataName', '');
+
+        if (tp.IsBlankString(v)) {
+            tp.WarningNote('Cannot save changes.\nNo Table Name (DataName)');
+            Result = false;
+        }
+
+        if (tp.IsString(v) && !tp.IsValidIdentifier(v, '$')) {
+            tp.WarningNote('Cannot save changes.\nTable Name should start with _ or letter \nand cannot contain spaces, special characters and punctuation.');
+            Result = false;
+        }
+
+        return Result;
+    }
+
+    /* private */
     /** Creates and assigns the tblFields. Sets tblFields a grid's data-source.
      * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
@@ -1035,87 +1121,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             }
         }
     }
-
-
-    /** Called before the Insert() operation of the owner View.
-    */
-    InsertItemBefore() {
-    }
-    /** Called after the Insert() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    InsertItemAfter(tblSysDataItem) {
-        this.SetupFieldsTableAndGrid(true, tblSysDataItem);
-
-        let Row = this.tblFields.AddEmptyRow();
-        Row.Set('Name', 'Id');
-        Row.Set('TitleKey', 'Id');
-        Row.Set('IsPrimaryKey', true);
-        Row.Set('DataType', tp.DataType.String);
-        Row.Set('Length', 40);
-        Row.Set('Required', true);
-
-    }
-
-    /** Called before the Edit() operation of the owner View. <br />
-     * The View is about to load in its Edit part a SysData Item from server.
-     * @param {string} Id
-     */
-    EditItemBefore(Id) {
-    }
-    /** Called after the Edit() operation of the owner View. <br />
-     * The View is just loaded in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    EditItemAfter(Id, tblSysDataItem) {
-        this.SetupFieldsTableAndGrid(false, tblSysDataItem);
-    }
-
-    /** Called before the Commit() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    CommitItemBefore(tblSysDataItem) {
-        let Row = tblSysDataItem.Rows[0];
-
-        let TableDef = new tp.DataTableDef();
-        TableDef.Name = Row.Get('DataName', '');
-        TableDef.TitleKey = Row.Get('TitleKey', '');
-        TableDef.FieldsFromDataTable(this.tblFields);
-
-        let JsonText = tp.ToJson(TableDef, true);
-        Row.Set('Data1', JsonText);
-    }
  
-
-    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @returns {boolean} Returns true if commit is allowed, else false.
-     */
-    CanCommitItem(tblSysDataItem) {
-        let Result = true;
-
-        if (tp.IsEmpty(this.tblFields) || this.tblFields.RowCount <= 1) {
-            tp.WarningNote('Cannot save changes.\nNo fields defined in the table');
-            Result = false;
-        }
-
-        let Row = tblSysDataItem.Rows[0];
-        let v = Row.Get('DataName', '');
-
-        if (tp.IsBlankString(v)) {
-            tp.WarningNote('Cannot save changes.\nNo Table Name (DataName)');
-            Result = false;
-        }
- 
-        if (tp.IsString(v) && !tp.IsValidIdentifier(v, '$')) {
-            tp.WarningNote('Cannot save changes.\nTable Name should start with _ or letter \nand cannot contain spaces, special characters and punctuation.');
-            Result = false;
-        }
-
-        return Result;
-    }
-
+    /* event handlers */
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */
@@ -1147,6 +1154,71 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     }
 };
 
+//#endregion
+
+//#region tp.SysDataHandlerBroker
+tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
+    /** Constructor
+     * @param {tp.View} View The view that calls and owns this handler
+     */
+    constructor(View) {
+        super(View, 'Broker')
+    }
+
+    /* overridables */
+
+    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
+    * */
+    CreateEditControls() {
+
+        if (this.View.pagerEdit.GetPageCount() === 1) {
+            // add a tp.TabPage to View's pagerEdit
+            let GeneralPage = this.View.pagerEdit.AddPage('General');
+            tp.Data(GeneralPage.Handle, 'Name', 'General');
+
+            // add a tp.Row to the tab page
+            let Row = new tp.Row(null, { Height: '100%' });
+            GeneralPage.AddComponent(Row);
+        }
+    }
+
+    /** Called before the Insert() operation of the owner View.
+    */
+    InsertItemBefore() {
+    }
+    /** Called after the Insert() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     */
+    InsertItemAfter(tblSysDataItem) {
+    }
+
+    /** Called before the Edit() operation of the owner View.
+     * The View is about to load in its Edit part a SysData Item from server.
+     * @param {string} Id
+     */
+    EditItemBefore(Id) {
+    }
+    /** Called after the Edit() operation of the owner View.
+     * The View is just loaded in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     */
+    EditItemAfter(Id, tblSysDataItem) {
+    }
+
+    /** Called before the Commit() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     */
+    CommitItemBefore(tblSysDataItem) {
+    }
+    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @returns {boolean} Returns true if commit is allowed, else false.
+     */
+    CanCommitItem(tblSysDataItem) {
+        return true;
+    }
+};
 //#endregion
 
 //#region tp.DeskSysDataView
@@ -1220,7 +1292,10 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.DataType = this.CreateParams.DataType
         switch (this.DataType) {
             case 'Table':
-                this.Handler = new tp.SysDataHandlerTable(this, this.DataType);
+                this.Handler = new tp.SysDataHandlerTable(this);
+                break;
+            case 'Broker':
+                this.Handler = new tp.SysDataHandlerBroker(this);
                 break;
             default:
                 tp.Throw(`SysData DataType not supported: ${this.DataType}`);

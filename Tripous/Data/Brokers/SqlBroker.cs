@@ -192,7 +192,7 @@ namespace Tripous.Data
                     {
                         Descriptor.Queries.Add(new SqlBrokerQueryDef() { 
                             Name = FieldDes.ForeignTableName,
-                            Sql = FieldDes.GetForeignSelectSql()
+                            SqlText = FieldDes.GetForeignSelectSql()
                         });
                     }
                 }
@@ -213,7 +213,7 @@ namespace Tripous.Data
                 {
                     Table = new MemTable(QueryDes.Name);
                     AddTable(Table);
-                    Table.SqlStatements.SelectSql = QueryDes.Sql;
+                    Table.SqlStatements.SelectSql = QueryDes.SqlText;
                     if (QueryDes.FieldTitleKeys != null)
                         Table.SqlStatements.FieldTitleKeys = QueryDes.FieldTitleKeys;
                 }
@@ -264,7 +264,7 @@ namespace Tripous.Data
                 {
                     StockTable = new MemTable(StockTableDes.Name);
                     AddTable(StockTable);
-                    StockTable.SqlStatements.SelectRowSql = StockTableDes.Sql;
+                    StockTable.SqlStatements.SelectRowSql = StockTableDes.SqlText;
                     tblItem.StockTables.Add(StockTable);
                 }
             }
@@ -768,7 +768,7 @@ namespace Tripous.Data
             { 
                 MemTable Table = FindTable(item => item.Name.IsSameText(QueryDes.Name));
                 if (Table != null)
-                    Store.SelectTo(Table, QueryDes.Sql);
+                    Store.SelectTo(Table, QueryDes.SqlText);
             }
         }
         /// <summary>
@@ -780,7 +780,7 @@ namespace Tripous.Data
             SqlBrokerQueryDef QueryDes = Descriptor.Queries.Find(item => item.Name.IsSameText(QueryName));
             if (QueryDes != null && Table != null)
             {
-                Store.SelectTo(Table, QueryDes.Sql);
+                Store.SelectTo(Table, QueryDes.SqlText);
             }
         }
 

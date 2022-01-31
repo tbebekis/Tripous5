@@ -19,9 +19,7 @@ namespace Tripous.Data
     {
         string fDefaultValue = Sys.NULL;
         string fTitleKey;
-
-        //DataFieldType fDataType;
-
+ 
         /* construction */
         /// <summary>
         /// Constructor
@@ -264,7 +262,7 @@ from
         public FieldFlags Flags { get; set; }
 
         /// <summary>
-        /// Gets or sets the Name of the code producer descriptor associated to this broker.
+        /// Gets or sets the Name of the code producer descriptor associated to this field.
         /// </summary>
         public string CodeProviderName { get; set; }
 

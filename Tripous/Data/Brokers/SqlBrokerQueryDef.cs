@@ -58,14 +58,14 @@ namespace Tripous.Data
 
         /* properties */
         /// <summary>
-        /// The field name.
+        /// The name.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
         /// The SELECT statement
         /// </summary>
-        public string Sql { get; set; }
+        public string SqlText { get; set; }
         /// <summary>
         /// A string list, where each string  has the format FIELD_NAME=TitleKey.
         /// <para>Determines the visibility of the fields in the drop-down grids: 

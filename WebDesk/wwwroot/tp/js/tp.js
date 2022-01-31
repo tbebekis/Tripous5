@@ -11505,7 +11505,10 @@ tp.Object = class {
         let PropNamesList = tp.GetPropertyNames(this, (Prop) => { return this.CanSerialize(Prop); });
 
         PropNamesList.forEach((Prop) => {
-            Result[Prop] = this[Prop];
+            if (tp.IsFunction(this[Prop].toJSON))
+                Result[Prop] = tp.Call(this[Prop].toJSON, this[Prop]);
+            else
+                Result[Prop] = this[Prop];
         });
  
         return Result;

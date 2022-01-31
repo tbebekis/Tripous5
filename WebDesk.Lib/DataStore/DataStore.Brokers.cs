@@ -74,6 +74,8 @@ from
             Table.AddTextBlob("Notes");
             Table.AddBoolean("Married", "Married", FieldFlags.Required | FieldFlags.Searchable).SetDefaultValue("0");
 
+            //string JsonText = Json.Serialize(Broker, true);
+
         }
 
         static void RegisterBrokers()
