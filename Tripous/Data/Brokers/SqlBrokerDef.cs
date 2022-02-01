@@ -340,7 +340,7 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// The list of select statements
+        /// The list of select statements of the list (browser) part.
         /// </summary>
         public List<SelectSql> SelectSqlList { get; set; } = new List<SelectSql>();
         /// <summary>
@@ -353,14 +353,15 @@ namespace Tripous.Data
         /// </summary>
         public List<SqlBrokerQueryDef> Queries { get; set; } = new List<SqlBrokerQueryDef>();
         /// <summary>
-        /// When is true indicates that the OID is a Guid string.  
+        /// When is true indicates that the OID is a Guid string. Defaults to true.
         /// </summary>
         public bool GuidOids { get; set; } = SysConfig.GuidOids;
         /// <summary>
-        /// Indicates that deletes should happen top to bottom, so if any database foreign constraint exists, then let
-        /// an exception to be thrown.
+        /// When true indicates that deletes should happen bottom to top, i.e. starting from the bottom table.
+        /// When false indicates that deletes should happen top to bottom, so if any database foreign constraint exists, then let
+        /// an exception to be thrown. Defaults to true.
         /// </summary>
-        public bool NoCascadeDeletes { get; set; }
+        public bool CascadeDeletes { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the class name of the <see cref="System.Type"/> this descriptor describes.

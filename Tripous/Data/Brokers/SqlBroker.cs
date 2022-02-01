@@ -157,7 +157,7 @@ namespace Tripous.Data
             // TableSet
             TableSetFlags TableSetFlags = TableSetFlags.None;
  
-            if (Descriptor.NoCascadeDeletes)
+            if (!Descriptor.CascadeDeletes)
                 TableSetFlags |= TableSetFlags.NoCascadeDeletes;
 
             // collect query tables

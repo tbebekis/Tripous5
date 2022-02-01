@@ -138,5 +138,182 @@ tp.SqlBrokerFieldDef.prototype.fTitleKey = '';
 
 //#endregion
 
+//#region SqlBrokerTableDef
+tp.SqlBrokerTableDef = class {
+
+    /** Constructor */
+    constructor() {
+        this.Fields = [];
+        this.JoinTables = [];
+        this.StockTables = [];
+    }
+
+    /** The field name
+     * @type {string}
+     */
+    Name = '';
+    /** The alias of this field
+     * @type {string}
+     */
+    Alias = '';
+
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+    /** The name of the primary key field
+     * @type {string}
+     */
+    PrimaryKeyField = 'Id';
+
+    /** The  name of the master table.
+     * It is used when this table is a detail table in a master-detail relation.
+     * @type {string}
+     */
+    MasterTableName = '';
+    /** The field name of a field belonging to a master table.
+     * Used when this table is a detail table in a master-detail relation or when this is a join table.
+     * @type {string}
+     */
+    MasterKeyField = 'Id';
+    /** The the detail key field. A field that belongs to this table and mathes the MasterTableName primary key field.
+     * It is used when this table is a detail table in a master-detail relation.
+     * @type {string}
+     */
+    DetailKeyField = '';
+
+    /** The list of the fields
+     * @type {tp.SqlBrokerFieldDef[]}
+     */
+    Fields = [];
+    /** The list of join tables
+     * @type {tp.SqlBrokerTableDef[]}
+     */
+    JoinTables = [];
+    /** The main table of a Broker (Item) is selected as <c>select * from TABLE_NAME where ID = :ID</c> <br />
+     * If the table contains foreign keys, for instance CUSTOMER_ID etc, then those foreign tables are NOT joined.
+     * The programmer who designs the UI just creates a Locator where needed.
+     * But there is always the need to have data from those foreign tables in many situations, i.e. in reports.
+     * StockTables are used for that. StockTables are selected each time after the select of the main broker table (Item)
+     * @type {tp.SqlBrokerQueryDef[]}
+     */
+    StockTables = [];
+
  
+};
+
+tp.SqlBrokerTableDef.prototype.fTitle = '';
+tp.SqlBrokerTableDef.prototype.fTitleKey = '';
+//#endregion
+
+//#region SqlBrokerDef
+
+tp.SqlBrokerDef = class {
+
+    /** Constructor */
+    constructor() {
+    }
+
+    /** The field name
+     * @type {string}
+     */
+    Name = '';
+    /** The C# class name of the type this descriptor describes.
+     * NOTE: The valus of this property may be a string returned by the Type.AssemblyQualifiedName property of the type.
+     * Otherwise it must be a type name registered to the TypeStore either directly or just by using the TypeStoreItemAttribute attribute.
+     * In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination both, when registering and when retreiving a type.
+     * Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
+     * Most of the Tripous types are already registered to the TypeStore with just their TypeName.
+     * @type {string}
+     */
+    TypeClassName = '';
+ 
+
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+    /** The connection name (database)
+     * @type {string}
+     */
+    ConnectionName = 'Default';
+
+    /** The name of the main table
+     * @type {string}
+     */
+    MainTableName = '';
+    /** The name of the detail table, if any
+     * @type {string}
+     */
+    LinesTableName = '';
+    /** The name of the sub-detail table, if any
+     * @type {string}
+     */
+    SubLinesTableName = '';
+
+    /** The name of the Entity this broker represents
+     * @type {string}
+     */
+    EntityName = '';
+
+    /** When is true indicates that the OID is a Guid string. 
+     * Defaults to true.
+     * @type {boolean}
+     */
+    GuidOids = true;
+    /** When true indicates that deletes should happen bottom to top, i.e. starting from the bottom table.
+     *  When false indicates that deletes should happen top to bottom, so if any database foreign constraint exists, then let an exception to be thrown. 
+     *  Defaults to true.
+     * @type {boolean}
+     */
+    CascadeDeletes = true;
+
+    /** The list of select statements of the list (browser) part.
+     * @type {tp.SelectSql[]}
+     */
+    SelectSqlList = [];
+    /** The list of table descriptors.
+     * @type {tp.SqlBrokerTableDef[]}
+     */
+    Tables = [];
+    /** A list of SELECT Sql statements that executed once at the initialization of the broker and may be used in various situations, i.e. Locators
+     * @type {tp.SqlBrokerQueryDef[]}
+     */
+    Queries = [];
+};
+
+tp.SqlBrokerDef.prototype.fTitle = '';
+tp.SqlBrokerDef.prototype.fTitleKey = '';
+
+//#endregion
  

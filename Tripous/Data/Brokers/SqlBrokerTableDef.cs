@@ -875,7 +875,7 @@ namespace Tripous.Data
         /// But there is always the need to have data from those foreign tables in many situations, i.e. in reports.
         /// </para>
         /// <para>
-        /// StockTables are used for that. They are selected each time after the select of the main broker table (Item)          
+        /// StockTables are used for that. StockTables are selected each time after the select of the main broker table (Item)          
         /// </para>
         /// </summary>
         public List<SqlBrokerQueryDef> StockTables { get; set; } = new List<SqlBrokerQueryDef>();
