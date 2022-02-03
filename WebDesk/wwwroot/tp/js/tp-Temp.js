@@ -24,6 +24,24 @@ tp.SqlBrokerQueryDef = class {
      * @type {string[]}
      */
     FieldTitleKeys = [];
+
+    /** Assigns this instance's properties from a specified source.
+    * @param {objec} Source
+    */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+
+        this.Name = Source.Name || '';
+        this.SqlText = Source.SqlText || '';
+
+        if (tp.IsArray(Source.FieldTitleKeys)) {
+            this.FieldTitleKeys = [];
+            Source.FieldTitleKeys.forEach((item) => { 
+                this.FieldTitleKeys.push(item);
+            });
+        }
+    }
 };
 
 //#endregion
@@ -131,6 +149,38 @@ tp.SqlBrokerFieldDef = class {
      */
     LocatorName = '';
 
+    /** Assigns this instance's properties from a specified source.
+    * @param {objec} Source
+    */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+
+        this.Name = Source.Name || '';
+        this.Alias = Source.Alias || '';
+
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        this.DataType = Source.DataType || tp.DataType.Unknown;
+        this.MaxLength = Source.MaxLength || 0;
+        this.Decimals = Source.Decimals || -1;
+        this.Flags = Source.Flags || tp.FieldFlags.None;
+
+        this.CodeProviderName = Source.CodeProviderName || '';
+        this.DefaultValue = Source.DefaultValue || '';
+        this.Expression = Source.Expression || '';
+
+        this.ForeignTableName = Source.ForeignTableName || '';
+        this.ForeignTableAlias = Source.ForeignTableAlias || '';
+        this.ForeignKeyField = Source.ForeignKeyField || '';
+        this.ForeignFieldList = Source.ForeignFieldList || '';
+        this.ForeignTableSql = Source.ForeignTableSql || '';
+
+        this.LocatorName = Source.LocatorName || '';
+ 
+    }
+
 };
  
 tp.SqlBrokerFieldDef.prototype.fTitle = '';
@@ -214,7 +264,52 @@ tp.SqlBrokerTableDef = class {
      */
     StockTables = [];
 
- 
+    /** Assigns this instance's properties from a specified source.
+    * @param {objec} Source
+    */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+
+        this.Name = Source.Name || '';
+        this.Alias = Source.Alias || '';
+
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        this.PrimaryKeyField = Source.PrimaryKeyField || 'Id';
+
+        this.MasterTableName = Source.MasterTableName || '';
+        this.MasterKeyField = Source.MasterKeyField || 'Id';
+        this.DetailKeyField = Source.DetailKeyField || ''; 
+
+        if (tp.IsArray(Source.Fields)) {
+            this.Fields = [];
+            Source.Fields.forEach((item) => {
+                let FieldDef = new tp.SqlBrokerFieldDef();
+                FieldDef.Assign(item);
+                this.Fields.push(FieldDef);
+            });
+        }
+
+        if (tp.IsArray(Source.JoinTables)) {
+            this.JoinTables = [];
+            Source.JoinTables.forEach((item) => {
+                let TableDef = new tp.SqlBrokerTableDef();
+                TableDef.Assign(item);
+                this.JoinTables.push(TableDef);
+            });
+        }
+
+        if (tp.IsArray(Source.StockTables)) {
+            this.StockTables = [];
+            Source.StockTables.forEach((item) => {
+                let QueryDef = new tp.SqlBrokerQueryDef();
+                QueryDef.Assign(item);
+                this.StockTables.push(QueryDef);
+            });
+        }
+    }
 };
 
 tp.SqlBrokerTableDef.prototype.fTitle = '';
@@ -241,9 +336,8 @@ tp.SqlBrokerDef = class {
      * Most of the Tripous types are already registered to the TypeStore with just their TypeName.
      * @type {string}
      */
-    TypeClassName = '';
+    TypeClassName = 'SqlBroker';
  
-
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -310,6 +404,46 @@ tp.SqlBrokerDef = class {
      * @type {tp.SqlBrokerQueryDef[]}
      */
     Queries = [];
+
+    /** Assigns this instance's properties from a specified source.
+     * @param {objec} Source
+     */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+ 
+        this.Name = Source.Name || '';
+        this.TypeClassName = Source.TypeClassName || 'SqlBroker';
+
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        this.ConnectionName = Source.ConnectionName || 'Default';
+
+        this.MainTableName = Source.MainTableName || '';
+        this.LinesTableName = Source.LinesTableName || '';
+        this.SubLinesTableName = Source.SubLinesTableName || '';
+
+        this.EntityName = Source.EntityName || '';
+
+        this.GuidOids = Source.GuidOids === true;
+        this.CascadeDeletes = Source.CascadeDeletes === true;
+ 
+        if (tp.IsArray(Source.SelectSqlList)) {
+            this.SelectSqlList = [];
+            Source.SelectSqlList.forEach((item) => {
+                let SelectSql = new tp.SelectSql();
+                SelectSql.Assign(item);
+                this.SelectSqlList.push(SelectSql);
+            });
+        }
+
+        // EDW
+
+    }
+
+
+
 };
 
 tp.SqlBrokerDef.prototype.fTitle = '';

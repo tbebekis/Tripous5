@@ -1234,7 +1234,7 @@ tp.SelectSql = class {
      * @param {string} FieldName A field name
      * @returns {string} Returns a DateTime param pair (date range params) suitable for thw WHERE part in a SelectSql
      */
-     DateRangeConstructWhereParams(Range, FieldName) {
+    DateRangeConstructWhereParams(Range, FieldName) {
 
         var sFrom = ":" + tp.DateRanges.PrefixFrom + tp.EnumNameOf(tp.DateRange, Range);
         var sTo = ":" + tp.DateRanges.PrefixTo + tp.EnumNameOf(tp.DateRange, Range);

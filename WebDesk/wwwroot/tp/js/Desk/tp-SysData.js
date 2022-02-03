@@ -691,34 +691,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      @type {tp.Grid}
      */
     gridFields = null;
-    /** A C# DataTableDef instance as it comes from server. <br />
-     <pre>
-          "Id": "{41B448A5-4D07-479A-8CDE-450C7B6288CC}",
-          "Name": "Trader",
-          "TitleKey": "Trader",
-          "Title": "Trader",
-          "Fields": [
-            {
-              "Id": "{E1579D46-FB77-4449-BFDC-F6DD18E5BE97}",
-              "Name": "Id",
-              "TitleKey": "Id",
-              "Title": "Id",
-              "IsPrimaryKey": true,
-              "DataType": "String",
-              "Length": 40,
-              "Required": true,
-              "DefaultExpression": null,
-              "Unique": false,
-              "UniqueConstraintName": null,
-              "ForeignKey": null,
-              "ForeignKeyConstraintName": null
-            },
-            ...
-        ]
-     </pre>
-     * @type {object}
-     */
-    TableDef = null;
+ 
 
     /* overrides */
     /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
@@ -791,7 +764,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @override
      */
     InsertItemAfter(tblSysDataItem) {
-        this.SetupFieldsTableAndGrid(true, tblSysDataItem);
+        this.SetupItem(true, tblSysDataItem);
 
         let Row = this.tblFields.AddEmptyRow();
         Row.Set('Name', 'Id');
@@ -817,7 +790,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @override
      */
     EditItemAfter(Id, tblSysDataItem) {
-        this.SetupFieldsTableAndGrid(false, tblSysDataItem);
+        this.SetupItem(false, tblSysDataItem);
     }
 
     /** Called before the Commit() operation of the owner View.
@@ -869,7 +842,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      * */
-    SetupFieldsTableAndGrid(IsInsertItem, tblSysDataItem) {
+    SetupItem(IsInsertItem, tblSysDataItem) {
 
         // create an empty tp.DataTableDef
         let TableDef = new tp.DataTableDef();
@@ -889,8 +862,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
         this.gridFields.DataSource = this.tblFields;
         this.gridFields.BestFitColumns();
-
-        // setup the gridFields
+ 
     }
  
     /** Creates and returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
@@ -1165,7 +1137,41 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         super(View, 'Broker')
     }
 
-    /* overridables */
+    /** A C# SqlBrokerDef instance as it comes from server. <br /> 
+     * @type {tp.SqlBrokerDef}
+     */
+    BrokerDef = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblBrokerDef = null;
+    /**
+     * @type {tp.DataSource}
+     */
+    dsBrokerDef = null;
+
+    /* private */
+    /** 
+     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * */
+    SetupItem(IsInsertItem, tblSysDataItem) {
+
+        // create an empty def
+        this.BrokerDef = new tp.SqlBrokerDef();
+
+        // if editing an already existing table definition
+        // then read the json from Data1 field and load the TableDef
+        if (IsInsertItem === false) {
+            let Text = tblSysDataItem.Rows[0].Get('Data1');
+            let Source = eval("(" + Text + ")");
+            log(Source);
+            this.BrokerDef.Assign(Source);
+        }
+
+    }
+
+    /* overrides */
 
     /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
     * */
@@ -1176,9 +1182,65 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             let GeneralPage = this.View.pagerEdit.AddPage('General');
             tp.Data(GeneralPage.Handle, 'Name', 'General');
 
-            // add a tp.Row to the tab page
-            let Row = new tp.Row(null, { Height: '100%' });
+ 
+
+            this.tblBrokerDef = new tp.DataTable();
+            this.tblBrokerDef.Name = 'BrokerDef';
+
+            this.tblBrokerDef.AddColumn('Name');
+            this.tblBrokerDef.AddColumn('TypeClassName');
+            this.tblBrokerDef.AddColumn('Title');
+            this.tblBrokerDef.AddColumn('TitleKey');
+            this.tblBrokerDef.AddColumn('ConnectionName');
+            this.tblBrokerDef.AddColumn('MainTableName');
+            this.tblBrokerDef.AddColumn('LinesTableName');
+            this.tblBrokerDef.AddColumn('SubLinesTableName');
+            this.tblBrokerDef.AddColumn('EntityName');
+            this.tblBrokerDef.AddColumn('GuidOids', tp.DataType.Boolean);
+            this.tblBrokerDef.AddColumn('CascadeDeletes', tp.DataType.Boolean);
+
+            let HtmlText;
+            let HtmlRowList = [];
+
+            this.tblBrokerDef.Columns.forEach((Column) => {
+                let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+
+                let Text = Column.Title;
+                let Ctrl = {
+                    TypeName: tp.DataTypeToUiType(Column.DataType),
+                    TableName: this.tblBrokerDef.Name,
+                    DataField: Column.Name
+                };
+
+                // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+                HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
+                HtmlRowList.push(HtmlText)
+            });
+
+
+            // join html text for all control rows
+            HtmlText = HtmlRowList.join('\n');
+
+            // content
+            HtmlText = `
+<div class="Row" data-setup='{Height: "100%", Breakpoints: [450, 768, 1050, 1480]}'>
+    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+        ${HtmlText}
+    </div>
+</div>
+`;
+            let elRow = tp.ContentWindow.GetContentElement(HtmlText);
+
+            let Row = new tp.Row(elRow, { Height: '100%' });
             GeneralPage.AddComponent(Row);
+
+            tp.Ui.CreateContainerControls(elRow);
+
+            this.dsBrokerDef = new tp.DataSource(this.tblBrokerDef);
+
+            tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });
+
+            // EDW
         }
     }
 
@@ -1190,6 +1252,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      */
     InsertItemAfter(tblSysDataItem) {
+        this.SetupItem(true, tblSysDataItem);
     }
 
     /** Called before the Edit() operation of the owner View.
@@ -1204,6 +1267,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      */
     EditItemAfter(Id, tblSysDataItem) {
+        this.SetupItem(false, tblSysDataItem);
     }
 
     /** Called before the Commit() operation of the owner View.
