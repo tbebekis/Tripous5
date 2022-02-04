@@ -204,9 +204,9 @@ tp.Classes = {
     Leaf: 'tp-Leaf',
 
     /* Sql Filters          ----------------------------------------------------------------- */
-    SelectSqlListUi: 'tp-SelectSqlListUi',
+    SqlFilterSelectSqlListUi: 'tp-SqlFilterSelectSqlListUi',
     SqlFilterPanel: 'tp-SqlFilterPanel',
-    SelectSqlListToolBar: 'tp-SelectSqlList-ToolBar',
+    SqlFilterSelectSqlListToolBar: 'tp-SqlFilterSelectSqlList-ToolBar',
 
     SqlFilterRow: 'tp-SqlFilterRow',
     SqlFilterCtrl: 'tp-SqlFilter-Ctrl',
@@ -18152,14 +18152,14 @@ tp.LocatorBox.prototype.fLayouting = false;
 //---------------------------------------------------------------------------------------
 
 
-//#region tp.SelectSqlListUi
+//#region tp.SqlFilterSelectSqlListUi
 /** Handles the combo-box with the available {@link tp.SelectSql} items for the user to choose one, define filters and execute it. <br />
  * Displays a panel list where each {@link tp.SelectSql} item has its own panel displaying its filter controls. <br />
  * A {@link tp.SelectSql} contains a list of {@link tp.SqlFilterDef} descriptor items. <br />
  * A filter descriptor is used in creating a filter item. <br />
  * A control link associates a Ui control and a filter item.
 * */
-tp.SelectSqlListUi = class extends tp.Component {
+tp.SqlFilterSelectSqlListUi = class extends tp.Component {
 
     /**
     Constructor <br />
@@ -18198,8 +18198,8 @@ tp.SelectSqlListUi = class extends tp.Component {
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.SelectSqlListUi';
-        this.fDefaultCssClasses = [tp.Classes.SelectSqlListUi];
+        this.tpClass = 'tp.SqlFilterSelectSqlListUi';
+        this.fDefaultCssClasses = [tp.Classes.SqlFilterSelectSqlListUi];
     }
 
 
@@ -18216,7 +18216,7 @@ tp.SelectSqlListUi = class extends tp.Component {
             `<div class="top-zone">
     <div class="select-list-container">
     </div>
-    <div class="ToolBar ${tp.Classes.SelectSqlListToolBar}">
+    <div class="ToolBar ${tp.Classes.SqlFilterSelectSqlListToolBar}">
         <a class="ButtonEx" data-setup="{ Command: 'Execute', Text: 'Execute', ToolTip: 'Execute' , IcoClasses: 'fa fa-bolt',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'ClearFilter', Text: 'Clear', ToolTip: 'Clear Filter' , IcoClasses: 'fa fa-trash-o',  NoText: true, Ico: 'Left'}"></a>
         <a class="ButtonEx" data-setup="{ Command: 'RowLimit', Text: 'Row Limit', ToolTip: 'Row Limit' , IcoClasses: 'fa fa-compress',  NoText: true, Ico: 'Left'}"></a>
@@ -18369,29 +18369,29 @@ tp.SelectSqlListUi = class extends tp.Component {
 /** The DIV where to build the Filters panel Ui.
  * @type {HTMLElement}
  */
-tp.SelectSqlListUi.prototype.elPanel = null;
+tp.SqlFilterSelectSqlListUi.prototype.elPanel = null;
 /** A list of {@link tp.SelectSql} items to display. The first item must be named 'Main' is it is non-editable and non-deletable.
  * NOTE: Comes from CreateParams.
  * @type {tp.SelectSql[]}
  */
-tp.SelectSqlListUi.prototype.SelectSqlList = [];
+tp.SqlFilterSelectSqlListUi.prototype.SelectSqlList = [];
 /** ToolBar
  * @type {tp.ToolBar}
  */
-tp.SelectSqlListUi.prototype.ToolBar = null;
+tp.SqlFilterSelectSqlListUi.prototype.ToolBar = null;
 /** ComboBox displaying the select statements
  * @type {tp.HtmlComboBox}
  */
-tp.SelectSqlListUi.prototype.cboSelectSqlList = null;
+tp.SqlFilterSelectSqlListUi.prototype.cboSelectSqlList = null;
 /** A panel list. Each panel corresponds to single {@link tp.SelectSql} instance.
  * @type {tp.PanelList}
  */
-tp.SelectSqlListUi.prototype.PanelList = null;
+tp.SqlFilterSelectSqlListUi.prototype.PanelList = null;
  
 /** When true a row limit is applied to the current Sql statement.
  * @type {boolean}
  */
-tp.SelectSqlListUi.prototype.UseRowLimit = false;
+tp.SqlFilterSelectSqlListUi.prototype.UseRowLimit = false;
 //#endregion
 
 //#region tp.SqlFilterConditions
@@ -22410,6 +22410,13 @@ tp.BindDataControl = function (Control, GetDataSourceFunc) {
 
 
 
+};
+/** Sets up all data-bindable {@tp.Control} objects that are direct or nested DOM elements in a specified parent element or the entire document.
+ *  @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
+ */
+tp.SetupDataControls = function (ParentElementOrSelector) {
+    let List = tp.GetAllDataControls(ParentElementOrSelector);
+    List.forEach(Control => tp.SetupDataControl(Control));
 };
 /** Sets up a data-bindable {@tp.Control} object after data-binding
  * @param {tp.Control} Control A {@link tp.Control}

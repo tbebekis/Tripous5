@@ -1250,7 +1250,7 @@ tp.BrokerView = class extends tp.View {
                 let el = tp.Div(elParent);
                 let CP = {};
                 CP.SelectSqlList = this.Broker.SelectSqlList;
-                this.SelectSqlListUi = new tp.SelectSqlListUi(el, CP);
+                this.SelectSqlListUi = new tp.SqlFilterSelectSqlListUi(el, CP);
                 this.SelectSqlListUi.On('Execute', (Args) => {
                     this.ListSelect();
                 });
@@ -2079,7 +2079,7 @@ tp.BrokerView.prototype.MainPager = null;
 tp.BrokerView.prototype.EditPager = null;
 /** Field. 
  @protected
- @type {tp.SelectSqlListUi}
+ @type {tp.SqlFilterSelectSqlListUi}
  */
 tp.BrokerView.prototype.SelectSqlListUi = null;
 

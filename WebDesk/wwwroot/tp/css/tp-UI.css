@@ -1345,9 +1345,9 @@ table.tp-CalendarBox td.tp-Marked {
 }
 
 /*---------------------------------------------------------------------------------------
-tp-SelectSqlListUi
+tp-SqlFilterSelectSqlListUi
 ---------------------------------------------------------------------------------------*/
-.tp-SelectSqlListUi {
+.tp-SqlFilterSelectSqlListUi {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1355,24 +1355,23 @@ tp-SelectSqlListUi
     height: 100%;
 }
 
-.tp-SelectSqlListUi > .top-zone {
+.tp-SqlFilterSelectSqlListUi > .top-zone {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.4em;
 }
 
- 
-.tp-SqlFilterUi {
+.tp-SqlFilterSelectSqlList-ToolBar a.tp-Active {
+    border-color: var(--FocusColor);
+}
+
+.tp-SqlFilterPanel {
     position: relative;
     display: flex;
     flex-direction: column;
     padding-top: 1em;
     gap: 0.8em;
-}
-
-.tp-SelectSqlList-ToolBar a.tp-Active {
-    border-color: var(--FocusColor);
 }
 
 .tp-SqlFilterRow {

@@ -1149,6 +1149,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.DataSource}
      */
     dsBrokerDef = null;
+    /** A responsive row which is the container of controls bound to tblBrokerDef.
+     * @type {tp.Row}
+     */
+    BrokerLayoutRow = null;
 
     /* private */
     /** 
@@ -1157,9 +1161,15 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * */
     SetupItem(IsInsertItem, tblSysDataItem) {
 
+        this.tblBrokerDef.ClearRows();
+        this.tblBrokerDef.AcceptChanges();
+
+        let Row = this.tblBrokerDef.AddEmptyRow();
+
         // create an empty def
         this.BrokerDef = new tp.SqlBrokerDef();
 
+        // Edit
         // if editing an already existing table definition
         // then read the json from Data1 field and load the TableDef
         if (IsInsertItem === false) {
@@ -1168,7 +1178,23 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             log(Source);
             this.BrokerDef.Assign(Source);
         }
+        else {
+           // Insert
+        }
 
+
+        Row.Set('Name', this.BrokerDef.Name);
+        Row.Set('TypeClassName', this.BrokerDef.TypeClassName);
+        //Row.Set('Title', this.BrokerDef.Title);
+        Row.Set('TitleKey', this.BrokerDef.TitleKey);
+        Row.Set('ConnectionName', this.BrokerDef.ConnectionName);
+        Row.Set('MainTableName', this.BrokerDef.MainTableName);
+        Row.Set('LinesTableName', this.BrokerDef.LinesTableName);
+        Row.Set('SubLinesTableName', this.BrokerDef.SubLinesTableName);
+        Row.Set('EntityName', this.BrokerDef.EntityName);
+        Row.Set('GuidOids', this.BrokerDef.GuidOids);
+        Row.Set('CascadeDeletes', this.BrokerDef.CascadeDeletes);
+ 
     }
 
     /* overrides */
@@ -1178,18 +1204,18 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     CreateEditControls() {
 
         if (this.View.pagerEdit.GetPageCount() === 1) {
+
             // add a tp.TabPage to View's pagerEdit
             let GeneralPage = this.View.pagerEdit.AddPage('General');
-            tp.Data(GeneralPage.Handle, 'Name', 'General');
+            tp.Data(GeneralPage.Handle, 'Name', 'General'); 
 
- 
-
+            // create the data table
             this.tblBrokerDef = new tp.DataTable();
             this.tblBrokerDef.Name = 'BrokerDef';
 
             this.tblBrokerDef.AddColumn('Name');
             this.tblBrokerDef.AddColumn('TypeClassName');
-            this.tblBrokerDef.AddColumn('Title');
+            //this.tblBrokerDef.AddColumn('Title');
             this.tblBrokerDef.AddColumn('TitleKey');
             this.tblBrokerDef.AddColumn('ConnectionName');
             this.tblBrokerDef.AddColumn('MainTableName');
@@ -1198,6 +1224,9 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             this.tblBrokerDef.AddColumn('EntityName');
             this.tblBrokerDef.AddColumn('GuidOids', tp.DataType.Boolean);
             this.tblBrokerDef.AddColumn('CascadeDeletes', tp.DataType.Boolean);
+
+            this.tblBrokerDef.SetColumnReadOnly('Name', true);
+            this.tblBrokerDef.SetColumnReadOnly('TitleKey', true);
 
             let HtmlText;
             let HtmlRowList = [];
@@ -1231,8 +1260,8 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 `;
             let elRow = tp.ContentWindow.GetContentElement(HtmlText);
 
-            let Row = new tp.Row(elRow, { Height: '100%' });
-            GeneralPage.AddComponent(Row);
+            this.BrokerLayoutRow = new tp.Row(elRow, { Height: '100%' });
+            GeneralPage.AddComponent(this.BrokerLayoutRow);
 
             tp.Ui.CreateContainerControls(elRow);
 
@@ -1240,7 +1269,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 
             tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });
 
-            // EDW
+            
         }
     }
 

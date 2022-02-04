@@ -69,7 +69,7 @@ tp.SqlBrokerFieldDef = class {
         return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
     }
     set Title(v) {
-        this.fTitle = v;
+        // nothing
     }
     /** A resource Key used in returning a localized version of Title
      * @type {string}
@@ -214,7 +214,7 @@ tp.SqlBrokerTableDef = class {
         return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
     }
     set Title(v) {
-        this.fTitle = v;
+        // nothing
     }
     /** A resource Key used in returning a localized version of Title
      * @type {string}
@@ -345,7 +345,7 @@ tp.SqlBrokerDef = class {
         return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
     }
     set Title(v) {
-        this.fTitle = v;
+        // nothing
     }
     /** A resource Key used in returning a localized version of Title
      * @type {string}
