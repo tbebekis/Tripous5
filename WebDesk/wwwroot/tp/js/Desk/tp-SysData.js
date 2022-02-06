@@ -659,6 +659,14 @@ tp.SysDataHandler = class {
         return true;
     }
 
+    /**
+    Event handler. Called by the owner View when the Edit Pager changes Page.
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    EditPager_PageChanged(Args) {
+ 
+    }
+
 };
 
 /**
@@ -835,6 +843,13 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         }
 
         return Result;
+    }
+
+    /**
+    Event handler. Called by the owner View when the Edit Pager changes Page.
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    EditPager_PageChanged(Args) {
     }
 
     /* private */
@@ -1153,6 +1168,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.Row}
      */
     BrokerLayoutRow = null;
+    /** The broker General tab page
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
 
     /* private */
     /** 
@@ -1160,14 +1179,13 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      * */
     SetupItem(IsInsertItem, tblSysDataItem) {
-
-        this.tblBrokerDef.ClearRows();
-        this.tblBrokerDef.AcceptChanges();
-
-        let Row = this.tblBrokerDef.AddEmptyRow();
-
+        let Row = tblSysDataItem.Rows[0];
+ 
         // create an empty def
-        this.BrokerDef = new tp.SqlBrokerDef();
+        this.BrokerDef = new tp.SqlBrokerDef(); 
+        this.BrokerDef.Name = Row.Get('DataName', this.BrokerDef.Name);
+        this.BrokerDef.TitleKey = Row.Get('TitleKey', this.BrokerDef.TitleKey);
+        
 
         // Edit
         // if editing an already existing table definition
@@ -1181,6 +1199,11 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         else {
            // Insert
         }
+
+        this.tblBrokerDef.ClearRows();
+        this.tblBrokerDef.AcceptChanges();
+
+        Row = this.tblBrokerDef.AddEmptyRow();
 
 
         Row.Set('Name', this.BrokerDef.Name);
@@ -1206,8 +1229,8 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         if (this.View.pagerEdit.GetPageCount() === 1) {
 
             // add a tp.TabPage to View's pagerEdit
-            let GeneralPage = this.View.pagerEdit.AddPage('General');
-            tp.Data(GeneralPage.Handle, 'Name', 'General'); 
+            this.tabGeneral = this.View.pagerEdit.AddPage('General');
+            tp.Data(this.tabGeneral.Handle, 'Name', 'General');
 
             // create the data table
             this.tblBrokerDef = new tp.DataTable();
@@ -1261,15 +1284,13 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             let elRow = tp.ContentWindow.GetContentElement(HtmlText);
 
             this.BrokerLayoutRow = new tp.Row(elRow, { Height: '100%' });
-            GeneralPage.AddComponent(this.BrokerLayoutRow);
+            this.tabGeneral.AddComponent(this.BrokerLayoutRow);
 
             tp.Ui.CreateContainerControls(elRow);
 
             this.dsBrokerDef = new tp.DataSource(this.tblBrokerDef);
 
-            tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });
-
-            
+            tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });            
         }
     }
 
@@ -1303,6 +1324,14 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      */
     CommitItemBefore(tblSysDataItem) {
+        let Row = tblSysDataItem.Rows[0];
+ 
+        this.BrokerDef.Name.Name = Row.Get('DataName', '');
+        this.BrokerDef.Name.TitleKey = Row.Get('TitleKey', ''); 
+
+        let JsonText = tp.ToJson(this.BrokerDef, true);
+ 
+        //Row.Set('Data1', JsonText);
     }
     /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
@@ -1310,6 +1339,22 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      */
     CanCommitItem(tblSysDataItem) {
         return true;
+    }
+
+    /**
+    Event handler. Called by the owner View when the Edit Pager changes Page.
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    EditPager_PageChanged(Args) {
+        let CurrentPage = this.View.pagerEdit.SelectedPage;
+        if (CurrentPage === this.tabGeneral) {
+
+            let SourceRow = this.View.tblSysDataItem.Rows[0];
+            let Row = this.tblBrokerDef.Rows[0];
+
+            Row.Set('Name', SourceRow.Get('DataName', ''));
+            Row.Set('TitleKey', SourceRow.Get('TitleKey', ''));
+        }
     }
 };
 //#endregion
@@ -1589,7 +1634,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
                 this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
             }
 
- 
+            this.pagerEdit.On('SelectedIndexChanged', this.pagerEdit_PageChanged, this);
 
         }
     }
@@ -1903,11 +1948,11 @@ tp.DeskSysDataView = class extends tp.DeskView {
         if (!tp.IsValid(v) || tp.IsBlankString(v))
             Row.Set('TitleKey', Row.Get('DataName', ''));
 
+        this.Handler.CommitItemBefore(this.tblSysDataItem);
+
         // checks
         if (!this.CanCommit())
-            return;
-
-        this.Handler.CommitItemBefore(this.tblSysDataItem);
+            return;        
 
         let Item = new tp.SysDataItem();
         Item.FromDataTable(this.tblSysDataItem);
@@ -1986,7 +2031,16 @@ tp.DeskSysDataView = class extends tp.DeskView {
     ListGrid_DoubleClick(Args) {
         this.ExecuteCommand(tp.DataViewMode.Edit);
     }
-
+    /**
+    Event handler. Called when the Edit Pager changes Page.
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    pagerEdit_PageChanged(Args) {
+        if (this.Handler) {
+            this.Handler.EditPager_PageChanged(Args);
+        }
+    }
 };
 
 tp.DeskSysDataView.prototype.PrimaryKeyField = 'Id';

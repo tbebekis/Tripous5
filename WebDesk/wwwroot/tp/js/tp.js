@@ -3821,6 +3821,45 @@ tp.Break = function (ParentOrSelector) {
         tp.Append(ParentOrSelector, '');
 };
 
+/** Creates an Ace Editor object inside a specified parent element.
+ * Returns the Ace Editor element. The '__Editor' property of the element points to Ace Editor object.
+ * @see {@link https://ace.c9.io|Ace Editor}
+ * @param {string|Node} ParentElementOrSelector - The parent element where the element is a direct or non-direct child. If not specified (i.e. passed as null) then the document is used.
+ * @param {string} EditorMode Optional. A string indicating the editor mode, e.g. sql or javascript or css or html or csharp, etc.
+ * @param {string} SourceCode Optional. The source code to display.
+ * @returns {HTMLElement} Returns the Ace Editor element. The '__Editor' property of the element points to Ace Editor object.
+ */
+tp.CreateSourceCodeEditor = function (ParentElementOrSelector, EditorMode = 'sql', SourceCode = '') {
+    let Id = tp.SafeId('AceEditor');
+
+    EditorMode = `ace/mode/${EditorMode}`;
+
+    let Css = `
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 14px;
+    margin: 2px 0;
+`;
+
+    let elEditor = tp.el(ParentElementOrSelector, 'pre');
+    elEditor.id = Id;
+    tp.StyleText(elEditor, Css);
+
+    let Editor = ace.edit(elEditor);
+    Editor.setTheme("ace/theme/twilight");
+    Editor.session.setMode(EditorMode);
+
+    if (tp.IsString(SourceCode) && !tp.IsBlank(SourceCode)) {
+        Editor.setValue(SourceCode, -1);
+    }
+
+    elEditor.__Editor = Editor;
+    return elEditor;
+};
+
 /** Indicates what is the value attribute of an element according to its node type: 
  * value, checked, innerHTML, selectedIndex or textContent */
 tp.ElementValueType = {
@@ -15814,8 +15853,7 @@ tp.ContentWindow.ShowModalAsync = async function (Content, WindowArgs = null) {
     return tp.ContentWindow.ShowAsync(true, Content, WindowArgs);
 };
 //#endregion
-
-
+ 
 //---------------------------------------------------------------------------------------
 // dialog boxes
 //---------------------------------------------------------------------------------------
@@ -16109,6 +16147,68 @@ tp.FrameBoxAsync = function (UrlOrHtmlContent, WindowArgs = null) {
 
 //#endregion
 
+//#region  tp.SourceEditBox
+/** Displays a Source Code Editor modal dialog box. The excellent Ace Editor is used as editor.
+ * When the dialog closes the Args property of the dialog has the Editor property which points to the editor object.
+ * @example
+ *      let EditorMode = 'sql';
+ *      let SourceCode = 'select * from Customer';
+ *      let DialogBox = await tp.SourceEditBoxAsync(EditorMode, SourceCode);
+ *      if (DialogBox.DialogResult === tp.DialogResult.OK) {
+ *          let Editor = DialogBox.Args.Editor;
+ *          let Source = Editor.getValue();
+ *          //
+ *      }
+ * @param {string} EditorMode Optional. A string indicating the editor mode, e.g. sql or javascript or css or html or csharp, etc.
+ * @param {string} SourceCode Optional. The source code to display.
+ * @param {tp.WindowArgs} [WindowArgs=null] Optional.
+ * @returns {tp.ContentWindow} Returns a {@link tp.ContentWindow} dialog box. The Editor property of the dialog box Args property is the editor.
+ */
+tp.SourceEditBox = function (EditorMode = 'sql', SourceCode = '', WindowArgs = null) {
+    WindowArgs = WindowArgs || {};
+    WindowArgs.EditorMode = EditorMode || 'sql';
+    WindowArgs.SourceCode = SourceCode || '';
+    WindowArgs.Text = WindowArgs.Text || 'Code Editor';
+
+    let elTemp = tp.Doc.createElement('div');
+    let elEditor = tp.CreateSourceCodeEditor(elTemp, WindowArgs.EditorMode, WindowArgs.SourceCode);
+
+    WindowArgs.Editor = elEditor.__Editor;
+
+    elTemp.removeChild(elTemp.children[0]);
+
+    return tp.ContentWindow.ShowModal(elEditor, WindowArgs);
+};
+/** Displays a Source Code Editor modal dialog box. The excellent Ace Editor is used as editor.
+ * When the dialog closes the Args property of the dialog has the Editor property which points to the editor object.
+ * @example
+ *      let EditorMode = 'sql';
+ *      let SourceCode = 'select * from Customer';
+ *      let DialogBox = await tp.SourceEditBoxAsync(EditorMode, SourceCode);
+ *      if (DialogBox.DialogResult === tp.DialogResult.OK) {
+ *          let Editor = DialogBox.Args.Editor;
+ *          let Source = Editor.getValue();
+ *          //
+ *      }
+ * @param {string} EditorMode Optional. A string indicating the editor mode, e.g. sql or javascript or css or html or csharp, etc.
+ * @param {string} SourceCode Optional. The source code to display.
+ * @param {tp.WindowArgs} [WindowArgs=null] Optional.
+ * @returns {tp.ContentWindow} Returns a {@link tp.ContentWindow} dialog box. The Editor property of the dialog box Args property is the editor.
+ */
+tp.SourceEditBoxAsync = function (EditorMode = 'sql', SourceCode = '', WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
+        };
+
+        tp.SourceEditBox(EditorMode, SourceCode, WindowArgs);
+    });
+};
+//#endregion
 
 //---------------------------------------------------------------------------------------
 // tp.StaticFiles
