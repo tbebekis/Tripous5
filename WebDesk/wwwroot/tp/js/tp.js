@@ -15873,7 +15873,6 @@ tp.MessageDialog = class extends tp.Window {
         super(Args);
     }
 
-
     /* overrides */
     InitClass() {
         super.InitClass();
@@ -15940,9 +15939,6 @@ padding: 4px;
 
         this.edtMemo.Focus();
     }
-
-
-
 };
 
 tp.MessageDialog.prototype.BoxType = '';

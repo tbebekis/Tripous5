@@ -593,6 +593,26 @@ tp.SelectSqlColumn = class {
     constructor() {       
     }
 
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+
     /**
     Assigns a source item to this instance
     @param {tp.SelectSqlColumn} Source The source to copy values from
@@ -601,6 +621,7 @@ tp.SelectSqlColumn = class {
         this.Name = Source.Name;
         this.DisplayType = Source.DisplayType;
         this.Title = Source.Title;
+        this.TitleKey = Source.TitleKey;
 
         this.Visible = Source.Visible;
         this.Width = Source.Width;
@@ -612,7 +633,38 @@ tp.SelectSqlColumn = class {
         this.Aggregate = Source.Aggregate;
         this.AggregateFormat = Source.AggregateFormat;        
     }
+    /**
+    If an object being stringified has a property named toJSON whose value is a function, then the toJSON() method customizes JSON stringification behavior.
+    Instead of the object being serialized, the value returned by the toJSON() method when called will be serialized.
+    @see {@link http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3|specification}
+    @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify|mdn}
+    @return {object} Returns a plain object having all the properties and values of this instance. JSON.stringify() uses that returned object instead of this instance when serializing.
+    */
+    toJSON() {
+        let Result = {};
+
+        Result.Name = this.Name;
+        Result.DisplayType = this.DisplayType;
+        Result.Title = this.Title;
+        Result.TitleKey = this.TitleKey;
+ 
+        Result.Visible = this.Visible;
+        Result.Width = this.Width;
+        Result.ReadOnly = this.ReadOnly;
+        Result.DisplayIndex = this.DisplayIndex;
+        Result.GroupIndex = this.GroupIndex;
+        Result.Decimals = this.Decimals;
+        Result.FormatString = this.FormatString;
+        Result.Aggregate = this.Aggregate;
+        Result.AggregateFormat = this.AggregateFormat;
+
+        return Result;
+    }
 };
+
+tp.SelectSqlColumn.prototype.fTitle = '';
+tp.SelectSqlColumn.prototype.fTitleKey = '';
+
 /** Name
  @type {string}
  * */
@@ -621,10 +673,7 @@ tp.SelectSqlColumn.prototype.Name = '';
  @type {tp.ColumnDisplayType.Default}
  * */
 tp.SelectSqlColumn.prototype.DisplayType = tp.ColumnDisplayType.Default;
-/** Title
- @type {string}
- * */
-tp.SelectSqlColumn.prototype.Title = '';
+ 
 
 /** Controls the visibility of the column
  @type {boolean}
@@ -967,6 +1016,23 @@ tp.SqlFilterEnum = class {
                 this[key] = Source[key];
         }
     }
+    /**
+    If an object being stringified has a property named toJSON whose value is a function, then the toJSON() method customizes JSON stringification behavior.
+    Instead of the object being serialized, the value returned by the toJSON() method when called will be serialized.
+    @see {@link http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3|specification}
+    @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify|mdn}
+    @return {object} Returns a plain object having all the properties and values of this instance. JSON.stringify() uses that returned object instead of this instance when serializing.
+    */
+    toJSON() {
+        let Result = {};
+
+        for (var key in this) {
+            if (typeof this[key] !== 'function')
+                Result[key] = this[key];
+        }
+
+        return Result;
+    }
 };
 
 /** SQL SELECT statement of an EnumQuery filter.
@@ -1009,6 +1075,25 @@ tp.SqlFilterDef = class   {
         this.FieldPath = FieldPath || '';
     }
 
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
     /**
      * Creates and returns a {@link tp.SqlFilterDef} descriptor.
      * @param {string} FieldPath The full path to the field, i.e. TableAlias.FieldName, or just FieldName
@@ -1030,7 +1115,7 @@ tp.SqlFilterDef = class   {
 
         this.FieldPath = Source.FieldPath;
         this.Title = Source.Title;
- 
+        this.TitleKey = Source.TitleKey;
 
         this.DataType = Source.DataType;
         this.Mode = Source.Mode;
@@ -1046,6 +1131,37 @@ tp.SqlFilterDef = class   {
             this.Enum.Assign(Source.Enum);
         }
     }
+    /**
+    If an object being stringified has a property named toJSON whose value is a function, then the toJSON() method customizes JSON stringification behavior.
+    Instead of the object being serialized, the value returned by the toJSON() method when called will be serialized.
+    @see {@link http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3|specification}
+    @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify|mdn}
+    @return {object} Returns a plain object having all the properties and values of this instance. JSON.stringify() uses that returned object instead of this instance when serializing.
+    */
+    toJSON() {
+        let Result = {};
+
+        Result.FieldPath = this.FieldPath;
+        Result.Title = this.Title;
+        Result.TitleKey = this.TitleKey;
+
+        Result.DataType = this.DataType;
+        Result.Mode = this.Mode;
+
+        Result.UseRange = this.UseRange;
+        Result.Locator = this.Locator;
+        Result.PutInHaving = this.PutInHaving;
+        Result.AggregateFunc = this.AggregateFunc;
+
+        Result.InitialValue = this.InitialValue;
+
+        if (tp.IsValid(this.Enum)) {
+            Result.Enum = this.Enum.toJSON();
+        }
+
+        return Result;
+    }
+
 
     ValidateAggregateFunc() {
         this.AggregateFunc = tp.ValidAggregateFunctions.indexOf(this.AggregateFunc) === -1? '': this.AggregateFunc;
@@ -1054,7 +1170,8 @@ tp.SqlFilterDef = class   {
 };
 
 
- 
+tp.SqlFilterDef.prototype.fTitle = '';
+tp.SqlFilterDef.prototype.fTitleKey = '';
 
  
 /**
@@ -1062,11 +1179,7 @@ The full path to the field, i.e. TableAlias.FieldName, or just FieldName
 @type {string}
 */
 tp.SqlFilterDef.prototype.FieldPath = '';
-/**
-The Title of this instance, used for display purposes
-@type {string}
-*/
-tp.SqlFilterDef.prototype.Title = '';
+ 
  
 
 /**
@@ -1133,6 +1246,24 @@ tp.SelectSql = class {
         this.Text = StatementText || '';        
     }
 
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
  
     /**
     Gets or sets the SELECT statement text
@@ -1288,6 +1419,45 @@ tp.SelectSql = class {
     Clone() {
         let Result = new tp.SelectSql();
         Result.Assign(this);
+        return Result;
+    }
+    /**
+    If an object being stringified has a property named toJSON whose value is a function, then the toJSON() method customizes JSON stringification behavior.
+    Instead of the object being serialized, the value returned by the toJSON() method when called will be serialized.
+    @see {@link http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3|specification}
+    @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify|mdn}
+    @return {object} Returns a plain object having all the properties and values of this instance. JSON.stringify() uses that returned object instead of this instance when serializing.
+    */
+    toJSON() {
+        let Result = {};
+
+        Result.Name = this.Name;
+        Result.Title = this.Title;
+        Result.TitleKey = this.TitleKey;
+ 
+        Result.CompanyAware = this.CompanyAware;
+        Result.ConnectionName = this.ConnectionName;
+ 
+        Result.DateRange = this.DateRange;
+        Result.DateRangeColumn = this.DateRangeColumn;
+ 
+        Result.Columns = [];
+        Result.Filters = [];
+
+        if (!tp.IsEmpty(this.Columns) && (this.Columns.length > 0)) {
+            this.Columns.forEach(item => {
+                Result.Columns.push(item.toJSON());
+            });
+        }
+
+        if (!tp.IsEmpty(this.Filters) && (this.Filters.length > 0)) {
+            this.Filters.forEach(item => {
+                Result.Filters.push(item.toJSON());
+            });
+        }
+
+        Result.Text = this.Text;
+
         return Result;
     }
 
@@ -1464,30 +1634,23 @@ tp.SelectSql = class {
 
  
 };
-/** Spaces 
+
+tp.SelectSql.prototype.fTitle = '';
+tp.SelectSql.prototype.fTitleKey = '';
+
+/** Spaces
  @constant
  @type {string}
  */
 tp.SelectSql.prototype.SPACES = '  ';
-
+ 
 /* properties */
 /**
 Name
 @type {string}
 */
 tp.SelectSql.prototype.Name = '';
-/**
-Title
-@type {string}
-*/
-tp.SelectSql.prototype.Title = '';
-/**
-TitleKey. Used when inserting a new instance or altering an existend.
-@type {string}
-*/
-tp.SelectSql.prototype.TitleKey = '';
-
-
+ 
 /**
 When true then adds a company related part in the WHERE statement, i.e. CompanyFieldName = :CompanyFieldName
 @type {boolean}

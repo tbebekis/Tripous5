@@ -1,4 +1,81 @@
-﻿
+﻿tp.SelectSqlEditDialog = class extends tp.Window {
+    /**
+     * Constructor
+     * @param {tp.WindowArgs} Args The window args
+     */
+    constructor(Args) {
+        super(Args);
+    }
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.SelectSqlEditDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+        //this.BoxType = this.Args['BoxType'] || ''; 
+    }
+    CreateControls() {
+        super.CreateControls();
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel);
+
+        // EDW
+    }
+};
+
+
+/**
+Displays a modal dialog box for editing a {@link tp.SelectSql} object
+@static
+@param {tp.SelectSql} SelectSql The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SelectSqlEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SelectSqlEditDialog.ShowModal = function (SelectSql, WindowArgs = null) {
+
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'SelectSql editor';
+
+    Args = new tp.WindowArgs(Args);
+    Args.AsModal = true;
+    Args.DefaultDialogResult = tp.DialogResult.Cancel;
+    Args.SelectSql = SelectSql;
+
+    let Result = new tp.SelectSqlEditDialog(Args);
+    Result.ShowModal();
+
+    return Result;
+};
+/**
+Displays a modal dialog box for editing a {@link tp.SelectSql} object
+@static
+@param {tp.SelectSql} SelectSql The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SelectSqlEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SelectSqlEditDialog.ShowModalAsync = function (SelectSql, WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
+        }; 
+
+        tp.SelectSqlEditDialog.ShowModal(SelectSql, WindowArgs);
+    });
+ 
+};
+
+
+
+
+
 //#region SqlBrokerQueryDef
 
 /** Describes a SELECT statement.

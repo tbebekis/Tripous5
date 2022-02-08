@@ -57,17 +57,30 @@
         tp.Ajax.GetAsync(Url);
     }
 
-    var Text = '';
-    var Button1Click = async function () {
+    let ShowSourceEditDialog = async () => {
         let EditorMode = 'sql';
         let SourceCode = 'select * from Customer';
-        let DialogBox = await tp.SourceEditBoxAsync(EditorMode, SourceCode); 
+        let DialogBox = await tp.SourceEditBoxAsync(EditorMode, SourceCode);
 
         let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult);
         if (DialogBox.Args.Editor) {
             S = S + '\nSource Code: ' + DialogBox.Args.Editor.getValue();
         }
         tp.InfoNote('DialogResult = ' + S);
+    };
+
+    let ShowSelectSqlEditDialog = async () => {
+        let SS = new tp.SelectSql('select * from Customer');
+
+        let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
+
+        let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult); 
+        tp.InfoNote('DialogResult = ' + S);
+    };
+
+ 
+    let Button1Click = async function () {
+        await ShowSelectSqlEditDialog();
     }
 
     function Button2Click() {
