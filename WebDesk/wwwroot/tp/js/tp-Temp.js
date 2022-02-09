@@ -7,6 +7,69 @@
         super(Args);
     }
 
+
+    /**
+     * @type {tp.TabControl}
+     */
+    Pager = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabSql = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabColumns = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabFilters = null;
+
+    /**
+     * @type {tp.TextBox}
+     */
+    edtName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtTitleKey = null;
+    /**
+     * @type {tp.CheckBox}
+     */
+    chCompanyAware = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtConnectionName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDateRangeColumn = null;
+    /**
+     * @type {tp.HtmlComboBox}
+     */
+    cboDateRange = null;
+
+    /** The element upon Ace Editor is created. 
+     * The '__Editor' property of the element points to Ace Editor object.
+     * @type {HTMLElement}
+     */
+    elSqlEditor = null;
+    /**
+     * @type {tp.Grid}
+     */
+    gridColumns = null;
+
+    /**
+     * @type {tp.DataTable}
+     */
+    tblColumns = null;
+ 
+
     /* overrides */
     InitClass() {
         super.InitClass();
@@ -15,18 +78,205 @@
     }
     ProcessInitInfo() {
         super.ProcessInitInfo();
+
+        this.SelectSql = this.Args.SelectSql;
         //this.BoxType = this.Args['BoxType'] || ''; 
     }
+    /**
+     * Creates all controls of this window.
+     * */
     CreateControls() {
         super.CreateControls();
 
+        let elRow, elCol, i, ln;
+
+        // , Height: "100%"
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
         this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
         this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel);
+ 
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage('General');
+        this.tabSql = this.Pager.AddPage('Sql');
+        this.tabColumns = this.Pager.AddPage('Columns');
+        this.tabFilters = this.Pager.AddPage('Filters');
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+        // controls
+        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
+        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'Title Key', { TypeName: 'TextBox' }).Control;        
+        this.edtConnectionName = tp.CreateControlRow(tp.Div(elCol), false, 'Connection', { TypeName: 'TextBox' }).Control;
+        this.edtDateRangeColumn = tp.CreateControlRow(tp.Div(elCol), false, 'Date Range Column', { TypeName: 'TextBox' }).Control;
+        this.cboDateRange = tp.CreateControlRow(tp.Div(elCol), false, 'Date Range', { TypeName: 'HtmlComboBox' }).Control;
+        this.chCompanyAware = tp.CreateControlRow(tp.Div(elCol), true, 'Company Aware', { TypeName: 'CheckBox' }).Control;
+
+        // item to controls
+        this.edtName.Text = this.SelectSql.Name;
+        this.edtTitleKey.Text = this.SelectSql.TitleKey;
+        this.edtConnectionName.Text = this.SelectSql.ConnectionName;
+        this.edtDateRangeColumn.Text = this.SelectSql.DateRangeColumn;
+        this.chCompanyAware.Checked = this.SelectSql.CompanyAware === true;
+
+        for (i = 0, ln = tp.DateRanges.WhereRanges.length; i < ln; i++) {
+            this.cboDateRange.Add(tp.DateRanges.WhereRangesTexts[i], tp.DateRanges.WhereRanges[i]);
+        }
+
+        let Index;
+        if (tp.IsNumber(this.SelectSql.DateRange)) {
+            let v = this.SelectSql.DateRange.toString();
+            Index = this.cboDateRange.IndexOfValue(v);            
+        }
+
+        Index = Index >= 0 ? Index : 0;
+        this.cboDateRange.SelectedIndex = Index;
+
+
+        // Sql Page
+        // ---------------------------------------------------------------------------------
+        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.SelectSql.Text);
+
+        // Columns Page
+        // ---------------------------------------------------------------------------------
+        // add a tp.Row to the tab page
+        let LayoutRow = new tp.Row(null, { Height: '100%' });
+        this.tabColumns.AddComponent(LayoutRow);
+
+        // add a DIV for the gridFields tp.Grid in the row
+        let el = LayoutRow.AddDivElement();
+        let CP = {
+            Name: "gridColumns",
+            Height: '100%',
+            
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            //ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            ReadOnly: false,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            Columns: [
+                { Name: 'Name' },
+                { Name: 'TitleKey' },
+                { Name: 'DisplayType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.ColumnDisplayTypeToLookUpTable() },
+ 
+                { Name: 'Width' },
+                { Name: 'ReadOnly' },
+
+                { Name: 'GroupIndex' },
+                { Name: 'Decimals' },
+                { Name: 'FormatString' },
+                { Name: 'Aggregate', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.AggregateTypeToLookUpTable() },
+                { Name: 'AggregateFormat' },
+            ]
+        };
+
+        // create the columns grid
+        this.gridColumns = new tp.Grid(el, CP);
+        //this.gridColumns.On("ToolBarButtonClick", this.GridColumns_AnyButtonClick, this);
+        //this.gridColumns.On(tp.Events.DoubleClick, this.GridColumns_DoubleClick, this);
+
+        // columns table
+        this.tblColumns = new tp.DataTable();
+        this.tblColumns.AddColumn('Name');
+        this.tblColumns.AddColumn('TitleKey');
+        this.tblColumns.AddColumn('DisplayType', tp.DataType.Boolean);
+        this.tblColumns.AddColumn('Width', tp.DataType.Integer);
+        this.tblColumns.AddColumn('ReadOnly', tp.DataType.Boolean);
+        this.tblColumns.AddColumn('GroupIndex', tp.DataType.Integer);
+        this.tblColumns.AddColumn('Decimals', tp.DataType.Integer);
+        this.tblColumns.AddColumn('FormatString');
+        this.tblColumns.AddColumn('Aggregate', tp.DataType.Integer);
+        this.tblColumns.AddColumn('AggregateFormat');
+
+        this.SelectSql.Columns.forEach((Column) => {
+            let DataRow = this.tblColumns.AddEmptyRow();
+            DataRow.Set('Name', Column.Name);
+            DataRow.Set('TitleKey', Column.TitleKey);
+            DataRow.Set('DisplayType', Column.DisplayType);
+            DataRow.Set('Width', Column.Width);
+            DataRow.Set('ReadOnly', Column.ReadOnly);
+            DataRow.Set('GroupIndex', Column.GroupIndex);
+            DataRow.Set('Decimals', Column.Decimals);
+            DataRow.Set('FormatString', Column.FormatString);
+            DataRow.Set('Aggregate', Column.Aggregate);
+            DataRow.Set('AggregateFormat', Column.AggregateFormat);
+        });
+
+        this.tblColumns.AcceptChanges();
+
+        this.gridColumns.DataSource = this.tblColumns;
+        this.gridColumns.BestFitColumns();
 
         // EDW
+ 
+    }
+
+
+
+
+    /* event handlers */
+    /** Event handler
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    GridColumns_AnyButtonClick(Args) {
+        Args.Handled = true;
+
+        switch (Args.Command) {
+            case 'GridRowInsert':
+                //this.InsertFieldRow();
+                break;
+            case 'GridRowEdit':
+                //this.EditFieldRow();
+                break;
+            case 'GridRowDelete':
+                //tp.InfoNote('Clicked: ' + Args.Command);
+                break;
+        }
+    }
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    GridColumns_DoubleClick(Args) {
+        //Args.Handled = true;
+        //this.EditFieldRow();
     }
 };
 
+
+/**
+ * @type {tp.SelectSql}
+ * */
+tp.SelectSqlEditDialog.prototype.SelectSql = null;
 
 /**
 Displays a modal dialog box for editing a {@link tp.SelectSql} object

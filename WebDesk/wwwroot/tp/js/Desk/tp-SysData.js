@@ -986,7 +986,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     </div>
 </div>
 `;
-        let elContent = tp.ContentWindow.GetContentElement(ContentHtmlText);
+        let elContent = tp.HtmlToElement(ContentHtmlText);
 
         // show the dialog
         if (tp.IsHTMLElement(elContent)) {
@@ -1281,7 +1281,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     </div>
 </div>
 `;
-            let elRow = tp.ContentWindow.GetContentElement(HtmlText);
+            let elRow = tp.HtmlToElement(HtmlText);
 
             this.BrokerLayoutRow = new tp.Row(elRow, { Height: '100%' });
             this.tabGeneral.AddComponent(this.BrokerLayoutRow);

@@ -393,11 +393,33 @@ tp.AggregateType = {
 };
 Object.freeze(tp.AggregateType);
 
+/** Returns the values of the properties of the {@link tp.AggregateType} type as a {@link tp.DataTable}
+ * @returns {tp.DataTable} Returns the values of the properties of the {@link tp.AggregateType} type as a {@link tp.DataTable}
+ * */
+tp.AggregateTypeToLookUpTable = function () {
+    let Result = new tp.DataTable();
+
+    Result.AddColumn('Id');
+    Result.AddColumn('Name');
+
+    for (let Prop in tp.AggregateType) {
+        if (!tp.IsFunction(tp.AggregateType[Prop])) {
+            Result.AddRow(tp.AggregateType[Prop], Prop);
+        }
+    }
+    Result.AcceptChanges();
+    return Result;
+};
+
 /** An array with valid aggregate function names 
  @constant
  @type {string[]}
  */
 tp.ValidAggregateFunctions = ["", "count", "avg", "sum", "max", "min"];
+
+
+
+
 //#endregion  
 
 //#region  tp.DateRange
@@ -569,6 +591,8 @@ A static enum-like class. The display type of a column. Used with grids.
 @enum {number}
 */
 tp.ColumnDisplayType = {
+    /** Whatever the underlying field is
+     */
     Default: 0,
     DateTime: 1,
     Date: 2,
@@ -578,6 +602,24 @@ tp.ColumnDisplayType = {
     Image: 6
 };
 Object.freeze(tp.ColumnDisplayType);
+
+/** Returns the values of the properties of the {@link tp.ColumnDisplayType} type as a {@link tp.DataTable}
+ * @returns {tp.DataTable} Returns the values of the properties of the {@link tp.ColumnDisplayType} type as a {@link tp.DataTable}
+ * */
+tp.ColumnDisplayTypeToLookUpTable = function () {
+    let Result = new tp.DataTable();
+ 
+    Result.AddColumn('Id');
+    Result.AddColumn('Name');
+
+    for (let Prop in tp.ColumnDisplayType) {
+        if (!tp.IsFunction(tp.ColumnDisplayType[Prop])) {
+            Result.AddRow(tp.ColumnDisplayType[Prop], Prop);
+        }
+    }
+    Result.AcceptChanges();
+    return Result;
+};
 //#endregion
 
 
@@ -1675,11 +1717,9 @@ tp.SelectSql.prototype.DateRangeColumn = '';
 
 
 /** The list of column descriptors of columns to display. If null or empty, then all columns are displayed. Else only the columns defined in this list are displayed.
- * @private
  * @type {tp.SelectSqlColumn[]} */
 tp.SelectSql.prototype.Columns = [];
 /** The filter descriptors used to generate the "user where" clause. User's where is appended to the WHERE clause.
- * @private
  * @type {tp.SqlFilterDef[]} */
 tp.SelectSql.prototype.Filters = [];
 

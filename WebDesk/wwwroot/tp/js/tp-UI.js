@@ -20206,13 +20206,41 @@ tp.CtrlRow.GetHtml = function (IsCheckBox, Text, Ctrl) {
     // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
 
     let RowClass = IsCheckBox === true ? 'tp-CheckBoxRow' : 'tp-CtrlRow';
-    o = {
+    let o = {
         Text: Text,
         Control: Ctrl
     };
     let DataSetupText = JSON.stringify(o);
 
     let Result = `<div class='${RowClass}' data-setup='${DataSetupText}' ></div>`;
+    return Result;
+};
+/** Creates a control row or check-box control row object, along with a data-setup attribute.
+ * @param {HTMLElement|string} ElementOrSelector The element or a selector up on to create the row.
+ * @param {boolean} IsCheckBox When true creates a check-box row.
+ * @param {string} Text The caption of the row. The Text part of the data-setup object.
+ * @param {object} Ctrl The Control part of the data-setup object.
+ * @returns {tp.CtrlRow|tp.CheckBoxRow} Returns a control row or check-box control row object.
+ */
+tp.CreateControlRow = function (ElementOrSelector, IsCheckBox, Text, Ctrl) {
+
+    // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+
+    let el = tp(ElementOrSelector);
+    if (!el) {
+        let HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
+        el = tp.HtmlToElement(HtmlText);
+    }
+    else {
+        let o = {
+            Text: Text,
+            Control: Ctrl
+        };
+        let DataSetupText = JSON.stringify(o);
+        tp.Data(el, 'setup', DataSetupText);
+    }
+
+    let Result = IsCheckBox === true ? new tp.CheckBoxRow(el) : new tp.CtrlRow(el);
     return Result;
 };
 

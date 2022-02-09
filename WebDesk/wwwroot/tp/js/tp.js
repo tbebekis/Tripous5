@@ -4122,24 +4122,33 @@ tp.Html = function (el, v = '') {
 };
 
 /**
- * Returns an HTMLElement based on a specified HtmlText. Throws an exception on failure. <br />
+ * Returns an HTMLElement based on a specified Selector or HtmlText. Throws an exception on failure. <br />
  * Used when he have to display a content div inside another div, such as in dialog boxes.
- * @param {string} HtmlText Plain HTML text.
- * @returns {HTMLElement} Returns an HTMLElement
+ * @param {HTMLElement|string} ElementOrSelectorOrHtmlText Could be an HTMLElement, a selector or just plain HTML text.
+ * @returns {HTMLElement} Returns an HTMLElement based on a specified Selector or HtmlText
  */
-tp.HtmlToElement = function (HtmlText) {
-    let Result = null; 
+tp.HtmlToElement = function (ElementOrSelectorOrHtmlText) {
+    let Result = null;
 
-    if (!tp.IsBlankString(HtmlText) && tp.IsHtml(HtmlText)) {
-        // create a temp div
-        let div = tp.Div(tp.Doc.body);
-        div.innerHTML = HtmlText.trim();
-        Result = div.firstChild;
-        div.parentNode.removeChild(div);
+    if (tp.IsElement(ElementOrSelectorOrHtmlText)) {
+        Result = ElementOrSelectorOrHtmlText;
+    }
+
+    if (Result === null && !tp.IsBlankString(ElementOrSelectorOrHtmlText)) {
+        if (tp.IsHtml(ElementOrSelectorOrHtmlText)) {
+            // create a temp div
+            let div = tp.Div(tp.Doc.body);
+            div.innerHTML = ElementOrSelectorOrHtmlText.trim();
+            Result = div.firstChild;
+            div.parentNode.removeChild(div);
+        }
+        else {
+            Result = tp(ElementOrSelectorOrHtmlText);
+        }
     }
 
     if (Result === null) {
-        tp.Throw('HtmlToElement: Can not extract the created element');
+        tp.Throw('Can not extract the Content element');
     }
 
     return Result;
@@ -15667,11 +15676,11 @@ tp.Window.prototype.HeaderButtonBar = null;     // HTMLElement;
 tp.Window.prototype.Footer = null;              // HTMLElement;
 
 /** It always created by this base class
- * @type {@link tp.Component}
+ * @type {tp.Component}
  * */
 tp.Window.prototype.ContentWrapper = null;     
 /** It may be created after a specific call to CreateContentElement()
- * @type {@link tp.Component}
+ * @type {tp.Component}
  * */
 tp.Window.prototype.Content = null;
 
@@ -15749,38 +15758,7 @@ tp.ContentWindow = class extends tp.Window {
     }
 };
 
-/**
- * Returns an HTMLElement based on a specified Selector or HtmlText. Throws an exception on failure. <br />
- * Used when he have to display a content div inside another div, such as in dialog boxes.
- * @param {HTMLElement|string} ElementOrSelectorOrHtmlText Could be an HTMLElement, a selector or just plain HTML text.
- * @returns {HTMLElement} Returns an HTMLElement based on a specified Selector or HtmlText
- */
-tp.ContentWindow.GetContentElement = function (ElementOrSelectorOrHtmlText) {
-    let Result = null;
-    if (tp.IsElement(ElementOrSelectorOrHtmlText)) {
-        Result = ElementOrSelectorOrHtmlText;
-    }
-
-    if (Result === null && !tp.IsBlankString(ElementOrSelectorOrHtmlText)) {
-        if (tp.IsHtml(ElementOrSelectorOrHtmlText)) {
-            // create a temp div
-            let div = tp.Div(tp.Doc.body);
-            div.innerHTML = ElementOrSelectorOrHtmlText.trim();
-            Result = div.firstChild;
-            div.parentNode.removeChild(div);
-        }
-        else {
-            Result = tp(ElementOrSelectorOrHtmlText);
-        }
-    }
-
-    if (Result === null) {
-        tp.Throw('Can not extract the Content element');
-    }
-
-    return Result;
-
-};
+ 
 
 /* static */
 /**
