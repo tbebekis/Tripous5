@@ -1036,72 +1036,7 @@ tp.SqlFilterMode = {
 Object.freeze(tp.SqlFilterMode);
 //#endregion  
 
-//#region tp.SqlFilterEnum
-/**
-Represents the enum settings of a Sql filter descriptor
-*/
-tp.SqlFilterEnum = class {
 
-    /**
-    Constructor
-    */
-    constructor() {
-    }
- 
-    /**
-    Assigns source to this instance
-    @param {tp.SqlFilterEnum} Source The source tp.SqlFilterEnum
-    */
-    Assign(Source) {
-        for (var key in Source) {
-            if (typeof Source[key] !== 'function')
-                this[key] = Source[key];
-        }
-    }
-    /**
-    If an object being stringified has a property named toJSON whose value is a function, then the toJSON() method customizes JSON stringification behavior.
-    Instead of the object being serialized, the value returned by the toJSON() method when called will be serialized.
-    @see {@link http://www.ecma-international.org/ecma-262/5.1/#sec-15.12.3|specification}
-    @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify|mdn}
-    @return {object} Returns a plain object having all the properties and values of this instance. JSON.stringify() uses that returned object instead of this instance when serializing.
-    */
-    toJSON() {
-        let Result = {};
-
-        for (var key in this) {
-            if (typeof this[key] !== 'function')
-                Result[key] = this[key];
-        }
-
-        return Result;
-    }
-};
-
-/** SQL SELECT statement of an EnumQuery filter.
- * @type {string}
- */
-tp.SqlFilterEnum.prototype.Sql = '';                    
-/** The result field
- * @type {string}
- */
-tp.SqlFilterEnum.prototype.ResultField = 'Id';           
-/** For EnumConst and EnumQuery only items. When true the user may select multiple items.
- * @type {boolean}
- */
-tp.SqlFilterEnum.prototype.IsMultiChoise = false;         
-/** list of constant options. Used only when the is an EnumConst filter.
- * @type {string[]}
- */
-tp.SqlFilterEnum.prototype.OptionList = [];
-/** When true, constant options are displayed initially to the user as checked.
- * @type {boolean}
- */
-tp.SqlFilterEnum.prototype.IncludeAll = true;            
-/**  A list where each line is FIELD_NAME=Title
- * @type {string}
- */
-tp.SqlFilterEnum.prototype.DisplayLabels = '';
-//#endregion  
 
 //#region tp.SqlFilterDef
 /**
@@ -1112,9 +1047,9 @@ tp.SqlFilterDef = class   {
     Constructor
     @param {string} [FieldPath] The field path, i.e. TableName.FieldName or just FieldName
     */
-    constructor(FieldPath) {
-        this.Enum = new tp.SqlFilterEnum();
+    constructor(FieldPath) { 
         this.FieldPath = FieldPath || '';
+        this.EnumOptionList = [];
     }
 
     /** Title (caption) of this instance, used for display purposes.
@@ -1137,6 +1072,81 @@ tp.SqlFilterDef = class   {
     }
 
     /**
+    The full path to the field, i.e. TableAlias.FieldName, or just FieldName
+    @type {string}
+    */
+    FieldPath = '';
+    /**
+    * Datatype. One of the values of the properties of the {@link tp.DataType}
+    * @type {string}
+    */
+    DataType = tp.DataType.String;
+    /**
+    Indicates how the user enters of selects the filter value. One of the {@link tp.SqlFilterMode} constants.
+    @type {number}
+    */
+    Mode = tp.SqlFilterMode.Simple;
+
+    /**
+    If true then range is used. Valid ONLY when Mode is Simple and DataType String, Integer, Float or Decimal. <br />
+    Date and Time are ALWAYS used as a range from-to. <br />
+    Defaults to false. <br />
+    @type {boolean}
+    */
+    UseRange = false;
+    /**
+    The locator name, when mode Locator
+    @type {string}
+    */
+    Locator = '';
+    /**
+    If true then the result string of this criterion goes to the HAVING clause of a SELECT statement.
+    @type {boolean}
+    */
+    PutInHaving = false;
+    /**
+    the aggregation function (sum, count, avg, min, max) to use, PutInHaving is true. It could be an empty string.
+    @type {string}
+    */
+    AggregateFunc = '';
+
+    /**
+     
+    @type {string}
+    */
+    InitialValue = '';
+
+    // enum properties
+    // Valid ONLY when Mode is Enum and DataType is String or Integer
+    //   filter enum settings, that is special settings when Mode is EnumQuery or EnumConst 
+
+    /** SQL SELECT statement of an EnumQuery filter.
+     * @type {string}
+     */
+    EnumSql = '';
+    /** The result field
+     * @type {string}
+     */
+    EnumResultField = 'Id';
+    /** For EnumConst and EnumQuery only items. When true the user may select multiple items.
+     * @type {boolean}
+     */
+    EnumIsMultiChoise = false;
+    /** list of constant options. Used only when the is an EnumConst filter.
+     * @type {string[]}
+     */
+    EnumOptionList = [];
+    /** When true, constant options are displayed initially to the user as checked.
+     * @type {boolean}
+     */
+    EnumIncludeAll = true;
+    /**  A list where each line is FIELD_NAME=Title
+     * @type {string}
+     */
+    EnumDisplayLabels = '';
+ 
+
+    /**
      * Creates and returns a {@link tp.SqlFilterDef} descriptor.
      * @param {string} FieldPath The full path to the field, i.e. TableAlias.FieldName, or just FieldName
      * @param {string} Title The Title of this instance, used for display purposes
@@ -1154,7 +1164,6 @@ tp.SqlFilterDef = class   {
     @param {tp.SqlFilterDef} Source The source to copy from
     */
     Assign(Source) {
-
         this.FieldPath = Source.FieldPath;
         this.Title = Source.Title;
         this.TitleKey = Source.TitleKey;
@@ -1167,11 +1176,14 @@ tp.SqlFilterDef = class   {
         this.PutInHaving = Source.PutInHaving;
         this.AggregateFunc = Source.AggregateFunc;
 
-        this.InitialValue = Source.InitialValue;
+        this.EnumSql = Source.EnumSql;
+        this.EnumResultField = Source.EnumResultField;
+        this.EnumIsMultiChoise = Source.EnumIsMultiChoise;
+        this.EnumOptionList = Source.EnumOptionList;
+        this.EnumIncludeAll = Source.EnumIncludeAll;
+        this.EnumDisplayLabels = Source.EnumDisplayLabels; 
 
-        if (tp.IsValid(Source.Enum)) {
-            this.Enum.Assign(Source.Enum);
-        }
+        this.InitialValue = Source.InitialValue;
     }
     /**
     If an object being stringified has a property named toJSON whose value is a function, then the toJSON() method customizes JSON stringification behavior.
@@ -1195,11 +1207,14 @@ tp.SqlFilterDef = class   {
         Result.PutInHaving = this.PutInHaving;
         Result.AggregateFunc = this.AggregateFunc;
 
-        Result.InitialValue = this.InitialValue;
+        Result.EnumSql = this.EnumSql;
+        Result.EnumResultField = this.EnumResultField;
+        Result.EnumIsMultiChoise = this.EnumIsMultiChoise;
+        Result.EnumOptionList = this.EnumOptionList;
+        Result.EnumIncludeAll = this.EnumIncludeAll;
+        Result.EnumDisplayLabels = this.EnumDisplayLabels;
 
-        if (tp.IsValid(this.Enum)) {
-            Result.Enum = this.Enum.toJSON();
-        }
+        Result.InitialValue = this.InitialValue;
 
         return Result;
     }
@@ -1215,59 +1230,14 @@ tp.SqlFilterDef = class   {
 tp.SqlFilterDef.prototype.fTitle = '';
 tp.SqlFilterDef.prototype.fTitleKey = '';
 
- 
-/**
-The full path to the field, i.e. TableAlias.FieldName, or just FieldName
-@type {string}
-*/
-tp.SqlFilterDef.prototype.FieldPath = '';
- 
+
+
+
+
+
  
 
-/**
-* Datatype. One of the values of the properties of the {@link tp.DataType}
-* @type {string}
-*/
-tp.SqlFilterDef.prototype.DataType = tp.DataType.String;
-/**
-Indicates how the user enters of selects the filter value. One of the {@link tp.SqlFilterMode} constants.
-@type {number}
-*/
-tp.SqlFilterDef.prototype.Mode = tp.SqlFilterMode.Simple;
 
-/**
-If true then range is used. Valid ONLY when Mode is Simple and DataType String, Integer, Float or Decimal. <br />
-Date and Time are ALWAYS used as a range from-to. <br />
-Defaults to false. <br />
-@type {boolean}
-*/
-tp.SqlFilterDef.prototype.UseRange = false;
-/**
-The locator name, when mode Locator
-@type {string}
-*/
-tp.SqlFilterDef.prototype.Locator = '';
-/**
-If true then the result string of this criterion goes to the HAVING clause of a SELECT statement.
-@type {boolean}
-*/
-tp.SqlFilterDef.prototype.PutInHaving = false;
-/**
-the aggregation function (sum, count, avg, min, max) to use, PutInHaving is true. It could be an empty string.
-@type {string}
-*/
-tp.SqlFilterDef.prototype.AggregateFunc = '';
-/**
-Returns the filter enum settings, that is special settings object when Mode is EnumQuery or EnumConst
-@type {tp.SqlFilterEnum}
-*/
-tp.SqlFilterDef.prototype.Enum = new tp.SqlFilterEnum();
-
-/**
- 
-@type {string}
-*/
-tp.SqlFilterDef.prototype.InitialValue = '';
 
 //#endregion  
 

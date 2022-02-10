@@ -68,7 +68,15 @@
      * @type {tp.DataTable}
      */
     tblColumns = null;
- 
+
+    /**
+     * @type {tp.ToolBar}
+     */
+    tbFilters = null;
+    /**
+    * @type {tp.HtmlListBox}
+    */
+    lboFilters = null;
 
     /* overrides */
     InitClass() {
@@ -88,7 +96,7 @@
     CreateControls() {
         super.CreateControls();
 
-        let elRow, elCol, i, ln;
+        let elRow, elCol, el, CP, i, ln;
 
         // , Height: "100%"
         let RowHtmlText = `
@@ -155,13 +163,14 @@
 
         // Columns Page
         // ---------------------------------------------------------------------------------
+
         // add a tp.Row to the tab page
         let LayoutRow = new tp.Row(null, { Height: '100%' });
         this.tabColumns.AddComponent(LayoutRow);
 
         // add a DIV for the gridFields tp.Grid in the row
-        let el = LayoutRow.AddDivElement();
-        let CP = {
+        el = LayoutRow.AddDivElement();
+        CP = {
             Name: "gridColumns",
             Height: '100%',
             
@@ -190,6 +199,7 @@
                 { Name: 'Width' },
                 { Name: 'ReadOnly' },
 
+                { Name: 'DisplayIndex' },
                 { Name: 'GroupIndex' },
                 { Name: 'Decimals' },
                 { Name: 'FormatString' },
@@ -209,7 +219,8 @@
         this.tblColumns.AddColumn('TitleKey');
         this.tblColumns.AddColumn('DisplayType', tp.DataType.Boolean);
         this.tblColumns.AddColumn('Width', tp.DataType.Integer);
-        this.tblColumns.AddColumn('ReadOnly', tp.DataType.Boolean);
+        this.tblColumns.AddColumn('ReadOnly', tp.DataType.Boolean);  
+        this.tblColumns.AddColumn('DisplayIndex', tp.DataType.Integer);
         this.tblColumns.AddColumn('GroupIndex', tp.DataType.Integer);
         this.tblColumns.AddColumn('Decimals', tp.DataType.Integer);
         this.tblColumns.AddColumn('FormatString');
@@ -223,6 +234,7 @@
             DataRow.Set('DisplayType', Column.DisplayType);
             DataRow.Set('Width', Column.Width);
             DataRow.Set('ReadOnly', Column.ReadOnly);
+            DataRow.Set('DisplayIndex', Column.DisplayIndex);
             DataRow.Set('GroupIndex', Column.GroupIndex);
             DataRow.Set('Decimals', Column.Decimals);
             DataRow.Set('FormatString', Column.FormatString);
@@ -234,9 +246,47 @@
 
         this.gridColumns.DataSource = this.tblColumns;
         this.gridColumns.BestFitColumns();
-
-        // EDW
+ 
         this.tblColumns.On('RowCreated', this.tblColumns_RowCreated, this);
+
+
+        // Filters Page
+        // ---------------------------------------------------------------------------------
+        el = this.tabFilters.AddDivElement();
+        tp.SetStyle(el, {
+            'position': 'relative',
+            'display': 'flex',
+            'gap': '2px',
+            'flex-direction': 'column',
+            'height': '100%'
+        }); 
+
+        this.tbFilters = new tp.ToolBar();
+        this.tbFilters.ParentHandle = el;
+        this.tbFilters.AddButton('Insert', 'Insert', 'Insert', 'fa fa-plus');
+        this.tbFilters.AddButton('Edit', 'Edit', 'Edit', 'fa fa-edit');
+        this.tbFilters.AddButton('Delete', 'Delete', 'Delete', 'fa fa-minus');
+        this.tbFilters.SetNoText(true);
+
+        el = tp.Div(el);
+        tp.SetStyle(el, {
+            'position': 'relative',
+            'flex-grow': 1,
+            'padding' : '0 0 1px 1px'
+        }); 
+
+        this.lboFilters = new tp.HtmlListBox();
+        this.lboFilters.ParentHandle = el;
+        this.lboFilters.Width = '240px';
+        this.lboFilters.Height = '100%';
+
+        this.tbFilters.On('ButtonClick', this.tbFilters_ButtonClick, this);
+
+        this.SelectSql.Filters.forEach((FilterDef) => {
+            this.lboFilters.Add(FilterDef.FieldPath, FilterDef.FieldPath);
+        });
+ 
+
     }
     /** Can be used in passing the results back to the caller code. 
      * On modal dialogs the code should examine the DialogResult to decide what to do.
@@ -244,7 +294,34 @@
      * */
     PassBackResult() {
         if (this.DialogResult === tp.DialogResult.OK) {
+            this.SelectSql.Name = this.edtName.Text;
+            this.SelectSql.TitleKey = this.edtTitleKey.Text;
+            this.SelectSql.ConnectionName = this.edtConnectionName.Text;
+            this.SelectSql.DateRangeColumn = this.edtDateRangeColumn.Text;
+            this.SelectSql.DateRange = tp.StrToInt(this.cboDateRange.SelectedValue);
+            this.SelectSql.CompanyAware = this.chCompanyAware.Checked;
 
+            this.SelectSql.Text = this.elSqlEditor.__Editor.getValue();
+
+            this.SelectSql.Columns.length = 0;
+
+            this.tblColumns.Rows.forEach((Row) => {
+                let Column = new tp.SelectSqlColumn();
+                this.SelectSql.Columns.push(Column);
+
+                Column.Name = Row.Get('Name', '');
+                Column.TitleKey = Row.Get('TitleKey', '');
+                Column.DisplayType = Row.Get('DisplayType', Column.DisplayType);
+                Column.Width = Row.Get('Width', 90);
+                Column.ReadOnly = Row.Get('ReadOnly', false);
+                Column.DisplayIndex = Row.Get('DisplayIndex', 0);
+                Column.GroupIndex = Row.Get('GroupIndex', -1);
+                Column.Decimals = Row.Get('Decimals', -1);
+                Column.FormatString = Row.Get('FormatString', '');
+                Column.Aggregate = Row.Get('Aggregate', Column.Aggregate);
+                Column.AggregateFormat = Row.Get('AggregateFormat', '');
+
+            });
         }
     }
 
@@ -293,6 +370,12 @@
     GridColumns_DoubleClick(Args) {
         //Args.Handled = true;
         //this.EditFieldRow();
+    }
+    /** Event handler. Filters tool-bar button click.
+     * @param {tp.ToolBarItemClickEventArgs} Args
+     */
+    tbFilters_ButtonClick(Args) {
+        tp.InfoNote(Args.Command);
     }
 };
 

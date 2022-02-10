@@ -19161,15 +19161,15 @@ tp.SqlFilterControlLink = class {
 
         let TableColumn, GridColumn;
         if (this.FilterDef.Mode === tp.SqlFilterMode.EnumQuery) {
-            this.tblEnum = await tp.Db.SelectAsync(this.FilterDef.Enum.Sql);
+            this.tblEnum = await tp.Db.SelectAsync(this.FilterDef.EnumSql);
         }
         else {
-            this.FilterDef.Enum.ResultField = this.FilterDef.Enum.ResultField || 'Result';
+            this.FilterDef.EnumResultField = this.FilterDef.EnumResultField || 'Result';
 
             this.tblEnum = new tp.DataTable('tblEnum');
-            this.tblEnum.AddColumn(this.FilterDef.Enum.ResultField, this.FilterDef.Enum.DataType, 140);
+            this.tblEnum.AddColumn(this.FilterDef.EnumResultField, this.FilterDef.EnumDataType, 140);
 
-            this.FilterDef.Enum.OptionList.forEach(item => {
+            this.FilterDef.EnumOptionList.forEach(item => {
                 this.tblEnum.AddRow([item]);
             });
         }
@@ -19179,7 +19179,7 @@ tp.SqlFilterControlLink = class {
             TableColumn.Title = '+/-';
         }
 
-        if (this.FilterDef.Enum.IsMultiChoise === true && this.FilterDef.Enum.IncludeAll === true) {
+        if (this.FilterDef.EnumIsMultiChoise === true && this.FilterDef.EnumIncludeAll === true) {
             this.tblEnum.Rows.forEach(Row => {
                 Row.Set('Include', true);
             });
@@ -19204,7 +19204,7 @@ tp.SqlFilterControlLink = class {
         this.gridEnum.SetColumnListWritable(['Include']);
 
         // when not multi-choise, ensure only a single row is selected
-        if (this.FilterDef.Enum.IsMultiChoise !== true) {
+        if (this.FilterDef.EnumIsMultiChoise !== true) {
             this.gridEnumDatasourceListener = new tp.DataSourceListener();
             this.gridEnum.DataSource.AddDataListener(this.gridEnumDatasourceListener);
             this.gridEnumDatasourceListener.DataSourceRowModified = (Table, Row, Column, OldValue, NewValue) => { this.gridEnum_DataSourceRowModified(Table, Row, Column, OldValue, NewValue); };
@@ -19306,7 +19306,7 @@ tp.SqlFilterControlLink = class {
             else {
                 Result = [];
 
-                let ResultField = this.FilterDef.Enum.ResultField;
+                let ResultField = this.FilterDef.EnumResultField;
                 if (tp.IsString(ResultField) && !tp.IsBlank(ResultField) && this.tblEnum.ContainsColumn(ResultField)) {
                     let v;
                     this.tblEnum.Rows.forEach(Row => {
@@ -19389,7 +19389,7 @@ tp.SqlFilterControlLink = class {
             this.edtTo.Text = '';
 
         if (tp.IsValid(this.tblEnum)) {
-            let Flag = this.FilterDef.Enum.IsMultiChoise === true && this.FilterDef.Enum.IncludeAll === true;
+            let Flag = this.FilterDef.EnumIsMultiChoise === true && this.FilterDef.EnumIncludeAll === true;
             this.tblEnum.Rows.forEach(Row => {
                 Row.Set('Include', Flag);
             });

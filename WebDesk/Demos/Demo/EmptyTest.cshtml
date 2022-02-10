@@ -48,7 +48,12 @@
 
 
 <script>
+
+    let SS = null;
+
     tp.Ready(function () {
+        SS = new tp.SelectSql('select * from Customer');
+        SS.Filters.push(new tp.SqlFilterDef('Customer.Name'));
         
     });
 
@@ -70,9 +75,7 @@
     };
 
     let ShowSelectSqlEditDialog = async () => {
-        let SS = new tp.SelectSql('select * from Customer');
-
-        let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
+         let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
 
         let S = tp.EnumNameOf(tp.DialogResult, DialogBox.DialogResult); 
         tp.InfoNote('DialogResult = ' + S);

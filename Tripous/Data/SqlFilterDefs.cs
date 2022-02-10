@@ -70,7 +70,7 @@ namespace Tripous.Data
             foreach (var Item in this)
             {
                 if (Bf.Member(Item.Mode, SqlFilterMode.EnumQuery | SqlFilterMode.EnumConst))
-                    Item.Enum.IsMultiChoise = Value;
+                    Item.EnumIsMultiChoise = Value;
             }
         }
 

@@ -23,61 +23,8 @@ namespace Tripous.Data
         /// </summary>
         static public readonly List<string> ValidAggregateFunctions = new List<string>(new string[] { "", "count", "avg", "sum", "max", "min" });
         string fAggregateFunc;
-        SqlFilterEnum fSqlFilterEnum;
+ 
         string fTitleKey;
-
-        /// <summary>
-        /// It is used when the data type of the criterion is either <see cref="SqlFilterMode.EnumConst"/> or <see cref="SqlFilterMode.EnumQuery"/>
-        /// </summary>
-        public class SqlFilterEnum 
-        {
-            List<string> fOptionList;
-
-            /* construction */
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public SqlFilterEnum()
-            {
-            }
-
-            /* properties */
-            /// <summary>
-            /// Gets or sets the SQL SELECT statement of a <see cref="SqlFilterMode.EnumQuery"/> criterion.
-            /// </summary>
-            public string Sql { get; set; }
-            /// <summary>
-            /// Ges or sets the result field  
-            /// </summary>
-            public string ResultField { get; set; } = "Id";
-            /// <summary>
-            /// For EnumConst and EnumQuery only items. When true the user interface presents
-            /// a multi choise control, otherwise a combo box is presented.
-            /// </summary>
-            public bool IsMultiChoise { get; set; }
-            /// <summary>
-            /// Gets the list of constant options. Used only when the filter is a <see cref="SqlFilterMode.EnumConst"/>  filter. 
-            /// </summary>
-            public List<string> OptionList
-            {
-                get
-                {
-                    if (fOptionList == null)
-                        fOptionList = new List<string>();
-                    return fOptionList;
-                }
-                set { fOptionList = value; }
-            }
-            /// <summary>
-            /// When true, constant options are displayed initially to the user as checked.
-            /// </summary>
-            public bool IncludeAll { get; set; }
-            /// <summary>
-            /// A list where each line is FIELD_NAME=Title
-            /// </summary>
-            public string DisplayLabels { get; set; }
-        }
-
  
         /* construction */
         /// <summary>
@@ -98,7 +45,7 @@ namespace Tripous.Data
   
             if (Mode == SqlFilterMode.EnumConst)
             {
-                if (Enum.OptionList == null || Enum.OptionList.Count == 0)
+                if (EnumOptionList == null || EnumOptionList.Count == 0)
                     Sys.Throw(Format, Res.GS("SqlFilter_Enum_ConstantOptionsList", "EnumConst Sql Filter. List of constants not defined."));
 
                 if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
@@ -106,19 +53,19 @@ namespace Tripous.Data
             }
             else if (Mode == SqlFilterMode.EnumQuery)
             {
-                if (string.IsNullOrWhiteSpace(Enum.ResultField))
+                if (string.IsNullOrWhiteSpace(EnumResultField))
                     Sys.Throw(Format, Res.GS("SqlFilter_Enum_ResultFieldName", "EnumQuery Sql Filter. Result Field Name not defined."));
 
                 if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
                     Sys.Throw("EnumQuery Sql Filter. Invalid data type. Only string and integer is allowed.");
 
-                if (string.IsNullOrWhiteSpace(Enum.Sql))
+                if (string.IsNullOrWhiteSpace(EnumSql))
                     Sys.Throw(Format, Res.GS("SqlFilter_Enum_Sql", "EnumQuery Sql Filter. SELECT Sql is not defined."));
 
                 Format = Res.GS("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
-                if (Enum.DisplayLabels != null && Enum.DisplayLabels.Length > 0)
+                if (EnumDisplayLabels != null && EnumDisplayLabels.Length > 0)
                 {
-                    string[] Lines = Enum.DisplayLabels.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] Lines = EnumDisplayLabels.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
                     for (int i = 0; i < Lines.Length; i++)
                         if (!Lines[i].Contains('='))
@@ -218,20 +165,37 @@ namespace Tripous.Data
             set { fAggregateFunc = value; }
         }
 
+ 
+
+        /* enum properties - Valid ONLY when Mode is Enum and DataType is String or Integer */
+
         /// <summary>
-        /// Gets the Enum.
-        /// <para>Valid ONLY when DataType is String or Integer</para>
+        /// Gets or sets the SQL SELECT statement of a <see cref="SqlFilterMode.EnumQuery"/> criterion.
         /// </summary>
-        public SqlFilterEnum Enum
-        {
-            get
-            {
-                if (fSqlFilterEnum == null)
-                    fSqlFilterEnum = new SqlFilterEnum();
-                return fSqlFilterEnum;
-            }
-            set { fSqlFilterEnum = value; }
-        }
+        public string EnumSql { get; set; }
+        /// <summary>
+        /// Ges or sets the result field  
+        /// </summary>
+        public string EnumResultField { get; set; } = "Id";
+        /// <summary>
+        /// For EnumConst and EnumQuery only items. When true the user interface presents
+        /// a multi choise control, otherwise a combo box is presented.
+        /// </summary>
+        public bool EnumIsMultiChoise { get; set; }
+        /// <summary>
+        /// Gets the list of constant options. Used only when the filter is a <see cref="SqlFilterMode.EnumConst"/>  filter. 
+        /// </summary>
+        public List<string> EnumOptionList { get; set; } = new List<string>();
+ 
+        /// <summary>
+        /// When true, constant options are displayed initially to the user as checked.
+        /// </summary>
+        public bool EnumIncludeAll { get; set; }
+        /// <summary>
+        /// A list where each line is FIELD_NAME=Title
+        /// </summary>
+        public string EnumDisplayLabels { get; set; }
+
 
         /// <summary>
         /// 
