@@ -15445,9 +15445,8 @@ gap: 0.15em;
 
         return true;
     }
-    /**
-     * Used with modal windows.
-     * Can be used in passing the results back to the caller code. 
+    /** Can be used in passing the results back to the caller code. 
+     * On modal dialogs the code should examine the DialogResult to decide what to do.
      * */
     PassBackResult() { 
     }
@@ -15944,7 +15943,7 @@ tp.MessageDialog.Show = function (MessageText, BoxType, CloseFunc = null, Creato
     Args.MessageText = MessageText;
     //Args.fModal = true;
 
-    var Result = new tp.MessageDialog(Args);
+    var Result = new tp.MessageDialog(Args); 
     Result.ShowModal();
     return Result;
 };
@@ -15993,8 +15992,8 @@ Displays an information dialog and returns a promise.
 */
 tp.InfoBoxAsync = async function (MessageText) {
     return new Promise((Resolve, Reject) => {
-        tp.InfoBox(MessageText, (Args) => {
-            Resolve(Args);
+        tp.InfoBox(MessageText, (Dialog) => {
+            Resolve(Dialog);
         });
     });
 };
@@ -16005,8 +16004,8 @@ Displays an error modal dialog and returns a promise.
 */
 tp.ErrorBoxAsync = async function (MessageText) {
     return new Promise((Resolve, Reject) => {
-        tp.ErrorBox(MessageText, (Args) => {
-            Resolve(Args);
+        tp.ErrorBox(MessageText, (Dialog) => {
+            Resolve(Dialog);
         });
     });
 };
@@ -16017,8 +16016,8 @@ Displays a yes-no modal dialog and returns a promise.
 */
 tp.YesNoBoxAsync = async function (MessageText) {
     return new Promise((Resolve, Reject) => {
-        tp.YesNoBox(MessageText, (Args) => {
-            let DialogResult = Args.Window.DialogResult;
+        tp.YesNoBox(MessageText, (Dialog) => {
+            let DialogResult = Dialog.DialogResult;
             Resolve(DialogResult === tp.DialogResult.Yes);
         });
     });

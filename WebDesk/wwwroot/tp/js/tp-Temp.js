@@ -236,13 +236,37 @@
         this.gridColumns.BestFitColumns();
 
         // EDW
- 
+        this.tblColumns.On('RowCreated', this.tblColumns_RowCreated, this);
+    }
+    /** Can be used in passing the results back to the caller code. 
+     * On modal dialogs the code should examine the DialogResult to decide what to do.
+     * @override
+     * */
+    PassBackResult() {
+        if (this.DialogResult === tp.DialogResult.OK) {
+
+        }
     }
 
 
 
-
     /* event handlers */
+    /** Called when a new data row is created and it is about to added to the table
+     * @param {tp.DataTableEventArgs} Args
+     */
+    tblColumns_RowCreated(Args) {
+        let Row = Args.Row;
+        Row.Set('Name', 'NewColumn');
+        Row.Set('TitleKey', 'New Column');
+        Row.Set('DisplayType', tp.ColumnDisplayType.Default);
+        Row.Set('Width', 90);
+        Row.Set('ReadOnly', false);
+        Row.Set('GroupIndex', -1);
+        Row.Set('Decimals', -1);
+        Row.Set('FormatString', '');
+        Row.Set('Aggregate', tp.AggregateType.None);
+        Row.Set('AggregateFormat', '');
+    }
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */

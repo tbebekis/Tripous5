@@ -5909,8 +5909,8 @@ tp.Grid = class extends tp.Control  {
                     if (!this.ReadOnly && this.Enabled && this.AllowUserToDeleteRows) {
                         Row = this.FocusedRow;
                         if (!tp.IsEmpty(Row)) {
-                            tp.YesNoBox('Delete selected row?', (Args) => {
-                                if (Args.Window.DialogResult === tp.DialogResult.Yes) {
+                            tp.YesNoBox('Delete selected row?', (Dialog) => {
+                                if (Dialog.DialogResult === tp.DialogResult.Yes) {
                                     this.DeleteRow(Row);
                                 }
                             });
