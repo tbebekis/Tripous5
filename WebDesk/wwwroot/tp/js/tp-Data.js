@@ -1,6 +1,32 @@
 ﻿
 /* eslint no-constant-condition: ["error", { "checkLoops": false }] */
 
+ 
+/** Returns the values of the properties of an enum type, such as the {@link tp.AggregateType} as a {@link tp.DataTable}
+ * @param {object} Enum The enum type to returns as data-table
+ * @param {object[]} [ExcludeValues=[]] Optional. An array of enum values to be excluded.
+ * @returns {tp.DataTable} Returns the values of the properties of an enum type, such as the {@link tp.AggregateType} as a {@link tp.DataTable}
+ */
+tp.EnumToLookUpTable = function (Enum, ExcludeValues = []) {
+    let Result = new tp.DataTable();
+
+    ExcludeValues = tp.IsArray(ExcludeValues) ? ExcludeValues : [];
+
+    Result.AddColumn('Id');
+    Result.AddColumn('Name');
+
+    for (let Prop in Enum) {
+        if (!tp.IsFunction(Enum[Prop]) && ExcludeValues.indexOf(Enum[Prop]) < 0  ) {
+            Result.AddRow(Enum[Prop], Prop);
+        }
+    }
+
+    Result.AcceptChanges();
+    return Result;
+};
+
+ 
+
 //#region tp.Sql
 /**
  * A static helper class for working with sql statements
@@ -181,27 +207,7 @@ tp.DataType = {
     get Blob() { return "B"; }, // = "B";          // {"blob", "bin", "binary"}
  */
 
-
-    /** Returns the values of the properties of this type as a {@link tp.DataTable}
-     * @type {string[]} ExcludeTypes Array containing {@link tp.DataType} constants to exclude.
-     * @returns {tp.DataTable} Returns the values of the properties of this type as a {@link tp.DataTable}
-     * */
-    ToLookupTable(ExcludeTypes = [tp.DataType.Unknown]) {
-        let Result = new tp.DataTable();
-
-        ExcludeTypes = tp.IsArray(ExcludeTypes) ? ExcludeTypes : [];
-
-        Result.AddColumn('Id');
-        Result.AddColumn('Name');
-
-        for (let Prop in tp.DataType) {
-            if (ExcludeTypes.indexOf(Prop) < 0 && !tp.IsFunction(tp.DataType[Prop])) {
-                Result.AddRow(Prop, Prop);
-            }
-        }
-        Result.AcceptChanges();
-        return Result;
-    },
+ 
     /** Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
      * @type {string[]} ExcludeTypes Array containing {@link tp.DataType} constants to exclude.
      * @returns {object[]} Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
@@ -392,24 +398,7 @@ tp.AggregateType = {
     Min: 16
 };
 Object.freeze(tp.AggregateType);
-
-/** Returns the values of the properties of the {@link tp.AggregateType} type as a {@link tp.DataTable}
- * @returns {tp.DataTable} Returns the values of the properties of the {@link tp.AggregateType} type as a {@link tp.DataTable}
- * */
-tp.AggregateTypeToLookUpTable = function () {
-    let Result = new tp.DataTable();
-
-    Result.AddColumn('Id');
-    Result.AddColumn('Name');
-
-    for (let Prop in tp.AggregateType) {
-        if (!tp.IsFunction(tp.AggregateType[Prop])) {
-            Result.AddRow(tp.AggregateType[Prop], Prop);
-        }
-    }
-    Result.AcceptChanges();
-    return Result;
-};
+ 
 
 /** An array with valid aggregate function names 
  @constant
@@ -603,23 +592,7 @@ tp.ColumnDisplayType = {
 };
 Object.freeze(tp.ColumnDisplayType);
 
-/** Returns the values of the properties of the {@link tp.ColumnDisplayType} type as a {@link tp.DataTable}
- * @returns {tp.DataTable} Returns the values of the properties of the {@link tp.ColumnDisplayType} type as a {@link tp.DataTable}
- * */
-tp.ColumnDisplayTypeToLookUpTable = function () {
-    let Result = new tp.DataTable();
  
-    Result.AddColumn('Id');
-    Result.AddColumn('Name');
-
-    for (let Prop in tp.ColumnDisplayType) {
-        if (!tp.IsFunction(tp.ColumnDisplayType[Prop])) {
-            Result.AddRow(tp.ColumnDisplayType[Prop], Prop);
-        }
-    }
-    Result.AcceptChanges();
-    return Result;
-};
 //#endregion
 
 
@@ -711,8 +684,8 @@ tp.SelectSqlColumn.prototype.fTitleKey = '';
  @type {string}
  * */
 tp.SelectSqlColumn.prototype.Name = '';
-/** The display type of a column. Used with grids.
- @type {tp.ColumnDisplayType.Default}
+/** The display type of a column. Used with grids. One of the constants of the {@link tp.ColumnDisplayType} type.
+ @type {number}
  * */
 tp.SelectSqlColumn.prototype.DisplayType = tp.ColumnDisplayType.Default;
  
@@ -1052,6 +1025,12 @@ tp.SqlFilterDef = class   {
         this.EnumOptionList = [];
     }
 
+    /**
+    The full path to the field, i.e. TableAlias.FieldName, or just FieldName
+    @type {string}
+    */
+    FieldPath = '';
+
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -1071,11 +1050,7 @@ tp.SqlFilterDef = class   {
         this.fTitleKey = v;
     }
 
-    /**
-    The full path to the field, i.e. TableAlias.FieldName, or just FieldName
-    @type {string}
-    */
-    FieldPath = '';
+
     /**
     * Datatype. One of the values of the properties of the {@link tp.DataType}
     * @type {string}
@@ -3790,9 +3765,15 @@ tp.DataRow = class {
             this.Table.OnRowCreated(this);
 
         if (this.Table.AutoGenerateGuidKeys && this.Table.PrimaryKeyIndex >= 0 && this.Table.Columns[this.Table.PrimaryKeyIndex].DataType === tp.DataType.String) {
-            var v = this.Data[this.Table.PrimaryKeyIndex];
+            let v = this.Data[this.Table.PrimaryKeyIndex];
             if (tp.IsEmpty(v) || (tp.IsString(v) && tp.IsBlank(v)))
                 this.SetByIndex(this.Table.PrimaryKeyIndex, tp.Guid());
+        }
+
+        // default values
+        for (let i = 0, ln = this.Table.ColumnCount; i < ln; i++) {
+            if (tp.IsValid(this.Table.Columns[i].DefaultValue) && tp.IsEmpty(this.Data[i]))
+                this.Data[i] = this.Table.Columns[i].DefaultValue;
         }
 
         this.State = tp.DataRowState.Detached;

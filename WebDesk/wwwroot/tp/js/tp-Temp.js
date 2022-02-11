@@ -59,24 +59,25 @@
      * @type {HTMLElement}
      */
     elSqlEditor = null;
+
     /**
      * @type {tp.Grid}
      */
     gridColumns = null;
-
     /**
      * @type {tp.DataTable}
      */
     tblColumns = null;
 
     /**
-     * @type {tp.ToolBar}
+     * @type {tp.Grid}
      */
-    tbFilters = null;
+    gridFilters = null;
     /**
-    * @type {tp.HtmlListBox}
-    */
-    lboFilters = null;
+     * @type {tp.DataTable}
+     */
+    tblFilters = null;
+ 
 
     /* overrides */
     InitClass() {
@@ -96,7 +97,7 @@
     CreateControls() {
         super.CreateControls();
 
-        let elRow, elCol, el, CP, i, ln;
+        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
 
         // , Height: "100%"
         let RowHtmlText = `
@@ -147,7 +148,7 @@
             this.cboDateRange.Add(tp.DateRanges.WhereRangesTexts[i], tp.DateRanges.WhereRanges[i]);
         }
 
-        let Index;
+        Index;
         if (tp.IsNumber(this.SelectSql.DateRange)) {
             let v = this.SelectSql.DateRange.toString();
             Index = this.cboDateRange.IndexOfValue(v);            
@@ -161,11 +162,11 @@
         // ---------------------------------------------------------------------------------
         this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.SelectSql.Text);
 
+
         // Columns Page
         // ---------------------------------------------------------------------------------
-
-        // add a tp.Row to the tab page
-        let LayoutRow = new tp.Row(null, { Height: '100%' });
+ 
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
         this.tabColumns.AddComponent(LayoutRow);
 
         // add a DIV for the gridFields tp.Grid in the row
@@ -194,7 +195,7 @@
             Columns: [
                 { Name: 'Name' },
                 { Name: 'TitleKey' },
-                { Name: 'DisplayType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.ColumnDisplayTypeToLookUpTable() },
+                { Name: 'DisplayType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.ColumnDisplayType) },
  
                 { Name: 'Width' },
                 { Name: 'ReadOnly' },
@@ -203,7 +204,7 @@
                 { Name: 'GroupIndex' },
                 { Name: 'Decimals' },
                 { Name: 'FormatString' },
-                { Name: 'Aggregate', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.AggregateTypeToLookUpTable() },
+                { Name: 'Aggregate', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.AggregateType) },
                 { Name: 'AggregateFormat' },
             ]
         };
@@ -215,17 +216,17 @@
 
         // columns table
         this.tblColumns = new tp.DataTable();
-        this.tblColumns.AddColumn('Name');
-        this.tblColumns.AddColumn('TitleKey');
-        this.tblColumns.AddColumn('DisplayType', tp.DataType.Boolean);
-        this.tblColumns.AddColumn('Width', tp.DataType.Integer);
-        this.tblColumns.AddColumn('ReadOnly', tp.DataType.Boolean);  
-        this.tblColumns.AddColumn('DisplayIndex', tp.DataType.Integer);
-        this.tblColumns.AddColumn('GroupIndex', tp.DataType.Integer);
-        this.tblColumns.AddColumn('Decimals', tp.DataType.Integer);
-        this.tblColumns.AddColumn('FormatString');
-        this.tblColumns.AddColumn('Aggregate', tp.DataType.Integer);
-        this.tblColumns.AddColumn('AggregateFormat');
+        this.tblColumns.AddColumn('Name').DefaultValue = 'NewColumn';
+        this.tblColumns.AddColumn('TitleKey').DefaultValue = 'New Column';
+        this.tblColumns.AddColumn('DisplayType', tp.DataType.Integer).DefaultValue = tp.ColumnDisplayType.Default;
+        this.tblColumns.AddColumn('Width', tp.DataType.Integer).DefaultValue = 90;
+        this.tblColumns.AddColumn('ReadOnly', tp.DataType.Boolean).DefaultValue = false;
+        this.tblColumns.AddColumn('DisplayIndex', tp.DataType.Integer).DefaultValue = 0;
+        this.tblColumns.AddColumn('GroupIndex', tp.DataType.Integer).DefaultValue = -1;
+        this.tblColumns.AddColumn('Decimals', tp.DataType.Integer).DefaultValue = -1;
+        this.tblColumns.AddColumn('FormatString').DefaultValue = '';
+        this.tblColumns.AddColumn('Aggregate', tp.DataType.Integer).DefaultValue = tp.AggregateType.None;
+        this.tblColumns.AddColumn('AggregateFormat').DefaultValue = ''; 
 
         this.SelectSql.Columns.forEach((Column) => {
             let DataRow = this.tblColumns.AddEmptyRow();
@@ -247,46 +248,97 @@
         this.gridColumns.DataSource = this.tblColumns;
         this.gridColumns.BestFitColumns();
  
-        this.tblColumns.On('RowCreated', this.tblColumns_RowCreated, this);
+ 
 
 
         // Filters Page
         // ---------------------------------------------------------------------------------
-        el = this.tabFilters.AddDivElement();
-        tp.SetStyle(el, {
-            'position': 'relative',
-            'display': 'flex',
-            'gap': '2px',
-            'flex-direction': 'column',
-            'height': '100%'
-        }); 
-
-        this.tbFilters = new tp.ToolBar();
-        this.tbFilters.ParentHandle = el;
-        this.tbFilters.AddButton('Insert', 'Insert', 'Insert', 'fa fa-plus');
-        this.tbFilters.AddButton('Edit', 'Edit', 'Edit', 'fa fa-edit');
-        this.tbFilters.AddButton('Delete', 'Delete', 'Delete', 'fa fa-minus');
-        this.tbFilters.SetNoText(true);
-
-        el = tp.Div(el);
-        tp.SetStyle(el, {
-            'position': 'relative',
-            'flex-grow': 1,
-            'padding' : '0 0 1px 1px'
-        }); 
-
-        this.lboFilters = new tp.HtmlListBox();
-        this.lboFilters.ParentHandle = el;
-        this.lboFilters.Width = '240px';
-        this.lboFilters.Height = '100%';
-
-        this.tbFilters.On('ButtonClick', this.tbFilters_ButtonClick, this);
-
-        this.SelectSql.Filters.forEach((FilterDef) => {
-            this.lboFilters.Add(FilterDef.FieldPath, FilterDef.FieldPath);
-        });
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabFilters.AddComponent(LayoutRow);
  
+        let AggregateFuncList = [
+            { Id: '', Name: '' },
+            { Id: 'count', Name: 'count' },
+            { Id: 'avg', Name: 'avg' },
+            { Id: 'sum', Name: 'sum' },
+            { Id: 'max', Name: 'max' },
+            { Id: 'min', Name: 'min' } 
+        ];
 
+        // add a DIV for the gridFields tp.Grid in the row
+        el = LayoutRow.AddDivElement();
+        CP = {
+            Name: "gridFilters",
+            Height: '100%',
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            //ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            ReadOnly: false,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            Columns: [
+                { Name: 'FieldPath' },
+                { Name: 'TitleKey' },
+
+                { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
+                { Name: 'Mode', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.SqlFilterMode), [tp.SqlFilterMode.None] },
+
+                { Name: 'UseRange' },
+                { Name: 'Locator' },
+                { Name: 'PutInHaving' },
+                { Name: 'AggregateFunc', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: AggregateFuncList },
+            ]
+        };
+
+ 
+        // create the columns grid
+        this.gridFilters = new tp.Grid(el, CP);
+
+        this.tblFilters = new tp.DataTable();
+        this.tblFilters.AddColumn('FieldPath').DefaultValue = 'TABLE_NAME.FIELD_NAME';
+        this.tblFilters.AddColumn('TitleKey').DefaultValue = 'New Filter';
+        this.tblFilters.AddColumn('DataType').DefaultValue = tp.DataType.String;
+        this.tblFilters.AddColumn('Mode', tp.DataType.Integer).DefaultValue = tp.SqlFilterMode.Simple;
+        this.tblFilters.AddColumn('UseRange', tp.DataType.Boolean).DefaultValue = false;
+        this.tblFilters.AddColumn('Locator').DefaultValue = '';
+        this.tblFilters.AddColumn('PutInHaving', tp.DataType.Boolean).DefaultValue = false;
+        this.tblFilters.AddColumn('AggregateFunc').DefaultValue = '';
+ 
+        this.SelectSql.Filters.forEach((FilterDef) => {
+            let DataRow = this.tblFilters.AddEmptyRow();
+            DataRow.Set('FieldPath', FilterDef.FieldPath);
+            DataRow.Set('TitleKey', FilterDef.TitleKey);
+            DataRow.Set('DataType', FilterDef.DataType);
+            DataRow.Set('Mode', FilterDef.Mode);
+            DataRow.Set('UseRange', FilterDef.UseRange);
+            DataRow.Set('Locator', FilterDef.Locator);
+            DataRow.Set('PutInHaving', FilterDef.PutInHaving);
+            DataRow.Set('AggregateFunc', FilterDef.AggregateFunc);
+
+            DataRow.FilterDef = FilterDef; 
+        });
+
+        this.tblFilters.AcceptChanges();
+
+        this.gridFilters.DataSource = this.tblFilters;
+        this.gridFilters.BestFitColumns();
+
+        this.tblFilters.On('RowCreated', this.tblFilters_RowCreated, this);
+        this.tblFilters.On('RowModified', this.tblFilters_RowModified, this);
+
+        // EDW
+        
     }
     /** Can be used in passing the results back to the caller code. 
      * On modal dialogs the code should examine the DialogResult to decide what to do.
@@ -328,22 +380,7 @@
 
 
     /* event handlers */
-    /** Called when a new data row is created and it is about to added to the table
-     * @param {tp.DataTableEventArgs} Args
-     */
-    tblColumns_RowCreated(Args) {
-        let Row = Args.Row;
-        Row.Set('Name', 'NewColumn');
-        Row.Set('TitleKey', 'New Column');
-        Row.Set('DisplayType', tp.ColumnDisplayType.Default);
-        Row.Set('Width', 90);
-        Row.Set('ReadOnly', false);
-        Row.Set('GroupIndex', -1);
-        Row.Set('Decimals', -1);
-        Row.Set('FormatString', '');
-        Row.Set('Aggregate', tp.AggregateType.None);
-        Row.Set('AggregateFormat', '');
-    }
+ 
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */
@@ -376,6 +413,20 @@
      */
     tbFilters_ButtonClick(Args) {
         tp.InfoNote(Args.Command);
+    }
+
+ 
+    /** Called when a new data row is created and it is about to be added to the table
+     * @param {tp.DataTableEventArgs} Args
+     */
+    tblFilters_RowCreated(Args) {
+        Args.Row.FilterDef = new tp.SqlFilterDef();
+    }
+    /** Called when a column in a data row is modified.
+     * @param {tp.DataTableEventArgs} Args
+     */
+    tblFilters_RowModified(Args) {
+        // nothing yet
     }
 };
 

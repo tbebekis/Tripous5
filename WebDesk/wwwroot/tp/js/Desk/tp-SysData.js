@@ -741,7 +741,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
                     { Name: 'Name' },
                     { Name: 'TitleKey' },
                     { Name: 'IsPrimaryKey' },
-                    { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.DataType.ToLookupTable([tp.DataType.Unknown]) },
+                    { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
 
                     { Name: 'Length' },
                     { Name: 'Required' },
@@ -1013,7 +1013,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
                         return DataSource;
 
                     if (DataSourceName === 'DataType') {
-                        let Result = new tp.DataSource(tp.DataType.ToLookupTable([tp.DataType.Unknown]));
+                        let Result = new tp.DataSource(tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]));
                         return Result;
                     }
 
