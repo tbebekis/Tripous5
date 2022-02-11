@@ -173,8 +173,7 @@
         el = LayoutRow.AddDivElement();
         CP = {
             Name: "gridColumns",
-            Height: '100%',
-            
+            Height: '100%',            
 
             ToolBarVisible: true,
             GroupsVisible: false,
@@ -292,7 +291,7 @@
                 { Name: 'TitleKey' },
 
                 { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
-                { Name: 'Mode', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.SqlFilterMode), [tp.SqlFilterMode.None] },
+                { Name: 'Mode', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.SqlFilterMode, [tp.SqlFilterMode.None]) },
 
                 { Name: 'UseRange' },
                 { Name: 'Locator' },

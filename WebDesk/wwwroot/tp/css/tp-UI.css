@@ -156,6 +156,7 @@ background-color: var(--BackColor);
     padding: 0 4px;
     gap: 4px;
     user-select: none;
+    height: 100%;
 }
 
 .tp-ToggleItemList > * {
@@ -346,13 +347,17 @@ tab control
 }
 
 .tp-DropDownBox > :first-child {
+    position: relative;
+/*
     position: absolute;
     left: 0;
     top: 0; 
     width: 100%;
     height: 100%;  
+*/
     overflow: auto;   
     border: none;
+    background-color: inherit;
 }
 
 /*---------------------------------------------------------------------------------------

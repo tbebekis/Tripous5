@@ -2818,7 +2818,7 @@ tp.DropDownBox = class extends tp.Component {
                     this.Position = 'fixed';
 
                 if (Style.width !== 'auto')
-                    this.Width = this.Associate.getBoundingClientRect().width;
+                    this.Width = Math.max(this.Associate.getBoundingClientRect().width, 100);
 
                 this.fIsFirstOpen = false;
             }
@@ -5394,6 +5394,7 @@ tp.ItemBar = class extends tp.Component {
    */
     InitializeFields() {
         super.InitializeFields();
+        this.fIsFirstOpen = true;
         this.CreateControls();
     }
     /**
@@ -5586,6 +5587,16 @@ tp.ItemBar = class extends tp.Component {
                     ToggleItem = this.Document.createElement('div');
                     this.ToggleItemList.appendChild(ToggleItem);
                     ToggleItem.innerHTML = this.GetItemTextAt(i);
+                }
+
+                // height
+                if (this.fIsFirstOpen === true) {
+
+                    this.ToggleDropDownBox.StyleProp('width', 'auto');
+                    let h = Math.min(this.ToggleDropDownBox.Handle.getBoundingClientRect().height, 220);
+                    this.ToggleDropDownBox.Height = h;
+
+                    this.fIsFirstOpen = false;
                 }
                 break;
 
@@ -5984,6 +5995,8 @@ tp.ItemBar.prototype.ItemContainer = null;
  @type {HTMLElement}
  */
 tp.ItemBar.prototype.LastItem = null;
+
+tp.ItemBar.prototype.fIsFirstOpen = true;
 
 //#endregion
 
