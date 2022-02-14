@@ -1,4 +1,166 @@
-﻿tp.SelectSqlEditDialog = class extends tp.Window {
+﻿//#region SqlFilterDefEnumDialog
+/** Modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor */
+tp.SqlFilterDefEnumDialog = class extends tp.Window {
+    /**
+     * Constructor
+     * @param {tp.WindowArgs} Args The window args
+     */
+    constructor(Args) {
+        super(Args);
+    }
+
+    edtResultField = null;
+    chIsMultiChoise = null;
+    chIncludeAll = null;
+    edtOptionList = null;
+    edtDisplayLabels = null;
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+
+        this.tpClass = 'tp.SqlFilterDefEnumDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+
+        this.FilterDef = this.Args.FilterDef;
+    }
+    /**
+     * Creates all controls of this window.
+     * */
+    CreateControls() {
+        super.CreateControls();
+
+        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
+ 
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "auto"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel);
+
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage('General');
+        this.tabSql = this.Pager.AddPage('Sql'); 
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+        // controls
+        this.edtResultField = tp.CreateControlRow(tp.Div(elCol), false, 'Result Field', { TypeName: 'TextBox' }).Control;
+        this.edtOptionList = tp.CreateControlRow(tp.Div(elCol), false, 'Options', { TypeName: 'Memo' }).Control;
+        this.chIsMultiChoise = tp.CreateControlRow(tp.Div(elCol), true, 'Is Multi Choise', { TypeName: 'CheckBox' }).Control;
+        this.chIncludeAll = tp.CreateControlRow(tp.Div(elCol), true, 'Include All', { TypeName: 'CheckBox' }).Control;
+
+        elCol = elRow.children[1];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+        this.edtDisplayLabels = tp.CreateControlRow(tp.Div(elCol), false, 'Display Labels', { TypeName: 'Memo' }).Control;
+
+        this.edtOptionList.Height = '10em';
+        this.edtDisplayLabels.Height = '10em';
+ 
+        // item to controls
+        this.edtResultField.Text = this.FilterDef.EnumResultField;
+        this.chIsMultiChoise.Checked = this.FilterDef.EnumIsMultiChoise === true;
+        this.chIncludeAll.Checked = this.FilterDef.EnumIncludeAll === true;
+        this.edtOptionList.AppendLines(this.FilterDef.EnumOptionList);
+        this.edtDisplayLabels.Text = this.FilterDef.EnumDisplayLabels;
+
+
+        // Sql Page
+        // ---------------------------------------------------------------------------------
+        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.FilterDef.EnumSql);
+    }
+    /** Can be used in passing the results back to the caller code. 
+     * On modal dialogs the code should examine the DialogResult to decide what to do.
+     * @override
+     * */
+    PassBackResult() {
+        if (this.DialogResult === tp.DialogResult.OK) {
+            this.FilterDef.EnumSql = this.elSqlEditor.__Editor.getValue();
+
+            this.FilterDef.EnumResultField = this.edtResultField.Text;
+            this.FilterDef.EnumIsMultiChoise = this.chIsMultiChoise.Checked;
+            this.FilterDef.EnumIncludeAll = this.chIncludeAll.Checked;
+            this.FilterDef.EnumOptionList = this.edtOptionList.GetLines(true);
+ 
+            this.FilterDef.EnumDisplayLabels = this.edtDisplayLabels.Text;
+        }
+    }
+};
+
+/**
+ * @type {tp.SqlFilterDef}
+ * */
+tp.SqlFilterDefEnumDialog.prototype.FilterDef = null;
+
+
+/**
+Displays a modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor
+@static
+@param {tp.SqlFilterDef} FilterDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlFilterDefEnumDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlFilterDefEnumDialog.ShowModal = function (FilterDef, WindowArgs = null) {
+
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'SqlFilterDef Enum editor';
+
+    Args = new tp.WindowArgs(Args);
+    Args.AsModal = true;
+    Args.DefaultDialogResult = tp.DialogResult.Cancel;
+    Args.FilterDef = FilterDef;
+
+    let Result = new tp.SqlFilterDefEnumDialog(Args);
+    Result.ShowModal();
+
+    return Result;
+};
+/**
+Displays a modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor
+@static
+@param {tp.SqlFilterDef} FilterDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlFilterDefEnumDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlFilterDefEnumDialog.ShowModalAsync = function (FilterDef, WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
+        };
+
+        tp.SqlFilterDefEnumDialog.ShowModal(FilterDef, WindowArgs);
+    });
+};
+//#endregion
+ 
+//#region SelectSqlEditDialog
+
+/** Modal dialog box for editing a {@link tp.SelectSql} descriptor
+ *  */
+tp.SelectSqlEditDialog = class extends tp.Window {
     /**
      * Constructor
      * @param {tp.WindowArgs} Args The window args
@@ -304,6 +466,12 @@
         // create the columns grid
         this.gridFilters = new tp.Grid(el, CP);
 
+        this.gridFilters.AddToolBarButton('EditEnum', '', 'Edit Enum part', 'fa fa-sticky-note-o', '', false);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
+
+        this.gridFilters.On('ToolBarButtonClick', this.gridFilters_ToolBarButtonClick, this);
+        //ToolBarButtonClick
+        // gridFilters_ToolBarButtonClick
+
         this.tblFilters = new tp.DataTable();
         this.tblFilters.AddColumn('FieldPath').DefaultValue = 'TABLE_NAME.FIELD_NAME';
         this.tblFilters.AddColumn('TitleKey').DefaultValue = 'New Filter';
@@ -379,7 +547,6 @@
 
 
     /* event handlers */
- 
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */
@@ -407,13 +574,6 @@
         //Args.Handled = true;
         //this.EditFieldRow();
     }
-    /** Event handler. Filters tool-bar button click.
-     * @param {tp.ToolBarItemClickEventArgs} Args
-     */
-    tbFilters_ButtonClick(Args) {
-        tp.InfoNote(Args.Command);
-    }
-
  
     /** Called when a new data row is created and it is about to be added to the table
      * @param {tp.DataTableEventArgs} Args
@@ -426,6 +586,24 @@
      */
     tblFilters_RowModified(Args) {
         // nothing yet
+    }
+    /** Called when a button in the filters grid tool-bar is clicked. 
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    async gridFilters_ToolBarButtonClick(Args) {
+        if (Args.Command === 'EditEnum') {
+            Args.Handled = true;
+
+            let Row = this.gridFilters.FocusedRow;
+            if (!tp.IsEmpty(Row)) {
+                let FilterDef = Row.FilterDef;
+
+                let Res = await tp.SqlFilterDefEnumDialog.ShowModalAsync(FilterDef);
+                let o = Res;
+            }
+
+            // tp.SqlFilterDefEnumDialog.ShowModalAsync = function (FilterDef
+        }
     }
 };
 
@@ -475,12 +653,9 @@ tp.SelectSqlEditDialog.ShowModalAsync = function (SelectSql, WindowArgs = null) 
         }; 
 
         tp.SelectSqlEditDialog.ShowModal(SelectSql, WindowArgs);
-    });
- 
+    }); 
 };
-
-
-
+//#endregion
 
 
 //#region SqlBrokerQueryDef

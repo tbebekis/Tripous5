@@ -705,7 +705,7 @@ tab control
     justify-content: center;
     align-items: center;
     text-decoration: none;
-    cursor: default;
+    cursor: pointer;
     margin: 0 1px;
     border: var(--Border);
     min-height: 2.2em;

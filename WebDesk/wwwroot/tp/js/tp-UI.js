@@ -8769,13 +8769,23 @@ tp.Memo = class extends tp.Control {
         S = tp.IsBlank(S) ? Text : S + '\n' + Text;
         this.Text = S;
     }
+
+    /** Appends each line of a string array to this instance.
+     * @param {string[]} StringList The string array.
+     */
+    AppendLines(StringList) {
+        if (tp.IsArray(StringList)) {
+            StringList.forEach((item) => { this.AppendLine(item); });
+        }
+    }
     /**
     Returns a string array with the text lines in the memo.
+    @param {boolean} [RemoveEmptyLines=false] Optional. When true, then empty entries are removed from result. Defaults to false.
     @returns {string[]} Returns a string array with the text lines in the memo.
     */
-    GetLines() {
+    GetLines(RemoveEmptyLines = false) {
         var S = this.Text;
-        var Parts = tp.Split(S, '\n', false);
+        var Parts = tp.Split(S, '\n', RemoveEmptyLines);
         return Parts;
     }
 
