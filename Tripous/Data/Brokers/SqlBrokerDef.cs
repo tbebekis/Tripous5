@@ -144,15 +144,18 @@ namespace Tripous.Data
         {
             List<SqlBrokerFieldDef> Result = new List<SqlBrokerFieldDef>();
 
-            foreach (var Field in Def.MainTable.Fields)
+            if (Def.MainTable != null)
             {
-                if (!string.IsNullOrWhiteSpace(Field.CodeProviderName))
+                foreach (var Field in Def.MainTable.Fields)
                 {
-                    if (!CodeProviderDef.Contains(Field.CodeProviderName))
-                        Sys.Throw($"No code provider found for a field. Broker: {Def.Name}, CodeProvider: {Field.CodeProviderName}, Field: {Field.Name}");
+                    if (!string.IsNullOrWhiteSpace(Field.CodeProviderName))
+                    {
+                        if (!CodeProviderDef.Contains(Field.CodeProviderName))
+                            Sys.Throw($"No code provider found for a field. Broker: {Def.Name}, CodeProvider: {Field.CodeProviderName}, Field: {Field.Name}");
 
-                    Result.Add(Field);
-                } 
+                        Result.Add(Field);
+                    }
+                }
             }
 
             return Result.ToArray();

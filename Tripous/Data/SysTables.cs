@@ -92,6 +92,7 @@ create table {SysTables.Log}  (
             SchemaVersion schema = Schema.FindOrAdd(Version: 1);
 
             /*  SYS_LANG  */
+            // IMPORTANT: Code (el, en, etc) MUST be unique
             string SqlText = $@"
 create table {SysTables.Lang} (
     Id                      {SysConfig.PrimaryKeyStr()}
@@ -109,7 +110,7 @@ create table {SysTables.Lang} (
             SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.EnId}', 'English', 'en', 'en-US', 'gb.png') ";
             schema.AddStatementAfter(SqlText);
 
-            SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.GrId}', 'Greek', 'gr', 'el-GR', 'gr.png') ";
+            SqlText = $@"insert into {SysTables.Lang} (Id, Name, Code, CultureCode, FlagImage) values ('{Sys.GrId}', 'Greek', 'el', 'el-GR', 'gr.png') ";
             schema.AddStatementAfter(SqlText);
         }
         /// <summary>
@@ -125,7 +126,7 @@ create table {SysTables.Lang} (
             string SqlText = $@"
 create table {SysTables.StrRes} (
     Id                      {SysConfig.PrimaryKeyStr()} 
-   ,LanguageId              {SysConfig.ForeignKeyStr()} @NULL                 
+   ,LanguageCode            @NVARCHAR(40)        @NOT_NULL    
    ,TableName               @NVARCHAR(96)        @NULL           
    ,TableId                 {SysConfig.ForeignKeyStr()} @NULL           
    ,EntryKey                @NVARCHAR(96)        @NOT_NULL		 

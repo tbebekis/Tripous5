@@ -11,27 +11,8 @@ namespace Tripous
     /// </summary>
     public class LanguageResourceStringList
     {
-        class ResourceItem
-        {
-            public ResourceItem(string Key, string Value)
-            {
-                if (string.IsNullOrWhiteSpace(Key))
-                    throw new ExceptionEx("String resource item Key can not be null or empty.");
-
-                this.Key = Key.ToUpperInvariant();
-                this.Value = Value;
-            }
-
-            public override string ToString()
-            {
-                return $"{Key}|{Value}";
-            }
-
-            public string Key { get; }
-            public string Value { get; }
-        }
-
-        List<ResourceItem> Items = new List<ResourceItem>();
+ 
+        Dictionary<string, string> Entries = new Dictionary<string, string>();
 
         /* construction */
         /// <summary>
@@ -47,16 +28,16 @@ namespace Tripous
         /// </summary>
         public void Clear()
         {
-            Items.Clear();
+            Entries.Clear();
         }        
         /// <summary>
         /// Clears the internal list and loads string resources from a specified source
         /// </summary>
         public void LoadFrom(Dictionary<string, string> Source)
         {
-            Items.Clear();
+            Entries.Clear();
             foreach (var Entry in Source)
-                Items.Add(new ResourceItem(Entry.Key, Entry.Value));
+                Entries[Entry.Key.ToLowerInvariant()] = Entry.Value;
         }
         /// <summary>
         /// Returns a resource string based on a key, if any, or null. 
@@ -65,15 +46,15 @@ namespace Tripous
         /// </summary>
         public string Find(string Key, bool DefaultToKey = true)
         {
-            string sKey = Key.ToUpperInvariant();
-            ResourceItem Item = Items.FirstOrDefault(item => item.Key == sKey);
-            return Item != null ? Item.Value : (DefaultToKey ? Key : null);
+            string sKey = Key.ToLowerInvariant();
+            var Value = Entries[sKey];
+            return !string.IsNullOrWhiteSpace(Value) ? Value : (DefaultToKey ? Key : null);
         }
 
         /* properties */
         /// <summary>
         /// True when the internal resource list is empty
         /// </summary>
-        public bool IsEmpty { get { return Items.Count == 0; } }
+        public bool IsEmpty { get { return Entries.Count == 0; } }
     }
 }

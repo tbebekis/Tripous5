@@ -553,10 +553,6 @@ namespace Tripous.Data
 
 
         /* static */
-
-
-
-
         /// <summary>
         /// Creates and returns an instance of a <see cref="SqlBroker"/> based on a specified descriptor.
         /// </summary>
@@ -592,9 +588,20 @@ namespace Tripous.Data
 
             return Result;
         }
+        /// <summary>
+        /// Creates and returns a SqlBroker upon a single table.
+        /// </summary>
+        static public SqlBroker CreateSingleTableBroker(string MainTableName, bool AsListBroker = false, string ConnectionName = "")
+        {
+            if (string.IsNullOrWhiteSpace(ConnectionName))
+                ConnectionName = SysConfig.DefaultConnection;
 
+            SqlBrokerDef Descriptor = new SqlBrokerDef();
+            Descriptor.MainTableName = MainTableName;
 
-
+            SqlBroker Result = Create(Descriptor, true, AsListBroker);
+            return Result;
+        }
 
         /* List select */
         /// <summary>

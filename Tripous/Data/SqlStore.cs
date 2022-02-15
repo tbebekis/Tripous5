@@ -297,7 +297,7 @@ namespace Tripous.Data
 
         /* select methods - Transactioned */
         /// <summary>
-        /// Executes SqlText and returns a DataTable, actually a <see cref="DataTable"/>.
+        /// Executes SqlText and returns a <see cref="DataTable"/>.
         /// <para></para>
         /// <para>
         /// The passed Params can be: <br />
@@ -335,7 +335,7 @@ namespace Tripous.Data
             return Result;
         }
         /// <summary>
-        /// Executes SqlText and returns a DataTable, actually a <see cref="DataTable"/>.
+        /// Executes SqlText and returns a <see cref="DataTable"/>.
         /// </summary>
         public DataTable Select(string SqlText)
         {
@@ -424,7 +424,8 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// Ideal for executing SELECT statements of the type "select FIELD_NAME from TABLE_NAME"
+        /// Ideal for executing SELECT statements of the type "select FIELD_NAME from TABLE_NAME".
+        /// <para>Returns a specified default value if the SELECT returns no values.</para>
         /// <para>
         /// The passed Params can be: <br />
         /// a. either a comma separated list of parameters or <br />
@@ -451,6 +452,7 @@ namespace Tripous.Data
         }
         /// <summary>
         /// Ideal for executing SELECT statements of the type "select FIELD_NAME from TABLE_NAME"
+        /// <para>Returns a specified default value if the SELECT returns no values.</para>
         /// </summary>
         public object SelectResult(string SqlText, object Default)
         {
@@ -458,6 +460,7 @@ namespace Tripous.Data
         }
         /// <summary>
         /// Ideal for executing SELECT statements of the type "select FIELD_NAME from TABLE_NAME"
+        /// <para>Returns <see cref="DBNull"/> if the SELECT returns no values.</para>
         /// </summary>
         public object SelectResult(string SqlText)
         {

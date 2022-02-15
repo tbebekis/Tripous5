@@ -184,6 +184,15 @@ namespace WebLib
  
             }
         }
+        static void Test()
+        {
+            SqlBroker Broker = SqlBroker.CreateSingleTableBroker(SysTables.StrRes);
+            Broker.Insert();
+            Broker.Row["LanguageCode"] = "el";
+            Broker.Row["EntryKey"] = "Paparia";
+            Broker.Row["EntryValue"] = "Παπάρια";
+            Broker.Commit();
+        }
 
         /// <summary>
         /// Initializer
@@ -214,6 +223,8 @@ namespace WebLib
                 EntityDescriptors.Load(typeof(DataStore).Assembly);
 
                 AddTestData();
+
+                //Test();
             }
 
            
