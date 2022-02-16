@@ -98,6 +98,30 @@ namespace Tripous
                 return Item;
             }
         }
+        /// <summary>
+        /// Returns a language, specified by the two letter code of the language, e.g en, el, it, fr, etc, if any, else null.
+        /// </summary>
+        static public Language FindByCode(string LanguageCode)
+        {
+            lock (syncLock)
+            {
+                LanguageCode = LanguageCode.ToLowerInvariant();
+                return fItems.FirstOrDefault(item => item.Code.ToLowerInvariant() == LanguageCode);
+            }
+        }
+        /// <summary>
+        /// Returns a language, specified by the two letter code of the language, e.g en, el, it, fr, etc, if any, else throws an exception.
+        /// </summary>
+        static public Language GetByCode(string LanguageCode)
+        {
+            lock (syncLock)
+            {
+                Language Item = FindByCode(LanguageCode);
+                if (Item == null)
+                    throw new ApplicationException($"Language not registered: {LanguageCode}");
+                return Item;
+            }
+        }
 
         /// <summary>
         /// Registers a language

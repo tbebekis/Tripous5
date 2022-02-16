@@ -226,8 +226,7 @@ namespace WebDesk
                     if (Cookie != null && DataStore.Initialized)
                     {
                         string CultureCode = Cookie.CultureCode;
-                        Language[] Languages = DataStore.GetLanguages();
-                        fLanguage = Tripous.Languages.FindByCultureCode(CultureCode);
+                        fLanguage = Languages.GetByCultureCode(CultureCode);
                     }
                 }
 

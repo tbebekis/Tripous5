@@ -141,6 +141,19 @@ namespace WebDesk
             // set the default language
             var Settings = DataStore.GetSettings();
             Tripous.Languages.SetDefaultLanguage(Settings.General.CultureCode);
+
+            // load translation files
+            string TranslationsFolder = Path.Combine(SysConfig.AppExeFolder, "Translations");
+            if (Directory.Exists(TranslationsFolder))
+            {
+                string[] TranslationFiles = Directory.GetFiles(TranslationsFolder, "*.json", SearchOption.TopDirectoryOnly);
+                string LanguageCode;
+                foreach (string TranslationFilePath in TranslationFiles)
+                {
+                    LanguageCode = Path.GetFileNameWithoutExtension(TranslationFilePath);
+                    StrRes.ImportTranslationFile(LanguageCode, TranslationFilePath);
+                }
+            }
         }
         /// <summary>
         /// A call-back function to be used with <see cref="ObjectMapper.Configure(Action{object})"/> methods.
@@ -465,8 +478,6 @@ namespace WebDesk
         /// </summary>
         static public void Configure(IApplicationBuilder app, IOptionsMonitor<AppSettings> AppSettingsAccessor)
         {
-
-
             // ● RootServiceProvider - set the root service provider
             WSys.RootServiceProvider = app.ApplicationServices;
 

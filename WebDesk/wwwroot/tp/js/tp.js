@@ -16750,6 +16750,7 @@ tp.ButtonClasses = [];
 tp.Urls = {};
 tp.Urls.AjaxExecute = '/Ajax/Execute'; 
 tp.Urls.Language = '/App/Language';
+tp.Urls.TranslationList = '/App/TranslationList';
 tp.Urls.StringResource = '/App/StringResource';
 tp.Urls.StringResourceList = '/App/StringResourceList';
 tp.Urls.Culture = '/App/Culture';
@@ -16823,9 +16824,7 @@ tp.Language = class {
         this.fCultureCode = CultureCode;
         this.fItems = new tp.Dictionary();
     }
-
-
-
+ 
     /* properties */
     /**
     The two letter code of the language, e.g en, el, it, fr, etc.
@@ -16855,11 +16854,34 @@ tp.Language = class {
     */
     AddStringList(Source) {
         if (Source) {
+            let sKey;
             for (var Key in Source) {
-                this.Items.Set(Key, Source[Key]);
+                sKey = Key.toLowerCase();
+                this.Items.Set(sKey, Source[Key]);
             }
         }
     }
+    /**
+    Sets a localization entry. 
+    A new entry is created if no entry exists under the specified key.
+    @param {string} Key The key
+    @param {string} Value The value
+    */
+    SetLocalizationEntry(Key, Value) {
+        Key = Key.toLowerCase();
+        this.Items.Set(Key, Value);
+    }
+    /** Returns a localized string based on a specified resource key.
+     * If the key is not found in the internal dictionary, then the key is returned.
+     * @param {string} Key The key
+     * @returns {string} Returns a localized string based on a specified resource key
+     */
+    Localize(Key) {
+        let sKey = Key.toLowerCase();
+        let Value = this.Items.Get(sKey);
+        return tp.IsString(Value) ? Value : Key;
+    }
+ 
     /**
     Returns a string representation of this instance
     @returns {string} Returns a string representation of this instance
@@ -16986,6 +17008,17 @@ tp.Languages = {
 
 
 //#endregion
+
+
+/** Returns a localized string, on the current language, based on a specified resource key.
+* If the key is not found in the internal dictionary, then the key is returned.
+* @param {string} Key The key
+* @returns {string} Returns a localized string, on the current language, based on a specified resource key.
+*/
+_L = function (Key) {
+    return tp.Languages.Current.Localize(Key);
+}
+
 
 //#region tp.Res
 /**
@@ -17491,7 +17524,7 @@ tp.AddLanguagesFunc = null;
 
 (function () {
 
-    let InitializeLogDiv = function () {
+    let InitializeLogDiv = () => {
         if (!tp.LogDiv) {
             tp.LogDiv = document.getElementById('LogDiv');
             if (!tp.LogDiv) {
@@ -17504,7 +17537,7 @@ tp.AddLanguagesFunc = null;
         }
     };
 
-    let InitializeLanguages = function () {
+    let InitializeLanguages = () => {
         tp.Languages.En = new tp.Language('English', 'en', 'en-US');
         tp.Languages.Gr = new tp.Language('Greek', 'el', 'el-GR');
         tp.Languages.Items.push(tp.Languages.En, tp.Languages.Gr);
@@ -17513,7 +17546,7 @@ tp.AddLanguagesFunc = null;
         tp.Call(tp.AddLanguagesFunc);
     };
 
-    let InitializeCulture = function () {
+    let InitializeCulture = () => {
 
         // en-US
         let C = new tp.Culture();
@@ -17571,34 +17604,41 @@ tp.AddLanguagesFunc = null;
 
         let CultureCode = document.querySelector('html').getAttribute('lang');
 
-        if (tp.IsString(CultureCode)) {
+        if (!tp.IsString(CultureCode) || tp.IsBlank(CultureCode))
+            CultureCode = 'en-US';
 
-            if (tp.IsBlank(CultureCode))
-                CultureCode = 'en-US';
-
-            if (CultureCode.length == 2) {
-                let o = tp.FirstOrDefault(tp.Cultures.Items, (item) => { return item.Code.startsWith(CultureCode) });
-                if (o)
-                    CultureCode = o.Code;
-            }
-
-            if (CultureCode.length < 5 || CultureCode[2] !== '-')
-                tp.Throw(`Invalid culture code: ${CultureCode} \nPlease define a Culture in the html lang attribute. Example lang="en-US"`);
-
-            tp.CultureCode = CultureCode;
-
-            let Parts = CultureCode.split('-');
-            let Lang = tp.Languages.Find(Parts[0]);
-            if (!Lang) {
-                Lang = tp.Languages.Add("unknown", Parts[0], CultureCode);
-            }
-
-            tp.Languages.fCurrent = tp.Languages.Lang;
+        if (CultureCode.length == 2) {
+            let o = tp.FirstOrDefault(tp.Cultures.Items, (item) => { return item.Code.startsWith(CultureCode) });
+            if (o)
+                CultureCode = o.Code;
         }
 
+        if (CultureCode.length < 5 || CultureCode[2] !== '-')
+            tp.Throw(`Invalid culture code: ${CultureCode} \nPlease define a Culture in the html lang attribute. Example lang="en-US"`);
+
+        tp.CultureCode = CultureCode;
+
+        let Parts = CultureCode.split('-');
+        let Lang = tp.Languages.Find(Parts[0]);
+        if (!Lang) {
+            Lang = tp.Languages.Add("unknown", Parts[0], CultureCode);
+        }
+
+        tp.Languages.fCurrent = tp.Languages.Lang;
+    };
+ 
+    let GetTranslationList = async () => {
+        let Url = tp.Urls.TranslationList;
+        let Data = {
+            CultureCode: tp.CultureCode
+        }
+
+        let Args = await tp.Ajax.GetAsync(Url, Data);
+        let Packet = Args.Packet;
+        tp.Languages.Current.AddStringList(Packet);
     };
 
-    let ReadyFunc = function () {
+    let ReadyFunc = async () => {
         let List;
 
         if (tp.SysConfig.DebugMode === true)
@@ -17606,6 +17646,7 @@ tp.AddLanguagesFunc = null;
 
         InitializeLanguages();
         InitializeCulture();
+        await GetTranslationList();
 
         // initialize global objects
         tp.Environment.Initialize();
@@ -17642,7 +17683,7 @@ tp.AddLanguagesFunc = null;
     if (tp.IsReady) {
         ReadyFunc();
     } else {
-        tp.Doc.addEventListener('readystatechange', function (e) {
+        tp.Doc.addEventListener('readystatechange', async (e) => {
             if (tp.IsReady) {
                 ReadyFunc();
             }

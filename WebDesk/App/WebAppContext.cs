@@ -88,17 +88,17 @@ namespace WebDesk
         /// The physical "root path", i.e. the root folder of the application
         /// <para> e.g. C:\MyApp</para>
         /// </summary>
-        public string RootPath { get { return WApp.RootPath; } }
+        public string RootPath => WApp.RootPath;
         /// <summary>
         /// The physical "web root" path, i.e. the path to the "wwwroot" folder
         /// <para>e.g. C:\MyApp\wwwwroot</para>
         /// </summary>
-        public string WebRootPath { get { return WApp.WebRootPath; } }
+        public string WebRootPath => WApp.WebRootPath;
         /// <summary>
         /// Returns the physical path of the images folder, i.e. C:\MyApp\wwwroot\images
         /// </summary>
-        public string ImagesPath { get { return WApp.ImagesPath; } }
- 
+        public string ImagesPath => WApp.ImagesPath;
+
         /// <summary>
         /// Represents an application memory cache.
         /// </summary>
@@ -132,21 +132,8 @@ namespace WebDesk
         /// This property here uses that setting to return its value.
         /// </para>
         /// </summary>
-        public Language Language
-        {
-            get
-            {
-                return Lib.RequestContext.Language;
-                /*
-                                Language Result = null;
-                                Language[] Languages = DataStore.GetLanguages();
-                                Result = Languages.FindByCultureCode(Culture.Name);                  
-                                if (Result == null) 
-                                    Result = DataStore.EnLanguage;
-                                return Result; 
-                 */
-            }
-        }
+        public Language Language => Lib.RequestContext.Language;
+
 
         /// <summary>
         /// Returns true when HostEnvironment.IsDevelopment() returns true.

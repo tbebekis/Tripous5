@@ -88,7 +88,33 @@ namespace WebDesk.Controllers
 
             return Json(Result);
         }
-       
+
+        #region Translations
+        [HttpGet("/App/TranslationList")]
+        public async Task<JsonResult> AppGetTranslationList(string CultureCode)
+        {
+            await Task.CompletedTask;
+
+            HttpActionResult Result = new HttpActionResult();
+            try
+            {
+                Dictionary<string, string> StringList = DataStore.GetLanguageResourceStringList(CultureCode);
+
+                Result.SerializePacket(StringList);
+                Result.IsSuccess = true;
+            }
+            catch (Exception e)
+            {
+                Result.ErrorText = GetExceptionText(e);
+            }
+
+            return Json(Result);
+ 
+        }
+
+
+        #endregion
+
         #region Sql
         [HttpPost("/Sql/Select")]
         public async Task<JsonResult> SqlSelect([FromBody] SqlTextItem SqlTextItem)
@@ -417,6 +443,13 @@ where
  
             return Json(Result);
         }
+        #endregion
+
+
+
+        #region Miscs
+
+
         #endregion
     }
 }

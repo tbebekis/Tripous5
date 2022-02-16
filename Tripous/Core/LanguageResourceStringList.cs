@@ -47,8 +47,21 @@ namespace Tripous
         public string Find(string Key, bool DefaultToKey = true)
         {
             string sKey = Key.ToLowerInvariant();
-            var Value = Entries[sKey];
-            return !string.IsNullOrWhiteSpace(Value) ? Value : (DefaultToKey ? Key : null);
+            if (Entries.ContainsKey(sKey))
+            {
+                var Value = Entries[sKey];
+                return !string.IsNullOrWhiteSpace(Value) ? Value : (DefaultToKey ? Key : null);
+            }
+
+            return DefaultToKey ? Key : null;
+        }
+
+        /// <summary>
+        /// Returns the internal dictionary with resource strings.
+        /// </summary>
+        public Dictionary<string, string> GetResourceStringListDictionary()
+        {
+            return Entries;
         }
 
         /* properties */

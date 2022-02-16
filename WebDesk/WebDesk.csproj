@@ -13,6 +13,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Content Remove="Translations\el.json" />
+      <Content Remove="Translations\en.json" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.8" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.6" /> 
@@ -21,6 +26,15 @@
     <ItemGroup>
         <ProjectReference Include="..\Tripous\Tripous.csproj" />
         <ProjectReference Include="..\WebDesk.Lib\WebDesk.Lib.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Translations\en.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="Translations\el.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

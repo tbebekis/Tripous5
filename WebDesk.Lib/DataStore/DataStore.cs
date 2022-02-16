@@ -43,9 +43,6 @@ namespace WebLib
         /// </summary>
         static public Language GrLanguage = new Language() { Id = "ELL", Name = "Greek", Code = "el", CultureCode = "el-GR", FlagImage = "gr.png" };
  
-        static Language[] StoreLanguages;
-
-
         static int? fDefaultCacheTimeoutMinutes;
 
         static int DefaultCacheTimeoutMinutes
@@ -241,22 +238,23 @@ namespace WebLib
             //App.AddObjectMap(typeof(AppUser), typeof(DeAppUser), true);
         }
 
-
-
         /* public */
-
-
         /// <summary>
-        /// Returns the list of languages this web-site supports
+        /// Returns the list of languages this web-site supports.
+        /// <para>NOTE: Throws an exception if languages not defined.</para>
         /// </summary>
         static public Language[] GetLanguages()
         {
-            if (StoreLanguages == null)
+ 
+            //-----------------------------------------------
+            Language[] GetLanguagesInternal()
             {
-                string Sql = SSelectLanguages;
-                DataTable Table = SqlStore.Select(Sql);
                 List<Language> LanguageList = new List<Language>();
+
+                string Sql = SSelectLanguages;
+                DataTable Table = SqlStore.Select(Sql);               
                 Language Item;
+                
                 foreach (DataRow Row in Table.Rows)
                 {
                     Item = new Language();
@@ -269,14 +267,51 @@ namespace WebLib
                     Item.FlagImage = Row.AsString("FlagImage");
                 }
 
-                StoreLanguages = LanguageList.ToArray();
+                return LanguageList.ToArray();
+            }
+            //-----------------------------------------------
 
-                // TODO: load string resources
-                // Lang.Resources.LoadFrom(GetResourceStringList(Lang.Id));
+            // This method is called even when the initialization is not complete and no ServiceProvider is available
+            // so we need extra precaution when call it.
+
+            Language[] Result = null;
+
+            if (WSys.HttpContext == null)
+            {
+                Result = GetLanguagesInternal();
+            }
+            else
+            {
+                Result = App.Cache.Get<Language[]>(CacheKeys.LanguageList, () => {
+                    int TimeoutMinutes = DefaultCacheTimeoutMinutes;
+                    return (TimeoutMinutes, GetLanguagesInternal());
+                });
             }
 
-            return StoreLanguages;
+
+            if (Result.Length == 0)
+                Lib.Error($"Languages not defined.");
+
+            return Result;
         }
+        /// <summary>
+        /// Returns the general resource strings (not translatable table data) of a language specified by a culture code, (e.g. el-GR, en-US, etc), as dictionary.
+        /// <para>NOTE: Throws exceptions if no languages defined or the specified language not exists.</para>
+        /// </summary>
+        static public Dictionary<string, string> GetLanguageResourceStringList(string CultureCode)
+        {
+            Language Language = Languages.GetByCultureCode(CultureCode);
+
+            if (Language.Resources.IsEmpty)
+            {
+                Dictionary<string, string> ResourceStringList = StrRes.GetStringListAsDictionary(Language.Code);
+                Language.Resources.LoadFrom(ResourceStringList);
+            }
+
+            Dictionary<string, string> Result = Language.Resources.GetResourceStringListDictionary();
+            return Result;
+        }
+ 
         /// <summary>
         /// Returns the data-store settings
         /// <para>WARNING: do NOT use the cache with settings.</para>
@@ -286,7 +321,6 @@ namespace WebLib
             // TODO: load app settings
             return new DataStoreSettings();
         }
-
 
         /// <summary>
         /// Returns a user from database found under a specified Id, if any, else null.
@@ -412,13 +446,7 @@ where
         /// </summary>
         static public string Localize(string CultureCode, string Key)
         { 
-            if (StoreLanguages == null)
-                Lib.Error($"Cannot Localize(). No Languages");
-
-            Language Language = StoreLanguages.FindByCultureCode(CultureCode);  
-            if (Language == null)
-                Lib.Error($"Language not found: {CultureCode}");
-
+            Language Language = Languages.GetByCultureCode(CultureCode);  
             return Localize(Language, Key);
         }
         /// <summary>
@@ -427,7 +455,6 @@ where
         static public string Localize(Language Language, string Key)
         {
             string Result = Language.Resources.Find(Key);
-
             return !string.IsNullOrWhiteSpace(Result) ? Result : Key;
         }
 

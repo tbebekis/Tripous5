@@ -46,8 +46,7 @@ namespace WebDesk
                     if (Token != null && WSys.ContainsClaim(Token.Claims, Requestor.SCultureClaimType))
                     {
                         string CultureCode = WSys.GetClaimValue(Token.Claims, Requestor.SCultureClaimType);
-                        Language[] Languages = DataStore.GetLanguages();
-                        fLanguage = Languages.FindByCultureCode(CultureCode);
+                        fLanguage = Languages.GetByCultureCode(CultureCode);
                     }
                 }
 

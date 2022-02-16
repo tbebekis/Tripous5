@@ -270,15 +270,15 @@ tp.SelectSqlEditDialog = class extends tp.Window {
 `;
 
         this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
-        this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel);
+        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
  
         this.Pager = new tp.TabControl(null, { Height: '100%' });
         this.Pager.Parent = this.ContentWrapper;
 
-        this.tabGeneral = this.Pager.AddPage('General');
+        this.tabGeneral = this.Pager.AddPage(_L('General'));
         this.tabSql = this.Pager.AddPage('Sql');
-        this.tabColumns = this.Pager.AddPage('Columns');
-        this.tabFilters = this.Pager.AddPage('Filters');
+        this.tabColumns = this.Pager.AddPage(_L('Columns'));
+        this.tabFilters = this.Pager.AddPage(_L('Filters'));
 
         setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
 
