@@ -16,6 +16,12 @@ namespace WebLib
     /// </summary>
     public interface IRequestContext
     {
+
+        /// <summary>
+        /// Returns the language object of the current request according to <see cref="CultureCode"/>
+        /// </summary>
+        Language GetLanguage();
+
         /// <summary>
         /// The http context
         /// </summary>
@@ -30,9 +36,9 @@ namespace WebLib
         IQueryCollection Query { get; }
 
         /// <summary>
-        /// The language of the current request
+        /// The culture (language) of the current request specified as a culture code (en-US, el-GR)
         /// </summary>
-        Language Language { get; set; }
+        string CultureCode { get; set; }
         /// <summary>
         /// The user or api client of the current request
         /// </summary>

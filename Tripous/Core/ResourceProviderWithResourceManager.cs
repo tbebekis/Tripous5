@@ -16,9 +16,6 @@ namespace Tripous
     /// <summary>
     /// Represents an object that provides resources such as string and images.
     /// <para>This is the base implementation.</para>
-    /// <para>Each Assembly may contain a ResourceProvider class
-    /// decorated with the ResourceProviderAttribute. It can contain more than one though.</para>
-    /// <para>NOTE: see ResourceProviderTripous for an example derived class.</para>
     /// </summary>
     public class ResourceProviderWithResourceManager: IResourceProvider
     {

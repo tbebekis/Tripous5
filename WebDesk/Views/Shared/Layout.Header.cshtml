@@ -1,7 +1,8 @@
 ﻿
 @{
     Language[] Languages = DataStore.GetLanguages();
-    Language SelectedLanguage = Lib.App.Language;
+
+    Language SelectedLanguage = Lib.RequestContext.GetLanguage();
 }
 
 <header class="tp-Header" data-setup="{ ReturnUrl: '@RelativeRawUrlEncoded'}">

@@ -1,6 +1,8 @@
 ﻿{
     "Cancel": "Cancel",
+    "List": "List",
+    "Data": "Data",
     "General": "General",
     "Columns": "Columns",
-    "Filters":  "Filters"
+    "Filters": "Filters"
 }

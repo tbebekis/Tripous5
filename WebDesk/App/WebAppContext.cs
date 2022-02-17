@@ -76,6 +76,13 @@ namespace WebDesk
         }
 
         /// <summary>
+        /// Returns the language object of the current request according to <see cref="Culture"/>
+        /// </summary>
+        public Language GetLanguage()
+        {
+            return Languages.GetByCultureCode(Culture.Name);
+        }
+        /// <summary>
         /// Returns the application settings
         /// </summary>
         public DataStoreSettings GetSettings()
@@ -126,13 +133,18 @@ namespace WebDesk
                 return Feature != null ? Feature.RequestCulture.Culture : new CultureInfo("en-US");
             }
         }
-        /// <summary>
-        /// The <see cref="Language"/> language of the current request.
-        /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
-        /// This property here uses that setting to return its value.
-        /// </para>
-        /// </summary>
-        public Language Language => Lib.RequestContext.Language;
+
+
+
+        /*
+                /// <summary>
+                /// The <see cref="Language"/> language of the current request.
+                /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
+                /// This property here uses that setting to return its value.
+                /// </para>
+                /// </summary>
+                public Language Language => Lib.RequestContext.Language; 
+         */
 
 
         /// <summary>

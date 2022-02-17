@@ -58,6 +58,11 @@ namespace WebLib
         /// Represents an application memory cache.
         /// </summary>
         IWebAppCache Cache { get; }
+
+        /// <summary>
+        /// Returns the language object of the current request according to <see cref="Culture"/>
+        /// </summary>
+        Language GetLanguage();
         /// <summary>
         /// Returns the application settings
         /// </summary>
@@ -70,13 +75,6 @@ namespace WebLib
         /// </para>
         /// </summary>
         CultureInfo Culture { get; }
-        /// <summary>
-        /// The <see cref="Language"/> language of the current request.
-        /// <para>CAUTION: The culture of each HTTP Request is set by a lambda in ConfigureServices().
-        /// This property here uses that setting to return its value.
-        /// </para>
-        /// </summary>
-        Language Language { get; }
 
         /// <summary>
         /// Returns true when HostEnvironment.IsDevelopment() returns true.

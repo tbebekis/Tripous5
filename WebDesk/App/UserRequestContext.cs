@@ -20,8 +20,6 @@ using WebLib.AspNet;
 namespace WebDesk
 {
 
-
-
     /// <summary>
     /// Request context for browser clients (cookies)
     /// <para>NOTE: This is a Scoped Service (i.e. one instance per HTTP Request) </para>
@@ -33,7 +31,7 @@ namespace WebDesk
         Requestor fRequestor;
         UserCookie Cookie;
         bool LoadingCookie;
-        Language fLanguage;
+        string fCultureCode;
 
         /// <summary>
         /// Returns a user from database found under a specified Id, if any, else null.
@@ -214,43 +212,43 @@ namespace WebDesk
             }
 
         }
+
         /// <summary>
-        /// The selected language (and culture) of the Requestor
+        /// The culture (language) of the current request specified as a culture code (en-US, el-GR)
         /// </summary>
-        public override Language Language
+        public override string CultureCode
         {
             get
             {
-                if (fLanguage == null)
+                if (string.IsNullOrWhiteSpace(fCultureCode))
                 {
                     if (Cookie != null && DataStore.Initialized)
                     {
-                        string CultureCode = Cookie.CultureCode;
-                        fLanguage = Languages.GetByCultureCode(CultureCode);
+                        fCultureCode = Cookie.CultureCode;
                     }
                 }
 
-                return fLanguage != null ? fLanguage : DataStore.EnLanguage;
-
+                return !string.IsNullOrWhiteSpace(fCultureCode)? fCultureCode: Languages.DefaultLanguage.CultureCode;
             }
             set
             {
-                if (fLanguage != value)
+                if (!Sys.IsSameText(fCultureCode, value))
                 {
-                    fLanguage = value;
+                    fCultureCode = value;
 
                     // CAUTION: Language setter is called from the inherited constructor too, when Cookie is still null.
                     if (Cookie != null)
                     {
-                        string CultureCode = Cookie.CultureCode;
-                        if (value != null && !value.CultureCode.IsSameText(CultureCode))
+                        string CookieCultureCode = Cookie.CultureCode;
+                        if (!string.IsNullOrWhiteSpace(value) && !Sys.IsSameText(value, CookieCultureCode))
                         {
-                            Cookie.CultureCode = value.CultureCode;
+                            Cookie.CultureCode = value;
                         }
                     }
                 }
             }
         }
+ 
         /// <summary>
         /// True when the user is authenticated with the cookie authentication scheme.
         /// </summary>

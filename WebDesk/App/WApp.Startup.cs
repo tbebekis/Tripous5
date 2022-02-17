@@ -90,13 +90,7 @@ namespace WebDesk
             SysConfig.MainAssembly = typeof(WApp).Assembly;
             SysConfig.SqlConnectionsFileName = "SqlConnections.json";
         }
-        /// <summary>
-        /// Initializes <see cref="DbProviderFactory"/> classes.
-        /// </summary>
-        static void InitializeDbProviderFactories()
-        {
-            // DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
-        }
+ 
 
  
         /// <summary>
@@ -129,18 +123,15 @@ namespace WebDesk
         /// </summary>
         static void LoadLanguages()
         {
-            // load active languages
-            Language[] A = DataStore.GetLanguages();
- 
-            foreach (var Item in A)
-            {
-                Tripous.Languages.Add(Item); 
-            }
-
-
             // set the default language
             var Settings = DataStore.GetSettings();
-            Tripous.Languages.SetDefaultLanguage(Settings.General.CultureCode);
+
+            // load active languages
+            Language[] A = DataStore.GetLanguages(); 
+            Languages.SetDefaultLanguage(Settings.General.CultureCode);
+        }
+        static void ImportTranslationFiles()
+        {
 
             // load translation files
             string TranslationsFolder = Path.Combine(SysConfig.AppExeFolder, "Translations");
@@ -174,7 +165,6 @@ namespace WebDesk
         /// </summary>
         static void InitializeApplication()
         {
-
             try
             {
                 // ● initialize libraries
@@ -187,16 +177,22 @@ namespace WebDesk
                 ObjectStore.Initialize();
                 Db.Initialize();
                 Lib.Initialize(WApp.AppContext);
-
-                // ● data store
-                InitializeDbProviderFactories();                
                 DataStore.Initialize(WApp.AppContext);
 
-                // ● plugins
-                LoadPlugins();
+                // ● data store
+                DataStore.InitializeDatabases();
 
                 // ● languages
                 LoadLanguages();
+
+                // ● decriptors (brokers, locators, views, etc.)
+                DataStore.RegisterDescriptors();
+
+                // ● translations
+                ImportTranslationFiles();
+
+                // ● plugins
+                LoadPlugins();
 
                 // ● plugin initialization
                 InitializePlugins();
@@ -267,11 +263,11 @@ namespace WebDesk
 
             // ● Build a temporary root service provider
             // We set the final root ServiceProvider in Configure()
-            //ServiceProvider TempServiceProvider = services.BuildServiceProvider();
+            // ServiceProvider TempServiceProvider = services.BuildServiceProvider();
             //WSys.RootServiceProvider = TempServiceProvider;
 
             // ● Application
-            InitializeApplication();
+            //InitializeApplication();
 
             // ● Request Localization
             // https://www.codemag.com/Article/2009081/A-Deep-Dive-into-ASP.NET-Core-Localization
@@ -280,11 +276,10 @@ namespace WebDesk
                 var Provider = new CustomRequestCultureProvider(async (HttpContext) => {
                     await Task.Yield();
                     IRequestContext RequestContext = Lib.IsMvcRequest(HttpContext) ? GetService<IUserRequestContext>() : GetService<IJwtRequestContext>();
-                    Language Language = RequestContext.Language; 
-                    return new ProviderCultureResult(Language.CultureCode);
+                    return new ProviderCultureResult(RequestContext.CultureCode);
                 });
 
-                var Cultures = DataStore.GetLanguages().Select(item => item.GetCulture()).ToArray(); // Tripous.Languages.Items.Select(item => item.GetCulture()).ToArray();
+                var Cultures = DataStore.GetLanguages().Select(item => item.GetCulture()).ToArray(); 
                 options.DefaultRequestCulture = new RequestCulture(DataStore.EnLanguage.GetCulture());
                 options.SupportedCultures = Cultures;
                 options.SupportedUICultures = Cultures;
@@ -480,6 +475,9 @@ namespace WebDesk
         {
             // ● RootServiceProvider - set the root service provider
             WSys.RootServiceProvider = app.ApplicationServices;
+
+            // ● Application
+            InitializeApplication();
 
             // ● events
             IHostApplicationLifetime appLifetime = WSys.GetService<IHostApplicationLifetime>();

@@ -4,6 +4,8 @@ using System.Text;
 using System.Globalization;
 using System.Data;
 
+ 
+
 using Newtonsoft.Json;
 
 namespace Tripous
@@ -98,4 +100,9 @@ namespace Tripous
         public LanguageResourceStringList Resources { get; } = new LanguageResourceStringList();
 
     }
+
+
+
+
+
 }

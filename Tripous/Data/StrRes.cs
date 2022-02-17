@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Data;
 
+
+
 namespace Tripous.Data
 {
 
@@ -43,9 +45,7 @@ namespace Tripous.Data
                 return fStore;
             }
         }
-
-
-
+ 
         /* construction */
         /// <summary>
         /// Constructor.
@@ -245,4 +245,6 @@ where
             }
         }
     }
+
+
 }

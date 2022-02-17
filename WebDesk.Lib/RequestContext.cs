@@ -11,7 +11,6 @@ using Tripous;
 namespace WebLib
 {
 
-
     /// <summary>
     /// Represents a context regarding the current HTTP request.
     /// </summary>
@@ -31,6 +30,15 @@ namespace WebLib
             this.HttpContext = HttpContextAccessor.HttpContext;
         }
 
+        /* public */
+        /// <summary>
+        /// Returns the language object of the current request according to <see cref="CultureCode"/>
+        /// </summary>
+        public virtual Language GetLanguage()
+        {
+            return Languages.GetByCultureCode(CultureCode);
+        }
+
         /* properties */
         /// <summary>
         /// The http context
@@ -46,9 +54,10 @@ namespace WebLib
         public IQueryCollection Query => Request.Query;
 
         /// <summary>
-        /// The language of the current request
+        /// The culture (language) of the current request specified as a culture code (en-US, el-GR)
         /// </summary>
-        public abstract Language Language { get; set; }
+        public abstract string CultureCode { get; set; }
+ 
         /// <summary>
         /// The user or api client of the current request
         /// </summary>

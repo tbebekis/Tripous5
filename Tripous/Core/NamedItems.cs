@@ -116,20 +116,25 @@ namespace Tripous
             if (UniqueNames)
             {
                 INamedItem Item2;
-                string ErrorText = Res.GS("E_ItemWithNameAlreadyInList", "An item with this name already exists in list: {0} ");
-
+ 
                 /* is a new insert, or after an add */
                 if (Item != null)
                 {
                     Item2 = this.Find(Item.Name);
                     if ((Item2 != null) && (Item2 != Item))
-                        Sys.Throw(ErrorText, Item.Name);
+                    {
+                        Sys.Throw($"An item with this name already exists in list: {Item.Name} ");
+                    }
+                        
                 }
                 /* is a name change of an existing item, or before an add */
                 else
                 {
                     if (Contains(Name))
-                        Sys.Throw(ErrorText, Name);
+                    {
+                        Sys.Throw($"An item with this name already exists in list: {Name} ");
+                    }
+                        
                 }
             }
         }

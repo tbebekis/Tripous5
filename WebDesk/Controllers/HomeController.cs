@@ -25,13 +25,12 @@ namespace WebDesk.Controllers
         [Route("/setlanguage", Name = "SetLanguage"), AllowAnonymous]
         public IActionResult SetLanguage(string LanguageCode, string ReturnUrl = "")
         {
-            var Languages = DataStore.GetLanguages();
-            Language Lang = Languages.FirstOrDefault(item => item.Code.IsSameText(LanguageCode));
+            Language[] LanguageList = DataStore.GetLanguages();
+            Language Lang = Languages.FindByCode(LanguageList, LanguageCode);
 
-            if (Lang != null && Lang.CultureCode != this.UserContext.Language.CultureCode)
+            if (Lang != null && Lang.CultureCode != this.UserContext.CultureCode)
             {
-                this.UserContext.Language = Lang;
-                string S = Session.GetString("CultureCode");
+                this.UserContext.CultureCode = Lang.CultureCode; 
             }
 
             return HandleReturnUrl(ReturnUrl);

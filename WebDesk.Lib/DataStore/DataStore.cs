@@ -60,6 +60,15 @@ namespace WebLib
             }
         }
 
+        static void EnsureLanguageResources(Language Language)
+        {
+            if (Language.Resources.IsEmpty)
+            {
+                Dictionary<string, string> ResourceStringList = StrRes.GetStringListAsDictionary(Language.Code);
+                Language.Resources.LoadFrom(ResourceStringList);
+            }
+        }
+
         /// <summary>
         /// Registers DbProviderFactory classes
         /// </summary>
@@ -162,25 +171,6 @@ namespace WebLib
             Table = Json.FromJson<DataTableDef>(JsonText);
             Table.Check();
         }
-        static void AddTestData()
-        {
-            // add Traders
-            string SqlText = "select count(Id) as Result from Trader";
-            int Count = SqlStore.IntegerResult(SqlText, 0);
-            if (Count == 0)
-            {
-                string[] Traders = { "Jules Verne", "Robert Heinlein", "Isaac Asimov", "William Gibson", "Arthur Clarke" };
-                SqlBroker Broker = SqlBroker.Create("Trader", true, false);
-
-                foreach (string TraderName in Traders)
-                {
-                    Broker.Insert();
-                    Broker.Row["Name"] = TraderName;
-                    Broker.Commit();
-                }
- 
-            }
-        }
         static void Test()
         {
             SqlBroker Broker = SqlBroker.CreateSingleTableBroker(SysTables.StrRes);
@@ -198,34 +188,53 @@ namespace WebLib
         {
             if (DataStore.App == null)
             {
-                DataStore.App = App;
-
-                Logger.Add(new DataLogListener());
-                AjaxRequest.Register(new AjaxRequestDefaultHandler()); 
-
-                RegisterDbProviderFactories();
-                LoadConnectionStrings();
-                CreateDatabases();
-
-                SqlStore = SqlStores.CreateDefaultSqlStore();
-
-                ExecuteSystemSchema(); 
-                ExecuteSchemas();
-
-                RegisterBrokers();
-                RegisterLocators();
-
-                RegisterViews();
-
-                EntityDescriptors.Load(typeof(DataStore).Assembly);
-
-                AddTestData();
-
-                //Test();
-            }
-
-           
+                DataStore.App = App;                
+            }           
         }
+        static public void InitializeDatabases()
+        {
+            RegisterDbProviderFactories();
+            LoadConnectionStrings();
+            CreateDatabases();
+
+            SqlStore = SqlStores.CreateDefaultSqlStore();
+
+            ExecuteSystemSchema();
+            ExecuteSchemas();
+
+            Logger.Add(new DataLogListener());
+        }
+        static public void RegisterDescriptors()
+        {
+            AjaxRequest.Register(new AjaxRequestDefaultHandler());
+
+            RegisterBrokers();
+            RegisterLocators();
+
+            RegisterViews();
+
+            EntityDescriptors.Load(typeof(DataStore).Assembly);
+        }
+        static public void AddTestData()
+        {
+            // add Traders
+            string SqlText = "select count(Id) as Result from Trader";
+            int Count = SqlStore.IntegerResult(SqlText, 0);
+            if (Count == 0)
+            {
+                string[] Traders = { "Jules Verne", "Robert Heinlein", "Isaac Asimov", "William Gibson", "Arthur Clarke" };
+                SqlBroker Broker = SqlBroker.Create("Trader", true, false);
+
+                foreach (string TraderName in Traders)
+                {
+                    Broker.Insert();
+                    Broker.Row["Name"] = TraderName;
+                    Broker.Commit();
+                }
+
+            }
+        }
+
         /// <summary>
         /// Called by the system. 
         /// <para>Instructs plugin to add any object to object mappings may have by calling either:</para>
@@ -267,6 +276,8 @@ namespace WebLib
                     Item.FlagImage = Row.AsString("FlagImage");
                 }
 
+                Languages.SetLanguages(LanguageList);
+
                 return LanguageList.ToArray();
             }
             //-----------------------------------------------
@@ -302,11 +313,7 @@ namespace WebLib
         {
             Language Language = Languages.GetByCultureCode(CultureCode);
 
-            if (Language.Resources.IsEmpty)
-            {
-                Dictionary<string, string> ResourceStringList = StrRes.GetStringListAsDictionary(Language.Code);
-                Language.Resources.LoadFrom(ResourceStringList);
-            }
+            EnsureLanguageResources(Language);
 
             Dictionary<string, string> Result = Language.Resources.GetResourceStringListDictionary();
             return Result;
@@ -407,10 +414,7 @@ where
 
             return Result;
         }
-
-
-
-
+ 
         static public Command[] GetMainMenu()
         {
             List<Command> Result = new List<Command>();
@@ -439,7 +443,7 @@ where
         /// </summary>
         static public string Localize(string Key)
         {
-            return Localize(App.Language, Key);
+            return Localize(App.Culture.Name, Key);
         }
         /// <summary>
         /// Returns a localized string based on a specified resource key, e.g. Customer, and a culture code, e.g. el-GR
@@ -454,6 +458,7 @@ where
         /// </summary>
         static public string Localize(Language Language, string Key)
         {
+            EnsureLanguageResources(Language);
             string Result = Language.Resources.Find(Key);
             return !string.IsNullOrWhiteSpace(Result) ? Result : Key;
         }

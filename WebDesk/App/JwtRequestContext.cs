@@ -20,7 +20,7 @@ namespace WebDesk
     /// </summary>
     internal class JwtRequestContext : RequestContext, IJwtRequestContext
     {
-        Language fLanguage;
+        string fCultureCode;
 
         /* construction */
         /// <summary>
@@ -32,30 +32,31 @@ namespace WebDesk
         }
 
         /// <summary>
-        /// The language of the current request
+        /// The culture (language) of the current request specified as a culture code (en-US, el-GR)
         /// </summary>
-        public override Language Language
+        public override string CultureCode
         {
             get
             {
-                if (fLanguage == null)
+                if (string.IsNullOrWhiteSpace(fCultureCode))
                 {
                     // read the token from HTTP headers
                     JwtSecurityToken Token = JwtAuthHelper.ReadTokenFromRequestHeader(HttpContext);
 
                     if (Token != null && WSys.ContainsClaim(Token.Claims, Requestor.SCultureClaimType))
                     {
-                        string CultureCode = WSys.GetClaimValue(Token.Claims, Requestor.SCultureClaimType);
-                        fLanguage = Languages.GetByCultureCode(CultureCode);
+                        fCultureCode = WSys.GetClaimValue(Token.Claims, Requestor.SCultureClaimType);
                     }
                 }
-
-                return fLanguage != null? fLanguage: DataStore.EnLanguage;
+        
+                return !string.IsNullOrWhiteSpace(fCultureCode)? fCultureCode: Languages.DefaultLanguage.CultureCode;
             }
             set
             {
+
             }
         }
+ 
 
         /// <summary>
         /// True when the user is authenticated with the cookie authentication scheme.

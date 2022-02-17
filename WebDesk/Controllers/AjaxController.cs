@@ -111,8 +111,6 @@ namespace WebDesk.Controllers
             return Json(Result);
  
         }
-
-
         #endregion
 
         #region Sql
@@ -444,12 +442,7 @@ where
             return Json(Result);
         }
         #endregion
-
-
-
-        #region Miscs
-
-
-        #endregion
+ 
+ 
     }
 }
