@@ -99,6 +99,15 @@ namespace Tripous
         [JsonIgnore]
         public LanguageResourceStringList Resources { get; } = new LanguageResourceStringList();
 
+        /// <summary>
+        /// English language
+        /// </summary>
+        static public Language En => new Language() { Id = "ENU", Name = "English", Code = "en", CultureCode = "en-US", FlagImage = "gb.png" };
+        /// <summary>
+        /// Greek language
+        /// </summary>
+        static public Language El => new Language() { Id = "ELL", Name = "Greek", Code = "el", CultureCode = "el-GR", FlagImage = "gr.png" };
+
     }
 
 

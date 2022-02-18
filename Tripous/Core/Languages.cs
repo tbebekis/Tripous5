@@ -17,6 +17,17 @@ namespace Tripous
         static List<Language> fItems = new List<Language>();
         static Language fDefaultLanguage;
 
+
+        /* construction */
+        /// <summary>
+        /// Static constructor
+        /// </summary>
+        static Languages()
+        {
+            Add(Language.En);
+            Add(Language.El);
+        }
+
         /* public */
         /// <summary>
         /// Registers a language

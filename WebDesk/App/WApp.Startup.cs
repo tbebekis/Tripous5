@@ -280,7 +280,7 @@ namespace WebDesk
                 });
 
                 var Cultures = DataStore.GetLanguages().Select(item => item.GetCulture()).ToArray(); 
-                options.DefaultRequestCulture = new RequestCulture(DataStore.EnLanguage.GetCulture());
+                options.DefaultRequestCulture = new RequestCulture(Language.En.GetCulture());  
                 options.SupportedCultures = Cultures;
                 options.SupportedUICultures = Cultures;
                 options.RequestCultureProviders.Insert(0, Provider);

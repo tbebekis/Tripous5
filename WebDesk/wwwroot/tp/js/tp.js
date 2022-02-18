@@ -2184,6 +2184,32 @@ tp.RandomFloat = function (Min, Max) {
 
 //#region Dates
 
+/** Replaces the toJSON() method of the Date object. <br />
+ * The toJSON() default implementation returns a string by just calling the toISOString() method. <br />
+ * That is while all other Date operations are performed in local time, the stringification results in UTC time. <br />
+ * {@link https://stackoverflow.com/questions/31877535/json-stringify-changes-date|JSON.stringify changes date} <br />
+ * {@link https://stackoverflow.com/questions/1486476/json-stringify-changes-time-of-date-because-of-utc|JSON Stringify changes time of date because of UTC} <br />
+ * {@link https://stackoverflow.com/questions/31096130/how-to-json-stringify-a-javascript-date-and-preserve-timezone|How to JSON stringify a javascript Date and preserve timezone} <br />
+ * The above described logic creates problems when the stringified date is sent to server. <br />
+ * This implementation stringifies a date and preserves the time-zone, i.e. sends local time to server. <br />
+ * TAKEN FROM: https://stackoverflow.com/a/36643588/1779320
+ * */
+Date.prototype.toJSON = function () {
+    var timezoneOffsetInHours = -(this.getTimezoneOffset() / 60); //UTC minus local time
+    var sign = timezoneOffsetInHours >= 0 ? '+' : '-';
+    var leadingZero = (Math.abs(timezoneOffsetInHours) < 10) ? '0' : '';
+
+    //It's a bit unfortunate that we need to construct a new Date instance 
+    //(we don't want _this_ Date instance to be modified)
+    var correctedDate = new Date(this.getFullYear(), this.getMonth(),
+        this.getDate(), this.getHours(), this.getMinutes(), this.getSeconds(),
+        this.getMilliseconds());
+    correctedDate.setHours(this.getHours() + timezoneOffsetInHours);
+    var iso = correctedDate.toISOString().replace('Z', '');
+
+    return iso + sign + leadingZero + Math.abs(timezoneOffsetInHours).toString() + ':00';
+}
+
 /** Enum-like class
  @class
  @enum {number}
@@ -2218,8 +2244,14 @@ tp.DatePattern = {
     YMD: 2
 };
  
-
-
+/** Returns true if a specified Date value is a valid date.
+ * @param {Date|object} v The value to check.
+ * @returns {boolean} Returns true if a specified Date value is a valid date.
+ */
+tp.IsValidDate = function (v) {
+    return v instanceof Date && !isNaN(v.getTime());
+    // return new Date(v).toString() !== 'Invalid Date';
+};
 
 /**
  * Parses a date, time or date-time string into a Date value. The string format should be in yyyy/MM/dd HH:mm:ss  

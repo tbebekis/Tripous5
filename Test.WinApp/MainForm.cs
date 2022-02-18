@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Newtonsoft.Json.Linq;
 
+using Tripous;
 using Tripous.Data;
 
 namespace Test.WinApp
@@ -87,14 +89,30 @@ namespace Test.WinApp
             }
         }
 
+        void TestDateTimeJson()
+        {
+            //  sDT = "2022-06-03T21:00:00Z";  // 2022-06-03T21:00:00.000Z
+
+            LogEntry Entry = new LogEntry();
+            string JsonText = Json.Serialize(Entry);
+
+            AppendLine(JsonText);
+
+            JsonText = @"{
+  'Date': '2022-02-18T21:50:57.907+02:00'
+}";
+            Entry = Json.Deserialize<LogEntry>(JsonText);
+            JsonText = Json.Serialize(Entry);
+
+            AppendLine(JsonText);
+        }
         void FormInitialize()
         {
             App.Initialize(this);
 
             SettingTest.LoadSettings();
 
-            //Test();
-            //BrokerTest.Test1();
+            TestDateTimeJson();
         }
         void Test()
         {
@@ -142,5 +160,10 @@ namespace Test.WinApp
             InitializeComponent();
         }
 
+    }
+
+    public class LogEntry
+    {
+        public DateTime Date { get; set; } = DateTime.UtcNow.Date;
     }
 }

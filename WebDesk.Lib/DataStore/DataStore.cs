@@ -31,17 +31,6 @@ namespace WebLib
     /// </summary>
     static public partial class DataStore
     {
-
- 
-
-        /// <summary>
-        /// English language
-        /// </summary>
-        static public Language EnLanguage = new Language() { Id = "ENU", Name = "English", Code = "en", CultureCode = "en-US", FlagImage = "gb.png" };
-        /// <summary>
-        /// Greek language
-        /// </summary>
-        static public Language GrLanguage = new Language() { Id = "ELL", Name = "Greek", Code = "el", CultureCode = "el-GR", FlagImage = "gr.png" };
  
         static int? fDefaultCacheTimeoutMinutes;
 

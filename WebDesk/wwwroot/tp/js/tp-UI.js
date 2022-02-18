@@ -8448,7 +8448,26 @@ tp.TextBox = class extends tp.InputControl {
         this.TextAlign = tp.Alignment.ToText(Alignment);
         super.OnBindCompleted();
     }
- 
+
+    /**
+     * Converts a value coming from data-source's column to a value assignable to the data-property of this instance.
+     * NOTE: Use this method with simple and list controls only
+     * @param {any} v - The value to operate on.
+     * @returns {any} The result of the convertion
+    */
+    DataValueToDataProperty(v) {
+        return tp.IsString(v) && tp.Db.NULL !== v ? v : null;
+    }
+    /**
+     * Converts the value of the data-property of this instance to a value assignable to data-source's column.
+     * NOTE: Use this method with simple and list controls only
+     * @param {any} v - The value to operate on.
+     * @returns {any} The result of the convertion
+    */
+    DataPropertyToDataValue(v) {
+        return v;
+    }
+
     /* public */
     /**
     Focuses an element and selects all the text in it
@@ -8729,6 +8748,26 @@ tp.Memo = class extends tp.Control {
         super.Bind();
         this.ReadDataValue();
     }
+
+    /**
+     * Converts a value coming from data-source's column to a value assignable to the data-property of this instance.
+     * NOTE: Use this method with simple and list controls only
+     * @param {any} v - The value to operate on.
+     * @returns {any} The result of the convertion
+    */
+    DataValueToDataProperty(v) {
+        return tp.IsString(v) && tp.Db.NULL !== v? v: null;
+    }
+    /**
+     * Converts the value of the data-property of this instance to a value assignable to data-source's column.
+     * NOTE: Use this method with simple and list controls only
+     * @param {any} v - The value to operate on.
+     * @returns {any} The result of the convertion
+    */
+    DataPropertyToDataValue(v) {
+        return v;
+    }
+
 
     /* public */
     /**
@@ -13246,9 +13285,7 @@ tp.CalendarBox = class extends tp.Control {
     @override
     */
     InitializeFields() {
-        super.InitializeFields();
-
-        //this.fDate = tp.ClearTime(new Date());
+        super.InitializeFields(); 
 
         this.fWeekRows = [];
         this.fDayCells = [];
@@ -13502,67 +13539,67 @@ tp.CalendarBox = class extends tp.Control {
  @protected
  @type {Date}
  */
-tp.CalendarBox.prototype.fDate;
+tp.CalendarBox.prototype.fDate = null;
 /** Field
  @protected
  @type {HTMLTableElement}
  */
-tp.CalendarBox.prototype.elTable;
+tp.CalendarBox.prototype.elTable = null;
 /** Field
  @protected
  @type {HTMLTableRowElement}
  */
-tp.CalendarBox.prototype.fDateRow;
+tp.CalendarBox.prototype.fDateRow = null;
 /** Field
  @protected
  @type {HTMLTableRowElement}
  */
-tp.CalendarBox.prototype.fDaysRow;
+tp.CalendarBox.prototype.fDaysRow = null;
 /** Field
  @protected
  @type {HTMLTableRowElement[]}
  */
-tp.CalendarBox.prototype.fWeekRows;
+tp.CalendarBox.prototype.fWeekRows = null;
 /** Field
  @protected
  @type {HTMLTableCellElement[]}
  */
-tp.CalendarBox.prototype.fDayCells;
+tp.CalendarBox.prototype.fDayCells = null;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.CalendarBox.prototype.fPrevYearCell;
+tp.CalendarBox.prototype.fPrevYearCell = null;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.CalendarBox.prototype.fPrevMonthCell;
+tp.CalendarBox.prototype.fPrevMonthCell = null;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.CalendarBox.prototype.fCurDateCell;
+tp.CalendarBox.prototype.fCurDateCell = null;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.CalendarBox.prototype.fNextMonthCell;
+tp.CalendarBox.prototype.fNextMonthCell = null;
 /** Field
  @protected
  @type {HTMLTableCellElement}
  */
-tp.CalendarBox.prototype.fNextYearCell;
+tp.CalendarBox.prototype.fNextYearCell = null;
 /** Field
  @protected
  @type {number}
  */
-tp.CalendarBox.prototype.fYear;
+tp.CalendarBox.prototype.fYear = null;
 /** Field
  @protected
  @type {number}
  */
-tp.CalendarBox.prototype.fMonth;
+tp.CalendarBox.prototype.fMonth = null;
 
 
 //#endregion
@@ -13621,7 +13658,7 @@ tp.DateBox = class extends tp.Control {
     @type {Date}
     */
     get Date() {
-        return this.fDate;
+        return tp.IsValidDate(this.fDate)? this.fDate: null;
     }
     set Date(v) {
         if (tp.IsString(v)) {
@@ -13633,27 +13670,32 @@ tp.DateBox = class extends tp.Control {
             }
         }
 
-        if (v instanceof Date)
-            v = tp.ClearTime(v);
+        if (tp.DateCompare(this.fDate, v) !== 0) {
 
-        if ((this.fTextBox && tp.IsBlank(this.fTextBox.value)) || tp.DateCompare(this.fDate, v) !== 0) {
-            if (v instanceof Date) {
+            let sValue = '';
+            let IsValidNew = tp.IsValidDate(v);
+
+            if (IsValidNew) {
+                v = tp.ClearTime(v);
                 this.fDate = v;
-                if (this.fTextBox)
-                    this.fTextBox.value = tp.FormatDateTime(v, tp.GetDateFormat()); //  'yyyy-MM-dd'
-                if (this.fCalendar) {
-                    this.fCalendar.Date = v;
-                    this.fCalendar.Update();
-                }
-            } else {
+                sValue = tp.FormatDateTime(v, tp.GetDateFormat()); //  'yyyy-MM-dd'
+            }
+            else {
                 this.fDate = null;
-                if (this.fTextBox)
-                    this.fTextBox.value = '';
+            }
+
+            if (this.fTextBox)
+                this.fTextBox.value = sValue;
+
+            if (this.fCalendar) {
+                this.fCalendar.Date = v;
+                this.fCalendar.Update();
             }
 
             this.WriteDataValue();
             this.OnDateChanged();
-        }
+        } 
+
     }
  
     /**
@@ -13868,7 +13910,7 @@ tp.DateBox = class extends tp.Control {
 
 
     }
-
+ 
     /* public */
     /**
     Displays the dropdown box
@@ -13935,32 +13977,32 @@ tp.DateBox = class extends tp.Control {
  * @protected
  * @type {HTMLInputElement}
  */
-tp.DateBox.prototype.fTextBox;
+tp.DateBox.prototype.fTextBox = null;
 /** Field
  * @protected
  * @type {HTMLElement}
  */
-tp.DateBox.prototype.fButton;
+tp.DateBox.prototype.fButton = null;
 /** Field
  * @protected
  * @type {tp.DropDownBox}
  */
-tp.DateBox.prototype.fDropDownBox;
+tp.DateBox.prototype.fDropDownBox = null;
 /** Field
  * @protected
  * @type {tp.CalendarBox}
  */
-tp.DateBox.prototype.fCalendar;
+tp.DateBox.prototype.fCalendar = null;
 /** Field
  * @protected
  * @type {Date}
  */
-tp.DateBox.prototype.fDate;
+tp.DateBox.prototype.fDate = null;
 /** Field
  * @protected
  * @type {tp.Size}
  */
-tp.DateBox.prototype.fCalendarSize;
+tp.DateBox.prototype.fCalendarSize = null;
 //#endregion
 
 //#region  tp.ImageBox

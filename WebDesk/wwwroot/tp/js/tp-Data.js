@@ -1963,8 +1963,8 @@ tp.Db = class {
 
     /** Constant
      * @type {string}
-     */
-    static get NULL() { return "___null___"; }
+    */
+    static get NULL() { return tp.NULL; }
     /** Constant
      * @type {string}
      */

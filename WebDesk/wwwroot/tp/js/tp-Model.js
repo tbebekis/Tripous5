@@ -457,6 +457,7 @@ tp.Broker = class extends tp.Object {
 
         if (Action.AssignFlag === true) {
             this.Clear();
+            //log(Args.Packet);
             this.Assign(Args.Packet);
         }
 
@@ -778,7 +779,9 @@ tp.Broker = class extends tp.Object {
         // WARNING: The serialization must be done here, at the last moment
         // so any code can have the chance to alter table data until that last moment
         var Model = this.toJSON();
+        log(Model);
         let JsonText = JSON.stringify(Model);
+        log(JsonText);
         Action.Args.Data = JsonText;
 
         Action.Args.ContentType = 'application/json; charset=utf-8';
