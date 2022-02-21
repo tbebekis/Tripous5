@@ -1172,6 +1172,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.TabPage}
      */
     tabGeneral = null;
+    /**  
+     * @type {tp.TabPage}
+     */
+    tabSelectSqlList = null;
 
     /* private */
     /** 
@@ -1229,8 +1233,13 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         if (this.View.pagerEdit.GetPageCount() === 1) {
 
             // add a tp.TabPage to View's pagerEdit
-            this.tabGeneral = this.View.pagerEdit.AddPage('General');
+            this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
             tp.Data(this.tabGeneral.Handle, 'Name', 'General');
+
+            this.tabSelectSqlList = this.View.pagerEdit.AddPage(_L('SelectSqlList'));
+            //tp.Data(this.tabSelectSqlList.Handle, 'Name', 'SelectSqlList');
+            // EDW
+
 
             // create the data table
             this.tblBrokerDef = new tp.DataTable();
@@ -1638,7 +1647,12 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
         }
     }
-
+    /**
+    Displays the main local menu
+    @protected
+    */
+    DisplayHomeLocalMenu() {
+    }
     // commands/modes
     /**
     Returns the bit-field (set) of the valid commands for this view. <br />

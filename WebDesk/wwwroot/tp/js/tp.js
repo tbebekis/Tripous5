@@ -2195,6 +2195,9 @@ tp.RandomFloat = function (Min, Max) {
  * TAKEN FROM: https://stackoverflow.com/a/36643588/1779320
  * */
 Date.prototype.toJSON = function () {
+    if (!tp.IsValidDate(this))
+        return null;
+
     var timezoneOffsetInHours = -(this.getTimezoneOffset() / 60); //UTC minus local time
     var sign = timezoneOffsetInHours >= 0 ? '+' : '-';
     var leadingZero = (Math.abs(timezoneOffsetInHours) < 10) ? '0' : '';
