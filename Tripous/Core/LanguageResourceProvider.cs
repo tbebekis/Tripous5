@@ -4,7 +4,7 @@ using System.Text;
 using System.Data;
 
 using System.Resources;
-using System.Drawing;
+//using System.Drawing;
 using System.Globalization;
 
 namespace Tripous.Core
