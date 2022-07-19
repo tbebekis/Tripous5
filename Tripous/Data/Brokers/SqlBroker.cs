@@ -597,6 +597,7 @@ namespace Tripous.Data
                 ConnectionName = SysConfig.DefaultConnection;
 
             SqlBrokerDef Descriptor = new SqlBrokerDef();
+            Descriptor.ConnectionName = ConnectionName;
             Descriptor.MainTableName = MainTableName;
 
             SqlBroker Result = Create(Descriptor, true, AsListBroker);

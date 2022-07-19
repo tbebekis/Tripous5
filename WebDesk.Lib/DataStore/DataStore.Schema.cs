@@ -106,7 +106,7 @@ create table {TableName} (
 ";
             schema.AddTable(SqlText);
 
-            string Id = Sys.GenId(true);
+            string Id = Sys.GenId();
             int UserLevel = (int)Tripous.UserLevel.Admin;
             string PasswordSalt = GenerateRandomText(8);
             string Password = "webdesk";
@@ -249,7 +249,7 @@ create table {TableName} (
 
             SV.AddTable(SqlText);
 
-            string Id = Sys.GenId(true);
+            string Id = Sys.GenId();
             int UserLevel = (int)Tripous.UserLevel.Admin;
             string PasswordSalt = GenerateRandomText(8);
             string Password = "webdesk";

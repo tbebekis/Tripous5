@@ -20,7 +20,7 @@ namespace WebLib
         /// <summary>
         /// Database Id
         /// </summary>
-        public string Id { get; set; } = Sys.GenId(true);
+        public string Id { get; set; } = Sys.GenId();
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>

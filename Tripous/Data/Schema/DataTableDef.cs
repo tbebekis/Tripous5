@@ -639,7 +639,7 @@ namespace Tripous.Data
         /// <summary>
         /// A GUID string. 
         /// </summary>
-        public string Id { get; set; } = Sys.GenId(true);
+        public string Id { get; set; } = Sys.GenId();
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>

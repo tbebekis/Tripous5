@@ -286,7 +286,7 @@ namespace Tripous.Data
             return Store.LastId(TableName);
         }
         /// <summary>
-        /// Creates and returns a new Guid surrounded by {}
+        /// Creates and returns a new Guid NOT surrounded by {}
         /// </summary>
         protected string GetGuid()
         {

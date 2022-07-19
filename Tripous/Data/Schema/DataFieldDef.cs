@@ -216,7 +216,7 @@ namespace Tripous.Data
         /// A GUID string. We need this in comparing two instances of <see cref="DataTableDef"/> 
         /// for fields with the same Id but different Name, for column renaming.
         /// </summary>
-        public string Id { get; set; } = Sys.GenId(true);
+        public string Id { get; set; } = Sys.GenId();
         /// <summary>
         /// A name unique among all instances of this type
         /// </summary>
