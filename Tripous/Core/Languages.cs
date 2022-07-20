@@ -104,7 +104,11 @@ namespace Tripous
             {
                 Language Item = FindByCultureCode(CultureCode);
                 if (Item == null)
-                    throw new ApplicationException($"Language not registered: {CultureCode}");
+                {
+                    Item = DefaultLanguage;
+                    Logging.Logger.Warn($"Language not registered: {CultureCode}");
+                }
+                //    throw new ApplicationException($"Language not registered: {CultureCode}");
                 return Item;
             }
         }
@@ -117,7 +121,11 @@ namespace Tripous
             {
                 Language Item = FindByCode(TwoLetterLanguageCode);
                 if (Item == null)
-                    throw new ApplicationException($"Language not registered: {TwoLetterLanguageCode}");
+                {
+                    Item = DefaultLanguage;
+                    Logging.Logger.Warn($"Language not registered: {TwoLetterLanguageCode}");
+                }
+                //    throw new ApplicationException($"Language not registered: {TwoLetterLanguageCode}");
                 return Item;
             }
         }
