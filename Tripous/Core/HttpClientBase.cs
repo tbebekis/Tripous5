@@ -5,10 +5,113 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
- 
+using System.Net.Mime;
+
+
 
 namespace Tripous
 {
+    /// <summary>
+    /// The type of a HttpClient call
+    /// </summary>
+    public enum HttpClientCallType
+    {
+        /// <summary>
+        /// Get
+        /// </summary>
+        Get,
+        /// <summary>
+        /// Post
+        /// </summary>
+        Post,
+        /// <summary>
+        /// PostForm
+        /// </summary>
+        PostForm,
+        /// <summary>
+        /// Put
+        /// </summary>
+        Put,
+        /// <summary>
+        /// Delete
+        /// </summary>
+        Delete,
+    }
+
+
+    /// <summary>
+    /// To be used with events
+    /// </summary>
+    public class HttpClientCallInfo: EventArgs
+    {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        private HttpClientCallInfo()
+        {
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public HttpClientCallInfo(HttpClientCallType CallType, string ActionUrl)
+        {
+            this.CallType = CallType; 
+            this.ActionUrl = ActionUrl; 
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public HttpClientCallInfo(HttpClientCallType CallType, string ActionUrl, object Packet)
+            : this(CallType, ActionUrl)
+        {
+            this.Packet= Packet;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public HttpClientCallInfo(HttpClientCallType CallType, string ActionUrl, Dictionary<string, string> FormData)
+            : this(CallType, ActionUrl)
+        {
+            this.FormData = FormData;
+        }
+
+
+        /* properties */
+        /// <summary>
+        /// The type of the call
+        /// </summary>
+        public HttpClientCallType CallType { get; }
+        /// <summary>
+        /// The relative Url of the action
+        /// </summary>
+        public string ActionUrl { get; }
+        /// <summary>
+        /// The packet, if any, else null. 
+        /// Used by Post and Put only.
+        /// </summary>
+        public object Packet { get; }
+        /// <summary>
+        /// The FormData, if any, else null.
+        /// Used by PostForm only.
+        /// </summary>
+        public Dictionary<string, string> FormData { get; }
+        /// <summary>
+        /// The Response object.
+        /// Valid only in the <see cref="HttpClientBase{T}.OnCallAfter(HttpClientCallInfo)"/> call, else null.
+        /// </summary>
+        public HttpResponseMessage Response { get; set; }
+        /// <summary>
+        /// The client result.
+        /// Valid only in the <see cref="HttpClientBase{T}.OnCallAfter(HttpClientCallInfo)"/> call, else null.
+        /// </summary>
+        public HttpClientResult ClientResult { get; set; }
+        /// <summary>
+        /// User defined.
+        /// </summary>
+        public object Tag { get; set; }
+    }
+
     /// <summary>
     /// Represents a "typed" http client. Covers the <see cref="HttpClientBase{T}" /> class.
     /// </summary>
@@ -95,6 +198,7 @@ namespace Tripous
         /// Authenticates with the Api in order to get the access token. On succes it assignes the AccessToken property.
         /// </summary>
         protected abstract void Authenticate();
+
         /// <summary>
         /// Prepares the authentication headers
         /// </summary>
@@ -104,13 +208,43 @@ namespace Tripous
         /// </summary>
         protected virtual void PrepareHeaders()
         {
-            if (Client.DefaultRequestHeaders.Accept == null || !Client.DefaultRequestHeaders.Accept.Any(m => m.MediaType == "application/json"))
+            OnPrepareHeadersBefore();
+
+            if (Client.DefaultRequestHeaders.Accept == null || !Client.DefaultRequestHeaders.Accept.Any(m => m.MediaType == MediaTypeNames.Application.Json))
             {
-                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
             }
 
             PrepareAuthenticationHeaders();
-            
+
+            OnPrepareHeadersAfter();
+        }
+        /// <summary>
+        /// Called by the <see cref="PrepareHeaders"/>
+        /// </summary>
+        protected virtual void OnPrepareHeadersBefore()
+        {
+        }
+        /// <summary>
+        /// Called by the <see cref="PrepareHeaders"/>
+        /// </summary>
+        protected virtual void OnPrepareHeadersAfter()
+        {
+        }
+
+        /// <summary>
+        /// Called by action methods
+        /// </summary>
+        protected virtual void OnCallBefore(HttpClientCallInfo CallInfo)
+        {
+
+        }
+        /// <summary>
+        /// Called by action methods
+        /// </summary>
+        protected virtual void OnCallAfter(HttpClientCallInfo CallInfo)
+        {
+
         }
 
         /// <summary>
@@ -165,6 +299,8 @@ namespace Tripous
         {
         }
 
+
+
         /* public */
         /// <summary>
         /// Executes a GET Action to Api
@@ -177,11 +313,23 @@ namespace Tripous
                 if (!IsAuthenticated)
                     Authenticate();
 
+                if (!IsAuthenticated)
+                    Sys.Throw("Http Client is not authenticated.");
+
+                PrepareHeaders();
+
+                HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Get, ActionUrl);
+                OnCallBefore(CallInfo);
+
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
                 // SEE: https://stackoverflow.com/a/10369275/1779320
                 // SEE ALSO: https://blog.stephencleary.com/2012/02/async-and-await.html
                 HttpResponseMessage Response = await Client.GetAsync(ActionUrl).ConfigureAwait(false);
                 await Result.LoadFromResponseAsync(Response).ConfigureAwait(false);
+
+                CallInfo.Response = Response;
+                CallInfo.ClientResult = Result;
+                OnCallAfter(CallInfo);
             }
             catch (Exception Ex)
             {
@@ -207,11 +355,23 @@ namespace Tripous
                 if (!IsAuthenticated)
                     Authenticate();
 
+                if (!IsAuthenticated)
+                    Sys.Throw("Http Client is not authenticated.");
+
+                PrepareHeaders();
+
+                HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.PostForm, ActionUrl, FormData);
+                OnCallBefore(CallInfo);
+
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
                 // SEE: https://stackoverflow.com/a/10369275/1779320
                 // SEE ALSO: https://blog.stephencleary.com/2012/02/async-and-await.html
                 HttpResponseMessage Response = await Client.PostAsync(ActionUrl, new FormUrlEncodedContent(FormData)).ConfigureAwait(false);
                 await Result.LoadFromResponseAsync(Response).ConfigureAwait(false);
+
+                CallInfo.Response = Response;
+                CallInfo.ClientResult = Result;
+                OnCallAfter(CallInfo);
             }
             catch (Exception Ex)
             {
@@ -237,14 +397,26 @@ namespace Tripous
                 if (!IsAuthenticated)
                     Authenticate();
 
+                if (!IsAuthenticated)
+                    Sys.Throw("Http Client is not authenticated.");
+
+                PrepareHeaders();
+
+                HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Post, ActionUrl, Packet);
+                OnCallBefore(CallInfo);
+
                 string JsonText = Json.ToJson(Packet);
-                StringContent Content = new StringContent(JsonText, Encoding.UTF8, "application/json");
+                StringContent Content = new StringContent(JsonText, Encoding.UTF8, MediaTypeNames.Application.Json);
 
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
                 // SEE: https://stackoverflow.com/a/10369275/1779320
                 // SEE ALSO: https://blog.stephencleary.com/2012/02/async-and-await.html
                 HttpResponseMessage Response = await Client.PostAsync(ActionUrl, Content).ConfigureAwait(false);
                 await Result.LoadFromResponseAsync(Response).ConfigureAwait(false);
+
+                CallInfo.Response = Response;
+                CallInfo.ClientResult = Result;
+                OnCallAfter(CallInfo);
             }
             catch (Exception Ex)
             {
@@ -270,14 +442,26 @@ namespace Tripous
                 if (!IsAuthenticated)
                     Authenticate();
 
+                if (!IsAuthenticated)
+                    Sys.Throw("Http Client is not authenticated.");
+
+                PrepareHeaders();
+
+                HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Put, ActionUrl, Packet);
+                OnCallBefore(CallInfo);
+
                 string JsonText = Json.ToJson(Packet);
-                StringContent Content = new StringContent(JsonText, Encoding.UTF8, "application/json");
+                StringContent Content = new StringContent(JsonText, Encoding.UTF8, MediaTypeNames.Application.Json);
 
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
                 // SEE: https://stackoverflow.com/a/10369275/1779320
                 // SEE ALSO: https://blog.stephencleary.com/2012/02/async-and-await.html
                 HttpResponseMessage Response = await Client.PutAsync(ActionUrl, Content).ConfigureAwait(false);
                 await Result.LoadFromResponseAsync(Response).ConfigureAwait(false);
+
+                CallInfo.Response = Response;
+                CallInfo.ClientResult = Result;
+                OnCallAfter(CallInfo);
             }
             catch (Exception Ex)
             {
@@ -304,11 +488,23 @@ namespace Tripous
                 if (!IsAuthenticated)
                     Authenticate();
 
+                if (!IsAuthenticated)
+                    Sys.Throw("Http Client is not authenticated.");
+
+                PrepareHeaders();
+
+                HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Delete, ActionUrl);
+                OnCallBefore(CallInfo);
+
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
                 // SEE: https://stackoverflow.com/a/10369275/1779320
                 // SEE ALSO: https://blog.stephencleary.com/2012/02/async-and-await.html
                 HttpResponseMessage Response = await Client.DeleteAsync(ActionUrl).ConfigureAwait(false);
                 await Result.LoadFromResponseAsync(Response).ConfigureAwait(false);
+
+                CallInfo.Response = Response;
+                CallInfo.ClientResult = Result;
+                OnCallAfter(CallInfo);
             }
             catch (Exception Ex)
             {

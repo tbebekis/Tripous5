@@ -52,6 +52,17 @@ namespace Tripous
                 return Json.Deserialize<T>(ResponseJsonText);
             return default(T);
         }
+        /// <summary>
+        /// Deserializes the response json text into an object.
+        /// </summary>
+        public virtual void Deserialize(object Instance)
+        {
+            if (Instance != null)
+            {
+                Json.PopulateObject(Instance, ResponseJsonText);
+            }            
+        }
+
 
         /* properties */
         /// <summary>
