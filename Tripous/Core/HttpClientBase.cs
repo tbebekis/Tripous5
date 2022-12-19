@@ -307,7 +307,7 @@ namespace Tripous
         /// </summary>
         public async Task<T> GetAsync(string ActionUrl)
         {
-            T Result = Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
+            T Result = CreateResult(ActionUrl); // Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
             try
             {
                 if (!IsAuthenticated)
@@ -348,8 +348,8 @@ namespace Tripous
         /// Executes a POST Action to Api
         /// </summary>
         public async Task<T> PostFormAsync(string ActionUrl, Dictionary<string, string> FormData)
-        { 
-            T Result =  Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
+        {
+            T Result = CreateResult(ActionUrl);
             try
             {
                 if (!IsAuthenticated)
@@ -391,7 +391,7 @@ namespace Tripous
         /// </summary>
         public async Task<T> PostAsync(string ActionUrl, object Packet)
         {
-            T Result = Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
+            T Result = CreateResult(ActionUrl);
             try
             {
                 if (!IsAuthenticated)
@@ -436,7 +436,7 @@ namespace Tripous
         /// </summary>
         public async Task<T> PutAsync(string ActionUrl, object Packet)
         {
-            T Result = Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
+            T Result = CreateResult(ActionUrl);
             try
             {
                 if (!IsAuthenticated)
@@ -482,7 +482,7 @@ namespace Tripous
         /// </summary>
         public async Task<T> DeleteAsync(string ActionUrl)
         {
-            T Result = Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
+            T Result = CreateResult(ActionUrl);
             try
             {
                 if (!IsAuthenticated)
