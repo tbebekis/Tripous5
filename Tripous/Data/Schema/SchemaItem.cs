@@ -22,7 +22,18 @@ namespace Tripous.Data
         public SchemaItem()
         {
         }
- 
+
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        public override string ToString()
+        { 
+            if (!string.IsNullOrWhiteSpace(Name))
+                return this.Name; 
+
+            return base.ToString();
+        }
+
         /// <summary>
         /// The name of this table or view schema item.
         /// </summary>

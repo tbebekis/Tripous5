@@ -31,6 +31,25 @@ namespace Tripous.Data
         {
         }
 
+        /// <summary>
+        /// Returns a string representation of this instance.
+        /// </summary>
+        public override string ToString()
+        {
+            if (!string.IsNullOrWhiteSpace(Domain) && !string.IsNullOrWhiteSpace(ConnectionName))
+            {
+                return $"{Domain} - {ConnectionName}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(Domain))
+                return this.Domain;
+
+            if (!string.IsNullOrWhiteSpace(ConnectionName))
+                return this.ConnectionName;
+
+            return base.ToString();
+        }
+
         /* public */
         /// <summary>
         /// Adds a new schema version, if the specified version is not found. Else returns the found version.
