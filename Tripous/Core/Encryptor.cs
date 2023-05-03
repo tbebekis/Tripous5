@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -143,8 +144,35 @@ namespace Tripous
             get { return !string.IsNullOrWhiteSpace(fDefaultEncryptionKey) ? fDefaultEncryptionKey : "8fDL@sHv#p0re-F0"; }
             set { fDefaultEncryptionKey = value; }
         }
-       
 
+
+        /// <summary>
+        /// Computes the hash value of a specified Text using a specified hash algorithm
+        /// </summary>
+        static public string ComputeHash(HashAlgorithmType Type, string Text)
+        {
+            byte[] Buffer = Encoding.UTF8.GetBytes(Text);
+            Buffer = ComputeHash(Type, Buffer);
+            string Result = BitConverter.ToString(Buffer).Replace("-", "");
+            return Result;
+        }
+        /// <summary>
+        /// Computes the hash value of a specified byte array using a specified hash algorithm
+        /// </summary>
+        static public byte[] ComputeHash(HashAlgorithmType Type, byte[] Buffer)
+        {
+            switch (Type)
+            {
+                case HashAlgorithmType.Sha1: return SHA1.HashData(Buffer);
+                case HashAlgorithmType.Sha256: return SHA256.HashData(Buffer);
+                case HashAlgorithmType.Sha384: return SHA384.HashData(Buffer);
+                case HashAlgorithmType.Sha512: return SHA512.HashData(Buffer);
+                case HashAlgorithmType.Md5: return MD5.HashData(Buffer);
+            }
+
+            return Buffer;
+
+        }
 
     }
 }

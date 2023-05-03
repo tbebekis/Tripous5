@@ -8,6 +8,7 @@ using Tripous;
 using Tripous.Data;
  
 using System.Security.Cryptography;
+using System.Security.Authentication;
 
 namespace WebLib
 {
@@ -39,11 +40,13 @@ namespace WebLib
         /// Generates and returns a hash of a Password specified in clear text, using the SHA1 algorithm. 
         /// <para>It appends a specified SaltKey to the password first.</para>
         /// </summary>
-        static string GeneratePasswordHash(string PlainTextPassword, string PasswordSalt, string AlgorithmName = "SHA1")
+        static string GeneratePasswordHash(string PlainTextPassword, string PasswordSalt, HashAlgorithmType Type = HashAlgorithmType.Sha1)
         {
             string S = string.Concat(PlainTextPassword, PasswordSalt);
-            return ComputeHash(Encoding.UTF8.GetBytes(S), AlgorithmName);
+            //return ComputeHash(Encoding.UTF8.GetBytes(S), AlgorithmName);
+            return Encryptor.ComputeHash(Type, S);
         }
+        /*
         /// <summary>
         /// Computes the hash value of a specifed byte array
         /// </summary>
@@ -59,6 +62,7 @@ namespace WebLib
             Buffer = Algorithm.ComputeHash(Buffer);
             return BitConverter.ToString(Buffer).Replace("-", "");
         }
+        */
         /// <summary>
         /// Validates the password of a user/requestor
         /// </summary>

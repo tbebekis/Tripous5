@@ -24,21 +24,21 @@ namespace Tripous.Identity
         /// </summary>
         public virtual string GenerateSalt()
         {
-            return SHA256Hasher.GenerateSalt();
+            return Hasher.GenerateSalt();
         }
         /// <summary>
         /// Hashes a specified password given in plain text, using a specified salt and returns the hashed password
         /// </summary>
         public virtual string Hash(string PlainTextPassword, string Salt)
         {
-            return SHA256Hasher.Hash(PlainTextPassword, Salt);
+            return Hasher.Hash(PlainTextPassword, Salt);
         }
         /// <summary>
         /// Returns true if a hashed password and a password given in plain text along with a salt, are identical.
         /// </summary>
         public virtual bool Verify(string PlainTextPassword, string Salt, string HashedPassword)
         {
-            return SHA256Hasher.Verify(PlainTextPassword, Salt, HashedPassword);
+            return Hasher.Validate(PlainTextPassword, Salt, HashedPassword);
         }
     }
 }
