@@ -56,6 +56,10 @@ namespace WebDesk.Controllers
         [HttpPost("/login", Name = "Login"), AllowAnonymous]
         public async Task<IActionResult> Login(CredentialsModel M, string ReturnUrl = "")
         {
+            /*
+             admin
+             webdesk   
+             */
             if (Lib.IsCookieAuthenticated)
                 return RedirectToRoute("Home");
  

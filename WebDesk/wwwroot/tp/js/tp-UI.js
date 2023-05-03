@@ -17321,7 +17321,7 @@ tp.Locator = class extends tp.Object {
         if (!tp.IsValid(Associate))
             tp.Throw("No Associate");
 
-        if (tp.IsValid(this.ListTable)) {
+        if (tp.IsValid(this.ListTable) && this.ListTable.RowCount > 0) {
             this.DisplayListTable(Associate);
         }
         else {
@@ -17394,7 +17394,7 @@ tp.Locator = class extends tp.Object {
             {
                 let S = this.DataValueAsTextOf(FieldDef.DataField);
                 let S2 = LocatorLink.BoxGetText(this, Box);
-                //if (tp.IsBlank(S2)) this.ClearDataValue(); else
+                if (tp.IsBlank(S2)) this.ClearDataValue(); else
                 if (S !== S2)
                     LocatorLink.BoxSetText(this, Box, S);
             }
@@ -17955,6 +17955,7 @@ tp.LocatorBox = class extends tp.Control {
             if (e.target === this.btnZoom) {
                 // TODO: Zoom
             } else if (e.target === this.btnList) {
+                //this.Locator.ListTable = null;
                 this.Locator.ShowList(this.Handle);
             }
         }

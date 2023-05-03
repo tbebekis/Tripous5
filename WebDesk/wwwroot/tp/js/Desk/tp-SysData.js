@@ -1176,6 +1176,14 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.TabPage}
      */
     tabSelectSqlList = null;
+    /**
+     * @type {tp.Grid}
+     */
+    gridSelectSqlList = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblSelectSqlList = null;  
 
     /* private */
     /** 
@@ -1209,7 +1217,6 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 
         Row = this.tblBrokerDef.AddEmptyRow();
 
-
         Row.Set('Name', this.BrokerDef.Name);
         Row.Set('TypeClassName', this.BrokerDef.TypeClassName);
         //Row.Set('Title', this.BrokerDef.Title);
@@ -1220,27 +1227,24 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         Row.Set('SubLinesTableName', this.BrokerDef.SubLinesTableName);
         Row.Set('EntityName', this.BrokerDef.EntityName);
         Row.Set('GuidOids', this.BrokerDef.GuidOids);
-        Row.Set('CascadeDeletes', this.BrokerDef.CascadeDeletes);
- 
+        Row.Set('CascadeDeletes', this.BrokerDef.CascadeDeletes); 
     }
 
     /* overrides */
-
     /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
     * */
     CreateEditControls() {
 
         if (this.View.pagerEdit.GetPageCount() === 1) {
 
+            let LayoutRow, el, CP;
+
+            // General Page
+            // ---------------------------------------------------------------------------------
             // add a tp.TabPage to View's pagerEdit
             this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
             tp.Data(this.tabGeneral.Handle, 'Name', 'General');
-
-            this.tabSelectSqlList = this.View.pagerEdit.AddPage(_L('SelectSqlList'));
-            //tp.Data(this.tabSelectSqlList.Handle, 'Name', 'SelectSqlList');
-            // EDW
-
-
+ 
             // create the data table
             this.tblBrokerDef = new tp.DataTable();
             this.tblBrokerDef.Name = 'BrokerDef';
@@ -1263,6 +1267,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             let HtmlText;
             let HtmlRowList = [];
 
+            // for each table field, produce html text for control rows and add the text to a string-list
             this.tblBrokerDef.Columns.forEach((Column) => {
                 let IsCheckBox = Column.DataType === tp.DataType.Boolean;
 
@@ -1292,14 +1297,68 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 `;
             let elRow = tp.HtmlToElement(HtmlText);
 
-            this.BrokerLayoutRow = new tp.Row(elRow, { Height: '100%' });
-            this.tabGeneral.AddComponent(this.BrokerLayoutRow);
+            LayoutRow = new tp.Row(elRow, { Height: '100%' });
+            this.tabGeneral.AddComponent(LayoutRow);
 
             tp.Ui.CreateContainerControls(elRow);
 
             this.dsBrokerDef = new tp.DataSource(this.tblBrokerDef);
 
-            tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });            
+            tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });        
+
+            // SelectSqlList Page
+            // ---------------------------------------------------------------------------------
+            this.tabSelectSqlList = this.View.pagerEdit.AddPage(_L('SelectSqlList'));
+            tp.Data(this.tabSelectSqlList.Handle, 'Name', 'SelectSqlList');
+
+            LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+            this.tabSelectSqlList.AddComponent(LayoutRow);
+
+
+            // add a DIV for the gridSelectSqlList tp.Grid in the row
+            el = LayoutRow.AddDivElement();
+            CP = {
+                Name: "gridSelectSqlList",
+                Height: '100%',
+
+                ToolBarVisible: true,
+                GroupsVisible: false,
+                FilterVisible: false,
+                FooterVisible: false,
+                GroupFooterVisible: false,
+
+                ButtonInsertVisible: true,
+                ButtonEditVisible: true,
+                ButtonDeleteVisible: true,
+                ConfirmDelete: true,
+
+                ReadOnly: true,
+                AllowUserToAddRows: true,
+                AllowUserToDeleteRows: true,
+                AutoGenerateColumns: false,
+
+                Columns: [
+                    { Name: 'Name' },
+                    { Name: 'ConnectionName' },
+                    { Name: 'CompanyAware' },                     
+                ]
+            };
+
+            // create the columns grid
+            this.gridSelectSqlList = new tp.Grid(el, CP);
+
+            this.tblSelectSqlList = new tp.DataTable();
+            this.tblSelectSqlList.AddColumn('Name').DefaultValue = '';
+            this.tblSelectSqlList.AddColumn('ConnectionName').DefaultValue = tp.SysConfig.DefaultConnection;
+            this.tblSelectSqlList.AddColumn('CompanyAware', tp.DataType.Boolean).DefaultValue = false;
+ 
+            this.tblSelectSqlList.AcceptChanges();
+
+            this.gridSelectSqlList.DataSource = this.tblSelectSqlList;
+            this.gridSelectSqlList.BestFitColumns();
+
+            this.gridSelectSqlList.On("ToolBarButtonClick", this.GridSelectSqlList_AnyButtonClick, this);
+            this.gridSelectSqlList.On(tp.Events.DoubleClick, this.GridSelectSqlList_DoubleClick, this);
         }
     }
 
@@ -1365,6 +1424,86 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             Row.Set('TitleKey', SourceRow.Get('TitleKey', ''));
         }
     }
+
+
+    /** Called when inserting a single row of the tblSelectSqlList and displays the edit dialog
+    */
+    async InsertSelectSqlRow() {
+
+        let SS = new tp.SelectSql();
+
+        let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblSelectSqlList.AddEmptyRow();
+            Row.Set('Name', SS.Name);
+            Row.Set('ConnectionName', SS.ConnectionName);
+            Row.Set('CompanyAware', SS.CompanyAware);
+            Row.SelectSql = SS;
+            this.BrokerDef.SelectSqlList.push(SS);
+        }
+    }
+    /** Called when editing a single row of the tblSelectSqlList and displays the edit dialog
+     */
+    async EditSelectSqlRow() {       
+        let Row = this.gridSelectSqlList.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let SS = Row.SelectSql;
+            let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Row.Set('Name', SS.Name);
+                Row.Set('ConnectionName', SS.ConnectionName);
+                Row.Set('CompanyAware', SS.CompanyAware);
+            }
+        } 
+    }
+    /** Deletes a single row of the tblSelectSqlList 
+     */
+    DeleteSelectSqlRow() {
+        let Row = this.gridSelectSqlList.FocusedRow;
+        if (tp.IsValid(Row)) {
+            tp.YesNoBox('Delete selected row?', (Dialog) => {
+                if (Dialog.DialogResult === tp.DialogResult.Yes) {
+                    let SS = Row.SelectSql;
+                    tp.ListRemove(this.BrokerDef.SelectSqlList, SS);
+                    this.tblBrokerDef.RemoveRow(Row);
+                }
+            });
+        }
+    }
+
+
+    /* event handlers */
+    /** Event handler
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    GridSelectSqlList_AnyButtonClick(Args) {
+        Args.Handled = true;
+
+        switch (Args.Command) {
+            case 'GridRowInsert':
+                this.InsertSelectSqlRow();
+                break;
+            case 'GridRowEdit':
+                this.EditSelectSqlRow();
+                break;
+            case 'GridRowDelete':
+                tp.InfoNote('Clicked: ' + Args.Command);
+                break;
+        }
+    }
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    GridSelectSqlList_DoubleClick(Args) {
+        this.EditSelectSqlRow();
+    }
+
+    // EDW next
+    //      Queries
+    //      Tables
+
 };
 //#endregion
 

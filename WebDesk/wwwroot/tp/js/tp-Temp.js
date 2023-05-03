@@ -326,8 +326,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
 
 
         // Columns Page
-        // ---------------------------------------------------------------------------------
- 
+        // --------------------------------------------------------------------------------- 
         LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
         this.tabColumns.AddComponent(LayoutRow);
 
@@ -469,8 +468,6 @@ tp.SelectSqlEditDialog = class extends tp.Window {
         this.gridFilters.AddToolBarButton('EditEnum', '', 'Edit Enum part', 'fa fa-sticky-note-o', '', false);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
 
         this.gridFilters.On('ToolBarButtonClick', this.gridFilters_ToolBarButtonClick, this);
-        //ToolBarButtonClick
-        // gridFilters_ToolBarButtonClick
 
         this.tblFilters = new tp.DataTable();
         this.tblFilters.AddColumn('FieldPath').DefaultValue = 'TABLE_NAME.FIELD_NAME';
@@ -600,9 +597,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
 
                 let Res = await tp.SqlFilterDefEnumDialog.ShowModalAsync(FilterDef);
                 let o = Res;
-            }
-
-            // tp.SqlFilterDefEnumDialog.ShowModalAsync = function (FilterDef
+            } 
         }
     }
 };
@@ -1100,8 +1095,6 @@ tp.SqlBrokerDef = class {
         // EDW
 
     }
-
-
 
 };
 

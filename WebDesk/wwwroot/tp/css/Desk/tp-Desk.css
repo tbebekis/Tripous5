@@ -109,6 +109,7 @@ main menu bar items
     text-decoration-thickness: 3px;
     text-decoration-skip-ink: none;
     text-underline-offset: 3px;
+    background-color: var(--Color4);
 }
 
 /* page list */

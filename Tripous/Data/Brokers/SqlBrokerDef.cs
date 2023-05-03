@@ -138,7 +138,7 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// Returns a list of code fields. A code field is associated to a code provider. The code providers procudes the value of the field on INSERTs.
+        /// Returns a list of code fields. A code field is associated to a code provider. A code provider produces the value of a code field on INSERTs.
         /// </summary>
         static public SqlBrokerFieldDef[] GetCodeFields(SqlBrokerDef Def)
         {
