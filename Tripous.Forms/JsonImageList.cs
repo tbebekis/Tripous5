@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 //using System.Drawing;
 
+ 
+
 namespace Tripous
 {
  
@@ -31,7 +33,7 @@ namespace Tripous
             Mime = ImageUtls.MimeOf(Image);
             Width = Image.Width;
             Height = Image.Height;
-            Data = Sys.ImageToBase64(Image, false);
+            Data = Tripous.Forms.Ui.ImageToBase64(Image, false);
         }
 
 

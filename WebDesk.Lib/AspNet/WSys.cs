@@ -474,6 +474,7 @@ namespace WebLib.AspNet
         /// </summary>
         static public string UrlEscape(string Url)
         {
+#pragma warning disable SYSLIB0013
             return Uri.EscapeUriString(Url);
         }
         /// <summary>

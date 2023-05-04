@@ -15,6 +15,7 @@ namespace WebLib
     {
         /// <summary>
         /// The file name
+        /// <para>WARNING: The specified FileName must include an extension, e.g. MyPic.png </para>
         /// </summary>
         public string FileName { get; set; }
         /// <summary>
@@ -24,7 +25,7 @@ namespace WebLib
         /// <summary>
         /// Base64 text of picture bytes
         /// </summary>
-        public string PictureText { get; set; }
+        public string Base64Text { get; set; }
         /// <summary>
         /// Url of the image
         /// </summary>

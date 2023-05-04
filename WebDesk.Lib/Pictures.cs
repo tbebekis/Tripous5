@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Globalization;
-
 
 using Tripous;
 
@@ -89,40 +83,31 @@ namespace WebLib
         }
 
         /// <summary>
-        /// Saves an image in Theme's image folder and returns the image url path.
-        /// </summary>
-        static public string Save(string FileName, Image Image, string Prefix = "")
-        {
-            string Result = "";
-            if (Image != null)
-            {
-                try
-                {
-                    FileName = ValidateFileName(FileName, Image.FileExtension(), Prefix);
-                    string FilePath = Path.Combine(ImagesPath, FileName);
-                    if (!File.Exists(FilePath))
-                        Image.Save(FilePath);
-                    Result = ImageUrlFunc(FileName);
-                }
-                catch
-                {
-                }
-            }
-            return Result;
-        }
-        /// <summary>
         /// Saves a base64 string as an image in Theme's image folder and returns the image url path.
+        /// <para>WARNING: The specified FileName must include an extension, e.g. MyPic.png </para>
         /// </summary>
-        static public string Save(string FileName, string PictureText, string Prefix = "")
+        static public string Save(string FileName, string PictureBase64Text, string Prefix = "")
         {
             string Result = "";
 
-            if (!string.IsNullOrWhiteSpace(PictureText))
+            if (!string.IsNullOrWhiteSpace(PictureBase64Text))
             {
                 try
                 {
-                    Image Image = Sys.Base64ToImage(PictureText);
-                    Result = Save(FileName, Image, Prefix);
+                    byte[] Bytes = Convert.FromBase64String(PictureBase64Text);
+
+                    if ((Bytes != null) && (Bytes.Length > 0))
+                    {
+                        string Extension = Path.GetExtension(FileName);
+                        if (Extension != null && Extension.StartsWith('.'))
+                            Extension = Extension.Substring(1);
+
+                        FileName = ValidateFileName(FileName, Extension, Prefix);
+                        string FilePath = Path.Combine(ImagesPath, FileName);
+
+                        File.WriteAllBytes(FilePath, Bytes);
+
+                    } 
                 }
                 catch
                 {
@@ -136,9 +121,10 @@ namespace WebLib
         /// </summary>
         static public string Save(Picture Picture, string Prefix = "")
         {
-            return Picture == null ? string.Empty : Save(Picture.FileName, Picture.PictureText, Prefix);
+            return Picture == null ? string.Empty : Save(Picture.FileName, Picture.Base64Text, Prefix);
         }
 
+        /* image url construction */
         /// <summary>
         /// Returns the path url of a 'system' image, e.g. ~/images/system/IMAGE.png
         /// </summary>

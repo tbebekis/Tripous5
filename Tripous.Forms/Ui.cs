@@ -561,7 +561,76 @@ namespace Tripous.Forms
             return Result;
         }
 
+        /* image handling */
+        /// <summary>
+        /// Converts an image to a base64 string
+        /// </summary>
+        static public string ImageToBase64(Image Image, bool InsertLineBreaks = true)
+        {
+            if (Image != null)
+            {
+                Base64FormattingOptions Options = InsertLineBreaks ? Base64FormattingOptions.InsertLineBreaks : Base64FormattingOptions.None;
 
+                using (MemoryStream MS = new MemoryStream())
+                {
+                    Image.Save(MS, Image.RawFormat);
+                    byte[] Bytes = MS.ToArray();
+                    return Convert.ToBase64String(Bytes, Options);
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Converts a base64 string back to an image
+        /// </summary>
+        static public Image Base64ToImage(string Text)
+        {
+            if (!string.IsNullOrWhiteSpace(Text))
+            {
+                byte[] Bytes = Convert.FromBase64String(Text);
+
+                if ((Bytes != null) && (Bytes.Length > 0))
+                {
+                    MemoryStream MS = new MemoryStream(Bytes, 0, Bytes.Length);
+                    MS.Write(Bytes, 0, Bytes.Length);
+                    return Image.FromStream(MS, true);
+                }
+            }
+
+            return null;
+        }
+
+        /* from DataRow extensions */
+        /// <summary>
+        /// Saves an image into a blob field
+        /// </summary>
+        static public void ImageToBlob(this DataRow Row, string FieldName, Image Image)
+        {
+            if (Image != null)
+            {
+                using (MemoryStream MS = new MemoryStream())
+                {
+                    Image.Save(MS, Image.RawFormat);
+                    Row.StreamToBlob(FieldName, MS);
+                }
+            }
+        }
+        /// <summary>
+        /// Reads a blob field and returns an image. 
+        /// <para>WARNING: Returns null if field is null</para>
+        /// </summary>
+        static public Image BlobToImage(this DataRow Row, string FieldName)
+        {
+            MemoryStream MS = Row.BlobToStream(FieldName);
+            if (MS.Length > 0)
+            {
+                MS.Position = 0;
+                Image Result = Image.FromStream(MS);
+                return Result;
+            }
+            return null;
+        }
 
         /* miscs */
         /// <summary>

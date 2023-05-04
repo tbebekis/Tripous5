@@ -24,7 +24,7 @@ using Tripous.Data;
 namespace WebDesk.Controllers
 {
 
-#warning WARNING: Remove the AllowAnonymous attribute from the AjaxController in production
+#warning TRIPOUS WARNING: Remove the AllowAnonymous attribute from the AjaxController in production
 
     /// <summary>
     /// Ajax controller.

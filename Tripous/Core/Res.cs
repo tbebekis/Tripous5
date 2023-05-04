@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Resources;
 using System.Globalization;
-//using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -126,12 +125,14 @@ namespace Tripous
 
             return null;
         }
+
         /// <summary>
         /// Returns a resource Image for the Key, if any, else null.
+        /// <para>NOTE: If in Windows, cast thre return object to the System.Drawing.Image class.</para>
         /// </summary>
-        static public Image GetImage(string Key, CultureInfo Culture = null)
+        static public object GetImage(string Key, CultureInfo Culture = null)
         {
-            Image Data;
+            object Data;
             foreach (IResourceProvider RP in fList)
             {
                 Data = RP.GetImage(Key);
@@ -141,6 +142,7 @@ namespace Tripous
 
             return null;
         }
+    
         /// <summary>
         /// Converts an xml file created using DataTable.WriteXml() and saved as a resource under Key, 
         /// back to a DataTable again.
@@ -216,19 +218,19 @@ namespace Tripous
 
         }
 
-        /* url data */
+        /* url data 
         /// <summary>
         /// Returns the image url data of the image specified by ResKey 
         /// </summary>
         static public string UrlData(string ResKey, CultureInfo Culture = null)
         {
-            System.Drawing.Image icon = Res.GetImage(ResKey);
+            Image icon = Res.GetImage(ResKey);
             return UrlData(icon);
         }
         /// <summary>
         /// Returns the image url data of the image specified by icon 
         /// </summary>
-        static public string UrlData(System.Drawing.Image icon)
+        static public string UrlData(Image icon)
         {
             if (icon != null)
             {
@@ -240,7 +242,7 @@ namespace Tripous
             }
             return string.Empty;
         }
-
+*/
     }
 
 }

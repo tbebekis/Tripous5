@@ -11,6 +11,8 @@ using System.IO;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
+ 
+
 namespace Tripous
 {
     /// <summary>
@@ -187,14 +189,14 @@ namespace Tripous
         /// </summary>
         static public string ImageToBase64(Image Image, bool InsertLineBreaks = true)
         {
-            return Sys.ImageToBase64(Image, InsertLineBreaks);
+            return Tripous.Forms.Ui.ImageToBase64(Image, InsertLineBreaks);
         }
         /// <summary>
         /// Converts a base64 string back to an image
         /// </summary>
         static public Image Base64ToImage(string Text)
         {
-            return Sys.Base64ToImage(Text);
+            return Tripous.Forms.Ui.Base64ToImage(Text);
         }
 
  

@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Resources;
-//using System.Drawing;
 using System.Globalization;
 
 namespace Tripous
@@ -78,10 +77,11 @@ namespace Tripous
         /// Returns a resource Image for the Key, if any, else null.
         /// <para>NOTE: Culture must be a specific culture (e.g. en-US, el-GR, etc.)</para>
         /// <para>NOTE: If not culture is specified the default culture is used.</para>
+        /// <para>NOTE: If in Windows, cast thre return object to the System.Drawing.Image class.</para>
         /// </summary>
-        public virtual Image GetImage(string Key, CultureInfo Culture = null)
+        public virtual object GetImage(string Key, CultureInfo Culture = null)
         {
-            return GetObject(Key, Culture) as Image;
+            return GetObject(Key, Culture);
         }
 
 

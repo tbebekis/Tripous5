@@ -4,7 +4,6 @@ using System.Text;
 using System.Data;
 
 using System.Resources;
-//using System.Drawing;
 using System.Globalization;
 
 namespace Tripous.Core
@@ -75,8 +74,9 @@ namespace Tripous.Core
         /// Returns a resource Image for the Key, if any, else null.
         /// <para>NOTE: Culture must be a specific culture (e.g. en-US, el-GR, etc.)</para>
         /// <para>NOTE: If not culture is specified the default culture is used.</para>
+        /// <para>NOTE: If in Windows, cast thre return object to the System.Drawing.Image class.</para>
         /// </summary>
-        public virtual Image GetImage(string Key, CultureInfo Culture = null)
+        public virtual object GetImage(string Key, CultureInfo Culture = null)
         {
             return null;
         }

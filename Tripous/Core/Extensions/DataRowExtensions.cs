@@ -6,7 +6,6 @@ using System;
 using System.Data;
 using System.Collections;
 using System.Collections.Generic;
-//using System.Drawing;
 using System.IO;
 
 namespace Tripous
@@ -491,35 +490,7 @@ namespace Tripous
             }
         }
 
-        /// <summary>
-        /// Saves an image into a blob field
-        /// </summary>
-        static public void ImageToBlob(this DataRow Row, string FieldName, Image Image)
-        {
-            if (Image != null)
-            {
-                using (MemoryStream MS = new MemoryStream())
-                {
-                    Image.Save(MS, Image.RawFormat);
-                    StreamToBlob(Row, FieldName, MS);
-                }
-            }
-        }
-        /// <summary>
-        /// Reads a blob field and returns an image. 
-        /// <para>WARNING: Returns null if field is null</para>
-        /// </summary>
-        static public Image BlobToImage(this DataRow Row, string FieldName)
-        {
-            MemoryStream MS = BlobToStream(Row, FieldName);
-            if (MS.Length > 0)
-            {
-                MS.Position = 0;
-                Image Result = Image.FromStream(MS);
-                return Result;
-            }
-            return null;
-        }
+
 
         /* miscs */
         /// <summary>

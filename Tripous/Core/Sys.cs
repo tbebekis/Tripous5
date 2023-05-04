@@ -9,7 +9,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Globalization;
@@ -477,6 +476,7 @@ namespace Tripous
             string FileName = $"ERROR {DateTime.Now.ToFileName()}.log";
             File.WriteAllText(FileName, Ex.ToString());
         }
+        
         /* to/from Base64 */
         /// <summary>
         /// Encodes Value into a Base64 string using the specified Enc.
@@ -502,44 +502,7 @@ namespace Tripous
             byte[] Data = Convert.FromBase64String(Value);
             return Enc.GetString(Data);
         }
-        /// <summary>
-        /// Converts an image to a base64 string
-        /// </summary>
-        static public string ImageToBase64(Image Image, bool InsertLineBreaks = true)
-        {
-            if (Image != null)
-            {
-                Base64FormattingOptions Options = InsertLineBreaks ? Base64FormattingOptions.InsertLineBreaks : Base64FormattingOptions.None;
 
-                using (MemoryStream MS = new MemoryStream())
-                {
-                    Image.Save(MS, Image.RawFormat);
-                    byte[] Bytes = MS.ToArray();
-                    return Convert.ToBase64String(Bytes, Options);            
-                }   
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Converts a base64 string back to an image
-        /// </summary>
-        static public Image Base64ToImage(string Text)
-        {
-            if (!string.IsNullOrWhiteSpace(Text))
-            {
-                byte[] Bytes = Convert.FromBase64String(Text);
-
-                if ((Bytes != null) && (Bytes.Length > 0))
-                {
-                    MemoryStream MS = new MemoryStream(Bytes, 0, Bytes.Length);
-                    MS.Write(Bytes, 0, Bytes.Length);
-                    return Image.FromStream(MS, true);
-                }
-            }
-
-            return null;
-        }
 
 
         /* Convertions */
