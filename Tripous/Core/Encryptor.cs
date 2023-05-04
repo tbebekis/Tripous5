@@ -14,166 +14,119 @@ using System.Text;
 namespace Tripous
 {
 
-
     /// <summary>
-    /// Encrypts a string Value
-    /// <para>SEE: https://stackoverflow.com/questions/10168240/encrypting-decrypting-a-string-in-c-sharp </para>
-    /// <para>SEE: https://github.com/nopara73/DotNetEssentials/blob/master/DotNetEssentials/Crypto/StringCipher.cs </para>
+    /// Encrypts and decrypts a string value.
+    /// <para>Uses the <see cref="Aes"/> a symmetric block cipher algorithm.</para>
+    /// <para>Symmetric means that encrypted data can be decrypted.</para>
+    /// <para>NOTE: adapted from https://code-maze.com/csharp-string-encryption-decryption/ </para>
     /// </summary>
     static public class Encryptor
     {
-        // This constant is used to determine the keysize of the encryption algorithm in bits.
-        // We divide this by 8 within the code below to get the equivalent number of bytes.
-        const int Keysize = 128;
-        /// <summary>
-        /// This constant determines the number of iterations for the password bytes generation function.
-        /// </summary>
-        const int DerivationIterations = 1000;
 
-        /* private */
-        static string fDefaultEncryptionKey;
-        /// <summary>
-        /// Generate128BitsOfRandomEntropy
-        /// </summary>
-        static byte[] Generate128BitsOfRandomEntropy()
+        static byte[] IV =
         {
-            var randomBytes = new byte[16]; // 16 Bytes will give us 128 bits.
-            using (var rngCsp = new RNGCryptoServiceProvider())
-            {
-                // Fill the array with cryptographically secure random bytes.
-                rngCsp.GetBytes(randomBytes);
-            }
-            return randomBytes;
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16
+        }; 
+
+        static byte[] DeriveKeyFromPassword(string password)
+        {
+            var emptySalt = Array.Empty<byte>();
+            var iterations = 1000;
+            var desiredKeyLength = 16; // 16 bytes equal 128 bits.
+            var hashMethod = HashAlgorithmName.SHA384;
+            return Rfc2898DeriveBytes.Pbkdf2(Encoding.Unicode.GetBytes(password),
+                                             emptySalt,
+                                             iterations,
+                                             hashMethod,
+                                             desiredKeyLength);
         }
 
-        /* public */
         /// <summary>
         /// Encrypts a string and returns the result.
-        /// <para>EXAMPLE: Encrypt(Passphrase, TextToEncrypt) </para>
+        /// <para>NOTE: The specified passphrase used in decryption should be the one used for encryption. </para>
         /// </summary>
-        static public string Encrypt(string TextToEncrypt, string EncryptionKey = "")
+        static public string Encrypt(string PlainTextPassword, string Passphrase)
         {
-            if (string.IsNullOrWhiteSpace(EncryptionKey))
-                EncryptionKey = DefaultEncryptionKey;
+            if (string.IsNullOrWhiteSpace(PlainTextPassword))
+                throw new ArgumentNullException(PlainTextPassword);
 
-            // Salt and IV is randomly generated each time, but is preprended to encrypted cipher text
-            // so that the same Salt and IV values can be used when decrypting.  
-            var saltStringBytes = Generate128BitsOfRandomEntropy();
-            var ivStringBytes = Generate128BitsOfRandomEntropy();
-            var plainTextBytes = Encoding.UTF8.GetBytes(TextToEncrypt);
-            using (var password = new Rfc2898DeriveBytes(EncryptionKey, saltStringBytes, DerivationIterations))
+            if (string.IsNullOrWhiteSpace(Passphrase))
+                throw new ArgumentNullException(Passphrase);
+
+            using (Aes aes = Aes.Create())
             {
-                var keyBytes = password.GetBytes(Keysize / 8);
-                using (var symmetricKey = new RijndaelManaged())
+                aes.Key = DeriveKeyFromPassword(Passphrase);
+                aes.IV = IV;
+
+                using (MemoryStream OutMS = new MemoryStream())
                 {
-                    symmetricKey.BlockSize = 128;
-                    symmetricKey.Mode = CipherMode.CBC;
-                    symmetricKey.Padding = PaddingMode.PKCS7;
-                    using (var encryptor = symmetricKey.CreateEncryptor(keyBytes, ivStringBytes))
+                    using (CryptoStream CryptoStream = new(OutMS, aes.CreateEncryptor(), CryptoStreamMode.Write))
                     {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
-                            {
-                                cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
-                                cryptoStream.FlushFinalBlock();
-                                // Create the final bytes as a concatenation of the random salt bytes, the random iv bytes and the cipher bytes.
-                                var cipherTextBytes = saltStringBytes;
-                                cipherTextBytes = cipherTextBytes.Concat(ivStringBytes).ToArray();
-                                cipherTextBytes = cipherTextBytes.Concat(memoryStream.ToArray()).ToArray();
-                                memoryStream.Close();
-                                cryptoStream.Close();
-                                return Convert.ToBase64String(cipherTextBytes);
-                            }
-                        }
+                        CryptoStream.Write(Encoding.Unicode.GetBytes(PlainTextPassword));
+                        CryptoStream.FlushFinalBlock();
                     }
+
+                    return Convert.ToBase64String(OutMS.ToArray());
                 }
             }
         }
         /// <summary>
         /// Decrypts a string and returns the result.
-        /// <para>EXAMPLE: Decrypt(Passphrase, TextToDecrypt) </para>
+        /// <para>NOTE: The specified passphrase used in decryption should be the one used for encryption. </para>
         /// </summary>
-        static public string Decrypt(string TextToDecrypt, string EncryptionKey = "")
+        static public string Decrypt(string EncryptedPassword, string Passphrase)
         {
-            if (string.IsNullOrWhiteSpace(EncryptionKey))
-                EncryptionKey = DefaultEncryptionKey;
+            if (string.IsNullOrWhiteSpace(EncryptedPassword))
+                throw new ArgumentNullException(EncryptedPassword);
 
-            // Get the complete stream of bytes that represent:
-            // [32 bytes of Salt] + [16 bytes of IV] + [n bytes of CipherText]
-            var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(TextToDecrypt);
-            // Get the saltbytes by extracting the first 16 bytes from the supplied cipher Text bytes.
-            var saltStringBytes = cipherTextBytesWithSaltAndIv.Take(Keysize / 8).ToArray();
-            // Get the IV bytes by extracting the next 16 bytes from the supplied cipher Text bytes.
-            var ivStringBytes = cipherTextBytesWithSaltAndIv.Skip(Keysize / 8).Take(Keysize / 8).ToArray();
-            // Get the actual cipher text bytes by removing the first 64 bytes from the cipher Text string.
-            var cipherTextBytes = cipherTextBytesWithSaltAndIv.Skip((Keysize / 8) * 2).Take(cipherTextBytesWithSaltAndIv.Length - ((Keysize / 8) * 2)).ToArray();
+            if (string.IsNullOrWhiteSpace(Passphrase))
+                throw new ArgumentNullException(Passphrase);
 
-            using (var password = new Rfc2898DeriveBytes(EncryptionKey, saltStringBytes, DerivationIterations))
+            byte[] EncryptedBuffer = Convert.FromBase64String(EncryptedPassword);
+
+            using (Aes aes = Aes.Create())
             {
-                var keyBytes = password.GetBytes(Keysize / 8);
-                using (var symmetricKey = new RijndaelManaged())
+                aes.Key = DeriveKeyFromPassword(Passphrase);
+                aes.IV = IV;
+
+                using (MemoryStream InMS = new(EncryptedBuffer))
                 {
-                    symmetricKey.BlockSize = 128;
-                    symmetricKey.Mode = CipherMode.CBC;
-                    symmetricKey.Padding = PaddingMode.PKCS7;
-                    using (var decryptor = symmetricKey.CreateDecryptor(keyBytes, ivStringBytes))
+                    using (CryptoStream CryptoStream = new(InMS, aes.CreateDecryptor(), CryptoStreamMode.Read))
                     {
-                        using (var memoryStream = new MemoryStream(cipherTextBytes))
-                        {
-                            using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
-                            {
-                                var plainTextBytes = new byte[cipherTextBytes.Length];
-                                var decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                                memoryStream.Close();
-                                cryptoStream.Close();
-                                return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
-                            }
-                        }
+                        using MemoryStream OutMS = new();
+                        CryptoStream.CopyTo(OutMS);
+
+                        byte[] Buffer = OutMS.ToArray();
+
+                        return Encoding.Unicode.GetString(Buffer);
                     }
                 }
             }
         }
 
-        /* properties */
         /// <summary>
-        /// The encryption key used by Encrypt()/Decrypt() when no encryption key is passed to those calls.
+        /// Encrypts a string and returns the result.
         /// </summary>
-        static public string DefaultEncryptionKey
+        static public string Encrypt(string PlainTextPassword)
         {
-            get { return !string.IsNullOrWhiteSpace(fDefaultEncryptionKey) ? fDefaultEncryptionKey : "8fDL@sHv#p0re-F0"; }
-            set { fDefaultEncryptionKey = value; }
-        }
-
-
-        /// <summary>
-        /// Computes the hash value of a specified Text using a specified hash algorithm
-        /// </summary>
-        static public string ComputeHash(HashAlgorithmType Type, string Text)
-        {
-            byte[] Buffer = Encoding.UTF8.GetBytes(Text);
-            Buffer = ComputeHash(Type, Buffer);
-            string Result = BitConverter.ToString(Buffer).Replace("-", "");
-            return Result;
+            string Passphrase = DefaultPassphrase;
+            return Encrypt(PlainTextPassword, Passphrase);
         }
         /// <summary>
-        /// Computes the hash value of a specified byte array using a specified hash algorithm
+        /// Decrypts a string and returns the result.
         /// </summary>
-        static public byte[] ComputeHash(HashAlgorithmType Type, byte[] Buffer)
+        static public string Decrypt(string EncryptedPassword)
         {
-            switch (Type)
-            {
-                case HashAlgorithmType.Sha1: return SHA1.HashData(Buffer);
-                case HashAlgorithmType.Sha256: return SHA256.HashData(Buffer);
-                case HashAlgorithmType.Sha384: return SHA384.HashData(Buffer);
-                case HashAlgorithmType.Sha512: return SHA512.HashData(Buffer);
-                case HashAlgorithmType.Md5: return MD5.HashData(Buffer);
-            }
-
-            return Buffer;
-
+            string Passphrase = DefaultPassphrase;
+            return Decrypt(EncryptedPassword, Passphrase);
         }
 
+        /// <summary>
+        /// The default passphrase to be used when encrypting/decrypting without specifying a passphrase.
+        /// </summary>
+        static public string DefaultPassphrase { get; set; } = SysConfig.DefaultPassphrase; // @"8fDL@sHv#p0re-F0";
     }
+
 }
  

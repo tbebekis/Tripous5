@@ -96,8 +96,8 @@ create table {TableName} (
     ,IsActivated            integer default 0   @NOT_NULL
     ,ActivationToken        @NVARCHAR(96)       @NULL
 
-    ,Password               @NVARCHAR(96)       @NULL
-    ,PasswordSalt           @NVARCHAR(20)       @NULL
+    ,Password               @NVARCHAR(256)      @NULL
+    ,PasswordSalt           @NVARCHAR(256)      @NULL
     ,PassRecoveryDT         @DATE_TIME          @NULL
     ,PassRecoveryToken      @NVARCHAR(96)       @NULL    
 
@@ -108,9 +108,9 @@ create table {TableName} (
 
             string Id = Sys.GenId();
             int UserLevel = (int)Tripous.UserLevel.Admin;
-            string PasswordSalt = GenerateRandomText(8);
+            string PasswordSalt = Hasher.GenerateSalt();
             string Password = "webdesk";
-            Password = GeneratePasswordHash(Password, PasswordSalt);
+            Password = Hasher.Hash(Password, PasswordSalt);
 
             SqlText = $@"
 insert into {TableName} (
@@ -238,8 +238,8 @@ create table {TableName} (
             Table.AddInteger("IsActivated", true, null, "0");
             Table.AddString("ActivationToken", 96, false);
 
-            Table.AddString("Password", 96, false);
-            Table.AddString("PasswordSalt", 20, false);
+            Table.AddString("Password", 256, false);
+            Table.AddString("PasswordSalt", 256, false);
             Table.AddDateTime("PassRecoveryDT");
             Table.AddString("PassRecoveryToken", 96, false);
 
@@ -251,9 +251,9 @@ create table {TableName} (
 
             string Id = Sys.GenId();
             int UserLevel = (int)Tripous.UserLevel.Admin;
-            string PasswordSalt = GenerateRandomText(8);
+            string PasswordSalt = Hasher.GenerateSalt();
             string Password = "webdesk";
-            Password = GeneratePasswordHash(Password, PasswordSalt);
+            Password = Hasher.Hash(Password, PasswordSalt);
 
             SqlText = $@"
 insert into {TableName} (

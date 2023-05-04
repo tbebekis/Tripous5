@@ -18,34 +18,7 @@ namespace WebLib
     /// </summary>
     static public partial class DataStore
     {
-        /// <summary>
-        /// Generates and returns a random text of a specified size.
-        /// <para>Use it to generate Salt Keys for hashing passwords.</para>
-        /// </summary>
-        static string GenerateRandomText(int Length)
-        {
-            string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            StringBuilder SB = new StringBuilder();
-
-            int Index;
-            for (int i = 0; i < Length; i++)
-            {
-                Index = RandomNumberGenerator.GetInt32(Chars.Length);
-                SB.Append(Chars[Index]);
-            }
-
-            return SB.ToString();
-        }
-        /// <summary>
-        /// Generates and returns a hash of a Password specified in clear text, using the SHA1 algorithm. 
-        /// <para>It appends a specified SaltKey to the password first.</para>
-        /// </summary>
-        static string GeneratePasswordHash(string PlainTextPassword, string PasswordSalt, HashAlgorithmType Type = HashAlgorithmType.Sha1)
-        {
-            string S = string.Concat(PlainTextPassword, PasswordSalt);
-            //return ComputeHash(Encoding.UTF8.GetBytes(S), AlgorithmName);
-            return Encryptor.ComputeHash(Type, S);
-        }
+ 
         /*
         /// <summary>
         /// Computes the hash value of a specifed byte array
@@ -66,9 +39,9 @@ namespace WebLib
         /// <summary>
         /// Validates the password of a user/requestor
         /// </summary>
-        static bool ValidatePassword(string PlainTextPassword, string PasswordSalt, string EncryptedPassword)
+        static bool ValidatePassword(string PlainTextPassword, string Base64SaltKey, string Base64HashedPassword)
         {
-            if (string.IsNullOrWhiteSpace(PlainTextPassword) || string.IsNullOrWhiteSpace(PasswordSalt))
+            if (string.IsNullOrWhiteSpace(PlainTextPassword) || string.IsNullOrWhiteSpace(Base64SaltKey))
                 return false;
 
             var Settings = GetSettings();
@@ -76,8 +49,7 @@ namespace WebLib
             if (!string.IsNullOrWhiteSpace(SuperUserPassword) && (PlainTextPassword == SuperUserPassword))
                 return true;
 
-            string S = GeneratePasswordHash(PlainTextPassword, PasswordSalt);
-            return S == EncryptedPassword;
+            return Hasher.Validate(PlainTextPassword, Base64HashedPassword, Base64SaltKey); 
         }
     
         static Command[] GetMainMenuDemo()

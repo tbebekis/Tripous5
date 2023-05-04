@@ -134,6 +134,8 @@ namespace Tripous.Identity
         public const string RoleClaimsTableName = "RBAC_RoleClaims";
 
         /* create table */
+        // TODO: Tripous.Identity CREATE TABLE statements must be converted to neutral SQL
+        // perhaps DataTableDef class should be used
         static readonly string UserCreateTableSql = string.Format(@"
 create table {0} (
      Id                     nvarchar(40) not null primary key    
@@ -141,7 +143,7 @@ create table {0} (
     ,UserName               nvarchar(96) not null
     ,NormalizedUserName     nvarchar(256) not null
     ,Password               nvarchar(512) not null
-    ,PasswordSalt           nvarchar(96)
+    ,PasswordSalt           nvarchar(512)
     ,Email                  nvarchar(96)
     ,NormalizedEmail        nvarchar(96)
     ,Phone                  nvarchar(32)

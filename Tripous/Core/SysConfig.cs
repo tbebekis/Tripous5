@@ -406,6 +406,11 @@ namespace Tripous
         /// </summary>
         static public string DefaultConnection { get; set; } = Sys.DEFAULT;
 
+        /// <summary>
+        /// The default passphrase to be used when using <see cref="Encryptor"/> in encrypting/decrypting without specifying a passphrase.
+        /// </summary>
+        static public string DefaultPassphrase { get; set; } = @"8fDL@sHv#p0re-F0";
+
         /* read-only */
         /// <summary>
         /// Gets the url slash, ie /

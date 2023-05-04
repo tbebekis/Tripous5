@@ -15,23 +15,7 @@ namespace Tripous.Identity
     static public class IdLib
     {
         static PasswordHasher fPasswordHasher;
- 
-        /// <summary>
-        /// Encrypts a byte buffer with MD5 and returns the string
-        /// </summary>
-        static public string ToMD5Hash(this byte[] Buffer)
-        {
-            byte[] HashBuffer = MD5.Create().ComputeHash(Buffer);
-            return BitConverter.ToString(HashBuffer).Replace("-", "").ToLowerInvariant();
-        }
-        /// <summary>
-        /// Encrypts a string with MD5 and returns the string
-        /// </summary>
-        static public string ToMD5Hash(this string Text)
-        {
-            return Encoding.UTF8.GetBytes(Text).ToMD5Hash();
-        }
-
+  
         /// <summary>
         /// Creates an authenticated <see cref="ClaimsIdentity"/> identity and the <see cref="ClaimsPrincipal"/> principal and assigns the context's Principal property.
         /// <para>No claims are added to the identity.</para>
