@@ -1,6 +1,6 @@
-﻿//#region SqlFilterDefEnumDialog
+﻿//#region SqlFilterDefEditDialog
 /** Modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor */
-tp.SqlFilterDefEnumDialog = class extends tp.Window {
+tp.SqlFilterDefEditDialog = class extends tp.Window {
     /**
      * Constructor
      * @param {tp.WindowArgs} Args The window args
@@ -9,17 +9,30 @@ tp.SqlFilterDefEnumDialog = class extends tp.Window {
         super(Args);
     }
 
-    edtResultField = null;
-    chIsMultiChoise = null;
-    chIncludeAll = null;
-    edtOptionList = null;
-    edtDisplayLabels = null;
+    tabGeneral = null;
+    tabEnum = null;
+    tabEnumSql = null;
+
+    edtFieldPath = null;
+    edtTitleKey = null;
+    cboDataType = null;
+    cboMode = null;
+    chUseRange = null;
+    edtLocator = null;
+    chPutInHaving = null;
+    edtAggregateFunc = null;
+
+    edtEnumResultField = null;
+    chEnumIsMultiChoise = null;
+    chEnumIncludeAll = null;
+    edtEnumOptionList = null;
+    edtEnumDisplayLabels = null;
 
     /* overrides */
     InitClass() {
         super.InitClass();
 
-        this.tpClass = 'tp.SqlFilterDefEnumDialog';
+        this.tpClass = 'tp.SqlFilterDefEditDialog';
     }
     ProcessInitInfo() {
         super.ProcessInitInfo();
@@ -49,8 +62,9 @@ tp.SqlFilterDefEnumDialog = class extends tp.Window {
         this.Pager = new tp.TabControl(null, { Height: '100%' });
         this.Pager.Parent = this.ContentWrapper;
 
-        this.tabGeneral = this.Pager.AddPage('General');
-        this.tabSql = this.Pager.AddPage('Sql'); 
+        this.tabGeneral = this.Pager.AddPage('Enum');
+        this.tabEnum = this.Pager.AddPage('Enum');
+        this.tabEnumSql = this.Pager.AddPage('Enum Sql'); 
 
         setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
 
@@ -63,30 +77,58 @@ tp.SqlFilterDefEnumDialog = class extends tp.Window {
         elCol = elRow.children[0];
         tp.StyleProp(elCol, 'padding-left', '2px');
 
+        // controls 
+        this.edtFieldPath = tp.CreateControlRow(tp.Div(elCol), false, 'Field Path', { TypeName: 'TextBox' }).Control;
+        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'Title Key', { TypeName: 'TextBox' }).Control;
+        this.cboDataType = tp.CreateControlRow(tp.Div(elCol), false, 'DataType', { TypeName: 'ComboBox', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.DataType.ToList([]) }).Control;
+        this.cboMode = tp.CreateControlRow(tp.Div(elCol), false, 'Mode', { TypeName: 'ComboBox', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.SqlFilterMode.ToList([]) }).Control;
+        this.chUseRange = tp.CreateControlRow(tp.Div(elCol), true, 'Use Range', { TypeName: 'CheckBox' }).Control;
+        this.edtLocator = tp.CreateControlRow(tp.Div(elCol), false, 'Locator', { TypeName: 'TextBox' }).Control;
+        this.chPutInHaving = tp.CreateControlRow(tp.Div(elCol), true, 'Put in Having', { TypeName: 'CheckBox' }).Control;
+        this.edtAggregateFunc = tp.CreateControlRow(tp.Div(elCol), false, 'Aggregate Func', { TypeName: 'TextBox' }).Control;
+
+        // item to controls 
+        this.edtFieldPath.Text = this.FilterDef.FieldPath;
+        this.edtTitleKey.Text = this.FilterDef.TitleKey;
+        this.cboDataType.SelectedIndex = this.cboDataType.Items.indexOf(this.FilterDef.DataType);
+        this.cboMode.SelectedIndex = this.cboMode.Items.indexOf(this.FilterDef.Mode);
+        this.chUseRange.Checked = this.FilterDef.UseRange === true;
+        this.edtLocator.Text = this.FilterDef.Locator;
+        this.chPutInHaving.Checked = this.FilterDef.PutInHaving === true;
+        this.edtAggregateFunc.Text = this.FilterDef.AggregateFunc;
+
+        // Enum Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabEnum.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
         // controls
-        this.edtResultField = tp.CreateControlRow(tp.Div(elCol), false, 'Result Field', { TypeName: 'TextBox' }).Control;
-        this.edtOptionList = tp.CreateControlRow(tp.Div(elCol), false, 'Options', { TypeName: 'Memo' }).Control;
-        this.chIsMultiChoise = tp.CreateControlRow(tp.Div(elCol), true, 'Is Multi Choise', { TypeName: 'CheckBox' }).Control;
-        this.chIncludeAll = tp.CreateControlRow(tp.Div(elCol), true, 'Include All', { TypeName: 'CheckBox' }).Control;
+        this.edtEnumResultField = tp.CreateControlRow(tp.Div(elCol), false, 'Result Field', { TypeName: 'TextBox' }).Control;
+        this.edtEnumOptionList = tp.CreateControlRow(tp.Div(elCol), false, 'Options', { TypeName: 'Memo' }).Control;
+        this.chEnumIsMultiChoise = tp.CreateControlRow(tp.Div(elCol), true, 'Is Multi Choise', { TypeName: 'CheckBox' }).Control;
+        this.chEnumIncludeAll = tp.CreateControlRow(tp.Div(elCol), true, 'Include All', { TypeName: 'CheckBox' }).Control;
 
         elCol = elRow.children[1];
         tp.StyleProp(elCol, 'padding-left', '2px');
-        this.edtDisplayLabels = tp.CreateControlRow(tp.Div(elCol), false, 'Display Labels', { TypeName: 'Memo' }).Control;
+        this.edtEnumDisplayLabels = tp.CreateControlRow(tp.Div(elCol), false, 'Display Labels', { TypeName: 'Memo' }).Control;
 
-        this.edtOptionList.Height = '10em';
-        this.edtDisplayLabels.Height = '10em';
+        this.edtEnumOptionList.Height = '10em';
+        this.edtEnumDisplayLabels.Height = '10em';
  
         // item to controls
-        this.edtResultField.Text = this.FilterDef.EnumResultField;
-        this.chIsMultiChoise.Checked = this.FilterDef.EnumIsMultiChoise === true;
-        this.chIncludeAll.Checked = this.FilterDef.EnumIncludeAll === true;
-        this.edtOptionList.AppendLines(this.FilterDef.EnumOptionList);
-        this.edtDisplayLabels.Text = this.FilterDef.EnumDisplayLabels;
-
+        this.edtEnumResultField.Text = this.FilterDef.EnumResultField;
+        this.chEnumIsMultiChoise.Checked = this.FilterDef.EnumIsMultiChoise === true;
+        this.chEnumIncludeAll.Checked = this.FilterDef.EnumIncludeAll === true;
+        this.edtEnumOptionList.AppendLines(this.FilterDef.EnumOptionList);
+        this.edtEnumDisplayLabels.Text = this.FilterDef.EnumDisplayLabels;
 
         // Sql Page
         // ---------------------------------------------------------------------------------
-        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.FilterDef.EnumSql);
+        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabEnumSql.Handle, 'sql', this.FilterDef.EnumSql);
     }
     /** Can be used in passing the results back to the caller code. 
      * On modal dialogs the code should examine the DialogResult to decide what to do.
@@ -94,14 +136,26 @@ tp.SqlFilterDefEnumDialog = class extends tp.Window {
      * */
     PassBackResult() {
         if (this.DialogResult === tp.DialogResult.OK) {
+
+            // EDW: check if is valid before closing
+
+            this.FilterDef.FieldPath = this.edtFieldPath.Text;
+            this.FilterDef.TitleKey = this.edtTitleKey.Text;
+            this.FilterDef.DataType = this.cboDataType.SelectedValue;
+            this.FilterDef.Mode = this.cboMode.SelectedValue;
+            this.FilterDef.UseRange = this.chUseRange.Checked;
+            this.FilterDef.Locator = this.edtLocator.Text;
+            this.FilterDef.PutInHaving = this.chPutInHaving.Checked;
+            this.FilterDef.AggregateFunc = this.edtAggregateFunc.Text; 
+ 
             this.FilterDef.EnumSql = this.elSqlEditor.__Editor.getValue();
 
-            this.FilterDef.EnumResultField = this.edtResultField.Text;
-            this.FilterDef.EnumIsMultiChoise = this.chIsMultiChoise.Checked;
-            this.FilterDef.EnumIncludeAll = this.chIncludeAll.Checked;
-            this.FilterDef.EnumOptionList = this.edtOptionList.GetLines(true);
+            this.FilterDef.EnumResultField = this.edtEnumResultField.Text;
+            this.FilterDef.EnumIsMultiChoise = this.chEnumIsMultiChoise.Checked;
+            this.FilterDef.EnumIncludeAll = this.chEnumIncludeAll.Checked;
+            this.FilterDef.EnumOptionList = this.edtEnumOptionList.GetLines(true);
  
-            this.FilterDef.EnumDisplayLabels = this.edtDisplayLabels.Text;
+            this.FilterDef.EnumDisplayLabels = this.edtEnumDisplayLabels.Text; 
         }
     }
 };
@@ -109,39 +163,39 @@ tp.SqlFilterDefEnumDialog = class extends tp.Window {
 /**
  * @type {tp.SqlFilterDef}
  * */
-tp.SqlFilterDefEnumDialog.prototype.FilterDef = null;
+tp.SqlFilterDefEditDialog.prototype.FilterDef = null;
 
 
 /**
-Displays a modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor
+Displays a modal dialog box for editing a {@link tp.SqlFilterDef} descriptor
 @static
 @param {tp.SqlFilterDef} FilterDef The object to edit
 @param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SqlFilterDefEnumDialog} Returns the {@link tp.ContentWindow}  dialog box
+@returns {tp.SqlFilterDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
 */
-tp.SqlFilterDefEnumDialog.ShowModal = function (FilterDef, WindowArgs = null) {
+tp.SqlFilterDefEditDialog.ShowModal = function (FilterDef, WindowArgs = null) {
 
     let Args = WindowArgs || {};
-    Args.Text = Args.Text || 'SqlFilterDef Enum editor';
+    Args.Text = Args.Text || 'SqlFilterDef editor';
 
     Args = new tp.WindowArgs(Args);
     Args.AsModal = true;
     Args.DefaultDialogResult = tp.DialogResult.Cancel;
     Args.FilterDef = FilterDef;
 
-    let Result = new tp.SqlFilterDefEnumDialog(Args);
+    let Result = new tp.SqlFilterDefEditDialog(Args);
     Result.ShowModal();
 
     return Result;
 };
 /**
-Displays a modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor
+Displays a modal dialog box for a {@link tp.SqlFilterDef} descriptor
 @static
 @param {tp.SqlFilterDef} FilterDef The object to edit
 @param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SqlFilterDefEnumDialog} Returns the {@link tp.ContentWindow}  dialog box
+@returns {tp.SqlFilterDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
 */
-tp.SqlFilterDefEnumDialog.ShowModalAsync = function (FilterDef, WindowArgs = null) {
+tp.SqlFilterDefEditDialog.ShowModalAsync = function (FilterDef, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
         WindowArgs = WindowArgs || {};
         let CloseFunc = WindowArgs.CloseFunc;
@@ -151,7 +205,7 @@ tp.SqlFilterDefEnumDialog.ShowModalAsync = function (FilterDef, WindowArgs = nul
             Resolve(Window);
         };
 
-        tp.SqlFilterDefEnumDialog.ShowModal(FilterDef, WindowArgs);
+        tp.SqlFilterDefEditDialog.ShowModal(FilterDef, WindowArgs);
     });
 };
 //#endregion
@@ -411,7 +465,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
             GroupFooterVisible: false,
 
             ButtonInsertVisible: true,
-            //ButtonEditVisible: true,
+            ButtonEditVisible: true,
             ButtonDeleteVisible: true,
             ConfirmDelete: true,
 
@@ -435,7 +489,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
         };
  
         this.gridFilters = new tp.Grid(el, CP);
-        this.gridFilters.AddToolBarButton('EditEnum', '', 'Edit Enum part', 'fa fa-sticky-note-o', '', false);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
+        //this.gridFilters.AddToolBarButton('EditEnum', '', 'Edit Enum part', 'fa fa-sticky-note-o', '', false);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
         this.gridFilters.On('ToolBarButtonClick', this.gridFilters_ToolBarButtonClick, this);
  
         this.gridFilters.DataSource = this.tblFilters;
@@ -443,10 +497,8 @@ tp.SelectSqlEditDialog = class extends tp.Window {
 
         this.tblFilters.On('RowCreated', this.tblFilters_RowCreated, this);
         this.tblFilters.On('RowModified', this.tblFilters_RowModified, this);
-
-        // EDW :
-        // 1. Modify SqlFilterDefEnumDialog, make it SqlFilterDefEditDialog for the whole filter def
-        // 2. when insert button is clicked in grid, add a new row
+ 
+ 
     }
     /** Can be used in passing the results back to the caller code. 
      * On modal dialogs the code should examine the DialogResult to decide what to do.
@@ -520,7 +572,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
      * @param {tp.DataTableEventArgs} Args
      */
     tblFilters_RowCreated(Args) {
-        Args.Row.FilterDef = new tp.SqlFilterDef();
+        //Args.Row.FilterDef = new tp.SqlFilterDef();
     }
     /** Called when a column in a data row is modified.
      * @param {tp.DataTableEventArgs} Args
@@ -528,10 +580,91 @@ tp.SelectSqlEditDialog = class extends tp.Window {
     tblFilters_RowModified(Args) {
         // nothing yet
     }
+
+    /** Creates and returns a clone of the tblFilters with just a single row, in order to be passed to the edit dialog.
+     * The row is either empty, on insert, or a clone of a tblFilters row, on edit.
+     * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFilters row, on edit.
+     * @returns {tp.DataTable} Returns a clone of the tblFilters with just a single row, in order to be passed to the edit dialog.
+     */
+    CreateEditFilterTable(SourceRow = null) {
+        let Row;
+        let IsInsert = tp.IsEmpty(SourceRow);
+
+        // create the table, used in editing a single row
+        let Table = this.tblFilters.Clone();
+        Table.Name = 'Filter';
+
+        // add the single row in table
+        Row = Table.AddEmptyRow();
+
+        if (IsInsert) {
+            let Item = new tp.SqlFilterDef();
+            Item.ToDataRow(Row);
+        }
+        else {
+            Row.CopyFromRow(SourceRow);
+        }
+
+        return Table;
+    }
+    /** Called when inserting a single row of the tblFilters and displays the edit dialog
+    */
+    async InsertFilterRow() {
+        let Item = new tp.SqlFilterDef();
+
+        let DialogBox = await tp.SqlFilterDefEditDialog.ShowModalAsync(Item);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblFilters.AddEmptyRow(); 
+            Item.ToDataRow(Row);            
+            this.SelectSql.Filters.push(Item); 
+        }
+    }
+    /** Called when editing a single row of the tblFilters and displays the edit dialog
+     */
+    async EditFilterRow() {
+        let Row = this.gridFilters.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Item = Row.OBJECT; 
+            let DialogBox = await this.ShowEditFilterDialog(Item);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Item.ToDataRow(Row);
+            }
+        } 
+    }
+    /** Deletes a single row of the tblSelectSqlList 
+    */
+    DeleteFilterRow() {
+        let Row = this.gridFilters.FocusedRow;
+        if (tp.IsValid(Row)) {
+            tp.YesNoBox('Delete selected row?', (Dialog) => {
+                if (Dialog.DialogResult === tp.DialogResult.Yes) {
+                    let Item = Row.OBJECT; 
+                    tp.ListRemove(this.SelectSql.Filters, Item);
+                    this.tblFilters.RemoveRow(Row);
+                }
+            });
+        }
+    }
+
     /** Called when a button in the filters grid tool-bar is clicked. 
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */
     async gridFilters_ToolBarButtonClick(Args) {
+        Args.Handled = true;
+
+        switch (Args.Command) {
+            case 'GridRowInsert':
+                this.InsertFilterRow();
+                break;
+            case 'GridRowEdit':
+                this.EditFilterRow();
+                break;
+            case 'GridRowDelete':
+                this.DeleteFilterRow(); 
+                break;
+        }
+
+        /*
         if (Args.Command === 'EditEnum') {
             Args.Handled = true;
 
@@ -546,6 +679,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
                 let o = Res;
             } 
         }
+        */
     }
 };
 

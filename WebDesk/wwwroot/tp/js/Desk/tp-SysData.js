@@ -497,7 +497,7 @@ tp.DataFieldDef = class extends tp.Object {
         Table.AddColumn('ForeignKey', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
         Table.AddColumn('ForeignKeyConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
 
-        return table;
+        return Table;
     }
 };
 

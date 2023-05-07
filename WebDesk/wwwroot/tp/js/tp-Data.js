@@ -220,7 +220,7 @@ tp.DataType = {
         for (let Prop in tp.DataType) {
             if (ExcludeTypes.indexOf(Prop) < 0 && !tp.IsFunction(tp.DataType[Prop])) {
                 let o = {
-                    Id: Prop,
+                    Id: tp.DataType[Prop],
                     Name: Prop
                 };
 
@@ -1060,7 +1060,30 @@ tp.SqlFilterMode = {
     Simple: 1,
     EnumQuery: 2,
     EnumConst: 4,
-    Locator: 8
+    Locator: 8,
+
+    /** Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * @type {string[]} ExcludeItems Array containing {@link tp.SqlFilterMode} constants to exclude.
+     * @returns {object[]} Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * */
+    ToList(ExcludeItems = [tp.SqlFilterMode.None]) {
+        let Result = [];
+
+        ExcludeItems = tp.IsArray(ExcludeItems) ? ExcludeItems : [];
+
+        for (let Prop in tp.SqlFilterMode) {
+            if (ExcludeItems.indexOf(tp.SqlFilterMode[Prop]) < 0 && !tp.IsFunction(tp.SqlFilterMode[Prop])) {
+                let o = {
+                    Id: tp.SqlFilterMode[Prop],
+                    Name: Prop
+                };
+
+                Result.push(o);
+            }
+        }
+
+        return Result;
+    },
 };
 Object.freeze(tp.SqlFilterMode);
 //#endregion  
@@ -1268,7 +1291,14 @@ tp.SqlFilterDef = class   {
             this.Locator = Row.Get('Locator', this.Locator);
             this.PutInHaving = Row.Get('PutInHaving', this.PutInHaving);
             this.AggregateFunc = Row.Get('AggregateFunc', this.AggregateFunc); 
-        }
+
+            this.EnumSql = Row.Get('EnumSql', this.EnumSql); 
+            this.EnumResultField = Row.Get('EnumResultField', this.EnumResultField); 
+            this.EnumIsMultiChoise = Row.Get('EnumIsMultiChoise', this.EnumIsMultiChoise);
+            let S = Row.Get('EnumOptionList', '');
+            this.EnumOptionList = tp.IsNullOrWhitespace(S) ? '' : S.split(','); 
+            this.EnumIncludeAll = Row.Get('EnumIncludeAll', this.EnumIncludeAll); 
+            this.EnumDisplayLabels = Row.Get('EnumDisplayLabels', this.EnumDisplayLabels);         }
     }
     /** Saves this instance's properties to a specified {@link tp.DataRow}
      * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
@@ -1282,6 +1312,15 @@ tp.SqlFilterDef = class   {
         Row.Set('Locator', this.Locator);
         Row.Set('PutInHaving', this.PutInHaving);
         Row.Set('AggregateFunc', this.AggregateFunc); 
+
+        Row.Set('EnumSql', this.EnumSql); 
+        Row.Set('EnumResultField', this.EnumResultField); 
+        Row.Set('EnumIsMultiChoise', this.EnumIsMultiChoise); 
+        Row.Set('EnumOptionList', this.EnumOptionList === null ? '' : this.EnumOptionList.toString()); 
+        Row.Set('EnumIncludeAll', this.EnumIncludeAll); 
+        Row.Set('EnumDisplayLabels', this.EnumDisplayLabels); 
+
+        Row.OBJECT = this;
     }
     /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
      */
@@ -1296,6 +1335,13 @@ tp.SqlFilterDef = class   {
         Table.AddColumn('Locator').DefaultValue = '';
         Table.AddColumn('PutInHaving', tp.DataType.Boolean).DefaultValue = false;
         Table.AddColumn('AggregateFunc').DefaultValue = '';
+
+        Table.AddColumn('EnumSql').DefaultValue = '';
+        Table.AddColumn('EnumResultField').DefaultValue = '';
+        Table.AddColumn('EnumIsMultiChoise', tp.DataType.Boolean).DefaultValue = false;
+        Table.AddColumn('EnumOptionList').DefaultValue = '';
+        Table.AddColumn('EnumIncludeAll', tp.DataType.Boolean).DefaultValue = false;
+        Table.AddColumn('EnumDisplayLabels').DefaultValue = '';
 
         return Table;
     }
@@ -1778,6 +1824,7 @@ tp.SelectSql = class {
         this.Filters.forEach((Item) => {
             let Row = Table.AddEmptyRow();
             Item.ToDataRow(Row);
+            Row.OBJECT = Item;
         });
 
         Table.AcceptChanges();
