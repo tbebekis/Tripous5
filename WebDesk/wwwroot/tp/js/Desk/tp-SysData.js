@@ -316,22 +316,7 @@ tp.DataTableDef = class extends tp.Object {
      * */
     FieldsToDataTable(Table = null) {
         if (!(Table instanceof tp.DataTable)) {
-            Table = new tp.DataTable();
-            Table.Name = 'Fields';
-
-            Table.AddColumn('Id', tp.DataType.String, 40);
-            Table.AddColumn('Name', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
-            Table.AddColumn('TitleKey', tp.DataType.String, 96);
-            Table.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
-            Table.AddColumn('DataType', tp.DataType.String, 40);
-            Table.AddColumn('Length', tp.DataType.Integer);
-            Table.AddColumn('Required', tp.DataType.Boolean);
-            Table.AddColumn('DefaultExpression', tp.DataType.String, 80);
-            Table.AddColumn('Unique', tp.DataType.Boolean);
-            Table.AddColumn('UniqueConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
-            Table.AddColumn('ForeignKey', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
-            Table.AddColumn('ForeignKeyConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
-
+            Table = tp.DataFieldDef.CreateDataTable();
         }           
  
         this.Fields.forEach((FieldDef) => {
@@ -492,6 +477,27 @@ tp.DataFieldDef = class extends tp.Object {
         Row.Set('UniqueConstraintName', this.UniqueConstraintName);
         Row.Set('ForeignKey', this.ForeignKey);
         Row.Set('ForeignKeyConstraintName', this.ForeignKeyConstraintName);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'Fields';
+
+        Table.AddColumn('Id', tp.DataType.String, 40);
+        Table.AddColumn('Name', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('TitleKey', tp.DataType.String, 96);
+        Table.AddColumn('IsPrimaryKey', tp.DataType.Boolean);
+        Table.AddColumn('DataType', tp.DataType.String, 40);
+        Table.AddColumn('Length', tp.DataType.Integer);
+        Table.AddColumn('Required', tp.DataType.Boolean);
+        Table.AddColumn('DefaultExpression', tp.DataType.String, 80);
+        Table.AddColumn('Unique', tp.DataType.Boolean);
+        Table.AddColumn('UniqueConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('ForeignKey', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('ForeignKeyConstraintName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+
+        return table;
     }
 };
 

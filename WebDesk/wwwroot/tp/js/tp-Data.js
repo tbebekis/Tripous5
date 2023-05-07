@@ -675,6 +675,61 @@ tp.SelectSqlColumn = class {
 
         return Result;
     }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) { 
+            this.Name = Row.Get('Name', '');
+            this.TitleKey = Row.Get('TitleKey', '');
+            this.DisplayType = Row.Get('DisplayType', this.DisplayType);
+            this.Width = Row.Get('Width', this.Width);
+            this.ReadOnly = Row.Get('ReadOnly', this.ReadOnly);
+            this.DisplayIndex = Row.Get('DisplayIndex', this.DisplayIndex);
+            this.GroupIndex = Row.Get('GroupIndex', this.GroupIndex);
+            this.Decimals = Row.Get('Decimals', this.Decimals);
+            this.FormatString = Row.Get('FormatString', this.FormatString);
+            this.Aggregate = Row.Get('Aggregate', this.Aggregate);
+            this.AggregateFormat = Row.Get('AggregateFormat', this.AggregateFormat); 
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('Name', Column.Name);
+        Row.Set('TitleKey', Column.TitleKey);
+        Row.Set('DisplayType', Column.DisplayType);
+        Row.Set('Width', Column.Width);
+        Row.Set('ReadOnly', Column.ReadOnly);
+        Row.Set('DisplayIndex', Column.DisplayIndex);
+        Row.Set('GroupIndex', Column.GroupIndex);
+        Row.Set('Decimals', Column.Decimals);
+        Row.Set('FormatString', Column.FormatString);
+        Row.Set('Aggregate', Column.Aggregate);
+        Row.Set('AggregateFormat', Column.AggregateFormat);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+
+        Table.AddColumn('Name').DefaultValue = 'NewColumn';
+        Table.AddColumn('TitleKey').DefaultValue = 'New Column';
+        Table.AddColumn('DisplayType', tp.DataType.Integer).DefaultValue = tp.ColumnDisplayType.Default;
+        Table.AddColumn('Width', tp.DataType.Integer).DefaultValue = 90;
+        Table.AddColumn('ReadOnly', tp.DataType.Boolean).DefaultValue = false;
+        Table.AddColumn('DisplayIndex', tp.DataType.Integer).DefaultValue = 0;
+        Table.AddColumn('GroupIndex', tp.DataType.Integer).DefaultValue = -1;
+        Table.AddColumn('Decimals', tp.DataType.Integer).DefaultValue = -1;
+        Table.AddColumn('FormatString').DefaultValue = '';
+        Table.AddColumn('Aggregate', tp.DataType.Integer).DefaultValue = tp.AggregateType.None;
+        Table.AddColumn('AggregateFormat').DefaultValue = '';
+
+        return Table;
+    }
+
 };
 
 tp.SelectSqlColumn.prototype.fTitle = '';
@@ -726,6 +781,7 @@ tp.SelectSqlColumn.prototype.Aggregate = tp.AggregateType.None;
  @type {number}
  */
 tp.SelectSqlColumn.prototype.AggregateFormat = '';
+
 //#endregion  
 
  
@@ -1198,7 +1254,51 @@ tp.SqlFilterDef = class   {
     ValidateAggregateFunc() {
         this.AggregateFunc = tp.ValidAggregateFunctions.indexOf(this.AggregateFunc) === -1? '': this.AggregateFunc;
     }
-    
+ 
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+ * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+ */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            this.FieldPath = Row.Get('FieldPath', this.FieldPath);
+            this.TitleKey = Row.Get('TitleKey', this.TitleKey);
+            this.DataType = Row.Get('DataType', this.FieldPath);
+            this.Mode = Row.Get('Mode', this.Mode);
+            this.UseRange = Row.Get('UseRange', this.UseRange);
+            this.Locator = Row.Get('Locator', this.Locator);
+            this.PutInHaving = Row.Get('PutInHaving', this.PutInHaving);
+            this.AggregateFunc = Row.Get('AggregateFunc', this.AggregateFunc); 
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('FieldPath', this.FieldPath);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('DataType', this.DataType);
+        Row.Set('Mode', this.Mode);
+        Row.Set('UseRange', this.UseRange);
+        Row.Set('Locator', this.Locator);
+        Row.Set('PutInHaving', this.PutInHaving);
+        Row.Set('AggregateFunc', this.AggregateFunc); 
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+
+        Table.AddColumn('FieldPath').DefaultValue = 'TABLE_NAME.FIELD_NAME';
+        Table.AddColumn('TitleKey').DefaultValue = 'New Filter';
+        Table.AddColumn('DataType').DefaultValue = tp.DataType.String;
+        Table.AddColumn('Mode', tp.DataType.Integer).DefaultValue = tp.SqlFilterMode.Simple;
+        Table.AddColumn('UseRange', tp.DataType.Boolean).DefaultValue = false;
+        Table.AddColumn('Locator').DefaultValue = '';
+        Table.AddColumn('PutInHaving', tp.DataType.Boolean).DefaultValue = false;
+        Table.AddColumn('AggregateFunc').DefaultValue = '';
+
+        return Table;
+    }
 };
 
 
@@ -1618,8 +1718,72 @@ tp.SelectSql = class {
             });
         }
     }
-
  
+    /** Loads this instance's columns from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load filters from.
+     */
+    ColumnsFromDataTable(Table) {
+        this.Columns.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SelectSqlColumn();
+                this.Columns.push(Item);
+                Item.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's columns to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save columns to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    ColumnsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SelectSqlColumn.CreateDataTable();
+        }
+
+        this.Columns.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToDataRow(Row);
+        });
+
+        Table.AcceptChanges();
+
+        return Table;
+    }
+
+
+
+    /** Loads this instance's filters from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load filters from.
+     */
+    FiltersFromDataTable(Table) {
+        this.Filters.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SqlFilterDef();
+                this.Filters.push(Item);
+                Item.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's filters to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save filters to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    FiltersToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SqlFilterDef.CreateDataTable();
+        }
+
+        this.Filters.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToDataRow(Row);
+        });
+
+        Table.AcceptChanges();
+
+        return Table;
+    }
 };
 
 tp.SelectSql.prototype.fTitle = '';

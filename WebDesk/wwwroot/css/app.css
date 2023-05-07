@@ -45,6 +45,10 @@
    transform: rotate(50deg);  
  }
 
+.tp-CtrlRow > .tp-CText {
+    justify-content: end;
+}
+
 
 /*---------------------------------------------------------------------------------------
   general

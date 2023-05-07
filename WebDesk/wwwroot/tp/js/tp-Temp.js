@@ -329,12 +329,16 @@ tp.SelectSqlEditDialog = class extends tp.Window {
         // --------------------------------------------------------------------------------- 
         LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
         this.tabColumns.AddComponent(LayoutRow);
+ 
+        // columns table
+        this.tblColumns = this.SelectSql.ColumnsToDataTable(); 
 
+        // columns grid
         // add a DIV for the gridFields tp.Grid in the row
         el = LayoutRow.AddDivElement();
         CP = {
             Name: "gridColumns",
-            Height: '100%',            
+            Height: '100%',
 
             ToolBarVisible: true,
             GroupsVisible: false,
@@ -356,7 +360,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
                 { Name: 'Name' },
                 { Name: 'TitleKey' },
                 { Name: 'DisplayType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.ColumnDisplayType) },
- 
+
                 { Name: 'Width' },
                 { Name: 'ReadOnly' },
 
@@ -369,53 +373,22 @@ tp.SelectSqlEditDialog = class extends tp.Window {
             ]
         };
 
-        // create the columns grid
         this.gridColumns = new tp.Grid(el, CP);
         //this.gridColumns.On("ToolBarButtonClick", this.GridColumns_AnyButtonClick, this);
         //this.gridColumns.On(tp.Events.DoubleClick, this.GridColumns_DoubleClick, this);
-
-        // columns table
-        this.tblColumns = new tp.DataTable();
-        this.tblColumns.AddColumn('Name').DefaultValue = 'NewColumn';
-        this.tblColumns.AddColumn('TitleKey').DefaultValue = 'New Column';
-        this.tblColumns.AddColumn('DisplayType', tp.DataType.Integer).DefaultValue = tp.ColumnDisplayType.Default;
-        this.tblColumns.AddColumn('Width', tp.DataType.Integer).DefaultValue = 90;
-        this.tblColumns.AddColumn('ReadOnly', tp.DataType.Boolean).DefaultValue = false;
-        this.tblColumns.AddColumn('DisplayIndex', tp.DataType.Integer).DefaultValue = 0;
-        this.tblColumns.AddColumn('GroupIndex', tp.DataType.Integer).DefaultValue = -1;
-        this.tblColumns.AddColumn('Decimals', tp.DataType.Integer).DefaultValue = -1;
-        this.tblColumns.AddColumn('FormatString').DefaultValue = '';
-        this.tblColumns.AddColumn('Aggregate', tp.DataType.Integer).DefaultValue = tp.AggregateType.None;
-        this.tblColumns.AddColumn('AggregateFormat').DefaultValue = ''; 
-
-        this.SelectSql.Columns.forEach((Column) => {
-            let DataRow = this.tblColumns.AddEmptyRow();
-            DataRow.Set('Name', Column.Name);
-            DataRow.Set('TitleKey', Column.TitleKey);
-            DataRow.Set('DisplayType', Column.DisplayType);
-            DataRow.Set('Width', Column.Width);
-            DataRow.Set('ReadOnly', Column.ReadOnly);
-            DataRow.Set('DisplayIndex', Column.DisplayIndex);
-            DataRow.Set('GroupIndex', Column.GroupIndex);
-            DataRow.Set('Decimals', Column.Decimals);
-            DataRow.Set('FormatString', Column.FormatString);
-            DataRow.Set('Aggregate', Column.Aggregate);
-            DataRow.Set('AggregateFormat', Column.AggregateFormat);
-        });
-
-        this.tblColumns.AcceptChanges();
-
         this.gridColumns.DataSource = this.tblColumns;
-        this.gridColumns.BestFitColumns();
- 
- 
+        this.gridColumns.BestFitColumns(); 
 
 
         // Filters Page
         // ---------------------------------------------------------------------------------
         LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
         this.tabFilters.AddComponent(LayoutRow);
- 
+
+        // filters table
+        this.tblFilters = this.SelectSql.FiltersToDataTable();
+
+        // filters grid
         let AggregateFuncList = [
             { Id: '', Name: '' },
             { Id: 'count', Name: 'count' },
@@ -442,7 +415,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
             ButtonDeleteVisible: true,
             ConfirmDelete: true,
 
-            ReadOnly: false,
+            ReadOnly: true,
             AllowUserToAddRows: true,
             AllowUserToDeleteRows: true,
             AutoGenerateColumns: false,
@@ -460,49 +433,20 @@ tp.SelectSqlEditDialog = class extends tp.Window {
                 { Name: 'AggregateFunc', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: AggregateFuncList },
             ]
         };
-
  
-        // create the columns grid
         this.gridFilters = new tp.Grid(el, CP);
-
         this.gridFilters.AddToolBarButton('EditEnum', '', 'Edit Enum part', 'fa fa-sticky-note-o', '', false);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
-
         this.gridFilters.On('ToolBarButtonClick', this.gridFilters_ToolBarButtonClick, this);
-
-        this.tblFilters = new tp.DataTable();
-        this.tblFilters.AddColumn('FieldPath').DefaultValue = 'TABLE_NAME.FIELD_NAME';
-        this.tblFilters.AddColumn('TitleKey').DefaultValue = 'New Filter';
-        this.tblFilters.AddColumn('DataType').DefaultValue = tp.DataType.String;
-        this.tblFilters.AddColumn('Mode', tp.DataType.Integer).DefaultValue = tp.SqlFilterMode.Simple;
-        this.tblFilters.AddColumn('UseRange', tp.DataType.Boolean).DefaultValue = false;
-        this.tblFilters.AddColumn('Locator').DefaultValue = '';
-        this.tblFilters.AddColumn('PutInHaving', tp.DataType.Boolean).DefaultValue = false;
-        this.tblFilters.AddColumn('AggregateFunc').DefaultValue = '';
  
-        this.SelectSql.Filters.forEach((FilterDef) => {
-            let DataRow = this.tblFilters.AddEmptyRow();
-            DataRow.Set('FieldPath', FilterDef.FieldPath);
-            DataRow.Set('TitleKey', FilterDef.TitleKey);
-            DataRow.Set('DataType', FilterDef.DataType);
-            DataRow.Set('Mode', FilterDef.Mode);
-            DataRow.Set('UseRange', FilterDef.UseRange);
-            DataRow.Set('Locator', FilterDef.Locator);
-            DataRow.Set('PutInHaving', FilterDef.PutInHaving);
-            DataRow.Set('AggregateFunc', FilterDef.AggregateFunc);
-
-            DataRow.FilterDef = FilterDef; 
-        });
-
-        this.tblFilters.AcceptChanges();
-
         this.gridFilters.DataSource = this.tblFilters;
         this.gridFilters.BestFitColumns();
 
         this.tblFilters.On('RowCreated', this.tblFilters_RowCreated, this);
         this.tblFilters.On('RowModified', this.tblFilters_RowModified, this);
 
-        // EDW
-        
+        // EDW :
+        // 1. Modify SqlFilterDefEnumDialog, make it SqlFilterDefEditDialog for the whole filter def
+        // 2. when insert button is clicked in grid, add a new row
     }
     /** Can be used in passing the results back to the caller code. 
      * On modal dialogs the code should examine the DialogResult to decide what to do.
@@ -594,6 +538,9 @@ tp.SelectSqlEditDialog = class extends tp.Window {
             let Row = this.gridFilters.FocusedRow;
             if (!tp.IsEmpty(Row)) {
                 let FilterDef = Row.FilterDef;
+
+
+                //         this.tblFilters.AddColumn('Mode', tp.DataType.Integer).DefaultValue = tp.SqlFilterMode.Simple;
 
                 let Res = await tp.SqlFilterDefEnumDialog.ShowModalAsync(FilterDef);
                 let o = Res;
