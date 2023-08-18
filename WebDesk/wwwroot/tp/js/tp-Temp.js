@@ -1,739 +1,4 @@
-﻿//#region SqlFilterDefEditDialog
-/** Modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor */
-tp.SqlFilterDefEditDialog = class extends tp.Window {
-    /**
-     * Constructor
-     * @param {tp.WindowArgs} Args The window args
-     */
-    constructor(Args) {
-        super(Args);
-    }
-
-    tabGeneral = null;
-    tabEnum = null;
-    tabEnumSql = null;
-
-    edtFieldPath = null;
-    edtTitleKey = null;
-    cboDataType = null;
-    cboMode = null;
-    chUseRange = null;
-    edtLocator = null;
-    chPutInHaving = null;
-    edtAggregateFunc = null;
-
-    edtEnumResultField = null;
-    chEnumIsMultiChoise = null;
-    chEnumIncludeAll = null;
-    edtEnumOptionList = null;
-    edtEnumDisplayLabels = null;
-
-    /* overrides */
-    InitClass() {
-        super.InitClass();
-
-        this.tpClass = 'tp.SqlFilterDefEditDialog';
-    }
-    ProcessInitInfo() {
-        super.ProcessInitInfo();
-
-        this.FilterDef = this.Args.FilterDef;
-    }
-    /**
-     * Creates all controls of this window.
-     * */
-    CreateControls() {
-        super.CreateControls();
-
-        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
- 
-        let RowHtmlText = `
-<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "auto"}'>
-    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-    </div>
-    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-    </div>
-</div>
-`;
-
-        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
-        this.CreateFooterButton('Cancel', 'Cancel', tp.DialogResult.Cancel);
-
-        this.Pager = new tp.TabControl(null, { Height: '100%' });
-        this.Pager.Parent = this.ContentWrapper;
-
-        this.tabGeneral = this.Pager.AddPage('Enum');
-        this.tabEnum = this.Pager.AddPage('Enum');
-        this.tabEnumSql = this.Pager.AddPage('Enum Sql'); 
-
-        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
-
-        // General Page
-        // ---------------------------------------------------------------------------------
-        elRow = tp.HtmlToElement(RowHtmlText);
-        this.tabGeneral.Handle.appendChild(elRow);
-        tp.Ui.CreateContainerControls(elRow.parentElement);
-
-        elCol = elRow.children[0];
-        tp.StyleProp(elCol, 'padding-left', '2px');
-
-        // controls 
-        this.edtFieldPath = tp.CreateControlRow(tp.Div(elCol), false, 'Field Path', { TypeName: 'TextBox' }).Control;
-        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'Title Key', { TypeName: 'TextBox' }).Control;
-        this.cboDataType = tp.CreateControlRow(tp.Div(elCol), false, 'DataType', { TypeName: 'ComboBox', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.DataType.ToList([]) }).Control;
-        this.cboMode = tp.CreateControlRow(tp.Div(elCol), false, 'Mode', { TypeName: 'ComboBox', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.SqlFilterMode.ToList([]) }).Control;
-        this.chUseRange = tp.CreateControlRow(tp.Div(elCol), true, 'Use Range', { TypeName: 'CheckBox' }).Control;
-        this.edtLocator = tp.CreateControlRow(tp.Div(elCol), false, 'Locator', { TypeName: 'TextBox' }).Control;
-        this.chPutInHaving = tp.CreateControlRow(tp.Div(elCol), true, 'Put in Having', { TypeName: 'CheckBox' }).Control;
-        this.edtAggregateFunc = tp.CreateControlRow(tp.Div(elCol), false, 'Aggregate Func', { TypeName: 'TextBox' }).Control;
-
-        // item to controls 
-        this.edtFieldPath.Text = this.FilterDef.FieldPath;
-        this.edtTitleKey.Text = this.FilterDef.TitleKey;
-        this.cboDataType.SelectedIndex = this.cboDataType.Items.indexOf(this.FilterDef.DataType);
-        this.cboMode.SelectedIndex = this.cboMode.Items.indexOf(this.FilterDef.Mode);
-        this.chUseRange.Checked = this.FilterDef.UseRange === true;
-        this.edtLocator.Text = this.FilterDef.Locator;
-        this.chPutInHaving.Checked = this.FilterDef.PutInHaving === true;
-        this.edtAggregateFunc.Text = this.FilterDef.AggregateFunc;
-
-        // Enum Page
-        // ---------------------------------------------------------------------------------
-        elRow = tp.HtmlToElement(RowHtmlText);
-        this.tabEnum.Handle.appendChild(elRow);
-        tp.Ui.CreateContainerControls(elRow.parentElement);
-
-        elCol = elRow.children[0];
-        tp.StyleProp(elCol, 'padding-left', '2px');
-
-        // controls
-        this.edtEnumResultField = tp.CreateControlRow(tp.Div(elCol), false, 'Result Field', { TypeName: 'TextBox' }).Control;
-        this.edtEnumOptionList = tp.CreateControlRow(tp.Div(elCol), false, 'Options', { TypeName: 'Memo' }).Control;
-        this.chEnumIsMultiChoise = tp.CreateControlRow(tp.Div(elCol), true, 'Is Multi Choise', { TypeName: 'CheckBox' }).Control;
-        this.chEnumIncludeAll = tp.CreateControlRow(tp.Div(elCol), true, 'Include All', { TypeName: 'CheckBox' }).Control;
-
-        elCol = elRow.children[1];
-        tp.StyleProp(elCol, 'padding-left', '2px');
-        this.edtEnumDisplayLabels = tp.CreateControlRow(tp.Div(elCol), false, 'Display Labels', { TypeName: 'Memo' }).Control;
-
-        this.edtEnumOptionList.Height = '10em';
-        this.edtEnumDisplayLabels.Height = '10em';
- 
-        // item to controls
-        this.edtEnumResultField.Text = this.FilterDef.EnumResultField;
-        this.chEnumIsMultiChoise.Checked = this.FilterDef.EnumIsMultiChoise === true;
-        this.chEnumIncludeAll.Checked = this.FilterDef.EnumIncludeAll === true;
-        this.edtEnumOptionList.AppendLines(this.FilterDef.EnumOptionList);
-        this.edtEnumDisplayLabels.Text = this.FilterDef.EnumDisplayLabels;
-
-        // Sql Page
-        // ---------------------------------------------------------------------------------
-        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabEnumSql.Handle, 'sql', this.FilterDef.EnumSql);
-    }
-    /** Can be used in passing the results back to the caller code. 
-     * On modal dialogs the code should examine the DialogResult to decide what to do.
-     * @override
-     * */
-    PassBackResult() {
-        if (this.DialogResult === tp.DialogResult.OK) {
-
-            // EDW: check if is valid before closing
-
-            this.FilterDef.FieldPath = this.edtFieldPath.Text;
-            this.FilterDef.TitleKey = this.edtTitleKey.Text;
-            this.FilterDef.DataType = this.cboDataType.SelectedValue;
-            this.FilterDef.Mode = this.cboMode.SelectedValue;
-            this.FilterDef.UseRange = this.chUseRange.Checked;
-            this.FilterDef.Locator = this.edtLocator.Text;
-            this.FilterDef.PutInHaving = this.chPutInHaving.Checked;
-            this.FilterDef.AggregateFunc = this.edtAggregateFunc.Text; 
- 
-            this.FilterDef.EnumSql = this.elSqlEditor.__Editor.getValue();
-
-            this.FilterDef.EnumResultField = this.edtEnumResultField.Text;
-            this.FilterDef.EnumIsMultiChoise = this.chEnumIsMultiChoise.Checked;
-            this.FilterDef.EnumIncludeAll = this.chEnumIncludeAll.Checked;
-            this.FilterDef.EnumOptionList = this.edtEnumOptionList.GetLines(true);
- 
-            this.FilterDef.EnumDisplayLabels = this.edtEnumDisplayLabels.Text; 
-        }
-    }
-};
-
-/**
- * @type {tp.SqlFilterDef}
- * */
-tp.SqlFilterDefEditDialog.prototype.FilterDef = null;
-
-
-/**
-Displays a modal dialog box for editing a {@link tp.SqlFilterDef} descriptor
-@static
-@param {tp.SqlFilterDef} FilterDef The object to edit
-@param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SqlFilterDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
-*/
-tp.SqlFilterDefEditDialog.ShowModal = function (FilterDef, WindowArgs = null) {
-
-    let Args = WindowArgs || {};
-    Args.Text = Args.Text || 'SqlFilterDef editor';
-
-    Args = new tp.WindowArgs(Args);
-    Args.AsModal = true;
-    Args.DefaultDialogResult = tp.DialogResult.Cancel;
-    Args.FilterDef = FilterDef;
-
-    let Result = new tp.SqlFilterDefEditDialog(Args);
-    Result.ShowModal();
-
-    return Result;
-};
-/**
-Displays a modal dialog box for a {@link tp.SqlFilterDef} descriptor
-@static
-@param {tp.SqlFilterDef} FilterDef The object to edit
-@param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SqlFilterDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
-*/
-tp.SqlFilterDefEditDialog.ShowModalAsync = function (FilterDef, WindowArgs = null) {
-    return new Promise((Resolve, Reject) => {
-        WindowArgs = WindowArgs || {};
-        let CloseFunc = WindowArgs.CloseFunc;
-
-        WindowArgs.CloseFunc = (Window) => {
-            tp.Call(CloseFunc, Window.Args.Creator, Window);
-            Resolve(Window);
-        };
-
-        tp.SqlFilterDefEditDialog.ShowModal(FilterDef, WindowArgs);
-    });
-};
-//#endregion
- 
-//#region SelectSqlEditDialog
-
-/** Modal dialog box for editing a {@link tp.SelectSql} descriptor
- *  */
-tp.SelectSqlEditDialog = class extends tp.Window {
-    /**
-     * Constructor
-     * @param {tp.WindowArgs} Args The window args
-     */
-    constructor(Args) {
-        super(Args);
-    }
-
-
-    /**
-     * @type {tp.TabControl}
-     */
-    Pager = null;
-    /**
-     * @type {tp.TabPage}
-     */
-    tabGeneral = null;
-    /**
-     * @type {tp.TabPage}
-     */
-    tabSql = null;
-    /**
-     * @type {tp.TabPage}
-     */
-    tabColumns = null;
-    /**
-     * @type {tp.TabPage}
-     */
-    tabFilters = null;
-
-    /**
-     * @type {tp.TextBox}
-     */
-    edtName = null;
-    /**
-     * @type {tp.TextBox}
-     */
-    edtTitleKey = null;
-    /**
-     * @type {tp.CheckBox}
-     */
-    chCompanyAware = null;
-    /**
-     * @type {tp.TextBox}
-     */
-    edtConnectionName = null;
-    /**
-     * @type {tp.TextBox}
-     */
-    edtDateRangeColumn = null;
-    /**
-     * @type {tp.HtmlComboBox}
-     */
-    cboDateRange = null;
-
-    /** The element upon Ace Editor is created. 
-     * The '__Editor' property of the element points to Ace Editor object.
-     * @type {HTMLElement}
-     */
-    elSqlEditor = null;
-
-    /**
-     * @type {tp.Grid}
-     */
-    gridColumns = null;
-    /**
-     * @type {tp.DataTable}
-     */
-    tblColumns = null;
-
-    /**
-     * @type {tp.Grid}
-     */
-    gridFilters = null;
-    /**
-     * @type {tp.DataTable}
-     */
-    tblFilters = null;
- 
-
-    /* overrides */
-    InitClass() {
-        super.InitClass();
-
-        this.tpClass = 'tp.SelectSqlEditDialog';
-    }
-    ProcessInitInfo() {
-        super.ProcessInitInfo();
-
-        this.SelectSql = this.Args.SelectSql;
-        //this.BoxType = this.Args['BoxType'] || ''; 
-    }
-    /**
-     * Creates all controls of this window.
-     * */
-    CreateControls() {
-        super.CreateControls();
-
-        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
-
-        // , Height: "100%"
-        let RowHtmlText = `
-<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
-    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-    </div>
-</div>
-`;
-
-        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
-        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
- 
-        this.Pager = new tp.TabControl(null, { Height: '100%' });
-        this.Pager.Parent = this.ContentWrapper;
-
-        this.tabGeneral = this.Pager.AddPage(_L('General'));
-        this.tabSql = this.Pager.AddPage('Sql');
-        this.tabColumns = this.Pager.AddPage(_L('Columns'));
-        this.tabFilters = this.Pager.AddPage(_L('Filters'));
-
-        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
-
-        // General Page
-        // ---------------------------------------------------------------------------------
-        elRow = tp.HtmlToElement(RowHtmlText);
-        this.tabGeneral.Handle.appendChild(elRow);
-        tp.Ui.CreateContainerControls(elRow.parentElement);
-
-        elCol = elRow.children[0];
-        tp.StyleProp(elCol, 'padding-left', '2px');
-
-        // controls
-        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
-        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'Title Key', { TypeName: 'TextBox' }).Control;        
-        this.edtConnectionName = tp.CreateControlRow(tp.Div(elCol), false, 'Connection', { TypeName: 'TextBox' }).Control;
-        this.edtDateRangeColumn = tp.CreateControlRow(tp.Div(elCol), false, 'Date Range Column', { TypeName: 'TextBox' }).Control;
-        this.cboDateRange = tp.CreateControlRow(tp.Div(elCol), false, 'Date Range', { TypeName: 'HtmlComboBox' }).Control;
-        this.chCompanyAware = tp.CreateControlRow(tp.Div(elCol), true, 'Company Aware', { TypeName: 'CheckBox' }).Control;
-
-        // item to controls
-        this.edtName.Text = this.SelectSql.Name;
-        this.edtTitleKey.Text = this.SelectSql.TitleKey;
-        this.edtConnectionName.Text = this.SelectSql.ConnectionName;
-        this.edtDateRangeColumn.Text = this.SelectSql.DateRangeColumn;
-        this.chCompanyAware.Checked = this.SelectSql.CompanyAware === true;
-
-        for (i = 0, ln = tp.DateRanges.WhereRanges.length; i < ln; i++) {
-            this.cboDateRange.Add(tp.DateRanges.WhereRangesTexts[i], tp.DateRanges.WhereRanges[i]);
-        }
-
-        Index;
-        if (tp.IsNumber(this.SelectSql.DateRange)) {
-            let v = this.SelectSql.DateRange.toString();
-            Index = this.cboDateRange.IndexOfValue(v);            
-        }
-
-        Index = Index >= 0 ? Index : 0;
-        this.cboDateRange.SelectedIndex = Index;
-
-
-        // Sql Page
-        // ---------------------------------------------------------------------------------
-        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.SelectSql.Text);
-
-
-        // Columns Page
-        // --------------------------------------------------------------------------------- 
-        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
-        this.tabColumns.AddComponent(LayoutRow);
- 
-        // columns table
-        this.tblColumns = this.SelectSql.ColumnsToDataTable(); 
-
-        // columns grid
-        // add a DIV for the gridFields tp.Grid in the row
-        el = LayoutRow.AddDivElement();
-        CP = {
-            Name: "gridColumns",
-            Height: '100%',
-
-            ToolBarVisible: true,
-            GroupsVisible: false,
-            FilterVisible: false,
-            FooterVisible: false,
-            GroupFooterVisible: false,
-
-            ButtonInsertVisible: true,
-            //ButtonEditVisible: true,
-            ButtonDeleteVisible: true,
-            ConfirmDelete: true,
-
-            ReadOnly: false,
-            AllowUserToAddRows: true,
-            AllowUserToDeleteRows: true,
-            AutoGenerateColumns: false,
-
-            Columns: [
-                { Name: 'Name' },
-                { Name: 'TitleKey' },
-                { Name: 'DisplayType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.ColumnDisplayType) },
-
-                { Name: 'Width' },
-                { Name: 'ReadOnly' },
-
-                { Name: 'DisplayIndex' },
-                { Name: 'GroupIndex' },
-                { Name: 'Decimals' },
-                { Name: 'FormatString' },
-                { Name: 'Aggregate', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.AggregateType) },
-                { Name: 'AggregateFormat' },
-            ]
-        };
-
-        this.gridColumns = new tp.Grid(el, CP);
-        //this.gridColumns.On("ToolBarButtonClick", this.GridColumns_AnyButtonClick, this);
-        //this.gridColumns.On(tp.Events.DoubleClick, this.GridColumns_DoubleClick, this);
-        this.gridColumns.DataSource = this.tblColumns;
-        this.gridColumns.BestFitColumns(); 
-
-
-        // Filters Page
-        // ---------------------------------------------------------------------------------
-        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
-        this.tabFilters.AddComponent(LayoutRow);
-
-        // filters table
-        this.tblFilters = this.SelectSql.FiltersToDataTable();
-
-        // filters grid
-        let AggregateFuncList = [
-            { Id: '', Name: '' },
-            { Id: 'count', Name: 'count' },
-            { Id: 'avg', Name: 'avg' },
-            { Id: 'sum', Name: 'sum' },
-            { Id: 'max', Name: 'max' },
-            { Id: 'min', Name: 'min' } 
-        ];
-
-        // add a DIV for the gridFields tp.Grid in the row
-        el = LayoutRow.AddDivElement();
-        CP = {
-            Name: "gridFilters",
-            Height: '100%',
-
-            ToolBarVisible: true,
-            GroupsVisible: false,
-            FilterVisible: false,
-            FooterVisible: false,
-            GroupFooterVisible: false,
-
-            ButtonInsertVisible: true,
-            ButtonEditVisible: true,
-            ButtonDeleteVisible: true,
-            ConfirmDelete: true,
-
-            ReadOnly: true,
-            AllowUserToAddRows: true,
-            AllowUserToDeleteRows: true,
-            AutoGenerateColumns: false,
-
-            Columns: [
-                { Name: 'FieldPath' },
-                { Name: 'TitleKey' },
-
-                { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
-                { Name: 'Mode', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.SqlFilterMode, [tp.SqlFilterMode.None]) },
-
-                { Name: 'UseRange' },
-                { Name: 'Locator' },
-                { Name: 'PutInHaving' },
-                { Name: 'AggregateFunc', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: AggregateFuncList },
-            ]
-        };
- 
-        this.gridFilters = new tp.Grid(el, CP);
-        //this.gridFilters.AddToolBarButton('EditEnum', '', 'Edit Enum part', 'fa fa-sticky-note-o', '', false);    // Command, Text, ToolTip, IcoClasses, CssClasses, ToRight
-        this.gridFilters.On('ToolBarButtonClick', this.gridFilters_ToolBarButtonClick, this);
- 
-        this.gridFilters.DataSource = this.tblFilters;
-        this.gridFilters.BestFitColumns();
-
-        this.tblFilters.On('RowCreated', this.tblFilters_RowCreated, this);
-        this.tblFilters.On('RowModified', this.tblFilters_RowModified, this);
- 
- 
-    }
-    /** Can be used in passing the results back to the caller code. 
-     * On modal dialogs the code should examine the DialogResult to decide what to do.
-     * @override
-     * */
-    PassBackResult() {
-        if (this.DialogResult === tp.DialogResult.OK) {
-            this.SelectSql.Name = this.edtName.Text;
-            this.SelectSql.TitleKey = this.edtTitleKey.Text;
-            this.SelectSql.ConnectionName = this.edtConnectionName.Text;
-            this.SelectSql.DateRangeColumn = this.edtDateRangeColumn.Text;
-            this.SelectSql.DateRange = tp.StrToInt(this.cboDateRange.SelectedValue);
-            this.SelectSql.CompanyAware = this.chCompanyAware.Checked;
-
-            this.SelectSql.Text = this.elSqlEditor.__Editor.getValue();
-
-            this.SelectSql.Columns.length = 0;
-
-            this.tblColumns.Rows.forEach((Row) => {
-                let Column = new tp.SelectSqlColumn();
-                this.SelectSql.Columns.push(Column);
-
-                Column.Name = Row.Get('Name', '');
-                Column.TitleKey = Row.Get('TitleKey', '');
-                Column.DisplayType = Row.Get('DisplayType', Column.DisplayType);
-                Column.Width = Row.Get('Width', 90);
-                Column.ReadOnly = Row.Get('ReadOnly', false);
-                Column.DisplayIndex = Row.Get('DisplayIndex', 0);
-                Column.GroupIndex = Row.Get('GroupIndex', -1);
-                Column.Decimals = Row.Get('Decimals', -1);
-                Column.FormatString = Row.Get('FormatString', '');
-                Column.Aggregate = Row.Get('Aggregate', Column.Aggregate);
-                Column.AggregateFormat = Row.Get('AggregateFormat', '');
-
-            });
-        }
-    }
-
-
-
-    /* event handlers */
-    /** Event handler
-     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
-     */
-    GridColumns_AnyButtonClick(Args) {
-        Args.Handled = true;
-
-        switch (Args.Command) {
-            case 'GridRowInsert':
-                //this.InsertFieldRow();
-                break;
-            case 'GridRowEdit':
-                //this.EditFieldRow();
-                break;
-            case 'GridRowDelete':
-                //tp.InfoNote('Clicked: ' + Args.Command);
-                break;
-        }
-    }
-    /**
-    Event handler
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    GridColumns_DoubleClick(Args) {
-        //Args.Handled = true;
-        //this.EditFieldRow();
-    }
- 
-    /** Called when a new data row is created and it is about to be added to the table
-     * @param {tp.DataTableEventArgs} Args
-     */
-    tblFilters_RowCreated(Args) {
-        //Args.Row.FilterDef = new tp.SqlFilterDef();
-    }
-    /** Called when a column in a data row is modified.
-     * @param {tp.DataTableEventArgs} Args
-     */
-    tblFilters_RowModified(Args) {
-        // nothing yet
-    }
-
-    /** Creates and returns a clone of the tblFilters with just a single row, in order to be passed to the edit dialog.
-     * The row is either empty, on insert, or a clone of a tblFilters row, on edit.
-     * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFilters row, on edit.
-     * @returns {tp.DataTable} Returns a clone of the tblFilters with just a single row, in order to be passed to the edit dialog.
-     */
-    CreateEditFilterTable(SourceRow = null) {
-        let Row;
-        let IsInsert = tp.IsEmpty(SourceRow);
-
-        // create the table, used in editing a single row
-        let Table = this.tblFilters.Clone();
-        Table.Name = 'Filter';
-
-        // add the single row in table
-        Row = Table.AddEmptyRow();
-
-        if (IsInsert) {
-            let Item = new tp.SqlFilterDef();
-            Item.ToDataRow(Row);
-        }
-        else {
-            Row.CopyFromRow(SourceRow);
-        }
-
-        return Table;
-    }
-    /** Called when inserting a single row of the tblFilters and displays the edit dialog
-    */
-    async InsertFilterRow() {
-        let Item = new tp.SqlFilterDef();
-
-        let DialogBox = await tp.SqlFilterDefEditDialog.ShowModalAsync(Item);
-        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-            let Row = this.tblFilters.AddEmptyRow(); 
-            Item.ToDataRow(Row);            
-            this.SelectSql.Filters.push(Item); 
-        }
-    }
-    /** Called when editing a single row of the tblFilters and displays the edit dialog
-     */
-    async EditFilterRow() {
-        let Row = this.gridFilters.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Item = Row.OBJECT; 
-            let DialogBox = await this.ShowEditFilterDialog(Item);
-            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                Item.ToDataRow(Row);
-            }
-        } 
-    }
-    /** Deletes a single row of the tblSelectSqlList 
-    */
-    DeleteFilterRow() {
-        let Row = this.gridFilters.FocusedRow;
-        if (tp.IsValid(Row)) {
-            tp.YesNoBox('Delete selected row?', (Dialog) => {
-                if (Dialog.DialogResult === tp.DialogResult.Yes) {
-                    let Item = Row.OBJECT; 
-                    tp.ListRemove(this.SelectSql.Filters, Item);
-                    this.tblFilters.RemoveRow(Row);
-                }
-            });
-        }
-    }
-
-    /** Called when a button in the filters grid tool-bar is clicked. 
-     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
-     */
-    async gridFilters_ToolBarButtonClick(Args) {
-        Args.Handled = true;
-
-        switch (Args.Command) {
-            case 'GridRowInsert':
-                this.InsertFilterRow();
-                break;
-            case 'GridRowEdit':
-                this.EditFilterRow();
-                break;
-            case 'GridRowDelete':
-                this.DeleteFilterRow(); 
-                break;
-        }
-
-        /*
-        if (Args.Command === 'EditEnum') {
-            Args.Handled = true;
-
-            let Row = this.gridFilters.FocusedRow;
-            if (!tp.IsEmpty(Row)) {
-                let FilterDef = Row.FilterDef;
-
-
-                //         this.tblFilters.AddColumn('Mode', tp.DataType.Integer).DefaultValue = tp.SqlFilterMode.Simple;
-
-                let Res = await tp.SqlFilterDefEnumDialog.ShowModalAsync(FilterDef);
-                let o = Res;
-            } 
-        }
-        */
-    }
-};
-
-
-/**
- * @type {tp.SelectSql}
- * */
-tp.SelectSqlEditDialog.prototype.SelectSql = null;
-
-/**
-Displays a modal dialog box for editing a {@link tp.SelectSql} object
-@static
-@param {tp.SelectSql} SelectSql The object to edit
-@param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SelectSqlEditDialog} Returns the {@link tp.ContentWindow}  dialog box
-*/
-tp.SelectSqlEditDialog.ShowModal = function (SelectSql, WindowArgs = null) {
-
-    let Args = WindowArgs || {};
-    Args.Text = Args.Text || 'SelectSql editor';
-
-    Args = new tp.WindowArgs(Args);
-    Args.AsModal = true;
-    Args.DefaultDialogResult = tp.DialogResult.Cancel;
-    Args.SelectSql = SelectSql;
-
-    let Result = new tp.SelectSqlEditDialog(Args);
-    Result.ShowModal();
-
-    return Result;
-};
-/**
-Displays a modal dialog box for editing a {@link tp.SelectSql} object
-@static
-@param {tp.SelectSql} SelectSql The object to edit
-@param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SelectSqlEditDialog} Returns the {@link tp.ContentWindow}  dialog box
-*/
-tp.SelectSqlEditDialog.ShowModalAsync = function (SelectSql, WindowArgs = null) {
-    return new Promise((Resolve, Reject) => {
-        WindowArgs = WindowArgs || {};
-        let CloseFunc = WindowArgs.CloseFunc;
-
-        WindowArgs.CloseFunc = (Window) => {
-            tp.Call(CloseFunc, Window.Args.Creator, Window);
-            Resolve(Window);
-        }; 
-
-        tp.SelectSqlEditDialog.ShowModal(SelectSql, WindowArgs);
-    }); 
-};
-//#endregion
-
-
+﻿
 //#region SqlBrokerQueryDef
 
 /** Describes a SELECT statement.
@@ -1183,4 +448,131 @@ tp.SqlBrokerDef.prototype.fTitle = '';
 tp.SqlBrokerDef.prototype.fTitleKey = '';
 
 //#endregion
+
+
+//#region SqlBrokerQueryDefEditDialog
+/** Modal dialog box for editing a {@link tp.SqlBrokerQueryDef} descriptor
+ *  */
+tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
+    /**
+     * Constructor
+     * @param {tp.WindowArgs} Args The window args
+     */
+    constructor(Args) {
+        super(Args);
+    }
+
+    /**
+     * @type {tp.TabControl}
+     */
+    Pager = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabSql = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabFieldTitleList = null;
+
+
+    /**
+     * @type {tp.TextBox}
+     */
+    edtName = null;
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+        this.tpClass = 'tp.SqlBrokerQueryDefEditDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+
+        this.SqlQuery = this.Args.SqlQuery; 
+    }
+    /**
+     * Creates all controls of this window.
+     * */
+    CreateControls() {
+        super.CreateControls();
+
+        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
+
+        // , Height: "100%"
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
+
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage(_L('General'));
+        this.tabSql = this.Pager.AddPage('Sql');
+        this.tabFieldTitleList = this.Pager.AddPage(_L('FieldTitles'));
+       
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+        // controls
+        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
+
+        // item to controls
+        this.edtName.Text = this.SelectSql.Name;
+
+
+        // Sql Page
+        // ---------------------------------------------------------------------------------
+        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.SqlQuery.SqlText);
+
+
+        // FieldTitleList Page
+        // --------------------------------------------------------------------------------- 
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabFieldTitleList.AddComponent(LayoutRow);
+
+        // EDW: add a Memo to edit the FieldTitleKeys = [];
  
+ 
+
+
+    }
+    /** Can be used in passing the results back to the caller code. 
+     * On modal dialogs the code should examine the DialogResult to decide what to do.
+     * @override
+     * */
+    PassBackResult() {
+        if (this.DialogResult === tp.DialogResult.OK) {
+            this.SqlQuery.Name = this.edtName.Text;
+            this.SqlQuery.SqlText = this.elSqlEditor.__Editor.getValue();
+
+
+        }
+    }
+}
+
+
+/** The instance to be edited by this dialog box.
+ * @type {tp.SqlBrokerQueryDef}
+ * */
+tp.SqlBrokerQueryDefEditDialog.prototype.SqlQuery = null;
+//#endregion

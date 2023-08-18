@@ -1174,6 +1174,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.Row}
      */
     BrokerLayoutRow = null;
+
     /** The broker General tab page
      * @type {tp.TabPage}
      */
@@ -1182,14 +1183,28 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.TabPage}
      */
     tabSelectSqlList = null;
+    /**  
+     * @type {tp.TabPage}
+    */
+    tabQueryList = null;
+ 
+    /**
+     * @type {tp.DataTable}
+     */
+    tblSelectSqlList = null;  
+    /**
+     * @type {tp.DataTable}
+     */
+    tblQueryList = null;  
+
     /**
      * @type {tp.Grid}
      */
     gridSelectSqlList = null;
     /**
-     * @type {tp.DataTable}
+     * @type {tp.Grid}
      */
-    tblSelectSqlList = null;  
+    gridQueryList = null;
 
     /* private */
     /** 
@@ -1320,11 +1335,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
             this.tabSelectSqlList.AddComponent(LayoutRow);
 
-
             // add a DIV for the gridSelectSqlList tp.Grid in the row
             el = LayoutRow.AddDivElement();
             CP = {
-                Name: "gridSelectSqlList",
+                NameTag: "gridSelectSqlList",
                 Height: '100%',
 
                 ToolBarVisible: true,
@@ -1350,8 +1364,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
                 ]
             };
 
-            // create the columns grid
+            // create the grid
             this.gridSelectSqlList = new tp.Grid(el, CP);
+
+ 
 
             this.tblSelectSqlList = new tp.DataTable();
             this.tblSelectSqlList.AddColumn('Name').DefaultValue = '';
@@ -1363,8 +1379,58 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             this.gridSelectSqlList.DataSource = this.tblSelectSqlList;
             this.gridSelectSqlList.BestFitColumns();
 
-            this.gridSelectSqlList.On("ToolBarButtonClick", this.GridSelectSqlList_AnyButtonClick, this);
-            this.gridSelectSqlList.On(tp.Events.DoubleClick, this.GridSelectSqlList_DoubleClick, this);
+            this.gridSelectSqlList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
+            this.gridSelectSqlList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
+
+
+            // Queries Page
+            // ---------------------------------------------------------------------------------
+            this.tabQueryList = this.View.pagerEdit.AddPage(_L('QueryList'));
+            tp.Data(this.tabQueryList.Handle, 'Name', 'QueryList');
+
+            LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+            this.tabQueryList.AddComponent(LayoutRow);
+
+            // add a DIV for the gridQueryList tp.Grid in the row
+            el = LayoutRow.AddDivElement();
+            CP = {
+                NameTag: "gridQueryList",
+                Height: '100%',
+
+                ToolBarVisible: true,
+                GroupsVisible: false,
+                FilterVisible: false,
+                FooterVisible: false,
+                GroupFooterVisible: false,
+
+                ButtonInsertVisible: true,
+                ButtonEditVisible: true,
+                ButtonDeleteVisible: true,
+                ConfirmDelete: true,
+
+                ReadOnly: true,
+                AllowUserToAddRows: true,
+                AllowUserToDeleteRows: true,
+                AutoGenerateColumns: false,
+
+                Columns: [
+                    { Name: 'Name' }, 
+                ]
+            };
+
+            // create the grid
+            this.gridQueryList = new tp.Grid(el, CP);
+
+            this.tblQueryList = new tp.DataTable();
+            this.tblQueryList.AddColumn('Name').DefaultValue = ''; 
+
+            this.tblQueryList.AcceptChanges();
+
+            this.gridQueryList.DataSource = this.tblQueryList;
+            this.gridQueryList.BestFitColumns();
+
+            this.gridQueryList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
+            this.gridQueryList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
         }
     }
 
@@ -1400,8 +1466,8 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     CommitItemBefore(tblSysDataItem) {
         let Row = tblSysDataItem.Rows[0];
  
-        this.BrokerDef.Name.Name = Row.Get('DataName', '');
-        this.BrokerDef.Name.TitleKey = Row.Get('TitleKey', ''); 
+        this.BrokerDef.Name = Row.Get('DataName', '');
+        this.BrokerDef.TitleKey = Row.Get('TitleKey', ''); 
 
         let JsonText = tp.ToJson(this.BrokerDef, true);
  
@@ -1464,45 +1530,82 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     }
     /** Deletes a single row of the tblSelectSqlList 
      */
-    DeleteSelectSqlRow() {
+    async DeleteSelectSqlRow() {
         let Row = this.gridSelectSqlList.FocusedRow;
         if (tp.IsValid(Row)) {
-            tp.YesNoBox('Delete selected row?', (Dialog) => {
-                if (Dialog.DialogResult === tp.DialogResult.Yes) {
-                    let SS = Row.SelectSql;
-                    tp.ListRemove(this.BrokerDef.SelectSqlList, SS);
-                    this.tblBrokerDef.RemoveRow(Row);
-                }
-            });
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                let SS = Row.SelectSql;
+                tp.ListRemove(this.BrokerDef.SelectSqlList, SS);
+                this.tblBrokerDef.RemoveRow(Row);
+            } 
         }
     }
 
+    /** Called when inserting a single row of the tblQueryList and displays the edit dialog
+    */
+    async InsertQuerylRow() {
+        let SqlQuery = new tp.SqlBrokerQueryDef();
 
+        // EDW
+    }
+    /** Called when editing a single row of the tblQueryList and displays the edit dialog
+     */
+    async EditQuerylRow() {
+
+    }
+    /** Deletes a single row of the tblQueryList
+     */
+    async EditQueryRow() {
+
+    }
+    
     /* event handlers */
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */
-    GridSelectSqlList_AnyButtonClick(Args) {
+    AnyGridButtonClick(Args) {
         Args.Handled = true;
 
-        switch (Args.Command) {
-            case 'GridRowInsert':
-                this.InsertSelectSqlRow();
-                break;
-            case 'GridRowEdit':
-                this.EditSelectSqlRow();
-                break;
-            case 'GridRowDelete':
-                tp.InfoNote('Clicked: ' + Args.Command);
-                break;
+        let NameTag = Args.Sender.NameTag;
+
+        if (NameTag === 'gridSelectSqlList') {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertSelectSqlRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditSelectSqlRow();
+                    break;
+                case 'GridRowDelete':
+                    this.DeleteSelectSqlRow();
+                    break;
+            }
         }
+        else if (NameTag === 'gridQueryList') {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertQuerylRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditQueryRow();
+                    break;
+                case 'GridRowDelete':
+                    this.DeleteQueryRow();
+                    break;
+            }
+        }
+        
+        
+
     }
     /**
     Event handler
     @protected
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
-    GridSelectSqlList_DoubleClick(Args) {
+    AnyGridDoubleClick(Args) {
+        // TODO: As the above AnyGridButtonClick
         this.EditSelectSqlRow();
     }
 
@@ -1513,752 +1616,4 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 };
 //#endregion
 
-//#region tp.DeskSysDataView
 
-/** Represents a view. Displays a list of items of a certain DataType. */
-tp.DeskSysDataView = class extends tp.DeskView {
-    /**
-     * Constructs the page
-     * @param {HTMLElement} elPage The page element.
-     * @param {object} [Params=null] Optional. A javascript object with initialization parameters.
-     */
-    constructor(elPage, CreateParams = null) {
-        super(elPage, CreateParams);
-    }
-
-
-    /**
-    Gets or sets the data mode. One of the {@link tp.DataViewMode} constants.
-    @type {number}
-    */
-    get ViewMode() {
-        return this.fViewMode;
-    }
-    set ViewMode(v) {
-        if (this.fViewMode !== v) {
-            this.fLastViewMode = this.fViewMode;
-            this.fViewMode = v;
-            this.OnViewModeChanged();
-            this.EnableCommands();
-        }
-    }
-
-    /* overrides */
-    /**
-    Initializes the 'static' and 'read-only' class fields
-    @protected
-    @override
-    */
-    InitClass() {
-        super.InitClass();
-
-        this.tpClass = 'tp.DeskSysDataView';
-        this.fDefaultCssClasses = [tp.Classes.View, tp.Classes.DeskSysDataView];
-    }
-    /**
-    Initializes fields and properties just before applying the create params.      
-    @protected
-    @override
-    */
-    InitializeFields() {
-        super.InitializeFields();
-
-        this.fName = tp.NextName('DeskSysDataView');
-        this.fViewMode = tp.DataViewMode.None;
-        this.fLastViewMode = tp.DataViewMode.None;
-
-        this.PrimaryKeyField = 'Id';
-        this.ForceSelect = false;
-    }
-
-    /* overridables */
-    /** This is called after the base class initialization completes and creates just the tool-bar, the main panel-list and the List grid. <br />
-     * It also creates the broker. <br /> 
-     * NOTE: Controls of the edit part are created and bound the first time an insert or edit is requested.
-     * @protected
-     * @override
-    */
-    InitializeView() {
-        super.InitializeView();
-
-        this.DataType = this.CreateParams.DataType
-        switch (this.DataType) {
-            case 'Table':
-                this.Handler = new tp.SysDataHandlerTable(this);
-                break;
-            case 'Broker':
-                this.Handler = new tp.SysDataHandlerBroker(this);
-                break;
-            default:
-                tp.Throw(`SysData DataType not supported: ${this.DataType}`);
-                break;
-        }
-
-        this.CreateToolBar();
-        this.CreateTabControl();
-        this.CreateListGrid();
-
-        this.ListSelect();
-    }
-
-    /**
-    Sets the visible panel index in the panel list.
-    @protected
-    @param {number} PageIndex The panel index
-    */
-    SetVisiblePage(PageIndex) {
-        if (this.MainPager) {
-            this.MainPager.SelectedIndex = PageIndex;
-        }
-    }
-    /**
-     * Sets the visible panel of the main pager (a PanelList) by its 'PanelMode'.
-     * NOTE: Each panel of the main pager (a PanelList) may have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
-     * @param {string} PageName The panel mode to check for.
-     */
-    SetVisiblePageByName(PageName) {
-        let elPanel = this.FindPageByName(PageName);
-        let Index = -1;
-        if (elPanel) {
-            let Panels = this.GetTabPageElements();
-            Index = Panels.indexOf(elPanel);
-        }
-
-        if (Index >= 0) {
-            this.SetVisiblePage(Index);
-        }
-    }
-    /**
-     * Each panel of the main pager (a PanelList) MUST have a data-setup with a 'PanelMode' string property indicating the 'mode' of the panel.
-     * This function returns a panel found having a specified PanelMode, or null if not found.
-     * @param {string} PageName The panel mode to check for.
-     * @returns {HTMLElement} Returns a panel found having a specified PanelMode, or null if not found.
-     */
-    FindPageByName(PageName) {
-        if (tp.IsValid(this.MainPager)) {
-            let Panels = this.GetTabPageElements();
-
-            let i, ln, elPanel, Setup;
-
-            for (i = 0, ln = Panels.length; i < ln; i++) {
-                elPanel = Panels[i];
-                Setup = tp.GetDataSetupObject(elPanel);
-                if (tp.IsValid(Setup)) {
-                    if (PageName === Setup.Name) {
-                        return elPanel;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /** Returns a DOM Element contained by this view.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetToolBarElement() { return tp.Select(this.Handle, '.ToolBar'); }
-    /** Returns a DOM Element contained by this view. Returns the main panel-list which in turn contains the three part panels: Brower, Edit and Filters.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetTabControlElement() { return tp.Select(this.Handle, '.MainContainer'); }
-    /** Returns an array with the panels of the panel list
-     * @returns {HTMLElement[]}
-     * */
-    GetTabPageElements() {
-        if (tp.IsValid(this.MainPager)) {
-            let List = tp.ChildHTMLElements(this.GetTabControlElement());
-            if (List && List.length === 2) {
-                return tp.ChildHTMLElements(List[1])
-            }
-        }
-        return [];
-    }
-    /** Returns a DOM Element contained by this view. Returns the Filters panel, the container of the filter controls.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetFilterPageElement() { return this.FindPageByName('Filters'); }
-    /** Returns a DOM Element contained by this view. Returns the List (browser) Panel, the container of the List (browser) grid, which displays the results of the various SELECTs of the broker.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetListPageElement() { return this.FindPageByName('List'); }
-    /** Returns a DOM Element contained by this view. Returns the Edit Panel, which is the container for all edit controls bound to broker datasources.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetEditPageElement() { return this.FindPageByName('Edit'); }
-    /** Returns a DOM Element contained by this view. Returns the element upon to create the List (browser) grid.
-     * @returns {HTMLElement} Returns a DOM Element contained by this view.
-     *  */
-    GetListGridElement() { return tp.Select(this.GetListPageElement(), '.Grid'); }
-
-
-    /**
-    Returns the Id (value of the primary key field) of the selected data-row of the List (browser) grid, if any, else null.
-    @protected
-    @returns {any} Returns the Id (value of the primary key field) of the selected data-row of the browser grid, if any, else null.
-    */
-    GetListSelectedId() {
-
-        if (!tp.IsBlank(this.PrimaryKeyField) && !tp.IsEmpty(this.gridList)) {
-            var Row = this.gridList.FocusedRow;
-            if (!tp.IsEmpty(Row) && Row.Table.ContainsColumn(this.PrimaryKeyField)) {
-                return Row.Get(this.PrimaryKeyField);
-            }
-        }
-
-        return null;
-    }
-
-    /* overridables */
-    /** Creates the toolbar of the view 
- @protected
- */
-    CreateToolBar() {
-        if (tp.IsEmpty(this.ToolBar)) {
-            let el = this.GetToolBarElement();
-            this.ToolBar = new tp.ToolBar(el);
-            this.ToolBar.On('ButtonClick', this.AnyClick, this);
-        }
-
-
-    }
-    /** Creates the panel-list of the view, the one with the 3 panels: List, Edit and Filters panels.
-     @protected
-     */
-    CreateTabControl() {
-        if (tp.IsEmpty(this.MainPager)) {
-            let el = this.GetTabControlElement();
-            this.MainPager = new tp.TabControl(el);
-            this.MainPager.ShowTabBar(false);   // hide tab-bar 
-        }
-    }
-    /**
-    Creates the List (browser) grid. <br />
-    NOTE: For the List (browser) grid to be created automatically by this method, a div marked with the Grid class is required in the List panel.
-    @protected
-    */
-    CreateListGrid() {
-        if (tp.IsEmpty(this.gridList)) {
-            let el = this.GetListGridElement();
-            this.gridList = new tp.Grid(el);
-        }
-
-        if (tp.IsEmpty(this.gridList)) {
-            let o = tp.FindComponentByCssClass(tp.Classes.Grid, this.GetListPageElement());
-            this.gridList = o instanceof tp.Grid ? o : null;
-        }
-
-        if (this.gridList) {
-            this.gridList.ReadOnly = true;
-            this.gridList.AllowUserToAddRows = false;
-            this.gridList.AllowUserToDeleteRows = false;
-            this.gridList.ToolBarVisible = false;
-            this.gridList.GroupsVisible = false;
-            this.gridList.GroupFooterVisible = false;
-            this.gridList.AutoGenerateColumns = false;
-
-            this.gridList.AddColumn('Owner');
-            //this.gridList.AddColumn('DataType');
-            this.gridList.AddColumn('DataName');
-            this.gridList.AddColumn('TitleKey');
-
-            this.gridList.AddColumn('Tag1');
-            this.gridList.AddColumn('Tag2');
-            this.gridList.AddColumn('Tag3');
-            this.gridList.AddColumn('Tag4');
-
-            this.gridList.On(tp.Events.DoubleClick, this.ListGrid_DoubleClick, this);
-        }
-
-
-    }
-
-    /** Creates and binds the controls of the edit part, if not already created.
-    * */
-    CreateEditControls() {
-        if (!tp.IsValid(this.pagerEdit)) {
-            let el = this.GetEditPageElement();
-
-            let ControlList = tp.Ui.CreateContainerControls(el);
-            this.pagerEdit = ControlList.find(item => item instanceof tp.TabControl);
-
-            this.Handler.CreateEditControls();
-
-            if (this.pagerEdit.GetPageCount() === 1) {
-                this.pagerEdit.ShowTabBar(false);   // hide tab-bar if we have only a single page
-            }
-
-            this.pagerEdit.On('SelectedIndexChanged', this.pagerEdit_PageChanged, this);
-
-        }
-    }
-    /**
-    Displays the main local menu
-    @protected
-    */
-    DisplayHomeLocalMenu() {
-    }
-    // commands/modes
-    /**
-    Returns the bit-field (set) of the valid commands for this view. <br />
-    @protected
-    @returns {number} Returns the bit-field (set) of the valid commands for this view. <br />
-    */
-    GetValidCommands() {
-        let Result = tp.DataViewMode.None;
-
-        for (var PropName in tp.DataViewMode) {
-            if (tp.IsInteger(tp.DataViewMode[PropName])) {
-                Result |= tp.DataViewMode[PropName];
-            }
-        }
-
-        return Result;
-    }
-    /**
-    Validates standard commands, that is decides which is or not valid at the moment of the call.
-    @protected
-    */
-    ValidateCommands() {
-
-        let Navigation = tp.DataViewMode.First |
-            tp.DataViewMode.Prior |
-            tp.DataViewMode.Next |
-            tp.DataViewMode.Last;
-
-        this.ValidCommands = this.GetValidCommands();
-        this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, Navigation);
-
-        switch (this.ViewMode) {
-            case tp.DataViewMode.List:
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.List |
-                    tp.DataViewMode.Save |
-                    tp.DataViewMode.Cancel
-                );
-                break;
-            case tp.DataViewMode.Insert:
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.Insert |
-                    tp.DataViewMode.Edit |
-                    tp.DataViewMode.Delete
-                );
-                break;
-            case tp.DataViewMode.Edit:
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.Edit
-                );
-                break;
-            case tp.DataViewMode.Delete:
-                break;
-            case tp.DataViewMode.Cancel:
-                break;
-            case tp.DataViewMode.Save:
-                break;
-
-            case tp.DataViewMode.Filters:
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands,
-                    tp.DataViewMode.Filters |
-                    tp.DataViewMode.Insert |
-                    tp.DataViewMode.Edit |
-                    tp.DataViewMode.Delete |
-                    tp.DataViewMode.Save |
-                    tp.DataViewMode.Cancel
-                );
-                break;
-        }
-
-
-        if (this.dsList) {
-            if (!this.dsList.CanFirst())
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.First);
-            if (!this.dsList.CanPrior())
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Prior);
-            if (!this.dsList.CanNext())
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Next);
-            if (!this.dsList.CanLast())
-                this.ValidCommands = tp.Bf.Subtract(this.ValidCommands, tp.DataViewMode.Last);
-        }
-    }
-    /**
-    Enables/disables buttons and menu items.
-    @protected
-    */
-    EnableCommands() {
-        this.ValidateCommands();
-        if (tp.IsNumber(this.ValidCommands)) {
-            if (this.ToolBar) {
-
-                let ControlList = tp.GetAllComponents(this.ToolBar.Handle),
-                    c,          // tp.Component,
-                    Command,    // string
-                    ViewMode    // integer
-                    ;
-
-                for (let i = 0, ln = ControlList.length; i < ln; i++) {
-                    c = ControlList[i];
-                    if (tp.HasCommandProperty(c)) {
-                        Command = c.Command;
-
-                        if (!tp.IsBlank(Command) && Command in tp.DataViewMode) {
-                            ViewMode = tp.DataViewMode[Command];
-                            c.Enabled = tp.Bf.In(ViewMode, this.ValidCommands);
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-    /**
-    Executes a standard command by name
-    @param {number | string} Command - One of the {@link tp.DataViewMode} constants, either the name or the value.
-    */
-    ExecuteCommand(Command) {
-        let ViewMode = tp.DataViewMode.None;
-
-        if (tp.IsString(Command) && !tp.IsBlank(Command)) {
-            ViewMode = Command in tp.DataViewMode ? tp.DataViewMode[Command] : tp.DataViewMode.None;
-        }
-        else if (tp.IsInteger(Command)) {
-            ViewMode = Command;
-        }
-
-        switch (ViewMode) {
-            case tp.DataViewMode.None:
-                this.ExecuteCustomCommand(Command);
-                break;
-
-            case tp.DataViewMode.Home:
-                this.DisplayHomeLocalMenu();
-                break;
-
-            case tp.DataViewMode.List:
-                this.ListSelect();
-                break;
-            case tp.DataViewMode.Filters:
-                this.DisplayFilterPanel();
-                break;
-
-            case tp.DataViewMode.First:
-                if (this.dsList && this.dsList.CanFirst()) {
-                    this.dsList.First();
-                    this.Edit();
-                }
-                break;
-            case tp.DataViewMode.Prior:
-                if (this.dsList && this.dsList.CanPrior()) {
-                    this.dsList.Prior();
-                    this.Edit();
-                }
-                break;
-            case tp.DataViewMode.Next:
-                if (this.dsList && this.dsList.CanNext()) {
-                    this.dsList.Next();
-                    this.Edit();
-                }
-                break;
-            case tp.DataViewMode.Last:
-                if (this.dsList && this.dsList.CanLast()) {
-                    this.dsList.Last();
-                    this.Edit();
-                }
-                break;
-
-
-            case tp.DataViewMode.Edit:
-                this.Edit();
-                break;
-            case tp.DataViewMode.Insert:
-                this.Insert();
-                break;
-            case tp.DataViewMode.Delete:
-                this.Delete();
-                break;
-            case tp.DataViewMode.Save:
-                this.Commit();
-                break;
-            case tp.DataViewMode.Cancel:
-                if (this.ForceSelect !== true) {
-                    this.ViewMode = tp.DataViewMode.Cancel;
-                    this.ViewMode = tp.DataViewMode.List;
-                } else {
-                    this.ListSelect();
-                }
-                break;
-
-            case tp.DataViewMode.Close:
-                this.CloseView();
-                break;
-        }
-    }
-    /**
-    Executes a custom command by name specified by a command name.
-    @param {string} Command - A string denoting the custom command.
-    */
-    ExecuteCustomCommand(Command) {
-    }
- 
-    /** Returns true if can commit changes, else false.
-     * @returns {boolean} Returns true if can commit changes, else false.
-     * */
-    CanCommit() {
-        if (!this.Handler.CanCommitItem(this.tblSysDataItem))
-            return false;
-
-        let Row = this.tblSysDataItem.Rows[0];
-        let v = Row.Get('DataName', '');
-        if (!tp.IsValid(v) || tp.IsBlankString(v)) {
-            tp.ErrorNote('Cannot save changes.\nNo value in field: DataName');
-            return false;
-        }
-
-        return true;
-    }
-
-    async ListSelect() {
-        let Url = tp.Urls.SysDataSelectList;
-        let Data = {
-            DataType: this.DataType,
-            NoBlobs: true
-        }
-
-        let Args = await tp.Ajax.GetAsync(Url, Data);
-        this.tblList = new tp.DataTable();
-        this.tblList.Assign(Args.Packet);
-
-        this.dsList = new tp.DataSource(this.tblList);
-        this.gridList.DataSource = this.dsList;
-
-        this.ForceSelect = false;
-        this.ViewMode = tp.DataViewMode.List;
-    }
- 
-    async Insert() {
-        this.CreateEditControls();        
-
-        this.pagerEdit.SelectedIndex = 0;
-
-        this.Handler.InsertItemBefore();
-
-        let Item = new tp.SysDataItem();
-        this.tblSysDataItem = Item.ToDataTable();
-
-        this.tblSysDataItem.SetColumnListReadOnly(['DataType', 'Owner']);
-        let Row = this.tblSysDataItem.RowCount === 0 ? this.tblSysDataItem.AddEmptyRow() : this.tblSysDataItem.Rows[0];
-
-        Row.Set('DataType', this.DataType);
-        Row.Set('Owner', 'App');
-        Row.Set('Tag4', 'Custom');
-
-        this.DataSources.length = 0;
-        this.DataSources.push(new tp.DataSource(this.tblSysDataItem));
-
-        let DataControlList = this.GetDataControlList();
-        this.BindControls(DataControlList);
-
-        this.Handler.InsertItemAfter(this.tblSysDataItem);
-
-        this.ViewMode = tp.DataViewMode.Insert;
-    }
-    async Edit() {
-        this.CreateEditControls();
-
-        let Id = this.GetListSelectedId();
-
-        if (tp.IsEmpty(Id)) {
-            tp.ErrorNote('No selected row');
-        } else {
-            let Url = tp.Urls.SysDataSelectItemById;
-            let Data = {
-                Id: Id
-            }
-
-            this.Handler.EditItemBefore(Id);
-
-            let Args = await tp.Ajax.GetAsync(Url, Data);
-
-            log(Args.Packet);
-
-            let Item = new tp.SysDataItem(Args.Packet);
-            this.tblSysDataItem = Item.ToDataTable();
-
-            this.tblSysDataItem.SetColumnListReadOnly(['DataType', 'Owner']);
-
-            this.DataSources.length = 0;
-            this.DataSources.push(new tp.DataSource(this.tblSysDataItem));
-
-            let DataControlList = this.GetDataControlList();
-            this.BindControls(DataControlList);
-
-            this.Handler.EditItemAfter(Id, this.tblSysDataItem);
-
-            this.ViewMode = tp.DataViewMode.Edit;
-        }
-    }
-    async Delete() {
-
-    }
-    async Commit() {
-
-        // default values
-        let Row = this.tblSysDataItem.Rows[0];
-        let v = Row.Get('TitleKey', '');
-        if (!tp.IsValid(v) || tp.IsBlankString(v))
-            Row.Set('TitleKey', Row.Get('DataName', ''));
-
-        this.Handler.CommitItemBefore(this.tblSysDataItem);
-
-        // checks
-        if (!this.CanCommit())
-            return;        
-
-        let Item = new tp.SysDataItem();
-        Item.FromDataTable(this.tblSysDataItem);
-
-        let Url = tp.Urls.SysDataSaveItem;
- 
-        let Args = await tp.Ajax.PostModelAsync(Url, Item);
-
-        if (Args.ResponseData.IsSuccess === true) {
-            tp.SuccessNote('OK');
-        }
-
-        this.ForceSelect = true;
-        this.ViewMode = tp.DataViewMode.Edit;
-    }
-
-
-
-
-    /* data-binding */
-    /**
-    Finds and returns a {@link tp.DataSource} data-source by name, if any, else null. <br />
-    @protected
-    @param {string} SourceName The data-source by name
-    @returns {tp.DataSource} Returns a {@link tp.DataSource} data-source or null
-    */
-    GetDataSource(SourceName) {
-        return super.GetDataSource(SourceName);
-    }
-    /** Returns the list of data controls.
-     * @returns {tp.Control[]}  Returns the list of data controls.
-     * */
-    GetDataControlList() {
-        let ElementList = this.pagerEdit.GetPageElementList();
-        let Result = tp.GetAllDataControls(ElementList[0]);     // controls bound to SysData table are in the first page only
-        return Result;
-    }
-
-    /* Event triggers */
-    /**
-    Event trigger
-    */
-    OnViewModeChanged() {
-        switch (this.ViewMode) {
-            case tp.DataViewMode.List:
-            case tp.DataViewMode.Cancel:
-                this.SetVisiblePageByName('List');
-                break;
-
-            case tp.DataViewMode.Insert:
-            case tp.DataViewMode.Edit:
-                this.SetVisiblePageByName('Edit');
-                break;
-        }
-
-        this.Trigger('OnViewModeChanged', {});
-    }
-    /**
-    Event handler. If a Command exists in the clicked element then the Args.Command is assigned.
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    AnyClick(Args) {
-        if (Args.Handled !== true) {
-            var Command = tp.GetCommand(Args);
-            if (!tp.IsBlank(Command)) {
-                this.ExecuteCommand(Command);
-            }
-        }
-    }
-    /**
-    Event handler
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    ListGrid_DoubleClick(Args) {
-        this.ExecuteCommand(tp.DataViewMode.Edit);
-    }
-    /**
-    Event handler. Called when the Edit Pager changes Page.
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    pagerEdit_PageChanged(Args) {
-        if (this.Handler) {
-            this.Handler.EditPager_PageChanged(Args);
-        }
-    }
-};
-
-tp.DeskSysDataView.prototype.PrimaryKeyField = 'Id';
-/** The DataType, i.e. Table, Broker, Report, etc.
- * @type {string}
- */
-tp.DeskSysDataView.prototype.DataType = '';
-/** The tool-bar
- * @type {tp.ToolBar}
- */
-tp.DeskSysDataView.prototype.ToolBar = null;
-/** Field
- @protected
- @type {tp.TabControl}
- */
-tp.DeskSysDataView.prototype.MainPager = null;
-
-/** The List (browser) grid
- * @type {tp.Grid}
- */
-tp.DeskSysDataView.prototype.gridList = null;
-/** Field
- @protected
- @type {tp.DataSource}
- */
-tp.DeskSysDataView.prototype.dsList = null;
-/** The List (browser) table
- * @type {tp.DataTable}
- */
-tp.DeskSysDataView.prototype.tblList = null;
-/** The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
- * @type {tp.DataTable}
- */
-tp.DeskSysDataView.prototype.tblSysDataItem = null;
-/** Field. One of the  {@link tp.DataViewMode} constants
- @protected
- @type {number}
- */
-tp.DeskSysDataView.prototype.fViewMode = tp.DataViewMode.None;
-/** Field. One of the  {@link tp.DataViewMode} constants
- @protected
- @type {number}
- */
-tp.DeskSysDataView.prototype.fLastViewMode = tp.DataViewMode.None;
-/** Field
-@protected
-@type {boolean}
-*/
-tp.DeskSysDataView.prototype.ForceSelect = false;
-/** The {@link tp.TabControl} in the Edit part. That control is the container of the edit controls. Its first page contains the data-bound controls.
-@protected
-@type {tp.TabControl}
-*/
-tp.DeskSysDataView.prototype.pagerEdit = null;
-/** An object that handles a specific DataType, e.g. Table, Broker, Report, etc.
-@protected
-@type {tp.SysDataHandler}
-*/
-tp.DeskSysDataView.prototype.Handler = null;
-
-
-//#endregion

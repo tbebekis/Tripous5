@@ -11588,10 +11588,13 @@ tp.Object = class {
         let PropNamesList = tp.GetPropertyNames(this, (Prop) => { return this.CanSerialize(Prop); });
 
         PropNamesList.forEach((Prop) => {
-            if (tp.IsFunction(this[Prop].toJSON))
-                Result[Prop] = tp.Call(this[Prop].toJSON, this[Prop]);
-            else
-                Result[Prop] = this[Prop];
+            if (this[Prop]) {
+                if (tp.IsFunction(this[Prop].toJSON))
+                    Result[Prop] = tp.Call(this[Prop].toJSON, this[Prop]);
+                else
+                    Result[Prop] = this[Prop];
+            }
+
         });
  
         return Result;
@@ -13557,7 +13560,7 @@ tp.Component = class extends tp.Object {
 };
 
 // ------------------------------------------------------------
-/* treat them as read-only  class fields (static) */
+/* treat the following instance properties as read-only  class fields (static) */
 
 /* protected */
 /** The creation parameters.
@@ -13647,6 +13650,17 @@ tp.Component.prototype.elText = null;
  * @type {HTMLSpanElement}
  * */
 tp.Component.prototype.elRequiredMark = null;
+
+/** User defined value
+ * @type {string}
+ * */
+tp.Component.prototype.NameTag = '';
+
+/** User defined value
+ * @default null
+ * @type {any}
+ * */
+tp.Component.prototype.Tag = '';
 
 
 /** Node type names array, used internally */

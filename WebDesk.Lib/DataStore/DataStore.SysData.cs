@@ -61,6 +61,10 @@ namespace WebLib
             {
                 SysDataSaveItem_Table(Item);
             }
+            else
+            {
+                Sys.Throw($"SysDataItem Type not yet supported: {Item.DataType}");
+            }
         }
     }
 }
