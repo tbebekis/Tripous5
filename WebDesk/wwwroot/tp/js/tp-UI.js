@@ -8697,7 +8697,8 @@ tp.Memo = class extends tp.Control {
     @override
     */
     OnHandleCreated() {
-        super.OnHandleCreated();        
+        super.OnHandleCreated();   
+        this.SpellCheck = false;
         this.HookEvent(tp.Events.Change);
     }
     /**

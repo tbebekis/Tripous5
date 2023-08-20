@@ -40,36 +40,38 @@ namespace Tripous.Data
         /// </summary>
         public void CheckDescriptor()
         {
+            if (string.IsNullOrWhiteSpace(FieldPath))
+                Sys.Throw(Res.GS("E_SqlFilterDef_NoFieldPath", "SqlFilterDef must have a FieldPath"));
 
-            string Format = Res.GS("E_EmptyField", "Field \"{0}\" can not be null or empty");
-  
+            string FirstPart = Res.GS("E_SqlFilterDef_Invalid", "Invalid SqlFilterDef: \"{0}\"."); 
+            FirstPart = string.Format(FirstPart, FieldPath) + " ";
+
+            if (Bf.In(this.Mode, SqlFilterMode.EnumConst | SqlFilterMode.EnumQuery))
+                if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
+                    Sys.Throw(FirstPart + Res.GS("SqlFilterDef_InvalidDataType", "Invalid data type. Only string and integer is allowed."));
+
             if (Mode == SqlFilterMode.EnumConst)
             {
                 if (EnumOptionList == null || EnumOptionList.Count == 0)
-                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_ConstantOptionsList", "EnumConst Sql Filter. List of constants not defined."));
-
-                if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
-                    Sys.Throw("EnumConst Sql Filter. Invalid data type. Only string and integer is allowed.");
+                    Sys.Throw(FirstPart + Res.GS("SqlFilterDef_EnumConst_NoOptionsList", "Enum Constant: Option List not defined."));
             }
             else if (Mode == SqlFilterMode.EnumQuery)
             {
                 if (string.IsNullOrWhiteSpace(EnumResultField))
-                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_ResultFieldName", "EnumQuery Sql Filter. Result Field Name not defined."));
-
-                if (!Bf.In(this.DataType, DataFieldType.String | DataFieldType.Integer))
-                    Sys.Throw("EnumQuery Sql Filter. Invalid data type. Only string and integer is allowed.");
+                    Sys.Throw(FirstPart + Res.GS("SqlFilterDef_EnumQuery_NoResultField", "Enum Query. Result Field Name not defined."));
+ 
 
                 if (string.IsNullOrWhiteSpace(EnumSql))
-                    Sys.Throw(Format, Res.GS("SqlFilter_Enum_Sql", "EnumQuery Sql Filter. SELECT Sql is not defined."));
+                    Sys.Throw(FirstPart + Res.GS("SqlFilterDef_EnumQuery_NoSql", "Enum Query. SELECT Sql is not defined."));
 
-                Format = Res.GS("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
+                string Format = Res.GS("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
                 if (EnumDisplayLabels != null && EnumDisplayLabels.Length > 0)
                 {
                     string[] Lines = EnumDisplayLabels.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
                     for (int i = 0; i < Lines.Length; i++)
                         if (!Lines[i].Contains('='))
-                            Sys.Throw(Format, i + 1);
+                            Sys.Throw(FirstPart + Format, i + 1);
                 }
 
             }

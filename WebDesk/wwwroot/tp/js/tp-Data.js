@@ -1273,14 +1273,53 @@ tp.SqlFilterDef = class   {
         return Result;
     }
 
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code is the exact copy of the C#'s SqlFilterDef.CheckDescriptor() function
+     */
+    CheckDescriptor() {
+ 
+        if (tp.IsNullOrWhitespace(this.FieldPath))
+            tp.Throw(_L("E_SqlFilterDef_NoFieldPath", "SqlFilterDef must have a FieldPath"));
+
+        let FirstPart = _L("E_SqlFilterDef_Invalid", "Invalid SqlFilterDef: \"{0}\".");
+        FirstPart = tp.Format(FirstPart, FieldPath) + " ";
+
+        if (tp.Bf.In(this.Mode, tp.SqlFilterMode.EnumConst | tp.SqlFilterMode.EnumQuery)) 
+            if (!tp.Bf.In(this.DataType, tp.DataType.String | tp.DataType.Integer))
+                Sys.Throw(FirstPart + Res.GS("SqlFilterDef_InvalidDataType", "Invalid data type. Only string and integer is allowed."));
+
+        if (this.Mode === tp.SqlFilterMode.EnumConst) {
+            if (tp.IsEmpty(this.EnumOptionList) || this.EnumOptionList.length == 0)
+                tp.Throw(FirstPart + _L("SqlFilterDef_EnumConst_NoOptionsList", "Enum Constant: Option List not defined."));
+        }
+        else if (this.Mode == tp.SqlFilterMode.EnumQuery) {
+            if (tp.IsNullOrWhiteSpace(this.EnumResultField))
+                tp.Throw(FirstPart + _L("SqlFilterDef_EnumQuery_NoResultField", "Enum Query. Result Field Name not defined."));
+
+            if (tp.IsNullOrWhiteSpace(this.EnumSql))
+                tp.Throw(FirstPart + _L("SqlFilterDef_EnumQuery_NoSql", "Enum Query. SELECT Sql is not defined."));
+
+            let Format = _L("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
+            if (!tp.IsEmpty(this.EnumDisplayLabels) && this.EnumDisplayLabels.length > 0) {
+
+                let Lines = tp.Split(this.EnumDisplayLabels, '\n', RemoveEmptyLines);   
+
+                for (let i = 0; i < Lines.length; i++) {
+                    if (!tp.ContainsText(Lines[i], '='))
+                        tp.Throw(FirstPart + tp.Format(Format, i + 1));
+                }
+
+            }
+        }
+    }
 
     ValidateAggregateFunc() {
         this.AggregateFunc = tp.ValidAggregateFunctions.indexOf(this.AggregateFunc) === -1? '': this.AggregateFunc;
     }
  
     /** Loads this instance's properties from a specified {@link tp.DataRow}
- * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
- */
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
     FromDataRow(Row) {
         if (Row instanceof tp.DataRow) {
             this.FieldPath = Row.Get('FieldPath', this.FieldPath);
@@ -1830,6 +1869,16 @@ tp.SelectSql = class {
         Table.AcceptChanges();
 
         return Table;
+    }
+
+
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code is the exact copy of the C#'s SqlFilterDef.CheckDescriptor() function
+     */
+    CheckDescriptor() {
+
+        // EDW: complete tp.SelectSql.CheckDescriptor()
+
     }
 };
 

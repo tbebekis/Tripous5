@@ -1502,16 +1502,16 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     */
     async InsertSelectSqlRow() {
 
-        let SS = new tp.SelectSql();
+        let Instance = new tp.SelectSql();
 
-        let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
+        let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(Instance);
         if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
             let Row = this.tblSelectSqlList.AddEmptyRow();
-            Row.Set('Name', SS.Name);
-            Row.Set('ConnectionName', SS.ConnectionName);
-            Row.Set('CompanyAware', SS.CompanyAware);
-            Row.SelectSql = SS;
-            this.BrokerDef.SelectSqlList.push(SS);
+            Row.Set('Name', Instance.Name);
+            Row.Set('ConnectionName', Instance.ConnectionName);
+            Row.Set('CompanyAware', Instance.CompanyAware);
+            Row.OBJECT = Instance;
+            this.BrokerDef.SelectSqlList.push(Instance);
         }
     }
     /** Called when editing a single row of the tblSelectSqlList and displays the edit dialog
@@ -1519,12 +1519,12 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     async EditSelectSqlRow() {       
         let Row = this.gridSelectSqlList.FocusedRow;
         if (tp.IsValid(Row)) {
-            let SS = Row.SelectSql;
-            let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(SS);
+            let Instance = Row.OBJECT;
+            let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(Instance);
             if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                Row.Set('Name', SS.Name);
-                Row.Set('ConnectionName', SS.ConnectionName);
-                Row.Set('CompanyAware', SS.CompanyAware);
+                Row.Set('Name', Instance.Name);
+                Row.Set('ConnectionName', Instance.ConnectionName);
+                Row.Set('CompanyAware', Instance.CompanyAware);
             }
         } 
     }
@@ -1535,9 +1535,9 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         if (tp.IsValid(Row)) {
             let Flag = await tp.YesNoBoxAsync('Delete selected row?');
             if (Flag === true) {
-                let SS = Row.SelectSql;
-                tp.ListRemove(this.BrokerDef.SelectSqlList, SS);
-                this.tblBrokerDef.RemoveRow(Row);
+                let Instance = Row.OBJECT;
+                tp.ListRemove(this.BrokerDef.SelectSqlList, Instance);
+                this.tblSelectSqlList.RemoveRow(Row);
             } 
         }
     }
@@ -1545,19 +1545,40 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     /** Called when inserting a single row of the tblQueryList and displays the edit dialog
     */
     async InsertQuerylRow() {
-        let SqlQuery = new tp.SqlBrokerQueryDef();
+        let Instance = new tp.SqlBrokerQueryDef();
 
-        // EDW
+        let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblQueryList.AddEmptyRow();
+            Row.Set('Name', Instance.Name);
+            Row.OBJECT = Instance;
+            this.BrokerDef.Queries.push(Instance);
+        }
     }
     /** Called when editing a single row of the tblQueryList and displays the edit dialog
      */
-    async EditQuerylRow() {
-
+    async EditQueryRow() {
+        let Row = this.gridQueryList.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Instance = Row.OBJECT;
+            let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Row.Set('Name', Instance.Name); 
+            }
+        } 
     }
     /** Deletes a single row of the tblQueryList
      */
-    async EditQueryRow() {
-
+    async DeleteQueryRow() {
+        let Row = this.gridQueryList.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                let Instance = Row.OBJECT;
+                tp.ListRemove(this.BrokerDef.Queries, Instance);
+                this.tblQueryList.RemoveRow(Row);
+            }
+        }
     }
     
     /* event handlers */
@@ -1604,13 +1625,23 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     @protected
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
-    AnyGridDoubleClick(Args) {
-        // TODO: As the above AnyGridButtonClick
-        this.EditSelectSqlRow();
+    async AnyGridDoubleClick(Args) {
+
+        Args.Handled = true;
+
+        let NameTag = Args.Sender.NameTag;
+
+        if (NameTag === 'gridSelectSqlList') {
+            await this.EditSelectSqlRow();
+        }
+        else if (NameTag === 'gridQueryList') {
+            await this.EditQueryRow();
+        }
+ 
     }
 
     // EDW next
-    //      Queries
+    //      Queries: almost ready, just check it more
     //      Tables
 
 };

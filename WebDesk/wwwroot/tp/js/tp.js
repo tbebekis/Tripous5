@@ -1106,6 +1106,7 @@ tp.Format = function (s, ...values) {
 
     return s;
 };
+let _F = tp.Format;
 /** 
  * Formats a number into a string the C# way. <br /> 
  * It uses two types of formats: Standard and Custom. <br />
@@ -12695,7 +12696,7 @@ tp.Component = class extends tp.Object {
     /* self handling */
     /**
     Sets the parent of this instance.
-    @param {tp.Component|HTMLElement} Parent - The parent
+    @param {tp.Component|HTMLElement} Parent - The parent. If not specified then the instance is removed from DOM.
     */
     SetParent(Parent) {
         if (this.Handle) {
@@ -15495,7 +15496,10 @@ gap: 0.15em;
         return true;
     }
     /** Can be used in passing the results back to the caller code. 
-     * On modal dialogs the code should examine the DialogResult to decide what to do.
+     * NOTE: On modal dialogs the code should examine the DialogResult to decide what to do.
+     * Do NOT use this method to check for result validity and throwing exceptions
+     * because the DialogResult is already set and the closing will be incomplete.
+     * Use the CanSetDialogResult() instead.
      * */
     PassBackResult() { 
     }
@@ -16923,12 +16927,20 @@ tp.Language = class {
     /** Returns a localized string based on a specified resource key.
      * If the key is not found in the internal dictionary, then the key is returned.
      * @param {string} Key The key
+     * @param {string} Default A default result string value if key not exists
      * @returns {string} Returns a localized string based on a specified resource key
      */
-    Localize(Key) {
+    Localize(Key, Default) {
         let sKey = Key.toLowerCase();
         let Value = this.Items.Get(sKey);
-        return tp.IsString(Value) ? Value : Key;
+
+        if (tp.IsString(Value))
+            return Value;
+
+        if (tp.IsString(Default))
+            return Default;
+
+        return Key;
     }
  
     /**
@@ -17062,10 +17074,11 @@ tp.Languages = {
 /** Returns a localized string, on the current language, based on a specified resource key.
 * If the key is not found in the internal dictionary, then the key is returned.
 * @param {string} Key The key
+* @param {string} Default A default result string value if key not exists
 * @returns {string} Returns a localized string, on the current language, based on a specified resource key.
 */
-_L = function (Key) {
-    return tp.Languages.Current.Localize(Key);
+let _L = function (Key, Default) {
+    return tp.Languages.Current.Localize(Key, Default);
 }
 
 

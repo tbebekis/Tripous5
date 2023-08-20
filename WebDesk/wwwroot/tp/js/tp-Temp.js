@@ -42,6 +42,19 @@ tp.SqlBrokerQueryDef = class {
             });
         }
     }
+
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code is the exact copy of the C#'s SqlFilterDef.CheckDescriptor() function
+     */
+    CheckDescriptor() {
+
+        if (tp.IsNullOrWhitespace(this.Name))
+            tp.Throw(_L("E_SqlBrokerQueryDef_NoName", "QueryDef must have a Name"));
+
+        if (tp.IsNullOrWhitespace(this.SqlText))
+            tp.Throw(_L("E_SqlBrokerQueryDef_NoSql", "QueryDef must have an SQL statement"));
+ 
+    }
 };
 
 //#endregion
@@ -438,7 +451,7 @@ tp.SqlBrokerDef = class {
             });
         }
 
-        // EDW
+        // EDW: complete the tp.SqlBrokerDef.Assign()
 
     }
 
@@ -484,6 +497,15 @@ tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
      * @type {tp.TextBox}
      */
     edtName = null;
+    /** The element upon Ace Editor is created. 
+     * The '__Editor' property of the element points to Ace Editor object.
+     * @type {HTMLElement}
+     */
+    elSqlEditor = null;
+    /**
+     * @type {tp.Memo}
+     */
+    mmoFieldTitleList = null;
 
     /* overrides */
     InitClass() {
@@ -519,7 +541,13 @@ tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
 
         this.tabGeneral = this.Pager.AddPage(_L('General'));
         this.tabSql = this.Pager.AddPage('Sql');
-        this.tabFieldTitleList = this.Pager.AddPage(_L('FieldTitles'));
+        this.tabFieldTitleList = this.Pager.AddPage(_L('FieldTitles', 'Field Titles'));
+        this.tabFieldTitleList.ToolTip = _L('QueryFieldTitles_ToolTip', `
+A string list, where each string  has the format FIELD_NAME=TitleKey.
+Determines the visibility of the fields in the drop-down grids:
+if it is empty then all fields are visible
+else only the included fields are visible
+        `);
        
 
         setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
@@ -537,7 +565,7 @@ tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
         this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
 
         // item to controls
-        this.edtName.Text = this.SelectSql.Name;
+        this.edtName.Text = this.SqlQuery.Name;
 
 
         // Sql Page
@@ -549,25 +577,48 @@ tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
         // --------------------------------------------------------------------------------- 
         LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
         this.tabFieldTitleList.AddComponent(LayoutRow);
-
-        // EDW: add a Memo to edit the FieldTitleKeys = [];
  
- 
+        this.mmoFieldTitleList = new tp.Memo(null);
+        this.mmoFieldTitleList.SetParent(LayoutRow);
 
+        this.mmoFieldTitleList.CssText = `
+width: calc(100% - 6px);
+height: calc(100% - 6px);
+font-family: monospace;
+white-space: pre;
+overflow: auto;
+
+outline: none;
+resize: none;
+padding: 4px;
+`;
+
+// border: none;
+
+        if (tp.IsArray(this.SqlQuery.FieldTitleKeys)) 
+            this.mmoFieldTitleList.Text = this.SqlQuery.FieldTitleKeys.join('\n');
 
     }
-    /** Can be used in passing the results back to the caller code. 
-     * On modal dialogs the code should examine the DialogResult to decide what to do.
+
+    /** Called just before a modal window is about to set its DialogResult property. <br />
+     * Returning false cancels the setting of the property and the closing of the modal window. <br />
+     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
      * @override
-     * */
-    PassBackResult() {
-        if (this.DialogResult === tp.DialogResult.OK) {
+     * @param {any} DialogResult
+     */
+    CanSetDialogResult(DialogResult) {
+        if (DialogResult === tp.DialogResult.OK) {
             this.SqlQuery.Name = this.edtName.Text;
             this.SqlQuery.SqlText = this.elSqlEditor.__Editor.getValue();
+            this.SqlQuery.FieldTitleKeys = this.mmoFieldTitleList.GetLines(true);
 
-
+            this.SqlQuery.CheckDescriptor();
         }
+ 
+        return true;
     }
+
+ 
 }
 
 
@@ -575,4 +626,49 @@ tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
  * @type {tp.SqlBrokerQueryDef}
  * */
 tp.SqlBrokerQueryDefEditDialog.prototype.SqlQuery = null;
+
+
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerQueryDef} object
+@static
+@param {tp.SqlBrokerQueryDef} SqlQuery The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerQueryDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerQueryDefEditDialog.ShowModal = function (SqlQuery, WindowArgs = null) {
+
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'Query editor';
+
+    Args = new tp.WindowArgs(Args);
+    Args.AsModal = true;
+    Args.DefaultDialogResult = tp.DialogResult.Cancel;
+    Args.SqlQuery = SqlQuery;
+
+    let Result = new tp.SqlBrokerQueryDefEditDialog(Args);
+    Result.ShowModal();
+
+    return Result;
+};
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerQueryDef} object
+@static
+@param {tp.SqlBrokerQueryDef} SqlQuery The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerQueryDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerQueryDefEditDialog.ShowModalAsync = function (SqlQuery, WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
+        };
+
+        tp.SqlBrokerQueryDefEditDialog.ShowModal(SqlQuery, WindowArgs);
+    });
+};
+
 //#endregion

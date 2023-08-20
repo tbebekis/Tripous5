@@ -25,7 +25,13 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
     edtEnumResultField = null;
     chEnumIsMultiChoise = null;
     chEnumIncludeAll = null;
+    /**
+     * @type {tp.Memo}
+     */
     edtEnumOptionList = null;
+    /**
+     * @type {tp.Memo}
+     */
     edtEnumDisplayLabels = null;
 
     /* overrides */
@@ -130,14 +136,14 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
         // ---------------------------------------------------------------------------------
         this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabEnumSql.Handle, 'sql', this.FilterDef.EnumSql);
     }
-    /** Can be used in passing the results back to the caller code. 
-     * On modal dialogs the code should examine the DialogResult to decide what to do.
+    /** Called just before a modal window is about to set its DialogResult property. <br />
+     * Returning false cancels the setting of the property and the closing of the modal window. <br />
+     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
      * @override
-     * */
-    PassBackResult() {
-        if (this.DialogResult === tp.DialogResult.OK) {
-
-            // EDW: check if is valid before closing
+     * @param {any} DialogResult
+     */
+    CanSetDialogResult(DialogResult) {
+        if (DialogResult === tp.DialogResult.OK) {
 
             this.FilterDef.FieldPath = this.edtFieldPath.Text;
             this.FilterDef.TitleKey = this.edtTitleKey.Text;
@@ -156,8 +162,15 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
             this.FilterDef.EnumOptionList = this.edtEnumOptionList.GetLines(true);
 
             this.FilterDef.EnumDisplayLabels = this.edtEnumDisplayLabels.Text;
+
+            // check if is valid before closing
+            this.FilterDef.CheckDescriptor();
         }
+
+        return true;
     }
+
+
 };
 
 /**
@@ -500,12 +513,14 @@ tp.SelectSqlEditDialog = class extends tp.Window {
 
 
     }
-    /** Can be used in passing the results back to the caller code. 
-     * On modal dialogs the code should examine the DialogResult to decide what to do.
+    /** Called just before a modal window is about to set its DialogResult property. <br />
+     * Returning false cancels the setting of the property and the closing of the modal window. <br />
+     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
      * @override
-     * */
-    PassBackResult() {
-        if (this.DialogResult === tp.DialogResult.OK) {
+     * @param {any} DialogResult
+     */
+    CanSetDialogResult(DialogResult) {
+        if (DialogResult === tp.DialogResult.OK) {
             this.SelectSql.Name = this.edtName.Text;
             this.SelectSql.TitleKey = this.edtTitleKey.Text;
             this.SelectSql.ConnectionName = this.edtConnectionName.Text;
@@ -532,10 +547,14 @@ tp.SelectSqlEditDialog = class extends tp.Window {
                 Column.FormatString = Row.Get('FormatString', '');
                 Column.Aggregate = Row.Get('Aggregate', Column.Aggregate);
                 Column.AggregateFormat = Row.Get('AggregateFormat', '');
-
             });
+
+            this.SelectSql.CheckDescriptor();
         }
+
+        return true;
     }
+ 
 
 
 
