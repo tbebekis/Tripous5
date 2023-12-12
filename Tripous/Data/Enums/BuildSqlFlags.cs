@@ -32,11 +32,11 @@ namespace Tripous.Data
         /// </summary>
         IncludeBlobFields = 4,
         /// <summary>
-        /// When is set indicates that look up fields are included in the generated S with join clauses
+        /// When is set indicates that look up fields are included in the generated Sql with join clauses
         /// </summary>
         JoinLookUpFields = 8,
         /// <summary>
-        /// When is set indicates that look up DataTables must created too, along with S generation
+        /// When is set indicates that look up DataTables must created too, along with Sql generation
         /// </summary>
         CreateLookUpTables = 16
     }
