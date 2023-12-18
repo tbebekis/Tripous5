@@ -5405,7 +5405,8 @@ tp.ItemBar = class extends tp.Component {
     OnInitializationCompleted() {
         super.OnInitializationCompleted();
 
-        this.HookEvent(tp.Events.Click);
+        //this.HookEvent(tp.Events.Click);
+        this.HookEventGroups(tp.EventGroup.Click);  // click, dblclick and auxclick
 
         this.IsElementResizeListener = true;
         this.RenderMode = tp.ItemBarRenderMode.Normal;
@@ -5480,7 +5481,7 @@ tp.ItemBar = class extends tp.Component {
                     for (i = 0, ln = List.length; i < ln; i++) {
                         if (tp.ContainsElement(List[i], e.target)) {
                             this.SelectedIndex = i;
-                            this.OnItemClicked(List[i], e);
+                            this.OnItemClicked(List[i], e, tp.Mouse.LEFT);
                             break;
                         }
                     }
@@ -5494,7 +5495,7 @@ tp.ItemBar = class extends tp.Component {
                         this.ToggleClicked();
 
                         List = this.GetItemElementList();
-                        this.OnItemClicked(List[Index], e);
+                        this.OnItemClicked(List[Index], e, tp.Mouse.LEFT);
                     }
                 }
                 else if (tp.ContainsEventTarget(this.btnToLeft, e.target)) {
@@ -5505,8 +5506,30 @@ tp.ItemBar = class extends tp.Component {
                     if (this.CanHideNext())
                         this.HideNext();
                 }
-            }
+            }   
+        }
+        else if (tp.Events.AuxClick === Type) {
+            if (tp.ContainsElement(this.ItemContainer, e.target)) {
 
+                Index = -1;
+                List = this.GetItemElementList();
+
+                for (i = 0, ln = List.length; i < ln; i++) {
+                    if (tp.ContainsElement(List[i], e.target)) {
+                        Index = i;
+                        break;
+                    }
+                }
+
+                if (Index > -1) {
+                    if (tp.Mouse.IsMid(e)) {
+                        this.OnItemClicked(List[Index], e, tp.Mouse.MID)
+                    }
+                    else if (tp.Mouse.IsRight(e)) {
+                        this.OnItemClicked(List[Index], e, tp.Mouse.RIGHT);
+                    }
+                }
+            }                
         }
 
         super.OnAnyDOMEvent(e);
@@ -5931,7 +5954,7 @@ tp.ItemBar = class extends tp.Component {
      * @param {HTMLElement} Item The clicked item
      * @param {Event} e The Event
      */
-    OnItemClicked(Item, e) {
+    OnItemClicked(Item, e, MouseButton) {
         let List = this.GetItemElementList();
         let Index = List.indexOf(Item);
 
@@ -5939,6 +5962,7 @@ tp.ItemBar = class extends tp.Component {
         Args.Item = Item;
         Args.el = Args.Item;
         Args.ItemIndex = Index;
+        Args.MouseButton = MouseButton;
 
         this.Trigger('ItemClicked', Args);
     }

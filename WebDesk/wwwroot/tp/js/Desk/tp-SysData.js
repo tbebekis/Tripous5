@@ -1187,6 +1187,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.TabPage}
     */
     tabQueryList = null;
+    /**  
+     * @type {tp.TabPage}
+    */
+    tabTableList = null;
  
     /**
      * @type {tp.DataTable}
@@ -1196,6 +1200,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.DataTable}
      */
     tblQueryList = null;  
+    /**
+     * @type {tp.DataTable}
+     */
+    tblTableList = null;  
 
     /**
      * @type {tp.Grid}
@@ -1205,6 +1213,10 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
      * @type {tp.Grid}
      */
     gridQueryList = null;
+    /**
+     * @type {tp.Grid}
+     */
+    gridTableList = null;
 
     /* private */
     /** 
@@ -1221,8 +1233,8 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         
 
         // Edit
-        // if editing an already existing table definition
-        // then read the json from Data1 field and load the TableDef
+        // if editing an already existing broker definition
+        // then read the json from Data1 field and load the BrokerDef
         if (IsInsertItem === false) {
             let Text = tblSysDataItem.Rows[0].Get('Data1');
             let Source = eval("(" + Text + ")");
@@ -1367,8 +1379,6 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             // create the grid
             this.gridSelectSqlList = new tp.Grid(el, CP);
 
- 
-
             this.tblSelectSqlList = new tp.DataTable();
             this.tblSelectSqlList.AddColumn('Name').DefaultValue = '';
             this.tblSelectSqlList.AddColumn('ConnectionName').DefaultValue = tp.SysConfig.DefaultConnection;
@@ -1424,13 +1434,73 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             this.tblQueryList = new tp.DataTable();
             this.tblQueryList.AddColumn('Name').DefaultValue = ''; 
 
-            this.tblQueryList.AcceptChanges();
+            //this.tblQueryList.AcceptChanges();
 
             this.gridQueryList.DataSource = this.tblQueryList;
             this.gridQueryList.BestFitColumns();
 
             this.gridQueryList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
             this.gridQueryList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
+
+            // Queries Page
+            // ---------------------------------------------------------------------------------
+            this.tabTableList = this.View.pagerEdit.AddPage(_L('TableList'));
+            tp.Data(this.tabTableList.Handle, 'Name', 'TableList');
+
+            LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+            this.tabTableList.AddComponent(LayoutRow);
+
+            // add a DIV for the gridTableList tp.Grid in the row
+            el = LayoutRow.AddDivElement();
+            CP = {
+                NameTag: "gridTableList",
+                Height: '100%',
+
+                ToolBarVisible: true,
+                GroupsVisible: false,
+                FilterVisible: false,
+                FooterVisible: false,
+                GroupFooterVisible: false,
+
+                ButtonInsertVisible: true,
+                ButtonEditVisible: true,
+                ButtonDeleteVisible: true,
+                ConfirmDelete: true,
+
+                ReadOnly: true,
+                AllowUserToAddRows: true,
+                AllowUserToDeleteRows: true,
+                AutoGenerateColumns: false,
+
+                Columns: [
+                    { Name: 'Name' },
+                    { Name: 'Alias' },
+                    { Name: 'TitleKey' },
+                    { Name: 'PrimaryKeyField' },
+                    { Name: 'MasterTableName' },
+                    { Name: 'MasterKeyField' },
+                    { Name: 'DetailKeyField' }, 
+                ]
+            };
+
+            // create the grid
+            this.gridTableList = new tp.Grid(el, CP);
+
+            this.tblTableList = new tp.DataTable();
+            this.tblTableList.AddColumn('Name');
+            this.tblTableList.AddColumn('Alias');
+            this.tblTableList.AddColumn('TitleKey');
+            this.tblTableList.AddColumn('PrimaryKeyField'); //.DefaultValue = 'Id';
+            this.tblTableList.AddColumn('MasterTableName');
+            this.tblTableList.AddColumn('MasterKeyField');
+            this.tblTableList.AddColumn('DetailKeyField');
+ 
+            this.gridTableList.DataSource = this.tblTableList;
+            this.gridTableList.BestFitColumns();
+
+            this.gridTableList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
+            this.gridTableList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
+
         }
     }
 
@@ -1580,7 +1650,60 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             }
         }
     }
-    
+
+
+    /** Called when inserting a single row of the tblTableList and displays the edit dialog
+    */
+    async InsertTableRow() {
+ 
+        let Instance = new tp.SqlBrokerTableDef();
+
+        let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblTableList.AddEmptyRow();
+            Row.Set('Name', Instance.Name);
+            Row.Set('Alias', Instance.Alias);
+            Row.Set('TitleKey', Instance.TitleKey);
+            Row.Set('PrimaryKeyField', Instance.PrimaryKeyField);
+            Row.Set('MasterTableName', Instance.MasterTableName);
+            Row.Set('MasterKeyField', Instance.MasterKeyField);
+            Row.Set('DetailKeyField', Instance.DetailKeyField);
+            Row.OBJECT = Instance;
+            this.BrokerDef.Tables.push(Instance);
+        } 
+    }
+    /** Called when editing a single row of the tblTableList and displays the edit dialog
+     */
+    async EditTableRow() {
+        let Row = this.gridTableList.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Instance = Row.OBJECT;
+            let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Row.Set('Name', Instance.Name);
+                Row.Set('Alias', Instance.Alias);
+                Row.Set('TitleKey', Instance.TitleKey);
+                Row.Set('PrimaryKeyField', Instance.PrimaryKeyField);
+                Row.Set('MasterTableName', Instance.MasterTableName);
+                Row.Set('MasterKeyField', Instance.MasterKeyField);
+                Row.Set('DetailKeyField', Instance.DetailKeyField);
+            }
+        } 
+    }
+    /** Deletes a single row of the tblTableList
+     */
+    async DeleteTableRow() {
+        let Row = this.gridTableList.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                let Instance = Row.OBJECT;
+                tp.ListRemove(this.BrokerDef.Tables, Instance);
+                this.tblTableList.RemoveRow(Row);
+            }
+        } 
+    }
+
     /* event handlers */
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
@@ -1617,7 +1740,19 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             }
         }
         
-        
+        else if (NameTag === 'gridTableList') {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertTableRow(); 
+                    break;
+                case 'GridRowEdit':
+                    this.EditTableRow();
+                    break;
+                case 'GridRowDelete':
+                    this.DeleteTableRow();
+                    break;
+            }
+        }    
 
     }
     /**
@@ -1637,12 +1772,13 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         else if (NameTag === 'gridQueryList') {
             await this.EditQueryRow();
         }
- 
+        else if (NameTag === 'gridTableList') {
+            await this.EditTableRow();
+        }
     }
 
-    // EDW next
-    //      Queries: almost ready, just check it more
-    //      Tables
+   
+    
 
 };
 //#endregion

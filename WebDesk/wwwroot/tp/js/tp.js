@@ -5775,6 +5775,7 @@ tp.Events = (function () {
     return {
         Unknown: 'Unknown',
         Click: 'Click',
+        AuxClick: 'AuxClick',
         DoubleClick: 'DoubleClick',
         MouseDown: 'MouseDown',
         MouseUp: 'MouseUp',
@@ -5812,6 +5813,7 @@ tp.Events = (function () {
 /** An array that maps DOM event names to Tripous event names */
 tp.Events.Map = [
     { dom: 'click', tp: tp.Events.Click },
+    { dom: 'auxclick', tp: tp.Events.AuxClick },
     { dom: 'dblclick', tp: tp.Events.DoubleClick },
     { dom: 'mousedown', tp: tp.Events.MouseDown },
     { dom: 'mouseup', tp: tp.Events.MouseUp },
@@ -13049,6 +13051,7 @@ tp.Component = class extends tp.Object {
 
             if (tp.Bf.In(tp.EventGroup.Click, M)) {
                 this.HookEvent('click');
+                this.HookEvent('auxclick');
                 this.HookEvent('dblclick');
             }
             if (tp.Bf.In(tp.EventGroup.Mouse, M)) {

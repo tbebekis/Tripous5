@@ -463,6 +463,7 @@ tp.DeskViewPager = class extends tp.Component {
         this.PageListContainer.AddClass(tp.Classes.List);
  
         this.TabBar.On('SelectedIndexChanged', this.TabBar_SelectedIndexChanged, this);
+        this.TabBar.On('ItemClicked', this.TabBar_ItemClicked, this);
     }
  
     /** Creates and adds a view and a tab-item, based on a packet from the server.
@@ -565,7 +566,25 @@ tp.DeskViewPager = class extends tp.Component {
     TabBar_SelectedIndexChanged(Args) {
         this.ShowView(Args.CurrentIndex); 
     }
+    /** Event handler. 
+     * See: tp.ItemBar OnItemClicked() function
+     * @param {tp.EventArgs} Args
+     */
+    TabBar_ItemClicked(Args) {
+        let ViewList, View;
 
+        switch (Args.MouseButton) {
+            case tp.Mouse.LEFT:
+                // left mouse button is handled by the TabBar (tp.ItemBar)
+                break;
+            case tp.Mouse.MID:
+            case tp.Mouse.RIGHT:
+                ViewList = this.GetViewList();
+                View = ViewList[Args.ItemIndex];
+                View.TabItemClicked(Args);
+                break;
+        }
+    }
 };
 
 /**
@@ -597,6 +616,19 @@ tp.DeskView = class extends tp.View {
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
     }
+
+    /** Event handler.
+     * Occurs when middle or right mouse button is clicked on the tab of the view (the element with the view title on it)
+     * See: tp.ItemBar OnItemClicked() function
+     * @param {tp.EventArgs} Args
+     */
+    TabItemClicked(Args) {
+        if (tp.IsValid(this.TabItem) && Args.Item === this.TabItem.Handle) {
+            if (Args.MouseButton === tp.Mouse.MID) {
+                this.CloseView();
+            }
+        }
+    }
  
 };
 
@@ -613,6 +645,19 @@ tp.DeskDataView = class extends tp.BrokerView {
      */
     constructor(ElementOrSelector, CreateParams) {
         super(ElementOrSelector, CreateParams);
+    }
+
+    /** Event handler.
+     * Occurs when middle or right mouse button is clicked on the tab of the view (the element with the view title on it)
+     * See: tp.ItemBar OnItemClicked() function
+     * @param {tp.EventArgs} Args
+     */
+    TabItemClicked(Args) {
+        if (tp.IsValid(this.TabItem) && Args.Item === this.TabItem.Handle) {
+            if (Args.MouseButton === tp.Mouse.MID) {
+                this.CloseView();
+            }
+        }
     }
  
 };
