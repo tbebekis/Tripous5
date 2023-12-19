@@ -1442,7 +1442,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
             this.gridQueryList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
             this.gridQueryList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
 
-            // Queries Page
+            // Tables Page
             // ---------------------------------------------------------------------------------
             this.tabTableList = this.View.pagerEdit.AddPage(_L('TableList'));
             tp.Data(this.tabTableList.Handle, 'Name', 'TableList');

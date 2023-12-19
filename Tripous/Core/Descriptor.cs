@@ -61,7 +61,7 @@ namespace Tripous
 
         /* public */
         /// <summary>
-        /// Throws an exception if this item has no name defined
+        /// Throws an exception if this item is not fully defined
         /// </summary>
         public virtual void CheckDescriptor()
         {

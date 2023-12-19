@@ -110,14 +110,14 @@ namespace Tripous.Data
         /// <summary>
         /// Creates and returns an instance of a <see cref="CodeProvider"/> based on a specified descriptor.
         /// </summary>
-        static public CodeProvider Create(string DescriptorName, string TableName)
+        static public CodeProvider Create(string DescriptorName, string TableName, string CodeFieldName)
         {
-            return Create(Find(DescriptorName), TableName);
+            return Create(Find(DescriptorName), TableName, CodeFieldName);
         }
         /// <summary>
         /// Creates and returns an instance of a <see cref="CodeProvider"/> based on a specified descriptor.
         /// </summary>
-        static public CodeProvider Create(CodeProviderDef Descriptor, string TableName)
+        static public CodeProvider Create(CodeProviderDef Descriptor, string TableName, string CodeFieldName)
         {
             if (Descriptor == null)
                 Sys.Throw($"Cannot create a {nameof(CodeProvider)}. Descriptor is null.");
@@ -125,7 +125,22 @@ namespace Tripous.Data
             CodeProvider Result = TypeStore.Create(Descriptor.TypeClassName) as CodeProvider;
             Result.Descriptor = Descriptor;
             Result.TableName = TableName;
+            Result.CodeFieldName = CodeFieldName;
             return Result;
+        }
+
+        /* public */
+        /// <summary>
+        /// Throws an exception if this descriptor is not fully defined
+        /// </summary>
+        public virtual void CheckDescriptor()
+        {
+ 
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_CodeProviderDef_NameIsEmpty", "CodeProviderDef Name is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.Text))
+                Sys.Throw(Res.GS("E_CodeProviderDef_TextIsEmpty", "CodeProviderDef Text is empty. Must be something like XXX-XXX"));
         }
 
         /* properties */
@@ -137,15 +152,11 @@ namespace Tripous.Data
         /// The definition text.
         /// <para>See the <see cref="CodeProviderPartType"/> enum for more information. </para>
         /// </summary>
-        public string Text { get; set; }
-        /// <summary>
-        /// The field name of the field to put the produced Code.
-        /// </summary>
-        public string CodeFieldName { get; set; } = "Code";
+        public string Text { get; set; } 
         /// <summary>
         /// A character that used in separating the parts of the produced Code.
         /// </summary>
-        public char PartSeparator { get; set; } = '-';
+        public string PartSeparator { get; set; } = "-";
 
         /// <summary>
         /// Gets or sets the class name of the <see cref="System.Type"/> this descriptor describes.

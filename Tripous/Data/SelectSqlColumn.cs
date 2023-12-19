@@ -34,7 +34,15 @@ namespace Tripous.Data
             Width = 90;
         }
 
-        /* methods */
+        /* public */
+        /// <summary>
+        /// Throws an exception if this descriptor is not fully defined
+        /// </summary>
+        public virtual void CheckDescriptor()
+        {
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_SelectSqlColumn_NameIsEmpty", "SelectSqlColumn Name is empty"));
+        }
         /// <summary>
         /// Returns a format string. It uses the FormatString property first,
         /// and then the Decimals property.

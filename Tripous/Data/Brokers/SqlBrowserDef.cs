@@ -28,7 +28,16 @@ namespace Tripous.Data
         {
         }
 
+
         /* public */
+        /// <summary>
+        /// Throws an exception if this descriptor is not fully defined
+        /// </summary>
+        public virtual void CheckDescriptor()
+        {
+            // TODO: CheckDescriptor()
+        }
+
         /// <summary>
         /// Copies <see cref="SelectSql"/> statements using as source the <see cref="SqlBroker"/> specified by a name.
         /// </summary>

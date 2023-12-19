@@ -412,6 +412,8 @@ where
             Result.Add(BarItem);
             BarItem.AddUi(new Command() { Name = "Ui.SysData.Table", TitleKey = "Tables", IsSingleInstance = true, Id = "{5F61B877-031F-4FA4-954E-80BB27363E6D}" });
             BarItem.AddUi(new Command() { Name = "Ui.SysData.Broker", TitleKey = "Brokers", IsSingleInstance = true, Id = "{67014D07-BB5A-46F5-AF4E-222A6FE31F9C}" });
+            BarItem.AddUi(new Command() { Name = "Ui.SysData.Locator", TitleKey = "Locators", IsSingleInstance = true, Id = "{A6F876C1-32B9-46FD-A4BF-3CF16DD7376E}" });
+            BarItem.AddUi(new Command() { Name = "Ui.SysData.CodeProvider", TitleKey = "Code Providers", IsSingleInstance = true, Id = "{D0242FD5-5FF3-499D-BE12-00F326C00FEF}" });
 
             // Admin
             BarItem = new Command() { TitleKey = "Admin", Type = Tripous.RequestType.Ui, Id = "{AB6BCF40-D5D6-488F-8FBA-A366AE0EDAE0}" };

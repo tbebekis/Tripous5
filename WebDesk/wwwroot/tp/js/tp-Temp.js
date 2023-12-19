@@ -1,4 +1,58 @@
-﻿
+﻿// TODO: JS main TODO
+/*
+- create C# views for CodeProviders and Locators, see: GetDefaultSysDataViewInfo() in C#
+- sub-menu in System for CodeProviderDef list, see app.MainCommandExecutor in JS
+- sub-menu in System for LocatorDef list
+- CheckDescriptor() to all xxxxDef classes
+*/
+
+//#region CodeProviderDef
+
+/** Describes the production of a unique Code.
+ */
+tp.CodeProviderDef = class {
+
+    /** Constructor */
+    constructor() {
+    }
+
+    /** A unique name for this instance
+     * @type {string}
+     */
+    Name = '';
+    /** The definition text, e.g. XXX-XXX
+     * @type {string}
+     */
+    Text = '';
+    /** A character that used in separating the parts of the produced Code.
+     * @type {string}
+     */
+    PartSeparator = '-';
+    /** The C# class name of the type this descriptor describes.
+     * NOTE: The value of this property may be a string returned by the Type.AssemblyQualifiedName property of the type.
+     * Otherwise it must be a type name registered to the TypeStore either directly or just by using the TypeStoreItemAttribute attribute.
+     * In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination both, when registering and when retreiving a type.
+     * Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
+     * Most of the Tripous types are already registered to the TypeStore with just their TypeName.
+     * @type {string}
+     */
+    TypeClassName = 'CodeProvider';
+
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_CodeProviderDef_NameIsEmpty", "CodeProviderDef Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.Text))
+            tp.Throw(_L("E_CodeProviderDef_TextIsEmpty", "CodeProviderDef Text is empty. Must be something like XXX-XXX")); 
+    }
+
+};
+
+//#endregion
+
 //#region SqlBrokerQueryDef
 
 /** Describes a SELECT statement.
@@ -48,10 +102,10 @@ tp.SqlBrokerQueryDef = class {
      */
     CheckDescriptor() {
 
-        if (tp.IsNullOrWhitespace(this.Name))
+        if (tp.IsNullOrWhiteSpace(this.Name))
             tp.Throw(_L("E_SqlBrokerQueryDef_NoName", "QueryDef must have a Name"));
 
-        if (tp.IsNullOrWhitespace(this.SqlText))
+        if (tp.IsNullOrWhiteSpace(this.SqlText))
             tp.Throw(_L("E_SqlBrokerQueryDef_NoSql", "QueryDef must have an SQL statement"));
  
     }
@@ -475,6 +529,198 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         super(Args);
     }
 
+    /**
+     * @type {tp.TabControl}
+     */
+    Pager = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+ 
+    /**
+     * @type {tp.TextBox}
+     */
+    edtName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtAlias = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtTitleKey = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtPrimaryKeyField = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtMasterTableName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtMasterKeyField = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDetailKeyField = null;
+
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+        this.tpClass = 'tp.SqlBrokerTableDefEditDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+
+        this.TableDef = this.Args.TableDef;
+    }
+    /**
+     * Creates all controls of this window.
+     * */
+    CreateControls() {
+        super.CreateControls();
+
+        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
+
+        // , Height: "100%"
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
+
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage(_L('General'));
+ 
+
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+        // controls
+        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
+
+        this.edtAlias           = tp.CreateControlRow(tp.Div(elCol), false, 'Alias', { TypeName: 'TextBox' }).Control;
+        this.edtTitleKey        = tp.CreateControlRow(tp.Div(elCol), false, 'TitleKey', { TypeName: 'TextBox' }).Control;
+        this.edtPrimaryKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'PrimaryKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtMasterTableName = tp.CreateControlRow(tp.Div(elCol), false, 'MasterTableName', { TypeName: 'TextBox' }).Control;
+        this.edtMasterKeyField  = tp.CreateControlRow(tp.Div(elCol), false, 'MasterKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtDetailKeyField  = tp.CreateControlRow(tp.Div(elCol), false, 'DetailKeyField', { TypeName: 'TextBox' }).Control;
+
+        // item to controls
+        this.edtName.Text = this.TableDef.Name;
+        this.edtAlias.Text = this.TableDef.Alias;          
+        this.edtTitleKey.Text = this.TableDef.TitleKey;      
+        this.edtPrimaryKeyField.Text = this.TableDef.PrimaryKeyField;
+        this.edtMasterTableName.Text = this.TableDef.MasterTableName;
+        this.edtMasterKeyField.Text = this.TableDef.MasterKeyField; 
+        this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;  
+
+    }
+
+
+    /** Called just before a modal window is about to set its DialogResult property. <br />
+     * Returning false cancels the setting of the property and the closing of the modal window. <br />
+     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
+     * @override
+     * @param {any} DialogResult
+     */
+    CanSetDialogResult(DialogResult) {
+        if (DialogResult === tp.DialogResult.OK) { 
+            this.TableDef.Name = this.edtName.Text;
+            this.TableDef.Alias = this.edtAlias.Text;
+            this.TableDef.TitleKey = this.edtTitleKey.Text;
+            this.TableDef.PrimaryKeyField = this.edtPrimaryKeyField.Text;
+            this.TableDef.MasterTableName = this.edtMasterTableName.Text;
+            this.TableDef.MasterKeyField = this.edtMasterKeyField.Text;
+            this.TableDef.DetailKeyField = this.edtDetailKeyField.Text;  
+        }
+
+        return true;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
     // EDW SqlBrokerTableDef EditDialog
 }
+
+
+/** The instance to be edited by this dialog box.
+ * @type {tp.SqlBrokerTableDef}
+ * */
+tp.SqlBrokerTableDefEditDialog.prototype.TableDef = null;
+
+
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
+@static
+@param {tp.SqlBrokerTableDef} TableDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerTableDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerTableDefEditDialog.ShowModal = function (TableDef, WindowArgs = null) {
+
+    let Args = WindowArgs || {};
+    Args.Text = Args.Text || 'Table Definition editor';
+
+    Args = new tp.WindowArgs(Args);
+    Args.AsModal = true;
+    Args.DefaultDialogResult = tp.DialogResult.Cancel;
+    Args.TableDef = TableDef;
+
+    let Result = new tp.SqlBrokerTableDefEditDialog(Args);
+    Result.ShowModal();
+
+    return Result;
+};
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
+@static
+@param {tp.SqlBrokerTableDef} TableDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerTableDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerTableDefEditDialog.ShowModalAsync = function (TableDef, WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
+        };
+
+        tp.SqlBrokerTableDefEditDialog.ShowModal(TableDef, WindowArgs);
+    });
+};
+
+
+
 //#endregion

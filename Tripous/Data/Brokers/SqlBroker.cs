@@ -578,7 +578,7 @@ namespace Tripous.Data
                 CodeProvider CodeProvider;
                 foreach (var CodeField in CodeFields)
                 {
-                    CodeProvider = CodeProviderDef.Create(CodeField.CodeProviderName, Descriptor.MainTableName);
+                    CodeProvider = CodeProviderDef.Create(CodeField.CodeProviderName, Descriptor.MainTableName, CodeField.Name);
                     Result.fCodeProviders.Add(CodeProvider);
                 }
             }

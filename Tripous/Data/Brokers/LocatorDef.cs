@@ -96,8 +96,15 @@ namespace Tripous.Data
         {
             return !string.IsNullOrWhiteSpace(Name) ? Name : base.ToString();
         }
+        /// <summary>
+        /// Throws an exception if this descriptor is not fully defined
+        /// </summary>
+        public virtual void CheckDescriptor()
+        {
+            // TODO: CheckDescriptor()
+        }
 
- 
+
         /// <summary>
         /// Adds and returns a field descriptor. 
         /// </summary>

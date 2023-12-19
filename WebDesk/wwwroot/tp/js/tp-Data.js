@@ -730,6 +730,13 @@ tp.SelectSqlColumn = class {
         return Table;
     }
 
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SelectSqlColumn_NameIsEmpty", "SelectSqlColumn Name is empty"));
+    }
 };
 
 tp.SelectSqlColumn.prototype.fTitle = '';
@@ -1274,11 +1281,11 @@ tp.SqlFilterDef = class   {
     }
 
     /** Throws exception if this instance is not a valid one. 
-     *  The following code is the exact copy of the C#'s SqlFilterDef.CheckDescriptor() function
+     *  The following code must be the exact copy of the C# class CheckDescriptor() function
      */
     CheckDescriptor() {
  
-        if (tp.IsNullOrWhitespace(this.FieldPath))
+        if (tp.IsNullOrWhiteSpace(this.FieldPath))
             tp.Throw(_L("E_SqlFilterDef_NoFieldPath", "SqlFilterDef must have a FieldPath"));
 
         let FirstPart = _L("E_SqlFilterDef_Invalid", "Invalid SqlFilterDef: \"{0}\".");
@@ -1335,7 +1342,7 @@ tp.SqlFilterDef = class   {
             this.EnumResultField = Row.Get('EnumResultField', this.EnumResultField); 
             this.EnumIsMultiChoise = Row.Get('EnumIsMultiChoise', this.EnumIsMultiChoise);
             let S = Row.Get('EnumOptionList', '');
-            this.EnumOptionList = tp.IsNullOrWhitespace(S) ? '' : S.split(','); 
+            this.EnumOptionList = tp.IsNullOrWhiteSpace(S) ? '' : S.split(','); 
             this.EnumIncludeAll = Row.Get('EnumIncludeAll', this.EnumIncludeAll); 
             this.EnumDisplayLabels = Row.Get('EnumDisplayLabels', this.EnumDisplayLabels);         }
     }
@@ -1384,6 +1391,9 @@ tp.SqlFilterDef = class   {
 
         return Table;
     }
+
+ 
+
 };
 
 
@@ -1876,9 +1886,14 @@ tp.SelectSql = class {
      *  The following code is the exact copy of the C#'s SqlFilterDef.CheckDescriptor() function
      */
     CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name) || tp.IsNullOrWhiteSpace(this.Select) || tp.IsNullOrWhiteSpace(this.From))
+            tp.Throw(_L("E_SelectSql_NotFullyDefined", "SelectSql Name or SQL statement is empty"));
 
-        // EDW: complete tp.SelectSql.CheckDescriptor()
+        if (tp.IsValid(this.Columns))
+            this.Columns.forEach((item) => { item.CheckDescriptor() });
 
+        if (tp.IsValid(this.Filters))
+            this.Filters.forEach((item) => { item.CheckDescriptor() });
     }
 };
 

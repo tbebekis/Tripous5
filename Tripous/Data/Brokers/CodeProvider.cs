@@ -184,7 +184,7 @@ namespace Tripous.Data
                     Result = Store.NextIdByGenerator(Part.Text).ToString();
                     break;
                 case CodeProviderPartType.Pivot:
-                    SqlText = $"select max({Descriptor.CodeFieldName}) from {TableName}";
+                    SqlText = $"select max({this.CodeFieldName}) from {TableName}";
                     Result = Select(SqlText);
 
                     if (string.IsNullOrWhiteSpace(Result))
@@ -294,7 +294,7 @@ namespace Tripous.Data
         /// <summary>
         /// The field name of the field to put the produced Code.
         /// </summary>
-        public string CodeFieldName => Descriptor.CodeFieldName;
+        public string CodeFieldName { get; set; } = "Code"; // => Descriptor.CodeFieldName;
 
 
     }

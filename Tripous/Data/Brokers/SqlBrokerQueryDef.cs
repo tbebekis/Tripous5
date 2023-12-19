@@ -30,7 +30,14 @@ namespace Tripous.Data
         {
             return Name;
         }
- 
+        /// <summary>
+        /// Throws an exception if this descriptor is not fully defined
+        /// </summary>
+        public virtual void CheckDescriptor()
+        {
+            // TODO: CheckDescriptor()
+        }
+
         /// <summary>
         /// Clears the property values of this instance.
         /// </summary>

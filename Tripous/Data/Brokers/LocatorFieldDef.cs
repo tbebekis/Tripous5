@@ -47,7 +47,17 @@ namespace Tripous.Data
             
         }
 
+
         /* public */
+        /// <summary>
+        /// Throws an exception if this descriptor is not fully defined
+        /// </summary>
+        public virtual void CheckDescriptor()
+        {
+            // TODO: CheckDescriptor()
+        }
+
+
         /// <summary>
         /// Sets a property and returns this instance.
         /// </summary>

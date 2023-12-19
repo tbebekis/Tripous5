@@ -1347,7 +1347,7 @@ tp.IsBlank = function (v) {
 @param {string} v - A string value.
 @returns {boolean}  Returns true if the string is null, undefined or it just contains white space chars
 */
-tp.IsNullOrWhitespace = function (v) { return tp.IsBlank(v); };
+tp.IsNullOrWhiteSpace = function (v) { return tp.IsBlank(v); };
 /**
  * Returns true if a specified string is null, undefined or it just contains white space chars (space, tab, etc). <br />
  * No exception is thrown if the specified value is other than undefined, null or string.
@@ -8900,7 +8900,7 @@ tp.Names = (function () {
         */
         Next: function (Prefix = '') {
 
-            if (!tp.IsNullOrWhitespace(Prefix)) {
+            if (!tp.IsNullOrWhiteSpace(Prefix)) {
                 var ucPrefix = Prefix.toUpperCase();
                 if (!(ucPrefix in items)) {
                     items[ucPrefix] = 2000; // do not collide with Asp.Net Core auto Ids
