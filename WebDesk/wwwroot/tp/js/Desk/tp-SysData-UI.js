@@ -1040,6 +1040,9 @@ tp.DeskSysDataView = class extends tp.DeskView {
             case 'Broker':
                 this.Handler = new tp.SysDataHandlerBroker(this);
                 break;
+            case 'Locator':
+                this.Handler = new tp.SysDataHandlerLocator(this);
+                break;
             default:
                 tp.Throw(`SysData DataType not supported: ${this.DataType}`);
                 break;

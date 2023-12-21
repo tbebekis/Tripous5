@@ -44,6 +44,19 @@ namespace WebLib
 
             return Info;
         }
+
+        /*
+        How to Create New SysData view
+        ------------------------------------------
+        - DataStore.GetMainMenu() add the menu item
+        - DataStore.RegisterViews() register the view
+        - app.MainCommandExecutor add the view to the ValidCommands
+        - tp-SysData.js create SysDataHandler class to handle the view
+        - tp.DeskSysDataView.InitializeView() create a SysDataHandler instance to handle the view 
+
+         */
+
+
         AjaxViewInfo GetDefaultSysDataViewInfo(AjaxRequest Request, string DataType)
         {
             AjaxViewInfo Info = new AjaxViewInfo();

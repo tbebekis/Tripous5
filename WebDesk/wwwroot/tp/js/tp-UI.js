@@ -16448,6 +16448,9 @@ tp.LocatorDef = class {
 
         if (tp.IsNullOrWhiteSpace(this.ConnectionName))
             tp.Throw(_L("E_LocatorDef_ConnectionNameIsEmpty", "LocatorDef ConnectionName is empty"));
+
+        if (tp.IsValid(this.Fields) && this.Fields.length > 0)
+            this.Fields.forEach((item) => { item.CheckDescriptor(); });
     }
 
     /**
@@ -16466,6 +16469,37 @@ tp.LocatorDef = class {
     FindByDataField(DataField) {
         return this.Fields.find((item) => { return tp.IsSameText(DataField, item.DataField); });
     }
+
+    /** Loads this instance's fields from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load fields from.
+     */
+    FieldsFromDataTable(Table) {
+        this.Fields.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let FieldDef = new tp.LocatorFieldDef();
+                this.Fields.push(FieldDef);
+                FieldDef.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's fields to a {@link tp.DataTable} and returns the table.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    FieldsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.LocatorFieldDef.CreateDataTable();
+        }
+
+        this.Fields.forEach((FieldDef) => {
+            let Row = Table.AddEmptyRow();
+            FieldDef.ToDataRow(Row);
+        });
+
+        return Table;
+    }
+
 
 };
 //#endregion 
@@ -16566,6 +16600,68 @@ tp.LocatorFieldDef = class {
 
         if (tp.IsNullOrWhiteSpace(this.TableName))
             tp.Throw(_L("E_LocatorFieldDef_TableNameIsEmpty", "LocatorFieldDef TableName is empty"));
+    }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+
+            this.Name = Row.Get('Name', '');
+            this.TableName = Row.Get('TableName', '');
+            this.DataField = Row.Get('DataField', '');
+            this.DataType = Row.Get('DataType', tp.DataType.String);
+
+            this.TitleKey = Row.Get('TitleKey', '');
+ 
+            this.Visible = Row.Get('Visible', true);
+            this.Searchable = Row.Get('Searchable', true);
+            this.ListVisible = Row.Get('ListVisible', true);
+            this.IsIntegerBoolean = Row.Get('IsIntegerBoolean', false);       
+            
+            this.Width = Row.Get('Width', 70); 
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+ 
+        Row.Set('Name', this.Name);
+        Row.Set('TableName', this.TableName);
+        Row.Set('DataField', this.DataField);
+        Row.Set('DataType', this.DataType);
+
+        Row.Set('TitleKey', this.TitleKey);
+
+        Row.Set('Visible', this.Visible);
+        Row.Set('Searchable', this.Searchable);
+        Row.Set('ListVisible', this.ListVisible);
+        Row.Set('IsIntegerBoolean', this.IsIntegerBoolean);
+
+        Row.Set('Width', this.Width);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'Fields';
+ 
+        Table.AddColumn('Name', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('TableName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('DataField', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('DataType', tp.DataType.String, 40);
+
+        Table.AddColumn('TitleKey', tp.DataType.String, 96);
+
+        Table.AddColumn('Visible', tp.DataType.Boolean);
+        Table.AddColumn('Searchable', tp.DataType.Boolean);
+        Table.AddColumn('ListVisible', tp.DataType.Boolean);
+        Table.AddColumn('IsIntegerBoolean', tp.DataType.Boolean);
+
+        Table.AddColumn('Width', tp.DataType.Integer);
+        return Table;
     }
 };
 

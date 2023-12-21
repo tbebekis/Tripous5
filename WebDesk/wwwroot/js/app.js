@@ -3,7 +3,6 @@
 - create C# views for CodeProviders and Locators, see: GetDefaultSysDataViewInfo() in C#
 - sub-menu in System for CodeProviderDef list, see app.MainCommandExecutor in JS
 - sub-menu in System for LocatorDef list
-- CheckDescriptor() to all xxxxDef classes
 */
 
 var app = app || {};
@@ -12,7 +11,6 @@ app.Config = app.Config || {};
 app.Config.CurrencySymbol = '€';
 
 app.Resources = app.Resources || {}; 
-
 //#region app.Header
 /** Handles controls and operations of the header */
 app.Header = class extends tp.Component {
@@ -82,6 +80,8 @@ app.MainCommandExecutor = class extends tp.DeskCommandExecutor {
         this.ValidCommands = [
             'Ui.SysData.Table',
             'Ui.SysData.Broker',
+            'Ui.SysData.Locator',
+            'Ui.SysData.CodeProvider',
             'Ui.Data.Trader',
             
         ];

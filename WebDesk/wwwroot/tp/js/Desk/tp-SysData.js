@@ -389,8 +389,6 @@ tp.DataFieldDef = class extends tp.Object {
         this.fTitleKey = v;
     }
  
-
-
     /** When true denotes a field upon which a unique constraint is applied
      * @type {boolean}
      */
@@ -447,7 +445,6 @@ tp.DataFieldDef = class extends tp.Object {
         if (Row instanceof tp.DataRow) {
             this.Id = Row.Get('Id', '');
             this.Name = Row.Get('Name', '');
-            this.Title = Row.Get('Title', '');
             this.TitleKey = Row.Get('TitleKey', '');
             this.IsPrimaryKey = Row.Get('IsPrimaryKey', false);
             this.DataType = Row.Get('DataType', tp.DataType.String);
@@ -466,7 +463,6 @@ tp.DataFieldDef = class extends tp.Object {
     ToDataRow(Row) {
         Row.Set('Id', this.Id);
         Row.Set('Name', this.Name);
-        Row.Set('Title', this.Title);
         Row.Set('TitleKey', this.TitleKey);
         Row.Set('IsPrimaryKey', this.IsPrimaryKey);
         Row.Set('DataType', this.DataType);
@@ -859,7 +855,8 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
     }
 
     /* private */
-    /** Creates and assigns the tblFields. Sets tblFields a grid's data-source.
+    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
+     * Creates and assigns the tblFields. Sets tblFields a grid's data-source.
      * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      * */
@@ -1219,7 +1216,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
     gridTableList = null;
 
     /* private */
-    /** 
+    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
      * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      * */
@@ -1784,3 +1781,146 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 //#endregion
 
 
+
+//#region tp.SysDataHandlerLocator
+tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
+    /** Constructor
+     * @param {tp.View} View The view that calls and owns this handler
+     */
+    constructor(View) {
+        super(View, 'Locator')
+    }
+
+    /** A {@link tp.DataTable} for handling the fields of a table def.
+     @type {tp.DataTable}
+     */
+    tblFields = null;
+    /** A {@link tp.Grid} for handling the fields of a table def.
+     @type {tp.Grid}
+     */
+    gridFields = null;
+
+
+    /* overrides */
+    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
+     * @override
+    * */
+    CreateEditControls() {
+        if (this.View.pagerEdit.GetPageCount() === 1) {
+
+            // add a tp.TabPage to View's pagerEdit
+            let FieldsPage = this.View.pagerEdit.AddPage('Fields');
+            tp.Data(FieldsPage.Handle, 'Name', 'Fields');
+
+            // add a tp.Row to the tab page
+            let Row = new tp.Row(null, { Height: '100%' });
+            FieldsPage.AddComponent(Row);
+
+            // add a DIV for the gridFields tp.Grid in the row
+            let el = Row.AddDivElement();
+            let CP = {
+                Name: "gridFields",
+                Height: '100%',
+
+                ToolBarVisible: true,
+                GroupsVisible: false,
+                FilterVisible: false,
+                FooterVisible: false,
+                GroupFooterVisible: false,
+
+                ButtonInsertVisible: true,
+                ButtonEditVisible: true,
+                ButtonDeleteVisible: true,
+                ConfirmDelete: true,
+
+                AllowUserToAddRows: true,
+                AllowUserToDeleteRows: true,
+                AutoGenerateColumns: false,
+
+                Columns: [
+                    { Name: 'Name' },
+                    { Name: 'TableName' },
+                    { Name: 'DataField' },
+                    { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
+
+                    { Name: 'TitleKey' },
+
+                    { Name: 'Visible' },
+                    { Name: 'Searchable' },
+                    { Name: 'ListVisible' },
+                    { Name: 'IsIntegerBoolean' },
+
+                    { Name: 'Width' },
+                ] 
+            };
+
+            // create the grid
+            this.gridFields = new tp.Grid(el, CP);
+            this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
+            this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
+        }
+
+    }
+
+
+    /* private */
+    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
+     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * */
+    SetupItem(IsInsertItem, tblSysDataItem) {
+
+        // create an empty Def instance
+        let Def = new tp.LocatorDef();
+
+        // if editing an already existing definition
+        // then read the json from Data1 field and load the Def instance
+        if (IsInsertItem === false) {
+            let Text = tblSysDataItem.Rows[0].Get('Data1');
+            let Source = eval("(" + Text + ")");
+            log(Source);
+            Def.Assign(Source);
+        }
+
+        // create the tblFields
+        this.tblFields = Def.FieldsToDataTable();
+        this.tblFields.AcceptChanges();
+
+        this.gridFields.DataSource = this.tblFields;
+        this.gridFields.BestFitColumns();
+    }
+
+
+    /* event handlers */
+    /** Event handler
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    GridFields_AnyButtonClick(Args) {
+        Args.Handled = true;
+
+        switch (Args.Command) {
+            case 'GridRowInsert':
+                this.InsertFieldRow();
+                break;
+            case 'GridRowEdit':
+                this.EditFieldRow();
+                break;
+            case 'GridRowDelete':
+                tp.InfoNote('Clicked: ' + Args.Command);
+                break;
+        }
+    }
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    GridFields_DoubleClick(Args) {
+        Args.Handled = true;
+        this.EditFieldRow();
+    }
+
+    // EDW - tp.SysDataHandlerLocator
+};
+
+//#endregion

@@ -99,6 +99,9 @@ namespace WebLib
         {
             CreateSysDataViewDef("Table", "Tables");
             CreateSysDataViewDef("Broker", "Brokers");
+            CreateSysDataViewDef("Locator", "Locators");
+            CreateSysDataViewDef("CodeProvider", "CodeProviders");
+ 
         }
     }
 }

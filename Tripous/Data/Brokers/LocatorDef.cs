@@ -106,6 +106,9 @@ namespace Tripous.Data
 
             if (string.IsNullOrWhiteSpace(this.ConnectionName))
                 Sys.Throw(Res.GS("E_LocatorDef_ConnectionNameIsEmpty", "LocatorDef ConnectionName is empty"));
+
+            if (this.Fields != null && this.Fields.Count > 0)
+                this.Fields.ForEach((item) => { item.CheckDescriptor(); });
         }
 
 
