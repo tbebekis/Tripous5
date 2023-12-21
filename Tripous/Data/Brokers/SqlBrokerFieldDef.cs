@@ -41,7 +41,14 @@ namespace Tripous.Data
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            // TODO: CheckDescriptor()
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_SqlBrokerFieldDef_NameIsEmpty", "SqlBrokerFieldDef Name is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.Alias))
+                Sys.Throw(Res.GS("E_SqlBrokerFieldDef_TextIsEmpty", "SqlBrokerFieldDef Alias  is empty. "));
+
+            if (this.DataType == DataFieldType.Unknown)
+                Sys.Throw(Res.GS("E_SqlBrokerFieldDef_DataTypeIsEmpty", "SqlBrokerFieldDef DataType is Unknown. "));
         }
 
 

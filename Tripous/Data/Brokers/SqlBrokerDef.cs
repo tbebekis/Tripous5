@@ -177,7 +177,19 @@ namespace Tripous.Data
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            // TODO: CheckDescriptor()
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_SqlBrokerDef_NameIsEmpty", "SqlBrokerDef Name is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.ConnectionName))
+                Sys.Throw(Res.GS("E_SqlBrokerDef_ConnectionNameIsEmpty", "SqlBrokerDef ConnectionName is empty"));
+
+            if (this.Tables == null || this.Tables.Count == 0)
+                Sys.Throw(Res.GS("E_SqlBrokerDef_TablesIsEmpty", "SqlBrokerDef Tables is empty"));
+
+            this.Tables.ForEach((item) => { item.CheckDescriptor(); });
+
+            if (this.Queries != null && this.Queries.Count > 0)
+                this.Queries.ForEach((item) => { item.CheckDescriptor(); });
         }
 
 

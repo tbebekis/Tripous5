@@ -1,4 +1,12 @@
-﻿var app = app || {};
+﻿// TODO: JS main TODO
+/*
+- create C# views for CodeProviders and Locators, see: GetDefaultSysDataViewInfo() in C#
+- sub-menu in System for CodeProviderDef list, see app.MainCommandExecutor in JS
+- sub-menu in System for LocatorDef list
+- CheckDescriptor() to all xxxxDef classes
+*/
+
+var app = app || {};
 
 app.Config = app.Config || {};
 app.Config.CurrencySymbol = '€';

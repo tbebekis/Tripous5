@@ -1293,7 +1293,7 @@ tp.SqlFilterDef = class   {
 
         if (tp.Bf.In(this.Mode, tp.SqlFilterMode.EnumConst | tp.SqlFilterMode.EnumQuery)) 
             if (!tp.Bf.In(this.DataType, tp.DataType.String | tp.DataType.Integer))
-                Sys.Throw(FirstPart + Res.GS("SqlFilterDef_InvalidDataType", "Invalid data type. Only string and integer is allowed."));
+                tp.Throw(FirstPart + _L("SqlFilterDef_InvalidDataType", "Invalid data type. Only string and integer is allowed."));
 
         if (this.Mode === tp.SqlFilterMode.EnumConst) {
             if (tp.IsEmpty(this.EnumOptionList) || this.EnumOptionList.length == 0)

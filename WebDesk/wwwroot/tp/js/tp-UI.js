@@ -16439,6 +16439,16 @@ tp.LocatorDef = class {
         }
 
     }
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_LocatorDef_NameIsEmpty", "LocatorDef Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.ConnectionName))
+            tp.Throw(_L("E_LocatorDef_ConnectionNameIsEmpty", "LocatorDef ConnectionName is empty"));
+    }
 
     /**
     Finds a {@link tp.LocatorFieldDef}  field descriptor by list field name and returns the field or null if not found
@@ -16546,6 +16556,16 @@ tp.LocatorFieldDef = class {
                 }
             }
         }
+    }
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_LocatorFieldDef_NameIsEmpty", "LocatorFieldDef Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.TableName))
+            tp.Throw(_L("E_LocatorFieldDef_TableNameIsEmpty", "LocatorFieldDef TableName is empty"));
     }
 };
 

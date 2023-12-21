@@ -134,8 +134,7 @@ namespace Tripous.Data
         /// Throws an exception if this descriptor is not fully defined
         /// </summary>
         public virtual void CheckDescriptor()
-        {
- 
+        { 
             if (string.IsNullOrWhiteSpace(this.Name))
                 Sys.Throw(Res.GS("E_CodeProviderDef_NameIsEmpty", "CodeProviderDef Name is empty"));
 

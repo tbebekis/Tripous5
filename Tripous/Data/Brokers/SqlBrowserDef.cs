@@ -35,7 +35,20 @@ namespace Tripous.Data
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            // TODO: CheckDescriptor()
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_SqlBrowserDef_NameIsEmpty", "SqlBrowserDef Name is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.ConnectionName))
+                Sys.Throw(Res.GS("E_SqlBrowserDef_ConnectionNameIsEmpty", "SqlBrowserDef ConnectionName is empty."));
+
+            if (string.IsNullOrWhiteSpace(this.PrimaryKeyField))
+                Sys.Throw(Res.GS("E_SqlBrowserDef_PrimaryKeyFieldIsEmpty", "SqlBrowserDef PrimaryKeyField is empty."));
+
+            if (string.IsNullOrWhiteSpace(this.TypeClassName))
+                Sys.Throw(Res.GS("E_SqlBrowserDef_TypeClassNameIsEmpty", "SqlBrowserDef TypeClassName is empty."));
+
+            if (this.SelectList == null || this.SelectList.Count == 0)
+                Sys.Throw(Res.GS("E_SqlBrowserDef_SelectListIsEmpty", "SqlBrowserDef SelectList is empty."));
         }
 
         /// <summary>

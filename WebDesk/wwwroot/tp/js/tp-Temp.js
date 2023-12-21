@@ -1,10 +1,4 @@
-﻿// TODO: JS main TODO
-/*
-- create C# views for CodeProviders and Locators, see: GetDefaultSysDataViewInfo() in C#
-- sub-menu in System for CodeProviderDef list, see app.MainCommandExecutor in JS
-- sub-menu in System for LocatorDef list
-- CheckDescriptor() to all xxxxDef classes
-*/
+﻿
 
 //#region CodeProviderDef
 
@@ -98,15 +92,15 @@ tp.SqlBrokerQueryDef = class {
     }
 
     /** Throws exception if this instance is not a valid one. 
-     *  The following code is the exact copy of the C#'s SqlFilterDef.CheckDescriptor() function
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
     CheckDescriptor() {
 
         if (tp.IsNullOrWhiteSpace(this.Name))
-            tp.Throw(_L("E_SqlBrokerQueryDef_NoName", "QueryDef must have a Name"));
+            tp.Throw(_L("E_SqlBrokerQueryDef_NoName", "SqlBrokerQueryDef must have a Name"));
 
         if (tp.IsNullOrWhiteSpace(this.SqlText))
-            tp.Throw(_L("E_SqlBrokerQueryDef_NoSql", "QueryDef must have an SQL statement"));
+            tp.Throw(_L("E_SqlBrokerQueryDef_NoSql", "SqlBrokerQueryDef must have an SQL statement"));
  
     }
 };
@@ -247,7 +241,19 @@ tp.SqlBrokerFieldDef = class {
         this.LocatorName = Source.LocatorName || '';
  
     }
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerFieldDef_NameIsEmpty", "SqlBrokerFieldDef Name is empty"));
 
+        if (tp.IsNullOrWhiteSpace(this.Alias))
+            tp.Throw(_L("E_SqlBrokerFieldDef_TextIsEmpty", "SqlBrokerFieldDef Alias  is empty. "));
+
+        if (this.DataType === tp.DataType.Unknown)
+            tp.Throw(_L("E_SqlBrokerFieldDef_DataTypeIsEmpty", "SqlBrokerFieldDef DataType is Unknown. "));
+    }
 };
  
 tp.SqlBrokerFieldDef.prototype.fTitle = '';
@@ -377,6 +383,23 @@ tp.SqlBrokerTableDef = class {
             });
         }
     }
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerTableDef_NameIsEmpty", "SqlBrokerTableDef Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.Alias))
+            tp.Throw(_L("E_SqlBrokerTableDef_AliasIsEmpty", "SqlBrokerTableDef Alias is empty."));
+
+        if (tp.IsNullOrWhiteSpace(this.PrimaryKeyField))
+            tp.Throw(_L("E_SqlBrokerTableDef_PrimaryKeyFieldIsEmpty", "SqlBrokerTableDef PrimaryKeyField is empty."));
+
+        if (!tp.IsValid(this.Fields) || this.Fields.length === 0)
+            tp.Throw(_L("E_SqlBrokerTableDef_NoFieldsDefined", "SqlBrokerTableDef Fields not defined."));
+    }
+
 };
 
 tp.SqlBrokerTableDef.prototype.fTitle = '';
@@ -508,7 +531,24 @@ tp.SqlBrokerDef = class {
         // EDW: complete the tp.SqlBrokerDef.Assign()
 
     }
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerDef_NameIsEmpty", "SqlBrokerDef Name is empty"));
 
+        if (tp.IsNullOrWhiteSpace(this.ConnectionName))
+            tp.Throw(_L("E_SqlBrokerDef_ConnectionNameIsEmpty", "SqlBrokerDef ConnectionName is empty"));
+
+        if (!tp.IsValid(this.Tables) || this.Tables.length === 0)
+            tp.Throw(_L("E_SqlBrokerDef_TablesIsEmpty", "SqlBrokerDef Tables is empty"));
+
+        this.Tables.forEach((item) => { item.CheckDescriptor(); });
+
+        if (tp.IsValid(this.Queries) && this.Queries.length > 0)
+            this.Queries.forEach((item) => { item.CheckDescriptor(); });
+    }
 };
 
 tp.SqlBrokerDef.prototype.fTitle = '';

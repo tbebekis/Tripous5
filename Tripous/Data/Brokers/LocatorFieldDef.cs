@@ -54,7 +54,11 @@ namespace Tripous.Data
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            // TODO: CheckDescriptor()
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_LocatorFieldDef_NameIsEmpty", "LocatorFieldDef Name is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.TableName))
+                Sys.Throw(Res.GS("E_LocatorFieldDef_TableNameIsEmpty", "LocatorFieldDef TableName is empty"));
         }
 
 

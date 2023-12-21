@@ -101,7 +101,11 @@ namespace Tripous.Data
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            // TODO: CheckDescriptor()
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_LocatorDef_NameIsEmpty", "LocatorDef Name is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.ConnectionName))
+                Sys.Throw(Res.GS("E_LocatorDef_ConnectionNameIsEmpty", "LocatorDef ConnectionName is empty"));
         }
 
 

@@ -35,7 +35,11 @@ namespace Tripous.Data
         /// </summary>
         public virtual void CheckDescriptor()
         {
-            // TODO: CheckDescriptor()
+            if (string.IsNullOrWhiteSpace(this.Name))
+                Sys.Throw(Res.GS("E_SqlBrokerQueryDef_NoName", "SqlBrokerQueryDef must have a Name"));
+
+            if (string.IsNullOrWhiteSpace(this.SqlText))
+                Sys.Throw(Res.GS("E_SqlBrokerQueryDef_NoSql", "SqlBrokerQueryDef must have an SQL statement"));
         }
 
         /// <summary>
