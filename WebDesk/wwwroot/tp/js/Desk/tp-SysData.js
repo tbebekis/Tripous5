@@ -929,14 +929,14 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         let ColumnNames = [];       // Visible Controls
         let EditableColumns = []    // Editable Controls
 
+        ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
+
         // inserting a Table
-        if (this.IsInsertItem) {
-            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
+        if (this.IsInsertItem) {            
             EditableColumns = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
         }
         // editing a Table
         else {
-            ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
             EditableColumns = IsInsertField === true ?
                 ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique']:
                 ['Name', 'TitleKey', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
@@ -1245,7 +1245,7 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
         this.tblBrokerDef.ClearRows();
         this.tblBrokerDef.AcceptChanges();
 
-        Row = this.tblBrokerDef.AddEmptyRow();
+        Row = this.tblBrokerDef.AddEmptyRow(); 
 
         Row.Set('Name', this.BrokerDef.Name);
         Row.Set('TypeClassName', this.BrokerDef.TypeClassName);
@@ -1780,8 +1780,6 @@ tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
 };
 //#endregion
 
-
-
 //#region tp.SysDataHandlerLocator
 tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
     /** Constructor
@@ -1790,6 +1788,34 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
     constructor(View) {
         super(View, 'Locator')
     }
+
+
+    /** A C# LocatorDef instance as it comes from server. <br /> 
+     * @type {tp.LocatorDef}
+     */
+    LocatorDef = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblLocatorDef = null;
+    /**
+     * @type {tp.DataSource}
+     */
+    dsLocatorDef = null;
+ 
+    /** The broker General tab page
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+    /** The Sql tab page
+     * @type {tp.TabPage}
+     */
+    tabSql = null;
+    /** The element upon Ace Editor is created. 
+     * The '__Editor' property of the element points to Ace Editor object.
+     * @type {HTMLElement}
+     */
+    elSqlEditor = null; 
 
     /** A {@link tp.DataTable} for handling the fields of a table def.
      @type {tp.DataTable}
@@ -1808,6 +1834,70 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
     CreateEditControls() {
         if (this.View.pagerEdit.GetPageCount() === 1) {
 
+            let LayoutRow,  // A responsive row which is the container of controls bound to tblLocatorDef.
+                el, CP;
+
+            // General Page
+            // ---------------------------------------------------------------------------------
+            // add a tp.TabPage to View's pagerEdit
+            this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
+            tp.Data(this.tabGeneral.Handle, 'Name', 'General');
+
+            // create the data table
+            this.tblLocatorDef = tp.LocatorDef.CreateDataTable();
+            this.tblLocatorDef.Name = 'LocatorDef';
+ 
+            let HtmlText;
+            let HtmlRowList = [];
+
+            // for each table field, produce html text for control rows and add the text to a string-list
+            this.tblLocatorDef.Columns.forEach((Column) => {
+                if (Column.Name !== 'SqlText') {
+                    let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+
+                    let Text = Column.Title;
+                    let Ctrl = {
+                        TypeName: tp.DataTypeToUiType(Column.DataType),
+                        TableName: this.tblLocatorDef.Name,
+                        DataField: Column.Name
+                    };
+
+                    // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+                    HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
+                    HtmlRowList.push(HtmlText)
+                }
+            });
+
+
+            // join html text for all control rows
+            HtmlText = HtmlRowList.join('\n');
+
+            // content
+            HtmlText = `
+<div class="Row" data-setup='{Height: "100%", Breakpoints: [450, 768, 1050, 1480]}'>
+    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+        ${HtmlText}
+    </div>
+</div>
+`;
+            let elRow = tp.HtmlToElement(HtmlText);
+
+            LayoutRow = new tp.Row(elRow, { Height: '100%' });
+            this.tabGeneral.AddComponent(LayoutRow);
+
+            tp.Ui.CreateContainerControls(elRow);
+
+            this.dsLocatorDef = new tp.DataSource(this.tblLocatorDef);
+
+            tp.BindAllDataControls(elRow, () => { return this.dsLocatorDef; });  
+
+            // SQL Page
+            // ---------------------------------------------------------------------------------
+            this.tabSql = this.View.pagerEdit.AddPage('Sql');
+            this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', '');
+
+            // Fields Page
+            // ---------------------------------------------------------------------------------
             // add a tp.TabPage to View's pagerEdit
             let FieldsPage = this.View.pagerEdit.AddPage('Fields');
             tp.Data(FieldsPage.Handle, 'Name', 'Fields');
@@ -1817,8 +1907,8 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
             FieldsPage.AddComponent(Row);
 
             // add a DIV for the gridFields tp.Grid in the row
-            let el = Row.AddDivElement();
-            let CP = {
+            el = Row.AddDivElement();
+            CP = {
                 Name: "gridFields",
                 Height: '100%',
 
@@ -1861,7 +1951,73 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
         }
 
     }
+    /** Called before the Insert() operation of the owner View.
+     * @override
+    */
+    InsertItemBefore() {
+    }
+    /** Called after the Insert() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    InsertItemAfter(tblSysDataItem) {
+        this.SetupItem(true, tblSysDataItem);
+    }
 
+    /** Called before the Edit() operation of the owner View. <br />
+     * The View is about to load in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @override
+     */
+    EditItemBefore(Id) {
+    }
+    /** Called after the Edit() operation of the owner View. <br />
+     * The View is just loaded in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    EditItemAfter(Id, tblSysDataItem) {
+        this.SetupItem(false, tblSysDataItem);
+    }
+
+    /** Called before the Commit() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    CommitItemBefore(tblSysDataItem) {
+        let Row = this.tblLocatorDef.Rows[0];
+        Row.Set('SqlText', this.elSqlEditor.__Editor.getValue());
+        this.LocatorDef.FromDataRow(Row);
+        this.LocatorDef.FieldsFromDataTable(this.tblFields);
+
+        let JsonText = tp.ToJson(this.LocatorDef, true);
+        Row = tblSysDataItem.Rows[0];
+        Row.Set('DataName', this.LocatorDef.Name);
+        Row.Set('TitleKey', this.LocatorDef.TitleKey);
+        Row.Set('Data1', JsonText);
+    }
+    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @returns {boolean} Returns true if commit is allowed, else false.
+     * @override
+     */
+    CanCommitItem(tblSysDataItem) {
+        let List = this.LocatorDef.GetDescriptorErrors();
+        if (List.length === 0)
+            return true;
+
+        let S = List.join('\n');
+        tp.ErrorBoxAsync(S);
+        return false;
+    }
+
+    /**
+    Event handler. Called by the owner View when the Edit Pager changes Page.
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    EditPager_PageChanged(Args) {
+    }
 
     /* private */
     /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
@@ -1869,9 +2025,14 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
      * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
      * */
     SetupItem(IsInsertItem, tblSysDataItem) {
+        let Row;
+
+        this.View.FindControlByDataField('DataName').ReadOnly = true;
+        this.View.FindControlByDataField('TitleKey').ReadOnly = true;
+ 
 
         // create an empty Def instance
-        let Def = new tp.LocatorDef();
+        this.LocatorDef = new tp.LocatorDef();
 
         // if editing an already existing definition
         // then read the json from Data1 field and load the Def instance
@@ -1879,17 +2040,223 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
             let Text = tblSysDataItem.Rows[0].Get('Data1');
             let Source = eval("(" + Text + ")");
             log(Source);
-            Def.Assign(Source);
+            this.LocatorDef.Assign(Source);
+
+            this.elSqlEditor.__Editor.setValue(this.LocatorDef.SqlText, -1);
+        }
+        else {
+            // Insert
+            this.elSqlEditor.__Editor.setValue('', -1);
         }
 
+        this.tblLocatorDef.ClearRows();
+        this.tblLocatorDef.AcceptChanges();
+
+        Row = this.tblLocatorDef.AddEmptyRow();
+
+        this.LocatorDef.ToDataRow(Row); 
+
         // create the tblFields
-        this.tblFields = Def.FieldsToDataTable();
+        this.tblFields = this.LocatorDef.FieldsToDataTable();
         this.tblFields.AcceptChanges();
 
         this.gridFields.DataSource = this.tblFields;
         this.gridFields.BestFitColumns();
     }
+    /** Creates and returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
+     * The row is either empty, on insert, or a clone of a tblFields row, on edit.
+     * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFields row, on edit.
+     * @returns {tp.DataTable} Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
+     */
+    CreateEditFieldTable(SourceRow = null) {
+        let Row;
+        let IsInsertField = tp.IsEmpty(SourceRow);
 
+        // create the tblField, used in editing a single field
+        let tblField = this.tblFields.Clone();
+        tblField.Name = 'Field';    // WARNING: This name is used to differentiate the DataTables in ShowEditFieldDialog()
+
+        // add the single row in tblField
+        Row = tblField.AddEmptyRow();
+
+        if (IsInsertField) { 
+            Row.Set('DataType', tp.DataType.String);
+ 
+            Row.Set('Visible', true);
+            Row.Set('Searchable', true);
+            Row.Set('ListVisible', true);
+            Row.Set('IsIntegerBoolean', false);
+
+            Row.Set('Width', 70);
+ 
+        }
+        else {
+            Row.CopyFromRow(SourceRow);
+        }
+
+        return tblField;
+    }
+
+    /** Displays an edit dialog box for editing an existing or new row of the tblFields.
+     * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
+     * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
+     * @param {boolean} IsInsertField True when is an Insert Field operation. False when is an Edit Field operation.
+     * @param {tp.DataTable} tblField The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
+     */
+    async ShowEditFieldDialog(IsInsertField, tblField) {
+        let DialogBox = null;
+  
+        let ContentHtmlText;
+        let HtmlText;
+        let HtmlRowList = [];
+
+
+        let ColumnNames = [];       // Visible Controls
+        let EditableColumns = []    // Editable Controls
+
+        ColumnNames = ['Name', 'TableName', 'DataField', 'DataType', 'TitleKey', 'Visible', 'Searchable', 'ListVisible', 'IsIntegerBoolean', 'Width'];
+        EditableColumns = ColumnNames; 
+
+        let DataSource = new tp.DataSource(tblField); 
+
+        // Visible Controls
+        // prepare HTML text for each column in tblFields
+        ColumnNames.forEach((ColumnName) => {
+            let Column = this.tblFields.FindColumn(ColumnName);
+            let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+
+            let Text = Column.Title;
+            let Ctrl = {
+                TypeName: Column.Name === 'DataType' ? 'ComboBox' : tp.DataTypeToUiType(Column.DataType),
+                TableName: tblField.Name,
+                DataField: Column.Name
+            };
+
+            if (ColumnName === 'DataType') {
+                Ctrl.ListOnly = true;
+                Ctrl.ListValueField = 'Id';
+                Ctrl.ListDisplayField = 'Name';
+                Ctrl.ListSourceName = 'DataType';
+            }
+
+            // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+            HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
+            HtmlRowList.push(HtmlText);
+        });
+
+
+        // join html text for all control rows
+        HtmlText = HtmlRowList.join('\n');
+
+        // content
+        ContentHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
+    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+        ${HtmlText}
+    </div>
+</div>
+`;
+        let elContent = tp.HtmlToElement(ContentHtmlText);
+
+        // show the dialog
+        if (tp.IsHTMLElement(elContent)) {
+
+
+            let BodyWidth = tp.Doc.body.offsetWidth
+            let w = BodyWidth <= 580 ? BodyWidth - 6 : 580;
+
+            let WindowArgs = new tp.WindowArgs({ Text: _L('LocatorFieldDialogTitle', 'Edit Locator field'), Width: w, Height: 'auto' });
+
+            //----------------------------------------------------- 
+            /** Callback to be called after the dialog shows itself (i.e. OnShown())
+             * @param {tp.Window} Window
+             */
+            WindowArgs.ShowFunc = (Window) => {
+                tp.StyleProp(elContent.parentElement, 'padding', '5px');
+
+                // force tp-Cols to adjust
+                Window.BroadcastSizeModeChanged();
+
+                // bind dialog controls
+                tp.BindAllDataControls(elContent, (DataSourceName) => {
+                    if (DataSourceName === 'Field')
+                        return DataSource;
+
+                    if (DataSourceName === 'DataType') {
+                        let Result = new tp.DataSource(tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]));
+                        return Result;
+                    }
+
+                    return null;
+                });
+            };
+            //----------------------------------------------------- 
+            /** Callback to be called just before a modal window is about to set its DialogResult property. <br />
+             *  Returning false from the call-back cancels the setting of the property and the closing of the modal window. <br />
+             * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
+             * @param {tp.Window} Window
+             * @param {number} DialogResult One of the {@link tp.DialogResult} constants
+             * */
+            WindowArgs.CanSetDialogResultFunc = (Window, DialogResult) => {
+                if (DialogResult === tp.DialogResult.OK) {
+
+                    let Row = tblField.Rows[0];
+
+                    // Name
+                    let v = Row.Get('Name', '');
+                    if (tp.IsBlank(v)) {
+                        tp.WarningNote('Name is required');
+                        return false;
+                    }
+
+                }
+
+                return true;
+            };
+            //----------------------------------------------------- 
+            /**  Callback to be called when the dialog is about to close (i.e. OnClosing())
+             * @param {tp.Window} Window
+             */
+            WindowArgs.CloseFunc = (Window) => {
+                let Row = tblField.Rows[0];
+                let v = Row.Get('TitleKey', '');
+                if (tp.IsBlank(v)) {
+                    Row.Set('TitleKey', Row.Get('Name', ''));
+                }
+            };
+            //----------------------------------------------------- 
+
+            tp.Ui.CreateContainerControls(elContent.parentElement);
+            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);
+        }
+      
+        return DialogBox;
+    }
+    /** Called when inserting a single row of the tblFields and displays the edit dialog 
+     */
+    async InsertFieldRow() {
+        let tblField = this.CreateEditFieldTable(null);
+        let DialogBox = await this.ShowEditFieldDialog(true, tblField);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let FieldRow = tblField.Rows[0];
+            let Row = this.tblFields.AddEmptyRow();
+            Row.CopyFromRow(FieldRow);
+        }
+    }
+    /** Called when editing a single row of the tblFields and displays the edit dialog 
+     */
+    async EditFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let tblField = this.CreateEditFieldTable(Row);
+            let DialogBox = await this.ShowEditFieldDialog(false, tblField);
+
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                let FieldRow = tblField.Rows[0];
+                Row.CopyFromRow(FieldRow);
+            }
+        }
+    }
 
     /* event handlers */
     /** Event handler
@@ -1919,8 +2286,203 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
         Args.Handled = true;
         this.EditFieldRow();
     }
-
-    // EDW - tp.SysDataHandlerLocator
+ 
 };
 
+//#endregion
+
+
+//#region tp.SysDataHandlerCodeProvider
+tp.SysDataHandlerCodeProvider = class extends tp.SysDataHandler {
+    /** Constructor
+     * @param {tp.View} View The view that calls and owns this handler
+     */
+    constructor(View) {
+        super(View, 'CodeProvider')
+    }
+
+
+    /** A C# CodeProviderDef instance as it comes from server. <br />
+     * @type {tp.CodeProviderDef}
+     */
+    CodeProviderDef = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblCodeProviderDef = null;
+    /**
+     * @type {tp.DataSource}
+     */
+    dsCodeProviderDef = null;
+
+    /** The General tab page
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+
+    /* overrides */
+    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
+     * @override
+    * */
+    CreateEditControls() {
+        if (this.View.pagerEdit.GetPageCount() === 1) {
+
+            let LayoutRow,  // A responsive row which is the container of controls bound to table.
+                el, CP;
+
+            // General Page
+            // ---------------------------------------------------------------------------------
+            // add a tp.TabPage to View's pagerEdit
+            this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
+            tp.Data(this.tabGeneral.Handle, 'Name', 'General');
+
+            // create the data table
+            this.tblCodeProviderDef = tp.CodeProviderDef.CreateDataTable();
+            this.tblCodeProviderDef.Name = 'CodeProviderDef';
+
+            let HtmlText;
+            let HtmlRowList = [];
+
+            // for each table field, produce html text for control rows and add the text to a string-list
+            this.tblCodeProviderDef.Columns.forEach((Column) => {
+                let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+
+                let Text = Column.Title;
+                let Ctrl = {
+                    TypeName: tp.DataTypeToUiType(Column.DataType),
+                    TableName: this.tblCodeProviderDef.Name,
+                    DataField: Column.Name
+                };
+
+                // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
+                HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
+                HtmlRowList.push(HtmlText)
+            });
+
+
+            // join html text for all control rows
+            HtmlText = HtmlRowList.join('\n');
+
+            // content
+            HtmlText = `
+<div class="Row" data-setup='{Height: "100%", Breakpoints: [450, 768, 1050, 1480]}'>
+    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+        ${HtmlText}
+    </div>
+</div>
+`;
+            let elRow = tp.HtmlToElement(HtmlText);
+
+            LayoutRow = new tp.Row(elRow, { Height: '100%' });
+            this.tabGeneral.AddComponent(LayoutRow);
+
+            tp.Ui.CreateContainerControls(elRow);
+
+            this.dsCodeProviderDef = new tp.DataSource(this.tblCodeProviderDef);
+
+            tp.BindAllDataControls(elRow, () => { return this.dsCodeProviderDef; });
+             
+ 
+        }
+    }
+    /** Called before the Insert() operation of the owner View.
+     * @override
+    */
+    InsertItemBefore() {
+    }
+    /** Called after the Insert() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    InsertItemAfter(tblSysDataItem) {
+        this.SetupItem(true, tblSysDataItem);
+    }
+
+    /** Called before the Edit() operation of the owner View. <br />
+     * The View is about to load in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @override
+     */
+    EditItemBefore(Id) {
+    }
+    /** Called after the Edit() operation of the owner View. <br />
+     * The View is just loaded in its Edit part a SysData Item from server.
+     * @param {string} Id
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    EditItemAfter(Id, tblSysDataItem) {
+        this.SetupItem(false, tblSysDataItem);
+    }
+
+    /** Called before the Commit() operation of the owner View.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @override
+     */
+    CommitItemBefore(tblSysDataItem) {
+        let Row = this.tblCodeProviderDef.Rows[0]; 
+        this.CodeProviderDef.FromDataRow(Row); 
+
+        let JsonText = tp.ToJson(this.CodeProviderDef, true);
+        Row = tblSysDataItem.Rows[0];
+        Row.Set('DataName', this.CodeProviderDef.Name);
+        Row.Set('TitleKey', this.CodeProviderDef.Name);
+        Row.Set('Data1', JsonText);
+    }
+    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * @returns {boolean} Returns true if commit is allowed, else false.
+     * @override
+     */
+    CanCommitItem(tblSysDataItem) {
+        let List = this.CodeProviderDef.GetDescriptorErrors();
+        if (List.length === 0)
+            return true;
+
+        let S = List.join('\n');
+        tp.ErrorBoxAsync(S);
+        return false;
+    }
+
+    /**
+    Event handler. Called by the owner View when the Edit Pager changes Page.
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    EditPager_PageChanged(Args) {
+    }
+
+    /* private */
+    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
+     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
+     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+     * */
+    SetupItem(IsInsertItem, tblSysDataItem) {
+
+        this.View.FindControlByDataField('DataName').ReadOnly = true;
+        this.View.FindControlByDataField('TitleKey').ReadOnly = true;
+
+        // create an empty Def instance
+        this.CodeProviderDef = new tp.CodeProviderDef();
+
+        // if editing an already existing definition
+        // then read the json from Data1 field and load the Def instance
+        if (IsInsertItem === false) {
+            let Text = tblSysDataItem.Rows[0].Get('Data1');
+            let Source = eval("(" + Text + ")");
+            log(Source);
+            this.CodeProviderDef.Assign(Source);
+        } 
+
+
+        let Row;
+
+        this.tblCodeProviderDef.ClearRows();
+        this.tblCodeProviderDef.AcceptChanges();
+
+        Row = this.tblCodeProviderDef.AddEmptyRow();
+
+        this.CodeProviderDef.ToDataRow(Row);
+
+    }
+}
 //#endregion

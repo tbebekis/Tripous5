@@ -1293,18 +1293,18 @@ tp.SqlFilterDef = class   {
 
         if (tp.Bf.In(this.Mode, tp.SqlFilterMode.EnumConst | tp.SqlFilterMode.EnumQuery)) 
             if (!tp.Bf.In(this.DataType, tp.DataType.String | tp.DataType.Integer))
-                tp.Throw(FirstPart + _L("SqlFilterDef_InvalidDataType", "Invalid data type. Only string and integer is allowed."));
+                tp.Throw(FirstPart + _L("E_SqlFilterDef_InvalidDataType", "Invalid data type. Only string and integer is allowed."));
 
         if (this.Mode === tp.SqlFilterMode.EnumConst) {
             if (tp.IsEmpty(this.EnumOptionList) || this.EnumOptionList.length == 0)
-                tp.Throw(FirstPart + _L("SqlFilterDef_EnumConst_NoOptionsList", "Enum Constant: Option List not defined."));
+                tp.Throw(FirstPart + _L("E_SqlFilterDef_EnumConst_NoOptionsList", "Enum Constant: Option List not defined."));
         }
         else if (this.Mode == tp.SqlFilterMode.EnumQuery) {
             if (tp.IsNullOrWhiteSpace(this.EnumResultField))
-                tp.Throw(FirstPart + _L("SqlFilterDef_EnumQuery_NoResultField", "Enum Query. Result Field Name not defined."));
+                tp.Throw(FirstPart + _L("E_SqlFilterDef_EnumQuery_NoResultField", "Enum Query. Result Field Name not defined."));
 
             if (tp.IsNullOrWhiteSpace(this.EnumSql))
-                tp.Throw(FirstPart + _L("SqlFilterDef_EnumQuery_NoSql", "Enum Query. SELECT Sql is not defined."));
+                tp.Throw(FirstPart + _L("E_SqlFilterDef_EnumQuery_NoSql", "Enum Query. SELECT Sql is not defined."));
 
             let Format = _L("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
             if (!tp.IsEmpty(this.EnumDisplayLabels) && this.EnumDisplayLabels.length > 0) {
@@ -3206,7 +3206,7 @@ tp.DataTable = class extends tp.Object {
             Col.ReadOnly = Flag;
     }
     /**
-    Sets column ReadOnly according to an array of column names. Each column in the array becomes visible, where the rest become invisible.
+    Sets column ReadOnly according to an array of column names. Each column in the array becomes read-ony, where the rest become editable.
     @param {string[]} ColumnNames A list of column names
     */
     SetColumnListReadOnly(ColumnNames) {

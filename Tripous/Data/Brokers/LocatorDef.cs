@@ -21,6 +21,7 @@ namespace Tripous.Data
     /// <para>For example, a TRADE data table has a CUSTOMER_ID column, representing that single value, but the user interface
     /// has to display information from the CUSTOMER table, specifically, the ID, CODE and NAME columns.</para>
     /// <para>The TRADE table is the target data table and the CUSTOMER_ID is the DataField field name.</para>
+    /// <para>NOTE: The SqlText is mandatory.</para>
     /// </summary>
     public class LocatorDef
     {
@@ -102,10 +103,16 @@ namespace Tripous.Data
         public virtual void CheckDescriptor()
         {
             if (string.IsNullOrWhiteSpace(this.Name))
-                Sys.Throw(Res.GS("E_LocatorDef_NameIsEmpty", "LocatorDef Name is empty"));
+                Sys.Throw(Res.GS("E_LocatorDef_NameIsEmpty", "LocatorDef: Name is empty"));
 
             if (string.IsNullOrWhiteSpace(this.ConnectionName))
-                Sys.Throw(Res.GS("E_LocatorDef_ConnectionNameIsEmpty", "LocatorDef ConnectionName is empty"));
+                Sys.Throw(Res.GS("E_LocatorDef_ConnectionNameIsEmpty", $"LocatorDef {Name}: ConnectionName is empty"));
+
+            if (string.IsNullOrWhiteSpace(this.SqlText))
+                Sys.Throw(Res.GS("E_LocatorDef_SqlTextIsEmpty", $"LocatorDef ${this.Name}: SqlText is empty"));
+
+            if (this.Fields == null ||  this.Fields.Count == 0)
+                Sys.Throw(Res.GS("E_LocatorDef_NoFields", $"LocatorDef ${this.Name}: No fields defined"));
 
             if (this.Fields != null && this.Fields.Count > 0)
                 this.Fields.ForEach((item) => { item.CheckDescriptor(); });
@@ -170,7 +177,7 @@ namespace Tripous.Data
         public string ZoomCommand { get; set; }
         
         /// <summary>
-        /// Indicates whether the locator is readonly
+        /// Indicates whether the locator is readonly, meaning the user cannot select from the drop-down list
         /// </summary>
         public bool ReadOnly { get; set; }
         /// <summary>

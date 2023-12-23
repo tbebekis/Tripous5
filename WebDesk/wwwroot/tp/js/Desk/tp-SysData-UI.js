@@ -1043,6 +1043,9 @@ tp.DeskSysDataView = class extends tp.DeskView {
             case 'Locator':
                 this.Handler = new tp.SysDataHandlerLocator(this);
                 break;
+            case 'CodeProvider':
+                this.Handler = new tp.SysDataHandlerCodeProvider(this);
+                break;
             default:
                 tp.Throw(`SysData DataType not supported: ${this.DataType}`);
                 break;
@@ -1252,6 +1255,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
     */
     DisplayHomeLocalMenu() {
     }
+
     // commands/modes
     /**
     Returns the bit-field (set) of the valid commands for this view. <br />
@@ -1466,7 +1470,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
             tp.ErrorNote('Cannot save changes.\nNo value in field: DataName');
             return false;
         }
-
+ 
         return true;
     }
 
@@ -1554,15 +1558,14 @@ tp.DeskSysDataView = class extends tp.DeskView {
 
     }
     async Commit() {
+        this.Handler.CommitItemBefore(this.tblSysDataItem); // must be before any further check
 
         // default values
         let Row = this.tblSysDataItem.Rows[0];
         let v = Row.Get('TitleKey', '');
         if (!tp.IsValid(v) || tp.IsBlankString(v))
             Row.Set('TitleKey', Row.Get('DataName', ''));
-
-        this.Handler.CommitItemBefore(this.tblSysDataItem);
-
+ 
         // checks
         if (!this.CanCommit())
             return;
@@ -1582,9 +1585,7 @@ tp.DeskSysDataView = class extends tp.DeskView {
         this.ViewMode = tp.DataViewMode.Edit;
     }
 
-
-
-
+ 
     /* data-binding */
     /**
     Finds and returns a {@link tp.DataSource} data-source by name, if any, else null. <br />

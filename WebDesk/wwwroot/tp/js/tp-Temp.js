@@ -31,16 +31,66 @@ tp.CodeProviderDef = class {
      * @type {string}
      */
     TypeClassName = 'CodeProvider';
+ 
 
-    /** Throws exception if this instance is not a valid one. 
+    /** Returns a string list with possible errors in this descriptor. If no errors the array is empty. 
+     * @param {string[]} [List=null] Optional. The string list to place the error strings. 
+     * @returns {string[]} A string list with error texts or empty.
+     */
+    GetDescriptorErrors(List = null) {
+        List = List || [];
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            List.push(_L("E_CodeProviderDef_NameIsEmpty", "CodeProviderDef: Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.Text))
+            List.push(_L("E_CodeProviderDef_TextIsEmpty", `CodeProviderDef ${this.Name}: Text is empty. Must be something like XXX-XXX`));  
+
+        return List;
+    }
+    /** Throws exception if this instance is not a valid one.
      *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
     CheckDescriptor() {
-        if (tp.IsNullOrWhiteSpace(this.Name))
-            tp.Throw(_L("E_CodeProviderDef_NameIsEmpty", "CodeProviderDef Name is empty"));
+        let List = this.GetDescriptorErrors();
+        if (List.length > 0) {
+            let S = List.join('\n');
+            tp.Throw(S);
+        }
+    }
 
-        if (tp.IsNullOrWhiteSpace(this.Text))
-            tp.Throw(_L("E_CodeProviderDef_TextIsEmpty", "CodeProviderDef Text is empty. Must be something like XXX-XXX")); 
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+
+            this.Name = Row.Get('Name', '');
+            this.Text = Row.Get('Text', '');
+            this.PartSeparator = Row.Get('PartSeparator', '');
+            this.TypeClassName = Row.Get('TypeClassName', ''); 
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
+        Row.Set('Text', this.Text);
+        Row.Set('PartSeparator', this.PartSeparator);
+        Row.Set('TypeClassName', this.TypeClassName);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'CodeProviders';
+
+        Table.AddColumn('Name');
+        Table.AddColumn('Text');
+        Table.AddColumn('PartSeparator');
+        Table.AddColumn('TypeClassName');
+        return Table;
     }
 
 };
@@ -535,6 +585,7 @@ tp.SqlBrokerDef = class {
      *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
     CheckDescriptor() {
+        //EDW: Check LocatorDef and CodeProviderDef CheckDescriptor()
         if (tp.IsNullOrWhiteSpace(this.Name))
             tp.Throw(_L("E_SqlBrokerDef_NameIsEmpty", "SqlBrokerDef Name is empty"));
 
@@ -697,16 +748,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         return true;
     }
 
-
-
-
-
-
-
-
-
-
-
+ 
 
     // EDW SqlBrokerTableDef EditDialog
 }

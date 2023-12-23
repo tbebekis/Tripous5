@@ -16285,7 +16285,7 @@ tp.Locators = class {
  * @type {tp.LocatorDef[]} 
  * */
 tp.Locators.Descriptors = [];
-//#endregion 
+//#endregion
 
 
 //#region tp.LocatorDef
@@ -16316,6 +16316,8 @@ NOTE: A locator of a {@link tp.LocatorBox} type, may or may not define the tp.Lo
 Usually in a case like that, the data table contains just the key field, the LocatorBox.DataField. <br />
 A locator of a grid-type must define the names of those fields always and the data table must contain DataColumn columns
 on those fields.
+
+NOTE: The SqlText is mandatory.
  * */
 tp.LocatorDef = class {
 
@@ -16324,26 +16326,12 @@ tp.LocatorDef = class {
         this.Fields = [];
     }
 
+ 
     /** Field
     * @private
     * @type {string}
     */
-    fName = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fTitle = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fListKeyField = '';
-    /** Field
-    * @private
-    * @type {string}
-    */
-    fZoomCommand = '';
+    fTitleKey = '';
 
 
     /* properties */
@@ -16351,22 +16339,22 @@ tp.LocatorDef = class {
     Gets or sets the locator descriptor name
     @type {string}
     */
-    get Name() {
-        return tp.IsString(this.fName) && !tp.IsBlank(this.fName) ? this.fName : tp.NO_NAME;
-    }
-    set Name(v) {
-        this.fName = v;
-    }
+    Name = '';
     /**
-    Gets or sets the title of the locator descriptor.
+    Gets or sets a resource Key used in returning a localized version of Title
     @type {string}
     */
-    get Title() {
-        return tp.IsString(this.fTitle) && !tp.IsBlank(this.fTitle) ? this.fTitle : this.Name;
+    get TitleKey() {
+        return !tp.IsNullOrWhiteSpace(this.fTitleKey) ? this.fTitleKey : this.Name;
     }
-    set Title(v) {
-        this.fTitle = v;
+    set TitleKey(v) {
+        this.fTitleKey = v;
     }
+    /**
+    The connection name 
+    @type {string}
+    */
+    ConnectionName = tp.SysConfig.DefaultConnection;
     /**
     Gets or sets the name of the list table
     @type {string}
@@ -16375,36 +16363,20 @@ tp.LocatorDef = class {
     /**
     Gets or sets the key field of the list table. The value of this field goes to the DataField
     */
-    get ListKeyField() {
-        return tp.IsString(this.fListKeyField) && !tp.IsBlank(this.fListKeyField) ? this.fListKeyField : 'Id';
-    }
-    set ListKeyField(v) {
-        this.fListKeyField = v;
-    }
+    ListKeyField = 'Id';
     /**
     Gets or sets the zoom command name. A user inteface (form) can use this name to call the command.
     @type {string}
     */
-    get ZoomCommand() {
-        return tp.IsString(this.fZoomCommand) && !tp.IsBlank(this.fZoomCommand) ? this.fZoomCommand : '';
-    }
-    set ZoomCommand(v) {
-        this.fZoomCommand = v;
-    }
-
+    ZoomCommand = '';
     /**
-    The where clause that is produced by a locator algorithm.
+    The SELECT statement to execute
     @type {string}
     */
-    WhereSql = '';
-    /**
-    The order by clause to append to the statement
-    @type {string}
-    */
-    OrderBySql = '';
+    SqlText = ''; 
 
     /**
-    Indicates whether the locator is readonly
+    Indicates whether the locator is readonly, meaning the user cannot select from the drop-down list
     @type {boolean}
     */
     ReadOnly = false;
@@ -16439,18 +16411,38 @@ tp.LocatorDef = class {
         }
 
     }
-    /** Throws exception if this instance is not a valid one. 
+    /** Returns a string list with possible errors in this descriptor. If no errors the array is empty. 
+     * @param {string[]} [List=null] Optional. The string list to place the error strings. 
+     * @returns {string[]} A string list with error texts or empty.
+     */
+    GetDescriptorErrors(List = null) {
+        List = List || [];
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            List.push(_L("E_LocatorDef_NameIsEmpty", "LocatorDef: Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.ConnectionName))
+            List.push(_L("E_LocatorDef_ConnectionNameIsEmpty", `LocatorDef ${this.Name}: ConnectionName is empty`));
+
+        if (tp.IsNullOrWhiteSpace(this.SqlText))
+            List.push(_L("E_LocatorDef_SqlTextIsEmpty", `LocatorDef ${this.Name}: SqlText is empty`));
+
+        if (!tp.IsValid(this.Fields) || this.Fields.Count === 0)
+            List.push(_L("E_LocatorDef_NoFields", `LocatorDef ${this.Name}: No fields defined`)); 
+
+        this.Fields.forEach((item) => { item.GetDescriptorErrors(List); });
+
+        return List;
+    }
+    /** Throws exception if this instance is not a valid one.
      *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
     CheckDescriptor() {
-        if (tp.IsNullOrWhiteSpace(this.Name))
-            tp.Throw(_L("E_LocatorDef_NameIsEmpty", "LocatorDef Name is empty"));
-
-        if (tp.IsNullOrWhiteSpace(this.ConnectionName))
-            tp.Throw(_L("E_LocatorDef_ConnectionNameIsEmpty", "LocatorDef ConnectionName is empty"));
-
-        if (tp.IsValid(this.Fields) && this.Fields.length > 0)
-            this.Fields.forEach((item) => { item.CheckDescriptor(); });
+        let List = this.GetDescriptorErrors();
+        if (List.length > 0) {
+            let S = List.join('\n');
+            tp.Throw(S);
+        }
     }
 
     /**
@@ -16500,7 +16492,52 @@ tp.LocatorDef = class {
         return Table;
     }
 
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
 
+            this.Name = Row.Get('Name', '');
+            this.Title = Row.Get('TitleKey', '');
+            this.ConnectionName = Row.Get('ConnectionName', '');
+            this.ListTableName = Row.Get('ListTableName', '');
+            this.ListKeyField = Row.Get('ListKeyField');
+            this.ZoomCommand = Row.Get('ZoomCommand', '');
+            this.SqlText = Row.Get('SqlText', '');
+            this.ReadOnly = Row.Get('ReadOnly', false); 
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+
+        Row.Set('Name', this.Name);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('ConnectionName', this.ConnectionName);
+        Row.Set('ListTableName', this.ListTableName);
+        Row.Set('ListKeyField', this.ListKeyField);
+        Row.Set('ZoomCommand', this.ZoomCommand);
+        Row.Set('SqlText', this.SqlText);
+        Row.Set('ReadOnly', this.ReadOnly);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'Locators';
+
+        Table.AddColumn('Name');
+        Table.AddColumn('TitleKey');
+        Table.AddColumn('ConnectionName').DefaultValue = tp.SysConfig.DefaultConnection;
+        Table.AddColumn('ListTableName');
+        Table.AddColumn('ListKeyField').DefaultValue = 'Id';
+        Table.AddColumn('ZoomCommand');
+        Table.AddColumn('SqlText');
+        Table.AddColumn('ReadOnly', tp.DataType.Boolean).DefaultValue = false; 
+        return Table;
+    }
 };
 //#endregion 
 
@@ -16591,15 +16628,28 @@ tp.LocatorFieldDef = class {
             }
         }
     }
-    /** Throws exception if this instance is not a valid one. 
+    /** Returns a string list with possible errors in this descriptor. If no errors the array is empty. 
+     * @param {string[]} [List=null] Optional. The string list to place the error strings. 
+     * @returns {string[]} A string list with error texts or empty.
+     */
+    GetDescriptorErrors(List = null) {
+        List = List || [];
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            List.push(_L("E_LocatorFieldDef_NameIsEmpty", "LocatorFieldDef: Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.TableName))
+            List.push(_L("E_LocatorFieldDef_TableNameIsEmpty", `LocatorFieldDef ${this.Name}:TableName is empty`));
+    }
+    /** Throws exception if this instance is not a valid one.
      *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
     CheckDescriptor() {
-        if (tp.IsNullOrWhiteSpace(this.Name))
-            tp.Throw(_L("E_LocatorFieldDef_NameIsEmpty", "LocatorFieldDef Name is empty"));
-
-        if (tp.IsNullOrWhiteSpace(this.TableName))
-            tp.Throw(_L("E_LocatorFieldDef_TableNameIsEmpty", "LocatorFieldDef TableName is empty"));
+        let List = this.GetDescriptorErrors();
+        if (List.length > 0) {
+            let S = List.join('\n');
+            tp.Throw(S);
+        }
     }
 
     /** Loads this instance's properties from a specified {@link tp.DataRow}
@@ -16666,7 +16716,7 @@ tp.LocatorFieldDef = class {
 };
 
 tp.LocatorFieldDef.BoxDefaultWidth = 70;
-//#endregion 
+//#endregion
 
 //#region tp.Locator
 /** The locator represents (returns) a single value. <br />
@@ -16689,6 +16739,9 @@ The locator provides the Descriptor property or type {@link tp.LocatorDef}.
 That descriptor contains a list of {@link tp.LocatorFieldDef} fields. <br />
 The fields are used in constructing a WHERE clause and when the SELECT statement is executed a ListTable is returned to the locator.
 The ListTable is used as a source by the locator. The locator locates the ListRow and then uses that row in assigning its data fields.
+
+NOTE: The locator executes an SQL statement which is given by the programmer or the user when a {@link tp.LocatorDef} is defined.
+
 @implements {tp.IDataSourceListener}
 @implements {tp.IDropDownBoxListener} 
  * */
@@ -22558,6 +22611,7 @@ tp.GetAllDataControls = function (ParentElementOrSelector) {
     });
     return Result;
 };
+ 
 /** Binds all data-bindable {@tp.Control} objects that are direct or nested DOM elements in a specified parent element or the entire document.
  * @param {string|Node} ParentElementOrSelector - String or Element. Defaults to document. The container of controls. If null/undefined/empty the document is used
  * @param {function} GetDataSourceFunc A call-back <code>function GetDataSource(DataSourceName)</code> which finds and returns a data-source by a specified name.
