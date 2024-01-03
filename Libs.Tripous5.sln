@@ -25,8 +25,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinApp.Demos", "WinApp.Demos\WinApp.Demos.csproj", "{0E5EC58B-9731-4A84-B1EF-316DD6C3E3B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8262DB92-2D6B-401F-8E72-D7528545301C}"
+	ProjectSection(SolutionItems) = preProject
+		ReadMe.md = ReadMe.md
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tripous.Forms", "Tripous.Forms\Tripous.Forms.csproj", "{52C552C0-47C7-4137-A08E-14C3FE2A96D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tripous.Forms", "Tripous.Forms\Tripous.Forms.csproj", "{52C552C0-47C7-4137-A08E-14C3FE2A96D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
