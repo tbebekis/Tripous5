@@ -9,7 +9,8 @@ using Tripous.Data;
 namespace Tripous.Data
 {
     /// <summary>
-    /// Broker
+    /// Broker. A broker represents a tree of tables of a data module. The top table, the tblItem, is a single-row table. 
+    /// It may have detail tables and sub-detail tables and so on. The broker loads, saves and deletes the whole table tree with a single call.
     /// </summary>
     [TypeStoreItem]
     public class Broker

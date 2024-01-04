@@ -2,17 +2,24 @@
 
 # Tripous Base Library
 
-Tripous is the **Base Library** for all Tripous [.Net](https://en.wikipedia.org/wiki/.NET_Framework) projects. Provides classes ranging from string handling to data access to desktop forms handling.
+Tripous is a `net7.0` **Base Library** providing classes ranging from string handling to data access to desktop forms handling.
 
-## Solution Content
- - **Tripous**. A NetStandard library. The Tripous namespace contains base and utility classes.
- - **Tripous.Data**.  A NetStandard library. The Tripous.Data namespace contains classes that store and retrieve data from a database. The `SqlStore` class can be used to store and retrieve data from databases such as **MsSql**, **SQLite**, **MySql**, **PostgreSQL**, **Firebird** and **Oracle**, using the various `SqlProvider` derived classes.
- - **Tripous.Data.Dapper**.  A NetStandard library. Extends the Tripous.Data namespace. It contains classes that store and retrieve Data Entities to a database using [Dapper](https://en.wikipedia.org/wiki/Dapper_ORM) ORM.
- - **Tripous.Forms.** A .Net Framework Windows Forms library. The Tripous.Forms namespace contains utility classes, base Form classes, and many dialog boxes and facilitates building Desktop Windows Applications.  
- - **Tripous.Web**. A .Net Core library. The Tripous.Web namespace contains base and utility classes.
+## The Content
+ - **Tripous**. A library. The Tripous namespace contains base and utility classes.
+ - **Tripous.Data**.  A namespace. 
+     - The `Tripous.Data` namespace contains classes that store and retrieve data from a database. 
+     - The `Tripous.Data.SqlStore` class can be used to store and retrieve data from databases such as **MsSql**, **SQLite**, **MySql**, **PostgreSQL**, **Firebird** and **Oracle**, using the various `SqlProvider` derived classes.
+	 - The `Tripous.Data.DataService` class can be used to store and retrieve `Tripous.Data.DataEntity` class derived objects to a database, using [Dapper](https://en.wikipedia.org/wiki/Dapper_ORM) ORM.
+	 - The `Tripous.Data.SqlBroker` class is another way to store and retrieve data in a database. A broker represents a tree of tables of a data module, lets say `Sales` and `SalesLines` tables. The top table is always a single-row table. It may have detail tables and sub-detail tables and so on. The broker loads, saves and deletes the whole table tree with a single call.
+ - **Tripous.Forms.** A `net7.0-windows` Windows Forms library. The `Tripous.Forms` namespace contains utility classes, base Form classes, and many dialog boxes and facilitates building Desktop Windows Applications.  
+ - **WebDesk**. A `net7.0` ASP.NET MVC Web Application. A, not-yet-finished, web application to be used as a template in creating **desktop-like** web applications. Contains a full list of javascript controls ranging from a simple `tp.Button` or `tp.TextBox` to a complex `tp.TreeView` and `tpGrid` with groups, summaries and virtual scrolling.
+    - Use `admin` as user and `webdesk` as password to log-in to the WebDesk application.
+	- Log-out and click on **Demos** to see the demos of the javascript controls.
 
 
 ## Database Connection Settings File
+The developer writes database-neutral code. The developer may use any of the supported databases, such as **MsSql**, **SQLite**, **MySql**, **PostgreSQL**, **Firebird** and **Oracle**, by just setting `"Provider": "PROVIDER NAME"` in a settings file. 
+
 An application built using the Tripous Base Library must provide a `json` file listing the available database connections. By default this file is named `SqlConnections.json` and may be placed in the main executable's folder. 
 
 The application loads the `SqlConnections.json` file using the `Tripous.Data.SqlConnectionInfoList` class and then assigns the `Connections` property of the  `Tripous.Data.Db` static class. The static `Tripous.Data.Db` class is the pivotal class of the data sub-system. 
