@@ -2,6 +2,8 @@
 
 # Tripous Base Library
 
+[![Nuget](https://img.shields.io/nuget/v/Tripous5)](https://www.nuget.org/packages/Tripous5/)
+
 Tripous is a `net7.0` **Base Library** providing classes ranging from string handling to data access to desktop forms handling.
 
 ## The Content
@@ -11,7 +13,7 @@ Tripous is a `net7.0` **Base Library** providing classes ranging from string han
      - The `Tripous.Data.SqlStore` class can be used to store and retrieve data from databases such as **MsSql**, **SQLite**, **MySql**, **PostgreSQL**, **Firebird** and **Oracle**, using the various `SqlProvider` derived classes.
 	 - The `Tripous.Data.DataService` class can be used to store and retrieve `Tripous.Data.DataEntity` class derived objects to a database, using [Dapper](https://en.wikipedia.org/wiki/Dapper_ORM) ORM.
 	 - The `Tripous.Data.SqlBroker` class is another way to store and retrieve data in a database. A broker represents a tree of tables of a data module, lets say `Sales` and `SalesLines` tables. The top table is always a single-row table. It may have detail tables and sub-detail tables and so on. The broker loads, saves and deletes the whole table tree with a single call.
- - **Tripous.Forms.** A `net7.0-windows` Windows Forms library. The `Tripous.Forms` namespace contains utility classes, base Form classes, and many dialog boxes and facilitates building Desktop Windows Applications.  
+ - **Tripous.Forms.** [![Nuget](https://img.shields.io/nuget/v/Tripous5.Forms)](https://www.nuget.org/packages/Tripous5.Forms/) A `net7.0-windows` Windows Forms library. The `Tripous.Forms` namespace contains utility classes, base Form classes, and many dialog boxes and facilitates building Desktop Windows Applications.  
  - **WebDesk**. A `net7.0` ASP.NET MVC Web Application. A, not-yet-finished, web application to be used as a template in creating **desktop-like** web applications. Contains a full list of javascript controls ranging from a simple `tp.Button` or `tp.TextBox` to a complex `tp.TreeView` and `tpGrid` with groups, summaries and virtual scrolling.
     - Use `admin` as user and `webdesk` as password to log-in to the WebDesk application.
 	- Log-out and click on **Demos** to see the demos of the javascript controls.
