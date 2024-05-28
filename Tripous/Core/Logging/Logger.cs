@@ -33,41 +33,44 @@ namespace Tripous.Logging
     /// </summary>
     static public class Logger
     {
-        static object[] EmptyParams = new object[] { };
+        static Dictionary<string, object> EmptyParams = new Dictionary<string, object>();
 
         static object syncLock = new LockObject();
         static int fActive = 0;
-        static LogLevel fLevel = LogLevel.Info;
-        static List<ILogListener> listeners = new List<ILogListener>();
+        static LogLevel fMinLevel = LogLevel.Info;
+        static List<LogListener> listeners = new List<LogListener>();
+        static Dictionary<string, int> fLineLengths = new Dictionary<string, int>();
         static string fLogFolder;
+        static int fRetainDays;
+        static int fRetainSizeKiloBytes;
+        static int fRetainPolicyCounter;
 
-        static bool CanCallListener(ILogListener Listener)
+        static Logger()
         {
-            if (Sys.HasProperty(Listener, "IsDisposed"))
-            {
-                object V = Sys.GetProperty(Listener, "IsDisposed");
-                if (V != null)
-                    return !Convert.ToBoolean(V);
-            }
+            fLineLengths.Add("Id", 40);
+            fLineLengths.Add("TimeStamp", 24);
+            fLineLengths.Add("Host", 24);
+            fLineLengths.Add("User", 24);
+            fLineLengths.Add("Level", 12);
+            fLineLengths.Add("EventId", 14);
+            fLineLengths.Add("Source", 64);
+            fLineLengths.Add("Scope", 64);
+ 
 
-            return true;
         }
 
         /* public  */
         /// <summary>
         /// Passes the log information to each listener.
         /// </summary>
-        static public void Log(LogInfo Info)
+        static public void Log(LogEntry Info)
         {
             lock (syncLock)
             {
-                if (Active && fLevel != LogLevel.None && (int)Info.Level >= (int)fLevel)
+                if (Active && fMinLevel != LogLevel.None && (int)Info.Level >= (int)fMinLevel)
                 {
-                    foreach (ILogListener Item in listeners)
+                    foreach (LogListener Item in listeners)
                     {
-                        if (!CanCallListener(Item))
-                            continue;
-
                         Threads.Run((info) => 
                         {
                             try
@@ -96,9 +99,9 @@ namespace Tripous.Logging
         /// Passes the log information to each listener.
         /// <para>NOTE: For how params are formatted into the specified text see <see cref="FormatParams" /> </para>
         /// </summary>
-        static public void Log(string Source, string ScopeId, string EventId, LogLevel Level, Exception Exception, string Text, params object[] Params)
+        static public void Log(string Source, string ScopeId, string EventId, LogLevel Level, Exception Exception, string Text, Dictionary<string, object> Params)
         {       
-            LogInfo Info = new LogInfo(Source, ScopeId, EventId, Level, Exception, Text, Params);
+            LogEntry Info = new LogEntry(Source, ScopeId, EventId, Level, Exception, Text, Params);
             Log(Info);
         }
 
@@ -225,7 +228,7 @@ namespace Tripous.Logging
         static public void Warn(string Source, string ScopeId, string EventId, string Text)
         {
             Exception Ex = null;
-            Log(Source, ScopeId, EventId, LogLevel.Warn, Ex, Text, EmptyParams);
+            Log(Source, ScopeId, EventId, LogLevel.Warning, Ex, Text, EmptyParams);
         }
         /// <summary>
         /// Logs a warn level message
@@ -234,7 +237,7 @@ namespace Tripous.Logging
         {
             Exception Ex = null;
             string ScopeId = "";
-            Log(Source, ScopeId, EventId, LogLevel.Warn, Ex, Text, EmptyParams);
+            Log(Source, ScopeId, EventId, LogLevel.Warning, Ex, Text, EmptyParams);
         }
         /// <summary>
         /// Logs a warn level message
@@ -244,7 +247,7 @@ namespace Tripous.Logging
             Exception Ex = null;
             string ScopeId = "";
             string Source = "";
-            Log(Source, ScopeId, EventId, LogLevel.Warn, Ex, Text, EmptyParams);
+            Log(Source, ScopeId, EventId, LogLevel.Warning, Ex, Text, EmptyParams);
         }
         /// <summary>
         /// Logs a warn level message
@@ -255,7 +258,7 @@ namespace Tripous.Logging
             string ScopeId = "";
             string Source = "";
             string EventId = "0";
-            Log(Source, ScopeId, EventId, LogLevel.Warn, Ex, Text, EmptyParams);
+            Log(Source, ScopeId, EventId, LogLevel.Warning, Ex, Text, EmptyParams);
         }
 
         /// <summary>
@@ -346,48 +349,39 @@ namespace Tripous.Logging
         /// </code>
         /// </example>
         /// </summary>
-        static public Dictionary<string, object> FormatParams(ref string Text, params object[] Params)
+        static public string FormatParams(string Text, Dictionary<string, object> Params)
         {
-            Dictionary<string, object> Result = null;
+            // The Text parameter should be something like the following:
+            // 'Customer {CustomerId} order {OrderId} is completed.';
 
-            if (Params != null)
+            string Result = Text;
+            string Param;
+            string Value;
+            foreach (var Pair in Params)
             {
-                string Pattern = @"(?<=\{)[^}]*(?=\})";
-                MatchCollection Matches = Regex.Matches(Text, Pattern);
-
-                if (Params.Length == Matches.Count)
+                if (Pair.Value != null)
                 {
-                    Result = new Dictionary<string, object>();
-                    Match Match;
-                    object Value;
+                    Param = "{" + Pair.Key + "}";
+                    Value = Pair.Value.ToString();
 
-                    for (int i = Params.Length - 1; i >= 0; i--)
-                    {
-                        Match = Matches[i];
-                        Value = Params[i];
-                        Result[Match.Value] = Value;
-                        Text = Text.Substring(0, Match.Index - 1) + (Value == null ? string.Empty : Value.ToString()) + Text.Substring(Match.Index + Match.Length + 1);
-                    } 
+                    Result = Result.Replace(Param, Value, StringComparison.InvariantCultureIgnoreCase);
                 }
             }
 
             return Result;
         }
 
-
         /// <summary>
         /// Adds a listener
         /// </summary>
-        static public void Add(ILogListener Listener)
+        static internal void Add(LogListener Listener)
         {
             lock (syncLock)
             {
                 try
                 {
                     if (!listeners.Contains(Listener))
-                    {
                         listeners.Add(Listener);
-                    }
                 }
                 catch
                 {
@@ -398,32 +392,113 @@ namespace Tripous.Logging
         /// <summary>
         /// Removes a listener
         /// </summary>
-        static public void Remove(ILogListener Listener)
+        static internal void Remove(LogListener Listener)
         {
             lock (syncLock)
             {
                 try
                 {
                     if (listeners.Contains(Listener))
-                    {
                         listeners.Remove(Listener);
-                    }
                 }
                 catch
                 {
                 }
             }
         }
-
-        /// <summary>
-        /// Adds the <see cref="LogFileListener"/> to the listeners.
-        /// </summary>
-        static public void AddFileListener(string Folder = "", int MaxSizeInMB = 5)
+ 
+        static public string GetAsJson(LogEntry Entry)
         {
-            var L = new LogFileListener(Folder, MaxSizeInMB);
-            Add(L);
+            LogRecord LR = new LogRecord(Entry);
+            return Json.Serialize(LR);
         }
+        static public string GetAsList(LogEntry Entry)
+        {
+            void AddLine(StringBuilder SB, string Name, string Value)
+            {
+                if (!string.IsNullOrWhiteSpace(Value))
+                {
+                    Value = Name.PadRight(12) + ": " + Value;
+                    SB.Append(Value);
+                }
+            } 
 
+            StringBuilder SB = new StringBuilder();
+            AddLine(SB, "Id", Entry.Id);
+            AddLine(SB, "TimeStamp", Entry.TimeStampText);
+            AddLine(SB, "Level", Entry.LevelText);
+            AddLine(SB, "Source", Entry.Source);
+            AddLine(SB, "Scope", Entry.ScopeId);
+            AddLine(SB, "EventId", Entry.EventId);
+            AddLine(SB, "Host", Entry.Host);
+            AddLine(SB, "User", Entry.User);
+            AddLine(SB, "Text", Entry.Text);
+
+            if (!string.IsNullOrWhiteSpace(Entry.ExceptionData))
+                AddLine(SB, "Stack", Environment.NewLine + Entry.ExceptionData);
+
+            if ((Entry.Properties != null) && (Entry.Properties.Count > 0))
+            {
+                AddLine(SB, "Properties", " ");
+                SB.AppendLine(Entry.GetPropertiesAsTextList());
+            }
+
+            return SB.ToString();
+ 
+        }
+        static public string GetAsLine(LogEntry Entry)
+        {
+
+            string RemoveLineEndings(string S)
+            {
+                return S.Replace("\r\n", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
+            }
+
+            StringBuilder SB = new StringBuilder();
+            SB.Append(Entry.Id.PadRight(fLineLengths["Id"]));
+            SB.Append(Entry.TimeStampText.PadRight(fLineLengths["TimeStamp"]));
+            SB.Append(Entry.Host.PadRight(fLineLengths["Host"]));
+            SB.Append(Entry.User.PadRight(fLineLengths["User"]));
+            SB.Append(Entry.LevelText.PadRight(fLineLengths["Level"]));
+            SB.Append(Entry.EventId.PadRight(fLineLengths["EventId"]));
+            SB.Append(Entry.Source.PadRight(fLineLengths["Source"]));
+            SB.Append(Entry.ScopeId.PadRight(fLineLengths["Scope"]));
+
+            if (!string.IsNullOrWhiteSpace(Entry.Text))
+                SB.Append(RemoveLineEndings(Entry.Text));
+
+            if (!string.IsNullOrWhiteSpace(Entry.ExceptionData))
+                SB.Append(RemoveLineEndings(Entry.ExceptionData));
+
+            string Result = SB.ToString();
+
+            if ((Entry.Properties != null) && (Entry.Properties.Count > 0))
+            {
+                Result += " - Properties: ";
+                Result += Entry.GetPropertiesAsSingleLine();
+            }
+
+            return Result;
+
+        }
+        static public string GetLineCaptions()
+        {
+            StringBuilder SB = new StringBuilder();
+
+            SB.Append("Id".PadRight(fLineLengths["Id"]));
+            SB.Append("TimeStamp UTC".PadRight(fLineLengths["TimeStamp"]));
+            SB.Append("Host".PadRight(fLineLengths["Host"]));
+            SB.Append("User".PadRight(fLineLengths["User"]));
+            SB.Append("Level".PadRight(fLineLengths["Level"]));
+            SB.Append("EventId".PadRight(fLineLengths["EventId"]));
+            SB.Append("Source".PadRight(fLineLengths["Source"]));
+            SB.Append("Scope".PadRight(fLineLengths["Scope"]));
+            SB.Append("Text");
+            SB.AppendLine();
+
+            return SB.ToString();
+        }
+ 
         /* properties */
         /// <summary>
         /// When false no logs are recorded. Defaults to true.
@@ -457,7 +532,17 @@ namespace Tripous.Logging
         /// See <see cref="LogLevel" /> enum for the numeric values of each level.
         /// <para>Defaults to Info.</para>
         /// </summary>
-        static public LogLevel Level { get { lock (syncLock) return fLevel; } set { lock (syncLock) fLevel = value; } }
+        static public LogLevel MinLevel 
+        { 
+            get 
+            {
+                lock (syncLock)
+                {
+                    return ((int)fMinLevel >= (int)LogLevel.Trace)? fMinLevel: LogLevel.Trace;
+                }
+            } 
+            set { lock (syncLock) fMinLevel = value; } 
+        }
         /// <summary>
         /// Returns the path to the folder where file logs are saved
         /// </summary>
@@ -467,9 +552,10 @@ namespace Tripous.Logging
             {
                 lock (syncLock)
                 {
-                    if (string.IsNullOrWhiteSpace(fLogFolder))
+                    if (string.IsNullOrWhiteSpace(fLogFolder) || !Directory.Exists(fLogFolder))
                     {
-                        fLogFolder = Path.Combine(SysConfig.AppRootDataFolder, "Logs");
+                        string AppFolder = Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
+                        fLogFolder = Path.Combine(AppFolder, "Logs");
                     }
 
                     if (!Directory.Exists(fLogFolder))
@@ -482,6 +568,34 @@ namespace Tripous.Logging
             set { fLogFolder = value; }
 
         }
+
+
+        /// <summary>
+        /// Retain policy. How many days to retain in the storage medium. Defaults to 7
+        /// </summary>
+        static public int RetainDays
+        {
+            get { return fRetainDays >= 1 ? fRetainDays : 7; }
+            set { fRetainDays = value; } 
+        }
+        /// <summary>
+        /// Retain policy. How many KB to allow a single log file to grow. Defaults to 512 KB
+        /// </summary>
+        static public int RetainSizeKiloBytes
+        {
+            get { return fRetainSizeKiloBytes >= 512 ? fRetainSizeKiloBytes : 512; }
+            set { fRetainSizeKiloBytes = value; }
+        }
+        /// <summary>
+        /// After how many writes to check whether it is time to apply the retain policy. Defaults to 100
+        /// </summary>
+        static public int RetainPolicyCounter
+        {
+            get { return fRetainPolicyCounter >= 100 ? fRetainPolicyCounter : 100; }
+            set { fRetainPolicyCounter = value; }
+        }
+ 
+
     }
 
 

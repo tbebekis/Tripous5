@@ -14,26 +14,42 @@ namespace Tripous.Logging
     /// <summary>
     /// Represents a log message 
     /// </summary>
-    public class LogInfo
+    public class LogEntry
     {
- 
+
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public LogInfo(string Source, string ScopeId, string EventId, LogLevel Level, Exception Exception, string Text, params object[] Params)
+        public LogEntry(string Source, string ScopeId, string EventId, LogLevel Level, Exception Exception, string Text, Dictionary<string, object> Params = null)
         {
-            this.Source = !string.IsNullOrWhiteSpace(Source) ? Source : (Exception != null? Exception.GetType().FullName: string.Empty);
+            Id = Sys.GenId(true);
+
+            Host = Sys.HostName;
+            User = Environment.UserName;
+
+            TimeStamp = DateTime.UtcNow;
+            TimeStampText = TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            Date = TimeStamp.ToString("yyyy-MM-dd");
+            Time = TimeStamp.ToString("HH:mm:ss.fff");
+
+            this.Source = !string.IsNullOrWhiteSpace(Source) ? Source : (Exception != null ? Exception.GetType().FullName : string.Empty);
             this.ScopeId = !string.IsNullOrWhiteSpace(ScopeId) ? ScopeId : string.Empty;
             this.EventId = !string.IsNullOrWhiteSpace(EventId) ? EventId : "0";
             this.Level = Level;
             this.Exception = Exception;
-            this.TextTemplate = !string.IsNullOrWhiteSpace(Text) ? Text : string.Empty;
-            this.Properties = Logger.FormatParams(ref Text, Params);
-            if (this.Properties == null)
-                this.Properties = new Dictionary<string, object>();
-            this.Text = !string.IsNullOrWhiteSpace(Text) ? Text : (Exception == null ? string.Empty: Exception.Message);
-            this.ExceptionData = Exception == null ? string.Empty : ExceptionEx.GetExceptionText(Exception);
+
+            LevelText = this.Level.ToString();
+
+            this.Text = !string.IsNullOrWhiteSpace(Text) ? Text : (Exception == null ? string.Empty : Exception.Message);
+            ExceptionData = Exception == null ? string.Empty : ExceptionEx.GetExceptionText(Exception);
+
+            Properties = Params;
+            if (Properties != null) 
+                this.Text = Logger.FormatParams(Text, Properties);
+            else
+                Properties = new Dictionary<string, object>();           
+            
         }
 
         /* public */
@@ -75,19 +91,71 @@ namespace Tripous.Logging
             File.WriteAllText(FileName, this.ToString());
         }
 
+        public string GetPropertiesAsSingleLine()
+        {
+            string Result = string.Empty;
+
+            if (Properties == null)
+            {
+                int Count = Properties.Count;
+                int i = 0;
+
+                foreach (var Pair in Properties)
+                {
+                    i++;
+                    if (Pair.Value != null)
+                    {
+                        Result += Pair.Key;
+                        Result += " = ";
+                        Result += Pair.Value.ToString();
+                        if (i < Count)
+                            Result += ", ";
+                    }
+                }
+            }
+
+            return Result;
+        } 
+        public string GetPropertiesAsTextList()
+        {
+            string Result = string.Empty;
+
+            if (Properties == null)
+            {
+                int Count = Properties.Count;
+                int i = 0;
+
+                foreach (var Pair in Properties)
+                {
+                    i++;
+                    if (Pair.Value != null)
+                    {
+                        Result += Pair.Key;
+                        Result += " = ";
+                        Result += Pair.Value.ToString();
+                        if (i < Count)
+                            Result += Environment.NewLine;
+                    }
+                }
+            }
+
+            return Result;
+        }
         /* properties */
+        public string Id { get; }
         /// <summary>
         /// Returns the UTC date-time this info created
         /// </summary>
-        public DateTime TimeStamp { get; private set; } = DateTime.UtcNow;
+        public DateTime TimeStamp { get; }
+        public string TimeStampText { get; }
         /// <summary>
         /// Returns the UTC date this info created.
         /// </summary>
-        public string Date { get { return this.TimeStamp.ToString("yyyy-MM-dd"); } }
+        public string Date { get; }
         /// <summary>
         /// Returns the UTC time this info created.
         /// </summary>
-        public string Time { get { return this.TimeStamp.ToString("HH:mm:ss.fff"); } }
+        public string Time { get; }
         /// <summary>
         /// The username of the current user of this application or the local computer
         /// </summary>
@@ -95,44 +163,42 @@ namespace Tripous.Logging
         /// <summary>
         /// The name of the local computer
         /// </summary>
-        public string Host { get { return Sys.HostName; } }
+        public string Host { get; }
 
         /// <summary>
         /// The log level
         /// </summary>
-        public LogLevel Level { get; private set; }
+        public LogLevel Level { get; }
+        public string LevelText { get; }
         /// <summary>
         /// The event Id
         /// </summary>
-        public string EventId { get; private set; }
-        /// <summary>
-        /// The text before formatting params into it.
-        /// </summary>
-        public string TextTemplate { get; private set; }
+        public string EventId { get; }
+
         /// <summary>
         /// The log message
         /// </summary>
-        public string Text { get; private set; }
+        public string Text { get; }
         /// <summary>
         /// The scope if any
         /// </summary>
-        public string ScopeId { get; private set; }
+        public string ScopeId { get; }
         /// <summary>
         /// The source of this log, if any
         /// </summary>
-        public string Source { get; private set; }
+        public string Source { get; }
         /// <summary>
         /// A dictionary with params passed when the log message was formatted. For use by structured log listeners
         /// </summary>
-        public IDictionary<string, object> Properties { get; private set; }
+        public Dictionary<string, object> Properties { get; }
         /// <summary>
         /// The exception if this is a log regarding an exception
         /// </summary>
-        public Exception Exception { get; private set; }
+        public Exception Exception { get; }
         /// <summary>
         /// The exception data, if this is a log regarding an exception
         /// </summary>
-        public string ExceptionData { get; private set; }
+        public string ExceptionData { get; }
 
 
     }

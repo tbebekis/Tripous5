@@ -87,7 +87,7 @@ insert into {0} (
         /// Thus Listeners should synchronize the ProcessLogInfo() call. Controls need to check if InvokeRequired.
         /// </para>
         /// </summary>
-        public void ProcessLog(LogInfo Info)
+        public void ProcessLog(LogEntry Info)
         {
             lock (syncLock)
             {

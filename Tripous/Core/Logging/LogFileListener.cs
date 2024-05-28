@@ -106,7 +106,7 @@ namespace Tripous.Logging
         /// Thus Listeners should synchronize the ProcessLogInfo() call. Controls need to check if InvokeRequired.
         /// </para>
         /// </summary>
-        public void ProcessLog(LogInfo Info)
+        public void ProcessLog(LogEntry Info)
         {
             StringBuilder SB = new StringBuilder();
             SB.Append(Pad(Info.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss.ff"), Lengths["TimeStamp"]));

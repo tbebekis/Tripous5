@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.Metrics;
 using System.Text;
 using System.Threading;
 
@@ -15,25 +16,21 @@ namespace Tripous.Data
 {
 
 
+
+
     /// <summary>
-    /// Monitors sql statement execution. It gathers information from an sql statement and sends
-    /// that information to the Logger.
+    /// Monitors sql statement execution. 
+    /// <para>It gathers information from an sql statement and sends that information to registered <see cref="SqlLogListener"/>s for further processing.</para>
     /// </summary>
     static public class SqlMonitor
     {
-
-        const string cStartLine = "/*==============================================================";
-        const string cEndLine = "--------------------------------------------------------------*/";
-        const string cLine = "----------------------------------------------------------------";
+ 
 
         static object syncLock = new LockObject();
-        static List<ILogListener> fListeners = new List<ILogListener>();
+        static List<SqlLogListener> fListeners = new List<SqlLogListener>();
 
         /* fields */
-        /// <summary>
-        /// Field
-        /// </summary>
-        static int fCounter;
+ 
         /// <summary>
         /// Field
         /// </summary>
@@ -43,9 +40,7 @@ namespace Tripous.Data
         /// </summary>
         static readonly int paramLength = 23;
 
-        /* private properties */
-        static int Counter { get { lock (syncLock) return fCounter; } }
-        static int ListenerCount { get { lock (syncLock) return fListeners.Count; } }
+ 
 
         /* private */
         /// <summary>
@@ -95,127 +90,154 @@ namespace Tripous.Data
         /// <summary>
         /// Adds a SqlMonitor listener
         /// </summary>
-        static public void Add(ILogListener Listener)
+        static internal void Add(SqlLogListener Listener)
         {
             lock (syncLock)
             {
-                fListeners.Add(Listener);
+                if (!fListeners.Contains(Listener))
+                    fListeners.Add(Listener);
             }
         }
         /// <summary>
         /// Removes a SqlMonitor listener
         /// </summary>
-        static public void Remove(ILogListener Listener)
+        static internal void Remove(SqlLogListener Listener)
         {
             lock (syncLock)
             {
-                fListeners.Remove(Listener);
+                if (fListeners.Contains(Listener))
+                    fListeners.Remove(Listener);
             }
         }
 
         /// <summary>
-        /// Prepares a text using the passed DbCommand and Datetime as sources.
+        /// Helper. Infers an EventId from an SQL statement.
         /// </summary>
-        static public string CommandToText(DateTime StartTime, DbCommand Cmd)
+        static public string GetEventId(string SqlText)
         {
-            try
-            {
-                if ((Cmd != null) && !string.IsNullOrWhiteSpace(Cmd.CommandText))
-                {
+            string EventId = "EXECUTE";
 
-                    DateTime EndTime = DateTime.Now;
-                    TimeSpan ElapsedTime = DateTime.Now - StartTime;
+            SqlText = SqlText.Trim();
 
-                    StringBuilder SB = new StringBuilder();
+            if (SqlText.StartsWith("SELECT", StringComparison.InvariantCultureIgnoreCase)) EventId = "SELECT";
+            else if (SqlText.StartsWith("INSERT", StringComparison.InvariantCultureIgnoreCase)) EventId = "INSERT";
+            else if (SqlText.StartsWith("UPDATE", StringComparison.InvariantCultureIgnoreCase)) EventId = "UPDATE";
+            else if (SqlText.StartsWith("DELETE", StringComparison.InvariantCultureIgnoreCase)) EventId = "DELETE";
 
-                    /* header */
-
-                    SB.AppendLine(cStartLine);
-                    SB.AppendLine(string.Format(" Started at: {0} - Elapsed time: {1}  ",
-                        StartTime.ToString("HH:mm:ss"),
-                        ElapsedTime.ToString(@"dd\.hh\:mm\:ss")));
-
-                    /* params */
-                    if (Cmd.Parameters.Count > 0)
-                    {
-                        SB.AppendLine(cLine);
-                        foreach (DbParameter Parameter in Cmd.Parameters)
-                        {
-                            AddParamTo(SB, Parameter);
-                        }
-                    }
-
-                    SB.AppendLine(cEndLine);
-
-
-
-                    /* sql */
-                    string SqlText = Cmd.CommandText.Trim();
-                    SB.Append(SqlText);
-
-
-
-                    return SB.ToString();
-                }
-            }
-            catch
-            {
-            }
-
-
-            return string.Empty;
+            return EventId;
         }
         /// <summary>
-        /// Logs information regarding the passed DbCommand and DateTime
+        /// Helper. Infers an EventId from an SQL statement.
         /// </summary>
-        static public void LogSql(DateTime StartTime, DbCommand Cmd)
+        static public string GetEventId(DbCommand Cmd)
         {
-            Interlocked.Increment(ref fCounter);
+            return GetEventId(Cmd.CommandText.Trim());
+        }
+        
 
+        /// <summary>
+        /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
+        /// </summary>
+        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source, string Scope, string EventId, string ParamsText)
+        {
+ 
             lock (syncLock)
             {
-                if ((fListeners.Count > 0) && (Cmd != null))
+                if ((fListeners.Count > 0) && !string.IsNullOrWhiteSpace(SqlText))
                 {
-                    try
+  
+                    SqlLogEntry Entry = new SqlLogEntry(StartTimeUtc, SqlText,  Source, Scope, EventId, ParamsText);
+
+                    foreach (var Listener in fListeners)
                     {
-                        string SqlText = string.IsNullOrWhiteSpace(Cmd.CommandText) ? string.Empty : Cmd.CommandText.Trim();
-                        if (!string.IsNullOrWhiteSpace(SqlText))
+                        try
                         {
-                            string Source = typeof(SqlMonitor).FullName;
-                            string EventId = "EXECUTE";
-
-                            if (SqlText.StartsWith("SELECT", StringComparison.InvariantCultureIgnoreCase)) EventId = "SELECT";
-                            else if (SqlText.StartsWith("INSERT", StringComparison.InvariantCultureIgnoreCase)) EventId = "INSERT";
-                            else if (SqlText.StartsWith("UPDATE", StringComparison.InvariantCultureIgnoreCase)) EventId = "UPDATE";
-                            else if (SqlText.StartsWith("DELETE", StringComparison.InvariantCultureIgnoreCase)) EventId = "DELETE";
-
-                            string CommandText = CommandToText(StartTime, Cmd);
-                            StringBuilder SB = new StringBuilder();
-                            SB.AppendLine(string.Format("[{0}]", Counter));
-                            SB.AppendLine(CommandText);
-                            
-                            LogInfo LogInfo = new LogInfo(Source, "", EventId, LogLevel.Trace, null, SB.ToString());
-
-                            foreach (var Listener in fListeners)
-                            {
-                                try
-                                {
-                                    Listener.ProcessLog(LogInfo);
-                                }
-                                catch
-                                {
-                                }
-                            }
+                            Listener.ProcessLog(Entry);
                         }
-                    }
-                    catch
-                    {
+                        catch
+                        {
+                        }
                     }
                 }
             }
+        }
+        /// <summary>
+        /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
+        /// </summary>
+        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source, string Scope)
+        {
+            LogSql(StartTimeUtc, SqlText, Source, Scope, string.Empty, string.Empty);
+        }
+        /// <summary>
+        /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
+        /// </summary>
+        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source)
+        {
+            LogSql(StartTimeUtc, SqlText, Source, string.Empty, string.Empty, string.Empty);
+        }
+        /// <summary>
+        /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
+        /// </summary>
+        static public void LogSql(DateTime StartTimeUtc, DbCommand Cmd, string Source, string Scope)
+        {
+
+            DateTime EndTimeUtc = DateTime.UtcNow;
+            string SqlText = Cmd.CommandText.Trim();
+            string EventId = GetEventId(SqlText);
+
+            StringBuilder SB = new StringBuilder(); 
+
+            /* params */
+            if (Cmd.Parameters.Count > 0)            
+            { 
+                foreach (DbParameter Parameter in Cmd.Parameters)
+                    AddParamTo(SB, Parameter);
+            }
+
+            string ParamsText = SB.ToString();
+
+            LogSql(StartTimeUtc, SqlText, Source, Scope, EventId, ParamsText);
 
         }
 
+        /// <summary>
+        /// Returns a string representation of a <see cref="DbCommand"/>
+        /// </summary>
+        static public string CommandToText(DateTime StartTimeUtc, DbCommand Cmd, string Source, string Scope)
+        {
+            DateTime EndTimeUtc = DateTime.UtcNow;
+            TimeSpan ElapsedTime = EndTimeUtc - StartTimeUtc;
+
+            string SqlText = Cmd.CommandText.Trim();
+            string EventId = GetEventId(SqlText);
+
+            StringBuilder SB = new StringBuilder();
+
+            /* params */
+            if (Cmd.Parameters.Count > 0)
+            {
+                foreach (DbParameter Parameter in Cmd.Parameters)
+                    AddParamTo(SB, Parameter);
+            }
+
+            string ParamsText = SB.ToString();
+ 
+            SB.Clear();
+            SB.AppendLine($"Start Time Utc: {StartTimeUtc.ToString("HH:mm:ss")}");
+            SB.AppendLine($"Elapsed Time: {ElapsedTime.ToString(@"dd\.hh\:mm\:ss")}");
+            SB.AppendLine($"Source: {Source}");
+            SB.AppendLine($"Scope: {Scope}");
+            SB.AppendLine($"EventId: {EventId}");
+            SB.AppendLine($"SqlText");
+            SB.AppendLine(SqlText); 
+            if (!string.IsNullOrWhiteSpace(ParamsText))
+            {
+                SB.AppendLine("Parameters");
+                SB.AppendLine(ParamsText);
+            } 
+
+            return SB.ToString();
+        }
 
     }
 

@@ -120,7 +120,9 @@ namespace Tripous.Data
         public DataTable Select(DbTransaction Transaction, string SqlText, params object[] Params)
         {
             ResolveSql(ref SqlText);
-            DateTime StartTime = DateTime.Now;
+            DateTime StartTimeUtc = DateTime.UtcNow;
+            string Source = $"SqlStore.{ConnectionName}";
+            string Scope = "Select";
 
             using (DbCommand Cmd = Transaction.Connection.CreateCommand())
             {
@@ -155,14 +157,15 @@ namespace Tripous.Data
                         Table.TableName = TableName;
                         Table.AcceptChanges();
 
-                        SqlMonitor.LogSql(StartTime, Cmd);
+
+                        SqlMonitor.LogSql(StartTimeUtc, Cmd, Source, Scope);
 
                         return Table;
                     }
                 }
                 catch (Exception ex)
                 {
-                    string CommandText = SqlMonitor.CommandToText(StartTime, Cmd);
+                    string CommandText = SqlMonitor.CommandToText(StartTimeUtc, Cmd, Source, Scope);
                     ex.Data["SqlText"] = CommandText;
                     throw new SqlExceptionEx(ex.Message, ex, CommandText);
                 }
@@ -515,7 +518,9 @@ namespace Tripous.Data
         public void ExecSql(DbTransaction Transaction, string SqlText, params object[] Params)
         {
             ResolveSql(ref SqlText);
-            DateTime StartTime = DateTime.Now;
+            DateTime StartTimeUtc = DateTime.UtcNow;
+            string Source = $"SqlStore.{ConnectionName}";
+            string Scope = "ExecSql";
 
             using (DbCommand Cmd = Transaction.Connection.CreateCommand())
             {
@@ -529,12 +534,14 @@ namespace Tripous.Data
 
                     Cmd.ExecuteNonQuery();
 
-                    SqlMonitor.LogSql(StartTime, Cmd);
+
+                    SqlMonitor.LogSql(StartTimeUtc, Cmd, Source, Scope); 
                 }
                 catch (Exception ex)
                 {
-                    ex.Data["SqlText"] = SqlText;
-                    throw;
+                    string CommandText = SqlMonitor.CommandToText(StartTimeUtc, Cmd, Source, Scope);
+                    ex.Data["SqlText"] = CommandText;
+                    throw new SqlExceptionEx(ex.Message, ex, CommandText);
                 }
             }
         }

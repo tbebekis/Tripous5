@@ -115,7 +115,7 @@ namespace Tripous.Logging
             {
                 if (fActive)
                 {
-                    LogInfo Info = new LogInfo(this.Name, Scope.Id, EventId, Level, Ex, Text, Params);
+                    LogEntry Info = new LogInfo(this.Name, Scope.Id, EventId, Level, Ex, Text, Params);
 
                     if (Scope.Properties != null)
                     {
@@ -209,7 +209,7 @@ namespace Tripous.Logging
         /// </summary>
         public void Warn(string EventId, string Text)
         {
-            Log(EventId, LogLevel.Warn, Text);
+            Log(EventId, LogLevel.Warning, Text);
         }
         /// <summary>
         /// Logs a warn levelmessage

@@ -28,7 +28,7 @@ namespace Tripous.Logging
         /// <summary>
         /// Warn
         /// </summary>
-        Warn = 8,
+        Warning = 8,
         /// <summary>
         /// Error
         /// </summary>

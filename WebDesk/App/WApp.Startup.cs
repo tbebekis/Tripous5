@@ -202,7 +202,7 @@ namespace WebDesk
             }
             catch (Exception ex)
             {
-                LogInfo Info = new LogInfo("Application", "Start", "", LogLevel.Fatal, ex, "Fatal error on WApp.Start()");
+                LogEntry Info = new LogEntry("Application", "Start", "", LogLevel.Fatal, ex, "Fatal error on WApp.Start()");
                 Logger.Log(Info);
                 throw;
             }
