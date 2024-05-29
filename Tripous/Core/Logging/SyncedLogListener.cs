@@ -12,6 +12,7 @@ namespace Tripous.Logging
     /// <para>Client code has just to link to <see cref="EntryEvent"/> and then process the passed <see cref="LogEntry"/> safely.</para>
     /// <para>The <see cref="LogEntry"/> provides methods such as <see cref="LogEntry.AsJson()"/>, <see cref="LogEntry.AsList()"/>, etc. 
     /// for getting a string representation of the entry.</para>
+    /// <para>SEE: https://lostechies.com/gabrielschenker/2009/01/23/synchronizing-calls-to-the-ui-in-a-multi-threaded-application/</para>
     /// </summary>
     public class SyncedLogListener : LogListener
     {
