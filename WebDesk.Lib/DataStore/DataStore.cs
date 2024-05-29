@@ -56,6 +56,8 @@ namespace WebLib
                 Language.Resources.LoadFrom(ResourceStringList);
             }
         }
+        static SqlStoreLogListener fSqlStoreLogListener;
+
 
         /// <summary>
         /// Registers DbProviderFactory classes
@@ -189,8 +191,8 @@ namespace WebLib
 
             ExecuteSystemSchema();
             ExecuteSchemas();
-
-            Logger.Add(new DataLogListener());
+ 
+            fSqlStoreLogListener = new SqlStoreLogListener();
         }
         static public void RegisterDescriptors()
         {

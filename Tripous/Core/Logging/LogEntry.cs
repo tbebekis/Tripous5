@@ -91,6 +91,9 @@ namespace Tripous.Logging
             File.WriteAllText(FileName, this.ToString());
         }
 
+        /// <summary>
+        /// Returns a string representation of the <see cref="Properties"/> property of this entry.
+        /// </summary>
         public string GetPropertiesAsSingleLine()
         {
             string Result = string.Empty;
@@ -115,7 +118,10 @@ namespace Tripous.Logging
             }
 
             return Result;
-        } 
+        }
+        /// <summary>
+        /// Returns a string representation of the <see cref="Properties"/> property of this entry.
+        /// </summary>
         public string GetPropertiesAsTextList()
         {
             string Result = string.Empty;
@@ -141,12 +147,38 @@ namespace Tripous.Logging
 
             return Result;
         }
+
+        /// <summary>
+        /// Returns a string representation of this entry.
+        /// </summary>
+        public string AsList()
+        {
+            return Logger.GetAsList(this);
+        }
+        /// <summary>
+        /// Returns a string representation of this entry.
+        /// </summary>
+        public string AsLine()
+        {
+            return Logger.GetAsLine(this);
+        }
+        /// <summary>
+        /// Returns a string representation of this entry.
+        /// </summary>
+        public string AsJson()
+        {
+            return Logger.GetAsJson(this);
+        }
+
         /* properties */
         public string Id { get; }
         /// <summary>
         /// Returns the UTC date-time this info created
         /// </summary>
         public DateTime TimeStamp { get; }
+        /// <summary>
+        /// The timestamp as string.
+        /// </summary>
         public string TimeStampText { get; }
         /// <summary>
         /// Returns the UTC date this info created.
@@ -169,6 +201,9 @@ namespace Tripous.Logging
         /// The log level
         /// </summary>
         public LogLevel Level { get; }
+        /// <summary>
+        /// The level as string
+        /// </summary>
         public string LevelText { get; }
         /// <summary>
         /// The event Id

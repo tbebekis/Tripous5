@@ -18,6 +18,8 @@ namespace Test.WinApp
     static public partial class App
     {
         static MainForm MainForm;
+        static FileLogListener fFileLogListener;
+        static SyncedLogListener fSyncedLogListener;
 
         /* private */
         /// <summary>
@@ -171,8 +173,9 @@ namespace Test.WinApp
 
             App.MainForm = MainForm;
 
-            Logger.Add(new LogLineListener(MainForm.AppendLine));
-            Logger.Add(new LogFileListener(Path.Combine(SysConfig.AppExeFolder, "Logs")));
+            fFileLogListener = new FileLogListener(Path.Combine(SysConfig.AppExeFolder, "Logs"));
+            fSyncedLogListener = new SyncedLogListener();
+            fSyncedLogListener.EntryEvent += SyncedLogListener_EntryEvent; 
 
             ObjectStore.Initialize();
             Db.Initialize();
@@ -187,6 +190,11 @@ namespace Test.WinApp
             SqlStore = SqlStores.CreateDefaultSqlStore();
 
             RegisterBrokers();
+        }
+
+        static void SyncedLogListener_EntryEvent(object sender, LogEntryArgs e)
+        {
+            LogAppendLine(e.Entry.AsJson());
         }
 
         /* log */

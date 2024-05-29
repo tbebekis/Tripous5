@@ -42,9 +42,12 @@ namespace Tripous.Logging
         static Dictionary<string, int> fLineLengths = new Dictionary<string, int>();
         static string fLogFolder;
         static int fRetainDays;
-        static int fRetainSizeKiloBytes;
+        static int fMaxSizeKiloBytes;
         static int fRetainPolicyCounter;
 
+        /// <summary>
+        /// Static constructor
+        /// </summary>
         static Logger()
         {
             fLineLengths.Add("Id", 40);
@@ -55,11 +58,19 @@ namespace Tripous.Logging
             fLineLengths.Add("EventId", 14);
             fLineLengths.Add("Source", 64);
             fLineLengths.Add("Scope", 64);
- 
 
+            Active = true;
         }
 
         /* public  */
+        /// <summary>
+        /// Creates and returns a source
+        /// </summary>
+        static public LogSource CreateSource(string Name)
+        {
+            return new LogSource(Name);
+        }
+
         /// <summary>
         /// Passes the log information to each listener.
         /// </summary>
@@ -407,11 +418,17 @@ namespace Tripous.Logging
             }
         }
  
+        /// <summary>
+        /// Returns a string representation of a specified entry.
+        /// </summary>
         static public string GetAsJson(LogEntry Entry)
         {
             LogRecord LR = new LogRecord(Entry);
             return Json.Serialize(LR);
         }
+        /// <summary>
+        /// Returns a string representation of a specified entry.
+        /// </summary>
         static public string GetAsList(LogEntry Entry)
         {
             void AddLine(StringBuilder SB, string Name, string Value)
@@ -446,6 +463,9 @@ namespace Tripous.Logging
             return SB.ToString();
  
         }
+        /// <summary>
+        /// Returns a string representation of a specified entry.
+        /// </summary>
         static public string GetAsLine(LogEntry Entry)
         {
 
@@ -481,6 +501,9 @@ namespace Tripous.Logging
             return Result;
 
         }
+        /// <summary>
+        /// Returns a string with the captions of the log information, property formatted, i.e. right padded with spaces.
+        /// </summary>
         static public string GetLineCaptions()
         {
             StringBuilder SB = new StringBuilder();
@@ -569,7 +592,14 @@ namespace Tripous.Logging
 
         }
 
-
+        /// <summary>
+        /// After how many writes to check whether it is time to apply the retain policy. Defaults to 100
+        /// </summary>
+        static public int RetainPolicyCounter
+        {
+            get { return fRetainPolicyCounter >= 100 ? fRetainPolicyCounter : 100; }
+            set { fRetainPolicyCounter = value; }
+        }
         /// <summary>
         /// Retain policy. How many days to retain in the storage medium. Defaults to 7
         /// </summary>
@@ -581,21 +611,12 @@ namespace Tripous.Logging
         /// <summary>
         /// Retain policy. How many KB to allow a single log file to grow. Defaults to 512 KB
         /// </summary>
-        static public int RetainSizeKiloBytes
+        static public int MaxSizeKiloBytes
         {
-            get { return fRetainSizeKiloBytes >= 512 ? fRetainSizeKiloBytes : 512; }
-            set { fRetainSizeKiloBytes = value; }
-        }
-        /// <summary>
-        /// After how many writes to check whether it is time to apply the retain policy. Defaults to 100
-        /// </summary>
-        static public int RetainPolicyCounter
-        {
-            get { return fRetainPolicyCounter >= 100 ? fRetainPolicyCounter : 100; }
-            set { fRetainPolicyCounter = value; }
+            get { return fMaxSizeKiloBytes >= 512 ? fMaxSizeKiloBytes : 512; }
+            set { fMaxSizeKiloBytes = value; }
         }
  
-
     }
 
 

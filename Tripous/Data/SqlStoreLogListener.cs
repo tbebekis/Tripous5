@@ -11,43 +11,47 @@ namespace Tripous.Logging
     /// <summary>
     /// A log listener that writes log info a database table
     /// </summary>
-    public class SqlStoreLogListener : ILogListener
+    public class SqlStoreLogListener : LogListener
     {
+ 
         const string CreateTableSql = @"
 create table {0}  (
    Id                     {1}
-  ,LogDate                @DATE            @NULL
+  ,Stamp                  @DATETIME        @NULL 
+  ,LogDate                @NVARCHAR(12)    @NULL
   ,LogTime                @NVARCHAR(12)    @NULL
   ,UserName               @NVARCHAR(96)    @NULL
-  ,Host                   @NVARCHAR(64)    @NULL
-  ,LogLevel               @NVARCHAR(24)    @NULL     
-  ,LogSource              @NVARCHAR(96)    @NULL
-  ,ScopeId                @NVARCHAR(96)    @NULL
+  ,HostName               @NVARCHAR(64)    @NULL
+  ,Level                  @NVARCHAR(24)    @NULL     
+  ,Source                 @NVARCHAR(96)    @NULL
+  ,Scope                  @NVARCHAR(96)    @NULL
   ,EventId                @NVARCHAR(96)    @NULL
   ,Data                   @NBLOB_TEXT      @NULL
 )
 ";
         const string InsertSql = @"
 insert into {0} (
-   Id          
+   Id      
+  ,Stamp 
   ,LogDate     
   ,LogTime     
   ,UserName    
-  ,Host        
-  ,LogLevel    
-  ,LogSource   
-  ,ScopeId     
+  ,HostName        
+  ,Level    
+  ,Source   
+  ,Scope    
   ,EventId     
   ,Data        
 ) values (
-   :Id          
+   :Id    
+  ,:Stamp
   ,:LogDate     
   ,:LogTime     
   ,:UserName    
-  ,:Host        
-  ,:LogLevel    
-  ,:LogSource   
-  ,:ScopeId     
+  ,:HostName        
+  ,:Level    
+  ,:Source   
+  ,:Scope     
   ,:EventId     
   ,:Data     
 )
@@ -60,13 +64,14 @@ insert into {0} (
         Dictionary<string, object> DataDic = new Dictionary<string, object>()
         {
             { "Id", null },
+            { "Stamp", null },
             { "LogDate", null },
             { "LogTime", null },
             { "UserName", null },
-            { "Host", null },
-            { "LogLevel", null },
-            { "LogSource", null },
-            { "ScopeId", null },
+            { "HostName", null },
+            { "Level", null },
+            { "Source", null },
+            { "Scope", null },
             { "EventId", null },
             { "Data", null },
         };
@@ -87,7 +92,7 @@ insert into {0} (
         /// Thus Listeners should synchronize the ProcessLogInfo() call. Controls need to check if InvokeRequired.
         /// </para>
         /// </summary>
-        public void ProcessLog(LogEntry Info)
+        public override void ProcessLog(LogEntry Entry)
         {
             lock (syncLock)
             {
@@ -104,35 +109,17 @@ insert into {0} (
                     Store.CreateTable(SqlText);
                 }
 
-                DataDic["Id"] = Sys.GenId();
-                DataDic["LogDate"] = Info.TimeStamp.Date;
-                DataDic["LogTime"] = Info.Time;
-                DataDic["UserName"] = !string.IsNullOrWhiteSpace(Info.User) ? Info.User : string.Empty;
-                DataDic["Host"] = !string.IsNullOrWhiteSpace(Info.Host) ? Info.Host : string.Empty;
-                DataDic["LogLevel"] = Info.Level.ToString();
-                DataDic["LogSource"] = !string.IsNullOrWhiteSpace(Info.Source) ? Info.Source : string.Empty;
-                DataDic["ScopeId"] = !string.IsNullOrWhiteSpace(Info.ScopeId) ? Info.ScopeId : string.Empty;
-                DataDic["EventId"] = !string.IsNullOrWhiteSpace(Info.EventId) ? Info.EventId : string.Empty;
-
-                StringBuilder SB = new StringBuilder();
-
-                if (!string.IsNullOrWhiteSpace(Info.Text))
-                    SB.AppendLine(Info.Text);
-
-                if (Info.Properties != null && Info.Properties.Count > 0)
-                {
-                    SB.AppendLine();
-                    SB.AppendLine("Properties");
-                    SB.AppendLine(Json.Serialize(Info.Properties));
-                }
-
-                if (!string.IsNullOrWhiteSpace(Info.ExceptionData))
-                {
-                    SB.AppendLine();
-                    SB.AppendLine(Info.ExceptionData);
-                }
-
-                DataDic["Data"] = SB.ToString();
+                DataDic["Id"] = Entry.Id;
+                DataDic["Stamp"] = Entry.TimeStamp;
+                DataDic["LogDate"] = Entry.Date;
+                DataDic["LogTime"] = Entry.Time;
+                DataDic["UserName"] = !string.IsNullOrWhiteSpace(Entry.User) ? Entry.User : string.Empty;
+                DataDic["HostName"] = !string.IsNullOrWhiteSpace(Entry.Host) ? Entry.Host : string.Empty;
+                DataDic["Level"] = Entry.LevelText;
+                DataDic["Source"] = !string.IsNullOrWhiteSpace(Entry.Source) ? Entry.Source : string.Empty;
+                DataDic["Scope"] = !string.IsNullOrWhiteSpace(Entry.ScopeId) ? Entry.ScopeId : string.Empty;
+                DataDic["EventId"] = !string.IsNullOrWhiteSpace(Entry.EventId) ? Entry.EventId : string.Empty;
+                DataDic["Data"] = Entry.AsJson();
 
                 SqlText = string.Format(InsertSql, SysTables.Log);
                 Store.ExecSql(SqlText, DataDic);

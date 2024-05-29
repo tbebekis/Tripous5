@@ -61,7 +61,7 @@ namespace WebDesk
         static internal List<IPlugin> PluginList = new List<IPlugin>();
         static IDisposable AppSettingsChangeToken;
         static WebAppContext AppContext = new WebAppContext();
- 
+        static FileLogListener fFileLogListener;
 
         /* private */
         /// <summary>
@@ -170,8 +170,9 @@ namespace WebDesk
                 InitializeSysConfig();
 
                 Pictures.ImagesPath = WApp.ImagesPath;
+ 
+                fFileLogListener = new FileLogListener();
 
-                Tripous.Logging.Logger.AddFileListener();
 
                 ObjectStore.Initialize();
                 Db.Initialize();
