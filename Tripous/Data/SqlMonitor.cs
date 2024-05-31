@@ -49,7 +49,8 @@ namespace Tripous.Data
         static string CompleteLength(string Line)
         {
             Line += " ";
-            return Line.PadRight(lineLength - Line.Length, ' ');
+            
+            return lineLength > Line.Length? Line.PadRight(lineLength - Line.Length, ' '): Line;
         }
         /// <summary>
         /// Formats the passed Line
@@ -143,6 +144,9 @@ namespace Tripous.Data
  
             lock (syncLock)
             {
+                if (fListeners.Count == 0 || !Active)
+                    return;
+
                 if ((fListeners.Count > 0) && !string.IsNullOrWhiteSpace(SqlText))
                 {
   
@@ -180,6 +184,8 @@ namespace Tripous.Data
         /// </summary>
         static public void LogSql(DateTime StartTimeUtc, DbCommand Cmd, string Source, string Scope)
         {
+            if (fListeners.Count == 0 || !Active)
+                return;
 
             DateTime EndTimeUtc = DateTime.UtcNow;
             string SqlText = Cmd.CommandText.Trim();
@@ -239,6 +245,7 @@ namespace Tripous.Data
             return SB.ToString();
         }
 
+        static public bool Active { get; set; } = true;
     }
 
 }
