@@ -123,6 +123,9 @@ namespace Tripous.Data
             DateTime StartTimeUtc = DateTime.UtcNow;
             string Source = $"SqlStore.{ConnectionName}";
             string Scope = "Select";
+  
+            string EventId = string.Empty;
+            string ParamsText = string.Empty;
             string CommandText = string.Empty;
 
             using (DbCommand Cmd = Transaction.Connection.CreateCommand())
@@ -145,7 +148,12 @@ namespace Tripous.Data
                         Adapter.SelectCommand = Cmd;
 
                         if (SqlMonitor.Active)
+                        {
+                            EventId = SqlMonitor.GetEventId(SqlText);
+                            ParamsText = SqlMonitor.GetParamsText(Cmd);
                             CommandText = SqlMonitor.CommandToText(StartTimeUtc, Cmd, Source, Scope);
+                        }
+                            
 
                         bool Flag = Table.AutoGenerateGuidKeys;
                         Table.AutoGenerateGuidKeys = false;
@@ -162,7 +170,7 @@ namespace Tripous.Data
                         Table.AcceptChanges();
 
                         if (SqlMonitor.Active)
-                            SqlMonitor.LogSql(StartTimeUtc, Cmd, Source, Scope);
+                            SqlMonitor.LogSql(StartTimeUtc, SqlText, Source, Scope, EventId, ParamsText);
 
                         return Table;
                     }
@@ -170,7 +178,7 @@ namespace Tripous.Data
                 catch (Exception ex)
                 {
                     if (SqlMonitor.Active)
-                        SqlMonitor.LogSql(StartTimeUtc, Cmd, Source, Scope);
+                        SqlMonitor.LogSql(StartTimeUtc, SqlText, Source, Scope, EventId, ParamsText);
 
                     ex.Data["SqlText"] = CommandText;
                     throw new SqlExceptionEx(ex.Message, ex, CommandText);
@@ -528,6 +536,9 @@ namespace Tripous.Data
             string Source = $"SqlStore.{ConnectionName}";
             string Scope = "ExecSql";
             string CommandText = string.Empty;
+            string EventId = string.Empty;
+            string ParamsText = string.Empty;
+ 
 
             using (DbCommand Cmd = Transaction.Connection.CreateCommand())
             {
@@ -540,17 +551,21 @@ namespace Tripous.Data
                     Cmd.Transaction = Transaction;
 
                     if (SqlMonitor.Active)
+                    {
+                        EventId = SqlMonitor.GetEventId(SqlText);
+                        ParamsText = SqlMonitor.GetParamsText(Cmd);
                         CommandText = SqlMonitor.CommandToText(StartTimeUtc, Cmd, Source, Scope);
+                    }
 
                     Cmd.ExecuteNonQuery();
 
                     if (SqlMonitor.Active)
-                        SqlMonitor.LogSql(StartTimeUtc, Cmd, Source, Scope);
+                        SqlMonitor.LogSql(StartTimeUtc, SqlText, Source, Scope, EventId, ParamsText);
                 }
                 catch (Exception ex)
                 {
                     if (SqlMonitor.Active)
-                        SqlMonitor.LogSql(StartTimeUtc, Cmd, Source, Scope);
+                        SqlMonitor.LogSql(StartTimeUtc, SqlText, Source, Scope, EventId, ParamsText);
 
                     ex.Data["SqlText"] = CommandText;
                     throw new SqlExceptionEx(ex.Message, ex, CommandText);

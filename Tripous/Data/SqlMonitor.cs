@@ -136,6 +136,52 @@ namespace Tripous.Data
             return GetEventId(Cmd.CommandText.Trim());
         }
         
+        /// <summary>
+        /// Returns a text representation of <see cref="DbCommand"/> parameters, along with their values, if any.
+        /// </summary>
+        static public string GetParamsText(DbCommand Cmd)
+        {
+            StringBuilder SB = new StringBuilder();
+
+            /* params */
+            if (Cmd.Parameters.Count > 0)
+            {
+                foreach (DbParameter Parameter in Cmd.Parameters)
+                    AddParamTo(SB, Parameter);
+            }
+
+            string ParamsText = SB.ToString();
+            return ParamsText;
+        }
+        /// <summary>
+        /// Returns a string representation of a <see cref="DbCommand"/>
+        /// </summary>
+        static public string CommandToText(DateTime StartTimeUtc, DbCommand Cmd, string Source, string Scope)
+        {
+            DateTime EndTimeUtc = DateTime.UtcNow;
+            TimeSpan ElapsedTime = EndTimeUtc - StartTimeUtc;
+
+            string SqlText = Cmd.CommandText.Trim();
+            string EventId = GetEventId(SqlText);
+            string ParamsText = GetParamsText(Cmd);
+
+            StringBuilder SB = new StringBuilder();
+            SB.AppendLine($"Start Time Utc: {StartTimeUtc.ToString("HH:mm:ss")}");
+            SB.AppendLine($"Elapsed Time: {ElapsedTime.ToString(@"dd\.hh\:mm\:ss")}");
+            SB.AppendLine($"Source: {Source}");
+            SB.AppendLine($"Scope: {Scope}");
+            SB.AppendLine($"EventId: {EventId}");
+            SB.AppendLine($"SqlText");
+            SB.AppendLine(SqlText);
+            if (!string.IsNullOrWhiteSpace(ParamsText))
+            {
+                SB.AppendLine("Parameters");
+                SB.AppendLine(ParamsText);
+            }
+
+            return SB.ToString();
+        }
+
 
         /// <summary>
         /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
@@ -150,7 +196,7 @@ namespace Tripous.Data
 
                 if ((fListeners.Count > 0) && !string.IsNullOrWhiteSpace(SqlText))
                 {
-  
+                       
                     SqlLogEntry Entry = new SqlLogEntry(StartTimeUtc, SqlText,  Source, Scope, EventId, ParamsText);
 
                     foreach (var Listener in fListeners)
@@ -169,82 +215,27 @@ namespace Tripous.Data
         /// <summary>
         /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
         /// </summary>
-        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source, string Scope)
+        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source, string Scope, string ParamsText)
         {
-            LogSql(StartTimeUtc, SqlText, Source, Scope, string.Empty, string.Empty);
+            LogSql(StartTimeUtc, SqlText, Source, Scope, GetEventId(SqlText), ParamsText);
         }
         /// <summary>
         /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
         /// </summary>
-        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source)
+        static public void LogSql(DateTime StartTimeUtc, string SqlText, string Source, string ParamsText)
         {
-            LogSql(StartTimeUtc, SqlText, Source, string.Empty, string.Empty, string.Empty);
+            LogSql(StartTimeUtc, SqlText, Source, string.Empty, GetEventId(SqlText), ParamsText);
         }
         /// <summary>
         /// Log method. Creates a <see cref="SqlLogEntry"/> instance and passes it to the registered <see cref="SqlLogListener"/>s.
         /// </summary>
-        static public void LogSql(DateTime StartTimeUtc, DbCommand Cmd, string Source, string Scope)
+        static public void LogSql(DateTime StartTimeUtc, string SqlText, string ParamsText)
         {
-            if (fListeners.Count == 0 || !Active)
-                return;
-
-            DateTime EndTimeUtc = DateTime.UtcNow;
-            string SqlText = Cmd.CommandText.Trim();
-            string EventId = GetEventId(SqlText);
-
-            StringBuilder SB = new StringBuilder(); 
-
-            /* params */
-            if (Cmd.Parameters.Count > 0)            
-            { 
-                foreach (DbParameter Parameter in Cmd.Parameters)
-                    AddParamTo(SB, Parameter);
-            }
-
-            string ParamsText = SB.ToString();
-
-            LogSql(StartTimeUtc, SqlText, Source, Scope, EventId, ParamsText);
-
+            LogSql(StartTimeUtc, SqlText, string.Empty, string.Empty, GetEventId(SqlText), ParamsText);
         }
 
-        /// <summary>
-        /// Returns a string representation of a <see cref="DbCommand"/>
-        /// </summary>
-        static public string CommandToText(DateTime StartTimeUtc, DbCommand Cmd, string Source, string Scope)
-        {
-            DateTime EndTimeUtc = DateTime.UtcNow;
-            TimeSpan ElapsedTime = EndTimeUtc - StartTimeUtc;
 
-            string SqlText = Cmd.CommandText.Trim();
-            string EventId = GetEventId(SqlText);
 
-            StringBuilder SB = new StringBuilder();
-
-            /* params */
-            if (Cmd.Parameters.Count > 0)
-            {
-                foreach (DbParameter Parameter in Cmd.Parameters)
-                    AddParamTo(SB, Parameter);
-            }
-
-            string ParamsText = SB.ToString();
- 
-            SB.Clear();
-            SB.AppendLine($"Start Time Utc: {StartTimeUtc.ToString("HH:mm:ss")}");
-            SB.AppendLine($"Elapsed Time: {ElapsedTime.ToString(@"dd\.hh\:mm\:ss")}");
-            SB.AppendLine($"Source: {Source}");
-            SB.AppendLine($"Scope: {Scope}");
-            SB.AppendLine($"EventId: {EventId}");
-            SB.AppendLine($"SqlText");
-            SB.AppendLine(SqlText); 
-            if (!string.IsNullOrWhiteSpace(ParamsText))
-            {
-                SB.AppendLine("Parameters");
-                SB.AppendLine(ParamsText);
-            } 
-
-            return SB.ToString();
-        }
         /// <summary>
         /// The monitor is considered active when two conditions are met:
         /// 1. Active property is set to true
