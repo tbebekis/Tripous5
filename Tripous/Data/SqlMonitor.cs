@@ -28,9 +28,10 @@ namespace Tripous.Data
 
         static object syncLock = new LockObject();
         static List<SqlLogListener> fListeners = new List<SqlLogListener>();
+        static int fActive = 1;  // Active initially
 
         /* fields */
- 
+
         /// <summary>
         /// Field
         /// </summary>
@@ -40,7 +41,7 @@ namespace Tripous.Data
         /// </summary>
         static readonly int paramLength = 23;
 
- 
+  
 
         /* private */
         /// <summary>
@@ -244,8 +245,35 @@ namespace Tripous.Data
 
             return SB.ToString();
         }
-
-        static public bool Active { get; set; } = true;
+        /// <summary>
+        /// The monitor is considered active when two conditions are met:
+        /// 1. Active property is set to true
+        /// 2. There are registered listeners
+        /// </summary>
+        static public bool Active
+        {
+            get
+            {
+                lock (syncLock)
+                {
+                    return (fActive == 0) && (fListeners.Count > 0);
+                }
+            }
+            set
+            {
+                lock (syncLock)
+                {
+                    if (!value)
+                        fActive++;
+                    else
+                    {
+                        fActive--;
+                        if (fActive < 0)
+                            fActive = 0;
+                    }
+                }
+            }
+        }
     }
 
 }

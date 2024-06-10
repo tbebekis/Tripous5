@@ -70,10 +70,7 @@ namespace Tripous
             this.DefaultFileName = DefaultFileName;
             this.ColumnLine = ColumnLine;
             this.MaxSizeKiloBytes = MaxSizeKiloBytes;
-
-            // create the first file
-            BeginFile();
-
+ 
         }
 
         /* public */
@@ -83,8 +80,12 @@ namespace Tripous
         /// <param name="Line"></param>
         public void WriteLine(string Line)
         {
+    
             if (!string.IsNullOrWhiteSpace(Line))
             {
+                if (string.IsNullOrWhiteSpace(LastFileName))
+                    BeginFile();
+
                 Line = Line.Trim();
                 Line += Environment.NewLine;
                 File.AppendAllText(LastFilePath, Line);
@@ -92,7 +93,7 @@ namespace Tripous
                 Size += System.Text.Encoding.Unicode.GetByteCount(Line);
 
                 if (Size > (1024 * MaxSizeKiloBytes))
-                    BeginFile();
+                    LastFileName = null;
             }
         }
         /// <summary>

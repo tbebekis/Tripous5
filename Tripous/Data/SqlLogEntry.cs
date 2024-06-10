@@ -62,7 +62,7 @@ namespace Tripous.Data
             SB.AppendLine(cEndLine);
             
 
-            return base.ToString();
+            return SB.ToString();
         }
 
         public int Counter { get; }

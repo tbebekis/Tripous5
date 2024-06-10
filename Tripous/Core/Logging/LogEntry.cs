@@ -45,8 +45,8 @@ namespace Tripous.Logging
             ExceptionData = Exception == null ? string.Empty : ExceptionEx.GetExceptionText(Exception);
 
             Properties = Params;
-            if (Properties != null) 
-                this.Text = Logger.FormatParams(Text, Properties);
+            if (Properties != null && Properties.Count > 0) 
+                this.Text = Logger.FormatParams(this.Text, Properties);
             else
                 Properties = new Dictionary<string, object>();           
             

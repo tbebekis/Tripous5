@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ using Tripous.Logging;
 
 namespace Tripous.Logging
 {
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class LogRecord
     {
         public LogRecord(LogEntry Entry)
@@ -25,8 +27,11 @@ namespace Tripous.Logging
             EventId = Entry.EventId;
             Message = Entry.Text;
 
-            if (Entry.Properties != null)
+            if (Entry.Properties != null && Entry.Properties.Count > 0)
                 Properties = Entry.GetPropertiesAsSingleLine();
+
+            if (!string.IsNullOrWhiteSpace(Entry.ExceptionData))
+                Stack = Entry.ExceptionData;
         }
 
 
@@ -42,6 +47,7 @@ namespace Tripous.Logging
         public string EventId { get; }
         public string Message { get; }
         public string Properties { get; }
+        public string Stack { get; }
  
     }
 }
