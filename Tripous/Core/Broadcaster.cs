@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Tripous.Core;
 
 namespace Tripous
 {
@@ -18,9 +19,9 @@ namespace Tripous
 
         /* private */
         static object syncLock = new LockObject();
-        static List<IBroadcasterListener> listeners = new List<IBroadcasterListener>();
+        static List<BroadcasterListener> listeners = new List<BroadcasterListener>();
 
-        static bool CanCallListener(IBroadcasterListener Listener)
+        static bool CanCallListener(BroadcasterListener Listener)
         {
             if (Sys.HasProperty(Listener, "IsDisposed"))
             {
@@ -44,7 +45,7 @@ namespace Tripous
         /// <summary>
         /// Registers Listener to the Broadcaster.
         /// </summary>
-        static public void Add(IBroadcasterListener Listener)
+        static internal void Add(BroadcasterListener Listener)
         {
             lock (syncLock)
             {
@@ -63,7 +64,7 @@ namespace Tripous
         /// <summary>
         /// Unregisters Listener from the Broadcaster.
         /// </summary>
-        static public void Remove(IBroadcasterListener Listener)
+        static internal void Remove(BroadcasterListener Listener)
         {
             lock (syncLock)
             {
@@ -83,33 +84,25 @@ namespace Tripous
 
         /// <summary>
         /// Calls all listeners synchronously. 
-        /// <para>The Args may contain an Event element which will be the "name" of the event.</para>
-        /// <para>If the Args contain a "Sender" argument, then the Value of that argument is the sender
-        /// of the event.</para>
+        /// <para>Sender is the sender object, while EventName is the "name" of the event.</para>
         /// </summary> 
-        static public void Send(string EventName, IDictionary<string, object> Args = null)
+        static public void Send(string EventName, object Sender, IDictionary<string, object> Params)
         {
             lock (syncLock)
             {
                 if (Active)
                 {
-                    if (Args == null)
-                    {
-                        Args = new Dictionary<string, object>();
-                        Args["EventName"] = EventName;
-                    }
+                    BroadcasterArgs Args = new BroadcasterArgs(EventName, Sender, Params);
+                    BroadcasterListener[] Items = listeners.ToArray();
 
-                    object Sender = Args.ContainsKey("Sender") ? Args["Sender"] : null;
-                    IBroadcasterListener[] Items = listeners.ToArray();
-
-                    foreach (IBroadcasterListener Item in Items)
+                    foreach (BroadcasterListener Item in Items)
                     {
                         if (!CanCallListener(Item))
                             continue;
 
                         if (Sender != Item)
                         {
-                            Item.HandleBroadcasterEvent(EventName, Args);
+                            Item.ProcessBroadcasterMessage(Args);
                         }
                     }
                 }
@@ -119,37 +112,25 @@ namespace Tripous
         /// Calls all listeners synchronously. 
         /// <para>Sender is the sender object, while EventName is the "name" of the event.</para>
         /// </summary>
-        static public void Send(object Sender, string EventName)
+        static public void Send(string EventName, object Sender)
         {
-            Dictionary<string, object> Args = new Dictionary<string, object>();
-            Args["Sender"] = Sender;
-            Args["EventName"] = EventName;
- 
-            Send(EventName, Args);
+            Send(EventName, Sender, new Dictionary<string, object>());
         }
 
         /// <summary>
         /// Calls all listeners asynchronously. 
-        /// <para>The Args may contain an Event element which will be the "name" of the event.</para>
-        /// <para>If the Args contain a "Sender" argument, then the Value of that argument is the sender
-        /// of the event.</para>
+        /// <para>Sender is the sender object, while EventName is the "name" of the event.</para>
         /// </summary> 
-        static public void Post(string EventName, IDictionary<string, object> Args = null)
+        static public void Post(string EventName, object Sender, IDictionary<string, object> Params)
         {
             lock (syncLock)
             {
                 if (Active)
                 {
-                    if (Args == null)
-                    {
-                        Args = new Dictionary<string, object>();
-                        Args["EventName"] = EventName;
-                    }
+                    BroadcasterArgs Args = new BroadcasterArgs(EventName, Sender, Params);
+                    BroadcasterListener[] Items = listeners.ToArray();
 
-                    object Sender = Args.ContainsKey("Sender") ? Args["Sender"] : null;
-                    IBroadcasterListener[] Items = listeners.ToArray();
-
-                    foreach (IBroadcasterListener Item in Items)
+                    foreach (BroadcasterListener Item in Items)
                     {
                         if (!CanCallListener(Item))
                             continue;
@@ -157,7 +138,7 @@ namespace Tripous
                         if (Sender != Item)
                         {
                             Task.Run(() => {
-                                Item.HandleBroadcasterEvent(EventName, Args);
+                                Item.ProcessBroadcasterMessage(Args);
                             }); 
                         }
                     }
@@ -168,13 +149,9 @@ namespace Tripous
         /// Calls all listeners asynchronously. 
         /// <para>Sender is the sender object, while EventName is the "name" of the event.</para>
         /// </summary>
-        static public void Post(object Sender, string EventName)
+        static public void Post(string EventName, object Sender)
         {
-            Dictionary<string, object> Args = new Dictionary<string, object>();
-            Args["Sender"] = Sender;
-            Args["EventName"] = EventName;
-
-            Post(EventName, Args);
+            Post(EventName, Sender, new Dictionary<string, object>());
         }
 
         /* properties */

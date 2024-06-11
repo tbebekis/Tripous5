@@ -32,7 +32,7 @@ namespace Tripous.Logging
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SyncedLogListener() 
+        public SyncedLogListener(): base()
         {
             fSyncContext = AsyncOperationManager.SynchronizationContext; 
         }
