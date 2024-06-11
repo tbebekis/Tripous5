@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tripous.Logging;
 
-namespace Tripous.Core
+namespace Tripous
 {
 
 
