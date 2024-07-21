@@ -578,14 +578,31 @@ tp.SqlBrokerDef = class {
             });
         }
 
-        // EDW: complete the tp.SqlBrokerDef.Assign()
+ 
+        if (tp.IsArray(Source.Tables)) {
+            this.Tables = [];
+            Source.Tables.forEach((item) => {
+                let TableDef = new tp.SqlBrokerTableDef();
+                TableDef.Assign(item);
+                this.Tables.push(TableDef);
+            });
+        }
 
+        if (tp.IsArray(Source.Queries)) {
+            this.Queries = [];
+            Source.Queries.forEach((item) => {
+                let QueryDef = new tp.SqlBrokerQueryDef();
+                QueryDef.Assign(item);
+                this.Queries.push(QueryDef);
+            });
+        }
+     
     }
     /** Throws exception if this instance is not a valid one. 
      *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
     CheckDescriptor() {
-        //EDW: Check LocatorDef and CodeProviderDef CheckDescriptor()
+ 
         if (tp.IsNullOrWhiteSpace(this.Name))
             tp.Throw(_L("E_SqlBrokerDef_NameIsEmpty", "SqlBrokerDef Name is empty"));
 
@@ -596,6 +613,9 @@ tp.SqlBrokerDef = class {
             tp.Throw(_L("E_SqlBrokerDef_TablesIsEmpty", "SqlBrokerDef Tables is empty"));
 
         this.Tables.forEach((item) => { item.CheckDescriptor(); });
+
+        if (tp.IsValid(this.SelectSqlList) && this.SelectSqlList.length > 0)
+            this.SelectSqlList.forEach((item) => { item.CheckDescriptor(); });
 
         if (tp.IsValid(this.Queries) && this.Queries.length > 0)
             this.Queries.forEach((item) => { item.CheckDescriptor(); });

@@ -188,6 +188,9 @@ namespace Tripous.Data
 
             this.Tables.ForEach((item) => { item.CheckDescriptor(); });
 
+            if (this.SelectSqlList != null && this.SelectSqlList.Count > 0)
+                this.SelectSqlList.ForEach((item) => { item.CheckDescriptor();});
+
             if (this.Queries != null && this.Queries.Count > 0)
                 this.Queries.ForEach((item) => { item.CheckDescriptor(); });
         }

@@ -362,11 +362,11 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// <summary>
         /// The TextBlob text
         /// </summary>
-        public override string TextBlob { get; } = "ntext";
+        public override string TextBlob { get; } = "nvarchar(max)"; // ntext
         /// <summary>
         /// The NTextBlob text
         /// </summary>
-        public override string NTextBlob { get; } = "ntext";
+        public override string NTextBlob { get; } = "nvarchar(max)"; // ntext
         /// <summary>
         /// The NotNullable text
         /// </summary>
