@@ -648,6 +648,11 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
      * @type {tp.TabPage}
      */
     tabGeneral = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabFields = null;
+    
  
     /**
      * @type {tp.TextBox}
@@ -712,6 +717,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         this.Pager.Parent = this.ContentWrapper;
 
         this.tabGeneral = this.Pager.AddPage(_L('General'));
+        this.tabFields = this.Pager.AddPage(_L('Fields'));
  
 
 
@@ -745,6 +751,18 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         this.edtMasterKeyField.Text = this.TableDef.MasterKeyField; 
         this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;  
 
+
+        // Fields Page
+        // ---------------------------------------------------------------------------------
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabFields.AddComponent(LayoutRow);
+
+        // columns grid
+        // add a DIV for the gridFields tp.Grid in the row
+        el = LayoutRow.AddDivElement();
+ 
+        // EDW SqlBrokerTableDef EditDialog
+
     }
 
 
@@ -770,7 +788,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
 
  
 
-    // EDW SqlBrokerTableDef EditDialog
+    
 }
 
 

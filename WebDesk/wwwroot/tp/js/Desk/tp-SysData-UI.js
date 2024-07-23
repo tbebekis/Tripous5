@@ -68,7 +68,7 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
         this.Pager = new tp.TabControl(null, { Height: '100%' });
         this.Pager.Parent = this.ContentWrapper;
 
-        this.tabGeneral = this.Pager.AddPage('Enum');
+        this.tabGeneral = this.Pager.AddPage('General');
         this.tabEnum = this.Pager.AddPage('Enum');
         this.tabEnumSql = this.Pager.AddPage('Enum Sql');
 
@@ -396,10 +396,7 @@ tp.SelectSqlEditDialog = class extends tp.Window {
         // --------------------------------------------------------------------------------- 
         LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
         this.tabColumns.AddComponent(LayoutRow);
-
-        // columns table
-        this.tblColumns = this.SelectSql.ColumnsToDataTable();
-
+ 
         // columns grid
         // add a DIV for the gridFields tp.Grid in the row
         el = LayoutRow.AddDivElement();
@@ -443,6 +440,10 @@ tp.SelectSqlEditDialog = class extends tp.Window {
         this.gridColumns = new tp.Grid(el, CP);
         //this.gridColumns.On("ToolBarButtonClick", this.GridColumns_AnyButtonClick, this);
         //this.gridColumns.On(tp.Events.DoubleClick, this.GridColumns_DoubleClick, this);
+
+        // columns table
+        this.tblColumns = this.SelectSql.ColumnsToDataTable();
+
         this.gridColumns.DataSource = this.tblColumns;
         this.gridColumns.BestFitColumns();
 
@@ -751,7 +752,6 @@ tp.SelectSqlEditDialog.ShowModalAsync = function (SelectSql, WindowArgs = null) 
     });
 };
 //#endregion
-
 
 //#region SqlBrokerQueryDefEditDialog
 /** Modal dialog box for editing a {@link tp.SqlBrokerQueryDef} descriptor
