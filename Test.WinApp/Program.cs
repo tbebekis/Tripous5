@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Threading;
+ 
 
-using Tripous;
-using Tripous.Logging;
 
 namespace Test.WinApp
 {
@@ -17,7 +10,7 @@ namespace Test.WinApp
         {
             if (MainForm != null)
             {
-                MainForm.AppendLine(Sys.ExceptionText(e));
+                LogBox.AppendLine(Sys.ExceptionText(e));
             }
             else
             {

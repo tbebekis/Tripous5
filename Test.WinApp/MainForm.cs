@@ -8,10 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 using Newtonsoft.Json.Linq;
 
 using Tripous;
 using Tripous.Data;
+using Tripous.Forms;
 
 namespace Test.WinApp
 {
@@ -24,54 +26,22 @@ namespace Test.WinApp
         }
 
 
-        /* public */
-        public void ClearLog()
+        /* private */        
+        void FormInitialize()
         {
-            edtLog.Clear();
-            Application.DoEvents();
-        }
-        public void Append(string Text)
-        {
-            if (!string.IsNullOrWhiteSpace(Text))
-            {
-                edtLog.AppendText(Text);
-                Application.DoEvents();
-            }
-        }
-        public void AppendLine(string Text)
-        {
-            if (string.IsNullOrWhiteSpace(Text))
-                Text = string.Empty;
+            LogBox.Initialize(edtLog);
+            App.Initialize(this);
 
-            edtLog.AppendText(Text + Environment.NewLine);
-            Application.DoEvents();
-        }
-        public void AppendLine()
-        {
-            AppendLine("-------------------------------------------------------------------");
-        }
-        public void AppendLineEmpty()
-        {
-            AppendLine(string.Empty);
-        }
-        public void Log(string Text = null)
-        {
-            if (string.IsNullOrWhiteSpace(Text))
-            {
-                ClearLog();
-            }
-            else
-            {
-                AppendLine(Text);
-            }
-        }
+            SettingTest.LoadSettings();
 
-
+            BrokerTest.TestJoinTables();
+            TestStringList();
+        }
         void Execute(Action Proc)
         {
             if (Executing)
             {
-                AppendLine("Cannot Execute(). Already executing!");
+                LogBox.AppendLine("Cannot Execute(). Already executing!");
             }
 
             Executing = true;
@@ -81,7 +51,7 @@ namespace Test.WinApp
             }
             catch (Exception e)
             {
-                AppendLine(e.ToString());
+                LogBox.AppendLine(e);
             }
             finally
             {
@@ -89,32 +59,7 @@ namespace Test.WinApp
             }
         }
 
-        void TestDateTimeJson()
-        {
-            //  sDT = "2022-06-03T21:00:00Z";  // 2022-06-03T21:00:00.000Z
-
-            LogEntry Entry = new LogEntry();
-            string JsonText = Json.Serialize(Entry);
-
-            AppendLine(JsonText);
-
-            JsonText = @"{
-  'Date': '2022-02-18T21:50:57.907+02:00'
-}";
-            Entry = Json.Deserialize<LogEntry>(JsonText);
-            JsonText = Json.Serialize(Entry);
-
-            AppendLine(JsonText);
-        }
-        void FormInitialize()
-        {
-            App.Initialize(this);
-
-            SettingTest.LoadSettings();
-
-            TestDateTimeJson();
-        }
-        void Test()
+        void CodeProviderTest()
         {
             DataTable Table = new DataTable();
             Table.Columns.Add("Code");
@@ -129,7 +74,20 @@ namespace Test.WinApp
             CodeProvider CP = new CodeProvider() { Descriptor = Def, TableName = "Customer" };
             //string Result = CP.Execute(Table.Rows[0], null, null);
         }
+        void TestStringList()
+        {
+            List<string> InsertList = new List<string>();
+            InsertList.Add("Id");
+            InsertList.Add("Name");
+            InsertList.Add("CountryId");
+
+            string S = string.Join(", " + Environment.NewLine, InsertList.ToArray());
+            LogBox.Clear();
+            LogBox.AppendLine(S);
  
+        }
+
+
         /* overrides */
         protected override void OnShown(EventArgs e)
         {
@@ -145,7 +103,7 @@ namespace Test.WinApp
             if (Executing)
             {
                 e.Cancel = true;
-                AppendLine("Can NOT close. Please STOP executing first." + Environment.NewLine);
+                LogBox.AppendLine("Can NOT close. Please STOP executing first." + Environment.NewLine);
             }
 
         }

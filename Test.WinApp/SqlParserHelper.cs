@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿ 
 
-using Tripous.Tokenizing;
 
 
 namespace Test.WinApp
@@ -21,7 +15,7 @@ namespace Test.WinApp
     static public partial class SqlParserHelper
     {
 
-        static public void Tokenize(string SqlText, LogBox Box)        
+        static public void Tokenize(string SqlText)        
         {
 
             StringBuilder SB = new StringBuilder(); 
@@ -62,8 +56,8 @@ namespace Test.WinApp
             }
 
 
-            Box.Clear();
-            Box.Log(SB.ToString());
+            LogBox.Clear();
+            LogBox.AppendLine(SB.ToString());
         }
     }
 }

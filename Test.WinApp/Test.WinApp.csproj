@@ -12,6 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Tripous.Forms\Tripous.Forms.csproj" />
         <ProjectReference Include="..\Tripous\Tripous.csproj" />
     </ItemGroup>
 

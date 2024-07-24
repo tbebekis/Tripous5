@@ -197,6 +197,72 @@ namespace Tripous.Data
         }
 
         /* sql generation */
+        public TableSqls BuildSql(BuildSqlFlags Flags)
+        {
+            TableSqls Statements = new TableSqls();
+
+            bool GuidOid = Bf.Member(BuildSqlFlags.GuidOids, Flags) || this.Fields.Find(item => item.Name.IsSameText(this.PrimaryKeyField)).DataType == DataFieldType.String;
+            bool OidModeIsBefore = !GuidOid && ((Flags & BuildSqlFlags.OidModeIsBefore) == BuildSqlFlags.OidModeIsBefore);
+
+            List<string> InsertList = new List<string>();
+            List<string> InsertParamsList = new List<string>();
+            List<string> UpdateList = new List<string>();
+
+            // string S = string.Join(", " + Environment.NewLine, InsertList.ToArray());
+
+            string FieldName;
+
+            foreach (var FieldDes in this.Fields)
+            {
+                if (FieldDes.IsNativeField && !FieldDes.IsNoInsertOrUpdate)
+                {
+                    FieldName = FieldDes.Name;
+
+                    if (!Sys.IsSameText(FieldName, this.PrimaryKeyField))
+                    {
+                        InsertList.Add($"  {FieldName}");
+                        InsertParamsList.Add($"  :{FieldName}");
+                        UpdateList.Add($"  {FieldName} = :{FieldName}");
+                    }
+                    else if (GuidOid || OidModeIsBefore)
+                    {
+                        InsertList.Add($"  {FieldName}");
+                        InsertParamsList.Add($"  :{FieldName}");
+                    }
+                }
+            }
+
+            string sInsertList = string.Join(", " + Environment.NewLine, InsertList.ToArray()).TrimEnd();
+            string sInsertParamsList = string.Join(", " + Environment.NewLine, InsertParamsList.ToArray()).TrimEnd();
+            string sUpdateList = string.Join(", " + Environment.NewLine, UpdateList.ToArray()).TrimEnd();
+
+
+
+            /* Insert */
+            Statements.InsertRowSql = $@"insert into {this.Name} (
+{sInsertList}
+) values (
+{sInsertParamsList}
+)
+";
+
+            /* Update */
+            Statements.UpdateRowSql = $@"update {this.Name} 
+set 
+{sUpdateList}
+where
+  {this.PrimaryKeyField} = :{this.PrimaryKeyField}
+";
+
+            /* Delete */
+            Statements.DeleteRowSql = $@"delete from {this.Name} where {this.PrimaryKeyField} = :{this.PrimaryKeyField}";
+
+
+
+
+            return Statements;
+        }
+
         /// <summary>
         /// Generates SQL statements using the TableDes descriptor and the Flags
         /// </summary>
@@ -815,7 +881,7 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// Sets the master table of this table.
+        /// Sets the master table of this table. Used in a master-detail relation-ship.
         /// </summary>
         public SqlBrokerTableDef SetMaster(string MasterTableName, string MasterKeyField, string DetailKeyField)
         {
@@ -823,6 +889,30 @@ namespace Tripous.Data
             this.MasterKeyField = MasterKeyField;
             this.DetailKeyField = DetailKeyField;
             return this;
+        }
+
+        /// <summary>
+        /// Adds a table join in this table and returns the joined table.
+        /// <para>If this is CUSTOMER table then the COUNTRY table can be joined as</para>
+        /// <para>TableName: COUNTRY</para>
+        /// <para>Alias: emtpy string or null or an alias</para>
+        /// <para>OwnKeyField: COUNTRY_ID</para>
+        /// <para>The above settings produce the following:</para>
+        /// <para><c>left join COUNTRY on COUNTRY.ID = CUSTOMER.COUNTRY_ID</c></para>
+        /// </summary>
+        /// <param name="TableName">The name of the table to join, e.g. COUNTRY to CUSTOMER</param>
+        /// <param name="Alias">The alias of the table to join, e.g. <c>co</c></param>
+        /// <param name="OwnKeyField">A field that belongs to this table. Is used in the join SQL statement</param>
+           public SqlBrokerTableDef Join(string TableName, string Alias, string OwnKeyField)
+        {
+            SqlBrokerTableDef Result = new SqlBrokerTableDef();
+            Result.Name = TableName;
+            Result.Alias = Alias;
+            Result.MasterKeyField = OwnKeyField;
+
+            JoinTables.Add(Result);
+
+            return Result;
         }
 
         /* properties */

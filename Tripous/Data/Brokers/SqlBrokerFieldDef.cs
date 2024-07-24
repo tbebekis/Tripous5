@@ -293,8 +293,7 @@ from
         /// Gets or sets the expression used to calculate the values in a column, or create an aggregate column
         /// </summary>
         public string Expression { get; set; }
-
-
+ 
         /// <summary>
         /// The name of a foreign table this field points to, if any, else null.
         /// <example> Lets suppose that we have a CUSTOMER table with a CUSTOMER.COUNTRY_ID field
@@ -328,7 +327,7 @@ from
         /// <para>NOTE: The <see cref="ForeignKeyField"/> must be included in this SELECT statement.</para>
         /// </summary>
         public string ForeignTableSql { get; set; }
-
+ 
         /// <summary>
         /// The name of a <see cref="LocatorDef"/> to be used with this field.
         /// </summary>

@@ -30,154 +30,148 @@ namespace Test.WinApp
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.StatusBar = new System.Windows.Forms.StatusStrip();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.ProgressBar = new System.Windows.Forms.ToolStripProgressBar();
-            this.ToolBar = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.Splitter = new System.Windows.Forms.SplitContainer();
-            this.Pager = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.edtLog = new System.Windows.Forms.RichTextBox();
-            this.StatusBar.SuspendLayout();
-            this.ToolBar.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Splitter)).BeginInit();
-            this.Splitter.Panel1.SuspendLayout();
-            this.Splitter.Panel2.SuspendLayout();
-            this.Splitter.SuspendLayout();
-            this.Pager.SuspendLayout();
-            this.SuspendLayout();
+            StatusBar = new StatusStrip();
+            lblStatus = new ToolStripStatusLabel();
+            ProgressBar = new ToolStripProgressBar();
+            ToolBar = new ToolStrip();
+            toolStripButton1 = new ToolStripButton();
+            Splitter = new SplitContainer();
+            Pager = new TabControl();
+            tabPage1 = new TabPage();
+            tabPage2 = new TabPage();
+            edtLog = new RichTextBox();
+            StatusBar.SuspendLayout();
+            ToolBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)Splitter).BeginInit();
+            Splitter.Panel1.SuspendLayout();
+            Splitter.Panel2.SuspendLayout();
+            Splitter.SuspendLayout();
+            Pager.SuspendLayout();
+            SuspendLayout();
             // 
             // StatusBar
             // 
-            this.StatusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus,
-            this.ProgressBar});
-            this.StatusBar.Location = new System.Drawing.Point(0, 439);
-            this.StatusBar.Name = "StatusBar";
-            this.StatusBar.Size = new System.Drawing.Size(784, 22);
-            this.StatusBar.TabIndex = 2;
-            this.StatusBar.Text = "statusStrip1";
+            StatusBar.Items.AddRange(new ToolStripItem[] { lblStatus, ProgressBar });
+            StatusBar.Location = new Point(0, 439);
+            StatusBar.Name = "StatusBar";
+            StatusBar.Size = new Size(784, 22);
+            StatusBar.TabIndex = 2;
+            StatusBar.Text = "statusStrip1";
             // 
             // lblStatus
             // 
-            this.lblStatus.AutoSize = false;
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(300, 17);
-            this.lblStatus.Text = "toolStripStatusLabel1";
+            lblStatus.AutoSize = false;
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(300, 17);
             // 
             // ProgressBar
             // 
-            this.ProgressBar.Name = "ProgressBar";
-            this.ProgressBar.Size = new System.Drawing.Size(180, 16);
+            ProgressBar.Name = "ProgressBar";
+            ProgressBar.Size = new Size(180, 16);
             // 
             // ToolBar
             // 
-            this.ToolBar.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.ToolBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1});
-            this.ToolBar.Location = new System.Drawing.Point(0, 0);
-            this.ToolBar.Name = "ToolBar";
-            this.ToolBar.Size = new System.Drawing.Size(784, 31);
-            this.ToolBar.TabIndex = 3;
-            this.ToolBar.Text = "toolStrip1";
+            ToolBar.ImageScalingSize = new Size(24, 24);
+            ToolBar.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            ToolBar.Location = new Point(0, 0);
+            ToolBar.Name = "ToolBar";
+            ToolBar.Size = new Size(784, 31);
+            ToolBar.TabIndex = 3;
+            ToolBar.Text = "toolStrip1";
             // 
             // toolStripButton1
             // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(28, 28);
-            this.toolStripButton1.Text = "toolStripButton1";
+            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
+            toolStripButton1.ImageTransparentColor = Color.Magenta;
+            toolStripButton1.Name = "toolStripButton1";
+            toolStripButton1.Size = new Size(28, 28);
+            toolStripButton1.Text = "toolStripButton1";
             // 
             // Splitter
             // 
-            this.Splitter.Cursor = System.Windows.Forms.Cursors.HSplit;
-            this.Splitter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Splitter.Location = new System.Drawing.Point(0, 31);
-            this.Splitter.Name = "Splitter";
-            this.Splitter.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            Splitter.Cursor = Cursors.HSplit;
+            Splitter.Dock = DockStyle.Fill;
+            Splitter.Location = new Point(0, 31);
+            Splitter.Name = "Splitter";
+            Splitter.Orientation = Orientation.Horizontal;
             // 
             // Splitter.Panel1
             // 
-            this.Splitter.Panel1.Controls.Add(this.Pager);
+            Splitter.Panel1.Controls.Add(Pager);
             // 
             // Splitter.Panel2
             // 
-            this.Splitter.Panel2.Controls.Add(this.edtLog);
-            this.Splitter.Size = new System.Drawing.Size(784, 408);
-            this.Splitter.SplitterDistance = 281;
-            this.Splitter.TabIndex = 4;
+            Splitter.Panel2.Controls.Add(edtLog);
+            Splitter.Size = new Size(784, 408);
+            Splitter.SplitterDistance = 281;
+            Splitter.TabIndex = 4;
             // 
             // Pager
             // 
-            this.Pager.Controls.Add(this.tabPage1);
-            this.Pager.Controls.Add(this.tabPage2);
-            this.Pager.Cursor = System.Windows.Forms.Cursors.Default;
-            this.Pager.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Pager.Location = new System.Drawing.Point(0, 0);
-            this.Pager.Name = "Pager";
-            this.Pager.SelectedIndex = 0;
-            this.Pager.Size = new System.Drawing.Size(784, 281);
-            this.Pager.TabIndex = 0;
+            Pager.Controls.Add(tabPage1);
+            Pager.Controls.Add(tabPage2);
+            Pager.Dock = DockStyle.Fill;
+            Pager.Location = new Point(0, 0);
+            Pager.Name = "Pager";
+            Pager.SelectedIndex = 0;
+            Pager.Size = new Size(784, 281);
+            Pager.TabIndex = 0;
             // 
             // tabPage1
             // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 24);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(776, 253);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(776, 253);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
             // 
             // tabPage2
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 24);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(982, 433);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(776, 253);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "tabPage2";
+            tabPage2.UseVisualStyleBackColor = true;
             // 
             // edtLog
             // 
-            this.edtLog.BackColor = System.Drawing.SystemColors.Control;
-            this.edtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.edtLog.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.edtLog.Location = new System.Drawing.Point(0, 0);
-            this.edtLog.Name = "edtLog";
-            this.edtLog.Size = new System.Drawing.Size(784, 123);
-            this.edtLog.TabIndex = 0;
-            this.edtLog.Text = "";
+            edtLog.BackColor = SystemColors.Control;
+            edtLog.Dock = DockStyle.Fill;
+            edtLog.Font = new Font("Courier New", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            edtLog.Location = new Point(0, 0);
+            edtLog.Name = "edtLog";
+            edtLog.Size = new Size(784, 123);
+            edtLog.TabIndex = 0;
+            edtLog.Text = "";
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 461);
-            this.Controls.Add(this.Splitter);
-            this.Controls.Add(this.ToolBar);
-            this.Controls.Add(this.StatusBar);
-            this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Test.WinApp";
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.StatusBar.ResumeLayout(false);
-            this.StatusBar.PerformLayout();
-            this.ToolBar.ResumeLayout(false);
-            this.ToolBar.PerformLayout();
-            this.Splitter.Panel1.ResumeLayout(false);
-            this.Splitter.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.Splitter)).EndInit();
-            this.Splitter.ResumeLayout(false);
-            this.Pager.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(784, 461);
+            Controls.Add(Splitter);
+            Controls.Add(ToolBar);
+            Controls.Add(StatusBar);
+            Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Test.WinApp";
+            WindowState = FormWindowState.Maximized;
+            StatusBar.ResumeLayout(false);
+            StatusBar.PerformLayout();
+            ToolBar.ResumeLayout(false);
+            ToolBar.PerformLayout();
+            Splitter.Panel1.ResumeLayout(false);
+            Splitter.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)Splitter).EndInit();
+            Splitter.ResumeLayout(false);
+            Pager.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

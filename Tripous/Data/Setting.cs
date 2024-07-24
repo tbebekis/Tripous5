@@ -12,9 +12,12 @@ using Tripous.Parsing;
 namespace Tripous.Data
 {
 
- 
+
     /// <summary>
-    /// A setting item
+    /// A setting item.  
+    /// <para><see cref="Settings"/> represents a list of setting items and it can be stored in a file or a database table.</para>
+    /// <para>A <see cref="Setting"/> Id must be unique among the parent list. </para>
+    /// <para>A <see cref="Setting"/>  Value maybe a single value or a multiple value (an array). The value may come from the <see cref="SelectList"/> property.  </para>
     /// </summary>
     public class Setting
     {

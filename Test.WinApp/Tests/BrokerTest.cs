@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Data;
-
-using Tripous;
-using Tripous.Data;
+﻿ 
 
 namespace Test.WinApp
 {
@@ -38,7 +29,7 @@ namespace Test.WinApp
         }
 
         [RegisterBrokersFunc]
-        static void RegisterBrokers()
+        static void TestRegisterBrokersFunc()
         {
             SqlBrokerDef BrokerDef;
             SqlBrokerTableDef TableDef;
@@ -57,6 +48,32 @@ namespace Test.WinApp
             FieldDef = TableDef.AddId("CustomerId");
             FieldDef = TableDef.AddString("StreetAddress", 96, "", FieldFlags.Required);
             FieldDef = TableDef.AddString("City", 96, "", FieldFlags.Required);
+
+            //string JsonText = Json.Serialize(BrokerDef);
+            //LogBox.AppendLine(JsonText);    
+        }
+
+        static public void TestJoinTables()
+        {
+            SqlBrokerDef BrokerDef;
+            SqlBrokerTableDef TableDef;
+            SqlBrokerFieldDef FieldDef;
+
+            SqlBrokerTableDef JoinTableDef;
+
+            BrokerDef = SqlBrokerDef.Register("Person");
+
+            TableDef = BrokerDef.AddTable("Person");
+            FieldDef = TableDef.AddId();
+            FieldDef = TableDef.AddString("Name", 96);
+            FieldDef = TableDef.AddId("CountryId");
+
+            JoinTableDef = TableDef.Join("Country", "", "CountryId");
+            FieldDef = JoinTableDef.AddId();
+            FieldDef = JoinTableDef.AddString("Name", 96);
+
+            string JsonText = Json.Serialize(BrokerDef);
+            LogBox.AppendLine(JsonText);  
         }
 
         static public void Test1()

@@ -12,7 +12,8 @@ using Tripous.Parsing;
 namespace Tripous.Data
 {
     /// <summary>
-    /// Represents a list of settings
+    /// Represents a list of settings.
+    /// <para>It can be stored to a file or a database table.</para>
     /// </summary>
     public class Settings
     {
