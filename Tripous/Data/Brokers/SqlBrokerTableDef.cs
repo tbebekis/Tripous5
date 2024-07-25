@@ -33,6 +33,7 @@ namespace Tripous.Data
         public const string SUBLINES = "_SUBLINES_";
 
         string fTitleKey;
+        string fAlias;
 
         /* construction */
         /// <summary>
@@ -197,6 +198,7 @@ namespace Tripous.Data
         }
 
         /* sql generation */
+        
         public TableSqls BuildSql(BuildSqlFlags Flags)
         {
             TableSqls Statements = new TableSqls();
@@ -232,9 +234,9 @@ namespace Tripous.Data
                 }
             }
 
-            string sInsertList = string.Join(", " + Environment.NewLine, InsertList.ToArray()).TrimEnd();
-            string sInsertParamsList = string.Join(", " + Environment.NewLine, InsertParamsList.ToArray()).TrimEnd();
-            string sUpdateList = string.Join(", " + Environment.NewLine, UpdateList.ToArray()).TrimEnd();
+            string sInsertList       = Sql.TransformToFieldList(InsertList);           // string.Join(", " + Environment.NewLine, InsertList.ToArray()).TrimEnd();
+            string sInsertParamsList = Sql.TransformToFieldList(InsertParamsList);     // string.Join(", " + Environment.NewLine, InsertParamsList.ToArray()).TrimEnd();
+            string sUpdateList       = Sql.TransformToFieldList(UpdateList);           // string.Join(", " + Environment.NewLine, UpdateList.ToArray()).TrimEnd();
 
 
 
@@ -259,9 +261,108 @@ where
 
 
 
+            /* RowSelect */
+            SelectSql SS = BuildSqlSelect(Flags, false);
+            SS.Where = $"  {this.Name}.{this.PrimaryKeyField} = :{this.PrimaryKeyField}"; 
+            Statements.SelectRowSql = SS.Text;
 
+
+            /* Browse */
+            SS = BuildSqlSelect(Flags, true);
+
+            // it is a detail table 
+            bool IsDetailTable = !string.IsNullOrWhiteSpace(this.MasterTableName)
+                                && !string.IsNullOrWhiteSpace(this.MasterKeyField)
+                                && !string.IsNullOrWhiteSpace(this.DetailKeyField);
+
+            if (IsDetailTable)
+            {
+                SS.Where = $"{this.Alias}.{this.DetailKeyField} = :{Sys.MASTER_KEY_FIELD_NAME}";
+                //string.Format("{0}.{1} = :{2}", this.Alias, this.DetailKeyField, Sys.MASTER_KEY_FIELD_NAME);
+            }
+
+            Statements.SelectSql = SS.Text;
+ 
             return Statements;
         }
+        SelectSql BuildSqlSelect(BuildSqlFlags Flags, bool IsBrowserSelect)
+        {
+            SelectSql SelectSql = new SelectSql();
+
+            // native fields
+            string S = string.Empty;
+            List<string> FieldList = new List<string>();
+
+            foreach (var FieldDes in this.Fields)
+            {
+                if (FieldDes.IsNativeField && !FieldDes.IsNoInsertOrUpdate)
+                {
+                    if (IsBrowserSelect)
+                    {
+                        if (FieldDes.DataType.IsBlob() && ((Flags & BuildSqlFlags.IncludeBlobFields) == BuildSqlFlags.None))
+                            continue;
+                    }
+
+                    string FieldName = $"  {this.Name}.{FieldDes.Name}".PadRight(Sql.StatementDefaultSpaces, ' ');
+                    FieldName = $"{FieldName} as {FieldDes.Name}";
+                    FieldList.Add(FieldName);
+                }
+            }
+
+            // add it to SELECT
+            string sFieldList = Sql.TransformToFieldList(FieldList);
+            SelectSql.Select = sFieldList;
+
+            // native from
+            SelectSql.From = $"{this.Name} {this.Alias} " + Environment.NewLine;
+
+            // joined tables and fields
+            NameValueStringList JoinTableNamesList = new NameValueStringList();
+            foreach (var JoinTableDes in this.JoinTables)
+                BuildSqlAddJoin(JoinTableNamesList, SelectSql, this.Alias, JoinTableDes);
+
+            // remove the last comma
+            S = SelectSql.Select.TrimEnd();
+            if ((S.Length > 1) && (S[S.Length - 1] == ','))
+                S = S.Remove(S.Length - 1, 1);
+
+            SelectSql.Select = S;
+            SelectSql.From = SelectSql.From.TrimEnd();
+
+            return SelectSql;
+        }
+        void BuildSqlAddJoin(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, SqlBrokerTableDef JoinTableDes)
+        {
+            string JoinTableName = Sql.FormatTableNameAlias(JoinTableDes.Name, JoinTableDes.Alias);
+
+            if (JoinTableNamesList.IndexOf(JoinTableName) == -1)
+            {
+                JoinTableNamesList.Add(JoinTableName);
+                SelectSql.From += $"    left join {JoinTableName} on {JoinTableDes.Alias}.{JoinTableDes.PrimaryKeyField} = {MasterAlias}.{JoinTableDes.MasterKeyField} " + Environment.NewLine;
+            }
+
+            // joined field list
+            List<string> FieldList = new List<string>();
+            foreach (var JoinFieldDes in JoinTableDes.Fields)
+            {
+                if (!Sys.IsSameText(JoinFieldDes.Name, JoinTableDes.PrimaryKeyField))
+                {
+                    string FieldName = $"  {JoinTableDes.Alias}.{JoinFieldDes.Name}".PadRight(Sql.StatementDefaultSpaces, ' '); 
+                    FieldName = $"{FieldName} as {JoinFieldDes.Alias}";
+                    FieldList.Add(FieldName);
+                }
+            }
+
+            // add it to SELECT
+            string sFieldList = Sql.TransformToFieldList(FieldList);
+            SelectSql.Select = SelectSql.Select.TrimEnd() + ", " + Environment.NewLine;
+            SelectSql.Select += sFieldList;
+
+            // joined tables to this join table
+            foreach (var JoinTableDescriptor in JoinTableDes.JoinTables)
+                BuildSqlAddJoin(JoinTableNamesList, SelectSql, JoinTableDes.Alias, JoinTableDescriptor);
+        }
+
 
         /// <summary>
         /// Generates SQL statements using the TableDes descriptor and the Flags
@@ -371,36 +472,9 @@ where
 
             // native from
             SelectSql.From = "  " + Sql.FormatTableNameAlias(this.Name, this.Alias) + " " + Environment.NewLine;
-
-
-            // if LookUp fields are to be handled as joined tables
-            NameValueStringList JoinTableNamesList = new NameValueStringList();
-
-            string JoinTableName;
-            if ((Flags & BuildSqlFlags.JoinLookUpFields) == BuildSqlFlags.JoinLookUpFields)
-            {
-                foreach (var FieldDes in this.Fields)
-                {
-                    if (FieldDes.IsForeignKeyField)
-                    {
-                        JoinTableName = Sql.FormatTableNameAlias(FieldDes.ForeignTableName, FieldDes.ForeignTableAlias);
-                        if (JoinTableNamesList.IndexOf(JoinTableName) == -1)
-                        {
-                            JoinTableNamesList.Add(JoinTableName);
-                            SelectSql.From += string.Format("    left join {0} on {1}.{2} = {3}.{4} " + Environment.NewLine,
-                                                                        JoinTableName,
-                                                                        FieldDes.ForeignTableAlias,
-                                                                        FieldDes.ForeignKeyField,
-                                                                        this.Alias,
-                                                                        FieldDes.Alias);
-                        }
-
-                        SelectSql.Select += "  " + Sql.FormatFieldNameAlias(FieldDes.ForeignTableAlias, FieldDes.ForeignKeyField, FieldDes.Name, Sql.StatementDefaultSpaces);
-                    }
-                }
-            }
-
+ 
             // joined tables and fields
+            NameValueStringList JoinTableNamesList = new NameValueStringList();
             foreach (var JoinTableDes in this.JoinTables)
                 BuildSql_AddJoinTable(JoinTableNamesList, SelectSql, this.Alias, JoinTableDes);
 
@@ -597,9 +671,9 @@ where
         /// </summary>
         MemTable CreateDescriptorTables_CreateLookUpTable(SqlBrokerFieldDef FieldDes)
         { 
-            MemTable Table = new MemTable() { TableName = FieldDes.ForeignTableAlias };            
+            MemTable Table = new MemTable() { TableName = FieldDes.LookUpTableAlias };            
  
-            DataColumn Column = new DataColumn(FieldDes.ForeignKeyField);
+            DataColumn Column = new DataColumn(FieldDes.LookUpKeyField);
             Column.DataType = FieldDes.DataType.GetNetType();
             Column.MaxLength = FieldDes.MaxLength;
             Table.Columns.Add(Column);
@@ -903,7 +977,7 @@ where
         /// <param name="TableName">The name of the table to join, e.g. COUNTRY to CUSTOMER</param>
         /// <param name="Alias">The alias of the table to join, e.g. <c>co</c></param>
         /// <param name="OwnKeyField">A field that belongs to this table. Is used in the join SQL statement</param>
-           public SqlBrokerTableDef Join(string TableName, string Alias, string OwnKeyField)
+        public SqlBrokerTableDef Join(string TableName, string Alias, string OwnKeyField)
         {
             SqlBrokerTableDef Result = new SqlBrokerTableDef();
             Result.Name = TableName;
@@ -923,7 +997,11 @@ where
         /// <summary>
         /// An alias of this table
         /// </summary>
-        public string Alias { get; set; }
+        public string Alias
+        {
+            get { return !string.IsNullOrWhiteSpace(fAlias) ? fAlias : Name; }
+            set { fAlias = value; }
+        }
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title

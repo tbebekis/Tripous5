@@ -4,6 +4,7 @@
 --------------------------------------------------------------------------------------*/
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Tripous.Data
 {
@@ -457,7 +458,8 @@ namespace Tripous.Data
         }
 
         /// <summary>
-        /// Returns a string such as "TableNameOrAlias.FieldName as Alias"
+        /// Returns a string such as  
+        /// <para><c>TableNameOrAlias.FieldName as Alias</c></para>
         /// </summary>
         static public string FormatFieldNameAlias(string TableNameOrAlias, string FieldName, string Alias, int Spaces)
         {
@@ -470,7 +472,8 @@ namespace Tripous.Data
             return FormatFieldNameAlias(TableNameOrAlias + "." + FieldName, Alias, Spaces);
         }
         /// <summary>
-        /// Returns a string such as "FieldName as Alias"
+        /// Returns a string such as 
+        /// <para><c>FieldName as Alias</c></para>
         /// </summary>
         static public string FormatFieldNameAlias(string FieldName, string Alias, int Spaces)
         {
@@ -483,7 +486,8 @@ namespace Tripous.Data
             return FieldName.PadRight(Spaces, ' ') + " as " + Alias + ", " + LB;
         }
         /// <summary>
-        /// Returns a string such as "TableName  Alias"
+        /// Returns a string such as 
+        /// <para><c>TableName  Alias</c></para>
         /// </summary>
         static public string FormatTableNameAlias(string TableName, string Alias)
         {
@@ -495,6 +499,16 @@ namespace Tripous.Data
             else
                 return TableName + " " + Alias;
         }
+        /// <summary>
+        /// Transforms a string list into a field list by adding a <c>,</c> and a line break in every string item, except the last one.
+        /// </summary>
+        static public string TransformToFieldList(List<string> StringList)
+        {
+            string Result = string.Join(", " + Environment.NewLine, StringList.ToArray()).TrimEnd();
+            return Result;
+        }
+ 
+
         /// <summary>
         /// Formats Value. Quotes the result if Quoted is true.
         /// </summary>

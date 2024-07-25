@@ -224,36 +224,41 @@ tp.SqlBrokerFieldDef = class {
      */
     Expression = null;
 
+
+
     /** The name of a foreign table this field points to, if any, else null. <br />
+     * NOTE: This idea comes from old Tripous versions where it was used with LookUp controls such as ComboBox.
+     * For examples of use in UIs check the Tripous2 ControlHandlerStandard class the Bind() method.
+     * 
      * Lets suppose that we have a CUSTOMER table with a CUSTOMER.COUNTRY_ID field
      * and a COUNTRY table with ID and NAME fields. To establish a foreign relation
      *     this field          = "COUNTRY_ID";     // CUSTOMER.COUNTRY_ID
-     *     ForeignTableName    = "COUNTRY";                           
-     *     ForeignKeyField     = "ID";             // COUNTRY.ID         
-     *     ForeignFieldList    = "ID;NAME";        // COUNTRY.ID, COUNTRY.NAME 
+     *     LookUpTableName     = "COUNTRY";                           
+     *     LookUpKeyField      = "ID";             // COUNTRY.ID         
+     *     LookUpFieldList     = "ID;NAME";        // COUNTRY.ID, COUNTRY.NAME 
      * @type {string}
      */
-    ForeignTableName = '';
+    LookUpTableName = '';
     /** The alias of a foreign table this field points to, if any, else null.
      * @type {string}
      */
-    ForeignTableAlias = '';
+    LookUpTableAlias = '';
     /** The name of the field of the foreign table that becomes the result of a look-up operation
      * @type {string}
      */
-    ForeignKeyField = '';
+    LookUpKeyField = '';
     /** A semi-colon separated list of field names, e.g. Id;Name
      * The fields in this list are used in constructing a SELECT statement. <br />
-     * NOTE: The ForeignKeyField must be included in this list. <br />
-     * NOTE: When this property has a value then the ForeignTableSql is not used.
+     * NOTE: The LookUpKeyField must be included in this list. <br />
+     * NOTE: When this property has a value then the LookUpTableSql is not used.
      * @type {string}
      */
-    ForeignFieldList = '';
-    /** A SELECT statement to be used instead of the ForeignFieldList. <br />
-     * NOTE: The ForeignKeyField must be included in this SELECT statement.
+    LookUpFieldList = '';
+    /** A SELECT statement to be used instead of the LookUpFieldList. <br />
+     * NOTE: The LookUpKeyField must be included in this SELECT statement.
      * @type {string}
      */
-    ForeignTableSql = '';
+    LookUpTableSql = '';
 
     /** The name of a LocatorDef to be used with this field.
      * @type {string}
@@ -282,11 +287,11 @@ tp.SqlBrokerFieldDef = class {
         this.DefaultValue = Source.DefaultValue || '';
         this.Expression = Source.Expression || '';
 
-        this.ForeignTableName = Source.ForeignTableName || '';
-        this.ForeignTableAlias = Source.ForeignTableAlias || '';
-        this.ForeignKeyField = Source.ForeignKeyField || '';
-        this.ForeignFieldList = Source.ForeignFieldList || '';
-        this.ForeignTableSql = Source.ForeignTableSql || '';
+        this.LookUpTableName = Source.LookUpTableName || '';
+        this.LookUpTableAlias = Source.LookUpTableAlias || '';
+        this.LookUpKeyField = Source.LookUpKeyField || '';
+        this.LookUpFieldList = Source.LookUpFieldList || '';
+        this.LookUpTableSql = Source.LookUpTableSql || '';
 
         this.LocatorName = Source.LocatorName || '';
  

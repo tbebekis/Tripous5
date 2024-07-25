@@ -19,7 +19,8 @@ namespace Tripous.Data
     {
         string fDefaultValue = Sys.NULL;
         string fTitleKey;
- 
+        string fAlias;
+
         /* construction */
         /// <summary>
         /// Constructor
@@ -82,25 +83,25 @@ namespace Tripous.Data
         /// </summary>
         public string GetForeignSelectSql()
         {
-            if (string.IsNullOrWhiteSpace(ForeignTableName) 
-                || string.IsNullOrWhiteSpace(ForeignKeyField)
-                || (string.IsNullOrWhiteSpace(ForeignFieldList) && string.IsNullOrWhiteSpace(ForeignTableSql)))
+            if (string.IsNullOrWhiteSpace(LookUpTableName) 
+                || string.IsNullOrWhiteSpace(LookUpKeyField)
+                || (string.IsNullOrWhiteSpace(LookUpFieldList) && string.IsNullOrWhiteSpace(LookUpTableSql)))
                 Sys.Throw($"Broker Field not fully defined: {Name}");
 
-            if (!string.IsNullOrWhiteSpace(ForeignTableSql))
-                return ForeignTableSql;
+            if (!string.IsNullOrWhiteSpace(LookUpTableSql))
+                return LookUpTableSql;
 
             List<string> List = new List<string>();
-            List.Add(ForeignKeyField);
+            List.Add(LookUpKeyField);
 
-            string[] FieldNames = ForeignFieldList.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            string[] FieldNames = LookUpFieldList.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             List.AddRange(FieldNames);
  
             string SqlText = $@" 
 select 
     {List.CommaText()} 
 from 
-{ForeignTableName} 
+{LookUpTableName} 
 ";
 
             return SqlText;
@@ -183,43 +184,43 @@ from
             return this;
         }
         /// <summary>
-        /// Sets the <see cref="ForeignTableName"/> and returns this instance.
+        /// Sets the <see cref="LookUpTableName"/> and returns this instance.
         /// </summary>
         public SqlBrokerFieldDef SetForeignTableName(string Value)
         {
-            this.ForeignTableName = Value;
+            this.LookUpTableName = Value;
             return this;
         }
         /// <summary>
-        /// Sets the <see cref="ForeignTableAlias"/> and returns this instance.
+        /// Sets the <see cref="LookUpTableAlias"/> and returns this instance.
         /// </summary>
         public SqlBrokerFieldDef SetForeignTableAlias(string Value)
         {
-            this.ForeignTableAlias = Value;
+            this.LookUpTableAlias = Value;
             return this;
         }
         /// <summary>
-        /// Sets the <see cref="ForeignKeyField"/> and returns this instance.
+        /// Sets the <see cref="LookUpKeyField"/> and returns this instance.
         /// </summary>
         public SqlBrokerFieldDef SetForeignKeyField(string Value)
         {
-            this.ForeignKeyField = Value;
+            this.LookUpKeyField = Value;
             return this;
         }
         /// <summary>
-        /// Sets the <see cref="ForeignFieldList"/> and returns this instance.
+        /// Sets the <see cref="LookUpFieldList"/> and returns this instance.
         /// </summary>
         public SqlBrokerFieldDef SetForeignFieldList(string Value)
         {
-            this.ForeignFieldList = Value;
+            this.LookUpFieldList = Value;
             return this;
         }
         /// <summary>
-        /// Sets the <see cref="ForeignTableSql"/> and returns this instance.
+        /// Sets the <see cref="LookUpTableSql"/> and returns this instance.
         /// </summary>
         public SqlBrokerFieldDef SetForeignTableSql(string Value)
         {
-            this.ForeignTableSql = Value;
+            this.LookUpTableSql = Value;
             return this;
         }
         /// <summary>
@@ -239,7 +240,11 @@ from
         /// <summary>
         /// An alias of this field
         /// </summary>
-        public string Alias { get; set; }
+        public string Alias
+        {
+            get { return !string.IsNullOrWhiteSpace(fAlias) ? fAlias : Name; }
+            set { fAlias = value; }
+        }
 
         /// <summary>
         /// Gets or sets a resource Key used in returning a localized version of Title
@@ -293,9 +298,12 @@ from
         /// Gets or sets the expression used to calculate the values in a column, or create an aggregate column
         /// </summary>
         public string Expression { get; set; }
- 
+
         /// <summary>
         /// The name of a foreign table this field points to, if any, else null.
+        /// <para><strong>NOTE:</strong>This idea comes from old Tripous versions where it was used with LookUp controls such as ComboBox.
+        /// For examples of use in UIs check the Tripous2 ControlHandlerStandard class the Bind() method.
+        /// </para>
         /// <example> Lets suppose that we have a CUSTOMER table with a CUSTOMER.COUNTRY_ID field
         /// and a COUNTRY table with ID and NAME fields. To establish a foreign relation
         /// <code>
@@ -306,27 +314,27 @@ from
         ///  </code>
         /// </example>
         /// </summary>
-        public string ForeignTableName { get; set; }
+        public string LookUpTableName { get; set; }
         /// <summary>
         /// The alias of a foreign table this field points to, if any, else null.
         /// </summary>
-        public string ForeignTableAlias { get; set; }
+        public string LookUpTableAlias { get; set; }
         /// <summary>
-        /// The name of the field of the foreign table that becomes the result of a look-up operation
+        /// The name of the field of the foreign table that becomes the <strong>result</strong> of a look-up operation
         /// </summary>
-        public string ForeignKeyField { get; set; }
+        public string LookUpKeyField { get; set; }
         /// <summary>
         /// A semi-colon separated list of field names, e.g. Id;Name
         /// <para>The fields in this list are used in constructing a SELECT statement.</para>
-        /// <para>NOTE: The <see cref="ForeignKeyField"/> must be included in this list.</para>
-        /// <para>NOTE: When this property has a value then the <see cref="ForeignTableSql"/> is not used.</para>
+        /// <para>NOTE: The <see cref="LookUpKeyField"/> must be included in this list.</para>
+        /// <para>NOTE: When this property has a value then the <see cref="LookUpTableSql"/> is not used.</para>
         /// </summary>
-        public string ForeignFieldList { get; set; }
+        public string LookUpFieldList { get; set; }
         /// <summary>
-        /// A SELECT statement to be used instead of the <see cref="ForeignFieldList"/>.
-        /// <para>NOTE: The <see cref="ForeignKeyField"/> must be included in this SELECT statement.</para>
+        /// A SELECT statement to be used instead of the <see cref="LookUpFieldList"/>.
+        /// <para>NOTE: The <see cref="LookUpKeyField"/> must be included in this SELECT statement.</para>
         /// </summary>
-        public string ForeignTableSql { get; set; }
+        public string LookUpTableSql { get; set; }
  
         /// <summary>
         /// The name of a <see cref="LocatorDef"/> to be used with this field.

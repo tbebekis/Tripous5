@@ -72,8 +72,17 @@ namespace Test.WinApp
             FieldDef = JoinTableDef.AddId();
             FieldDef = JoinTableDef.AddString("Name", 96);
 
-            string JsonText = Json.Serialize(BrokerDef);
-            LogBox.AppendLine(JsonText);  
+
+            TableDef = BrokerDef.AddTable("Address").SetMaster("Person", "Id", "PersonId");
+            FieldDef = TableDef.AddId();
+            FieldDef = TableDef.AddId("PersonId");
+            FieldDef = TableDef.AddString("StreetAddress", 96, "", FieldFlags.Required);
+            FieldDef = TableDef.AddString("City", 96, "", FieldFlags.Required);
+
+            //string JsonText = Json.Serialize(BrokerDef);
+            //LogBox.AppendLine(JsonText);  
+
+            TableSqls Sqls = TableDef.BuildSql(BuildSqlFlags.GuidOids | BuildSqlFlags.CreateLookUpTables);
         }
 
         static public void Test1()

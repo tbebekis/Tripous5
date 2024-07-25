@@ -190,10 +190,10 @@ namespace Tripous.Data
             {
                 foreach (var FieldDes in TableDes.Fields)
                 {                   
-                    if ((FieldDes.IsForeignKeyField) && Descriptor.Queries.Find(item => item.Name.IsSameText(FieldDes.ForeignTableName)) == null)
+                    if ((FieldDes.IsForeignKeyField) && Descriptor.Queries.Find(item => item.Name.IsSameText(FieldDes.LookUpTableName)) == null)
                     {
                         Descriptor.Queries.Add(new SqlBrokerQueryDef() { 
-                            Name = FieldDes.ForeignTableName,
+                            Name = FieldDes.LookUpTableName,
                             SqlText = FieldDes.GetForeignSelectSql()
                         });
                     }
