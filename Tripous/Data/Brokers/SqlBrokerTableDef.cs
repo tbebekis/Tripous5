@@ -367,7 +367,7 @@ where
         /// <summary>
         /// Generates SQL statements using the TableDes descriptor and the Flags
         /// </summary>
-        public void BuildSql(TableSqls Statements, BuildSqlFlags Flags)
+        public void BuildSql_NOT_USED(TableSqls Statements, BuildSqlFlags Flags)
         {
             Statements.Clear();
 
@@ -424,13 +424,13 @@ where
             Statements.DeleteRowSql = string.Format("delete from {0} where {1} = :{2}", this.Name, this.PrimaryKeyField, this.PrimaryKeyField);
 
             /* RowSelect */
-            SelectSql SS = BuildSql_Select(Flags, false);
+            SelectSql SS = BuildSql_Select_NOT_USED(Flags, false);
             SS.Where = string.Format("where {0}.{1} = :{1}", this.Name, this.PrimaryKeyField);
             Statements.SelectRowSql = SS.Text;
 
 
             /* Browse */
-            SS = BuildSql_Select(Flags, true);
+            SS = BuildSql_Select_NOT_USED(Flags, true);
             // it is a detail table 
             bool IsDetailTable = !string.IsNullOrWhiteSpace(this.MasterTableName)
                                 && !string.IsNullOrWhiteSpace(this.MasterKeyField)
@@ -447,7 +447,7 @@ where
         /// <summary>
         /// Generates and returns the SELECT statements
         /// </summary>
-        SelectSql BuildSql_Select(BuildSqlFlags Flags, bool IsBrowserSelect)
+        SelectSql BuildSql_Select_NOT_USED(BuildSqlFlags Flags, bool IsBrowserSelect)
         {
 
             SelectSql SelectSql = new SelectSql();
@@ -476,7 +476,7 @@ where
             // joined tables and fields
             NameValueStringList JoinTableNamesList = new NameValueStringList();
             foreach (var JoinTableDes in this.JoinTables)
-                BuildSql_AddJoinTable(JoinTableNamesList, SelectSql, this.Alias, JoinTableDes);
+                BuildSql_AddJoinTable_NOT_USED(JoinTableNamesList, SelectSql, this.Alias, JoinTableDes);
 
 
             // remove the last comma
@@ -494,7 +494,7 @@ where
         /// <summary>
         /// Called by BuildSql to handle join tables
         /// </summary>
-        void BuildSql_AddJoinTable(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, SqlBrokerTableDef JoinTableDes)
+        void BuildSql_AddJoinTable_NOT_USED(NameValueStringList JoinTableNamesList, SelectSql SelectSql, string MasterAlias, SqlBrokerTableDef JoinTableDes)
         {
 
             string JoinTableName = Sql.FormatTableNameAlias(JoinTableDes.Name, JoinTableDes.Alias);
@@ -521,7 +521,7 @@ where
 
             // joined tables to this join table
             foreach (var JoinTableDescriptor in JoinTableDes.JoinTables)
-                BuildSql_AddJoinTable(JoinTableNamesList, SelectSql, JoinTableDes.Alias, JoinTableDescriptor);
+                BuildSql_AddJoinTable_NOT_USED(JoinTableNamesList, SelectSql, JoinTableDes.Alias, JoinTableDescriptor);
 
         }
 

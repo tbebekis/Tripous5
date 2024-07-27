@@ -698,17 +698,17 @@ tp.SelectSqlColumn = class {
      * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
      */
     ToDataRow(Row) {
-        Row.Set('Name', Column.Name);
-        Row.Set('TitleKey', Column.TitleKey);
-        Row.Set('DisplayType', Column.DisplayType);
-        Row.Set('Width', Column.Width);
-        Row.Set('ReadOnly', Column.ReadOnly);
-        Row.Set('DisplayIndex', Column.DisplayIndex);
-        Row.Set('GroupIndex', Column.GroupIndex);
-        Row.Set('Decimals', Column.Decimals);
-        Row.Set('FormatString', Column.FormatString);
-        Row.Set('Aggregate', Column.Aggregate);
-        Row.Set('AggregateFormat', Column.AggregateFormat);
+        Row.Set('Name', this.Name);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('DisplayType', this.DisplayType);
+        Row.Set('Width', this.Width);
+        Row.Set('ReadOnly', this.ReadOnly);
+        Row.Set('DisplayIndex', this.DisplayIndex);
+        Row.Set('GroupIndex', this.GroupIndex);
+        Row.Set('Decimals', this.Decimals);
+        Row.Set('FormatString', this.FormatString);
+        Row.Set('Aggregate', this.Aggregate);
+        Row.Set('AggregateFormat', this.AggregateFormat);
     }
     /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
      */

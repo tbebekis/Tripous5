@@ -309,6 +309,47 @@ tp.SqlBrokerFieldDef = class {
         if (this.DataType === tp.DataType.Unknown)
             tp.Throw(_L("E_SqlBrokerFieldDef_DataTypeIsEmpty", "SqlBrokerFieldDef DataType is Unknown. "));
     }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            let Source = Row.OBJECT;
+            this.Assign(Source);
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
+        Row.Set('Alias', this.Alias);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('DataType', this.DataType);
+        Row.Set('MaxLength', this.MaxLength);
+        Row.Set('Decimals', this.Decimals);
+
+        Row.OBJECT = this;
+ 
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+
+        Table.AddColumn('Name').DefaultValue = 'NewField';
+        Table.AddColumn('Alias').DefaultValue = 'NewField';
+        Table.AddColumn('TitleKey').DefaultValue = 'NewField';
+        Table.AddColumn('DataType', tp.DataType.Integer).DefaultValue = tp.DataType.Unknown;
+        Table.AddColumn('MaxLength', tp.DataType.Integer).DefaultValue = 0;
+        Table.AddColumn('Decimals', tp.DataType.Integer).DefaultValue = -1;
+
+        return Table;
+    }
+
+
+
 };
  
 tp.SqlBrokerFieldDef.prototype.fTitle = '';
@@ -454,6 +495,39 @@ tp.SqlBrokerTableDef = class {
         if (!tp.IsValid(this.Fields) || this.Fields.length === 0)
             tp.Throw(_L("E_SqlBrokerTableDef_NoFieldsDefined", "SqlBrokerTableDef Fields not defined."));
     }
+
+    /** Loads this instance's fields from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load fields from.
+     */
+    FieldsFromDataTable(Table) {
+        this.Fields.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SqlBrokerFieldDef();
+                this.Fields.push(Item);
+                Item.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's fields to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    FieldsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SqlBrokerFieldDef.CreateDataTable();
+        }
+
+        this.Fields.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToDataRow(Row);
+        });
+
+        Table.AcceptChanges();
+
+        return Table;
+    }
+
 
 };
 
@@ -689,6 +763,16 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
     edtDetailKeyField = null;
 
 
+    /**
+     * @type {tp.Grid}
+     */
+    gridFields = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblFields = null;
+
+
     /* overrides */
     InitClass() {
         super.InitClass();
@@ -697,7 +781,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
     ProcessInitInfo() {
         super.ProcessInitInfo();
 
-        this.TableDef = this.Args.TableDef;
+        this.TableDef = this.Args.Instance;
     }
     /**
      * Creates all controls of this window.
@@ -705,7 +789,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
     CreateControls() {
         super.CreateControls();
 
-        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
+        let LayoutRow, elRow, elCol, el, CP;
 
         // , Height: "100%"
         let RowHtmlText = `
@@ -765,8 +849,47 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         // columns grid
         // add a DIV for the gridFields tp.Grid in the row
         el = LayoutRow.AddDivElement();
- 
-        // EDW SqlBrokerTableDef EditDialog
+
+        CP = {
+            Name: "gridFields",
+            Height: '100%',
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            //ReadOnly: true,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            Columns: [
+                { Name: 'Name' },
+                { Name: 'Alias' },
+                { Name: 'TitleKey' },
+                { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType) },
+
+                { Name: 'MaxLength' },
+                { Name: 'Decimals' }, 
+            ]
+        };
+
+        this.gridFields = new tp.Grid(el, CP); 
+        this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
+        this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
+
+        // fields table
+        this.tblFields = this.TableDef.FieldsToDataTable();
+
+        this.gridFields.DataSource = this.tblFields;
+        this.gridFields.BestFitColumns();
 
     }
 
@@ -791,8 +914,62 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         return true;
     }
 
- 
 
+ 
+    /** Called when inserting a single row of the tblFields and displays the edit dialog 
+     */
+    async InsertFieldRow() {
+        let FieldDef = new tp.SqlBrokerFieldDef();
+
+        let DialogBox = await tp.SqlBrokerFieldDefEditDialog.ShowModalAsync(FieldDef, null);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) { 
+            let Row = this.tblFields.AddEmptyRow();
+            FieldDef.ToDataRow(Row);
+        }
+    }
+    /** Called when editing a single row of the tblFields and displays the edit dialog 
+     */
+    async EditFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let FieldDef = new tp.SqlBrokerFieldDef();
+            FieldDef.Assign(Row.OBJECT);
+            let DialogBox = await tp.SqlBrokerFieldDefEditDialog.ShowModalAsync(FieldDef, null);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                FieldDef.ToDataRow(Row);
+            }
+        }
+    }
+ 
+    /* event handlers */
+    /** Event handler
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    GridFields_AnyButtonClick(Args) {
+        Args.Handled = true;
+
+        switch (Args.Command) {
+            case 'GridRowInsert':
+                this.InsertFieldRow();
+                break;
+            case 'GridRowEdit':
+                this.EditFieldRow();
+                break;
+            case 'GridRowDelete':
+                tp.InfoNote('Deleted.');
+                break;
+        }
+    }
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    GridFields_DoubleClick(Args) {
+        Args.Handled = true;
+        this.EditFieldRow();        
+    }
     
 }
 
@@ -803,28 +980,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
 tp.SqlBrokerTableDefEditDialog.prototype.TableDef = null;
 
 
-/**
-Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
-@static
-@param {tp.SqlBrokerTableDef} TableDef The object to edit
-@param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SqlBrokerTableDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
-*/
-tp.SqlBrokerTableDefEditDialog.ShowModal = function (TableDef, WindowArgs = null) {
-
-    let Args = WindowArgs || {};
-    Args.Text = Args.Text || 'Table Definition editor';
-
-    Args = new tp.WindowArgs(Args);
-    Args.AsModal = true;
-    Args.DefaultDialogResult = tp.DialogResult.Cancel;
-    Args.TableDef = TableDef;
-
-    let Result = new tp.SqlBrokerTableDefEditDialog(Args);
-    Result.ShowModal();
-
-    return Result;
-};
+ 
 /**
 Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
 @static
@@ -833,19 +989,222 @@ Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
 @returns {tp.SqlBrokerTableDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
 */
 tp.SqlBrokerTableDefEditDialog.ShowModalAsync = function (TableDef, WindowArgs = null) {
-    return new Promise((Resolve, Reject) => {
-        WindowArgs = WindowArgs || {};
-        let CloseFunc = WindowArgs.CloseFunc;
-
-        WindowArgs.CloseFunc = (Window) => {
-            tp.Call(CloseFunc, Window.Args.Creator, Window);
-            Resolve(Window);
-        };
-
-        tp.SqlBrokerTableDefEditDialog.ShowModal(TableDef, WindowArgs);
-    });
+    return tp.Window.ShowModalForAsync(TableDef, tp.SqlBrokerTableDefEditDialog, 'Table Definition Editor', WindowArgs);
 };
 
 
-
 //#endregion
+
+
+
+//#region SqlBrokerFieldDefEditDialog
+/** Modal dialog box for editing a {@link tp.SqlBrokerFieldDef} descriptor
+ */
+tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
+    /**
+     * Constructor
+     * @param {tp.WindowArgs} Args The window args
+     */
+    constructor(Args) {
+        super(Args);
+    }
+
+    /**
+     * @type {tp.TabControl}
+     */
+    Pager = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabFlags = null;
+
+    /**
+     * @type {tp.TextBox}
+     */
+    edtName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtAlias = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtTitleKey = null;
+    /**
+     * @type {tp.ComboBox}
+     */
+    cboDataType = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtMaxLength = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDecimals = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtCodeProviderName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDefaultValue = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtExpression = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpTableName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpTableAlias = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpKeyField = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpFieldList = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpTableSql = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLocatorName = null;
+ 
+
+
+
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+        this.tpClass = 'tp.SqlBrokerFieldDefEditDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+
+        this.FieldDef = this.Args.Instance;
+    }
+    /**
+     * Creates all controls of this window.
+     * */
+    CreateControls() {
+        super.CreateControls();
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
+
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage(_L('General'));
+        this.tabFlags = this.Pager.AddPage(_L('Flags'));
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+
+        let LayoutRow, elRow, elCol, el, CP;
+
+        //
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+
+/*
+Name
+Alias
+TitleKey
+DataType
+MaxLength
+Decimals
+Flags
+CodeProviderName
+DefaultValue
+Expression
+LookUpTableName
+LookUpTableAlias
+LookUpKeyField
+LookUpFieldList
+LookUpTableSql
+LocatorName
+*/
+
+        // controls
+        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
+        this.edtAlias = tp.CreateControlRow(tp.Div(elCol), false, 'Alias', { TypeName: 'TextBox' }).Control;
+        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'TitleKey', { TypeName: 'TextBox' }).Control;
+        this.cboDataType = tp.CreateControlRow(tp.Div(elCol), false, 'DataType', { TypeName: 'ComboBox', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.DataType.ToList([]) }).Control;
+        this.edtMaxLength = tp.CreateControlRow(tp.Div(elCol), false, 'MaxLength', { TypeName: 'TextBox' }).Control;
+        this.edtDecimals = tp.CreateControlRow(tp.Div(elCol), false, 'Decimals', { TypeName: 'TextBox' }).Control;
+
+        this.edtCodeProviderName = tp.CreateControlRow(tp.Div(elCol), false, 'CodeProviderName', { TypeName: 'TextBox' }).Control;
+        this.edtDefaultValue = tp.CreateControlRow(tp.Div(elCol), false, 'DefaultValue', { TypeName: 'TextBox' }).Control;
+        this.edtExpression = tp.CreateControlRow(tp.Div(elCol), false, 'Expression', { TypeName: 'TextBox' }).Control;
+ 
+        this.edtLookUpTableName  = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableName', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpTableAlias = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableAlias', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpKeyField   = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpFieldList  = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpFieldList', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpTableSql = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableSql', { TypeName: 'TextBox' }).Control;
+
+        this.edtLocatorName = tp.CreateControlRow(tp.Div(elCol), false, 'LocatorName', { TypeName: 'TextBox' }).Control;
+
+        // item to controls
+        /*
+        this.edtName.Text = this.TableDef.Name;
+        this.edtAlias.Text = this.TableDef.Alias;
+        this.edtTitleKey.Text = this.TableDef.TitleKey;
+        this.edtPrimaryKeyField.Text = this.TableDef.PrimaryKeyField;
+        this.edtMasterTableName.Text = this.TableDef.MasterTableName;
+        this.edtMasterKeyField.Text = this.TableDef.MasterKeyField;
+        this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;  
+        */
+
+ 
+    }
+
+}
+
+
+/** The instance to be edited by this dialog box.
+ * @type {tp.SqlBrokerFieldDef}
+ * */
+tp.SqlBrokerFieldDefEditDialog.prototype.FieldDef = null;
+
+
+ 
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerFieldDef} object
+@static
+@param {tp.SqlBrokerFieldDef} FieldDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerFieldDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerFieldDefEditDialog.ShowModalAsync = function (FieldDef, WindowArgs = null) {
+    return tp.Window.ShowModalForAsync(FieldDef, tp.SqlBrokerFieldDefEditDialog, 'Field Definition Editor', WindowArgs);
+};

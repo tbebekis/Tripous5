@@ -105,11 +105,10 @@ namespace Tripous.Data
 
             // 1. create sql statements for all Tables of the SqlBrokerDef
             // 2. create DataTable objects for all Tables of the SqlBrokerDef    
-            TableSqls TempSqlStatements;
+ 
             foreach (var TableDes in Descriptor.Tables)
             {
-                TempSqlStatements = new TableSqls();
-                TableDes.BuildSql(TempSqlStatements, SqlFlags);
+                TableSqls TempSqlStatements = TableDes.BuildSql(SqlFlags); 
                 TableDes.CreateDescriptorTable(Store, AddTable, false);
                 Table = FindTable(item => item.Name.IsSameText(TableDes.Name));
                 Table.SqlStatements = TempSqlStatements;

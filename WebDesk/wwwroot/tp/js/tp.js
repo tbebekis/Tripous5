@@ -15131,6 +15131,7 @@ outline: none;
         this.IsElementResizeListener = true;
         this.HookEvent(tp.Events.KeyDown);
         this.Handle.tabIndex = -1;
+        tp.Data(this.Handle, 'tpClass', this.tpClass);
     }
     /**
     Initializes fields and properties just before applying the create params.        
@@ -15746,6 +15747,55 @@ tp.Window.prototype.Content = null;
  */
 tp.Window.ICON_ThreeLines = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAANCAYAAAB2HjRBAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAACxJREFUOE9jcHBw+E8uZiBXI0gfZZr////PQC4mWyPIQsqcPRpgpKW2gQttALaGnxXL5WQ1AAAAAElFTkSuQmCC';
 //#endregion
+
+
+/**
+ * Displays a modal dialog box for editing a {@link Object} object.
+ * @static
+ * @param {Object} Instance The object to edit
+ * @param {tp.Window} WindowClass A {@link tp.Window} derived class to be used in creating the modal dialog
+ * @param {string} [Caption = null] Optional. A caption for the window
+ * @param {tp.WindowArgs} [WindowArgs = null] Optional. {@link tp.WindowArgs} object to be passed to the window.
+ * @returns {tp.Window} Returns an instance of the {@link tp.Window} derived class that passed as argument
+ */
+tp.Window.ShowModalFor = function (Instance, WindowClass, Caption = 'Instance Editor', WindowArgs = null) {
+    let Args = WindowArgs || {};
+    Args.Text = Caption || Args.Text || 'Instance Editor';
+
+    Args = new tp.WindowArgs(Args);
+    Args.AsModal = true;
+    Args.DefaultDialogResult = tp.DialogResult.Cancel;
+    Args.Instance = Instance;
+
+    let Result = new WindowClass(Args);
+    Result.ShowModal();
+
+    return Result;
+};
+
+/**
+ * Displays a modal dialog box for editing a {@link Object} object.
+ * @static
+ * @param {Object} Instance The object to edit
+ * @param {tp.Window} WindowClass A {@link tp.Window} derived class to be used in creating the modal dialog
+ * @param {string} [Caption = null] Optional. A caption for the window
+ * @param {tp.WindowArgs} [WindowArgs = null] Optional. {@link tp.WindowArgs} object to be passed to the window.
+ * @returns {tp.Window} Returns a {@link Promise} of an instance of the {@link tp.Window} derived class that passed as argument
+ */
+tp.Window.ShowModalForAsync = function (Instance, WindowClass, Caption = 'Instance Editor', WindowArgs = null) {
+    return new Promise((Resolve, Reject) => {
+        WindowArgs = WindowArgs || {};
+        let CloseFunc = WindowArgs.CloseFunc;
+
+        WindowArgs.CloseFunc = (Window) => {
+            tp.Call(CloseFunc, Window.Args.Creator, Window);
+            Resolve(Window);
+        };
+
+        tp.Window.ShowModalFor(Instance, WindowClass, Caption, WindowArgs);
+    });
+};
+
 
 //#region  tp.ContentWindow
 /**
