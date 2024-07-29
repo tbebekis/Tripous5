@@ -52,8 +52,13 @@
     let SS = null;
 
     tp.Ready(function () {
-        SS = new tp.SelectSql('select * from Customer');
-        SS.Filters.push(new tp.SqlFilterDef('Customer.Name'));
+        //SS = new tp.SelectSql('select * from Customer');
+        //SS.Filters.push(new tp.SqlFilterDef('Customer.Name'));
+
+        let V = 0;
+        let A = [2, 4, 16];
+        V = tp.FieldFlags.ArrayToValue(A)
+        tp.InfoNote('Result = ' + V);
         
     });
 

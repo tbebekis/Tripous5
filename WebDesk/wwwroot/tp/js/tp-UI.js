@@ -11476,7 +11476,8 @@ tp.CheckListControl = class extends tp.Control {
     */
     OnInitializationCompleted() {
         super.OnInitializationCompleted();
-        this.SetScrollerList();
+
+        setTimeout(() => { this.SetScrollerList(); }, 500);
     }
     /**
     Binds the control to its DataSource. It is called after the DataSource property is assigned.

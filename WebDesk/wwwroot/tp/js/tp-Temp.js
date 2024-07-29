@@ -1020,7 +1020,11 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
     /**
      * @type {tp.TabPage}
      */
-    tabFlags = null;
+    tabLookUp = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabLookUpTableSql = null;
 
     /**
      * @type {tp.TextBox}
@@ -1061,6 +1065,16 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
     /**
      * @type {tp.TextBox}
      */
+    edtLocatorName = null;
+    /**
+     * @type {tp.CheckListBox}
+     */
+    lboFlags = null;
+
+
+    /**
+     * @type {tp.TextBox}
+     */
     edtLookUpTableName = null;
     /**
      * @type {tp.TextBox}
@@ -1074,18 +1088,13 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
      * @type {tp.TextBox}
      */
     edtLookUpFieldList = null;
-    /**
-     * @type {tp.TextBox}
-     */
-    edtLookUpTableSql = null;
-    /**
-     * @type {tp.TextBox}
-     */
-    edtLocatorName = null;
  
 
-
-
+    /** The element upon Ace Editor is created. 
+    * The '__Editor' property of the element points to Ace Editor object.
+    * @type {HTMLElement}
+    */
+    elSqlEditor = null;
 
     /* overrides */
     InitClass() {
@@ -1110,16 +1119,19 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
         this.Pager.Parent = this.ContentWrapper;
 
         this.tabGeneral = this.Pager.AddPage(_L('General'));
-        this.tabFlags = this.Pager.AddPage(_L('Flags'));
+        this.tabLookUp = this.Pager.AddPage(_L('LookUp'));
+        this.tabLookUpTableSql = this.Pager.AddPage(_L('LookUp Table Sql'));
 
         setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
 
 
-        let LayoutRow, elRow, elCol, el, CP;
+        let LayoutRow, elRow, elCol, elCol2, el, CP;
 
         //
         let RowHtmlText = `
 <div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
     <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
     </div>
 </div>
@@ -1133,6 +1145,9 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
 
         elCol = elRow.children[0];
         tp.StyleProp(elCol, 'padding-left', '2px');
+
+        elCol2 = elRow.children[1];
+        tp.StyleProp(elCol2, 'padding-left', '2px');
 
 
 /*
@@ -1155,6 +1170,7 @@ LocatorName
 */
 
         // controls
+        // col 1
         this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
         this.edtAlias = tp.CreateControlRow(tp.Div(elCol), false, 'Alias', { TypeName: 'TextBox' }).Control;
         this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'TitleKey', { TypeName: 'TextBox' }).Control;
@@ -1166,25 +1182,51 @@ LocatorName
         this.edtDefaultValue = tp.CreateControlRow(tp.Div(elCol), false, 'DefaultValue', { TypeName: 'TextBox' }).Control;
         this.edtExpression = tp.CreateControlRow(tp.Div(elCol), false, 'Expression', { TypeName: 'TextBox' }).Control;
  
-        this.edtLookUpTableName  = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableName', { TypeName: 'TextBox' }).Control;
-        this.edtLookUpTableAlias = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableAlias', { TypeName: 'TextBox' }).Control;
-        this.edtLookUpKeyField   = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpKeyField', { TypeName: 'TextBox' }).Control;
-        this.edtLookUpFieldList  = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpFieldList', { TypeName: 'TextBox' }).Control;
-        this.edtLookUpTableSql = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableSql', { TypeName: 'TextBox' }).Control;
-
         this.edtLocatorName = tp.CreateControlRow(tp.Div(elCol), false, 'LocatorName', { TypeName: 'TextBox' }).Control;
 
-        // item to controls
-        /*
-        this.edtName.Text = this.TableDef.Name;
-        this.edtAlias.Text = this.TableDef.Alias;
-        this.edtTitleKey.Text = this.TableDef.TitleKey;
-        this.edtPrimaryKeyField.Text = this.TableDef.PrimaryKeyField;
-        this.edtMasterTableName.Text = this.TableDef.MasterTableName;
-        this.edtMasterKeyField.Text = this.TableDef.MasterKeyField;
-        this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;  
-        */
+        // col 2
+        this.lboFlags = tp.CreateControlRow(tp.Div(elCol2), false, 'Flags', { TypeName: 'CheckListBox', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.FieldFlags.ToList([]) }).Control;
+ 
+        
 
+        // LookUp Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabLookUp.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+
+        this.edtLookUpTableName = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableName', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpTableAlias = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableAlias', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpFieldList = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpFieldList', { TypeName: 'TextBox' }).Control;
+ 
+        // LookUp Table Sql Page
+        // ---------------------------------------------------------------------------------
+        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabLookUpTableSql.Handle, 'sql', this.FieldDef.LookUpTableSql);
+         
+
+
+        // item to controls
+        // --------------------------------------------------------------------------------- 
+        this.edtName.Text = this.FieldDef.Name;
+        this.edtAlias.Text = this.FieldDef.Alias;
+        this.edtTitleKey.Text = this.FieldDef.TitleKey;
+        this.cboDataType.SelectedIndex = this.cboDataType.Items.indexOf(this.FieldDef.DataType);
+        this.edtMaxLength.Text = this.FieldDef.MaxLength;
+        this.edtDecimals.Text = this.FieldDef.Decimals;
+ 
+        this.edtCodeProviderName.Text = this.FieldDef.CodeProviderName;
+        this.edtDefaultValue.Text = this.FieldDef.DefaultValue;
+        this.edtExpression.Text = this.FieldDef.Expression;
+
+        this.edtLocatorName.Text = this.FieldDef.LocatorName;
+ 
+        let Flags = tp.Bf.SetValueToIntegerArray(tp.FieldFlags, this.FieldDef.Flags)
+        this.lboFlags.SelectedValues = Flags;
  
     }
 
@@ -1208,3 +1250,5 @@ Displays a modal dialog box for editing a {@link tp.SqlBrokerFieldDef} object
 tp.SqlBrokerFieldDefEditDialog.ShowModalAsync = function (FieldDef, WindowArgs = null) {
     return tp.Window.ShowModalForAsync(FieldDef, tp.SqlBrokerFieldDefEditDialog, 'Field Definition Editor', WindowArgs);
 };
+
+//#endregion

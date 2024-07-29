@@ -34,6 +34,12 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
      */
     edtEnumDisplayLabels = null;
 
+    /** The element upon Ace Editor is created. 
+     * The '__Editor' property of the element points to Ace Editor object.
+     * @type {HTMLElement}
+     */
+    elSqlEditor = null;
+
     /* overrides */
     InitClass() {
         super.InitClass();
@@ -51,12 +57,10 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
     CreateControls() {
         super.CreateControls();
 
-        let LayoutRow, elRow, elCol, el, CP, i, ln, Index;
+        let LayoutRow, elRow, elCol, elCol2, el, CP, i, ln, Index;
 
         let RowHtmlText = `
 <div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "auto"}'>
-    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-    </div>
     <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
     </div>
 </div>

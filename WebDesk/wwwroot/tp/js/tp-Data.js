@@ -2196,6 +2196,30 @@ tp.FieldFlags = {
     ForeignKey: 0x1000,
     NoInsertUpdate: 0x2000,
     Localizable: 0x4000,
+
+
+    /** Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * @type {string[]} ExcludeItems Array containing {@link tp.FieldFlags} constants to exclude.
+     * @returns {object[]} Returns the values of the properties of this type as an array of {Id: 'xxx', Name: 'xxx' }
+     * */
+    ToList(ExcludeItems = [tp.FieldFlags.None]) {
+        let Result = [];
+
+        ExcludeItems = tp.IsArray(ExcludeItems) ? ExcludeItems : [];
+
+        for (let Prop in tp.FieldFlags) {
+            if (ExcludeItems.indexOf(tp.FieldFlags[Prop]) < 0 && !tp.IsFunction(tp.FieldFlags[Prop])) {
+                let o = {
+                    Id: tp.FieldFlags[Prop],
+                    Name: Prop
+                };
+
+                Result.push(o);
+            }
+        }
+
+        return Result;
+    }
 };
  
 Object.freeze(tp.FieldFlags);

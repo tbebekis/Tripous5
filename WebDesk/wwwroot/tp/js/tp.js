@@ -8188,7 +8188,7 @@ tp.Bf = {
     Dif: function (A, B) { return A ^ B; },
     /**
      * Subtraction (-).Returns the subtraction of B from A. 
-    The result is a new set containing the the elements of A MINUS the elements of B. 
+    The result is a new set containing the elements of A MINUS the elements of B. 
     @param {number} A -
     @param {number} B -
     @returns {number} -
@@ -8238,7 +8238,46 @@ tp.Bf = {
 
         var S = Result.join(', ');
         return S;
+    },
+
+    /**
+     * Returns an integer array where each element is a flag value of a specified bit-field type, found in a specified bit-field value.
+     * @param {Object} SetType A bit-field (Set) type, such as tp.FieldFlags (see tp-Data.js)
+     * @param {integer} SetValue An integer value, actually a bit-field value
+     * @returns {Array} Returns an integer array where each element is a flag value of a specified bit-field type, found in a specified bit-field value.
+     */
+    SetValueToIntegerArray: function(SetType, SetValue) {
+        let Result = [];
+
+        for (let Prop in SetType) {
+            if (!tp.IsFunction(SetType[Prop]) && tp.IsInteger(SetType[Prop])) {
+                let v = SetType[Prop];
+                if (tp.Bf.In(v, SetValue))
+                    Result.push(v);
+            }
+        }
+
+        return Result;
+    },
+    /**
+     * Returns a bit-field value by or-ing flag values found in a specified integer array
+     * @param {Array} A The integer array to operate on
+     * @returns {integer} Returns a bit-field value by or-ing flag values found in a specified integer array
+     */
+    IntegerArrayToSetValue: function(A) {
+        let Result = 0;
+
+        if (tp.IsArray(FieldFlagsArray)) {
+            FieldFlagsArray.forEach((item) => {
+                if (tp.IsInteger(item))
+                    Result |= item;
+            })
+        }
+
+        return Result;
     }
+
+
 };
 //#endregion
 
