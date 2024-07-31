@@ -140,7 +140,6 @@ tp.SqlBrokerQueryDef = class {
             });
         }
     }
-
     /** Throws exception if this instance is not a valid one. 
      *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
@@ -152,6 +151,33 @@ tp.SqlBrokerQueryDef = class {
         if (tp.IsNullOrWhiteSpace(this.SqlText))
             tp.Throw(_L("E_SqlBrokerQueryDef_NoSql", "SqlBrokerQueryDef must have an SQL statement"));
  
+    }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            let Source = Row.OBJECT;
+            this.Assign(Source);
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
+
+        Row.OBJECT = this;
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+
+        Table.AddColumn('Name').DefaultValue = 'New Item';
+
+        return Table;
     }
 };
 
@@ -528,6 +554,37 @@ tp.SqlBrokerTableDef = class {
         return Table;
     }
 
+    /** Loads this instance's StockTables from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load StockTables from.
+     */
+    StockTablesFromDataTable(Table) {
+        this.StockTables.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SqlBrokerQueryDef();
+                this.StockTables.push(Item);
+                Item.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's StockTables to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save StockTables to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    StockTablesToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SqlBrokerQueryDef.CreateDataTable();
+        }
+
+        this.Fields.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToDataRow(Row);
+        });
+
+        Table.AcceptChanges();
+
+        return Table;
+    }
 
 };
 
@@ -699,6 +756,11 @@ tp.SqlBrokerDef = class {
         if (tp.IsValid(this.Queries) && this.Queries.length > 0)
             this.Queries.forEach((item) => { item.CheckDescriptor(); });
     }
+
+
+
+
+
 };
 
 tp.SqlBrokerDef.prototype.fTitle = '';
@@ -731,6 +793,10 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
      * @type {tp.TabPage}
      */
     tabFields = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabStockTables = null;
     
  
     /**
@@ -772,6 +838,14 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
      */
     tblFields = null;
 
+    /**
+     * @type {tp.Grid}
+     */
+    gridStockTables = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblStockTables = null;
 
     /* overrides */
     InitClass() {
@@ -807,6 +881,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
 
         this.tabGeneral = this.Pager.AddPage(_L('General'));
         this.tabFields = this.Pager.AddPage(_L('Fields'));
+        this.tabStockTables = this.Pager.AddPage(_L('StockTables'));
  
 
 
@@ -881,15 +956,58 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
             ]
         };
 
-        this.gridFields = new tp.Grid(el, CP); 
-        this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
-        this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
-
-        // fields table
+        // table and grid
         this.tblFields = this.TableDef.FieldsToDataTable();
 
+        this.gridFields = new tp.Grid(el, CP); 
+        this.gridFields.On("ToolBarButtonClick", this.AnyGrid_AnyButtonClick, this);
+        this.gridFields.On(tp.Events.DoubleClick, this.AnyGrid_DoubleClick, this);
+ 
         this.gridFields.DataSource = this.tblFields;
         this.gridFields.BestFitColumns();
+
+        // StockTables Page
+        // ---------------------------------------------------------------------------------
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabStockTables.AddComponent(LayoutRow);
+
+
+        // add a DIV for the gridStockTables tp.Grid in the row
+        el = LayoutRow.AddDivElement();
+        CP = {
+            Name: "gridStockTables",
+            Height: '100%',
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            ReadOnly: true,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            Columns: [
+                { Name: 'Name' },
+            ]
+        };
+
+        // table and grid
+        this.tblStockTables = this.TableDef.StockTablesToDataTable();
+
+        this.gridStockTables = new tp.Grid(el, CP);        
+        this.gridStockTables.DataSource = this.tblStockTables;
+        this.gridStockTables.BestFitColumns();
+
+        this.gridStockTables.On("ToolBarButtonClick", this.AnyGrid_AnyButtonClick, this);
+        this.gridStockTables.On(tp.Events.DoubleClick, this.AnyGrid_DoubleClick, this);
 
     }
 
@@ -941,34 +1059,85 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
             }
         }
     }
- 
+
+
+    /** Called when inserting a single row of the tblStockTables and displays the edit dialog
+     */
+    async InsertStockTableRow() {
+        let Instance = new tp.SqlBrokerQueryDef();
+
+        let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance, null);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblStockTables.AddEmptyRow();
+            Instance.ToDataRow(Row);
+        }
+    }
+    /** Called when editing a single row of the tblStockTables and displays the edit dialog
+     */
+    async EditStockTableRow() {
+        let Row = this.gridStockTables.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let Instance = new tp.SqlBrokerQueryDef();
+            Instance.Assign(Row.OBJECT);
+            let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance, null);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Instance.ToDataRow(Row);
+            }
+        }
+    }
+
     /* event handlers */
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
      */
-    GridFields_AnyButtonClick(Args) {
+    AnyGrid_AnyButtonClick(Args) {
         Args.Handled = true;
 
-        switch (Args.Command) {
-            case 'GridRowInsert':
-                this.InsertFieldRow();
-                break;
-            case 'GridRowEdit':
-                this.EditFieldRow();
-                break;
-            case 'GridRowDelete':
-                tp.InfoNote('Deleted.');
-                break;
+        if (Args.Sender === this.gridFields) {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertFieldRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditFieldRow();
+                    break;
+                case 'GridRowDelete':
+                    tp.InfoNote('Fiel Deleted.');
+                    break;
+            }
         }
+        else if (Args.Sender === this.gridStockTables) {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertStockTableRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditStockTableRow();
+                    break;
+                case 'GridRowDelete':
+                    tp.InfoNote('StockTable Deleted.');
+                    break;
+            }
+        }
+         
+
+
     }
     /**
     Event handler
     @protected
     @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
     */
-    GridFields_DoubleClick(Args) {
+    AnyGrid_DoubleClick(Args) {
         Args.Handled = true;
-        this.EditFieldRow();        
+
+        if (Args.Sender === this.gridFields) {
+            this.EditFieldRow();    
+        }
+        else if (Args.Sender === this.gridStockTables) {
+            this.EditStockTableRow();    
+        }    
     }
     
 }
@@ -1148,27 +1317,7 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
 
         elCol2 = elRow.children[1];
         tp.StyleProp(elCol2, 'padding-left', '2px');
-
-
-/*
-Name
-Alias
-TitleKey
-DataType
-MaxLength
-Decimals
-Flags
-CodeProviderName
-DefaultValue
-Expression
-LookUpTableName
-LookUpTableAlias
-LookUpKeyField
-LookUpFieldList
-LookUpTableSql
-LocatorName
-*/
-
+ 
         // controls
         // col 1
         this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
@@ -1187,8 +1336,6 @@ LocatorName
         // col 2
         this.lboFlags = tp.CreateControlRow(tp.Div(elCol2), false, 'Flags', { TypeName: 'CheckListBox', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.FieldFlags.ToList([]) }).Control;
  
-        
-
         // LookUp Page
         // ---------------------------------------------------------------------------------
         elRow = tp.HtmlToElement(RowHtmlText);
@@ -1207,29 +1354,58 @@ LocatorName
         // LookUp Table Sql Page
         // ---------------------------------------------------------------------------------
         this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabLookUpTableSql.Handle, 'sql', this.FieldDef.LookUpTableSql);
-         
+ 
+    }
 
 
-        // item to controls
-        // --------------------------------------------------------------------------------- 
+    ItemToControls() {
         this.edtName.Text = this.FieldDef.Name;
         this.edtAlias.Text = this.FieldDef.Alias;
         this.edtTitleKey.Text = this.FieldDef.TitleKey;
-        this.cboDataType.SelectedIndex = this.cboDataType.Items.indexOf(this.FieldDef.DataType);
+        this.cboDataType.SelectedIndex = this.cboDataType.Items.findIndex((item) => item.Id === this.FieldDef.DataType );        
         this.edtMaxLength.Text = this.FieldDef.MaxLength;
         this.edtDecimals.Text = this.FieldDef.Decimals;
- 
+
         this.edtCodeProviderName.Text = this.FieldDef.CodeProviderName;
         this.edtDefaultValue.Text = this.FieldDef.DefaultValue;
         this.edtExpression.Text = this.FieldDef.Expression;
 
         this.edtLocatorName.Text = this.FieldDef.LocatorName;
- 
+
+        this.edtLookUpTableName.Text = this.FieldDef.LookUpTableName;
+        this.edtLookUpTableAlias.Text = this.FieldDef.LookUpTableAlias;
+        this.edtLookUpKeyField.Text = this.FieldDef.LookUpKeyField;
+        this.edtLookUpFieldList.Text = this.FieldDef.LookUpFieldList;
+        
+
         let Flags = tp.Bf.SetValueToIntegerArray(tp.FieldFlags, this.FieldDef.Flags)
         this.lboFlags.SelectedValues = Flags;
+    }
+    ControlsToItem() {
+        this.FieldDef.Name = this.edtName.Text;
+        this.FieldDef.Alias = this.edtAlias.Text;
+        this.FieldDef.TitleKey = this.edtTitleKey.Text;
+        this.FieldDef.DataType = this.cboDataType.SelectedValue;
+        this.FieldDef.MaxLength = tp.StrToInt(this.edtMaxLength.Text);
+        this.FieldDef.Decimals = tp.StrToInt(this.edtDecimals.Text);
+
+        this.FieldDef.CodeProviderName = this.edtCodeProviderName.Text;
+        this.FieldDef.DefaultValue = this.edtDefaultValue.Text;
+        this.FieldDef.Expression = this.edtExpression.Text;   
+
+        this.FieldDef.LocatorName = this.edtLocatorName.Text;
+
+        this.FieldDef.LookUpTableName = this.edtLookUpTableName.Text;
+        this.FieldDef.LookUpTableAlias = this.edtLookUpTableAlias.Text;
+        this.FieldDef.LookUpKeyField = this.edtLookUpKeyField.Text;
+        this.FieldDef.LookUpFieldList = this.edtLookUpFieldList.Text;
+        this.FieldDef.LookUpTableSql = this.elSqlEditor.__Editor.getValue();
+
+        this.FieldDef.Flags = tp.Bf.IntegerArrayToSetValue(this.lboFlags.SelectedValues);
+
+        this.FieldDef.CheckDescriptor();
  
     }
-
 }
 
 
@@ -1248,6 +1424,9 @@ Displays a modal dialog box for editing a {@link tp.SqlBrokerFieldDef} object
 @returns {tp.SqlBrokerFieldDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
 */
 tp.SqlBrokerFieldDefEditDialog.ShowModalAsync = function (FieldDef, WindowArgs = null) {
+    if (tp.IsEmpty(WindowArgs))
+        WindowArgs = new tp.WindowArgs();
+    WindowArgs.Height = 550;
     return tp.Window.ShowModalForAsync(FieldDef, tp.SqlBrokerFieldDefEditDialog, 'Field Definition Editor', WindowArgs);
 };
 

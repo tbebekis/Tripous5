@@ -8261,10 +8261,10 @@ tp.Bf = {
     },
     /**
      * Returns a bit-field value by or-ing flag values found in a specified integer array
-     * @param {Array} A The integer array to operate on
+     * @param {Array} FieldFlagsArray The integer array to operate on
      * @returns {integer} Returns a bit-field value by or-ing flag values found in a specified integer array
      */
-    IntegerArrayToSetValue: function(A) {
+    IntegerArrayToSetValue: function (FieldFlagsArray) {
         let Result = 0;
 
         if (tp.IsArray(FieldFlagsArray)) {
@@ -15529,12 +15529,17 @@ gap: 0.15em;
     /** Called just before a modal window is about to set its DialogResult property. <br />
      * Returning false cancels the setting of the property and the closing of the modal window. <br />
      * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
-     * @param {any} DialogResult
+     * @param {tp.DialogResult} DialogResult
      */
     CanSetDialogResult(DialogResult) {
+        let Result = true;
+
         if (tp.IsFunction(this.Args.CanSetDialogResultFunc)) {
-            return tp.Call(this.Args.CanSetDialogResultFunc, this.Args.Creator, this, DialogResult);
+            Result = tp.Call(this.Args.CanSetDialogResultFunc, this.Args.Creator, this, DialogResult);
         }
+
+        if (Result && this.IsValidDialogResult(DialogResult))
+            this.ControlsToItem();
 
         return true;
     }
@@ -15633,6 +15638,8 @@ gap: 0.15em;
         this.OnShown();
 
         tp.Call(this.Args.ShowFunc, this.Args.Creator, this);
+
+        this.ItemToControls();
     }
     /**
     Hides the window
@@ -15659,13 +15666,48 @@ gap: 0.15em;
 
         this.OnClosing();
 
-        this.PassBackResult();
+        if (this.IsValidResult())
+            this.PassBackResult();
+
+
+
         this.Hide();
 
         this.OnClosed();
 
         this.Dispose();
         tp.ListRemove(tp.Window.Windows, this);
+    }
+
+
+    /**
+     * To be used by modal dialogs in passing values from the object being edited to controls.
+     */
+    ItemToControls() {
+    }
+    /**
+     * To be used by modal dialogs in passing values from controls to the object being edited, in case of a valid DialogResult.
+     * NOTE: Throwing an exception from inside this method cancels the setting of the DialogResult property.
+     */
+    ControlsToItem() {
+    }
+
+    /**
+     * If this method returns true then the PassBackResult() is called.
+     * This implementation always returns true.
+     * @returns {boolean} If true then the PassBackResult() is called. This implementation always returns true.
+     */
+    IsValidResult() {
+        return true;
+    }
+    /**
+     * If this method returns true then the ControlsToItem() is called.
+     * This implementation returns true when the specified DialogResult value is OK or Yes.
+     * @param {tp.DialogResult} DialogResult The DialogResult value to check
+     * @returns If this method returns true then the ControlsToItem() is called. This implementation returns true when the specified DialogResult value is OK or Yes.
+     */
+    IsValidDialogResult(DialogResult) {
+        return DialogResult === tp.DialogResult.OK || DialogResult === tp.DialogResult.Yes;
     }
 
     /* notifications */

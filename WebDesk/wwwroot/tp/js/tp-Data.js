@@ -1289,7 +1289,7 @@ tp.SqlFilterDef = class   {
             tp.Throw(_L("E_SqlFilterDef_NoFieldPath", "SqlFilterDef must have a FieldPath"));
 
         let FirstPart = _L("E_SqlFilterDef_Invalid", "Invalid SqlFilterDef: \"{0}\".");
-        FirstPart = tp.Format(FirstPart, FieldPath) + " ";
+        FirstPart = tp.Format(FirstPart, this.FieldPath) + " ";
 
         if (tp.Bf.In(this.Mode, tp.SqlFilterMode.EnumConst | tp.SqlFilterMode.EnumQuery)) 
             if (!tp.Bf.In(this.DataType, tp.DataType.String | tp.DataType.Integer))
@@ -1308,7 +1308,7 @@ tp.SqlFilterDef = class   {
 
             let Format = _L("E_InvalidDisplayLabels", "Invalid field titles in line {0} ");
             if (!tp.IsEmpty(this.EnumDisplayLabels) && this.EnumDisplayLabels.length > 0) {
-
+                let RemoveEmptyLines = true;
                 let Lines = tp.Split(this.EnumDisplayLabels, '\n', RemoveEmptyLines);   
 
                 for (let i = 0; i < Lines.length; i++) {

@@ -100,7 +100,7 @@ tp.SqlFilterDefEditDialog = class extends tp.Window {
         // item to controls 
         this.edtFieldPath.Text = this.FilterDef.FieldPath;
         this.edtTitleKey.Text = this.FilterDef.TitleKey;
-        this.cboDataType.SelectedIndex = this.cboDataType.Items.indexOf(this.FilterDef.DataType);
+        this.cboDataType.SelectedIndex = this.cboDataType.Items.findIndex((item) => item.Id === this.FilterDef.DataType);       
         this.cboMode.SelectedIndex = this.cboMode.Items.indexOf(this.FilterDef.Mode);
         this.chUseRange.Checked = this.FilterDef.UseRange === true;
         this.edtLocator.Text = this.FilterDef.Locator;
@@ -809,7 +809,7 @@ tp.SqlBrokerQueryDefEditDialog = class extends tp.Window {
     ProcessInitInfo() {
         super.ProcessInitInfo();
 
-        this.SqlQuery = this.Args.SqlQuery;
+        this.SqlQuery = this.Args.Instance;
     }
     /**
      * Creates all controls of this window.
@@ -858,10 +858,6 @@ else only the included fields are visible
         // controls
         this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
 
-        // item to controls
-        this.edtName.Text = this.SqlQuery.Name;
-
-
         // Sql Page
         // ---------------------------------------------------------------------------------
         this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', this.SqlQuery.SqlText);
@@ -886,12 +882,7 @@ outline: none;
 resize: none;
 padding: 4px;
 `;
-
-        // border: none;
-
-        if (tp.IsArray(this.SqlQuery.FieldTitleKeys))
-            this.mmoFieldTitleList.Text = this.SqlQuery.FieldTitleKeys.join('\n');
-
+ 
     }
 
     /** Called just before a modal window is about to set its DialogResult property. <br />
@@ -912,7 +903,19 @@ padding: 4px;
         return true;
     }
 
+    ItemToControls() {
+        this.edtName.Text = this.SqlQuery.Name;
+        if (tp.IsArray(this.SqlQuery.FieldTitleKeys))
+            this.mmoFieldTitleList.Text = this.SqlQuery.FieldTitleKeys.join('\n');
 
+    }
+    ControlsToItem() {
+        this.SqlQuery.Name = this.edtName.Text;
+        this.SqlQuery.SqlText = this.elSqlEditor.__Editor.getValue();
+        this.SqlQuery.FieldTitleKeys = this.mmoFieldTitleList.GetLines(true);
+
+        this.SqlQuery.CheckDescriptor();
+    }
 }
 
 
@@ -922,6 +925,7 @@ padding: 4px;
 tp.SqlBrokerQueryDefEditDialog.prototype.SqlQuery = null;
 
 
+ 
 /**
 Displays a modal dialog box for editing a {@link tp.SqlBrokerQueryDef} object
 @static
@@ -929,40 +933,8 @@ Displays a modal dialog box for editing a {@link tp.SqlBrokerQueryDef} object
 @param {tp.WindowArgs} [WindowArgs=null] Optional.
 @returns {tp.SqlBrokerQueryDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
 */
-tp.SqlBrokerQueryDefEditDialog.ShowModal = function (SqlQuery, WindowArgs = null) {
-
-    let Args = WindowArgs || {};
-    Args.Text = Args.Text || 'Query editor';
-
-    Args = new tp.WindowArgs(Args);
-    Args.AsModal = true;
-    Args.DefaultDialogResult = tp.DialogResult.Cancel;
-    Args.SqlQuery = SqlQuery;
-
-    let Result = new tp.SqlBrokerQueryDefEditDialog(Args);
-    Result.ShowModal();
-
-    return Result;
-};
-/**
-Displays a modal dialog box for editing a {@link tp.SqlBrokerQueryDef} object
-@static
-@param {tp.SqlBrokerQueryDef} SqlQuery The object to edit
-@param {tp.WindowArgs} [WindowArgs=null] Optional.
-@returns {tp.SqlBrokerQueryDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
-*/
-tp.SqlBrokerQueryDefEditDialog.ShowModalAsync = function (SqlQuery, WindowArgs = null) {
-    return new Promise((Resolve, Reject) => {
-        WindowArgs = WindowArgs || {};
-        let CloseFunc = WindowArgs.CloseFunc;
-
-        WindowArgs.CloseFunc = (Window) => {
-            tp.Call(CloseFunc, Window.Args.Creator, Window);
-            Resolve(Window);
-        };
-
-        tp.SqlBrokerQueryDefEditDialog.ShowModal(SqlQuery, WindowArgs);
-    });
+tp.SqlBrokerQueryDefEditDialog.ShowModalAsync = function (SqlQuery, WindowArgs = null) { 
+    return tp.Window.ShowModalForAsync(SqlQuery, tp.SqlBrokerQueryDefEditDialog, 'SqlBrokerQueryDef Definition Editor', WindowArgs);
 };
 
 //#endregion
