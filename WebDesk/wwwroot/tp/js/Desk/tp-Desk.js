@@ -150,7 +150,7 @@ tp.DeskOptions = {
     IsAuthenticated: false,
 };
 
-/**
+/** Global variable. References the tp.Desktop single instance.
  * @type {tp.Desktop}
  * */
 tp.Desk = null;

@@ -1,4 +1,8 @@
-﻿//#region SqlFilterDefEditDialog
+﻿//---------------------------------------------------------------------------------------
+// SelectSql dialogs
+//---------------------------------------------------------------------------------------
+
+//#region SqlFilterDefEditDialog
 /** Modal dialog box for editing the Enum part (the EnumXXX properties) of a {@link tp.SqlFilterDef} descriptor */
 tp.SqlFilterDefEditDialog = class extends tp.Window {
     /**
@@ -757,6 +761,780 @@ tp.SelectSqlEditDialog.ShowModalAsync = function (SelectSql, WindowArgs = null) 
 };
 //#endregion
 
+//---------------------------------------------------------------------------------------
+// Broker Definition dialogs
+//---------------------------------------------------------------------------------------
+
+//#region SqlBrokerTableDefEditDialog
+/** Modal dialog box for editing a {@link tp.SqlBrokerTableDef} descriptor
+ */
+tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
+    /**
+     * Constructor
+     * @param {tp.WindowArgs} Args The window args
+     */
+    constructor(Args) {
+        super(Args);
+    }
+
+
+
+    /**
+     * @type {tp.TabControl}
+     */
+    Pager = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabFields = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabJoinTables = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabStockTables = null;
+
+
+    /**
+     * @type {tp.TextBox}
+     */
+    edtName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtAlias = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtTitleKey = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtPrimaryKeyField = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtMasterTableName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtMasterKeyField = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDetailKeyField = null;
+
+
+    /**
+     * @type {tp.Grid}
+     */
+    gridFields = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblFields = null;
+
+    /**
+     * @type {tp.Grid}
+     */
+    gridJoinTables = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblJoinTables = null;
+
+    /**
+     * @type {tp.Grid}
+     */
+    gridStockTables = null;
+    /**
+     * @type {tp.DataTable}
+     */
+    tblStockTables = null;
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+        this.tpClass = 'tp.SqlBrokerTableDefEditDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+
+        this.TableDef = this.Args.Instance;
+        this.IsJoinTable = this.Args.IsJoinTable || false;
+    }
+    /**
+     * Creates all controls of this window.
+     * */
+    CreateControls() {
+        super.CreateControls();
+
+        this.IsJoinTable = this.IsJoinTable === true;
+
+        let LayoutRow, elRow, elCol, el, CP;
+
+        // , Height: "100%"
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
+
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage(_L('General'));
+        this.tabFields = this.Pager.AddPage(_L('Fields'));
+        this.tabJoinTables = this.Pager.AddPage(_L('JoinTables'));
+        this.tabStockTables = this.Pager.AddPage(_L('StockTables'));
+
+
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+        // controls
+        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
+
+        this.edtAlias = tp.CreateControlRow(tp.Div(elCol), false, 'Alias', { TypeName: 'TextBox' }).Control;
+        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'TitleKey', { TypeName: 'TextBox' }).Control;
+        this.edtPrimaryKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'PrimaryKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtMasterTableName = tp.CreateControlRow(tp.Div(elCol), false, 'MasterTableName', { TypeName: 'TextBox' }).Control;
+        this.edtMasterKeyField = tp.CreateControlRow(tp.Div(elCol), false, this.IsJoinTable ? 'Own Key Field' : 'MasterKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtDetailKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'DetailKeyField', { TypeName: 'TextBox' }).Control;
+
+        this.edtMasterTableName.Enabled = this.IsJoinTable !== true;
+        this.edtDetailKeyField.Enabled = this.IsJoinTable !== true;
+
+        // item to controls
+        this.edtName.Text = this.TableDef.Name;
+        this.edtAlias.Text = this.TableDef.Alias;
+        this.edtTitleKey.Text = this.TableDef.TitleKey;
+        this.edtPrimaryKeyField.Text = this.TableDef.PrimaryKeyField;
+        this.edtMasterTableName.Text = this.TableDef.MasterTableName;
+        this.edtMasterKeyField.Text = this.TableDef.MasterKeyField;
+        this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;
+
+
+        // Fields Page
+        // ---------------------------------------------------------------------------------
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabFields.AddComponent(LayoutRow);
+
+        // columns grid
+        // add a DIV for the gridFields tp.Grid in the row
+        el = LayoutRow.AddDivElement();
+
+        CP = {
+            Name: "gridFields",
+            Height: '100%',
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            //ReadOnly: true,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            Columns: [
+                { Name: 'Name' },
+                { Name: 'Alias' },
+                { Name: 'TitleKey' },
+                { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType) },
+
+                { Name: 'MaxLength' },
+                { Name: 'Decimals' },
+            ]
+        };
+
+        // table and grid
+        this.tblFields = this.TableDef.FieldsToDataTable();
+
+        this.gridFields = new tp.Grid(el, CP);
+        this.gridFields.On("ToolBarButtonClick", this.AnyGrid_AnyButtonClick, this);
+        this.gridFields.On(tp.Events.DoubleClick, this.AnyGrid_DoubleClick, this);
+
+        this.gridFields.DataSource = this.tblFields;
+        this.gridFields.BestFitColumns();
+
+        // JoinTables Page
+        // ---------------------------------------------------------------------------------
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabJoinTables.AddComponent(LayoutRow);
+
+        // add a DIV for the gridJoinTables tp.Grid in the row
+        el = LayoutRow.AddDivElement();
+        CP = {
+            Name: "gridJoinTables",
+            Height: '100%',
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            ReadOnly: true,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            // string OwnKeyField, string ForeignTable, string ForeignAlias = "", string ForeignPrimaryKey
+
+            Columns: [
+                { Name: 'OwnKeyField' },
+                { Name: 'ForeignTable' },
+                { Name: 'ForeignAlias' },
+                { Name: 'ForeignPrimaryKey' },
+            ]
+        };
+
+        // table and grid
+        this.tblJoinTables = this.TableDef.JoinTablesToDataTable();
+
+        this.gridJoinTables = new tp.Grid(el, CP);
+        this.gridJoinTables.On("ToolBarButtonClick", this.AnyGrid_AnyButtonClick, this);
+        this.gridJoinTables.On(tp.Events.DoubleClick, this.AnyGrid_DoubleClick, this);
+
+        this.gridJoinTables.DataSource = this.tblJoinTables;
+        this.gridJoinTables.BestFitColumns();
+
+        // StockTables Page
+        // ---------------------------------------------------------------------------------
+        LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
+        this.tabStockTables.AddComponent(LayoutRow);
+
+
+        // add a DIV for the gridStockTables tp.Grid in the row
+        el = LayoutRow.AddDivElement();
+        CP = {
+            Name: "gridStockTables",
+            Height: '100%',
+
+            ToolBarVisible: true,
+            GroupsVisible: false,
+            FilterVisible: false,
+            FooterVisible: false,
+            GroupFooterVisible: false,
+
+            ButtonInsertVisible: true,
+            ButtonEditVisible: true,
+            ButtonDeleteVisible: true,
+            ConfirmDelete: true,
+
+            ReadOnly: true,
+            AllowUserToAddRows: true,
+            AllowUserToDeleteRows: true,
+            AutoGenerateColumns: false,
+
+            Columns: [
+                { Name: 'Name' },
+            ]
+        };
+
+        // table and grid
+        this.tblStockTables = this.TableDef.StockTablesToDataTable();
+
+        this.gridStockTables = new tp.Grid(el, CP);
+        this.gridStockTables.DataSource = this.tblStockTables;
+        this.gridStockTables.BestFitColumns();
+
+        this.gridStockTables.On("ToolBarButtonClick", this.AnyGrid_AnyButtonClick, this);
+        this.gridStockTables.On(tp.Events.DoubleClick, this.AnyGrid_DoubleClick, this);
+
+    }
+
+
+    /** Called just before a modal window is about to set its DialogResult property. <br />
+     * Returning false cancels the setting of the property and the closing of the modal window. <br />
+     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
+     * @override
+     * @param {any} DialogResult
+     */
+    CanSetDialogResult(DialogResult) {
+        if (DialogResult === tp.DialogResult.OK) {
+            this.TableDef.Name = this.edtName.Text;
+            this.TableDef.Alias = this.edtAlias.Text;
+            this.TableDef.TitleKey = this.edtTitleKey.Text;
+            this.TableDef.PrimaryKeyField = this.edtPrimaryKeyField.Text;
+            this.TableDef.MasterTableName = this.edtMasterTableName.Text;
+            this.TableDef.MasterKeyField = this.edtMasterKeyField.Text;
+            this.TableDef.DetailKeyField = this.edtDetailKeyField.Text;
+        }
+
+        return true;
+    }
+
+
+
+    /** Called when inserting a single row of the tblFields and displays the edit dialog 
+     */
+    async InsertFieldRow() {
+        let FieldDef = new tp.SqlBrokerFieldDef();
+
+        let DialogBox = await tp.SqlBrokerFieldDefEditDialog.ShowModalAsync(FieldDef, null);
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblFields.AddEmptyRow();
+            FieldDef.ToDataRow(Row);
+        }
+    }
+    /** Called when editing a single row of the tblFields and displays the edit dialog 
+     */
+    async EditFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let FieldDef = new tp.SqlBrokerFieldDef();
+            FieldDef.Assign(Row.OBJECT);
+            let DialogBox = await tp.SqlBrokerFieldDefEditDialog.ShowModalAsync(FieldDef, null);
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                FieldDef.ToDataRow(Row);
+            }
+        }
+    }
+
+    /** Called when inserting a single row of the tblStockTables and displays the edit dialog
+     */
+    async InsertJoinTableRow() {
+        let Instance = new tp.SqlBrokerTableDef();
+
+        let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance, { Text: 'Join Table Definition Editor', IsJoinTable: true });
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblJoinTables.AddEmptyRow();
+            Instance.ToJoinTableDataRow(Row);
+        }
+    }
+    /** Called when editing a single row of the tblStockTables and displays the edit dialog
+     */
+    async EditJoinTableRow() {
+        let Row = this.gridStockTables.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let Instance = new tp.SqlBrokerTableDef();
+            Instance.Assign(Row.OBJECT);
+            let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance, { Text: 'Join Table Definition Editor', IsJoinTable: true });
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Instance.ToJoinTableDataRow(Row);
+            }
+        }
+    }
+
+    /** Called when inserting a single row of the tblStockTables and displays the edit dialog
+     */
+    async InsertStockTableRow() {
+        let Instance = new tp.SqlBrokerQueryDef();
+
+        let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance, { Text: 'Stock Table Definition Editor' });
+        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+            let Row = this.tblStockTables.AddEmptyRow();
+            Instance.ToDataRow(Row);
+        }
+    }
+    /** Called when editing a single row of the tblStockTables and displays the edit dialog
+     */
+    async EditStockTableRow() {
+        let Row = this.gridStockTables.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let Instance = new tp.SqlBrokerQueryDef();
+            Instance.Assign(Row.OBJECT);
+            let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance, { Text: 'Stock Table Definition Editor' });
+            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
+                Instance.ToDataRow(Row);
+            }
+        }
+    }
+
+    /* event handlers */
+    /** Event handler
+     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+     */
+    AnyGrid_AnyButtonClick(Args) {
+        Args.Handled = true;
+
+        if (Args.Sender === this.gridFields) {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertFieldRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditFieldRow();
+                    break;
+                case 'GridRowDelete':
+                    tp.InfoNote('Fiel Deleted.');
+                    break;
+            }
+        }
+        else if (Args.Sender === this.gridStockTables) {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertStockTableRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditStockTableRow();
+                    break;
+                case 'GridRowDelete':
+                    tp.InfoNote('StockTable Deleted.');
+                    break;
+            }
+        }
+        else if (Args.Sender === this.gridJoinTables) {
+            switch (Args.Command) {
+                case 'GridRowInsert':
+                    this.InsertJoinTableRow();
+                    break;
+                case 'GridRowEdit':
+                    this.EditJoinTableRow();
+                    break;
+                case 'GridRowDelete':
+                    tp.InfoNote('StockTable Deleted.');
+                    break;
+            }
+        }
+    }
+    /**
+    Event handler
+    @protected
+    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
+    */
+    AnyGrid_DoubleClick(Args) {
+        Args.Handled = true;
+
+        if (Args.Sender === this.gridFields) {
+            this.EditFieldRow();
+        }
+        else if (Args.Sender === this.gridStockTables) {
+            this.EditStockTableRow();
+        }
+    }
+
+}
+
+
+/** The instance to be edited by this dialog box.
+ * @type {tp.SqlBrokerTableDef}
+ * */
+tp.SqlBrokerTableDefEditDialog.prototype.TableDef = null;
+/** When true it means that the dialog is used in editing a Join Table
+ * @type {boolean}
+ * */
+tp.SqlBrokerTableDefEditDialog.prototype.IsJoinTable = false;
+
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
+@static
+@param {tp.SqlBrokerTableDef} TableDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerTableDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerTableDefEditDialog.ShowModalAsync = function (TableDef, WindowArgs = null) {
+    WindowArgs = WindowArgs || {};
+    WindowArgs.Text = WindowArgs.Text || 'Table Definition Editor';
+    return tp.Window.ShowModalForAsync(TableDef, tp.SqlBrokerTableDefEditDialog, WindowArgs);
+};
+
+
+//#endregion
+
+//#region SqlBrokerFieldDefEditDialog
+/** Modal dialog box for editing a {@link tp.SqlBrokerFieldDef} descriptor
+ */
+tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
+    /**
+     * Constructor
+     * @param {tp.WindowArgs} Args The window args
+     */
+    constructor(Args) {
+        super(Args);
+    }
+
+    /**
+     * @type {tp.TabControl}
+     */
+    Pager = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabGeneral = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabLookUp = null;
+    /**
+     * @type {tp.TabPage}
+     */
+    tabLookUpTableSql = null;
+
+    /**
+     * @type {tp.TextBox}
+     */
+    edtName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtAlias = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtTitleKey = null;
+    /**
+     * @type {tp.ComboBox}
+     */
+    cboDataType = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtMaxLength = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDecimals = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtCodeProviderName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtDefaultValue = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtExpression = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLocatorName = null;
+    /**
+     * @type {tp.CheckListBox}
+     */
+    lboFlags = null;
+
+
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpTableName = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpTableAlias = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpKeyField = null;
+    /**
+     * @type {tp.TextBox}
+     */
+    edtLookUpFieldList = null;
+
+
+    /** The element upon Ace Editor is created. 
+    * The '__Editor' property of the element points to Ace Editor object.
+    * @type {HTMLElement}
+    */
+    elSqlEditor = null;
+
+    /* overrides */
+    InitClass() {
+        super.InitClass();
+        this.tpClass = 'tp.SqlBrokerFieldDefEditDialog';
+    }
+    ProcessInitInfo() {
+        super.ProcessInitInfo();
+
+        this.FieldDef = this.Args.Instance;
+    }
+    /**
+     * Creates all controls of this window.
+     * */
+    CreateControls() {
+        super.CreateControls();
+
+        this.CreateFooterButton('OK', 'OK', tp.DialogResult.OK);
+        this.CreateFooterButton('Cancel', _L('Cancel'), tp.DialogResult.Cancel);
+
+        this.Pager = new tp.TabControl(null, { Height: '100%' });
+        this.Pager.Parent = this.ContentWrapper;
+
+        this.tabGeneral = this.Pager.AddPage(_L('General'));
+        this.tabLookUp = this.Pager.AddPage(_L('LookUp'));
+        this.tabLookUpTableSql = this.Pager.AddPage(_L('LookUp Table Sql'));
+
+        setTimeout(() => { this.Pager.SelectedPage = this.tabGeneral; }, 100);
+
+
+        let LayoutRow, elRow, elCol, elCol2, el, CP;
+
+        //
+        let RowHtmlText = `
+<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480], Height: "100%"}'>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+    <div class="Col" data-setup='{WidthPercents: [100, 100, 50, 33.33, 33.33], ControlWidthPercents: [100, 60, 60, 60, 60]}'>
+    </div>
+</div>
+`;
+
+        // General Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabGeneral.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+        elCol2 = elRow.children[1];
+        tp.StyleProp(elCol2, 'padding-left', '2px');
+
+        // controls
+        // col 1
+        this.edtName = tp.CreateControlRow(tp.Div(elCol), false, 'Name', { TypeName: 'TextBox' }).Control;
+        this.edtAlias = tp.CreateControlRow(tp.Div(elCol), false, 'Alias', { TypeName: 'TextBox' }).Control;
+        this.edtTitleKey = tp.CreateControlRow(tp.Div(elCol), false, 'TitleKey', { TypeName: 'TextBox' }).Control;
+        this.cboDataType = tp.CreateControlRow(tp.Div(elCol), false, 'DataType', { TypeName: 'ComboBox', Mode: 'ListOnly', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.DataType.ToList([]) }).Control;
+        this.edtMaxLength = tp.CreateControlRow(tp.Div(elCol), false, 'MaxLength', { TypeName: 'TextBox' }).Control;
+        this.edtDecimals = tp.CreateControlRow(tp.Div(elCol), false, 'Decimals', { TypeName: 'TextBox' }).Control;
+
+        this.edtCodeProviderName = tp.CreateControlRow(tp.Div(elCol), false, 'CodeProviderName', { TypeName: 'TextBox' }).Control;
+        this.edtDefaultValue = tp.CreateControlRow(tp.Div(elCol), false, 'DefaultValue', { TypeName: 'TextBox' }).Control;
+        this.edtExpression = tp.CreateControlRow(tp.Div(elCol), false, 'Expression', { TypeName: 'TextBox' }).Control;
+
+        this.edtLocatorName = tp.CreateControlRow(tp.Div(elCol), false, 'LocatorName', { TypeName: 'TextBox' }).Control;
+
+        // col 2
+        this.lboFlags = tp.CreateControlRow(tp.Div(elCol2), false, 'Flags', { TypeName: 'CheckListBox', ListValueField: 'Id', ListDisplayField: 'Name', List: tp.FieldFlags.ToList([]) }).Control;
+
+        // LookUp Page
+        // ---------------------------------------------------------------------------------
+        elRow = tp.HtmlToElement(RowHtmlText);
+        this.tabLookUp.Handle.appendChild(elRow);
+        tp.Ui.CreateContainerControls(elRow.parentElement);
+
+        elCol = elRow.children[0];
+        tp.StyleProp(elCol, 'padding-left', '2px');
+
+
+        this.edtLookUpTableName = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableName', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpTableAlias = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpTableAlias', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpKeyField', { TypeName: 'TextBox' }).Control;
+        this.edtLookUpFieldList = tp.CreateControlRow(tp.Div(elCol), false, 'LookUpFieldList', { TypeName: 'TextBox' }).Control;
+
+        // LookUp Table Sql Page
+        // ---------------------------------------------------------------------------------
+        this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabLookUpTableSql.Handle, 'sql', this.FieldDef.LookUpTableSql);
+
+    }
+
+
+    ItemToControls() {
+        this.edtName.Text = this.FieldDef.Name;
+        this.edtAlias.Text = this.FieldDef.Alias;
+        this.edtTitleKey.Text = this.FieldDef.TitleKey;
+        this.cboDataType.SelectedIndex = this.cboDataType.Items.findIndex((item) => item.Id === this.FieldDef.DataType);
+        this.edtMaxLength.Text = this.FieldDef.MaxLength;
+        this.edtDecimals.Text = this.FieldDef.Decimals;
+
+        this.edtCodeProviderName.Text = this.FieldDef.CodeProviderName;
+        this.edtDefaultValue.Text = this.FieldDef.DefaultValue;
+        this.edtExpression.Text = this.FieldDef.Expression;
+
+        this.edtLocatorName.Text = this.FieldDef.LocatorName;
+
+        this.edtLookUpTableName.Text = this.FieldDef.LookUpTableName;
+        this.edtLookUpTableAlias.Text = this.FieldDef.LookUpTableAlias;
+        this.edtLookUpKeyField.Text = this.FieldDef.LookUpKeyField;
+        this.edtLookUpFieldList.Text = this.FieldDef.LookUpFieldList;
+
+
+        let Flags = tp.Bf.SetValueToIntegerArray(tp.FieldFlags, this.FieldDef.Flags)
+        this.lboFlags.SelectedValues = Flags;
+    }
+    ControlsToItem() {
+        this.FieldDef.Name = this.edtName.Text;
+        this.FieldDef.Alias = this.edtAlias.Text;
+        this.FieldDef.TitleKey = this.edtTitleKey.Text;
+        this.FieldDef.DataType = this.cboDataType.SelectedValue;
+        this.FieldDef.MaxLength = tp.StrToInt(this.edtMaxLength.Text);
+        this.FieldDef.Decimals = tp.StrToInt(this.edtDecimals.Text);
+
+        this.FieldDef.CodeProviderName = this.edtCodeProviderName.Text;
+        this.FieldDef.DefaultValue = this.edtDefaultValue.Text;
+        this.FieldDef.Expression = this.edtExpression.Text;
+
+        this.FieldDef.LocatorName = this.edtLocatorName.Text;
+
+        this.FieldDef.LookUpTableName = this.edtLookUpTableName.Text;
+        this.FieldDef.LookUpTableAlias = this.edtLookUpTableAlias.Text;
+        this.FieldDef.LookUpKeyField = this.edtLookUpKeyField.Text;
+        this.FieldDef.LookUpFieldList = this.edtLookUpFieldList.Text;
+        this.FieldDef.LookUpTableSql = this.elSqlEditor.__Editor.getValue();
+
+        this.FieldDef.Flags = tp.Bf.IntegerArrayToSetValue(this.lboFlags.SelectedValues);
+
+        this.FieldDef.CheckDescriptor();
+
+    }
+}
+
+
+/** The instance to be edited by this dialog box.
+ * @type {tp.SqlBrokerFieldDef}
+ * */
+tp.SqlBrokerFieldDefEditDialog.prototype.FieldDef = null;
+
+
+
+/**
+Displays a modal dialog box for editing a {@link tp.SqlBrokerFieldDef} object
+@static
+@param {tp.SqlBrokerFieldDef} FieldDef The object to edit
+@param {tp.WindowArgs} [WindowArgs=null] Optional.
+@returns {tp.SqlBrokerFieldDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
+*/
+tp.SqlBrokerFieldDefEditDialog.ShowModalAsync = function (FieldDef, WindowArgs = null) {
+    WindowArgs = WindowArgs || {};
+    WindowArgs.Height = 550;
+    WindowArgs.Text = WindowArgs.Text || 'Field Definition Editor';
+
+    return tp.Window.ShowModalForAsync(FieldDef, tp.SqlBrokerFieldDefEditDialog, WindowArgs);
+};
+
+//#endregion
+
 //#region SqlBrokerQueryDefEditDialog
 /** Modal dialog box for editing a {@link tp.SqlBrokerQueryDef} descriptor
  */
@@ -934,11 +1712,16 @@ Displays a modal dialog box for editing a {@link tp.SqlBrokerQueryDef} object
 @returns {tp.SqlBrokerQueryDefEditDialog} Returns the {@link tp.ContentWindow}  dialog box
 */
 tp.SqlBrokerQueryDefEditDialog.ShowModalAsync = function (SqlQuery, WindowArgs = null) { 
-    return tp.Window.ShowModalForAsync(SqlQuery, tp.SqlBrokerQueryDefEditDialog, 'SqlBrokerQueryDef Definition Editor', WindowArgs);
+    WindowArgs = WindowArgs || {};
+    WindowArgs.Text = WindowArgs.Text || 'SqlBrokerQueryDef Definition Editor';
+    return tp.Window.ShowModalForAsync(SqlQuery, tp.SqlBrokerQueryDefEditDialog, WindowArgs);
 };
 
 //#endregion
 
+//---------------------------------------------------------------------------------------
+// SysData View
+//---------------------------------------------------------------------------------------
 
 //#region tp.DeskSysDataView
 

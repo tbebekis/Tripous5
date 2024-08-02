@@ -21,8 +21,9 @@ namespace WebLib
 
             View.ClassType = "tp.SysDataView";
             View.AddCssClasses("tp-View tp-DeskView");
-
+ 
             View.JS.Add("/tp/js/Desk/tp-SysData.js");
+            View.JS.Add("/tp/js/Desk/tp-SysData-Handlers.js");
             View.JS.Add("/tp/js/Desk/tp-SysData-UI.js");
 
             // tool-bar

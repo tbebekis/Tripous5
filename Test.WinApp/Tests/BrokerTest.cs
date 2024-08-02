@@ -68,7 +68,7 @@ namespace Test.WinApp
             FieldDef = TableDef.AddString("Name", 96);
             FieldDef = TableDef.AddId("CountryId");
 
-            JoinTableDef = TableDef.Join("Country", "", "CountryId");
+            JoinTableDef = TableDef.Join("CountryId", "Country");
             FieldDef = JoinTableDef.AddId();
             FieldDef = JoinTableDef.AddString("Name", 96);
 

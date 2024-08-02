@@ -974,14 +974,16 @@ where
         /// <para>The above settings produce the following:</para>
         /// <para><c>left join COUNTRY on COUNTRY.ID = CUSTOMER.COUNTRY_ID</c></para>
         /// </summary>
-        /// <param name="TableName">The name of the table to join, e.g. COUNTRY to CUSTOMER</param>
-        /// <param name="Alias">The alias of the table to join, e.g. <c>co</c></param>
         /// <param name="OwnKeyField">A field that belongs to this table. Is used in the join SQL statement</param>
-        public SqlBrokerTableDef Join(string TableName, string Alias, string OwnKeyField)
+        /// <param name="ForeignTable">The name of the table to join, e.g. COUNTRY to CUSTOMER</param>
+        /// <param name="ForeignAlias">The alias of the table to join, e.g. <c>co</c></param>
+        /// <param name="ForeignPrimaryKey">The primary key field name of the table to join, e.g. <c>Id</c></param>
+        public SqlBrokerTableDef Join(string OwnKeyField, string ForeignTable, string ForeignAlias = "", string ForeignPrimaryKey = "Id")
         {
             SqlBrokerTableDef Result = new SqlBrokerTableDef();
-            Result.Name = TableName;
-            Result.Alias = Alias;
+            Result.Name = ForeignTable;
+            Result.Alias = ForeignAlias;
+            Result.PrimaryKeyField = ForeignPrimaryKey;
             Result.MasterKeyField = OwnKeyField;
 
             JoinTables.Add(Result);

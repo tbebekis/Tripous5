@@ -15839,11 +15839,12 @@ tp.Window.ICON_ThreeLines = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AA
  * @param {tp.WindowArgs} [WindowArgs = null] Optional. {@link tp.WindowArgs} object to be passed to the window.
  * @returns {tp.Window} Returns an instance of the {@link tp.Window} derived class that passed as argument
  */
-tp.Window.ShowModalFor = function (Instance, WindowClass, Caption = 'Instance Editor', WindowArgs = null) {
-    let Args = WindowArgs || {};
-    Args.Text = Caption || Args.Text || 'Instance Editor';
+tp.Window.ShowModalFor = function (Instance, WindowClass, WindowArgs = null) {
+    //let Args = WindowArgs || {};
+    //Args.Text = Caption || Args.Text || 'Instance Editor';
 
-    Args = new tp.WindowArgs(Args);
+    let Args = new tp.WindowArgs(WindowArgs);
+    Args.Text = Args.Text || 'Instance Editor';
     Args.AsModal = true;
     Args.DefaultDialogResult = tp.DialogResult.Cancel;
     Args.Instance = Instance;
@@ -15863,17 +15864,19 @@ tp.Window.ShowModalFor = function (Instance, WindowClass, Caption = 'Instance Ed
  * @param {tp.WindowArgs} [WindowArgs = null] Optional. {@link tp.WindowArgs} object to be passed to the window.
  * @returns {tp.Window} Returns a {@link Promise} of an instance of the {@link tp.Window} derived class that passed as argument
  */
-tp.Window.ShowModalForAsync = function (Instance, WindowClass, Caption = 'Instance Editor', WindowArgs = null) {
+tp.Window.ShowModalForAsync = function (Instance, WindowClass, WindowArgs = null) {
     return new Promise((Resolve, Reject) => {
-        WindowArgs = WindowArgs || {};
-        let CloseFunc = WindowArgs.CloseFunc;
 
-        WindowArgs.CloseFunc = (Window) => {
+        let Args = new tp.WindowArgs(WindowArgs);
+        Args.Text = Args.Text || 'Instance Editor'; 
+        let CloseFunc = Args.CloseFunc;
+
+        Args.CloseFunc = (Window) => {
             tp.Call(CloseFunc, Window.Args.Creator, Window);
             Resolve(Window);
         };
 
-        tp.Window.ShowModalFor(Instance, WindowClass, Caption, WindowArgs);
+        tp.Window.ShowModalFor(Instance, WindowClass, Args);
     });
 };
 

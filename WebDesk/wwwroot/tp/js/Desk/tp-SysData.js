@@ -2,8 +2,15 @@
 tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
 tp.Urls.SysDataSaveItem = '/SysData/SaveItem';
 
+ 
 
 //#region SysDataItem
+
+/** 
+ * Represents the data of a row in the 'system data' table.
+ * System data table is a database table which stores information 
+ * regarding system data, such as reports, descriptors, resources etc.
+ */
 tp.SysDataItem = class extends tp.Object {
     /** Constructor.
      * Assigns this instance's properties from a specified source, if not null.
@@ -221,6 +228,11 @@ tp.SysDataItem.CreateTable = function () {
 };
 
 //#endregion
+
+
+//---------------------------------------------------------------------------------------
+// Definition classes
+//---------------------------------------------------------------------------------------
 
 //#region DataTableDef
 
@@ -593,1896 +605,842 @@ tp.UniqueConstraintDef.prototype.fFieldNames = '';
 
 //#endregion
 
+//#region CodeProviderDef
 
-
-//#region SysDataHandler
-
-tp.SysDataHandler = class {
-
-    /** Constructor
-     * @param {tp.View} View The view that calls and owns this handler
-     * @param {string} DataType The SysData DataType this handler can handle.
-     */
-    constructor(View, DataType) {
-        this.View = View;
-        this.DataType = DataType;
-    }
-
-    /** Returns true if the owner {@link tp.View}  is in insert mode
-     * @type {boolean}
-     * */
-    get IsInsertItem() { return this.View.ViewMode === tp.DataViewMode.Insert; }
-    /** Returns true if the owner {@link tp.View}  is in edit mode
-     * @type {boolean}
-     * */
-    get IsEditItem() { return this.View.ViewMode === tp.DataViewMode.Edit; }
-
-    /* overridables */
-
-    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
-    * */
-    CreateEditControls() {
-    }
-
-    /** Called before the Insert() operation of the owner View.
-    */
-    InsertItemBefore() {
-    }
-    /** Called after the Insert() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    InsertItemAfter(tblSysDataItem) {
-    }
-
-    /** Called before the Edit() operation of the owner View.
-     * The View is about to load in its Edit part a SysData Item from server.
-     * @param {string} Id
-     */
-    EditItemBefore(Id) {
-    }
-    /** Called after the Edit() operation of the owner View.
-     * The View is just loaded in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    EditItemAfter(Id, tblSysDataItem) {
-    }
-
-    /** Called before the Commit() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    CommitItemBefore(tblSysDataItem) {
-    }
-    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @returns {boolean} Returns true if commit is allowed, else false.
-     */
-    CanCommitItem(tblSysDataItem) {
-        return true;
-    }
-
-    /**
-    Event handler. Called by the owner View when the Edit Pager changes Page.
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    EditPager_PageChanged(Args) {
- 
-    }
-
-};
-
-/**
- @type {string}
+/** Describes the production of a unique Code.
  */
-tp.SysDataHandler.prototype.DataType = 'Table';
-/**
- @type {tp.DeskSysDataView}
- */
-tp.SysDataHandler.prototype.View = null;
+tp.CodeProviderDef = class {
+
+    /** Constructor */
+    constructor() {
+    }
+
+    /** A unique name for this instance
+     * @type {string}
+     */
+    Name = '';
+    /** The definition text, e.g. XXX-XXX
+     * @type {string}
+     */
+    Text = '';
+    /** A character that used in separating the parts of the produced Code.
+     * @type {string}
+     */
+    PartSeparator = '-';
+    /** The C# class name of the type this descriptor describes.
+     * NOTE: The value of this property may be a string returned by the Type.AssemblyQualifiedName property of the type.
+     * Otherwise it must be a type name registered to the TypeStore either directly or just by using the TypeStoreItemAttribute attribute.
+     * In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination both, when registering and when retreiving a type.
+     * Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
+     * Most of the Tripous types are already registered to the TypeStore with just their TypeName.
+     * @type {string}
+     */
+    TypeClassName = 'CodeProvider';
+
+
+    /** Returns a string list with possible errors in this descriptor. If no errors the array is empty. 
+     * @param {string[]} [List=null] Optional. The string list to place the error strings. 
+     * @returns {string[]} A string list with error texts or empty.
+     */
+    GetDescriptorErrors(List = null) {
+        List = List || [];
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            List.push(_L("E_CodeProviderDef_NameIsEmpty", "CodeProviderDef: Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.Text))
+            List.push(_L("E_CodeProviderDef_TextIsEmpty", `CodeProviderDef ${this.Name}: Text is empty. Must be something like XXX-XXX`));
+
+        return List;
+    }
+    /** Throws exception if this instance is not a valid one.
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        let List = this.GetDescriptorErrors();
+        if (List.length > 0) {
+            let S = List.join('\n');
+            tp.Throw(S);
+        }
+    }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+
+            this.Name = Row.Get('Name', '');
+            this.Text = Row.Get('Text', '');
+            this.PartSeparator = Row.Get('PartSeparator', '');
+            this.TypeClassName = Row.Get('TypeClassName', '');
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
+        Row.Set('Text', this.Text);
+        Row.Set('PartSeparator', this.PartSeparator);
+        Row.Set('TypeClassName', this.TypeClassName);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'CodeProviders';
+
+        Table.AddColumn('Name');
+        Table.AddColumn('Text');
+        Table.AddColumn('PartSeparator');
+        Table.AddColumn('TypeClassName');
+        return Table;
+    }
+
+};
 
 //#endregion
 
-//#region SysDataHandlerTable
+//#region SqlBrokerQueryDef
 
-tp.SysDataHandlerTable = class extends tp.SysDataHandler {
-
-    /** Constructor
-     * @param {tp.View} View The view that calls and owns this handler
-     */
-    constructor(View) {
-        super(View, 'Table')
+/** Describes a SELECT statement.
+ * */
+tp.SqlBrokerQueryDef = class {
+    /** Constructor */
+    constructor() {
+        this.FieldTitleKeys = [];
     }
 
-    /** A {@link tp.DataTable} for handling the fields of a table def.
-     @type {tp.DataTable}
+    /** The name
+     * @type {string}
      */
-    tblFields = null;
-    /** A {@link tp.Grid} for handling the fields of a table def.
-     @type {tp.Grid}
+    Name = '';
+    /** The SELECT statement
+     * @type {string}
      */
-    gridFields = null;
- 
+    SqlText = '';
+    /** A string list, where each string  has the format FIELD_NAME=TitleKey. <br />
+     * Determines the visibility of the fields in the drop-down grids:
+     * if it is empty then all fields are visible
+     * else only the included fields are visible
+     * @type {string[]}
+     */
+    FieldTitleKeys = [];
 
-    /* overrides */
-    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
-     * @override
-    * */
-    CreateEditControls() {
-        if (this.View.pagerEdit.GetPageCount() === 1) {
-
-            // add a tp.TabPage to View's pagerEdit
-            let FieldsPage = this.View.pagerEdit.AddPage('Fields');
-            tp.Data(FieldsPage.Handle, 'Name', 'Fields');
-
-            // add a tp.Row to the tab page
-            let Row = new tp.Row(null, { Height: '100%' });
-            FieldsPage.AddComponent(Row);
-
-            // add a DIV for the gridFields tp.Grid in the row
-            let el = Row.AddDivElement();
-            let CP = {
-                Name: "gridFields",
-                Height: '100%',
-
-                ToolBarVisible: true,
-                GroupsVisible: false,
-                FilterVisible: false,
-                FooterVisible: false,
-                GroupFooterVisible: false,
-
-                ButtonInsertVisible: true,
-                ButtonEditVisible: true,
-                ButtonDeleteVisible: true,
-                ConfirmDelete: true,
-
-                AllowUserToAddRows: true,
-                AllowUserToDeleteRows: true,
-                AutoGenerateColumns: false,
-
-                Columns: [
-                    { Name: 'Name' },
-                    { Name: 'TitleKey' },
-                    { Name: 'IsPrimaryKey' },
-                    { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
-
-                    { Name: 'Length' },
-                    { Name: 'Required' },
-                    { Name: 'DefaultExpression' },
-
-                    { Name: 'Unique' },
-                    { Name: 'UniqueConstraintName' },
-                    { Name: 'ForeignKey' },
-                    { Name: 'ForeignKeyConstraintName' },
-                ]
-            };
-
-            // create the grid
-            this.gridFields = new tp.Grid(el, CP);
-            this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
-            this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
-        }
-
-    }
-
-    /** Called before the Insert() operation of the owner View.
-     * @override
+    /** Assigns this instance's properties from a specified source.
+    * @param {objec} Source
     */
-    InsertItemBefore() {
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
+
+        this.Name = Source.Name || '';
+        this.SqlText = Source.SqlText || '';
+
+        if (tp.IsArray(Source.FieldTitleKeys)) {
+            this.FieldTitleKeys = [];
+            Source.FieldTitleKeys.forEach((item) => {
+                this.FieldTitleKeys.push(item);
+            });
+        }
     }
-    /** Called after the Insert() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
-    InsertItemAfter(tblSysDataItem) {
-        this.SetupItem(true, tblSysDataItem);
+    CheckDescriptor() {
 
-        let Row = this.tblFields.AddEmptyRow();
-        Row.Set('Name', 'Id');
-        Row.Set('TitleKey', 'Id');
-        Row.Set('IsPrimaryKey', true);
-        Row.Set('DataType', tp.DataType.String);
-        Row.Set('Length', 40);
-        Row.Set('Required', true);
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerQueryDef_NoName", "SqlBrokerQueryDef must have a Name"));
+
+        if (tp.IsNullOrWhiteSpace(this.SqlText))
+            tp.Throw(_L("E_SqlBrokerQueryDef_NoSql", "SqlBrokerQueryDef must have an SQL statement"));
 
     }
 
-    /** Called before the Edit() operation of the owner View. <br />
-     * The View is about to load in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @override
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
      */
-    EditItemBefore(Id) {
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            let Source = Row.OBJECT;
+            this.Assign(Source);
+        }
     }
-    /** Called after the Edit() operation of the owner View. <br />
-     * The View is just loaded in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
      */
-    EditItemAfter(Id, tblSysDataItem) {
-        this.SetupItem(false, tblSysDataItem);
-    }
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
 
-    /** Called before the Commit() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
+        Row.OBJECT = this;
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
      */
-    CommitItemBefore(tblSysDataItem) {
-        let Row = tblSysDataItem.Rows[0];
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
 
-        let TableDef = new tp.DataTableDef();
-        TableDef.Name = Row.Get('DataName', '');
-        TableDef.TitleKey = Row.Get('TitleKey', '');
-        TableDef.FieldsFromDataTable(this.tblFields);
+        Table.AddColumn('Name').DefaultValue = 'New Item';
 
-        let JsonText = tp.ToJson(TableDef, true);
-        Row.Set('Data1', JsonText);
-    }
-    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @returns {boolean} Returns true if commit is allowed, else false.
-     * @override
-     */
-    CanCommitItem(tblSysDataItem) {
-        let Result = true;
-
-        if (tp.IsEmpty(this.tblFields) || this.tblFields.RowCount <= 1) {
-            tp.WarningNote('Cannot save changes.\nNo fields defined in the table');
-            Result = false;
-        }
-
-        let Row = tblSysDataItem.Rows[0];
-        let v = Row.Get('DataName', '');
-
-        if (tp.IsBlankString(v)) {
-            tp.WarningNote('Cannot save changes.\nNo Table Name (DataName)');
-            Result = false;
-        }
-
-        if (tp.IsString(v) && !tp.IsValidIdentifier(v, '$')) {
-            tp.WarningNote('Cannot save changes.\nTable Name should start with _ or letter \nand cannot contain spaces, special characters and punctuation.');
-            Result = false;
-        }
-
-        return Result;
-    }
-
-    /**
-    Event handler. Called by the owner View when the Edit Pager changes Page.
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    EditPager_PageChanged(Args) {
-    }
-
-    /* private */
-    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
-     * Creates and assigns the tblFields. Sets tblFields a grid's data-source.
-     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * */
-    SetupItem(IsInsertItem, tblSysDataItem) {
-
-        // create an empty tp.DataTableDef
-        let TableDef = new tp.DataTableDef();
-
-        // if editing an already existing table definition
-        // then read the json from Data1 field and load the TableDef
-        if (IsInsertItem === false) {
-            let Text = tblSysDataItem.Rows[0].Get('Data1');
-            let Source = eval("(" + Text + ")");
-            log(Source);
-            TableDef.Assign(Source);
-        }
-
-        // create the tblFields
-        this.tblFields = TableDef.FieldsToDataTable();
-        this.tblFields.AcceptChanges();
-
-        this.gridFields.DataSource = this.tblFields;
-        this.gridFields.BestFitColumns();
- 
-    }
- 
-    /** Creates and returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
-     * The row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @returns {tp.DataTable} Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
-     */
-    CreateEditFieldTable(SourceRow = null) {
-        let FieldRow;
-        let IsInsertField = tp.IsEmpty(SourceRow);    
-
-        // create the tblField, used in editing a single field
-        let tblField = this.tblFields.Clone();
-        tblField.Name = 'Field';
-
-        // add the single row in tblField
-        FieldRow = tblField.AddEmptyRow();
-
-        if (IsInsertField) {
-            FieldRow.Set('DataType', tp.DataType.String);
-            FieldRow.Set('Length', 0);
-            FieldRow.Set('IsPrimaryKey', false);
-            FieldRow.Set('Required', false);
-            FieldRow.Set('Unique', false);
-        }
-        else {
-            FieldRow.CopyFromRow(SourceRow);
-        } 
-
-        return tblField;
-    }
-
-    /** Displays an edit dialog box for editing an existing or new row of the tblFields.
-     * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
-     * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @param {boolean} IsInsertField True when is an Insert Field operation. False when is an Edit Field operation.
-     * @param {tp.DataTable} tblField The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
-     */
-    async ShowEditFieldDialog(IsInsertField, tblField) {
-        let DialogBox = null;
-        let ContentHtmlText;
-        let HtmlText;
-        let HtmlRowList = [];
-
-        
-        let ColumnNames = [];       // Visible Controls
-        let EditableColumns = []    // Editable Controls
-
-        ColumnNames = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'ForeignKeyConstraintName', 'Unique', 'UniqueConstraintName'];
-
-        // inserting a Table
-        if (this.IsInsertItem) {            
-            EditableColumns = ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
-        }
-        // editing a Table
-        else {
-            EditableColumns = IsInsertField === true ?
-                ['Name', 'TitleKey', 'DataType', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique']:
-                ['Name', 'TitleKey', 'Length', 'Required', 'DefaultExpression', 'ForeignKey', 'Unique'];
-        }
-
-        let DataSource = new tp.DataSource(tblField);
-
-        // Editable Controls
-        tblField.Columns.forEach((column) => {
-            if (column.Name === 'Name')
-                column.MaxLength = 30;
-
-            column.ReadOnly = EditableColumns.indexOf(column.Name) < 0;
-        });
-
-        // Visible Controls
-        // prepare HTML text for each column in tblFields
-        ColumnNames.forEach((ColumnName) => {
-            let Column = this.tblFields.FindColumn(ColumnName);
-            let IsCheckBox = Column.DataType === tp.DataType.Boolean;
-
-            let Text = Column.Title;
-            let Ctrl = {
-                TypeName: Column.Name === 'DataType' ? 'ComboBox' : tp.DataTypeToUiType(Column.DataType),
-                TableName: tblField.Name,
-                DataField: Column.Name
-            };
-
-            if (ColumnName === 'DataType') {
-                Ctrl.ListOnly = true;
-                Ctrl.ListValueField = 'Id';
-                Ctrl.ListDisplayField = 'Name';
-                Ctrl.ListSourceName = 'DataType';
-            }
-
-            // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-            HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
-            HtmlRowList.push(HtmlText);
-        });
-
-
-        // join html text for all control rows
-        HtmlText = HtmlRowList.join('\n');
-
-        // content
-        ContentHtmlText = `
-<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
-    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-        ${HtmlText}
-    </div>
-</div>
-`;
-        let elContent = tp.HtmlToElement(ContentHtmlText);
-
-        // show the dialog
-        if (tp.IsHTMLElement(elContent)) {
-
-
-            let BodyWidth = tp.Doc.body.offsetWidth
-            let w = BodyWidth <= 580 ? BodyWidth - 6 : 580;
-
-            let WindowArgs = new tp.WindowArgs({ Text: 'Edit Field', Width: w, Height: 'auto' });
-
-            //----------------------------------------------------- 
-            /** Callback to be called after the dialog shows itself (i.e. OnShown())
-             * @param {tp.Window} Window
-             */
-            WindowArgs.ShowFunc = (Window) => {
-                tp.StyleProp(elContent.parentElement, 'padding', '5px');
-
-                // force tp-Cols to adjust
-                Window.BroadcastSizeModeChanged();
-
-                // bind dialog controls
-                tp.BindAllDataControls(elContent, (DataSourceName) => {
-                    if (DataSourceName === 'Field')
-                        return DataSource;
-
-                    if (DataSourceName === 'DataType') {
-                        let Result = new tp.DataSource(tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]));
-                        return Result;
-                    }
-
-                    return null;
-                });
-            };
-            //----------------------------------------------------- 
-            /** Callback to be called just before a modal window is about to set its DialogResult property. <br />
-             *  Returning false from the call-back cancels the setting of the property and the closing of the modal window. <br />
-             * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
-             * @param {tp.Window} Window
-             * @param {number} DialogResult One of the {@link tp.DialogResult} constants
-             * */
-            WindowArgs.CanSetDialogResultFunc = (Window, DialogResult) => {
-                if (DialogResult === tp.DialogResult.OK) {
-                
-                    let Row = tblField.Rows[0];
-
-                    // Name
-                    let v = Row.Get('Name', '');
-                    if (tp.IsBlank(v)) {
-                        tp.WarningNote('Name is required');
-                        return false;
-                    }
-
-                    if (tp.IsString(v) && !tp.IsValidIdentifier(v, '$')) {
-                        tp.WarningNote('Name should start with _ or letter \nand cannot contain spaces, special characters and punctuation.');
-                        return false;
-                    }
-
-                    // Length
-                    v = Row.Get('DataType', '');
-                    if (v === tp.DataType.String) {
-                        v = Row.Get('Length', 0);
-                        if (v <= 0) {
-                            tp.WarningNote('Invalid Length');
-                            return false;
-                        }
-                    }
-
-
-                }
-                
-                return true;
-            };
-            //----------------------------------------------------- 
-            /**  Callback to be called when the dialog is about to close (i.e. OnClosing())
-             * @param {tp.Window} Window
-             */
-            WindowArgs.CloseFunc = (Window) => {
-                let Row = tblField.Rows[0];
-                let v = Row.Get('TitleKey', '');
-                if (tp.IsBlank(v)) {
-                    Row.Set('TitleKey', Row.Get('Name', ''));
-                }
-            };
-            //----------------------------------------------------- 
-
-            tp.Ui.CreateContainerControls(elContent.parentElement);
-            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);
-        }
-
-        return DialogBox;
-    }
-    /** Called when inserting a single row of the tblFields and displays the edit dialog 
-     */
-    async InsertFieldRow() {
-        let tblField = this.CreateEditFieldTable(null);
-        let DialogBox = await this.ShowEditFieldDialog(true, tblField);
-        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-            let FieldRow = tblField.Rows[0];
-            let Row = this.tblFields.AddEmptyRow();
-            Row.CopyFromRow(FieldRow);
-        }
-    }
-    /** Called when editing a single row of the tblFields and displays the edit dialog 
-     */
-    async EditFieldRow() {
-        let Row = this.gridFields.FocusedRow;
-        if (tp.IsValid(Row)) {
-            if (Row.Get('IsPrimaryKey', false) === true) {
-                tp.WarningNote('Editing Primary Key is not allowed.');
-            }
-            else {
-                let tblField = this.CreateEditFieldTable(Row);
-                let DialogBox = await this.ShowEditFieldDialog(false, tblField);
-
-                if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                    let FieldRow = tblField.Rows[0];
-                    Row.CopyFromRow(FieldRow);
-                }
-            }
-        }
-    }
- 
-    /* event handlers */
-    /** Event handler
-     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
-     */
-    GridFields_AnyButtonClick(Args) {
-        Args.Handled = true;
-
-        switch (Args.Command) {
-            case 'GridRowInsert':
-                this.InsertFieldRow();
-                break;
-            case 'GridRowEdit':
-                this.EditFieldRow();
-                break;
-            case 'GridRowDelete':
-                tp.InfoNote('Clicked: ' + Args.Command);
-                break;
-        }
-
-
-    }
-    /**
-    Event handler
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    GridFields_DoubleClick(Args) {
-        Args.Handled = true;
-        this.EditFieldRow();
+        return Table;
     }
 };
 
 //#endregion
 
-//#region tp.SysDataHandlerBroker
-tp.SysDataHandlerBroker = class extends tp.SysDataHandler {
-    /** Constructor
-     * @param {tp.View} View The view that calls and owns this handler
-     */
-    constructor(View) {
-        super(View, 'Broker')
+//#region SqlBrokerFieldDef
+tp.SqlBrokerFieldDef = class {
+
+    /** Constructor */
+    constructor() {
     }
 
-    /** A C# SqlBrokerDef instance as it comes from server. <br /> 
-     * @type {tp.SqlBrokerDef}
+    /** The field name
+     * @type {string}
      */
-    BrokerDef = null;
-    /**
-     * @type {tp.DataTable}
+    Name = '';
+    /** The alias of this field
+     * @type {string}
      */
-    tblBrokerDef = null;
-    /**
-     * @type {tp.DataSource}
-     */
-    dsBrokerDef = null;
-    /** A responsive row which is the container of controls bound to tblBrokerDef.
-     * @type {tp.Row}
-     */
-    BrokerLayoutRow = null;
+    Alias = '';
 
-    /** The broker General tab page
-     * @type {tp.TabPage}
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
      */
-    tabGeneral = null;
-    /**  
-     * @type {tp.TabPage}
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        // nothing
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
      */
-    tabSelectSqlList = null;
-    /**  
-     * @type {tp.TabPage}
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+    /** The data-type of the field. One of the {@link tp.DataType} constants.
+     * @type {string}
+     */
+    DataType = tp.DataType.Unknown;
+    /** The max length of a string field
+     * @type {number}
+     */
+    MaxLength = 0;
+    /** The decimals of the field. Used when is a float field. -1 means is not set.
+     * @type {number}
+     */
+    Decimals = -1;
+    /**
+    The flags bit-field.
+    @default tp.FieldFlags.None
+    @type {tp.FieldFlags}
     */
-    tabQueryList = null;
-    /**  
-     * @type {tp.TabPage}
+    Flags = tp.FieldFlags.None;
+
+    /** The name of the code producer descriptor associated to this field.
+     * @type {string}
+     */
+    CodeProviderName = '';
+    /** The default value of the field.
+     * @type {string}
+     */
+    DefaultValue = null;
+    /** The expression used to calculate the values in a column, or create an aggregate column
+     * @type {string}
+     */
+    Expression = null;
+
+
+
+    /** The name of a foreign table this field points to, if any, else null. <br />
+     * NOTE: This idea comes from old Tripous versions where it was used with LookUp controls such as ComboBox.
+     * For examples of use in UIs check the Tripous2 ControlHandlerStandard class the Bind() method.
+     * 
+     * Lets suppose that we have a CUSTOMER table with a CUSTOMER.COUNTRY_ID field
+     * and a COUNTRY table with ID and NAME fields. To establish a foreign relation
+     *     this field          = "COUNTRY_ID";     // CUSTOMER.COUNTRY_ID
+     *     LookUpTableName     = "COUNTRY";                           
+     *     LookUpKeyField      = "ID";             // COUNTRY.ID         
+     *     LookUpFieldList     = "ID;NAME";        // COUNTRY.ID, COUNTRY.NAME 
+     * @type {string}
+     */
+    LookUpTableName = '';
+    /** The alias of a foreign table this field points to, if any, else null.
+     * @type {string}
+     */
+    LookUpTableAlias = '';
+    /** The name of the field of the foreign table that becomes the result of a look-up operation
+     * @type {string}
+     */
+    LookUpKeyField = '';
+    /** A semi-colon separated list of field names, e.g. Id;Name
+     * The fields in this list are used in constructing a SELECT statement. <br />
+     * NOTE: The LookUpKeyField must be included in this list. <br />
+     * NOTE: When this property has a value then the LookUpTableSql is not used.
+     * @type {string}
+     */
+    LookUpFieldList = '';
+    /** A SELECT statement to be used instead of the LookUpFieldList. <br />
+     * NOTE: The LookUpKeyField must be included in this SELECT statement.
+     * @type {string}
+     */
+    LookUpTableSql = '';
+
+    /** The name of a LocatorDef to be used with this field.
+     * @type {string}
+     */
+    LocatorName = '';
+
+    /** Assigns this instance's properties from a specified source.
+    * @param {objec} Source
     */
-    tabTableList = null;
- 
-    /**
-     * @type {tp.DataTable}
-     */
-    tblSelectSqlList = null;  
-    /**
-     * @type {tp.DataTable}
-     */
-    tblQueryList = null;  
-    /**
-     * @type {tp.DataTable}
-     */
-    tblTableList = null;  
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
 
-    /**
-     * @type {tp.Grid}
+        this.Name = Source.Name || '';
+        this.Alias = Source.Alias || '';
+
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        this.DataType = Source.DataType || tp.DataType.Unknown;
+        this.MaxLength = Source.MaxLength || 0;
+        this.Decimals = Source.Decimals || -1;
+        this.Flags = Source.Flags || tp.FieldFlags.None;
+
+        this.CodeProviderName = Source.CodeProviderName || '';
+        this.DefaultValue = Source.DefaultValue || '';
+        this.Expression = Source.Expression || '';
+
+        this.LookUpTableName = Source.LookUpTableName || '';
+        this.LookUpTableAlias = Source.LookUpTableAlias || '';
+        this.LookUpKeyField = Source.LookUpKeyField || '';
+        this.LookUpFieldList = Source.LookUpFieldList || '';
+        this.LookUpTableSql = Source.LookUpTableSql || '';
+
+        this.LocatorName = Source.LocatorName || '';
+
+    }
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
-    gridSelectSqlList = null;
-    /**
-     * @type {tp.Grid}
-     */
-    gridQueryList = null;
-    /**
-     * @type {tp.Grid}
-     */
-    gridTableList = null;
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerFieldDef_NameIsEmpty", "SqlBrokerFieldDef Name is empty"));
 
-    /* private */
-    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
-     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * */
-    SetupItem(IsInsertItem, tblSysDataItem) {
-        let Row = tblSysDataItem.Rows[0];
- 
-        // create an empty def
-        this.BrokerDef = new tp.SqlBrokerDef(); 
-        this.BrokerDef.Name = Row.Get('DataName', this.BrokerDef.Name);
-        this.BrokerDef.TitleKey = Row.Get('TitleKey', this.BrokerDef.TitleKey);
-        
+        if (tp.IsNullOrWhiteSpace(this.Alias))
+            tp.Throw(_L("E_SqlBrokerFieldDef_TextIsEmpty", "SqlBrokerFieldDef Alias  is empty. "));
 
-        // Edit
-        // if editing an already existing broker definition
-        // then read the json from Data1 field and load the BrokerDef
-        if (IsInsertItem === false) {
-            let Text = tblSysDataItem.Rows[0].Get('Data1');
-            let Source = eval("(" + Text + ")");
-            log(Source);
-            this.BrokerDef.Assign(Source);
-        }
-        else {
-           // Insert
-        }
-
-        this.tblBrokerDef.ClearRows();
-        this.tblBrokerDef.AcceptChanges();
-
-        Row = this.tblBrokerDef.AddEmptyRow(); 
-
-        Row.Set('Name', this.BrokerDef.Name);
-        Row.Set('TypeClassName', this.BrokerDef.TypeClassName);
-        //Row.Set('Title', this.BrokerDef.Title);
-        Row.Set('TitleKey', this.BrokerDef.TitleKey);
-        Row.Set('ConnectionName', this.BrokerDef.ConnectionName);
-        Row.Set('MainTableName', this.BrokerDef.MainTableName);
-        Row.Set('LinesTableName', this.BrokerDef.LinesTableName);
-        Row.Set('SubLinesTableName', this.BrokerDef.SubLinesTableName);
-        Row.Set('EntityName', this.BrokerDef.EntityName);
-        Row.Set('GuidOids', this.BrokerDef.GuidOids);
-        Row.Set('CascadeDeletes', this.BrokerDef.CascadeDeletes); 
+        if (this.DataType === tp.DataType.Unknown)
+            tp.Throw(_L("E_SqlBrokerFieldDef_DataTypeIsEmpty", "SqlBrokerFieldDef DataType is Unknown. "));
     }
 
-    /* overrides */
-    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
-    * */
-    CreateEditControls() {
-
-        if (this.View.pagerEdit.GetPageCount() === 1) {
-
-            let LayoutRow, el, CP;
-
-            // General Page
-            // ---------------------------------------------------------------------------------
-            // add a tp.TabPage to View's pagerEdit
-            this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
-            tp.Data(this.tabGeneral.Handle, 'Name', 'General');
- 
-            // create the data table
-            this.tblBrokerDef = new tp.DataTable();
-            this.tblBrokerDef.Name = 'BrokerDef';
-
-            this.tblBrokerDef.AddColumn('Name');
-            this.tblBrokerDef.AddColumn('TypeClassName');
-            //this.tblBrokerDef.AddColumn('Title');
-            this.tblBrokerDef.AddColumn('TitleKey');
-            this.tblBrokerDef.AddColumn('ConnectionName');
-            this.tblBrokerDef.AddColumn('MainTableName');
-            this.tblBrokerDef.AddColumn('LinesTableName');
-            this.tblBrokerDef.AddColumn('SubLinesTableName');
-            this.tblBrokerDef.AddColumn('EntityName');
-            this.tblBrokerDef.AddColumn('GuidOids', tp.DataType.Boolean);
-            this.tblBrokerDef.AddColumn('CascadeDeletes', tp.DataType.Boolean);
-
-            this.tblBrokerDef.SetColumnReadOnly('Name', true);
-            this.tblBrokerDef.SetColumnReadOnly('TitleKey', true);
-
-            let HtmlText;
-            let HtmlRowList = [];
-
-            // for each table field, produce html text for control rows and add the text to a string-list
-            this.tblBrokerDef.Columns.forEach((Column) => {
-                let IsCheckBox = Column.DataType === tp.DataType.Boolean;
-
-                let Text = Column.Title;
-                let Ctrl = {
-                    TypeName: tp.DataTypeToUiType(Column.DataType),
-                    TableName: this.tblBrokerDef.Name,
-                    DataField: Column.Name
-                };
-
-                // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-                HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
-                HtmlRowList.push(HtmlText)
-            });
-
-
-            // join html text for all control rows
-            HtmlText = HtmlRowList.join('\n');
-
-            // content
-            HtmlText = `
-<div class="Row" data-setup='{Height: "100%", Breakpoints: [450, 768, 1050, 1480]}'>
-    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-        ${HtmlText}
-    </div>
-</div>
-`;
-            let elRow = tp.HtmlToElement(HtmlText);
-
-            LayoutRow = new tp.Row(elRow, { Height: '100%' });
-            this.tabGeneral.AddComponent(LayoutRow);
-
-            tp.Ui.CreateContainerControls(elRow);
-
-            this.dsBrokerDef = new tp.DataSource(this.tblBrokerDef);
-
-            tp.BindAllDataControls(elRow, () => { return this.dsBrokerDef; });        
-
-            // SelectSqlList Page
-            // ---------------------------------------------------------------------------------
-            this.tabSelectSqlList = this.View.pagerEdit.AddPage(_L('SelectSqlList'));
-            tp.Data(this.tabSelectSqlList.Handle, 'Name', 'SelectSqlList');
-
-            LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
-            this.tabSelectSqlList.AddComponent(LayoutRow);
-
-            // add a DIV for the gridSelectSqlList tp.Grid in the row
-            el = LayoutRow.AddDivElement();
-            CP = {
-                NameTag: "gridSelectSqlList",
-                Height: '100%',
-
-                ToolBarVisible: true,
-                GroupsVisible: false,
-                FilterVisible: false,
-                FooterVisible: false,
-                GroupFooterVisible: false,
-
-                ButtonInsertVisible: true,
-                ButtonEditVisible: true,
-                ButtonDeleteVisible: true,
-                ConfirmDelete: true,
-
-                ReadOnly: true,
-                AllowUserToAddRows: true,
-                AllowUserToDeleteRows: true,
-                AutoGenerateColumns: false,
-
-                Columns: [
-                    { Name: 'Name' },
-                    { Name: 'ConnectionName' },
-                    { Name: 'CompanyAware' },                     
-                ]
-            };
-
-            // create the grid
-            this.gridSelectSqlList = new tp.Grid(el, CP);
-
-            this.tblSelectSqlList = new tp.DataTable();
-            this.tblSelectSqlList.AddColumn('Name').DefaultValue = '';
-            this.tblSelectSqlList.AddColumn('ConnectionName').DefaultValue = tp.SysConfig.DefaultConnection;
-            this.tblSelectSqlList.AddColumn('CompanyAware', tp.DataType.Boolean).DefaultValue = false;
- 
-            this.tblSelectSqlList.AcceptChanges();
-
-            this.gridSelectSqlList.DataSource = this.tblSelectSqlList;
-            this.gridSelectSqlList.BestFitColumns();
-
-            this.gridSelectSqlList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
-            this.gridSelectSqlList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
-
-
-            // Queries Page
-            // ---------------------------------------------------------------------------------
-            this.tabQueryList = this.View.pagerEdit.AddPage(_L('QueryList'));
-            tp.Data(this.tabQueryList.Handle, 'Name', 'QueryList');
-
-            LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
-            this.tabQueryList.AddComponent(LayoutRow);
-
-            // add a DIV for the gridQueryList tp.Grid in the row
-            el = LayoutRow.AddDivElement();
-            CP = {
-                NameTag: "gridQueryList",
-                Height: '100%',
-
-                ToolBarVisible: true,
-                GroupsVisible: false,
-                FilterVisible: false,
-                FooterVisible: false,
-                GroupFooterVisible: false,
-
-                ButtonInsertVisible: true,
-                ButtonEditVisible: true,
-                ButtonDeleteVisible: true,
-                ConfirmDelete: true,
-
-                ReadOnly: true,
-                AllowUserToAddRows: true,
-                AllowUserToDeleteRows: true,
-                AutoGenerateColumns: false,
-
-                Columns: [
-                    { Name: 'Name' }, 
-                ]
-            };
-
-            // create the grid
-            this.gridQueryList = new tp.Grid(el, CP);
-
-            this.tblQueryList = new tp.DataTable();
-            this.tblQueryList.AddColumn('Name').DefaultValue = ''; 
-
-            //this.tblQueryList.AcceptChanges();
-
-            this.gridQueryList.DataSource = this.tblQueryList;
-            this.gridQueryList.BestFitColumns();
-
-            this.gridQueryList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
-            this.gridQueryList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
-
-            // Tables Page
-            // ---------------------------------------------------------------------------------
-            this.tabTableList = this.View.pagerEdit.AddPage(_L('TableList'));
-            tp.Data(this.tabTableList.Handle, 'Name', 'TableList');
-
-            LayoutRow = new tp.Row(null, { Height: '100%' }); // add a tp.Row to the tab page
-            this.tabTableList.AddComponent(LayoutRow);
-
-            // add a DIV for the gridTableList tp.Grid in the row
-            el = LayoutRow.AddDivElement();
-            CP = {
-                NameTag: "gridTableList",
-                Height: '100%',
-
-                ToolBarVisible: true,
-                GroupsVisible: false,
-                FilterVisible: false,
-                FooterVisible: false,
-                GroupFooterVisible: false,
-
-                ButtonInsertVisible: true,
-                ButtonEditVisible: true,
-                ButtonDeleteVisible: true,
-                ConfirmDelete: true,
-
-                ReadOnly: true,
-                AllowUserToAddRows: true,
-                AllowUserToDeleteRows: true,
-                AutoGenerateColumns: false,
-
-                Columns: [
-                    { Name: 'Name' },
-                    { Name: 'Alias' },
-                    { Name: 'TitleKey' },
-                    { Name: 'PrimaryKeyField' },
-                    { Name: 'MasterTableName' },
-                    { Name: 'MasterKeyField' },
-                    { Name: 'DetailKeyField' }, 
-                ]
-            };
-
-            // create the grid
-            this.gridTableList = new tp.Grid(el, CP);
-
-            this.tblTableList = new tp.DataTable();
-            this.tblTableList.AddColumn('Name');
-            this.tblTableList.AddColumn('Alias');
-            this.tblTableList.AddColumn('TitleKey');
-            this.tblTableList.AddColumn('PrimaryKeyField'); //.DefaultValue = 'Id';
-            this.tblTableList.AddColumn('MasterTableName');
-            this.tblTableList.AddColumn('MasterKeyField');
-            this.tblTableList.AddColumn('DetailKeyField');
- 
-            this.gridTableList.DataSource = this.tblTableList;
-            this.gridTableList.BestFitColumns();
-
-            this.gridTableList.On("ToolBarButtonClick", this.AnyGridButtonClick, this);
-            this.gridTableList.On(tp.Events.DoubleClick, this.AnyGridDoubleClick, this);
-
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            let Source = Row.OBJECT;
+            this.Assign(Source);
         }
     }
-
-    /** Called before the Insert() operation of the owner View.
-    */
-    InsertItemBefore() {
-    }
-    /** Called after the Insert() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
      */
-    InsertItemAfter(tblSysDataItem) {
-        this.SetupItem(true, tblSysDataItem);
-    }
+    ToDataRow(Row) {
+        Row.Set('Name', this.Name);
+        Row.Set('Alias', this.Alias);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('DataType', this.DataType);
+        Row.Set('MaxLength', this.MaxLength);
+        Row.Set('Decimals', this.Decimals);
 
-    /** Called before the Edit() operation of the owner View.
-     * The View is about to load in its Edit part a SysData Item from server.
-     * @param {string} Id
+        Row.OBJECT = this;
+
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
      */
-    EditItemBefore(Id) {
-    }
-    /** Called after the Edit() operation of the owner View.
-     * The View is just loaded in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    EditItemAfter(Id, tblSysDataItem) {
-        this.SetupItem(false, tblSysDataItem);
-    }
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
 
-    /** Called before the Commit() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     */
-    CommitItemBefore(tblSysDataItem) {
-        let Row = tblSysDataItem.Rows[0];
- 
-        this.BrokerDef.Name = Row.Get('DataName', '');
-        this.BrokerDef.TitleKey = Row.Get('TitleKey', ''); 
+        Table.AddColumn('Name').DefaultValue = 'NewField';
+        Table.AddColumn('Alias').DefaultValue = 'NewField';
+        Table.AddColumn('TitleKey').DefaultValue = 'NewField';
+        Table.AddColumn('DataType', tp.DataType.Integer).DefaultValue = tp.DataType.Unknown;
+        Table.AddColumn('MaxLength', tp.DataType.Integer).DefaultValue = 0;
+        Table.AddColumn('Decimals', tp.DataType.Integer).DefaultValue = -1;
 
-        let JsonText = tp.ToJson(this.BrokerDef, true);
- 
-        //Row.Set('Data1', JsonText);
-    }
-    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @returns {boolean} Returns true if commit is allowed, else false.
-     */
-    CanCommitItem(tblSysDataItem) {
-        return true;
-    }
-
-    /**
-    Event handler. Called by the owner View when the Edit Pager changes Page.
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    EditPager_PageChanged(Args) {
-        let CurrentPage = this.View.pagerEdit.SelectedPage;
-        if (CurrentPage === this.tabGeneral) {
-
-            let SourceRow = this.View.tblSysDataItem.Rows[0];
-            let Row = this.tblBrokerDef.Rows[0];
-
-            Row.Set('Name', SourceRow.Get('DataName', ''));
-            Row.Set('TitleKey', SourceRow.Get('TitleKey', ''));
-        }
+        return Table;
     }
 
 
-    /** Called when inserting a single row of the tblSelectSqlList and displays the edit dialog
-    */
-    async InsertSelectSqlRow() {
-
-        let Instance = new tp.SelectSql();
-
-        let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(Instance);
-        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-            let Row = this.tblSelectSqlList.AddEmptyRow();
-            Row.Set('Name', Instance.Name);
-            Row.Set('ConnectionName', Instance.ConnectionName);
-            Row.Set('CompanyAware', Instance.CompanyAware);
-            Row.OBJECT = Instance;
-            this.BrokerDef.SelectSqlList.push(Instance);
-        }
-    }
-    /** Called when editing a single row of the tblSelectSqlList and displays the edit dialog
-     */
-    async EditSelectSqlRow() {       
-        let Row = this.gridSelectSqlList.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Instance = Row.OBJECT;
-            let DialogBox = await tp.SelectSqlEditDialog.ShowModalAsync(Instance);
-            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                Row.Set('Name', Instance.Name);
-                Row.Set('ConnectionName', Instance.ConnectionName);
-                Row.Set('CompanyAware', Instance.CompanyAware);
-            }
-        } 
-    }
-    /** Deletes a single row of the tblSelectSqlList 
-     */
-    async DeleteSelectSqlRow() {
-        let Row = this.gridSelectSqlList.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
-            if (Flag === true) {
-                let Instance = Row.OBJECT;
-                tp.ListRemove(this.BrokerDef.SelectSqlList, Instance);
-                this.tblSelectSqlList.RemoveRow(Row);
-            } 
-        }
-    }
-
-    /** Called when inserting a single row of the tblQueryList and displays the edit dialog
-    */
-    async InsertQuerylRow() {
-        let Instance = new tp.SqlBrokerQueryDef();
-
-        let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance);
-        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-            let Row = this.tblQueryList.AddEmptyRow();
-            Row.Set('Name', Instance.Name);
-            Row.OBJECT = Instance;
-            this.BrokerDef.Queries.push(Instance);
-        }
-    }
-    /** Called when editing a single row of the tblQueryList and displays the edit dialog
-     */
-    async EditQueryRow() {
-        let Row = this.gridQueryList.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Instance = Row.OBJECT;
-            let DialogBox = await tp.SqlBrokerQueryDefEditDialog.ShowModalAsync(Instance);
-            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                Row.Set('Name', Instance.Name); 
-            }
-        } 
-    }
-    /** Deletes a single row of the tblQueryList
-     */
-    async DeleteQueryRow() {
-        let Row = this.gridQueryList.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
-            if (Flag === true) {
-                let Instance = Row.OBJECT;
-                tp.ListRemove(this.BrokerDef.Queries, Instance);
-                this.tblQueryList.RemoveRow(Row);
-            }
-        }
-    }
-
-
-    /** Called when inserting a single row of the tblTableList and displays the edit dialog
-    */
-    async InsertTableRow() {
- 
-        let Instance = new tp.SqlBrokerTableDef();
-
-        let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance);
-        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-            let Row = this.tblTableList.AddEmptyRow();
-            Row.Set('Name', Instance.Name);
-            Row.Set('Alias', Instance.Alias);
-            Row.Set('TitleKey', Instance.TitleKey);
-            Row.Set('PrimaryKeyField', Instance.PrimaryKeyField);
-            Row.Set('MasterTableName', Instance.MasterTableName);
-            Row.Set('MasterKeyField', Instance.MasterKeyField);
-            Row.Set('DetailKeyField', Instance.DetailKeyField);
-            Row.OBJECT = Instance;
-            this.BrokerDef.Tables.push(Instance);
-        } 
-    }
-    /** Called when editing a single row of the tblTableList and displays the edit dialog
-     */
-    async EditTableRow() {
-        let Row = this.gridTableList.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Instance = Row.OBJECT;
-            let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance);
-            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                Row.Set('Name', Instance.Name);
-                Row.Set('Alias', Instance.Alias);
-                Row.Set('TitleKey', Instance.TitleKey);
-                Row.Set('PrimaryKeyField', Instance.PrimaryKeyField);
-                Row.Set('MasterTableName', Instance.MasterTableName);
-                Row.Set('MasterKeyField', Instance.MasterKeyField);
-                Row.Set('DetailKeyField', Instance.DetailKeyField);
-            }
-        } 
-    }
-    /** Deletes a single row of the tblTableList
-     */
-    async DeleteTableRow() {
-        let Row = this.gridTableList.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
-            if (Flag === true) {
-                let Instance = Row.OBJECT;
-                tp.ListRemove(this.BrokerDef.Tables, Instance);
-                this.tblTableList.RemoveRow(Row);
-            }
-        } 
-    }
-
-    /* event handlers */
-    /** Event handler
-     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
-     */
-    AnyGridButtonClick(Args) {
-        Args.Handled = true;
-
-        let NameTag = Args.Sender.NameTag;
-
-        if (NameTag === 'gridSelectSqlList') {
-            switch (Args.Command) {
-                case 'GridRowInsert':
-                    this.InsertSelectSqlRow();
-                    break;
-                case 'GridRowEdit':
-                    this.EditSelectSqlRow();
-                    break;
-                case 'GridRowDelete':
-                    this.DeleteSelectSqlRow();
-                    break;
-            }
-        }
-        else if (NameTag === 'gridQueryList') {
-            switch (Args.Command) {
-                case 'GridRowInsert':
-                    this.InsertQuerylRow();
-                    break;
-                case 'GridRowEdit':
-                    this.EditQueryRow();
-                    break;
-                case 'GridRowDelete':
-                    this.DeleteQueryRow();
-                    break;
-            }
-        }
-        
-        else if (NameTag === 'gridTableList') {
-            switch (Args.Command) {
-                case 'GridRowInsert':
-                    this.InsertTableRow(); 
-                    break;
-                case 'GridRowEdit':
-                    this.EditTableRow();
-                    break;
-                case 'GridRowDelete':
-                    this.DeleteTableRow();
-                    break;
-            }
-        }    
-
-    }
-    /**
-    Event handler
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    async AnyGridDoubleClick(Args) {
-
-        Args.Handled = true;
-
-        let NameTag = Args.Sender.NameTag;
-
-        if (NameTag === 'gridSelectSqlList') {
-            await this.EditSelectSqlRow();
-        }
-        else if (NameTag === 'gridQueryList') {
-            await this.EditQueryRow();
-        }
-        else if (NameTag === 'gridTableList') {
-            await this.EditTableRow();
-        }
-    }
-
-   
-    
 
 };
+
+tp.SqlBrokerFieldDef.prototype.fTitle = '';
+tp.SqlBrokerFieldDef.prototype.fTitleKey = '';
+
 //#endregion
 
-//#region tp.SysDataHandlerLocator
-tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
-    /** Constructor
-     * @param {tp.View} View The view that calls and owns this handler
-     */
-    constructor(View) {
-        super(View, 'Locator')
+//#region SqlBrokerTableDef
+tp.SqlBrokerTableDef = class {
+
+    /** Constructor */
+    constructor() {
+        this.Fields = [];
+        this.JoinTables = [];
+        this.StockTables = [];
     }
 
-
-    /** A C# LocatorDef instance as it comes from server. <br /> 
-     * @type {tp.LocatorDef}
+    /** The field name
+     * @type {string}
      */
-    LocatorDef = null;
-    /**
-     * @type {tp.DataTable}
+    Name = '';
+    /** The alias of this field
+     * @type {string}
      */
-    tblLocatorDef = null;
-    /**
-     * @type {tp.DataSource}
+    Alias = '';
+
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
      */
-    dsLocatorDef = null;
- 
-    /** The broker General tab page
-     * @type {tp.TabPage}
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        // nothing
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
      */
-    tabGeneral = null;
-    /** The Sql tab page
-     * @type {tp.TabPage}
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+    /** The name of the primary key field
+     * @type {string}
      */
-    tabSql = null;
-    /** The element upon Ace Editor is created. 
-     * The '__Editor' property of the element points to Ace Editor object.
-     * @type {HTMLElement}
+    PrimaryKeyField = 'Id';
+
+    /** The  name of the master table.
+     * It is used when this table is a detail table in a master-detail relation.
+     * @type {string}
      */
-    elSqlEditor = null; 
-
-    /** A {@link tp.DataTable} for handling the fields of a table def.
-     @type {tp.DataTable}
+    MasterTableName = '';
+    /** The field name of a field belonging to a master table.
+     * Used when this table is a detail table in a master-detail relation or when this is a join table.
+     * @type {string}
      */
-    tblFields = null;
-    /** A {@link tp.Grid} for handling the fields of a table def.
-     @type {tp.Grid}
+    MasterKeyField = 'Id';
+    /** The the detail key field. A field that belongs to this table and mathes the MasterTableName primary key field.
+     * It is used when this table is a detail table in a master-detail relation.
+     * @type {string}
      */
-    gridFields = null;
+    DetailKeyField = '';
 
+    /** The list of the fields
+     * @type {tp.SqlBrokerFieldDef[]}
+     */
+    Fields = [];
+    /** The list of join tables
+     * @type {tp.SqlBrokerTableDef[]}
+     */
+    JoinTables = [];
+    /** The main table of a Broker (Item) is selected as <c>select * from TABLE_NAME where ID = :ID</c> <br />
+     * If the table contains foreign keys, for instance CUSTOMER_ID etc, then those foreign tables are NOT joined.
+     * The programmer who designs the UI just creates a Locator where needed.
+     * But there is always the need to have data from those foreign tables in many situations, i.e. in reports.
+     * StockTables are used for that. StockTables are selected each time after the select of the main broker table (Item)
+     * @type {tp.SqlBrokerQueryDef[]}
+     */
+    StockTables = [];
 
-    /* overrides */
-    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
-     * @override
-    * */
-    CreateEditControls() {
-        if (this.View.pagerEdit.GetPageCount() === 1) {
+    /** Assigns this instance's properties from a specified source.
+    * @param {objec} Source
+    */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
 
-            let LayoutRow,  // A responsive row which is the container of controls bound to tblLocatorDef.
-                el, CP;
+        this.Name = Source.Name || '';
+        this.Alias = Source.Alias || '';
 
-            // General Page
-            // ---------------------------------------------------------------------------------
-            // add a tp.TabPage to View's pagerEdit
-            this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
-            tp.Data(this.tabGeneral.Handle, 'Name', 'General');
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
 
-            // create the data table
-            this.tblLocatorDef = tp.LocatorDef.CreateDataTable();
-            this.tblLocatorDef.Name = 'LocatorDef';
- 
-            let HtmlText;
-            let HtmlRowList = [];
+        this.PrimaryKeyField = Source.PrimaryKeyField || 'Id';
 
-            // for each table field, produce html text for control rows and add the text to a string-list
-            this.tblLocatorDef.Columns.forEach((Column) => {
-                if (Column.Name !== 'SqlText') {
-                    let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+        this.MasterTableName = Source.MasterTableName || '';
+        this.MasterKeyField = Source.MasterKeyField || 'Id';
+        this.DetailKeyField = Source.DetailKeyField || '';
 
-                    let Text = Column.Title;
-                    let Ctrl = {
-                        TypeName: tp.DataTypeToUiType(Column.DataType),
-                        TableName: this.tblLocatorDef.Name,
-                        DataField: Column.Name
-                    };
-
-                    // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-                    HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
-                    HtmlRowList.push(HtmlText)
-                }
+        if (tp.IsArray(Source.Fields)) {
+            this.Fields = [];
+            Source.Fields.forEach((item) => {
+                let FieldDef = new tp.SqlBrokerFieldDef();
+                FieldDef.Assign(item);
+                this.Fields.push(FieldDef);
             });
-
-
-            // join html text for all control rows
-            HtmlText = HtmlRowList.join('\n');
-
-            // content
-            HtmlText = `
-<div class="Row" data-setup='{Height: "100%", Breakpoints: [450, 768, 1050, 1480]}'>
-    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-        ${HtmlText}
-    </div>
-</div>
-`;
-            let elRow = tp.HtmlToElement(HtmlText);
-
-            LayoutRow = new tp.Row(elRow, { Height: '100%' });
-            this.tabGeneral.AddComponent(LayoutRow);
-
-            tp.Ui.CreateContainerControls(elRow);
-
-            this.dsLocatorDef = new tp.DataSource(this.tblLocatorDef);
-
-            tp.BindAllDataControls(elRow, () => { return this.dsLocatorDef; });  
-
-            // SQL Page
-            // ---------------------------------------------------------------------------------
-            this.tabSql = this.View.pagerEdit.AddPage('Sql');
-            this.elSqlEditor = tp.CreateSourceCodeEditor(this.tabSql.Handle, 'sql', '');
-
-            // Fields Page
-            // ---------------------------------------------------------------------------------
-            // add a tp.TabPage to View's pagerEdit
-            let FieldsPage = this.View.pagerEdit.AddPage('Fields');
-            tp.Data(FieldsPage.Handle, 'Name', 'Fields');
-
-            // add a tp.Row to the tab page
-            let Row = new tp.Row(null, { Height: '100%' });
-            FieldsPage.AddComponent(Row);
-
-            // add a DIV for the gridFields tp.Grid in the row
-            el = Row.AddDivElement();
-            CP = {
-                Name: "gridFields",
-                Height: '100%',
-
-                ToolBarVisible: true,
-                GroupsVisible: false,
-                FilterVisible: false,
-                FooterVisible: false,
-                GroupFooterVisible: false,
-
-                ButtonInsertVisible: true,
-                ButtonEditVisible: true,
-                ButtonDeleteVisible: true,
-                ConfirmDelete: true,
-
-                AllowUserToAddRows: true,
-                AllowUserToDeleteRows: true,
-                AutoGenerateColumns: false,
-
-                Columns: [
-                    { Name: 'Name' },
-                    { Name: 'TableName' },
-                    { Name: 'DataField' },
-                    { Name: 'DataType', ListValueField: 'Id', ListDisplayField: 'Name', ListSource: tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]) },
-
-                    { Name: 'TitleKey' },
-
-                    { Name: 'Visible' },
-                    { Name: 'Searchable' },
-                    { Name: 'ListVisible' },
-                    { Name: 'IsIntegerBoolean' },
-
-                    { Name: 'Width' },
-                ] 
-            };
-
-            // create the grid
-            this.gridFields = new tp.Grid(el, CP);
-            this.gridFields.On("ToolBarButtonClick", this.GridFields_AnyButtonClick, this);
-            this.gridFields.On(tp.Events.DoubleClick, this.GridFields_DoubleClick, this);
         }
 
+        if (tp.IsArray(Source.JoinTables)) {
+            this.JoinTables = [];
+            Source.JoinTables.forEach((item) => {
+                let TableDef = new tp.SqlBrokerTableDef();
+                TableDef.Assign(item);
+                this.JoinTables.push(TableDef);
+            });
+        }
+
+        if (tp.IsArray(Source.StockTables)) {
+            this.StockTables = [];
+            Source.StockTables.forEach((item) => {
+                let QueryDef = new tp.SqlBrokerQueryDef();
+                QueryDef.Assign(item);
+                this.StockTables.push(QueryDef);
+            });
+        }
     }
-    /** Called before the Insert() operation of the owner View.
-     * @override
-    */
-    InsertItemBefore() {
-    }
-    /** Called after the Insert() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
-    InsertItemAfter(tblSysDataItem) {
-        this.SetupItem(true, tblSysDataItem);
+    CheckDescriptor() {
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerTableDef_NameIsEmpty", "SqlBrokerTableDef Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.Alias))
+            tp.Throw(_L("E_SqlBrokerTableDef_AliasIsEmpty", "SqlBrokerTableDef Alias is empty."));
+
+        if (tp.IsNullOrWhiteSpace(this.PrimaryKeyField))
+            tp.Throw(_L("E_SqlBrokerTableDef_PrimaryKeyFieldIsEmpty", "SqlBrokerTableDef PrimaryKeyField is empty."));
+
+        if (!tp.IsValid(this.Fields) || this.Fields.length === 0)
+            tp.Throw(_L("E_SqlBrokerTableDef_NoFieldsDefined", "SqlBrokerTableDef Fields not defined."));
     }
 
-    /** Called before the Edit() operation of the owner View. <br />
-     * The View is about to load in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @override
+    /** Loads this instance's fields from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load fields from.
      */
-    EditItemBefore(Id) {
+    FieldsFromDataTable(Table) {
+        this.Fields.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SqlBrokerFieldDef();
+                this.Fields.push(Item);
+                Item.FromDataRow(Row);
+            });
+        }
     }
-    /** Called after the Edit() operation of the owner View. <br />
-     * The View is just loaded in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
-     */
-    EditItemAfter(Id, tblSysDataItem) {
-        this.SetupItem(false, tblSysDataItem);
-    }
-
-    /** Called before the Commit() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
-     */
-    CommitItemBefore(tblSysDataItem) {
-        let Row = this.tblLocatorDef.Rows[0];
-        Row.Set('SqlText', this.elSqlEditor.__Editor.getValue());
-        this.LocatorDef.FromDataRow(Row);
-        this.LocatorDef.FieldsFromDataTable(this.tblFields);
-
-        let JsonText = tp.ToJson(this.LocatorDef, true);
-        Row = tblSysDataItem.Rows[0];
-        Row.Set('DataName', this.LocatorDef.Name);
-        Row.Set('TitleKey', this.LocatorDef.TitleKey);
-        Row.Set('Data1', JsonText);
-    }
-    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @returns {boolean} Returns true if commit is allowed, else false.
-     * @override
-     */
-    CanCommitItem(tblSysDataItem) {
-        let List = this.LocatorDef.GetDescriptorErrors();
-        if (List.length === 0)
-            return true;
-
-        let S = List.join('\n');
-        tp.ErrorBoxAsync(S);
-        return false;
-    }
-
-    /**
-    Event handler. Called by the owner View when the Edit Pager changes Page.
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    EditPager_PageChanged(Args) {
-    }
-
-    /* private */
-    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
-     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
+    /** Saves this instance's fields to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
      * */
-    SetupItem(IsInsertItem, tblSysDataItem) {
-        let Row;
-
-        this.View.FindControlByDataField('DataName').ReadOnly = true;
-        this.View.FindControlByDataField('TitleKey').ReadOnly = true;
- 
-
-        // create an empty Def instance
-        this.LocatorDef = new tp.LocatorDef();
-
-        // if editing an already existing definition
-        // then read the json from Data1 field and load the Def instance
-        if (IsInsertItem === false) {
-            let Text = tblSysDataItem.Rows[0].Get('Data1');
-            let Source = eval("(" + Text + ")");
-            log(Source);
-            this.LocatorDef.Assign(Source);
-
-            this.elSqlEditor.__Editor.setValue(this.LocatorDef.SqlText, -1);
-        }
-        else {
-            // Insert
-            this.elSqlEditor.__Editor.setValue('', -1);
+    FieldsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SqlBrokerFieldDef.CreateDataTable();
         }
 
-        this.tblLocatorDef.ClearRows();
-        this.tblLocatorDef.AcceptChanges();
-
-        Row = this.tblLocatorDef.AddEmptyRow();
-
-        this.LocatorDef.ToDataRow(Row); 
-
-        // create the tblFields
-        this.tblFields = this.LocatorDef.FieldsToDataTable();
-        this.tblFields.AcceptChanges();
-
-        this.gridFields.DataSource = this.tblFields;
-        this.gridFields.BestFitColumns();
-    }
-    /** Creates and returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
-     * The row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @param {tp.DataRow} SourceRow The row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @returns {tp.DataTable} Returns a clone of the tblFields with just a single row, in order to be passed to the edit dialog.
-     */
-    CreateEditFieldTable(SourceRow = null) {
-        let Row;
-        let IsInsertField = tp.IsEmpty(SourceRow);
-
-        // create the tblField, used in editing a single field
-        let tblField = this.tblFields.Clone();
-        tblField.Name = 'Field';    // WARNING: This name is used to differentiate the DataTables in ShowEditFieldDialog()
-
-        // add the single row in tblField
-        Row = tblField.AddEmptyRow();
-
-        if (IsInsertField) { 
-            Row.Set('DataType', tp.DataType.String);
- 
-            Row.Set('Visible', true);
-            Row.Set('Searchable', true);
-            Row.Set('ListVisible', true);
-            Row.Set('IsIntegerBoolean', false);
-
-            Row.Set('Width', 70);
- 
-        }
-        else {
-            Row.CopyFromRow(SourceRow);
-        }
-
-        return tblField;
-    }
-
-    /** Displays an edit dialog box for editing an existing or new row of the tblFields.
-     * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
-     * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @param {boolean} IsInsertField True when is an Insert Field operation. False when is an Edit Field operation.
-     * @param {tp.DataTable} tblField The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
-     */
-    async ShowEditFieldDialog(IsInsertField, tblField) {
-        let DialogBox = null;
-  
-        let ContentHtmlText;
-        let HtmlText;
-        let HtmlRowList = [];
-
-
-        let ColumnNames = [];       // Visible Controls
-        let EditableColumns = []    // Editable Controls
-
-        ColumnNames = ['Name', 'TableName', 'DataField', 'DataType', 'TitleKey', 'Visible', 'Searchable', 'ListVisible', 'IsIntegerBoolean', 'Width'];
-        EditableColumns = ColumnNames; 
-
-        let DataSource = new tp.DataSource(tblField); 
-
-        // Visible Controls
-        // prepare HTML text for each column in tblFields
-        ColumnNames.forEach((ColumnName) => {
-            let Column = this.tblFields.FindColumn(ColumnName);
-            let IsCheckBox = Column.DataType === tp.DataType.Boolean;
-
-            let Text = Column.Title;
-            let Ctrl = {
-                TypeName: Column.Name === 'DataType' ? 'ComboBox' : tp.DataTypeToUiType(Column.DataType),
-                TableName: tblField.Name,
-                DataField: Column.Name
-            };
-
-            if (ColumnName === 'DataType') {
-                Ctrl.ListOnly = true;
-                Ctrl.ListValueField = 'Id';
-                Ctrl.ListDisplayField = 'Name';
-                Ctrl.ListSourceName = 'DataType';
-            }
-
-            // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-            HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
-            HtmlRowList.push(HtmlText);
+        this.Fields.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToDataRow(Row);
         });
 
+        Table.AcceptChanges();
 
-        // join html text for all control rows
-        HtmlText = HtmlRowList.join('\n');
-
-        // content
-        ContentHtmlText = `
-<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
-    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-        ${HtmlText}
-    </div>
-</div>
-`;
-        let elContent = tp.HtmlToElement(ContentHtmlText);
-
-        // show the dialog
-        if (tp.IsHTMLElement(elContent)) {
-
-
-            let BodyWidth = tp.Doc.body.offsetWidth
-            let w = BodyWidth <= 580 ? BodyWidth - 6 : 580;
-
-            let WindowArgs = new tp.WindowArgs({ Text: _L('LocatorFieldDialogTitle', 'Edit Locator field'), Width: w, Height: 'auto' });
-
-            //----------------------------------------------------- 
-            /** Callback to be called after the dialog shows itself (i.e. OnShown())
-             * @param {tp.Window} Window
-             */
-            WindowArgs.ShowFunc = (Window) => {
-                tp.StyleProp(elContent.parentElement, 'padding', '5px');
-
-                // force tp-Cols to adjust
-                Window.BroadcastSizeModeChanged();
-
-                // bind dialog controls
-                tp.BindAllDataControls(elContent, (DataSourceName) => {
-                    if (DataSourceName === 'Field')
-                        return DataSource;
-
-                    if (DataSourceName === 'DataType') {
-                        let Result = new tp.DataSource(tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]));
-                        return Result;
-                    }
-
-                    return null;
-                });
-            };
-            //----------------------------------------------------- 
-            /** Callback to be called just before a modal window is about to set its DialogResult property. <br />
-             *  Returning false from the call-back cancels the setting of the property and the closing of the modal window. <br />
-             * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
-             * @param {tp.Window} Window
-             * @param {number} DialogResult One of the {@link tp.DialogResult} constants
-             * */
-            WindowArgs.CanSetDialogResultFunc = (Window, DialogResult) => {
-                if (DialogResult === tp.DialogResult.OK) {
-
-                    let Row = tblField.Rows[0];
-
-                    // Name
-                    let v = Row.Get('Name', '');
-                    if (tp.IsBlank(v)) {
-                        tp.WarningNote('Name is required');
-                        return false;
-                    }
-
-                }
-
-                return true;
-            };
-            //----------------------------------------------------- 
-            /**  Callback to be called when the dialog is about to close (i.e. OnClosing())
-             * @param {tp.Window} Window
-             */
-            WindowArgs.CloseFunc = (Window) => {
-                let Row = tblField.Rows[0];
-                let v = Row.Get('TitleKey', '');
-                if (tp.IsBlank(v)) {
-                    Row.Set('TitleKey', Row.Get('Name', ''));
-                }
-            };
-            //----------------------------------------------------- 
-
-            tp.Ui.CreateContainerControls(elContent.parentElement);
-            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);
-        }
-      
-        return DialogBox;
+        return Table;
     }
-    /** Called when inserting a single row of the tblFields and displays the edit dialog 
+
+    /** Loads this instance's JoinTables from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load JoinTables from.
      */
-    async InsertFieldRow() {
-        let tblField = this.CreateEditFieldTable(null);
-        let DialogBox = await this.ShowEditFieldDialog(true, tblField);
-        if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-            let FieldRow = tblField.Rows[0];
-            let Row = this.tblFields.AddEmptyRow();
-            Row.CopyFromRow(FieldRow);
+    JoinTablesFromDataTable(Table) {
+        this.JoinTables.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SqlBrokerTableDef();
+                this.JoinTables.push(Item);
+                Item.FromJoinTableDataRow(Row);
+            });
         }
     }
-    /** Called when editing a single row of the tblFields and displays the edit dialog 
+    /** Saves this instance's JoinTables to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save JoinTables to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    JoinTablesToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SqlBrokerTableDef.CreateJoinTableDataTable();
+        }
+
+        this.JoinTables.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToJoinTableDataRow(Row);
+        });
+
+        Table.AcceptChanges();
+
+        return Table;
+    }
+
+    static CreateJoinTableDataTable() {
+        let Table = new tp.DataTable();
+
+        Table.AddColumn('OwnKeyField').DefaultValue = 'Own Key Field';
+        Table.AddColumn('ForeignTable').DefaultValue = 'Foreign Table Name to Join';
+        Table.AddColumn('ForeignAlias').DefaultValue = '';
+        Table.AddColumn('ForeignPrimaryKey').DefaultValue = 'Id';
+
+        return Table;
+    }
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
      */
-    async EditFieldRow() {
-        let Row = this.gridFields.FocusedRow;
-        if (tp.IsValid(Row)) {
-            let tblField = this.CreateEditFieldTable(Row);
-            let DialogBox = await this.ShowEditFieldDialog(false, tblField);
+    FromJoinTableDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+            let Source = Row.OBJECT;
 
-            if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
-                let FieldRow = tblField.Rows[0];
-                Row.CopyFromRow(FieldRow);
-            }
+            Source.Name = Row.Get('ForeignTable', '');
+            Source.Alias = Row.Get('ForeignAlias', '');
+            Source.PrimaryKeyField = Row.Get('ForeignPrimaryKey', '');
+            Source.MasterKeyField = Row.Get('OwnKeyField', '');
+
+            this.Assign(Source);
         }
     }
-
-    /* event handlers */
-    /** Event handler
-     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
      */
-    GridFields_AnyButtonClick(Args) {
-        Args.Handled = true;
+    ToJoinTableDataRow(Row) {
+        Row.Set('ForeignTable', this.Name);
+        Row.Set('ForeignAlias', this.Alias);
+        Row.Set('ForeignPrimaryKey', this.PrimaryKeyField);
+        Row.Set('OwnKeyField', this.MasterKeyField);
 
-        switch (Args.Command) {
-            case 'GridRowInsert':
-                this.InsertFieldRow();
-                break;
-            case 'GridRowEdit':
-                this.EditFieldRow();
-                break;
-            case 'GridRowDelete':
-                tp.InfoNote('Clicked: ' + Args.Command);
-                break;
+        Row.OBJECT = this;
+    }
+
+
+    /** Loads this instance's StockTables from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load StockTables from.
+     */
+    StockTablesFromDataTable(Table) {
+        this.StockTables.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let Item = new tp.SqlBrokerQueryDef();
+                this.StockTables.push(Item);
+                Item.FromDataRow(Row);
+            });
         }
     }
-    /**
-    Event handler
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    GridFields_DoubleClick(Args) {
-        Args.Handled = true;
-        this.EditFieldRow();
+    /** Saves this instance's StockTables to a specified {@link tp.DataTable} and returns the table. If no table is specified a new one is created.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save StockTables to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    StockTablesToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.SqlBrokerQueryDef.CreateDataTable();
+        }
+
+        this.Fields.forEach((Item) => {
+            let Row = Table.AddEmptyRow();
+            Item.ToDataRow(Row);
+        });
+
+        Table.AcceptChanges();
+
+        return Table;
     }
- 
+
 };
 
+tp.SqlBrokerTableDef.prototype.fTitle = '';
+tp.SqlBrokerTableDef.prototype.fTitleKey = '';
 //#endregion
 
+//#region SqlBrokerDef
 
-//#region tp.SysDataHandlerCodeProvider
-tp.SysDataHandlerCodeProvider = class extends tp.SysDataHandler {
-    /** Constructor
-     * @param {tp.View} View The view that calls and owns this handler
-     */
-    constructor(View) {
-        super(View, 'CodeProvider')
+tp.SqlBrokerDef = class {
+
+    /** Constructor */
+    constructor() {
     }
 
-
-    /** A C# CodeProviderDef instance as it comes from server. <br />
-     * @type {tp.CodeProviderDef}
+    /** The field name
+     * @type {string}
      */
-    CodeProviderDef = null;
-    /**
-     * @type {tp.DataTable}
+    Name = '';
+    /** The C# class name of the type this descriptor describes.
+     * NOTE: The valus of this property may be a string returned by the Type.AssemblyQualifiedName property of the type.
+     * Otherwise it must be a type name registered to the TypeStore either directly or just by using the TypeStoreItemAttribute attribute.
+     * In the case of a type registered with the TypeStore, a safe way is to use a Namespace.TypeName combination both, when registering and when retreiving a type.
+     * Regarding types belonging to the various Tripous namespaces, using just the TypeName is enough.
+     * Most of the Tripous types are already registered to the TypeStore with just their TypeName.
+     * @type {string}
      */
-    tblCodeProviderDef = null;
-    /**
-     * @type {tp.DataSource}
+    TypeClassName = 'SqlBroker';
+
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
      */
-    dsCodeProviderDef = null;
-
-    /** The General tab page
-     * @type {tp.TabPage}
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+    }
+    set Title(v) {
+        // nothing
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
      */
-    tabGeneral = null;
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
 
-    /* overrides */
-    /** If not already created, then creates any control this handler needs in order to edit a SysDataItem.
-     * @override
-    * */
-    CreateEditControls() {
-        if (this.View.pagerEdit.GetPageCount() === 1) {
+    /** The connection name (database)
+     * @type {string}
+     */
+    ConnectionName = 'Default';
 
-            let LayoutRow,  // A responsive row which is the container of controls bound to table.
-                el, CP;
+    /** The name of the main table
+     * @type {string}
+     */
+    MainTableName = '';
+    /** The name of the detail table, if any
+     * @type {string}
+     */
+    LinesTableName = '';
+    /** The name of the sub-detail table, if any
+     * @type {string}
+     */
+    SubLinesTableName = '';
 
-            // General Page
-            // ---------------------------------------------------------------------------------
-            // add a tp.TabPage to View's pagerEdit
-            this.tabGeneral = this.View.pagerEdit.AddPage(_L('General'));
-            tp.Data(this.tabGeneral.Handle, 'Name', 'General');
+    /** The name of the Entity this broker represents
+     * @type {string}
+     */
+    EntityName = '';
 
-            // create the data table
-            this.tblCodeProviderDef = tp.CodeProviderDef.CreateDataTable();
-            this.tblCodeProviderDef.Name = 'CodeProviderDef';
+    /** When is true indicates that the OID is a Guid string. 
+     * Defaults to true.
+     * @type {boolean}
+     */
+    GuidOids = true;
+    /** When true indicates that deletes should happen bottom to top, i.e. starting from the bottom table.
+     *  When false indicates that deletes should happen top to bottom, so if any database foreign constraint exists, then let an exception to be thrown. 
+     *  Defaults to true.
+     * @type {boolean}
+     */
+    CascadeDeletes = true;
 
-            let HtmlText;
-            let HtmlRowList = [];
+    /** The list of select statements of the list (browser) part.
+     * @type {tp.SelectSql[]}
+     */
+    SelectSqlList = [];
+    /** The list of table descriptors.
+     * @type {tp.SqlBrokerTableDef[]}
+     */
+    Tables = [];
+    /** A list of SELECT Sql statements that executed once at the initialization of the broker and may be used in various situations, i.e. Locators
+     * @type {tp.SqlBrokerQueryDef[]}
+     */
+    Queries = [];
 
-            // for each table field, produce html text for control rows and add the text to a string-list
-            this.tblCodeProviderDef.Columns.forEach((Column) => {
-                let IsCheckBox = Column.DataType === tp.DataType.Boolean;
+    /** Assigns this instance's properties from a specified source.
+     * @param {objec} Source
+     */
+    Assign(Source) {
+        if (!tp.IsValid(Source))
+            return;
 
-                let Text = Column.Title;
-                let Ctrl = {
-                    TypeName: tp.DataTypeToUiType(Column.DataType),
-                    TableName: this.tblCodeProviderDef.Name,
-                    DataField: Column.Name
-                };
+        this.Name = Source.Name || '';
+        this.TypeClassName = Source.TypeClassName || 'SqlBroker';
 
-                // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-                HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
-                HtmlRowList.push(HtmlText)
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        this.ConnectionName = Source.ConnectionName || 'Default';
+
+        this.MainTableName = Source.MainTableName || '';
+        this.LinesTableName = Source.LinesTableName || '';
+        this.SubLinesTableName = Source.SubLinesTableName || '';
+
+        this.EntityName = Source.EntityName || '';
+
+        this.GuidOids = Source.GuidOids === true;
+        this.CascadeDeletes = Source.CascadeDeletes === true;
+
+        if (tp.IsArray(Source.SelectSqlList)) {
+            this.SelectSqlList = [];
+            Source.SelectSqlList.forEach((item) => {
+                let SelectSql = new tp.SelectSql();
+                SelectSql.Assign(item);
+                this.SelectSqlList.push(SelectSql);
             });
-
-
-            // join html text for all control rows
-            HtmlText = HtmlRowList.join('\n');
-
-            // content
-            HtmlText = `
-<div class="Row" data-setup='{Height: "100%", Breakpoints: [450, 768, 1050, 1480]}'>
-    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-        ${HtmlText}
-    </div>
-</div>
-`;
-            let elRow = tp.HtmlToElement(HtmlText);
-
-            LayoutRow = new tp.Row(elRow, { Height: '100%' });
-            this.tabGeneral.AddComponent(LayoutRow);
-
-            tp.Ui.CreateContainerControls(elRow);
-
-            this.dsCodeProviderDef = new tp.DataSource(this.tblCodeProviderDef);
-
-            tp.BindAllDataControls(elRow, () => { return this.dsCodeProviderDef; });
-             
- 
         }
+
+
+        if (tp.IsArray(Source.Tables)) {
+            this.Tables = [];
+            Source.Tables.forEach((item) => {
+                let TableDef = new tp.SqlBrokerTableDef();
+                TableDef.Assign(item);
+                this.Tables.push(TableDef);
+            });
+        }
+
+        if (tp.IsArray(Source.Queries)) {
+            this.Queries = [];
+            Source.Queries.forEach((item) => {
+                let QueryDef = new tp.SqlBrokerQueryDef();
+                QueryDef.Assign(item);
+                this.Queries.push(QueryDef);
+            });
+        }
+
     }
-    /** Called before the Insert() operation of the owner View.
-     * @override
-    */
-    InsertItemBefore() {
-    }
-    /** Called after the Insert() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
+    /** Throws exception if this instance is not a valid one. 
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
      */
-    InsertItemAfter(tblSysDataItem) {
-        this.SetupItem(true, tblSysDataItem);
+    CheckDescriptor() {
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            tp.Throw(_L("E_SqlBrokerDef_NameIsEmpty", "SqlBrokerDef Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.ConnectionName))
+            tp.Throw(_L("E_SqlBrokerDef_ConnectionNameIsEmpty", "SqlBrokerDef ConnectionName is empty"));
+
+        if (!tp.IsValid(this.Tables) || this.Tables.length === 0)
+            tp.Throw(_L("E_SqlBrokerDef_TablesIsEmpty", "SqlBrokerDef Tables is empty"));
+
+        this.Tables.forEach((item) => { item.CheckDescriptor(); });
+
+        if (tp.IsValid(this.SelectSqlList) && this.SelectSqlList.length > 0)
+            this.SelectSqlList.forEach((item) => { item.CheckDescriptor(); });
+
+        if (tp.IsValid(this.Queries) && this.Queries.length > 0)
+            this.Queries.forEach((item) => { item.CheckDescriptor(); });
     }
 
-    /** Called before the Edit() operation of the owner View. <br />
-     * The View is about to load in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @override
-     */
-    EditItemBefore(Id) {
-    }
-    /** Called after the Edit() operation of the owner View. <br />
-     * The View is just loaded in its Edit part a SysData Item from server.
-     * @param {string} Id
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
-     */
-    EditItemAfter(Id, tblSysDataItem) {
-        this.SetupItem(false, tblSysDataItem);
-    }
-
-    /** Called before the Commit() operation of the owner View.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @override
-     */
-    CommitItemBefore(tblSysDataItem) {
-        let Row = this.tblCodeProviderDef.Rows[0]; 
-        this.CodeProviderDef.FromDataRow(Row); 
-
-        let JsonText = tp.ToJson(this.CodeProviderDef, true);
-        Row = tblSysDataItem.Rows[0];
-        Row.Set('DataName', this.CodeProviderDef.Name);
-        Row.Set('TitleKey', this.CodeProviderDef.Name);
-        Row.Set('Data1', JsonText);
-    }
-    /** Called before the Commit() operation of the owner View. Returns true if commit is allowed, else false.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * @returns {boolean} Returns true if commit is allowed, else false.
-     * @override
-     */
-    CanCommitItem(tblSysDataItem) {
-        let List = this.CodeProviderDef.GetDescriptorErrors();
-        if (List.length === 0)
-            return true;
-
-        let S = List.join('\n');
-        tp.ErrorBoxAsync(S);
-        return false;
-    }
-
-    /**
-    Event handler. Called by the owner View when the Edit Pager changes Page.
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
-    EditPager_PageChanged(Args) {
-    }
-
-    /* private */
-    /** Called by the InsertItemAfter() and EditItemAfter() methods. It either creates a new xxxxDef instance or loads an existing one.
-     * @param {boolean} IsInsertItem True when is an Insert new SysDataItem operation. False when is an Edit an existing SysDataItem operation.
-     * @param {tp.DataTable} tblSysDataItem The Edit (data) table. Results from a convertion of a {@link tp.SysDataItem} to a {@link tp.DataTable}.
-     * */
-    SetupItem(IsInsertItem, tblSysDataItem) {
-
-        this.View.FindControlByDataField('DataName').ReadOnly = true;
-        this.View.FindControlByDataField('TitleKey').ReadOnly = true;
-
-        // create an empty Def instance
-        this.CodeProviderDef = new tp.CodeProviderDef();
-
-        // if editing an already existing definition
-        // then read the json from Data1 field and load the Def instance
-        if (IsInsertItem === false) {
-            let Text = tblSysDataItem.Rows[0].Get('Data1');
-            let Source = eval("(" + Text + ")");
-            log(Source);
-            this.CodeProviderDef.Assign(Source);
-        } 
 
 
-        let Row;
 
-        this.tblCodeProviderDef.ClearRows();
-        this.tblCodeProviderDef.AcceptChanges();
 
-        Row = this.tblCodeProviderDef.AddEmptyRow();
+};
 
-        this.CodeProviderDef.ToDataRow(Row);
+tp.SqlBrokerDef.prototype.fTitle = '';
+tp.SqlBrokerDef.prototype.fTitleKey = '';
 
-    }
-}
 //#endregion
+
+ 

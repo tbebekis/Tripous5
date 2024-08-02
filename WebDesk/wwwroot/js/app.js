@@ -11,8 +11,11 @@ app.Config = app.Config || {};
 app.Config.CurrencySymbol = '€';
 
 app.Resources = app.Resources || {}; 
+
 //#region app.Header
-/** Handles controls and operations of the header */
+/** Handles controls and operations of the header.
+ * The HTML markup of this component comes from the server inside the whole page.
+ */
 app.Header = class extends tp.Component {
 
     /** Constructor
