@@ -306,7 +306,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
 
         // create the tblField, used in editing a single field
         let tblField = this.tblFields.Clone();
-        tblField.Name = 'Field';
+        tblField.Name = 'Field';                // WARNING: This name is used to differentiate the DataTables in DatabaseFieldEditDialog()
 
         // add the single row in tblField
         FieldRow = tblField.AddEmptyRow();
@@ -1319,7 +1319,7 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
 
         // create the tblField, used in editing a single field
         let tblField = this.tblFields.Clone();
-        tblField.Name = 'Field';    // WARNING: This name is used to differentiate the DataTables in ShowEditFieldDialog()
+        tblField.Name = 'Field';    // WARNING: This name is used to differentiate the DataTables in LocatorFieldEditDialog()
 
         // add the single row in tblField
         Row = tblField.AddEmptyRow();
@@ -1341,147 +1341,12 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
 
         return tblField;
     }
-
-    /** Displays an edit dialog box for editing an existing or new row of the tblFields.
-     * The passed {@link tp.DataTable} is a clone of tblFields with just a single row.
-     * That single row is either empty, on insert, or a clone of a tblFields row, on edit.
-     * @param {boolean} IsInsertField True when is an Insert Field operation. False when is an Edit Field operation.
-     * @param {tp.DataTable} tblField The {@link tp.DataTable} that is going to be edited. Actually the first and only row it contains.
-     */
-    async ShowEditFieldDialog(IsInsertField, tblField) {
-        let DialogBox = null;
-  
-        let ContentHtmlText;
-        let HtmlText;
-        let HtmlRowList = [];
-
-
-        let ColumnNames = [];       // Visible Controls
-        let EditableColumns = []    // Editable Controls
-
-        ColumnNames = ['Name', 'TableName', 'DataField', 'DataType', 'TitleKey', 'Visible', 'Searchable', 'ListVisible', 'IsIntegerBoolean', 'Width'];
-        EditableColumns = ColumnNames; 
-
-        let DataSource = new tp.DataSource(tblField); 
-
-        // Visible Controls
-        // prepare HTML text for each column in tblFields
-        ColumnNames.forEach((ColumnName) => {
-            let Column = this.tblFields.FindColumn(ColumnName);
-            let IsCheckBox = Column.DataType === tp.DataType.Boolean;
-
-            let Text = Column.Title;
-            let Ctrl = {
-                TypeName: Column.Name === 'DataType' ? 'ComboBox' : tp.DataTypeToUiType(Column.DataType),
-                TableName: tblField.Name,
-                DataField: Column.Name
-            };
-
-            if (ColumnName === 'DataType') {
-                Ctrl.ListOnly = true;
-                Ctrl.ListValueField = 'Id';
-                Ctrl.ListDisplayField = 'Name';
-                Ctrl.ListSourceName = 'DataType';
-            }
-
-            // <div class="tp-CtrlRow" data-setup="{Text: 'Id', Control: { TypeName: 'TextBox', Id: 'Code', DataField: 'Code', ReadOnly: true } }"></div>
-            HtmlText = tp.CtrlRow.GetHtml(IsCheckBox, Text, Ctrl);
-            HtmlRowList.push(HtmlText);
-        });
-
-
-        // join html text for all control rows
-        HtmlText = HtmlRowList.join('\n');
-
-        // content
-        ContentHtmlText = `
-<div class="Row" data-setup='{Breakpoints: [450, 768, 1050, 1480]}'>
-    <div class="Col" data-setup='{ControlWidthPercents: [100, 60, 60, 60, 60]}'>
-        ${HtmlText}
-    </div>
-</div>
-`;
-        let elContent = tp.HtmlToElement(ContentHtmlText);
-
-        // show the dialog
-        if (tp.IsHTMLElement(elContent)) {
-
-
-            let BodyWidth = tp.Doc.body.offsetWidth
-            let w = BodyWidth <= 580 ? BodyWidth - 6 : 580;
-
-            let WindowArgs = new tp.WindowArgs({ Text: _L('LocatorFieldDialogTitle', 'Edit Locator field'), Width: w, Height: 'auto' });
-
-            //----------------------------------------------------- 
-            /** Callback to be called after the dialog shows itself (i.e. OnShown())
-             * @param {tp.Window} Window
-             */
-            WindowArgs.ShowFunc = (Window) => {
-                tp.StyleProp(elContent.parentElement, 'padding', '5px');
-
-                // force tp-Cols to adjust
-                Window.BroadcastSizeModeChanged();
-
-                // bind dialog controls
-                tp.BindAllDataControls(elContent, (DataSourceName) => {
-                    if (DataSourceName === 'Field')
-                        return DataSource;
-
-                    if (DataSourceName === 'DataType') {
-                        let Result = new tp.DataSource(tp.EnumToLookUpTable(tp.DataType, [tp.DataType.Unknown]));
-                        return Result;
-                    }
-
-                    return null;
-                });
-            };
-            //----------------------------------------------------- 
-            /** Callback to be called just before a modal window is about to set its DialogResult property. <br />
-             *  Returning false from the call-back cancels the setting of the property and the closing of the modal window. <br />
-             * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
-             * @param {tp.Window} Window
-             * @param {number} DialogResult One of the {@link tp.DialogResult} constants
-             * */
-            WindowArgs.CanSetDialogResultFunc = (Window, DialogResult) => {
-                if (DialogResult === tp.DialogResult.OK) {
-
-                    let Row = tblField.Rows[0];
-
-                    // Name
-                    let v = Row.Get('Name', '');
-                    if (tp.IsBlank(v)) {
-                        tp.WarningNote('Name is required');
-                        return false;
-                    }
-
-                }
-
-                return true;
-            };
-            //----------------------------------------------------- 
-            /**  Callback to be called when the dialog is about to close (i.e. OnClosing())
-             * @param {tp.Window} Window
-             */
-            WindowArgs.CloseFunc = (Window) => {
-                let Row = tblField.Rows[0];
-                let v = Row.Get('TitleKey', '');
-                if (tp.IsBlank(v)) {
-                    Row.Set('TitleKey', Row.Get('Name', ''));
-                }
-            };
-            //----------------------------------------------------- 
-
-            tp.Ui.CreateContainerControls(elContent.parentElement);
-            DialogBox = await tp.ContentWindow.ShowModalAsync(elContent, WindowArgs);
-        }
-      
-        return DialogBox;
-    }
+ 
     /** Called when inserting a single row of the tblFields and displays the edit dialog 
      */
     async InsertFieldRow() {
         let tblField = this.CreateEditFieldTable(null);
-        let DialogBox = await this.ShowEditFieldDialog(true, tblField);
+        let DialogBox = await tp.LocatorFieldEditDialog.ShowModalAsync(tblField, true);  
         if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
             let FieldRow = tblField.Rows[0];
             let Row = this.tblFields.AddEmptyRow();
@@ -1494,7 +1359,7 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
         let Row = this.gridFields.FocusedRow;
         if (tp.IsValid(Row)) {
             let tblField = this.CreateEditFieldTable(Row);
-            let DialogBox = await this.ShowEditFieldDialog(false, tblField);
+            let DialogBox = await tp.LocatorFieldEditDialog.ShowModalAsync(tblField, false);  
 
             if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
                 let FieldRow = tblField.Rows[0];

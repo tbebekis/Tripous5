@@ -1,4 +1,11 @@
-﻿
+﻿tp.Urls.SysDataSelectList = '/SysData/SelectList';
+tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
+tp.Urls.SysDataSaveItem = '/SysData/SaveItem';
+
+tp.Urls.LocatorGetDef = '/Locator/GetDef';
+tp.Urls.LocatorSqlSelect = '/Locator/SqlSelect';
+
+
 //#region SysDataItem
 
 /** 
@@ -614,9 +621,499 @@ tp.DataTableDef.prototype.UniqueConstraints = [];
 
 
 //---------------------------------------------------------------------------------------
-// Broker related Definition classes
+// Locator related Definition classes
 //---------------------------------------------------------------------------------------
 
+//#region tp.Locators
+/** A helper static class for locators */
+tp.Locators = class {
+
+    /**
+     * Returns a locator definition registered under a specified name, if any, else null/undefined. <br />
+     * It first searches the already downloaded definitions and if the requested is not found then calls the server.
+     * @param {string} Name The name of the locator definition.
+     * @returns {tp.LocatorDef} Returns a locator definition registered under a specified name, if any, else null/undefined.
+     */
+    static async GetDefAsync(Name) {
+        let Result = this.Descriptors.find(item => tp.IsSameText(Name, item.Name));
+
+        if (!tp.IsValid(Result)) {
+
+            let Url = tp.Urls.LocatorGetDef;
+            let Data = {
+                LocatorName: Name,
+            };
+
+            let Args = await tp.Ajax.GetAsync(Url, Data);
+
+            Result = new tp.LocatorDef();
+            Result.Assign(Args.Packet);
+            this.Descriptors.push(Result);
+        }
+
+        return Result;
+    }
+    /**
+     * Executes the SELECT statement of a specified Locator, along with the specified where clause and returns the result {@link tp.DataTable}
+     * @param {string} Name The name of the locator definition.
+     * @param {string} WhereSql The where clause text to add to the SELECT statement of a specified Locator.
+     * @returns {tp.DataTable} Returns the result {@link tp.DataTable}
+     */
+    static async SqlSelectAsync(Name, WhereSql) {
+        let Url = tp.Urls.LocatorSqlSelect;
+        let Data = {
+            LocatorName: Name,
+            WhereSql: WhereSql || ''
+        };
+
+        let Args = await tp.Ajax.GetAsync(Url, Data);
+        let Table = new tp.DataTable();
+        Table.Assign(Args.Packet);
+
+        return Table;
+    }
+};
+
+/** A list of locator definitions already downloaded from server.
+ * @static
+ * @type {tp.LocatorDef[]} 
+ * */
+tp.Locators.Descriptors = [];
+//#endregion
+
+//#region tp.LocatorDef
+
+/**
+Describes a {@link tp.Locator}. <br />
+
+A locator represents (returns) a single value, but it can handle and display multiple values
+in order to help the end user in identifying and locating that single value.  <br />
+
+For example, a TRADES table has a CUSTOMER_ID column, representing that single value, but the user interface
+has to display information from the CUSTOMERS table, specifically, the ID, CODE and NAME columns.
+
+The TRADES table is the data table and the CUSTOMER_ID is the DataField field name.
+The CUSTOMERS table is the list table, denoted by the ListTableName, and the ID is the ListKeyField field name.
+
+The fields, ID, CODE and NAME, may be described by individual {@link tp.LocatorFieldDef} field items.  <br />
+
+In other words, the TRADES.CUSTOMER_ID value comes from the CUSTOMERS.ID value. <br />
+The TRADES is the data-table where the CUSTOMERS is the list table. <br />
+A locator provides a filtering mechanism for the user to locate a CUSTOMERS row. <br />
+Also a locator displays the CUSTOMERS rows when the filtering returns more than one row. <br />
+
+A locator can be used either as a single-row control, as the {@link tp.LocatorBox}  does, or as a group of
+related columns in a {@link tp.Grid}.  <br />
+
+NOTE: A locator of a {@link tp.LocatorBox} type, may or may not define the tp.LocatorFieldDef.DataField field names. <br />
+Usually in a case like that, the data table contains just the key field, the LocatorBox.DataField. <br />
+A locator of a grid-type must define the names of those fields always and the data table must contain DataColumn columns
+on those fields.
+
+NOTE: The SqlText is mandatory.
+ * */
+tp.LocatorDef = class {
+
+    /** Contructor */
+    constructor() {
+        this.Fields = [];
+    }
+
+
+    /** Field
+    * @private
+    * @type {string}
+    */
+    fTitleKey = '';
+
+
+    /* properties */
+    /**
+    Gets or sets the locator descriptor name
+    @type {string}
+    */
+    Name = '';
+    /**
+    Gets or sets a resource Key used in returning a localized version of Title
+    @type {string}
+    */
+    get TitleKey() {
+        return !tp.IsNullOrWhiteSpace(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+    /**
+    The connection name 
+    @type {string}
+    */
+    ConnectionName = tp.SysConfig.DefaultConnection;
+    /**
+    Gets or sets the name of the list table
+    @type {string}
+    */
+    ListTableName = '';
+    /**
+    Gets or sets the key field of the list table. The value of this field goes to the DataField
+    */
+    ListKeyField = 'Id';
+    /**
+    Gets or sets the zoom command name. A user inteface (form) can use this name to call the command.
+    @type {string}
+    */
+    ZoomCommand = '';
+    /**
+    The SELECT statement to execute
+    @type {string}
+    */
+    SqlText = '';
+
+    /**
+    Indicates whether the locator is readonly, meaning the user cannot select from the drop-down list
+    @type {boolean}
+    */
+    ReadOnly = false;
+    /**
+    Gets the list of descriptor fields.
+    @type {tp.LocatorFieldDef[]}
+    */
+    Fields = [];
+
+    /**
+    Assigns the properties of this instance from a specified source object.
+    @param {object} Source The source to copy property values from.
+    */
+    Assign(Source) {
+        if (tp.IsValid(Source)) {
+            for (var Prop in Source) {
+                if (!tp.IsFunction(Source[Prop]) && tp.HasWritableProperty(this, Prop)) {
+                    if (Prop === 'Fields' && tp.IsArray(Source[Prop])) {
+                        this.Fields = [];
+                        let FieldDef;
+                        Source[Prop].forEach((SourceFieldDef) => {
+                            FieldDef = new tp.LocatorFieldDef();
+                            FieldDef.Assign(SourceFieldDef);
+                            this.Fields.push(FieldDef);
+                        });
+                    }
+                    else {
+                        this[Prop] = Source[Prop];
+                    }
+                }
+            }
+        }
+
+    }
+    /** Returns a string list with possible errors in this descriptor. If no errors the array is empty. 
+     * @param {string[]} [List=null] Optional. The string list to place the error strings. 
+     * @returns {string[]} A string list with error texts or empty.
+     */
+    GetDescriptorErrors(List = null) {
+        List = List || [];
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            List.push(_L("E_LocatorDef_NameIsEmpty", "LocatorDef: Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.ConnectionName))
+            List.push(_L("E_LocatorDef_ConnectionNameIsEmpty", `LocatorDef ${this.Name}: ConnectionName is empty`));
+
+        if (tp.IsNullOrWhiteSpace(this.SqlText))
+            List.push(_L("E_LocatorDef_SqlTextIsEmpty", `LocatorDef ${this.Name}: SqlText is empty`));
+
+        if (!tp.IsValid(this.Fields) || this.Fields.Count === 0)
+            List.push(_L("E_LocatorDef_NoFields", `LocatorDef ${this.Name}: No fields defined`));
+
+        this.Fields.forEach((item) => { item.GetDescriptorErrors(List); });
+
+        return List;
+    }
+    /** Throws exception if this instance is not a valid one.
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        let List = this.GetDescriptorErrors();
+        if (List.length > 0) {
+            let S = List.join('\n');
+            tp.Throw(S);
+        }
+    }
+
+    /**
+    Finds a {@link tp.LocatorFieldDef}  field descriptor by list field name and returns the field or null if not found
+    @param {string} ListField - The name of the ListField.
+    @returns {tp.LocatorFieldDef} Finds a {@link tp.LocatorFieldDef}  field descriptor by list field name and returns the field or null if not found
+    */
+    Find(ListField) {
+        return this.Fields.find((item) => { return tp.IsSameText(ListField, item.Name); });
+    }
+    /**
+    Finds a {@link tp.LocatorFieldDef} field descriptor by data field and returns the field or null if not found
+    @param {string} DataField - The field name of the field in the target data-source
+    @returns {tp.LocatorFieldDef} Finds a {@link tp.LocatorFieldDef} field descriptor by data field and returns the field or null if not found
+    */
+    FindByDataField(DataField) {
+        return this.Fields.find((item) => { return tp.IsSameText(DataField, item.DataField); });
+    }
+
+    /** Loads this instance's fields from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load fields from.
+     */
+    FieldsFromDataTable(Table) {
+        this.Fields.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let FieldDef = new tp.LocatorFieldDef();
+                this.Fields.push(FieldDef);
+                FieldDef.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's fields to a {@link tp.DataTable} and returns the table.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    FieldsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.LocatorFieldDef.CreateDataTable();
+        }
+
+        this.Fields.forEach((FieldDef) => {
+            let Row = Table.AddEmptyRow();
+            FieldDef.ToDataRow(Row);
+        });
+
+        return Table;
+    }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+
+            this.Name = Row.Get('Name', '');
+            this.Title = Row.Get('TitleKey', '');
+            this.ConnectionName = Row.Get('ConnectionName', '');
+            this.ListTableName = Row.Get('ListTableName', '');
+            this.ListKeyField = Row.Get('ListKeyField');
+            this.ZoomCommand = Row.Get('ZoomCommand', '');
+            this.SqlText = Row.Get('SqlText', '');
+            this.ReadOnly = Row.Get('ReadOnly', false);
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+
+        Row.Set('Name', this.Name);
+        Row.Set('TitleKey', this.TitleKey);
+        Row.Set('ConnectionName', this.ConnectionName);
+        Row.Set('ListTableName', this.ListTableName);
+        Row.Set('ListKeyField', this.ListKeyField);
+        Row.Set('ZoomCommand', this.ZoomCommand);
+        Row.Set('SqlText', this.SqlText);
+        Row.Set('ReadOnly', this.ReadOnly);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'Locators';
+
+        Table.AddColumn('Name');
+        Table.AddColumn('TitleKey');
+        Table.AddColumn('ConnectionName').DefaultValue = tp.SysConfig.DefaultConnection;
+        Table.AddColumn('ListTableName');
+        Table.AddColumn('ListKeyField').DefaultValue = 'Id';
+        Table.AddColumn('ZoomCommand');
+        Table.AddColumn('SqlText');
+        Table.AddColumn('ReadOnly', tp.DataType.Boolean).DefaultValue = false;
+        return Table;
+    }
+};
+//#endregion 
+
+//#region tp.LocatorFieldDef
+/** Describes the "field" (text box or grid column) of a Locator. <br />
+ * A field such that associates a column in the data table (the target) to a column in the list table (the source).
+ * */
+tp.LocatorFieldDef = class {
+
+    /** Contructor */
+    constructor() {
+    }
+
+    /**
+    The field name in the list (source) table
+    @type {string}
+    */
+    Name = '';
+    /**
+    The table name of the list (source) table
+    @type {string}
+    */
+    TableName = '';
+
+    /** When not empty/null then it denotes a field in the dest data table where to put the value of this field.
+     * @type {string}
+     */
+    DataField = '';
+    /**
+    Gets or sets the data type of the field. One of the tp.DataType constants
+    @type {string}
+    */
+    DataType = tp.DataType.String;
+
+    /**
+    Gets or sets tha Title of this descriptor, used for display purposes.
+    @type {string}
+    */
+    Title = '';
+    /**
+    Gets or sets a resource Key used in returning a localized version of Title.
+    @type {string}
+    */
+    get TitleKey() {
+        return tp.IsBlank(this.fTitleKey) ? this.Name : this.fTitleKey;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+
+    /**
+    Indicates whether a TextBox for this field is visible in a LocatorBox
+    @type {boolean}
+    */
+    Visible = true;
+    /**
+    When true the field can be part in a where clause in a select statement.
+    @type {boolean}
+    */
+    Searchable = true;
+    /**
+    Indicates whether the field is visible when the list table is displayed
+    @type {boolean}
+    */
+    ListVisible = true
+
+    /**
+    Used to notify criterial links to treat the field as an integer boolea fieldn (1 = true, 0 = false)
+    @type {boolean}
+    */
+    IsIntegerBoolean = false;
+    /**
+    Controls the width of the text box in a LocatorBox. In pixels.
+    @type {number}
+    */
+    Width = 70;
+
+    /**
+    Assigns the properties of this instance from a specified source object.
+    @param {object} Source The source to copy property values from.
+    */
+    Assign(Source) {
+        if (tp.IsValid(Source)) {
+            for (let Prop in Source) {
+                if (!tp.IsFunction(Source[Prop]) && tp.HasWritableProperty(this, Prop)) {
+                    this[Prop] = Source[Prop];
+                }
+            }
+        }
+    }
+    /** Returns a string list with possible errors in this descriptor. If no errors the array is empty. 
+     * @param {string[]} [List=null] Optional. The string list to place the error strings. 
+     * @returns {string[]} A string list with error texts or empty.
+     */
+    GetDescriptorErrors(List = null) {
+        List = List || [];
+
+        if (tp.IsNullOrWhiteSpace(this.Name))
+            List.push(_L("E_LocatorFieldDef_NameIsEmpty", "LocatorFieldDef: Name is empty"));
+
+        if (tp.IsNullOrWhiteSpace(this.TableName))
+            List.push(_L("E_LocatorFieldDef_TableNameIsEmpty", `LocatorFieldDef ${this.Name}:TableName is empty`));
+    }
+    /** Throws exception if this instance is not a valid one.
+     *  The following code must be the exact copy of the corresponding C# class CheckDescriptor() function
+     */
+    CheckDescriptor() {
+        let List = this.GetDescriptorErrors();
+        if (List.length > 0) {
+            let S = List.join('\n');
+            tp.Throw(S);
+        }
+    }
+
+    /** Loads this instance's properties from a specified {@link tp.DataRow}
+     * @param {tp.DataRow} Row The {@link tp.DataRow} to load from.
+     */
+    FromDataRow(Row) {
+        if (Row instanceof tp.DataRow) {
+
+            this.Name = Row.Get('Name', '');
+            this.TableName = Row.Get('TableName', '');
+            this.DataField = Row.Get('DataField', '');
+            this.DataType = Row.Get('DataType', tp.DataType.String);
+
+            this.TitleKey = Row.Get('TitleKey', '');
+
+            this.Visible = Row.Get('Visible', true);
+            this.Searchable = Row.Get('Searchable', true);
+            this.ListVisible = Row.Get('ListVisible', true);
+            this.IsIntegerBoolean = Row.Get('IsIntegerBoolean', false);
+
+            this.Width = Row.Get('Width', 70);
+        }
+    }
+    /** Saves this instance's properties to a specified {@link tp.DataRow}
+     * @param {tp.DataRow}  Row The {@link tp.DataRow} to save to.
+     */
+    ToDataRow(Row) {
+
+        Row.Set('Name', this.Name);
+        Row.Set('TableName', this.TableName);
+        Row.Set('DataField', this.DataField);
+        Row.Set('DataType', this.DataType);
+
+        Row.Set('TitleKey', this.TitleKey);
+
+        Row.Set('Visible', this.Visible);
+        Row.Set('Searchable', this.Searchable);
+        Row.Set('ListVisible', this.ListVisible);
+        Row.Set('IsIntegerBoolean', this.IsIntegerBoolean);
+
+        Row.Set('Width', this.Width);
+    }
+    /** Creates and returns a {@link tp.DataTable} used in moving around instances of this class.
+     */
+    static CreateDataTable() {
+        let Table = new tp.DataTable();
+        Table.Name = 'Fields';
+
+        Table.AddColumn('Name', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('TableName', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('DataField', tp.DataType.String, tp.SysConfig.DbIdentifierMaxLength);
+        Table.AddColumn('DataType', tp.DataType.String, 40);
+
+        Table.AddColumn('TitleKey', tp.DataType.String, 96);
+
+        Table.AddColumn('Visible', tp.DataType.Boolean);
+        Table.AddColumn('Searchable', tp.DataType.Boolean);
+        Table.AddColumn('ListVisible', tp.DataType.Boolean);
+        Table.AddColumn('IsIntegerBoolean', tp.DataType.Boolean);
+
+        Table.AddColumn('Width', tp.DataType.Integer);
+        return Table;
+    }
+};
+
+tp.LocatorFieldDef.BoxDefaultWidth = 70;
+//#endregion
+
+//---------------------------------------------------------------------------------------
+// Broker related Definition classes
+//---------------------------------------------------------------------------------------
 
 //#region CodeProviderDef
 
@@ -714,6 +1211,7 @@ tp.CodeProviderDef = class {
 };
 
 //#endregion
+
 
 //#region SqlBrokerQueryDef
 
