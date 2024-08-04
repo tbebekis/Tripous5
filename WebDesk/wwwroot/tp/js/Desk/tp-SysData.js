@@ -226,15 +226,14 @@ tp.SysDataItem.CreateTable = function () {
 
 
 //---------------------------------------------------------------------------------------
-// Definition classes
+// Database related Definition classes
 //---------------------------------------------------------------------------------------
 
-//#region DataTableDef
+//#region UniqueConstraintDef
 
-/** Database table definition
+/** For table-wise unique constraints, possibly on multiple fields.
  * */
-tp.DataTableDef = class extends tp.Object {
-
+tp.UniqueConstraintDef = class extends tp.Object {
     /** Constructor.
      * Assigns this instance's properties from a specified source, if not null.
      * @param {objec} Source Optional.
@@ -242,38 +241,22 @@ tp.DataTableDef = class extends tp.Object {
     constructor(Source = null) {
         super();
 
-        this.Id = tp.Guid(true);
-        this.fTitle = '';
-        this.fTitleKey = '';
-        this.Fields = [];
-        this.UniqueConstraints = [];
-
+        this.Name = '';
         this.Assign(Source);
     }
+    /** A proper string, e.g. <code>Field1, Field2</code>
+     * @type {string}
+     */
+    get FieldNames() { return this.fFieldNames; }
+    set FieldNames(v) {
+        if (this.fFieldNames != v) {
+            if (!tp.IsBlankString(v) && tp.IsBlankString(this.Name))
+                this.Name = "UC_" + tp.GenerateRandomString(tp.SysConfig.DbIdentifierMaxLength - 3);
 
-    /** A GUID string
-     * @type {string}
-     */
-    Id = '';
-    /** Title (caption) of this instance, used for display purposes.
-     * @type {string}
-     */
-    get Title() {
-        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
+            this.fFieldNames = v;
+        }
     }
-    set Title(v) {
-        this.fTitle = v;
-    }
-    /** A resource Key used in returning a localized version of Title
-     * @type {string}
-     */
-    get TitleKey() {
-        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
-    }
-    set TitleKey(v) {
-        this.fTitleKey = v;
-    }
- 
+
     /** Assigns this instance's properties from a specified source.
      * @param {objec} Source
      */
@@ -281,79 +264,23 @@ tp.DataTableDef = class extends tp.Object {
         if (!tp.IsValid(Source))
             return;
 
-        this.Id = Source.Id || tp.Guid(true);
+        this.FieldNames = Source.FieldNames || '';
         this.Name = Source.Name || '';
-        this.Title = Source.Title || '';
-        this.TitleKey = Source.TitleKey || '';
-
-        if (tp.IsArray(Source.Fields)) {
-            this.Fields = [];
-            Source.Fields.forEach((item) => {
-                let FieldDef = new tp.DataFieldDef(item);
-                this.Fields.push(FieldDef);
-            });
-        }
-
-        if (tp.IsArray(Source.UniqueConstraints)) {
-            this.UniqueConstraints = [];
-            Source.UniqueConstraints.forEach((item) => {
-                let UC = new tp.UniqueConstraintDef(item);
-                this.UniqueConstraints.push(UC);
-            });
-        }
- 
     }
 
-    /** Loads this instance's fields from a specified {@link tp.DataTable}
-     * @param {tp.DataTable} Table The table to load fields from.
-     */
-    FieldsFromDataTable(Table) {
-        this.Fields.length = 0;
-        if (Table instanceof tp.DataTable) {
-            Table.Rows.forEach((Row) => {
-                let FieldDef = new tp.DataFieldDef();
-                this.Fields.push(FieldDef);
-                FieldDef.FromDataRow(Row);
-            });
-        }
-    }
-    /** Saves this instance's fields to a {@link tp.DataTable} and returns the table.
-     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
-     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
-     * */
-    FieldsToDataTable(Table = null) {
-        if (!(Table instanceof tp.DataTable)) {
-            Table = tp.DataFieldDef.CreateDataTable();
-        }           
- 
-        this.Fields.forEach((FieldDef) => {
-            let Row = Table.AddEmptyRow();
-            FieldDef.ToDataRow(Row);
-        });        
-
-        return Table;
-    }
 };
-
-
-
-tp.DataTableDef.prototype.fTitle = '';
-tp.DataTableDef.prototype.fTitleKey = '';
-
-/** A name unique among all instances of this type
+/** The constraint name
  * @type {string}
  */
-tp.DataTableDef.prototype.Name = '';
-/** The list of fields
- * @type {tp.DataFieldDef[]}
+tp.UniqueConstraintDef.prototype.Name = '';
+/** A proper string, e.g. <code>Field1, Field2</code>
+ * @type {string}
  */
-tp.DataTableDef.prototype.Fields = [];
-/** For multi-field unique constraints.
- * Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2
- * @type {string[]}
- */
-tp.DataTableDef.prototype.UniqueConstraints = [];
+tp.UniqueConstraintDef.prototype.fFieldNames = '';
 
+//#endregion
+
+//#region DataFieldDef
 
 /** Database table field definition
  * */
@@ -395,7 +322,7 @@ tp.DataFieldDef = class extends tp.Object {
     set TitleKey(v) {
         this.fTitleKey = v;
     }
- 
+
     /** When true denotes a field upon which a unique constraint is applied
      * @type {boolean}
      */
@@ -550,10 +477,14 @@ tp.DataFieldDef.prototype.fForeignKey = '';
  */
 tp.DataFieldDef.prototype.ForeignKeyConstraintName = '';
 
+//#endregion
 
-/** For table-wise unique constraints, possibly on multiple fields.
+//#region DataTableDef
+
+/** Database table definition
  * */
-tp.UniqueConstraintDef = class extends tp.Object {
+tp.DataTableDef = class extends tp.Object {
+
     /** Constructor.
      * Assigns this instance's properties from a specified source, if not null.
      * @param {objec} Source Optional.
@@ -561,44 +492,131 @@ tp.UniqueConstraintDef = class extends tp.Object {
     constructor(Source = null) {
         super();
 
-        this.Name = '';
+        this.Id = tp.Guid(true);
+        this.fTitle = '';
+        this.fTitleKey = '';
+        this.Fields = [];
+        this.UniqueConstraints = [];
+
         this.Assign(Source);
     }
-    /** A proper string, e.g. <code>Field1, Field2</code>
+
+    /** A GUID string
      * @type {string}
      */
-    get FieldNames() { return this.fFieldNames; }
-    set FieldNames(v) {
-        if (this.fFieldNames != v) {
-            if (!tp.IsBlankString(v) && tp.IsBlankString(this.Name))
-                this.Name = "UC_" + tp.GenerateRandomString(tp.SysConfig.DbIdentifierMaxLength - 3);
-
-            this.fFieldNames = v;
-        }
+    Id = '';
+    /** Title (caption) of this instance, used for display purposes.
+     * @type {string}
+     */
+    get Title() {
+        return !tp.IsBlankString(this.fTitle) ? this.fTitle : this.Name;
     }
-
+    set Title(v) {
+        this.fTitle = v;
+    }
+    /** A resource Key used in returning a localized version of Title
+     * @type {string}
+     */
+    get TitleKey() {
+        return !tp.IsBlankString(this.fTitleKey) ? this.fTitleKey : this.Name;
+    }
+    set TitleKey(v) {
+        this.fTitleKey = v;
+    }
+ 
     /** Assigns this instance's properties from a specified source.
      * @param {objec} Source
      */
     Assign(Source) {
         if (!tp.IsValid(Source))
             return;
+
+        this.Id = Source.Id || tp.Guid(true);
+        this.Name = Source.Name || '';
+        this.Title = Source.Title || '';
+        this.TitleKey = Source.TitleKey || '';
+
+        if (tp.IsArray(Source.Fields)) {
+            this.Fields = [];
+            Source.Fields.forEach((item) => {
+                let FieldDef = new tp.DataFieldDef(item);
+                this.Fields.push(FieldDef);
+            });
+        }
+
+        if (tp.IsArray(Source.UniqueConstraints)) {
+            this.UniqueConstraints = [];
+            Source.UniqueConstraints.forEach((item) => {
+                let UC = new tp.UniqueConstraintDef(item);
+                this.UniqueConstraints.push(UC);
+            });
+        }
  
-        this.FieldNames = Source.FieldNames || '';
-        this.Name = Source.Name || ''; 
     }
 
+    /** Loads this instance's fields from a specified {@link tp.DataTable}
+     * @param {tp.DataTable} Table The table to load fields from.
+     */
+    FieldsFromDataTable(Table) {
+        this.Fields.length = 0;
+        if (Table instanceof tp.DataTable) {
+            Table.Rows.forEach((Row) => {
+                let FieldDef = new tp.DataFieldDef();
+                this.Fields.push(FieldDef);
+                FieldDef.FromDataRow(Row);
+            });
+        }
+    }
+    /** Saves this instance's fields to a {@link tp.DataTable} and returns the table.
+     * @param {tp.DataTable} [Table=null] Optional. The table to save fields to.
+     * @returns {tp.DataTable} Returns the {@link tp.DataTable} table.
+     * */
+    FieldsToDataTable(Table = null) {
+        if (!(Table instanceof tp.DataTable)) {
+            Table = tp.DataFieldDef.CreateDataTable();
+        }           
+ 
+        this.Fields.forEach((FieldDef) => {
+            let Row = Table.AddEmptyRow();
+            FieldDef.ToDataRow(Row);
+        });        
+
+        return Table;
+    }
 };
-/** The constraint name
+
+
+
+tp.DataTableDef.prototype.fTitle = '';
+tp.DataTableDef.prototype.fTitleKey = '';
+
+/** A name unique among all instances of this type
  * @type {string}
  */
-tp.UniqueConstraintDef.prototype.Name = '';
-/** A proper string, e.g. <code>Field1, Field2</code>
- * @type {string}
+tp.DataTableDef.prototype.Name = '';
+/** The list of fields
+ * @type {tp.DataFieldDef[]}
  */
-tp.UniqueConstraintDef.prototype.fFieldNames = '';
+tp.DataTableDef.prototype.Fields = [];
+/** For multi-field unique constraints.
+ * Use it when a unique constraint is required on more than a single field adding a proper string, e.g. Field1, Field2
+ * @type {string[]}
+ */
+tp.DataTableDef.prototype.UniqueConstraints = [];
+
+
+
+
+
+
 
 //#endregion
+
+
+//---------------------------------------------------------------------------------------
+// Broker related Definition classes
+//---------------------------------------------------------------------------------------
+
 
 //#region CodeProviderDef
 
