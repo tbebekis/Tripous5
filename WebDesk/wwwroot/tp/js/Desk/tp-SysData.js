@@ -1,9 +1,4 @@
-﻿tp.Urls.SysDataSelectList = '/SysData/SelectList';
-tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
-tp.Urls.SysDataSaveItem = '/SysData/SaveItem';
-
- 
-
+﻿
 //#region SysDataItem
 
 /** 
@@ -799,10 +794,15 @@ tp.SqlBrokerFieldDef = class {
      * @type {string}
      */
     Name = '';
-    /** The alias of this field
+    /** The alias of this instance
      * @type {string}
      */
-    Alias = '';
+    get Alias() {
+        return !tp.IsBlankString(this.fAlias) ? this.fAlias : this.Name;
+    }
+    set Alias(v) {
+        this.fAlias = v;
+    }
 
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
@@ -985,6 +985,7 @@ tp.SqlBrokerFieldDef = class {
 
 tp.SqlBrokerFieldDef.prototype.fTitle = '';
 tp.SqlBrokerFieldDef.prototype.fTitleKey = '';
+tp.SqlBrokerFieldDef.prototype.fAlias = '';
 
 //#endregion
 
@@ -1002,11 +1003,15 @@ tp.SqlBrokerTableDef = class {
      * @type {string}
      */
     Name = '';
-    /** The alias of this field
+    /** The alias of this instance
      * @type {string}
-     */
-    Alias = '';
-
+     */ 
+    get Alias() {
+        return !tp.IsBlankString(this.fAlias) ? this.fAlias : this.Name;
+    }
+    set Alias(v) {
+        this.fAlias = v;
+    }
     /** Title (caption) of this instance, used for display purposes.
      * @type {string}
      */
@@ -1265,6 +1270,7 @@ tp.SqlBrokerTableDef = class {
 
 tp.SqlBrokerTableDef.prototype.fTitle = '';
 tp.SqlBrokerTableDef.prototype.fTitleKey = '';
+tp.SqlBrokerTableDef.prototype.fAlias = '';
 //#endregion
 
 //#region SqlBrokerDef

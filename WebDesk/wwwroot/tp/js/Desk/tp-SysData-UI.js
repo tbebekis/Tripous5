@@ -1,4 +1,9 @@
-﻿//---------------------------------------------------------------------------------------
+﻿
+tp.Urls.SysDataSelectList = '/SysData/SelectList';
+tp.Urls.SysDataSelectItemById = '/SysData/SelectItemById';
+tp.Urls.SysDataSaveItem = '/SysData/SaveItem';
+
+//---------------------------------------------------------------------------------------
 // SelectSql dialogs
 //---------------------------------------------------------------------------------------
 
@@ -776,8 +781,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
     constructor(Args) {
         super(Args);
     }
-
-
+    
 
     /**
      * @type {tp.TabControl}
@@ -863,11 +867,15 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         super.InitClass();
         this.tpClass = 'tp.SqlBrokerTableDefEditDialog';
     }
+    /**
+     * Override
+     */
     ProcessInitInfo() {
         super.ProcessInitInfo();
 
         this.TableDef = this.Args.Instance;
         this.IsJoinTable = this.Args.IsJoinTable || false;
+        this.OwnKeyFieldName = this.Args.OwnKeyFieldName || '';
     }
     /**
      * Creates all controls of this window.
@@ -919,19 +927,12 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         this.edtPrimaryKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'PrimaryKeyField', { TypeName: 'TextBox' }).Control;
         this.edtMasterTableName = tp.CreateControlRow(tp.Div(elCol), false, 'MasterTableName', { TypeName: 'TextBox' }).Control;
         this.edtMasterKeyField = tp.CreateControlRow(tp.Div(elCol), false, this.IsJoinTable ? 'Own Key Field' : 'MasterKeyField', { TypeName: 'TextBox' }).Control;
-        this.edtDetailKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'DetailKeyField', { TypeName: 'TextBox' }).Control;
-
+        this.edtDetailKeyField = tp.CreateControlRow(tp.Div(elCol), false, 'DetailKeyField', { TypeName: 'TextBox' }).Control; 
+ 
         this.edtMasterTableName.Enabled = this.IsJoinTable !== true;
         this.edtDetailKeyField.Enabled = this.IsJoinTable !== true;
 
-        // item to controls
-        this.edtName.Text = this.TableDef.Name;
-        this.edtAlias.Text = this.TableDef.Alias;
-        this.edtTitleKey.Text = this.TableDef.TitleKey;
-        this.edtPrimaryKeyField.Text = this.TableDef.PrimaryKeyField;
-        this.edtMasterTableName.Text = this.TableDef.MasterTableName;
-        this.edtMasterKeyField.Text = this.TableDef.MasterKeyField;
-        this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;
+
 
 
         // Fields Page
@@ -971,6 +972,9 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
 
                 { Name: 'MaxLength' },
                 { Name: 'Decimals' },
+            ],
+            CustomButtons: [
+                { Command: 'Field.JoinTable', Text: '', ToolTip: 'Join Table to Field', IcoClasses: 'fa fa-table', CssClasses: '', ToRight: false }, 
             ]
         };
 
@@ -1077,25 +1081,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
     }
 
 
-    /** Called just before a modal window is about to set its DialogResult property. <br />
-     * Returning false cancels the setting of the property and the closing of the modal window. <br />
-     * NOTE: Setting the DialogResult to any value other than <code>tp.DialogResult.None</code> closes a modal dialog window.
-     * @override
-     * @param {any} DialogResult
-     */
-    CanSetDialogResult(DialogResult) {
-        if (DialogResult === tp.DialogResult.OK) {
-            this.TableDef.Name = this.edtName.Text;
-            this.TableDef.Alias = this.edtAlias.Text;
-            this.TableDef.TitleKey = this.edtTitleKey.Text;
-            this.TableDef.PrimaryKeyField = this.edtPrimaryKeyField.Text;
-            this.TableDef.MasterTableName = this.edtMasterTableName.Text;
-            this.TableDef.MasterKeyField = this.edtMasterKeyField.Text;
-            this.TableDef.DetailKeyField = this.edtDetailKeyField.Text;
-        }
 
-        return true;
-    }
 
 
 
@@ -1124,22 +1110,43 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
             }
         }
     }
+    async JoinTableToField() {
+        let Row = this.gridFields.FocusedRow;
 
-    /** Called when inserting a single row of the tblStockTables and displays the edit dialog
+        if (tp.IsValid(Row)) {
+            /** @type {tp.SqlBrokerFieldDef}*/
+            let FieldDef = Row.OBJECT;
+            let FieldName = FieldDef.Name;
+            let JoinTableRow = this.tblJoinTables.FindRow('OwnKeyField', FieldName);
+            if (tp.IsValid(JoinTableRow)) {
+                await this.EditJoinTableRow(JoinTableRow);
+            }
+            else {
+                await this.InsertJoinTableRow(FieldName);
+            }             
+        }
+    }
+ 
+    /**
+     * Called when inserting a single row of the tblJoinTables and displays the edit dialog
+     * @param {string} OwnKeyFieldName Used when the table being edited is a JoinTable. When it is not null or empty, goes to MasterKeyField
      */
-    async InsertJoinTableRow() {
+    async InsertJoinTableRow(OwnKeyFieldName = null) {
         let Instance = new tp.SqlBrokerTableDef();
+        Instance.MasterKeyField = OwnKeyFieldName || Instance.MasterKeyField;
 
         let DialogBox = await tp.SqlBrokerTableDefEditDialog.ShowModalAsync(Instance, { Text: 'Join Table Definition Editor', IsJoinTable: true });
         if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
             let Row = this.tblJoinTables.AddEmptyRow();
             Instance.ToJoinTableDataRow(Row);
         }
-    }
-    /** Called when editing a single row of the tblStockTables and displays the edit dialog
+    } 
+    /**
+     * Called when editing a single row of the tblJoinTables and displays the edit dialog
+     * @param {tp.DataRow} RowToEdit When not null then is the row to edit
      */
-    async EditJoinTableRow() {
-        let Row = this.gridStockTables.FocusedRow;
+    async EditJoinTableRow(RowToEdit = null) {
+        let Row = RowToEdit || this.gridJoinTables.FocusedRow;
 
         if (tp.IsValid(Row)) {
             let Instance = new tp.SqlBrokerTableDef();
@@ -1177,6 +1184,32 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         }
     }
 
+
+    /** Override */
+    ItemToControls() {
+        // item to controls
+        this.edtName.Text = this.TableDef.Name;
+        this.edtAlias.Text = this.TableDef.Alias;
+        this.edtTitleKey.Text = this.TableDef.TitleKey;
+        this.edtPrimaryKeyField.Text = this.TableDef.PrimaryKeyField;
+        this.edtMasterTableName.Text = this.TableDef.MasterTableName;
+        this.edtMasterKeyField.Text = this.TableDef.MasterKeyField;
+        this.edtDetailKeyField.Text = this.TableDef.DetailKeyField;
+    }
+    /** Override */
+    ControlsToItem() {
+        this.TableDef.Name = this.edtName.Text;
+        this.TableDef.Alias = this.edtAlias.Text || this.edtName.Text;
+        this.TableDef.TitleKey = this.edtTitleKey.Text;
+        this.TableDef.PrimaryKeyField = this.edtPrimaryKeyField.Text;
+        this.TableDef.MasterTableName = this.edtMasterTableName.Text;
+        this.TableDef.MasterKeyField = this.edtMasterKeyField.Text;
+        this.TableDef.DetailKeyField = this.edtDetailKeyField.Text;
+
+        this.TableDef.CheckDescriptor();
+    }
+
+
     /* event handlers */
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
@@ -1195,6 +1228,10 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
                 case 'GridRowDelete':
                     tp.InfoNote('Fiel Deleted.');
                     break;
+                case 'Field.JoinTable': // custom button
+                    this.JoinTableToField();
+                    break;
+ 
             }
         }
         else if (Args.Sender === this.gridStockTables) {
@@ -1240,6 +1277,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
         }
     }
 
+
 }
 
 
@@ -1251,6 +1289,7 @@ tp.SqlBrokerTableDefEditDialog.prototype.TableDef = null;
  * @type {boolean}
  * */
 tp.SqlBrokerTableDefEditDialog.prototype.IsJoinTable = false;
+ 
 
 /**
 Displays a modal dialog box for editing a {@link tp.SqlBrokerTableDef} object
@@ -1459,7 +1498,7 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
 
     }
 
-
+    /** Override */
     ItemToControls() {
         this.edtName.Text = this.FieldDef.Name;
         this.edtAlias.Text = this.FieldDef.Alias;
@@ -1483,9 +1522,10 @@ tp.SqlBrokerFieldDefEditDialog = class extends tp.Window {
         let Flags = tp.Bf.SetValueToIntegerArray(tp.FieldFlags, this.FieldDef.Flags)
         this.lboFlags.SelectedValues = Flags;
     }
+    /** Override */
     ControlsToItem() {
         this.FieldDef.Name = this.edtName.Text;
-        this.FieldDef.Alias = this.edtAlias.Text;
+        this.FieldDef.Alias = this.edtAlias.Text || this.edtName.Text;
         this.FieldDef.TitleKey = this.edtTitleKey.Text;
         this.FieldDef.DataType = this.cboDataType.SelectedValue;
         this.FieldDef.MaxLength = tp.StrToInt(this.edtMaxLength.Text);

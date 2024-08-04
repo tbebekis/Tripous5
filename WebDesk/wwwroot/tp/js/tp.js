@@ -15682,11 +15682,13 @@ gap: 0.15em;
 
     /**
      * To be used by modal dialogs in passing values from the object being edited to controls.
+     * This method is called after the window becomes visible.
      */
     ItemToControls() {
     }
     /**
      * To be used by modal dialogs in passing values from controls to the object being edited, in case of a valid DialogResult.
+     * This method is called just before setting the DialogResult property and only if the DialogResult that is going to be set is OK, Yes, etc.
      * NOTE: Throwing an exception from inside this method cancels the setting of the DialogResult property.
      */
     ControlsToItem() {

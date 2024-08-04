@@ -497,7 +497,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
      */
     async InsertFieldRow() {
         let tblField = this.CreateEditFieldTable(null);
-        let DialogBox = await this.ShowEditFieldDialog(true, tblField);
+        let DialogBox = await tp.DatabaseFieldEditDialog.ShowModalAsync(tblField, true);  // await this.ShowEditFieldDialog(true, tblField);
         if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
             let FieldRow = tblField.Rows[0];
             let Row = this.tblFields.AddEmptyRow();
@@ -514,7 +514,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             }
             else {
                 let tblField = this.CreateEditFieldTable(Row);
-                let DialogBox = await this.ShowEditFieldDialog(false, tblField);
+                let DialogBox = await tp.DatabaseFieldEditDialog.ShowModalAsync(tblField, false);  // await this.ShowEditFieldDialog(false, tblField);
 
                 if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
                     let FieldRow = tblField.Rows[0];
