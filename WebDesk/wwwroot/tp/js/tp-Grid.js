@@ -5729,9 +5729,29 @@ tp.Grid = class extends tp.Control  {
                 }
             }
         }
-
-
     }
+    /**
+     * Deletes the selected {@link tp.DataRow} data-row.
+     * Displays a confirm dialog if {@link ConfirmDelete} is true.
+     * NOTE: To be used by UIs with read-only grids.
+     */
+    DeleteFocusedRow() {
+        let Row = this.FocusedRow;
+        if (!tp.IsEmpty(Row)) {
+            if (this.ConfirmDelete === true) {
+                tp.YesNoBox('Delete selected row?', (Dialog) => {
+                    if (Dialog.DialogResult === tp.DialogResult.Yes) {
+                        this.DeleteRow(Row);
+                    }
+                });
+            }
+            else {
+                this.DeleteRow(Row);
+            }
+        }
+    }
+
+
     /**
     Returns true if a specified  {@link tp.DataRow} data row is (falls) into view.
     @param {tp.DataRow} Row The {@link tp.DataRow} row
@@ -5907,14 +5927,7 @@ tp.Grid = class extends tp.Control  {
                     break;
                 case 'GridRowDelete':
                     if (!this.ReadOnly && this.Enabled && this.AllowUserToDeleteRows) {
-                        Row = this.FocusedRow;
-                        if (!tp.IsEmpty(Row)) {
-                            tp.YesNoBox('Delete selected row?', (Dialog) => {
-                                if (Dialog.DialogResult === tp.DialogResult.Yes) {
-                                    this.DeleteRow(Row);
-                                }
-                            });
-                        }
+                        this.DeleteFocusedRow(); 
                     }
                     break;
             }

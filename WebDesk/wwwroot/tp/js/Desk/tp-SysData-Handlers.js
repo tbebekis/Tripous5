@@ -365,14 +365,15 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
         Args.Handled = true;
 
         switch (Args.Command) {
-            case 'GridRowInsert':
+            case 'GridRowInsert':                
                 this.InsertFieldRow();
                 break;
-            case 'GridRowEdit':
+            case 'GridRowEdit': 
                 this.EditFieldRow();
                 break;
             case 'GridRowDelete':
-                tp.InfoNote('Clicked: ' + Args.Command);
+                this.gridFields.DeleteFocusedRow(); 
+                // EDW : continue adding GridRowDelete for all grids
                 break;
         }
 
