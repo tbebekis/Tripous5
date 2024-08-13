@@ -36,7 +36,29 @@ namespace Tripous
     /// <para>SEE: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-overview </para>
     /// </summary>
     static public class Json
-    { 
+    {
+
+        /// <summary>
+        /// Returns true if ClassType implements InterfaceType.  
+        /// </summary>
+        static public bool ImplementsInterface(Type ClassType, Type InterfaceType)
+        {
+            return (ClassType != null) && (Array.IndexOf(ClassType.GetInterfaces(), InterfaceType) != -1);
+        }
+        /// <summary>
+        /// Returns trur if Value exists in List, case insensitively.
+        /// </summary>
+        static public bool ContainsText(IList<string> List, string Value)
+        {
+            if (List != null)
+            {
+                for (int i = 0; i < List.Count; i++)
+                    if (string.Compare(List[i], Value, StringComparison.InvariantCultureIgnoreCase) == 0)
+                        return true;
+            }
+            return false;
+        }
+
         /* construction */
         /// <summary>
         /// Constructor
@@ -359,7 +381,7 @@ namespace Tripous
                     if (Value.GetType() == DefaultType)
                         return (T)Value;
 
-                    if (DefaultType.ImplementsInterface(typeof(IConvertible)))
+                    if (ImplementsInterface(DefaultType, typeof(IConvertible)))
                         return (T)System.Convert.ChangeType(Value, DefaultType, CultureInfo.InvariantCulture);
                 }
 
@@ -396,7 +418,7 @@ namespace Tripous
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {
             IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
-            properties = properties.Where(p => !ExcludeProperties.ContainsText(p.PropertyName)).ToList();
+            properties = properties.Where(p => !Json.ContainsText(ExcludeProperties, p.PropertyName)).ToList();
             return properties;
         }
 
