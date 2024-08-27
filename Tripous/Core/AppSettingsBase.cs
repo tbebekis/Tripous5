@@ -44,7 +44,9 @@ namespace Tripous
         {
         }
         /// <summary>
-        /// Constructor
+        /// Constructor.
+        /// <para>Writes the file if not exists, and loads the file, so settings are available from the creation of this instance.</para>
+        /// <para>Also it sets up a <see cref="FileSystemWatcher"/> to detect changes in the specified file and re-load it.</para>
         /// </summary>
         protected AppSettingsBase(string sFolder = "", string sFileName = "")
         {
@@ -66,6 +68,8 @@ namespace Tripous
                     Directory.CreateDirectory(Folder);
                 Save();
             }
+
+            Load();
 
 
             Watcher = new FileSystemWatcher(Folder);
