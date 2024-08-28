@@ -23,17 +23,22 @@ namespace Tripous
         protected string FileName { get; private set; }        
         protected string FilePath { get; private set; }
         protected FileSystemWatcher Watcher { get; private set; }
+        protected bool IsSaving { get; private set; }
+        protected bool IsReloadable { get; private set; }
 
         /// <summary>
         /// event handler
         /// </summary>
         protected void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
-            string S = e.FullPath.ToLower();
-            string S2 = FilePath.ToLower();
+            if (!IsSaving)
+            {
+                string S = e.FullPath.ToLower();
+                string S2 = FilePath.ToLower();
 
-            if (S == S2)
-                Load();
+                if (S == S2)
+                    Load();
+            }
         }
 
 
@@ -49,35 +54,38 @@ namespace Tripous
         /// <para>Writes the file if not exists, and loads the file, so settings are available from the creation of this instance.</para>
         /// <para>Also it sets up a <see cref="FileSystemWatcher"/> to detect changes in the specified file and re-load it.</para>
         /// </summary>
-        protected AppSettingsBase(string sFolder = "", string sFileName = "")
-        {
-            this.Folder = sFolder;
-            this.FileName = sFileName;
-
-            
+        protected AppSettingsBase(string Folder = "", string FileName = "", bool IsReloadable = true)
+        { 
             if (string.IsNullOrWhiteSpace(Folder))
                 Folder = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
 
             if (string.IsNullOrWhiteSpace(FileName))
                 FileName = SFileName;
 
-            FilePath = Path.Combine(Folder, FileName);
+            this.Folder = Folder;
+            this.FileName = FileName;
+            this.IsReloadable = IsReloadable;
 
-            if (!File.Exists(FilePath))
+            this.FilePath = Path.Combine(this.Folder, this.FileName);
+
+            if (!File.Exists(this.FilePath))
             {
-                if (!Directory.Exists(Folder))
-                    Directory.CreateDirectory(Folder);
+                if (!Directory.Exists(this.Folder))
+                    Directory.CreateDirectory(this.Folder);
                 Save();
             }
 
             Load();
 
+            if (IsReloadable)
+            {
+                Watcher = new FileSystemWatcher(this.Folder);
+                Watcher.NotifyFilter = NotifyFilters.LastWrite;
+                Watcher.Filter = this.FileName;
+                Watcher.EnableRaisingEvents = true;
+                Watcher.Changed += Watcher_Changed;
+            }
 
-            Watcher = new FileSystemWatcher(Folder);
-            Watcher.NotifyFilter = NotifyFilters.LastWrite;
-            Watcher.Filter = FileName;
-            Watcher.EnableRaisingEvents = true;
-            Watcher.Changed += Watcher_Changed;
         }
 
 
@@ -93,7 +101,15 @@ namespace Tripous
         /// </summary>
         public virtual void Save()
         {
-            Json.SaveToFile(this, FilePath);
+            IsSaving = true;
+            try
+            {
+                Json.SaveToFile(this, FilePath);
+            }
+            finally
+            {
+                IsSaving = false;
+            }            
         }
     }
 }
