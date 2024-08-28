@@ -12,6 +12,7 @@ namespace Tripous
     /// <summary>
     /// Base class for application settings.
     /// <para>Watches for changes in the settings file and reloads this instance.</para>
+    /// <para><strong>NOTE: </strong> If this class contains lists, then override the <see cref="Load()"/> method, clean the lists, and after that call the base implementation.</para>
     /// </summary>
     public class AppSettingsBase
     {
