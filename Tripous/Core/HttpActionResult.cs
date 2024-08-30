@@ -44,6 +44,16 @@ namespace Tripous
             Result.IsSuccess = IsSuccess;
             return Result;
         }
+        /// <summary>
+        /// Creates and returns a failed result with an error message.
+        /// </summary>
+        static public HttpActionResult Error(string ErrorText)
+        {
+            HttpActionResult Result = new HttpActionResult();
+            Result.ErrorText = ErrorText;
+            Result.IsSuccess = false;
+            return Result;
+        }
 
         /* public */
         /// <summary>
