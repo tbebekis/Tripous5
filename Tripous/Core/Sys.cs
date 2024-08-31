@@ -1556,7 +1556,10 @@ namespace Tripous
         /// The username of the current user of this application, if any, else null
         /// </summary>
         static public string AppUserName { get; set; }
-
+        /// <summary>
+        /// Returns the full path to the folder where the main executable resides
+        /// </summary>
+        static public string AppFolder { get { return Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]); } }
  
 
         /// <summary>
@@ -1568,6 +1571,5 @@ namespace Tripous
         /// </summary>
         static public string HostName { get; private set; } = System.Net.Dns.GetHostName();
  
-
     }
 }
