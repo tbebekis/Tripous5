@@ -9,11 +9,13 @@ namespace Tripous.Logging
 {
 
     /// <summary>
-    /// A log listener that writes log info a database table
+    /// A log listener that writes log info a database table.
+    /// <para><strong>NOTE: </strong> Applies retain policy. By default keeps entries 7 days old.</para>
     /// </summary>
     public class SqlStoreLogListener : LogListener
     {
- 
+        
+
         const string CreateTableSql = @"
 create table {0}  (
    Id                     {1}
@@ -59,6 +61,7 @@ insert into {0} (
 
         static object syncLock = new LockObject();
 
+        int Counter = 0;
         string ConnectionName;
         SqlStore Store;
         Dictionary<string, object> DataDic = new Dictionary<string, object>()
@@ -75,6 +78,24 @@ insert into {0} (
             { "EventId", null },
             { "Data", null },
         };
+
+
+
+        void ApplyRetainPolicy()
+        {
+            if (Counter > RetainPolicyCounter)
+            {
+                Counter = 0;
+                DeleteEntriesOlderThan(RetainDays);
+            }
+        }
+        void DeleteEntriesOlderThan(int Days)
+        {
+            DateTime StartDT = DateTime.UtcNow.AddDays(-Days);
+            string sStartDT = StartDT.ToString("yyyy-MM-dd 00:00:00");
+            string SqlText = $"delete from {SysTables.Log} where Stamp < '{sStartDT}'";
+            Store.ExecSql(SqlText);
+        }
 
         /// <summary>
         /// Constructor.
@@ -107,6 +128,13 @@ insert into {0} (
                 {
                     SqlText = string.Format(CreateTableSql, SysTables.Log, "@NVARCHAR(40)    @NOT_NULL primary key");
                     Store.CreateTable(SqlText);
+
+                    // indexes
+                    SqlText = $"create index IDX_{SysTables.Log}_00 on {SysTables.Log}(Stamp) ";
+                    Store.ExecSql(SqlText);
+
+                    SqlText = $"create index IDX_{SysTables.Log}_01 on {SysTables.Log}(LogDate) ";
+                    Store.ExecSql(SqlText);
                 }
 
                 DataDic["Id"] = Entry.Id;
@@ -123,6 +151,9 @@ insert into {0} (
 
                 SqlText = string.Format(InsertSql, SysTables.Log);
                 Store.ExecSql(SqlText, DataDic);
+
+                Counter++;
+                ApplyRetainPolicy();
 
             }
         }

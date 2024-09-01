@@ -9,7 +9,7 @@ namespace Tripous.Logging
 {
     /// <summary>
     /// A log listener that writes log info to file(s).
-    /// 
+    /// <para><strong>NOTE: </strong> Applies retain policy. By default keeps log files 7 days old.</para>
     /// </summary>
     public class FileLogListener : LogListener
     {

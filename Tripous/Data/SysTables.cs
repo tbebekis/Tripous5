@@ -52,36 +52,7 @@ namespace Tripous.Data
         }
 
         /* system schema */
-        /// <summary>
-        /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
-        /// </summary>
-        static public void AddSchemaLog()
-        {
 
-            Schema Schema = Schemas.GetSystemSchema();
-            SchemaVersion schema = Schema.FindOrAdd(Version: 1);
-
-            /* SYS_LOG */
-            string SqlText = $@" 
-create table {SysTables.Log}  (
-   Id                     {SysConfig.PrimaryKeyStr()}
-  ,LogDate                @DATE            @NULL
-  ,LogTime                @NVARCHAR(12)    @NULL
-  ,UserName               @NVARCHAR(96)    @NULL
-  ,Host                   @NVARCHAR(64)    @NULL
-  ,LogLevel               @NVARCHAR(24)    @NULL     
-  ,LogSource              @NVARCHAR(96)    @NULL
-  ,ScopeId                @NVARCHAR(96)    @NULL
-  ,EventId                @NVARCHAR(96)    @NULL
-  ,Data                   @NBLOB_TEXT      @NULL
-)
-";
-
-            schema.AddTable(SqlText);
-
-            SqlText = $"create index IDX_{SysTables.Log}_00 on {SysTables.Log}(LogDate) ";
-            schema.AddStatementAfter(SqlText);
-        }
         /// <summary>
         /// Adds the database schema of a system table to version #1 of system <see cref="Schema"/>.
         /// </summary>
@@ -245,8 +216,7 @@ create table {SysTables.SmtpProvider} (
         /// Adds the database schema of all system tables to version #1 of system <see cref="Schema"/>.
         /// </summary>
         static public void AddSchemaAll()
-        {
-            AddSchemaLog();
+        { 
             AddSchemaLang();
             AddSchemaStrRes();
             AddSchemaData();
