@@ -77,6 +77,10 @@ namespace Tripous.Data
         /// <summary>
         /// constant
         /// </summary>
+        public const string CAUTO_INC = "@AUTO_INC";
+        /// <summary>
+        /// constant
+        /// </summary>
         public const string CVARCHAR = "@VARCHAR";
         /// <summary>
         /// constant
@@ -559,8 +563,8 @@ namespace Tripous.Data
         /// </summary>
         public virtual string ReplaceDataTypePlaceholders(string SqlText)
         {
-
             SqlText = SqlText.Replace(CPRIMARY_KEY, PrimaryKey);
+            SqlText = SqlText.Replace(CAUTO_INC, AutoInc);       
             SqlText = SqlText.Replace(CVARCHAR, Varchar);
             SqlText = SqlText.Replace(CNVARCHAR, NVarchar);
             SqlText = SqlText.Replace(CFLOAT, Float);
@@ -1278,6 +1282,10 @@ namespace Tripous.Data
         /// Returns true if the database server supports generators/sequencers
         /// </summary>
         public virtual bool SupportsGenerators { get; } = false;
+        /// <summary>
+        /// Returns true when the database server supports auto-increment integer fields.
+        /// </summary>
+        public virtual bool SupportsAutoIncFields { get; } = false;
 
         /// <summary>
         /// Returns a set (bit-field) of the supported <see cref="AlterTableType"/>s.
@@ -1307,6 +1315,10 @@ namespace Tripous.Data
         /// The PrimaryKey text
         /// </summary>
         public virtual string PrimaryKey { get; } = "integer not null primary key";
+        /// <summary>
+        /// Auto-increment field, when supported, else exception.
+        /// </summary>
+        public virtual string AutoInc { get; } = "";
         /// <summary>
         /// The Varchar text
         /// </summary>

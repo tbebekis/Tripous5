@@ -86,8 +86,7 @@ namespace Tripous.Data
             // alter table {TableName} alter column {ColumnName} drop default
             return $@"alter table {TableName} alter column {ColumnName} drop default";
         }
-
-
+ 
 
         /* methods */
         /// <summary>
@@ -190,6 +189,54 @@ limit {RowLimit}";
         }
 
 
+        /// <summary>
+        /// Returns true if the GeneratorName exists in a database.
+        /// </summary>
+        public override bool GeneratorExists(string ConnectionString, string GeneratorName)
+        {
+            string SqlText = $"SELECT count(sequence_name) FROM information_schema.sequences WHERE sequence_name = '{GeneratorName}' ;";  
+            return this.IntegerResult(ConnectionString, SqlText, -1) > 0;
+        }
+        /// <summary>
+        /// Creates the GeneratorName generator to the database.
+        /// </summary>
+        public override void CreateGenerator(string ConnectionString, string GeneratorName)
+        {
+            GeneratorName = GeneratorName.ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+            string SqlText = $"CREATE SEQUENCE IF NOT EXISTS {GeneratorName} ;";
+            this.ExecSql(ConnectionString, SqlText);
+        }
+        /// <summary>
+        /// Attempts to set a generator/sequencer to Value.
+        /// <para>DANGEROOUS.</para>
+        /// </summary>
+        public override void SetGeneratorTo(string ConnectionString, string GeneratorName, int Value)
+        {
+            GeneratorName = GeneratorName.ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+            string SqlText = $"SELECT setval('{GeneratorName}', {Value}) ;";
+            this.ExecSql(ConnectionString, SqlText);
+        }
+        /// <summary>
+        /// Attempts to set a generator/sequencer or identity column to Value.
+        /// <para>VERY DANGEROOUS.</para>
+        /// </summary>
+        public override void SetTableGeneratorTo(string ConnectionString, string TableName, int Value)
+        {
+            if (GeneratorExists(ConnectionString, "G_" + TableName))
+                SetGeneratorTo(ConnectionString, "G_" + TableName, Value);
+        }
+        /// <summary>
+        /// Returns the next value of the GeneratorName generator.
+        /// </summary>
+        public override int NextIdByGenerator(SqlStore Store, DbTransaction Transaction, string GeneratorName)
+        { 
+            GeneratorName = GeneratorName.ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+            string SqlText = $"SELECT nextval('{GeneratorName}') ;";  
+            return Store.IntegerResult(Transaction, SqlText, -1);
+        }
+
+
+
         /* properties */
         /// <summary>
         /// Gets the Description this Provider
@@ -279,7 +326,11 @@ limit {RowLimit}";
         /// <summary>
         /// Returns true if the database server supports generators/sequencers
         /// </summary>
-        public override bool SupportsGenerators { get; } = false;
+        public override bool SupportsGenerators { get; } = true;
+        /// <summary>
+        /// Returns true when the database server supports auto-increment integer fields.
+        /// </summary>
+        public override bool SupportsAutoIncFields { get; } = true;
 
         /// <summary>
         /// Keys used in connection string by this provider
@@ -302,6 +353,10 @@ limit {RowLimit}";
         /// The PrimaryKey text
         /// </summary>
         public override string PrimaryKey { get; } = "serial not null primary key";
+        /// <summary>
+        /// Auto-increment field, when supported, else exception.
+        /// </summary>
+        public override string AutoInc { get { return "serial"; } }
         /// <summary>
         /// The Varchar text
         /// </summary>

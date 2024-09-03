@@ -298,6 +298,10 @@ namespace Tripous.Data
         /// Returns true if the database server supports generators/sequencers
         /// </summary>
         public override bool SupportsGenerators { get; } = true;
+        /// <summary>
+        /// Returns true when the database server supports auto-increment integer fields.
+        /// </summary>
+        public override bool SupportsAutoIncFields { get; } = false;
 
         /// <summary>
         /// Keys used in connection string by this provider
@@ -320,6 +324,10 @@ namespace Tripous.Data
         /// The PrimaryKey text
         /// </summary>
         public override string PrimaryKey { get; } = "integer not null primary key";
+        /// <summary>
+        /// Auto-increment field, when supported, else exception.
+        /// </summary>
+        public override string AutoInc { get { Sys.Throw("Auto-increment fields NOT supported by Oracle, use Sequence instead."); return ""; } }
         /// <summary>
         /// The Varchar text
         /// </summary>

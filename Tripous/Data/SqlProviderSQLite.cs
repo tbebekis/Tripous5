@@ -268,6 +268,10 @@ limit {RowLimit}";
         /// Returns true if the database server supports generators/sequencers
         /// </summary>
         public override bool SupportsGenerators { get; } = false;
+        /// <summary>
+        /// Returns true when the database server supports auto-increment integer fields.
+        /// </summary>
+        public override bool SupportsAutoIncFields { get; } = true;
 
         /// <summary>
         /// Returns a set (bit-field) of the supported <see cref="AlterTableType"/>s.
@@ -295,6 +299,10 @@ limit {RowLimit}";
         /// The PrimaryKey text
         /// </summary>
         public override string PrimaryKey { get; } = "integer not null primary key autoincrement";
+        /// <summary>
+        /// Auto-increment field, when supported, else exception.
+        /// </summary>
+        public override string AutoInc { get; } = "integer autoincrement";
         /// <summary>
         /// The Varchar text
         /// </summary>

@@ -305,6 +305,10 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// Returns true if the database server supports generators/sequencers
         /// </summary>
         public override bool SupportsGenerators { get; } = false;
+        /// <summary>
+        /// Returns true when the database server supports auto-increment integer fields.
+        /// </summary>
+        public override bool SupportsAutoIncFields { get; } = true;
 
         /// <summary>
         /// Keys used in connection string by this provider
@@ -327,6 +331,10 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// The PrimaryKey text
         /// </summary>
         public override string PrimaryKey { get; } = "integer identity not null primary key";
+        /// <summary>
+        /// Auto-increment field, when supported, else exception.
+        /// </summary>
+        public override string AutoInc { get; } = "integer identity";
         /// <summary>
         /// The Varchar text
         /// </summary>
