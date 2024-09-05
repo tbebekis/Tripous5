@@ -574,8 +574,8 @@ namespace Tripous.Data
             SqlText = SqlText.Replace(CVARCHAR, Varchar);
             SqlText = SqlText.Replace(CNVARCHAR, NVarchar);
             SqlText = SqlText.Replace(CFLOAT, Float);
-            SqlText = SqlText.Replace(CDECIMAL, Decimal);
-            SqlText = SqlText.Replace(CDECIMAL_, Decimal_);
+            SqlText = SqlText.Replace(CDECIMAL_, Decimal_);  // CDECIMAL_ must execute before the CDECIMAL
+            SqlText = SqlText.Replace(CDECIMAL, Decimal);            
             SqlText = SqlText.Replace(CDATE_TIME, DateTime);
             SqlText = SqlText.Replace(CDATE, Date);
             SqlText = SqlText.Replace(CBOOL, Bool);
