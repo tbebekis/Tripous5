@@ -91,9 +91,15 @@ namespace Tripous.Data
         /// </summary>
         public const string CFLOAT = "@FLOAT";
         /// <summary>
-        /// constant
+        /// Constant. Implied Precision and Scale <c>(18, 4)</c>
+        /// <para>Example: <c>@DECIMAL</c> becomes <c>decimal(18, 4)</c></para>
         /// </summary>
         public const string CDECIMAL = "@DECIMAL";
+        /// <summary>
+        /// Constant. The user provides the Precision and Scale explicitly.
+        /// <para>Example: <c>@DECIMAL_(10, 2)</c> becomes <c>decimal(10, 2)</c></para>
+        /// </summary>
+        public const string CDECIMAL_ = "@DECIMAL_";
         /// <summary>
         /// constant
         /// </summary>
@@ -569,6 +575,7 @@ namespace Tripous.Data
             SqlText = SqlText.Replace(CNVARCHAR, NVarchar);
             SqlText = SqlText.Replace(CFLOAT, Float);
             SqlText = SqlText.Replace(CDECIMAL, Decimal);
+            SqlText = SqlText.Replace(CDECIMAL_, Decimal_);
             SqlText = SqlText.Replace(CDATE_TIME, DateTime);
             SqlText = SqlText.Replace(CDATE, Date);
             SqlText = SqlText.Replace(CBOOL, Bool);
@@ -1332,9 +1339,17 @@ namespace Tripous.Data
         /// </summary>
         public virtual string Float { get; } = "float";
         /// <summary>
-        /// The Decimal text
+        /// The Decimal text. 
+        /// <para>Implied Precision and Scale <c>(18, 4)</c></para>
+        /// <para>Example: <c>@DECIMAL</c> becomes <c>decimal(18, 4)</c></para>
         /// </summary>
         public virtual string Decimal { get; } = "decimal(18, 4)";
+        /// <summary>
+        /// The Decimal text. 
+        /// <para>The user provides the Precision and Scale explicitly.</para>
+        /// <para>Example: <c>@DECIMAL_(10, 2)</c> becomes <c>decimal(10, 2)</c></para>
+        /// </summary>
+        public virtual string Decimal_ { get; } = "decimal";
         /// <summary>
         /// The Date text
         /// </summary>

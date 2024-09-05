@@ -341,9 +341,17 @@ namespace Tripous.Data
         /// </summary>
         public override string Float { get; } = "float";
         /// <summary>
-        /// The Decimal text
+        /// The Decimal text. 
+        /// <para>Implied Precision and Scale <c>(18, 4)</c></para>
+        /// <para>Example: <c>@DECIMAL</c> becomes <c>decimal(18, 4)</c></para>
         /// </summary>
         public override string Decimal { get; } = "decimal(18, 4)";
+        /// <summary>
+        /// The Decimal text. 
+        /// <para>The user provides the Precision and Scale explicitly.</para>
+        /// <para>Example: <c>@DECIMAL_(10, 2)</c> becomes <c>decimal(10, 2)</c></para>
+        /// </summary>
+        public override string Decimal_ { get; } = "decimal";
         /// <summary>
         /// The Date text
         /// </summary>

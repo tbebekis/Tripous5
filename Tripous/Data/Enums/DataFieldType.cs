@@ -36,28 +36,36 @@ namespace Tripous
         Float = 4,
         /// <summary>
         /// Decimal (decimal(18, 4))
+        /// <para>Implied Precision and Scale <c>(18, 4)</c></para>
+        /// <para>Example: <c>@DECIMAL</c> becomes <c>decimal(18, 4)</c></para>
         /// </summary>
         Decimal = 8,
         /// <summary>
+        /// Decimal (decimal(?, ?))
+        /// <para>The user provides the Precision and Scale explicitly.</para>
+        /// <para>Example: <c>@DECIMAL_(10, 2)</c> becomes <c>decimal(10, 2)</c></para>
+        /// </summary>
+        Decimal_ = 0x10,
+        /// <summary>
         /// Date (date)
         /// </summary>
-        Date = 0x10,
+        Date = 0x20,
         /// <summary>
         /// DateTime (datetime, timestamp, etc)
         /// </summary>
-        DateTime = 0x20,
+        DateTime = 0x40,
         /// <summary>
         /// Boolean (integer always, 1 = true, else false)
         /// </summary>
-        Boolean = 0x40,
+        Boolean = 0x80,
         /// <summary>
         /// Blob
         /// </summary>
-        Blob = 0x80,
+        Blob = 0x100,
         /// <summary>
         /// Text Blob
         /// </summary>
-        TextBlob = 0x100,
+        TextBlob = 0x200,
     }
 
 

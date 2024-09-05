@@ -43,6 +43,7 @@ namespace Tripous.Data
                 case DataFieldType.Integer: return "integer";
                 case DataFieldType.Float: return SqlProvider.CFLOAT;
                 case DataFieldType.Decimal: return SqlProvider.CDECIMAL;
+                case DataFieldType.Decimal_: return SqlProvider.CDECIMAL;
                 case DataFieldType.Date: return SqlProvider.CDATE;
                 case DataFieldType.DateTime: return SqlProvider.CDATE_TIME;
                 case DataFieldType.Boolean: return "integer";
@@ -82,6 +83,10 @@ namespace Tripous.Data
             else if (DataType == DataFieldType.String)
             {
                 sDataType = $"{SqlProvider.CNVARCHAR}({Length})";
+            }
+            else if (DataType == DataFieldType.Decimal_)
+            {
+                sDataType = $"{SqlProvider.CDECIMAL_}({DecimalPart})";
             }
             else
             {
@@ -282,6 +287,13 @@ namespace Tripous.Data
             set { fLength = value; }
 
         }
+        /// <summary>
+        /// Defines the Precision and Scale explicitly of a decimal field. 
+        /// <para>Used with <see cref="DataFieldType.Decimal_"/> only.</para>
+        /// <para>The user provides the Precision and Scale explicitly <strong>without parentheses.</strong>.</para>
+        /// <para>Example: <c>@DECIMAL_(10, 2)</c> becomes <c>decimal(10, 2)</c></para>
+        /// </summary>
+        public string DecimalPart { get; set; } = "18, 4";
         /// <summary>
         /// True when the field is NOT nullable 
         /// <para>NOTE: when true then produces 'not null'</para>

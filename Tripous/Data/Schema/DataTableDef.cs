@@ -591,11 +591,14 @@ namespace Tripous.Data
         }
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
+        ///  <para><strong>NOTE: </strong> The decimal part should be given <strong>without parentheses.</strong></para>
         /// </summary>
-        public DataFieldDef AddDecimal(string FieldName, bool Required = false, string TitleKey = null, string DefaultExpression = null)
+        public DataFieldDef AddDecimal(string FieldName, string DecimalPart = "18, 4", bool Required = false, string TitleKey = null, string DefaultExpression = null)
         {
-            return AddField(FieldName, DataFieldType.Decimal, Required, TitleKey, DefaultExpression);
-        }
+            DataFieldDef Result = AddField(FieldName, DataFieldType.Decimal_, Required, TitleKey, DefaultExpression);
+            Result.DecimalPart = DecimalPart;
+            return Result;
+        } 
         /// <summary>
         ///  Creates, adds and returns a field of a certain type.
         /// </summary>

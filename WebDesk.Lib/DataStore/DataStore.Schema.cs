@@ -297,7 +297,7 @@ insert into {TableName} (
             Table.AddString("Name", 96, true).SetUnique(true);
             Table.AddBoolean("Married", true).SetDefaultExpression("0");
             Table.AddDate("BirthDate", false);
-            Table.AddDecimal("Salary", true).SetDefaultExpression("0");
+            Table.AddDecimal("Salary", "10, 2", true).SetDefaultExpression("0");
             Table.AddTextBlob("Notes", false);
             
 
