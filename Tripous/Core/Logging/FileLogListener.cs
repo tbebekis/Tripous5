@@ -31,6 +31,7 @@ namespace Tripous.Logging
         /// Constructor
         /// </summary>
         public FileLogListener(string Folder = "", int MaxSizeKiloBytes = 512)
+                : base()
         {
             string AppPath = Environment.GetCommandLineArgs()[0];
 

@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 
 using Tripous.Data;
+using System.Xml;
 
 namespace Tripous.Logging
 {
@@ -63,7 +64,37 @@ insert into {0} (
 
         int Counter = 0;
         string ConnectionName;
-        SqlStore Store;
+        SqlStore fStore;
+        SqlStore Store 
+        {
+            get
+            {
+                if (fStore == null)
+                {
+                    ConnectionName = !string.IsNullOrWhiteSpace(ConnectionName) ? ConnectionName : SysConfig.DefaultConnection;
+                    fStore = SqlStores.CreateSqlStore(ConnectionName);
+
+                    if (!fStore.TableExists(SysTables.Log))
+                    {
+                        string SqlText = string.Format(CreateTableSql, SysTables.Log, "@NVARCHAR(40)    @NOT_NULL primary key");
+                        fStore.CreateTable(SqlText);
+
+                        // indexes
+                        SqlText = $"create index IDX_{SysTables.Log}_00 on {SysTables.Log}(Stamp) ";
+                        fStore.ExecSql(SqlText);
+
+                        SqlText = $"create index IDX_{SysTables.Log}_01 on {SysTables.Log}(LogDate) ";
+                        fStore.ExecSql(SqlText); 
+                    }
+
+                }
+
+                return fStore;
+            }
+        }
+ 
+
+
         Dictionary<string, object> DataDic = new Dictionary<string, object>()
         {
             { "Id", null },
@@ -101,8 +132,9 @@ insert into {0} (
         /// Constructor.
         /// </summary>
         public SqlStoreLogListener(string ConnectionName = "")
+            : base()
         {
-            this.ConnectionName = !string.IsNullOrWhiteSpace(ConnectionName) ? ConnectionName : SysConfig.DefaultConnection;
+            this.ConnectionName = ConnectionName;
         }
 
         /* public */
@@ -118,24 +150,6 @@ insert into {0} (
             lock (syncLock)
             {
                 string SqlText;
-
-                if (Store == null)
-                {
-                    Store = SqlStores.CreateSqlStore(ConnectionName);
-                }
-
-                if (!Store.TableExists(SysTables.Log))
-                {
-                    SqlText = string.Format(CreateTableSql, SysTables.Log, "@NVARCHAR(40)    @NOT_NULL primary key");
-                    Store.CreateTable(SqlText);
-
-                    // indexes
-                    SqlText = $"create index IDX_{SysTables.Log}_00 on {SysTables.Log}(Stamp) ";
-                    Store.ExecSql(SqlText);
-
-                    SqlText = $"create index IDX_{SysTables.Log}_01 on {SysTables.Log}(LogDate) ";
-                    Store.ExecSql(SqlText);
-                }
 
                 DataDic["Id"] = Entry.Id;
                 DataDic["Stamp"] = Entry.TimeStamp;
