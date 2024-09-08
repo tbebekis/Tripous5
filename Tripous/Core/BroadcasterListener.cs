@@ -7,9 +7,9 @@ using Tripous.Logging;
 namespace Tripous
 {
 
- 
+
     /// <summary>
-    /// Represents an object that has subscribed to an Broadcaster object
+    /// Represents an object that has subscribed to the <see cref="Broadcaster"/> static object
     /// for getting event notifications.
     /// </summary>
     public abstract class BroadcasterListener

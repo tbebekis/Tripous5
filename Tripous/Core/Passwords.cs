@@ -41,7 +41,7 @@ namespace Tripous
             if (UseLowerChars) SB.Append(LowerChars);
             if (UseUpperChars) SB.Append(UpperChars);
 
-            Length = Length < 6 || Length > 16 ? 8 : Length;
+            Length = Length < 6 || Length > 64 ? 32 : Length;
 
             int Index;
 
