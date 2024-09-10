@@ -222,6 +222,21 @@ namespace Tripous.Data
         }
 
         /// <summary>
+        /// Creates and adds a query to queries.
+        /// </summary>
+        public SqlBrokerQueryDef AddQuery(string Name, string SqlText = "")
+        {
+            SqlBrokerQueryDef Result = Queries.FirstOrDefault(item  => item.Name == Name);
+            if (Result == null)
+            {
+                Result = new SqlBrokerQueryDef(this) { Name = Name, SqlText = SqlText };
+                Queries.Add(Result);
+            }
+
+            return Result;
+        }
+
+        /// <summary>
         /// Creates and adds a table to tables.
         /// </summary>
         public SqlBrokerTableDef AddTable(string TableName, string TitleKey = "")
@@ -229,7 +244,7 @@ namespace Tripous.Data
             SqlBrokerTableDef Result = FindTable(TableName);
             if (Result == null)
             {
-                Result = new SqlBrokerTableDef() { Name = TableName, TitleKey = TitleKey };
+                Result = new SqlBrokerTableDef(this) { Name = TableName, TitleKey = TitleKey };
                 Tables.Add(Result);
             }
 
@@ -274,6 +289,8 @@ namespace Tripous.Data
 
             return List.ToArray();
         }
+
+
 
         /* properties */
         /// <summary>

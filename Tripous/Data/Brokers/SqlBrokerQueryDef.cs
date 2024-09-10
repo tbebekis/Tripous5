@@ -21,6 +21,14 @@ namespace Tripous.Data
         public SqlBrokerQueryDef()
         {
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SqlBrokerQueryDef(SqlBrokerDef BrokerDef)
+        {
+            this.BrokerDef = BrokerDef;
+        }
+
 
         /* public */
         /// <summary>
@@ -68,6 +76,11 @@ namespace Tripous.Data
         }
 
         /* properties */
+        /// <summary>
+        /// The master definition this instance belongs to.
+        /// </summary>
+        [JsonIgnore]
+        public SqlBrokerDef BrokerDef { get; }
         /// <summary>
         /// The name.
         /// </summary>

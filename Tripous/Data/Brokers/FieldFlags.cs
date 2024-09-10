@@ -74,9 +74,9 @@ namespace Tripous.Data
         /// </summary>
         ForeignKey = 0x1000,
         /// <summary>
-        /// The field is not used with INSERT or UPDATE statements. 
-        /// <para>It maybe something like the ExtraField or an identity/autoinc field,
-        /// in a position other than that of a primary key</para>
+        /// The field is not used with INSERT or UPDATE statements, but it is included in SELECT statements, such as the <see cref="TableSqls.SelectRowSql"/>.
+        /// <para>It maybe something like the ExtraField or an identity/autoinc field, in a position other than that of a primary key</para>
+        /// <para><strong>NOTE: </strong>In any case it is considered a <strong>Native</strong> field.</para>
         /// </summary>
         NoInsertUpdate = 0x2000,
         /// <summary>

@@ -438,7 +438,7 @@ namespace Tripous.Data
             
             if (!string.IsNullOrWhiteSpace(TableName))
             {
-                FindTable(item => TableName.IsSameText(item.TableName));
+                Result = FindTable(item => TableName.IsSameText(item.TableName));
 
                 if (Result == null)
                 {

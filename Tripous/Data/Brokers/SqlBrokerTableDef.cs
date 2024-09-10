@@ -41,7 +41,13 @@ namespace Tripous.Data
         /// </summary>
         public SqlBrokerTableDef()
         {
-
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SqlBrokerTableDef(SqlBrokerDef BrokerDef)
+        {
+            this.BrokerDef = BrokerDef;
         }
 
         /* public */
@@ -295,7 +301,7 @@ where
 
             foreach (var FieldDes in this.Fields)
             {
-                if (FieldDes.IsNativeField && !FieldDes.IsNoInsertOrUpdate)
+                if (FieldDes.IsNativeField) //  && !FieldDes.IsNoInsertOrUpdate -- NO, auto-inc fields are Native
                 {
                     if (IsBrowserSelect)
                     {
@@ -819,7 +825,7 @@ where
 
             if (Result == null)
             {
-                Result = new SqlBrokerFieldDef() 
+                Result = new SqlBrokerFieldDef(this) 
                 { 
                     Name = Name,
                     TitleKey = !string.IsNullOrWhiteSpace(TitleKey)? TitleKey: Name,
@@ -992,6 +998,11 @@ where
         }
 
         /* properties */
+        /// <summary>
+        /// The master definition this instance belongs to.
+        /// </summary>
+        [JsonIgnore]
+        public SqlBrokerDef BrokerDef { get; }
         /// <summary>
         /// The table name.
         /// </summary>

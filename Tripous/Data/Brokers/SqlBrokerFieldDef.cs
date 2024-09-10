@@ -28,6 +28,14 @@ namespace Tripous.Data
         public SqlBrokerFieldDef()
         {
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SqlBrokerFieldDef(SqlBrokerTableDef TableDef)
+        {
+            this.TableDef = TableDef;
+        }
+ 
 
         /* public */
         /// <summary>
@@ -233,6 +241,13 @@ from
         }
 
         /* properties */
+        // SqlBrokerTableDef
+
+        /// <summary>
+        /// The master definition this instance belongs to.
+        /// </summary>
+        [JsonIgnore]
+        public SqlBrokerTableDef TableDef { get; }
         /// <summary>
         /// The field name.
         /// </summary>

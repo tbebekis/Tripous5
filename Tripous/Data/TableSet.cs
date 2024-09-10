@@ -537,30 +537,7 @@ namespace Tripous.Data
 
             if (topTable.Rows.Count > 0)
                 LastCommitedId = topTable.Rows[0][topTable.PrimaryKeyField];
-
-            /*
-            if (IsInsert)
-            {
-                if (topTable.IsStringField(topTable.PrimaryKeyField))
-                {
-                    if (topTable.Rows.Count > 0)
-                        Result = topTable.Rows[0][topTable.PrimaryKeyField];
-                }
-                else
-                {
-                    if (OidIsAfter)
-                        Result = LastId(topTable.TableName);
-                    else if (OidIsBefore && (topTable.Rows.Count > 0))
-                        Result = topTable.Rows[0][topTable.PrimaryKeyField];
-                }
-            }
-            else if (!IsInsert && (topTable.Rows.Count > 0))
-            {
-                Result = topTable.Rows[0][topTable.PrimaryKeyField];
-            }
-            //*/
-
-            //if ((IsInsert || Reselect) && !Sys.IsNull(Result))
+ 
             if (Reselect && !Sys.IsNull(LastCommitedId))
                 Select(LastCommitedId);
 
