@@ -4,7 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
- 
+
+using Tripous.Logging;
 
 namespace Tripous.Forms
 {
@@ -15,9 +16,27 @@ namespace Tripous.Forms
     /// </summary>
     static public class LogBox
     {
+        class LogBoxLogListener: LogListener
+        {
+            /// <summary>
+            /// Called by the Logger to pass <see cref="LogEntry"/> to a log listener.
+            ///<para>
+            /// CAUTION: The Logger calls its Listeners asynchronously, that is from inside a thread.
+            /// Thus Listeners should synchronize the ProcessLog() call. Controls need to check if InvokeRequired.
+            /// </para>
+            /// </summary>
+            public override void ProcessLog(LogEntry Entry)
+            {
+                AppendLine(Entry.Text);
+            }
+        }
+
+
         static SynchronizationContext fSyncContext = AsyncOperationManager.SynchronizationContext; 
         static TextBoxBase Box;
- 
+        static LogBoxLogListener logListener;
+
+
         /* private */
         static void DoClear(object Fake)
         {
@@ -40,9 +59,15 @@ namespace Tripous.Forms
         /// <summary>
         /// Initializes this class.
         /// </summary>
-        static public void Initialize(TextBoxBase Box)
+        static public void Initialize(TextBoxBase Box, bool UseLogListenerToo = true)
         {
-            LogBox.Box = Box;
+            if (LogBox.Box == null)
+            {
+                LogBox.Box = Box;
+                if (UseLogListenerToo)
+                    logListener = new LogBoxLogListener();
+            }
+            
         }
 
         /// <summary>

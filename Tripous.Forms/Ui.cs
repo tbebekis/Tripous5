@@ -791,8 +791,110 @@ Large: 8       // 1201 ..
                 }
             }
         }
- 
- 
+
+        /// <summary>
+        /// Handles string dates and partial dates written in a text box.
+        /// <para>Assumes that date format is <c>yyyy-MM-dd</c> or <c>dd-MM-yyyy</c>.</para>
+        /// <para>User may use <c>-, ., or /</c> as date separators.</para>
+        /// </summary>
+        static public void HandleDateTextBoxLeave(TextBoxBase Box)
+        {
+            void Handler(TextBoxBase Box)
+            {
+                const int PartTypeNone = 0;
+                const int PartTypeYear = 1;
+                const int PartTypeMonth = 2;
+                const int PartTypeDay = 3;
+
+                // --------------------------------------------
+                int AsNumber(string v)
+                {
+                    int Result = -1;
+                    if (!string.IsNullOrWhiteSpace(v) && int.TryParse(v, out Result))
+                        return Result;
+                    return -1;
+                }
+                // --------------------------------------------
+                int GetPartType(string v)
+                {
+                    int Result = PartTypeNone;
+                    int N = AsNumber(v);
+                    if (N > 0)
+                    {
+                        if (N > 31)
+                            return PartTypeYear;
+                        if (N > 12)
+                            return PartTypeDay;
+                        return PartTypeMonth;
+                    }
+
+
+                    return Result;
+                }
+                // --------------------------------------------
+
+                string Text = Box.Text;
+
+                if (!string.IsNullOrWhiteSpace(Text))
+                {
+                    string Year = "";
+                    string Month = "";
+                    string Day = "";
+
+                    string S;
+                    int partType;
+
+                    char Sep = Text.Contains('-') ? '-' : (Text.Contains('/') ? '/' : (Text.Contains('.') ? '.' : '-'));
+                    string[] Parts = Text.Split(Sep);
+
+                    if (Parts.Length >= 1)
+                    {
+                        S = Parts[0];
+                        partType = GetPartType(S);
+                        if (partType == PartTypeYear)
+                            Year = S;
+                        else // PartTypeDay
+                            Day = S;
+                    }
+
+                    if (Parts.Length >= 2)
+                    {
+                        S = Parts[1];
+                        partType = GetPartType(S);
+                        if (partType == PartTypeMonth)
+                            Month = S;
+                    }
+
+                    if (Parts.Length >= 3)
+                    {
+                        S = Parts[2];
+                        partType = GetPartType(S);
+                        if (partType == PartTypeYear)
+                            Year = S;
+                        else // PartTypeDay
+                            Day = S;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(Year))
+                        Year = DateTime.Now.Year.ToString();
+
+                    if (string.IsNullOrWhiteSpace(Month))
+                        Month = DateTime.Now.Month.ToString();
+                    if (Month.Length == 1)
+                        Month = "0" + Month;
+
+                    if (string.IsNullOrWhiteSpace(Day))
+                        Day = DateTime.Now.Day.ToString();
+                    if (Day.Length == 1)
+                        Day = "0" + Day;
+
+                    Box.Text = $"{Year}-{Month}-{Day}";
+                }
+            }
+            // --------------------------------------------
+
+            Box.Leave += (s, e) => Handler(Box);
+        }
 
         /* events */
         /// <summary>
