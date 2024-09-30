@@ -72,10 +72,11 @@ namespace Tripous
         /// <summary>
         /// Creates and returns an instance of default settings for the serializer
         /// </summary>
-         static public JsonSerializerSettings CreateDefaultSettings(bool Formatted = true)
+         static public JsonSerializerSettings CreateDefaultSettings(bool Formatted = true, bool IgnoreNullProperties = false)
         {
             JsonSerializerSettings Result = new JsonSerializerSettings();
             Result.Formatting = Formatted ? Formatting.Indented : Formatting.None;
+            Result.NullValueHandling = IgnoreNullProperties ? NullValueHandling.Ignore : NullValueHandling.Include;
             Result.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
             return Result;
