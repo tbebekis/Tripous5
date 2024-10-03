@@ -16,7 +16,7 @@ namespace Tripous.Data
 
     /// <summary>
     /// Describes a Sql provider
-    /// <para>NOTE: Add the NuGet package https://www.nuget.org/packages/System.Data.SqlClient </para>
+    /// <para>NOTE: Add the NuGet package https://www.nuget.org/packages/Microsoft.Data.SqlClient </para>
     /// </summary>
     public class SqlProviderMsSql: SqlProvider
     {
@@ -225,11 +225,11 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// <summary>
         /// The file name of the provider assembly, e.g. FirebirdSql.Data.FirebirdClient.dll
         /// </summary>
-        public override string AssemblyFileName { get; } = "System.Data.SqlClient.dll";
+        public override string AssemblyFileName { get; } = "Microsoft.Data.SqlClient.dll";
         /// <summary>
         /// The class name of the DbProviderFactory, e.g. FirebirdSql.Data.FirebirdClient.FirebirdClientFactory
         /// </summary>
-        public override string DbProviderFactoryTypeName { get; } = "System.Data.SqlClient.SqlClientFactory";
+        public override string DbProviderFactoryTypeName { get; } = "Microsoft.Data.SqlClient.SqlClientFactory";
  
         /// <summary>
         /// The type of the <see cref="SqlStore"/> class to use when creating <see cref="SqlStore"/> instances.
