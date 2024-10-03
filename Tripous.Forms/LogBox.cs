@@ -90,7 +90,7 @@ namespace Tripous.Forms
         /// </summary>
         static public void AppendLine(string Text = "")
         {
-            Text = string.IsNullOrWhiteSpace(Text)? Environment.NewLine: Text + Environment.NewLine;
+            Text = string.IsNullOrWhiteSpace(Text)? Environment.NewLine: Environment.NewLine + Text;
             fSyncContext.Post(o => DoLog(o as string), Text);
         }
         /// <summary>
@@ -106,7 +106,7 @@ namespace Tripous.Forms
         static public void AppendLine()
         {
             string Text = "-------------------------------------------------------------------";
-            fSyncContext.Post(o => DoLog(o as string), Text);
+            AppendLine(Text);
         }
  
     }
