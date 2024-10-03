@@ -283,7 +283,7 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// <summary>
         /// The template for a connection string
         /// </summary>
-        public override string ConnectionStringTemplate { get; } = "Data Source={0}; Initial Catalog={1}; User ID={2}; Password={3};";
+        public override string ConnectionStringTemplate { get; } = "Data Source={0}; Initial Catalog={1}; User ID={2}; Password={3}; TrustServerCertificate=true;";
         /// <summary>
         /// Super user name
         /// </summary>
