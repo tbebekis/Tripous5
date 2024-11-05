@@ -1,0 +1,28 @@
+We are in Microsoft Visual Studio IDE.
+
+In Visual Studio a, so called, solution is a group of projects.
+
+Tripous5 is the root folder and represents the solution.
+
+Beneath this root folder are the projects of this solution.
+
+Each of the following folders represent a project in this solution
+
+Tripous: is a library project. It contains c# classes that can be used in a variety of projects
+Tripous.Forms: is a library project on top of Tripous. Contains c# classes for building a Desktop UI with System.Windows.Forms namespace.
+WebDesk: is a C# ASP.NET web project. Except of C# code contains javascript and css code found beneath the wwwroot folder.
+WebDesk.Lib: is a library project. It is used by WebDesk project.
+WinApp.Demos: a Windows Desktop project. Just for testing purposes
+Test.WinApp: a Windows Desktop project. Just for testing purposes
+
+----
+
+Now lets see the WebDesk\wwwroot folder and its sub-folders
+
+wwwroot: root folder for client side code, i.e. css and javascript
+wwwrott\tp: the whole Tripous client library, along with my own CSS library
+wwwrott\tp\js: the Tripous Javascript library
+wwwrott\tp\js\Desk: extension to Tripous Javascript library for building desktop-like UI with Javascript and CSS
+wwwroot\tp\css: Tripous CSS library, tp.css, tp-UI.css ant tp-Variables.css
+wwwroot\tp\css\Desk: CSS files for the Desk
+ 

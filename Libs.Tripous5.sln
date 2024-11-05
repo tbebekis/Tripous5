@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{9F3E7B89-0128-4A0B-8A9D-29DC7B65610C}"
 	ProjectSection(SolutionItems) = preProject
 		_Files\ALTER_TABLE.txt = _Files\ALTER_TABLE.txt
+		_Files\Codeium.txt = _Files\Codeium.txt
 		_Files\GUIDs.txt = _Files\GUIDs.txt
 		_Files\HtmlEntities.txt = _Files\HtmlEntities.txt
 		_Files\Licence.txt = _Files\Licence.txt

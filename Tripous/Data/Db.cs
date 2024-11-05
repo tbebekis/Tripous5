@@ -831,33 +831,22 @@ namespace Tripous.Data
             }
             set
             {
-                if (fConnections != null)
-                {
-                    Logger.Warn("Connections strings are already set.");
-                    return;
-                }                    
-
-                if (value == null || value.Count == 0)
-                    Sys.Throw("Can not set Connections to a null or empty list. No database connections provided");
-
                 fConnections = value;
 
-                SqlConnectionInfo CS = fConnections.FirstOrDefault(item => item.Name.IsSameText(SysConfig.DefaultConnection));
-                if (CS == null)
+                if (fConnections != null && fConnections.Count > 0)
                 {
-                    CS = fConnections.FirstOrDefault(item => item.Name.IsSameText(Sys.DEFAULT));
+                    SqlConnectionInfo CS = fConnections.FirstOrDefault(item => item.Name.IsSameText(SysConfig.DefaultConnection));
+                    if (CS == null)
+                        CS = fConnections.FirstOrDefault(item => item.Name.IsSameText(Sys.DEFAULT));
+
+                    string DefaultConnectionName = CS != null ? CS.Name : fConnections[0].Name;
+                    if (SysConfig.DefaultConnection.IsSameText(DefaultConnectionName))
+                        SysConfig.DefaultConnection = DefaultConnectionName;
+
+
+                    foreach (SqlConnectionInfo Item in fConnections)
+                        Item.ConnectionString = ConnectionStringBuilder.NormalizeConnectionString(Item.ConnectionString);
                 }
- 
-                string DefaultConnectionName = CS != null ? CS.Name : fConnections[0].Name;
-                if (SysConfig.DefaultConnection.IsSameText(DefaultConnectionName))
-                    SysConfig.DefaultConnection = DefaultConnectionName;
-
-
-                foreach (SqlConnectionInfo Item in fConnections)
-                {
-                    Item.ConnectionString = ConnectionStringBuilder.NormalizeConnectionString(Item.ConnectionString);
-                }
-
             }
         }
         /// <summary>
