@@ -158,6 +158,16 @@ namespace Tripous.Data
             RejectChanges();
         }
 
+        /// <summary>
+        /// Called from inside <see cref="Commit"/>.
+        /// <para>NOTE: It looks like we have to call EndEdit() for the DataRow(s) to post the changes.</para>
+        /// </summary>
+        protected virtual void DoEndEdit(bool Reselect)
+        {
+            for (int i = 0; i < tblItem.Rows.Count; i++)
+                tblItem.Rows[i].EndEdit();
+        }
+
         /* item miscs */
         /// <summary>
         /// Called to commit changes made to the tblItem
@@ -339,11 +349,18 @@ namespace Tripous.Data
                 Commiting = true;
                 try
                 {
+                    DoEndEdit(Reselect);
+
                     string PlusEventName = "." + OldState.ToString();
                     DoCommitBefore(Reselect);
 
+                    DoEndEdit(Reselect);
+
                     //OnStateChange(ExecTime.Before, DataMode.Commit, State, null, Reselect);
                     CheckCanCommit(Reselect);
+
+                    DoEndEdit(Reselect);
+
                     LastCommitedId = DoCommit(Reselect);
                     DoCommitAfter(Reselect);
                     //OnStateChange(ExecTime.After, DataMode.Commit, State, null, Reselect);
