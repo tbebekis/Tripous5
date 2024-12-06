@@ -295,6 +295,8 @@ limit {RowLimit}";
         /// </summary>
         public override string[] PasswordKeys { get; } = new string[] { };
  
+        // SEE: http://www.sqlite.org/datatype3.html
+
         /// <summary>
         /// The PrimaryKey text
         /// </summary>
@@ -314,19 +316,19 @@ limit {RowLimit}";
         /// <summary>
         /// The Float text
         /// </summary>
-        public override string Float { get; } = "float";
+        public override string Float { get; } = "real";
         /// <summary>
         /// The Decimal text. 
         /// <para>Implied Precision and Scale <c>(18, 4)</c></para>
         /// <para>Example: <c>@DECIMAL</c> becomes <c>decimal(18, 4)</c></para>
         /// </summary>
-        public override string Decimal { get; } = "decimal(18, 4)";
+        public override string Decimal { get; } = "real";
         /// <summary>
         /// The Decimal text. 
         /// <para>The user provides the Precision and Scale explicitly.</para>
         /// <para>Example: <c>@DECIMAL_(10, 2)</c> becomes <c>decimal(10, 2)</c></para>
         /// </summary>
-        public override string Decimal_ { get; } = "decimal";
+        public override string Decimal_ { get; } = "real";
         /// <summary>
         /// The Date text
         /// </summary>
