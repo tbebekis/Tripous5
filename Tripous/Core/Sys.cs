@@ -13,6 +13,7 @@ using System.IO;
 using System.Threading;
 using System.Globalization;
 using System.Reflection;
+using System.Threading.Tasks;
 
 [assembly: CLSCompliant(true)]
 
@@ -27,7 +28,11 @@ namespace Tripous
     {
 
         static DateTime today = DateTime.MinValue;
-
+        /// <summary>
+        /// Used when calling async methods as synchronous
+        /// </summary>
+        static public readonly TaskFactory TaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None, TaskContinuationOptions.None, TaskScheduler.Default);
+ 
 
 
         /* public fields */
@@ -126,6 +131,40 @@ namespace Tripous
         static public void LogError(string Text, string Source = "", int EventId = 0)
         {
             Tripous.Logging.Logger.Error(Source, EventId.ToString(), Text);
+        }
+
+        /* async as sync */
+        /// <summary>
+        /// Executes an async method as a synchronous one
+        /// </summary>
+        static public TResult RunSync<TResult>(Func<Task<TResult>> Func)
+        {
+            CultureInfo UiCulture = CultureInfo.CurrentUICulture;
+            CultureInfo Culture = CultureInfo.CurrentCulture;
+
+            return TaskFactory.StartNew(() =>
+            {
+                Thread.CurrentThread.CurrentCulture = Culture;
+                Thread.CurrentThread.CurrentUICulture = UiCulture;
+                return Func();
+
+            }).Unwrap().GetAwaiter().GetResult();
+        }
+        /// <summary>
+        /// Executes an async method as a synchronous one
+        /// </summary>
+        static public void RunSync(Func<Task> Func)
+        {
+            CultureInfo UiCulture = CultureInfo.CurrentUICulture;
+            CultureInfo Culture = CultureInfo.CurrentCulture;
+
+            TaskFactory.StartNew(() =>
+            {
+                Thread.CurrentThread.CurrentCulture = Culture;
+                Thread.CurrentThread.CurrentUICulture = UiCulture;
+                return Func();
+
+            }).Unwrap().GetAwaiter().GetResult();
         }
 
         /* Strings */

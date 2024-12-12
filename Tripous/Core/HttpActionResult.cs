@@ -92,5 +92,7 @@ namespace Tripous
         /// True when the call succeeds business-logic-wise.
         /// </summary>
         public bool IsSuccess { get; set; } = false;
+
+
     }
 }
