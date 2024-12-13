@@ -5,7 +5,6 @@
 using System;
 using System.Text;
 using System.IO;
-using System.IO.Compression;
 
 namespace Tripous
 {

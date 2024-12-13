@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
     /// <summary>
     /// A localizable <see cref="DisplayNameAttribute"/> attribute, to be used with model properties

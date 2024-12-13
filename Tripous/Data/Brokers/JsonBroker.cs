@@ -1,16 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2016 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.Text;
- 
- 
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// JsonBroker

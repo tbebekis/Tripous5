@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Data;
-
-using System.Resources;
-using System.Globalization;
-
-namespace Tripous.Core
+﻿namespace Tripous.Core
 {
 
     /// <summary>

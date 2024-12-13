@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Data;
-using System.Security.Claims;
-
-namespace Tripous.Identity
+﻿namespace Tripous.Identity
 {
     /// <summary>
     /// A claim that belongs to a <see cref="User"/>

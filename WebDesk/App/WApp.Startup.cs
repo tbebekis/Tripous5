@@ -203,7 +203,7 @@ namespace WebDesk
             }
             catch (Exception ex)
             {
-                LogEntry Info = new LogEntry("Application", "Start", "", LogLevel.Fatal, ex, "Fatal error on WApp.Start()");
+                LogEntry Info = new LogEntry("Application", "Start", "", Tripous.Logging.LogLevel.Fatal, ex, "Fatal error on WApp.Start()");
                 Logger.Log(Info);
                 throw;
             }
@@ -342,7 +342,7 @@ namespace WebDesk
 
                 // Set the secure flag, which Chrome's changes will require for SameSite none.
                 // Note this will also require you to be running on HTTPS.
-                o.MinimumSameSitePolicy = SameSiteMode.None;
+                o.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
 
                 // Set the cookie to HTTP only which is good practice unless you really do need
                 // to access it client side in scripts.

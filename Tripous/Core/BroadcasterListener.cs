@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Tripous.Core;
-using Tripous.Logging;
-
-namespace Tripous
+﻿namespace Tripous
 {
 
 

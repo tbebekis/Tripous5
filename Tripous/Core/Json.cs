@@ -1,33 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
- 
-using System.IO;
-using System.Dynamic;
-using System.Globalization;
- 
-using System.ComponentModel;
-using System.Data;
-
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
- 
-
-using System.Reflection;
-
-using Newtonsoft;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json.Linq;
-
-
-namespace Tripous
+﻿namespace Tripous
 {
  
 
@@ -75,7 +46,7 @@ namespace Tripous
          static public JsonSerializerSettings CreateDefaultSettings(bool Formatted = true, bool IgnoreNullProperties = false)
         {
             JsonSerializerSettings Result = new JsonSerializerSettings();
-            Result.Formatting = Formatted ? Formatting.Indented : Formatting.None;
+            Result.Formatting = Formatted ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None;
             Result.NullValueHandling = IgnoreNullProperties ? NullValueHandling.Ignore : NullValueHandling.Include;
             Result.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 

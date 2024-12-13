@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
- 
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Information about a razor view

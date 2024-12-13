@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Data;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// A cache of <see cref="DataTable"/> instances, containing schema of a named sql statement, per connection.

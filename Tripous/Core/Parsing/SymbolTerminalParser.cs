@@ -7,15 +7,10 @@
 	by teo.bebekis@gmail.com                                
 --------------------------------------------------------------------------------------*/
 
-using System;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-
-using Tripous.Tokenizing;
-
 namespace Tripous.Parsing
 {
+    using Tripous.Tokenizing;
+
     /// <summary>
     /// A Symbol matches a specific sequence, such as greater, or equal that a tokenizer
     /// </summary>

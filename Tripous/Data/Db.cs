@@ -1,22 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
-using System.Data.Common;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-
-using Tripous.Data.Metadata;
-using Tripous.Logging;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
 

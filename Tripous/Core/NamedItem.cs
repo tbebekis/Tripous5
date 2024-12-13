@@ -1,11 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.ComponentModel;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Represents an object with a Name property. A NamedItem can be an element

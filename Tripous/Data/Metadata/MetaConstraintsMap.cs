@@ -1,14 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-
-namespace Tripous.Data.Metadata
+﻿namespace Tripous.Data.Metadata
 {
     /// <summary>
     /// Provides a unified way in accessing the DataTable columns, 

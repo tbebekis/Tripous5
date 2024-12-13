@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tripous.Logging;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
  
     public class SqlLogEntryArgs : EventArgs

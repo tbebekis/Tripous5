@@ -1,18 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-using Tripous.Tokenizing;
-using Tripous.Parsing;
-
-namespace WinApp.Demos
+﻿namespace WinApp.Demos
 {
     public partial class Tokenizer1 : UserControl
     {
@@ -182,7 +168,7 @@ namespace WinApp.Demos
             AppendSplitLine();
 
             Parser Parser = new WordTerminalParser();
-            Assembly A = new TokenAssembly(Text);
+            Tripous.Parsing.Assembly A = new TokenAssembly(Text);
 
             while (true)
             {
@@ -203,7 +189,7 @@ namespace WinApp.Demos
             AppendSplitLine();
 
             Parser Parser = new QuotedStringTerminalParser();
-            Assembly A = new TokenAssembly(Text);
+            Tripous.Parsing.Assembly A = new TokenAssembly(Text);
 
             A = Parser.BestMatch(A);
             if (A != null)
@@ -227,7 +213,7 @@ namespace WinApp.Demos
             Parser SubParser = new WordTerminalParser();
             Parser Parser = new RepetitionParser(SubParser);
 
-            List<Assembly> List = new List<Assembly>();
+            List<Tripous.Parsing.Assembly> List = new List<Tripous.Parsing.Assembly>();
             List.Add(A);
             List = Parser.Match(List);
 
@@ -256,9 +242,9 @@ hot coffee";
             SequenceCollectionParser good = new SequenceCollectionParser();
             good.Add(new RepetitionParser(adjective));
             good.Add(new LiteralTerminalParser("coffee"));
-             
 
-            Assembly A = new TokenAssembly(Text);
+
+            Tripous.Parsing.Assembly A = new TokenAssembly(Text);
             A = good.BestMatch(A);
 
             if (A != null)
@@ -299,7 +285,7 @@ hot coffee";
             };
 
 
-            Assembly A;
+            Tripous.Parsing.Assembly A;
              
             foreach (string Text in Texts)
             {

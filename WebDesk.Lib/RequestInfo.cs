@@ -1,12 +1,4 @@
-﻿using System;
-using System.Text;
-
-using Microsoft.Net.Http.Headers;
-using Microsoft.AspNetCore.Http;
-
-using Tripous;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
 
     /// <summary>

@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Claims;
-
-using Microsoft.AspNetCore.Http;
-
-using Tripous;
-
-namespace WebLib
+﻿namespace WebLib
 {
 
     /// <summary>

@@ -1,11 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Indicates how a DateTime should be formatted as a string

@@ -7,15 +7,10 @@
 	by teo.bebekis@gmail.com                                
 --------------------------------------------------------------------------------------*/
 
-using System;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-
-using Tripous.Tokenizing;
-
 namespace Tripous.Parsing
 {
+    using Tripous.Tokenizing;
+
     /// <summary>
     /// A TokenAssembly is an Assembly whose elements are Tokens.
     /// Tokens are, roughly, the chunks of text that a tokenizer returns.

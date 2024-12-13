@@ -1,17 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
- 
-using System;
-using System.Windows.Forms;
-using System.Drawing;
-using System.Data;
-using System.Collections.Generic;
-
- 
-
-namespace Tripous.Forms
+﻿namespace Tripous.Forms
 {
  
     /// <summary>

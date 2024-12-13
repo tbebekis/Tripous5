@@ -1,17 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-using Tripous;
-using WebLib.AspNet;
-
 namespace WebDesk
 {
 

@@ -1,16 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Data.Common;
- 
-
-namespace Tripous.Data.Metadata
+﻿namespace Tripous.Data.Metadata
 {
     // Oracle Schema Collections     http://msdn.microsoft.com/en-us/library/cc716723.aspx          
  

@@ -1,30 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Globalization;
-using System.Net.Http;
-using System.Security.Claims;
-using System.IO;
-using System.Text;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
-using Newtonsoft.Json;
-
-using Tripous;
-using WebLib.AspNet;
-using Tripous.Logging;
-
-namespace WebLib 
+﻿namespace WebLib 
 {
 
     /// <summary>

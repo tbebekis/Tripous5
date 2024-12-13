@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Provides the basic functionality for objects capable of performing 

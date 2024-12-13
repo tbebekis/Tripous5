@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Diagnostics.Metrics;
-using System.Reflection;
-
-namespace Tripous.Logging
+﻿namespace Tripous.Logging
 {
     /// <summary>
     /// A log listener that writes log info to file(s).

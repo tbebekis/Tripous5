@@ -1,10 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Represents a method which can be called with Params. The method could

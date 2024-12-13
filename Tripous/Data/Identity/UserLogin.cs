@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Data;
- 
-
-namespace Tripous.Identity
+﻿namespace Tripous.Identity
 {
     /// <summary>
     /// User account in an external identity provider, e.g. Facebook, Google

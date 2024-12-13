@@ -1,17 +1,3 @@
-/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Data.Common;
-using System.Threading;
-using System.Linq;
-
-
 namespace Tripous.Data.Metadata
 {
 

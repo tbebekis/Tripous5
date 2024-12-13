@@ -6,16 +6,11 @@
 	Adaptation to C#, modifications and additions
 	by teo.bebekis@gmail.com                                
 --------------------------------------------------------------------------------------*/
-
-using System;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-
-using Tripous.Tokenizing;
-
+ 
 namespace Tripous.Parsing
 {
+    using Tripous.Tokenizing;
+
     /// <summary>
     /// A parser that matches a number from a token assembly.
     /// </summary>

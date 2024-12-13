@@ -1,14 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
   
     /// <summary>

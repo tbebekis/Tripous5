@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Dynamic;
-
-using Newtonsoft.Json;
-
-#pragma warning disable CS1591
+﻿#pragma warning disable CS1591
 
 namespace Tripous 
 {

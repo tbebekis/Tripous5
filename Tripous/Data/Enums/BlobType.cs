@@ -1,12 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// Indicates the type of a blob mode of a pop up form

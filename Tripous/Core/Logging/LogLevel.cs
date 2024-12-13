@@ -1,7 +1,4 @@
-﻿using System;
- 
-
-namespace Tripous.Logging
+﻿namespace Tripous.Logging
 {
     /// <summary>
     /// The level of log info to issue, display, or persist

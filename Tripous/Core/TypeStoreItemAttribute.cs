@@ -1,12 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Marks a <see cref="System.Type"/>, such as enums, Broker and Form classes, as a code element that must be registered with the <see cref="TypeStore"/>.

@@ -1,15 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.Data;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// A helper class for returning typed values from an IDictionary in a safe manner.

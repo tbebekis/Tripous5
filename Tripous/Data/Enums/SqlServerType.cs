@@ -1,9 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// Indicates the type of the database server/data a connection uses

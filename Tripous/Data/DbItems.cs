@@ -1,18 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                            Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// Base collection for the data sub-system

@@ -1,12 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
-
-namespace Tripous
+﻿namespace Tripous
 {
 
 

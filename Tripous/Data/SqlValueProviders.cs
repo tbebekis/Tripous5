@@ -1,15 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2019 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-using System.Data;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
     /// <summary>

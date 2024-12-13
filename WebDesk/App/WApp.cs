@@ -1,46 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Data.Common;
-using Microsoft.Data.SqlClient;
-using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Net;
-using System.Net.Http;
-using System.Data;
-
-//using Microsoft.Net.Http.Headers;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.CookiePolicy;
-
-
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.HttpOverrides;
-
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Caching.Memory; 
-
-using Tripous;
-using WebLib.AspNet;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
     /// <summary>
     /// Represents this application

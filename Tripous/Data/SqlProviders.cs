@@ -1,14 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2019 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// A registry-like static class for <see cref="SqlProvider"/> instances.

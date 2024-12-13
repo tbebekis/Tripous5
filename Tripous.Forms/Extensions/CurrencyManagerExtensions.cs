@@ -1,16 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
- 
-using System;
-using System.Collections;
-using System.Reflection;
-using System.Windows.Forms;
-using System.ComponentModel;
-using System.Data;
-  
-namespace Tripous.Forms
+﻿namespace Tripous.Forms
 {
     /// <summary>
     /// Extensions

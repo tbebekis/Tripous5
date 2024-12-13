@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.Reflection;
-using System.Data;
-using System.Data.Common;
-using System.Threading.Tasks;
-using System.Transactions;
-
-using Dapper;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
     /// <summary>

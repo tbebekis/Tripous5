@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tripous.Data 
+﻿namespace Tripous.Data 
 {
     /// <summary>
     /// Delegates DomainEntity related events to registered listeners.

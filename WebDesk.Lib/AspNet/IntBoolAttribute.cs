@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
     /// <summary>
     /// Marks a model integer property to be used as a boolean and display an html checkbox when rendered.

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using Tripous;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
     /// <summary>
     /// Generates unique Ids for HTML elements.

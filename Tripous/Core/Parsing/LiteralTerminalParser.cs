@@ -7,15 +7,13 @@
 	by teo.bebekis@gmail.com                                
 --------------------------------------------------------------------------------------*/
 
-using System;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
 
-using Tripous.Tokenizing;
+
 
 namespace Tripous.Parsing
 {
+    using Tripous.Tokenizing;
+
     /// <summary>
     /// A parser that matches a specific string from an assembly.
     /// </summary>

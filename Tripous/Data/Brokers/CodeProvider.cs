@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
-using System.Data.Common;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-using Tripous.Data;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// Produces unique Codes. The decriptor of this class describes the form of the Code.

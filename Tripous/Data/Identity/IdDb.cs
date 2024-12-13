@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-using System.Linq;
-using System.Data;
-using System.Security.Cryptography;
-using System.Security.Claims;
-
-using Tripous.Data;
- 
-
-namespace Tripous.Identity
+﻿namespace Tripous.Identity
 {
     
     /// <summary>

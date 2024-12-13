@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Globalization;
-
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-
-using Tripous;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
     /// <summary>
     /// Provides access to session variables (entries)

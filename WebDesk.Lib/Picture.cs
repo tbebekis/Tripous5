@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Newtonsoft.Json;
-
-namespace WebLib
+﻿namespace WebLib
 {
     /// <summary>
     /// A picture of an item, i.e. product, etc.

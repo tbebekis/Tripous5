@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Tripous;
-using Tripous.Data;
- 
-using System.Security.Cryptography;
-using System.Security.Authentication;
-
-namespace WebLib
+﻿namespace WebLib
 {
 
     /// <summary>

@@ -1,14 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tripous.Identity;
-using Tripous.Logging;
- 
-
-namespace Tripous.Logging
+﻿namespace Tripous.Logging
 {
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class LogRecord

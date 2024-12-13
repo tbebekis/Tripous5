@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.Text;
-
-using Tripous.Data;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// Broker. A broker represents a tree of tables of a data module. The top table, the tblItem, is a single-row table. 

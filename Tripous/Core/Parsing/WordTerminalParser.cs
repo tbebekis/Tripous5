@@ -7,16 +7,10 @@
 	by teo.bebekis@gmail.com                                
 --------------------------------------------------------------------------------------*/
 
-using System;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-
-using Tripous.Tokenizing;
-
 namespace Tripous.Parsing
 {
- 
+    using Tripous.Tokenizing;
+
     /// <summary>
     /// A Word matches a word from a token assembly.
     /// </summary>

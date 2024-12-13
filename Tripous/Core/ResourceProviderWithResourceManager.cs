@@ -1,16 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Resources;
-using System.Globalization;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Represents an object that provides resources such as string and images.

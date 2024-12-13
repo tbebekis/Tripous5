@@ -1,13 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
-using static System.Formats.Asn1.AsnWriter;
+﻿//using static System.Formats.Asn1.AsnWriter;
 
 namespace Tripous.Logging
 {

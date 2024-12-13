@@ -1,13 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections;
-using System.ComponentModel;
-
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// A Descriptor is a class that describes other business classes.

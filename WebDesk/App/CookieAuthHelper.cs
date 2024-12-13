@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
-using WebLib;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
 
     /// <summary>
@@ -37,7 +24,7 @@ namespace WebDesk
             // SEE: https://stackoverflow.com/questions/52456388/net-core-cookie-will-not-be-set
             Options.IsEssential = true;
 
-            Options.SameSite = SameSiteMode.Strict;
+            Options.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
 
             // expiration
             if (Settings.General.UserCookieExpirationHours < 0)             // never 

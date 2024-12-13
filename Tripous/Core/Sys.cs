@@ -1,23 +1,6 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Globalization;
-using System.Reflection;
-using System.Threading.Tasks;
-
+﻿
 [assembly: CLSCompliant(true)]
-
-//using Newtonsoft.Json;
+ 
 
 namespace Tripous
 {

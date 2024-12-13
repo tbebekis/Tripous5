@@ -1,13 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                            Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Linq;
-using System.Collections.Generic;
-
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
 

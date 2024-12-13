@@ -1,18 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Xml;
-using System.Text;
-using System.IO;
-using System.Linq;
-using System.Xml.Serialization;
-using System.Runtime.Serialization;
-using System.Reflection;
- 
-
-namespace Tripous
+﻿namespace Tripous
 {
 
     /// <summary>
@@ -77,7 +63,7 @@ namespace Tripous
                 XTW = new XmlTextWriter(SW);
 
                 //we want the output formatted
-                XTW.Formatting = Formatting.Indented;
+                XTW.Formatting = System.Xml.Formatting.Indented;
 
                 //get the dom to dump its contents into the XTW 
                 Doc.WriteTo(XTW);

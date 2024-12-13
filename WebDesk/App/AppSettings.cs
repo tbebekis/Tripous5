@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using Tripous;
-using WebLib.AspNet;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
     /// <summary>
     /// Application settings, coming from appsettings.json

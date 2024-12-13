@@ -1,14 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
-using Newtonsoft.Json;
-
-namespace Tripous
+﻿namespace Tripous
 {
 
 

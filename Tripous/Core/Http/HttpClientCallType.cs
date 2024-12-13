@@ -1,6 +1,4 @@
-﻿ 
-
-namespace Tripous
+﻿namespace Tripous.Http
 {
     /// <summary>
     /// The type of a HttpClient call

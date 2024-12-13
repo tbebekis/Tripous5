@@ -1,12 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-
-using Newtonsoft.Json;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     ///  A custom json converter for the SimpleType enum

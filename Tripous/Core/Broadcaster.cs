@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Tripous.Core;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Represents an object that sends event notifications to its subscribed listeners.

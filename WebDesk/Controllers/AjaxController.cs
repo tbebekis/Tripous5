@@ -1,27 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Data;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using Tripous;
-using WebLib;
-using WebLib.Models;
-using WebLib.AspNet;
- 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Tripous.Data;
-
-namespace WebDesk.Controllers
+﻿namespace WebDesk.Controllers
 {
 
 #warning TRIPOUS WARNING: Remove the AllowAnonymous attribute from the AjaxController in production

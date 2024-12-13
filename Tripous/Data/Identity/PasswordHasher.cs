@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tripous.Identity
+﻿namespace Tripous.Identity
 {
     /// <summary>
     /// Password hasher. It uses the SHA256 algorithm.

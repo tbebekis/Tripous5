@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// The languages this application supports, i.e. provides localized resources for.

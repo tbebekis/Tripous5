@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Indicates the platform where a Ui element may displayed, such as 

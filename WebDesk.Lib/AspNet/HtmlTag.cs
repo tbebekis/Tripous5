@@ -1,18 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Text.Encodings.Web;
-
-using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using System.Web;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
  
     /// <summary>

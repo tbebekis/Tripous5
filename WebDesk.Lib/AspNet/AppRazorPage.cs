@@ -1,19 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.IO;
-using System.Net;
-
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.Razor;
-
-using Tripous;
- 
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-
-namespace WebLib.AspNet
+﻿namespace WebLib.AspNet
 {
 
     /// <summary>

@@ -1,23 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text;
-using System.Net;
-using System.Security.Claims;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.Net.Http.Headers;
-using Microsoft.Extensions.Primitives;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
-using Tripous;
-using WebLib;
-using WebLib.AspNet;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
 
     /// <summary>

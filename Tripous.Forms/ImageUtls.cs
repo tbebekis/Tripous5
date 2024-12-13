@@ -1,19 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-//using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-
- 
-
-namespace Tripous
+﻿namespace Tripous
 {
     /// <summary>
     /// Helper class for images
@@ -59,7 +44,7 @@ namespace Tripous
                 ImageCodecInfo imageCodecInfo = GetEncoderInfo(Source.RawFormat);
 
                 // Create an Encoder object for the Quality parameter.
-                Encoder encoder = Encoder.Quality;
+                System.Drawing.Imaging.Encoder encoder = System.Drawing.Imaging.Encoder.Quality;
 
                 // Create an EncoderParameters object. 
                 EncoderParameters encoderParameters = new EncoderParameters(1);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     public class SyncedSqlLogListener: SqlLogListener
     {

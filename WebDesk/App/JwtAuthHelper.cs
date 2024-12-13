@@ -1,27 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.IO;
-using System.Threading.Tasks;
-using System.Net.Mime;
-using System.Text;
-using System.Security.Claims;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Net.Http.Headers;
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-
-using WebLib;
-using WebLib.Models;
-using WebLib.AspNet;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
 
     /// <summary>

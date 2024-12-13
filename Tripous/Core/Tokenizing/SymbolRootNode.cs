@@ -7,9 +7,6 @@
 	by teo.bebekis@gmail.com                                
 --------------------------------------------------------------------------------------*/
 
-using System;
-using System.Text;
-using System.Collections;
 
 namespace Tripous.Tokenizing
 {

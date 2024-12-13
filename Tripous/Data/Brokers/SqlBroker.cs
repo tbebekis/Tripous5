@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.Text;
-
-using Tripous.Data;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
     /// <summary>

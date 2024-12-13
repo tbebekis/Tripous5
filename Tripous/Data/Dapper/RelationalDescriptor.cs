@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using System.Reflection;
-
-using Dapper;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
     /// <summary>

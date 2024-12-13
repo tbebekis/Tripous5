@@ -1,13 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Collections.Generic;
-
-using Microsoft.AspNetCore.Http; 
-
-using Tripous;
-using WebLib.AspNet;
-
-namespace WebLib
+﻿namespace WebLib
 {
     /// <summary>
     /// Represents the web application

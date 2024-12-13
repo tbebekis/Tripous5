@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-using Tripous.Data;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
     /// <summary>
     /// <para>The <see cref="CodeProviderDef"/> decriptor provides information regarding the parts that make up a Code, passing a definition text to a <see cref="CodeProvider"/>.</para>

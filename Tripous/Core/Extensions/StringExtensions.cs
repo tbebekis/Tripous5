@@ -1,16 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Web;
-
-namespace Tripous
+﻿namespace Tripous
 {
 
 

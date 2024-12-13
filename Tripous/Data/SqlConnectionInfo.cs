@@ -1,7 +1,4 @@
-﻿using System;
-using System.Data.Common;
-
-namespace Tripous.Data
+﻿namespace Tripous.Data
 {
 
     /// <summary>

@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tripous
+﻿namespace Tripous
 {
 
     /// <summary>
     /// Base class for application settings.
     /// <para>Watches for changes in the settings file and reloads this instance.</para>
-    /// <para><strong>NOTE: </strong> If this class contains lists, then override the <see cref="Load()"/> method, clean the lists, and after that call the base implementation.</para>
+    /// <para><strong>NOTE: </strong> If this class contains lists, then override the <see cref="Load()"/> method, 
+    /// clean the lists, and after that call the base implementation.</para>
     /// </summary>
     public class AppSettingsBase
     {

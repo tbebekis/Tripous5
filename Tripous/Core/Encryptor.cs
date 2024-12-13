@@ -1,17 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Authentication;
-using System.Security.Cryptography;
-using System.Text;
-
-namespace Tripous
+﻿namespace Tripous
 {
 
     /// <summary>

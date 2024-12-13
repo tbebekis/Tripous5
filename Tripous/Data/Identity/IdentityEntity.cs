@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Data;
-using System.Globalization;
-
-using Tripous.Data;
-
-namespace Tripous.Identity
+﻿namespace Tripous.Identity
 {
 
     /// <summary>

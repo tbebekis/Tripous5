@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-
-using Microsoft.AspNetCore.Http;
-
-using System.IdentityModel.Tokens.Jwt;
-
-using Tripous;
-
-using WebLib;
-using WebLib.AspNet;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
 
     /// <summary>

@@ -1,22 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Globalization;
-using System.IO;
-using System.Data;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.Caching.Memory;
-
-using Tripous;
-using WebLib;
-using WebLib.AspNet;
-
-namespace WebDesk
+﻿namespace WebDesk
 {
     /// <summary>
     /// Represents the web application. It is passed to the DataStore as a link point between the two parts.

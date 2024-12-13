@@ -1,12 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2013 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using System;
-
-
-namespace Tripous.Data.Metadata
+﻿namespace Tripous.Data.Metadata
 {
 
     /// <summary>

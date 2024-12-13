@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tripous
+﻿namespace Tripous.Http
 {
     /// <summary>
     /// To be used by controller action methods returning json data. 
     /// </summary>
     public class HttpActionResult
     {
- 
 
         /* construction */
         /// <summary>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-
-using Tripous;
-
-namespace WebLib
+﻿namespace WebLib
 {
 
     /// <summary>

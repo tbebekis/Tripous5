@@ -1,11 +1,4 @@
-﻿/*--------------------------------------------------------------------------------------        
-                           Copyright © 2018 Theodoros Bebekis
-                               teo.bebekis@gmail.com 
---------------------------------------------------------------------------------------*/
-
-using Tripous.Data;
-
-namespace Tripous.Logging
+﻿namespace Tripous.Logging
 {
 
 
