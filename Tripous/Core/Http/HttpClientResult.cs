@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the response of a call to the WebApi
     /// </summary>
-    public class HttpClientResult //: EventArgs
+    public class HttpClientResult 
     {
         HttpActionResult fActionResult;
 

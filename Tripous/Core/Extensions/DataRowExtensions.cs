@@ -374,7 +374,7 @@
                     {
                         byte[] Bytes = new byte[Stream.Length];
                         Stream.Position = 0;
-                        Stream.Read(Bytes, 0, Convert.ToInt32(Stream.Length));
+                        Stream.ReadExactly(Bytes, 0, Convert.ToInt32(Stream.Length));
                         Row[FieldName] = Bytes;
                     }
                 }

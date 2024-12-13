@@ -28,164 +28,158 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MessageBoxDialog));
-            this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.pnlBase = new System.Windows.Forms.Panel();
-            this.pnlContent = new System.Windows.Forms.Panel();
-            this.Memo = new System.Windows.Forms.RichTextBox();
-            this.pnlTop = new System.Windows.Forms.Panel();
-            this.picBox = new System.Windows.Forms.PictureBox();
-            this.edtTitle = new System.Windows.Forms.TextBox();
-            this.pnlBottom = new System.Windows.Forms.Panel();
-            this.btnYes = new System.Windows.Forms.Button();
-            this.btnNo = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.pnlBase.SuspendLayout();
-            this.pnlContent.SuspendLayout();
-            this.pnlTop.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picBox)).BeginInit();
-            this.pnlBottom.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // imageList
-            // 
-            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
-            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList.Images.SetKeyName(0, "ERROR_ICO.PNG");
-            this.imageList.Images.SetKeyName(1, "EXCLAMATION_ICO.PNG");
-            this.imageList.Images.SetKeyName(2, "INFORMATION_ICO.PNG");
-            this.imageList.Images.SetKeyName(3, "QUESTION_ICO.PNG");
+            pnlBase = new Panel();
+            pnlContent = new Panel();
+            Memo = new RichTextBox();
+            pnlTop = new Panel();
+            picBox = new PictureBox();
+            edtTitle = new TextBox();
+            pnlBottom = new Panel();
+            btnYes = new Button();
+            btnNo = new Button();
+            btnCancel = new Button();
+            pnlBase.SuspendLayout();
+            pnlContent.SuspendLayout();
+            pnlTop.SuspendLayout();
+            ((ISupportInitialize)picBox).BeginInit();
+            pnlBottom.SuspendLayout();
+            SuspendLayout();
             // 
             // pnlBase
             // 
-            this.pnlBase.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlBase.Controls.Add(this.pnlContent);
-            this.pnlBase.Controls.Add(this.pnlBottom);
-            this.pnlBase.Location = new System.Drawing.Point(6, 6);
-            this.pnlBase.Name = "pnlBase";
-            this.pnlBase.Size = new System.Drawing.Size(458, 311);
-            this.pnlBase.TabIndex = 2;
+            pnlBase.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pnlBase.Controls.Add(pnlContent);
+            pnlBase.Controls.Add(pnlBottom);
+            pnlBase.Location = new Point(7, 7);
+            pnlBase.Margin = new Padding(4, 3, 4, 3);
+            pnlBase.Name = "pnlBase";
+            pnlBase.Size = new Size(534, 359);
+            pnlBase.TabIndex = 2;
             // 
             // pnlContent
             // 
-            this.pnlContent.Controls.Add(this.Memo);
-            this.pnlContent.Controls.Add(this.pnlTop);
-            this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlContent.Location = new System.Drawing.Point(0, 0);
-            this.pnlContent.Name = "pnlContent";
-            this.pnlContent.Size = new System.Drawing.Size(458, 274);
-            this.pnlContent.TabIndex = 1;
+            pnlContent.Controls.Add(Memo);
+            pnlContent.Controls.Add(pnlTop);
+            pnlContent.Dock = DockStyle.Fill;
+            pnlContent.Location = new Point(0, 0);
+            pnlContent.Margin = new Padding(4, 3, 4, 3);
+            pnlContent.Name = "pnlContent";
+            pnlContent.Size = new Size(534, 316);
+            pnlContent.TabIndex = 1;
             // 
             // Memo
             // 
-            this.Memo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Memo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.Memo.Location = new System.Drawing.Point(0, 40);
-            this.Memo.Name = "Memo";
-            this.Memo.Size = new System.Drawing.Size(458, 234);
-            this.Memo.TabIndex = 1;
-            this.Memo.Text = "";
-            this.Memo.WordWrap = false;
+            Memo.Dock = DockStyle.Fill;
+            Memo.Font = new Font("Microsoft Sans Serif", 8.25F);
+            Memo.Location = new Point(0, 46);
+            Memo.Margin = new Padding(4, 3, 4, 3);
+            Memo.Name = "Memo";
+            Memo.Size = new Size(534, 270);
+            Memo.TabIndex = 1;
+            Memo.Text = "";
+            Memo.WordWrap = false;
             // 
             // pnlTop
             // 
-            this.pnlTop.Controls.Add(this.picBox);
-            this.pnlTop.Controls.Add(this.edtTitle);
-            this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlTop.Location = new System.Drawing.Point(0, 0);
-            this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(458, 40);
-            this.pnlTop.TabIndex = 0;
+            pnlTop.Controls.Add(picBox);
+            pnlTop.Controls.Add(edtTitle);
+            pnlTop.Dock = DockStyle.Top;
+            pnlTop.Location = new Point(0, 0);
+            pnlTop.Margin = new Padding(4, 3, 4, 3);
+            pnlTop.Name = "pnlTop";
+            pnlTop.Size = new Size(534, 46);
+            pnlTop.TabIndex = 0;
             // 
             // picBox
             // 
-            this.picBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.picBox.Location = new System.Drawing.Point(6, 4);
-            this.picBox.Name = "picBox";
-            this.picBox.Size = new System.Drawing.Size(32, 32);
-            this.picBox.TabIndex = 1;
-            this.picBox.TabStop = false;
+            picBox.ImeMode = ImeMode.NoControl;
+            picBox.Location = new Point(7, 5);
+            picBox.Margin = new Padding(4, 3, 4, 3);
+            picBox.Name = "picBox";
+            picBox.Size = new Size(37, 37);
+            picBox.TabIndex = 1;
+            picBox.TabStop = false;
             // 
             // edtTitle
             // 
-            this.edtTitle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.edtTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.edtTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
-            this.edtTitle.Location = new System.Drawing.Point(71, 6);
-            this.edtTitle.Name = "edtTitle";
-            this.edtTitle.ReadOnly = true;
-            this.edtTitle.Size = new System.Drawing.Size(385, 20);
-            this.edtTitle.TabIndex = 0;
-            this.edtTitle.TabStop = false;
-            this.edtTitle.Text = "edtTitle";
+            edtTitle.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            edtTitle.BorderStyle = BorderStyle.FixedSingle;
+            edtTitle.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold);
+            edtTitle.Location = new Point(83, 7);
+            edtTitle.Margin = new Padding(4, 3, 4, 3);
+            edtTitle.Name = "edtTitle";
+            edtTitle.ReadOnly = true;
+            edtTitle.Size = new Size(449, 20);
+            edtTitle.TabIndex = 0;
+            edtTitle.TabStop = false;
+            edtTitle.Text = "edtTitle";
             // 
             // pnlBottom
             // 
-            this.pnlBottom.Controls.Add(this.btnYes);
-            this.pnlBottom.Controls.Add(this.btnNo);
-            this.pnlBottom.Controls.Add(this.btnCancel);
-            this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlBottom.Location = new System.Drawing.Point(0, 274);
-            this.pnlBottom.Name = "pnlBottom";
-            this.pnlBottom.Size = new System.Drawing.Size(458, 37);
-            this.pnlBottom.TabIndex = 0;
+            pnlBottom.Controls.Add(btnYes);
+            pnlBottom.Controls.Add(btnNo);
+            pnlBottom.Controls.Add(btnCancel);
+            pnlBottom.Dock = DockStyle.Bottom;
+            pnlBottom.Location = new Point(0, 316);
+            pnlBottom.Margin = new Padding(4, 3, 4, 3);
+            pnlBottom.Name = "pnlBottom";
+            pnlBottom.Size = new Size(534, 43);
+            pnlBottom.TabIndex = 0;
             // 
             // btnYes
             // 
-            this.btnYes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnYes.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnYes.Location = new System.Drawing.Point(212, 6);
-            this.btnYes.Name = "btnYes";
-            this.btnYes.Size = new System.Drawing.Size(78, 26);
-            this.btnYes.TabIndex = 2;
-            this.btnYes.Text = "btnYes";
+            btnYes.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnYes.ImeMode = ImeMode.NoControl;
+            btnYes.Location = new Point(247, 7);
+            btnYes.Margin = new Padding(4, 3, 4, 3);
+            btnYes.Name = "btnYes";
+            btnYes.Size = new Size(91, 30);
+            btnYes.TabIndex = 2;
+            btnYes.Text = "btnYes";
             // 
             // btnNo
             // 
-            this.btnNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnNo.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnNo.Location = new System.Drawing.Point(294, 6);
-            this.btnNo.Name = "btnNo";
-            this.btnNo.Size = new System.Drawing.Size(78, 26);
-            this.btnNo.TabIndex = 1;
-            this.btnNo.Text = "btnNo";
+            btnNo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnNo.ImeMode = ImeMode.NoControl;
+            btnNo.Location = new Point(343, 7);
+            btnNo.Margin = new Padding(4, 3, 4, 3);
+            btnNo.Name = "btnNo";
+            btnNo.Size = new Size(91, 30);
+            btnNo.TabIndex = 1;
+            btnNo.Text = "btnNo";
             // 
             // btnCancel
             // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnCancel.Location = new System.Drawing.Point(375, 6);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(78, 26);
-            this.btnCancel.TabIndex = 0;
-            this.btnCancel.Text = "btnCancel";
+            btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnCancel.ImeMode = ImeMode.NoControl;
+            btnCancel.Location = new Point(438, 7);
+            btnCancel.Margin = new Padding(4, 3, 4, 3);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(91, 30);
+            btnCancel.TabIndex = 0;
+            btnCancel.Text = "btnCancel";
             // 
             // MessageBoxDialog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(471, 323);
-            this.Controls.Add(this.pnlBase);
-            this.Name = "MessageBoxDialog";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MessageBoxDialog";
-            this.pnlBase.ResumeLayout(false);
-            this.pnlContent.ResumeLayout(false);
-            this.pnlTop.ResumeLayout(false);
-            this.pnlTop.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picBox)).EndInit();
-            this.pnlBottom.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(550, 373);
+            Controls.Add(pnlBase);
+            Margin = new Padding(4, 3, 4, 3);
+            Name = "MessageBoxDialog";
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "MessageBoxDialog";
+            pnlBase.ResumeLayout(false);
+            pnlContent.ResumeLayout(false);
+            pnlTop.ResumeLayout(false);
+            pnlTop.PerformLayout();
+            ((ISupportInitialize)picBox).EndInit();
+            pnlBottom.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
-
-        private System.Windows.Forms.ImageList imageList;
         private System.Windows.Forms.Panel pnlBase;
         private System.Windows.Forms.Panel pnlContent;
         private System.Windows.Forms.RichTextBox Memo;

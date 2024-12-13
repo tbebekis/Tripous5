@@ -1,4 +1,6 @@
-﻿namespace Tripous.Forms
+﻿using Tripous.Forms.Properties;
+
+namespace Tripous.Forms
 {
 
 
@@ -26,10 +28,10 @@
                 this.Icon = Ui.MainForm.Icon;
             }
 
-            int ERROR_ICO = 0;
+            //int ERROR_ICO = 0;
             //int EXCLAMATION_ICO = 1;
-            int INFORMATION_ICO = 2;
-            int QUESTION_ICO = 3;
+            //int INFORMATION_ICO = 2;
+            //int QUESTION_ICO = 3;
 
             this.MinimumSize = new System.Drawing.Size(360, 220);
             string Title = "";
@@ -38,20 +40,24 @@
             {
                 case MessageBoxType.Info:
                     Title = "Information";
-                    picBox.Image = imageList.Images[INFORMATION_ICO];
+                    //picBox.Image = imageList.Images[INFORMATION_ICO];
+                    picBox.Image = Resources.info_rhombus;
                     break;
                 case MessageBoxType.Error:
                     Title = "Error";
-                    picBox.Image = imageList.Images[ERROR_ICO];
+                    //picBox.Image = imageList.Images[ERROR_ICO];
+                    picBox.Image = Resources.error;
                     break;
 
                 case MessageBoxType.YesNo:                                      // Yes | No
                     Title = "Question";
-                    picBox.Image = imageList.Images[QUESTION_ICO];
+                    //picBox.Image = imageList.Images[QUESTION_ICO];
+                    picBox.Image = Resources.question;
                     break;
                 case MessageBoxType.YesNoCancel:                                // Yes | No | Cancel 
                     Title = "Question";
-                    picBox.Image = imageList.Images[QUESTION_ICO];
+                    //picBox.Image = imageList.Images[QUESTION_ICO];
+                    picBox.Image = Resources.question;
                     break;
             }
 

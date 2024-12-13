@@ -4,7 +4,7 @@
     /// <summary>
     /// To be used with events
     /// </summary>
-    public class HttpClientCallInfo // : EventArgs
+    public class HttpClientCallInfo  
     {
 
         /// <summary>

@@ -23,7 +23,7 @@
     /// <item>https://byterot.blogspot.com/2016/07/singleton-httpclient-dns.html</item>
     /// </list>
     /// </summary>
-    public abstract class HttpClientBase<T>  where T: HttpClientResult
+    public class HttpClientBase<T>  where T: HttpClientResult
     {
         /* protected */
         /// <summary>
@@ -49,12 +49,16 @@
         /// <summary>
         /// Authenticates with the Api in order to get the access token. On succes it assignes the AccessToken property.
         /// </summary>
-        protected abstract void Authenticate();
+        protected virtual void Authenticate()
+        {
+        }
 
         /// <summary>
         /// Prepares the authentication headers
         /// </summary>
-        protected abstract void PrepareAuthenticationHeaders(HttpClientCallInfo CallInfo);
+        protected virtual void PrepareAuthenticationHeaders(HttpClientCallInfo CallInfo)
+        {
+        }
         /// <summary>
         /// Prepares the accept and the authentication header
         /// </summary>
@@ -116,8 +120,8 @@
         /// Constructor
         /// </summary>
         public HttpClientBase()
+            : this(new HttpClient())
         {
-            this.Client = new HttpClient();
         }
         /// <summary>
         /// Constructor

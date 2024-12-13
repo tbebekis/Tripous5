@@ -1,4 +1,6 @@
-﻿namespace Tripous
+﻿using System.Runtime.Serialization;
+
+namespace Tripous
 {
 
     /// <summary>
@@ -518,6 +520,7 @@
             using (StringReader Reader = new StringReader(XmlText))
                 return serializer.Deserialize(Reader);
         }
+        /* WARNING: warning SYSLIB0050: 'FormatterServices' is obsolete: 'Formatter-based serialization is obsolete and should not be used.'  */
         /// <summary>
         /// Loads an object's properties from a specified xml text.
         /// </summary>
@@ -525,8 +528,10 @@
         {
             object Temp = FromXml(Instance.GetType(), XmlText);
 
+#pragma warning disable SYSLIB0050
             MemberInfo[] members = FormatterServices.GetSerializableMembers(Instance.GetType());
             FormatterServices.PopulateObjectMembers(Instance, members, FormatterServices.GetObjectData(Temp, members));
+#pragma warning restore SYSLIB0050
         }
 
 
