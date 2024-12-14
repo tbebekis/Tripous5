@@ -196,20 +196,20 @@
         /// <summary>
         /// Returns the value of the field with ColumnName of the current  <see cref="DataRow"/> of Grid, if any, else Default.
         /// </summary>
-        static public double AsFloat(this DataGridView Grid, string ColumnName, double Default)
+        static public double AsDouble(this DataGridView Grid, string ColumnName, double Default)
         {
             DataRow Row = CurrentDataRow(Grid);
             if (Row != null)
-                return DataRowExtensions.AsFloat(Row, ColumnName, Default);
+                return DataRowExtensions.AsDouble(Row, ColumnName, Default);
 
             return Default;
         }
         /// <summary>
         /// Returns the value of the field with ColumnName of the current  <see cref="DataRow"/> of Grid, if any, else Default.
         /// </summary>
-        static public double AsFloat(this DataGridView Grid, string ColumnName)
+        static public double AsDouble(this DataGridView Grid, string ColumnName)
         {
-            return AsFloat(Grid, ColumnName, 0);
+            return AsDouble(Grid, ColumnName, 0);
         }
         /// <summary>
         /// Returns the value of the field with ColumnName of the current  <see cref="DataRow"/> of Grid, if any, else Default.

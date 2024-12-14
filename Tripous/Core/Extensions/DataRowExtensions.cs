@@ -49,16 +49,16 @@
         /// <summary>
         /// Retusn the value of the field by ColumnName of row, if any, else Default.
         /// </summary>
-        static public double AsFloat(this DataRow row, string ColumnName, double Default)
+        static public double AsDouble(this DataRow row, string ColumnName, double Default)
         {
-            return AsFloat(row, row.Table.Columns.IndexOf(ColumnName), Default);
+            return AsDouble(row, row.Table.Columns.IndexOf(ColumnName), Default);
         }
         /// <summary>
         /// Retusn the value of the field by ColumnName of row, if any, else Default.
         /// </summary>
-        static public double AsFloat(this DataRow row, string ColumnName)
+        static public double AsDouble(this DataRow row, string ColumnName)
         {
-            return AsFloat(row, ColumnName, 0);
+            return AsDouble(row, ColumnName, 0);
         }
         /// <summary>
         /// Retusn the value of the field by ColumnName of row, if any, else Default.
@@ -191,7 +191,7 @@
         /// <summary>
         /// Retusn the value of the field by ColumnName of row, if any, else Default.
         /// </summary>
-        static public double AsFloat(this DataRow row, int ColumnIndex, double Default)
+        static public double AsDouble(this DataRow row, int ColumnIndex, double Default)
         {
             if ((ColumnIndex >= 0) && (ColumnIndex <= row.Table.Columns.Count - 1))
             {
@@ -217,9 +217,9 @@
         /// <summary>
         /// Retusn the value of the field by ColumnIndex of row, if any, else Default.
         /// </summary>
-        static public double AsFloat(this DataRow row, int ColumnIndex)
+        static public double AsDouble(this DataRow row, int ColumnIndex)
         {
-            return AsFloat(row, ColumnIndex, 0);
+            return AsDouble(row, ColumnIndex, 0);
         }
         /// <summary>
         /// Retusn the value of the field by ColumnName of row, if any, else Default.

@@ -56,53 +56,44 @@
 
         /* static */
         /// <summary>
-        /// Returns a list of cookies from a specified <see cref="HttpResponseMessage"/>  response, if any, else empty list.
+        /// Returns a <see cref="Cookie"/> instance from a specified cookie text
         /// </summary>
-        static public List<string> GetCookieStringList(HttpResponseMessage Response)
+        static public Cookie CreateCookie(string CookieText)
         {
-            if (Response.Headers.TryGetValues("Set-Cookie", out var CookieStringList))
-                return CookieStringList.ToList();
-            return new List<string>();
+            string[] Parts = CookieText.Split(';', StringSplitOptions.TrimEntries);
+
+            string Part = Parts[0].Trim();
+
+            string Name = Part.Split("=")[0];
+            int Index = Part.IndexOf("=");
+            string Value = Part.Remove(0, Index + 1).Trim();
+            Cookie Cookie = new Cookie(Name, Value);
+
+            for (int i = 1; i < Parts.Length; i++)
+            {
+                if (Parts[i].StartsWith("path=", StringComparison.OrdinalIgnoreCase))
+                    Cookie.Path = Parts[i].Replace("path", "");
+                else if (Parts[i].StartsWith("secure", StringComparison.OrdinalIgnoreCase))
+                    Cookie.Secure = true;
+                else if (Parts[i].StartsWith("httponly", StringComparison.OrdinalIgnoreCase))
+                    Cookie.HttpOnly = true;
+                else if (Parts[i].StartsWith("domain=", StringComparison.OrdinalIgnoreCase))
+                    Cookie.Domain = Parts[i].Replace("domain=", "");
+                else if (Parts[i].StartsWith("expires=", StringComparison.OrdinalIgnoreCase))
+                {
+                    string S = Parts[i].Replace("expires=", "", StringComparison.OrdinalIgnoreCase);
+                    if (DateTime.TryParse(S, out DateTime Expires))
+                        Cookie.Expires = Expires;
+                }
+            }
+
+            return Cookie;
         }
         /// <summary>
         /// Returns a list of <see cref="Cookie"/> instances from a specified <see cref="HttpResponseMessage"/>  response, if any, else empty list.
         /// </summary>
         static public List<Cookie> GetCookieList(List<string> CookieStringList)
         {
-            // -------------------------------------------------------------
-            Cookie CreateCookie(string CookieText)
-            {
-                string[] Parts = CookieText.Split(';', StringSplitOptions.TrimEntries);
-
-                string Part = Parts[0].Trim();
-
-                string Name = Part.Split("=")[0];
-                int Index = Part.IndexOf("=");
-                string Value = Part.Remove(0, Index + 1).Trim();
-                Cookie Cookie = new Cookie(Name, Value);
-
-                for (int i = 1; i < Parts.Length; i++)
-                {
-                    if (Parts[i].StartsWith("path=", StringComparison.OrdinalIgnoreCase))
-                        Cookie.Path = Parts[i].Replace("path", "");
-                    else if (Parts[i].StartsWith("secure", StringComparison.OrdinalIgnoreCase))
-                        Cookie.Secure = true;
-                    else if (Parts[i].StartsWith("httponly", StringComparison.OrdinalIgnoreCase))
-                        Cookie.HttpOnly = true;
-                    else if (Parts[i].StartsWith("domain=", StringComparison.OrdinalIgnoreCase))
-                        Cookie.Domain = Parts[i].Replace("domain=", "");
-                    else if (Parts[i].StartsWith("expires=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        string S = Parts[i].Replace("expires=", "", StringComparison.OrdinalIgnoreCase);
-                        if (DateTime.TryParse(S, out DateTime Expires))
-                            Cookie.Expires = Expires;
-                    }
-                }
-
-                return Cookie;
-            }
-            // -------------------------------------------------------------
-
             List<Cookie> Result = new List<Cookie>();
 
             foreach (string CookieText in CookieStringList)
@@ -112,6 +103,15 @@
             }
 
             return Result;
+        }
+        /// <summary>
+        /// Returns a list of cookies from a specified <see cref="HttpResponseMessage"/>  response, if any, else empty list.
+        /// </summary>
+        static public List<string> GetCookieStringList(HttpResponseMessage Response)
+        {
+            if (Response.Headers.TryGetValues("Set-Cookie", out var CookieStringList))
+                return CookieStringList.ToList();
+            return new List<string>();
         }
         /// <summary>
         /// Returns a list of <see cref="Cookie"/> instances from a specified <see cref="HttpResponseMessage"/>  response, if any, else empty list.

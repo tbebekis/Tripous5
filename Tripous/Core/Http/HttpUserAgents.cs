@@ -31,7 +31,8 @@ namespace Tripous.Http
             "Mozilla/5.0 (Linux; Linux x86_64; en-US) AppleWebKit/537.35 (KHTML, like Gecko) Chrome/53.0.2585.246 Safari/601",
             "Mozilla/5.0 (Linux; Linux x86_64; en-US) Gecko/20130401 Firefox/67.8",
             "Mozilla/5.0 (Windows NT 10.2; x64) AppleWebKit/534.45 (KHTML, like Gecko) Chrome/55.0.3502.198 Safari/600.8 Edge/9.69335",
-            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0"
         ];
 
         static readonly Random random = new Random();
@@ -40,9 +41,16 @@ namespace Tripous.Http
         /// <summary>
         /// Returns a random user agent
         /// </summary>
-        public static string GetRandom()
+        static public string GetRandom()
         {
             return UserAgents[random.Next(UserAgents.Length)];
+        }
+        /// <summary>
+        /// Returns a specified user agent
+        /// </summary>
+        static public string GetUserAgent(int Index)
+        {
+            return UserAgents[Index];
         }
     }
 }
