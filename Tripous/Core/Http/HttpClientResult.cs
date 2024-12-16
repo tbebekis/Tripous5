@@ -29,7 +29,7 @@
             this.IsSuccess = Response.IsSuccessStatusCode;
 
             if (Response.IsSuccessStatusCode)
-                ResponseJsonText = await Response.Content.ReadAsStringAsync();
+                ResponseJsonText = await Response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             CookieStringList = GetCookieStringList(Response);
         }
