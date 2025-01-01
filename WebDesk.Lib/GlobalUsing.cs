@@ -17,7 +17,7 @@ global using System.Collections.Specialized;
 global using System.Collections.ObjectModel;
 global using System.Data;
 global using System.Data.Common;
-global using System.Data.SQLite;
+ 
 global using System.Transactions;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
@@ -37,6 +37,7 @@ global using System.Text.Encodings.Web;
 global using System.ComponentModel.DataAnnotations;
  
 global using Dapper;
+global using System.Data.SQLite;
 
 //global using Newtonsoft;
 global using Newtonsoft.Json;

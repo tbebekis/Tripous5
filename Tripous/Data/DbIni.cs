@@ -33,7 +33,7 @@
         /// </summary>
         private void EnsureTableExists()
         {
-            if (!Store.TableExists(TableName))
+            if (!Store.TableExists(TableName, UseSelect: false))
             {
                 string CreateTableSql = $@"
 create table {TableName} (                   

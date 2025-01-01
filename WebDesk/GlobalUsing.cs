@@ -17,7 +17,6 @@ global using System.Collections.Specialized;
 global using System.Collections.ObjectModel;
 global using System.Data;
 global using System.Data.Common;
-global using System.Data.SQLite;
 global using System.Transactions;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
@@ -39,6 +38,8 @@ global using System.IdentityModel.Tokens.Jwt;
 
 global using Dapper;
 global using AutoMapper;
+
+global using System.Data.SQLite;
 
 //global using Newtonsoft;
 global using Newtonsoft.Json;

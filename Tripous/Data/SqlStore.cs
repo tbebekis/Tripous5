@@ -943,10 +943,28 @@
         /// <summary>
         /// Returns true if a table with TableName exists in the database.
         /// </summary>
-        public bool TableExists(string TableName)
+        public bool TableExists(string TableName, bool UseSelect = false)
         {
-            IList<string> List = GetTableNames();
-            return List.ContainsText(TableName);
+            if (UseSelect)
+            {
+                string SqlText = string.Format("select count(*) as RESULT from {0}", TableName);
+                try
+                {
+                    IntegerResult(SqlText, 0);
+                    return true;
+                }
+                catch
+                {                    
+                }
+
+                return false;
+
+            }
+            else
+            {
+                IList<string> List = GetTableNames();
+                return List.ContainsText(TableName);
+            }
         }
         /// <summary>
         /// Empties the TableName table in the database and initializes its generator/sequencer or identity column.

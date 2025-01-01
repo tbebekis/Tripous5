@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// Describes a Sql provider
-    /// <para>NOTE: Tripous already references System.Data.SQLite.dll (.Net Standard 2.0) </para>
+    /// <para>NOTE: Tripous already references System.Data.SQLite  namespace. </para>
     /// </summary>
     public class SqlProviderSQLite : SqlProvider
     {
@@ -87,7 +87,9 @@
                 if (!string.IsNullOrWhiteSpace(Folder) && !Directory.Exists(Folder))
                     Directory.CreateDirectory(Folder);
 
-                SQLiteConnection.CreateFile(FilePath);
+                SQLiteConnection.CreateFile(FilePath); // the old way 
+                SQLiteConnection.ClearAllPools(); 
+
                 Result = true;
             }
 
@@ -227,7 +229,7 @@ limit {RowLimit}";
         /// <summary>
         /// The template for a connection string
         /// </summary>
-        public override string ConnectionStringTemplate { get; } = @"Data Source={0};";
+        public override string ConnectionStringTemplate { get; } = @"Data Source=""{0}"";";
         /// <summary>
         /// Super user name.
         /// <para>NOTE: No super user.</para>
