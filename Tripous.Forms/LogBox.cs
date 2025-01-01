@@ -42,6 +42,7 @@
             if (Box != null)
             {
                 Box.AppendText(Text);
+                Box.ScrollToCaret();
                 Application.DoEvents();
             }
         }

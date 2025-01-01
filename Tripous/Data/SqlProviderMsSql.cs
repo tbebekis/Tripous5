@@ -349,7 +349,7 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
         /// <summary>
         /// The Date text
         /// </summary>
-        public override string Date { get; } = "datetime";
+        public override string Date { get; } = "date";
         /// <summary>
         /// The DateTime text
         /// </summary>

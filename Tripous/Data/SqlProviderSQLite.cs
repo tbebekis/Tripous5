@@ -227,7 +227,7 @@ limit {RowLimit}";
         /// <summary>
         /// The template for a connection string
         /// </summary>
-        public override string ConnectionStringTemplate { get; } = @"Data Source=""{0}"";";
+        public override string ConnectionStringTemplate { get; } = @"Data Source={0};";
         /// <summary>
         /// Super user name.
         /// <para>NOTE: No super user.</para>

@@ -7,8 +7,6 @@
     public class SqlConnectionInfo
     {
 
- 
-
         /* construction */
         /// <summary>
         /// Constructor
@@ -40,6 +38,15 @@
             return GetSqlProvider().CanConnect(ConnectionString, ThrowIfNot);
         }
 
+        /// <summary>
+        /// Returns a clone of this instance
+        /// </summary>
+        public SqlConnectionInfo Clone()
+        {
+            SqlConnectionInfo Result = new SqlConnectionInfo();
+            Sys.AssignObject(this, Result);
+            return Result;
+        }
 
         /* properties */
         /// <summary>

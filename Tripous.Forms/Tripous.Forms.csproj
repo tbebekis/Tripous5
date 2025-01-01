@@ -18,7 +18,7 @@
 		<Authors>Theodoros Bebekis</Authors>
 		<Product>Tripous5.Forms</Product>
 		<Company>AntyxSoft</Company>		
-		<Description>A net7.0 Library containing utility classes, base Form classes, and many dialog boxes for building Desktop Windows Applications.</Description>
+		<Description>A Library containing utility classes, base Form classes, and many dialog boxes for building Desktop Windows Applications.</Description>
 		<Copyright>Theodoros Bebekis 2024</Copyright>
 		<PackageProjectUrl>https://github.com/tbebekis/Tripous5.git</PackageProjectUrl>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>

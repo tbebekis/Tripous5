@@ -24,7 +24,7 @@
 		<Authors>Theodoros Bebekis</Authors>
 		<Product>Tripous5</Product>
 		<Company>AntyxSoft</Company>
-		<Description>A net7.0 Library providing classes ranging from string handling to data access to desktop forms handling.</Description>
+		<Description>A Library providing classes ranging from string handling to data access to desktop forms handling.</Description>
 		<Copyright>Theodoros Bebekis 2024</Copyright>
 		<PackageProjectUrl>https://github.com/tbebekis/Tripous5.git</PackageProjectUrl>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
