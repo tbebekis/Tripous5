@@ -45,44 +45,13 @@ Here is an example.
     ]
 }
 ```
- 
 
-<table>
-<thead>
-	<tr>
-		<th>Property</th>
-		<th>Type</th>
-		<th>Description</th>
-	</tr>
-</thead>
-<tbody>
-	<tr>
-		<td>Name</td>
-		<td>string</td>
-		<td>The name of the connection. The default connection should be named DEFAULT.</td>
-	</tr>
-		<tr>
-		<td>Provider</td>
-		<td>string</td>
-		<td>The name of the provider. Valid values: MsSql, Oracle, Firebird, SQLite, MySql and PostgreSQL.</td>
-	</tr>
-		<tr>
-		<td>ConnectionString</td>
-		<td>string</td>
-		<td>The connection string</td>
-	</tr>
-		<tr>
-		<td>AutoCreateGenerators</td>
-		<td>boolean</td>
-		<td>Whether to create table generators/sequences automatically. For databases that support generators/sequences such as Oracle and Firebird. Optional. Defaults to false.</td>
-	</tr>
-		<tr>
-		<td>CommandTimeoutSeconds</td>
-		<td>integer</td>
-		<td>The time in seconds to wait for a SELECT/INSERT/UPDATE/DELETE/CREATE TABLE ect. command to execute. Zero means the default timeout. Optional. Defaults to 0.</td>
-	</tr>
-</tbody>
-</table>
+- **Name** (string): The name of the connection. The default connection should be named DEFAULT. 
+- **Provider** (string): The name of the provider. Valid values: MsSql, Oracle, Firebird, SQLite, MySql and PostgreSQL.                         
+- **ConnectionString** (string): The connection string 
+- **AutoCreateGenerators** (boolean): Whether to create table generators/sequences automatically. <br> For databases that support generators/sequences such as Oracle and Firebird.<br> Optional. Defaults to false.
+- **CommandTimeoutSeconds** (integer): The time in seconds to wait for a SELECT/INSERT/UPDATE/DELETE/CREATE TABLE ect. command to execute. Zero means the default timeout. Optional. Defaults to 0.      
+  
 
 
 
