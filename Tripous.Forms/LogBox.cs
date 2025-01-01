@@ -42,7 +42,11 @@
             if (Box != null)
             {
                 Box.AppendText(Text);
-                Box.ScrollToCaret();
+                if (Box.Text.Length > 0)
+                {
+                    Box.SelectionStart = Box.Text.Length;
+                    Box.ScrollToCaret();
+                }
                 Application.DoEvents();
             }
         }

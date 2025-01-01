@@ -14,7 +14,7 @@
 		<!-- NUGET -->
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>Tripous5.Forms</Title>
-		<Version>5.25-01-01</Version>
+		<Version>5.25.01.01</Version>
 		<Authors>Theodoros Bebekis</Authors>
 		<Product>Tripous5.Forms</Product>
 		<Company>AntyxSoft</Company>		
@@ -24,7 +24,7 @@
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/tbebekis/Tripous5.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<AssemblyVersion>5.25-01-01</AssemblyVersion>
+		<AssemblyVersion>5.25.01.01</AssemblyVersion>
 		<PackageLicenseFile>Licence.txt</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>		
