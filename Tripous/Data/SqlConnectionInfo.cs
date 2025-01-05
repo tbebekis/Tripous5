@@ -14,6 +14,16 @@
         public SqlConnectionInfo()
         {
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SqlConnectionInfo(string Name, string Provider, string Server, string Database, string UserName, string Password)
+        {
+            this.Name = Name;
+            this.Provider = Provider;
+            SqlProvider SqlProvider = GetSqlProvider();  
+            this.ConnectionString = SqlProvider.CreateConnectionString(Server, Database, UserName, Password);
+        }
 
         /* public */
         /// <summary>
@@ -64,10 +74,10 @@
         /// <summary>
         /// Whether to create table generators/sequences automatically. For databases that support generators/sequences such as Oracle and Firebird.
         /// </summary>
-        public bool AutoCreateGenerators { get; set; }
+        public bool AutoCreateGenerators { get; set; } = false;
         /// <summary>
         /// The time in seconds to wait for an SELECT/INSERT/UPDATE/DELETE/CREATE TABLE ect. command to execute. Zero means the default timeout.
         /// </summary>
-        public int CommandTimeoutSeconds { get; set; }
+        public int CommandTimeoutSeconds { get; set; } = 300;
     }
 }

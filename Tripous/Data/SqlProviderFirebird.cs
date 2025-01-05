@@ -78,11 +78,12 @@
             // alter table {TableName} alter column {ColumnName} drop default
             return $@"alter table {TableName} alter column {ColumnName} drop default";
         }
- 
+
 
         /* methods */
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.
+        /// <para><strong>NOTE: </strong>latest versions of Firebird Provider can <strong>NOT</strong> create databases</para>
         /// </summary>
         public override bool CreateDatabase(string ConnectionString)
         {
@@ -100,7 +101,9 @@
 
                     if (Method != null)
                     {
-                        Method.Invoke(null, new object[] { CS, 1024 * 16, true, false });
+                        // Page size for the database, in bytes. Possible values are 4096, 8192, 16384 and 32768. The default page size is 8192.
+                        int PageSize = 32768;
+                        Method.Invoke(null, new object[] { CS, PageSize, true, false });
                         Result = true;
 
                         // NOTE: There is a problem here: Although the database is created any attempt to connect to it
@@ -250,6 +253,13 @@
             return Store.IntegerResult(Transaction, SqlText, -1);
         }
 
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public override string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            return string.Format(ConnectionStringTemplate, Server, Database, UserName, Password);
+        }
 
         /* properties */
         /// <summary>
@@ -319,7 +329,7 @@
         /// The template for a connection string.
         /// <para>WARNING: Database without a path goes to C:\Windows\System32 folder by default. </para>
         /// </summary>
-        public override string ConnectionStringTemplate { get; } = @"DataSource={0}; Database={1}; User={2}; Password={3}; Charset=UTF8;";
+        public override string ConnectionStringTemplate { get; } = @"DataSource={0}; Database=""{1}""; User={2}; Password={3}; Charset=UTF8;";
         /// <summary>
         /// Super user name
         /// </summary>
@@ -336,7 +346,7 @@
         /// <summary>
         /// Returns true if the provider can create a new database
         /// </summary>
-        public override bool CanCreateDatabases { get; } = true;
+        public override bool CanCreateDatabases { get; } = false;   // latest versions of Firebird Provider canNOT create databases
         /// <summary>
         /// Returns true if the database server supports generators/sequencers
         /// </summary>

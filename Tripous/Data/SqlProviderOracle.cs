@@ -194,7 +194,14 @@
             string SqlText = string.Format("select {0}.NEXTVAL from DUAL", GeneratorName);
             return Store.IntegerResult(Transaction, SqlText, -1);
         }
- 
+
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public override string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            return string.Format(ConnectionStringTemplate, Server, UserName, Password);
+        }
 
         /* properties */
         /// <summary>

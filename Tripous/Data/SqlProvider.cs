@@ -553,21 +553,21 @@
         /// </summary>
         public virtual string ReplaceDataTypePlaceholders(string SqlText)
         {
-            SqlText = SqlText.Replace(CPRIMARY_KEY, PrimaryKey);
-            SqlText = SqlText.Replace(CAUTO_INC, AutoInc);       
-            SqlText = SqlText.Replace(CVARCHAR, Varchar);
-            SqlText = SqlText.Replace(CNVARCHAR, NVarchar);
-            SqlText = SqlText.Replace(CFLOAT, Float);
-            SqlText = SqlText.Replace(CDECIMAL_, Decimal_);  // CDECIMAL_ must execute before the CDECIMAL
-            SqlText = SqlText.Replace(CDECIMAL, Decimal);            
-            SqlText = SqlText.Replace(CDATE_TIME, DateTime);
-            SqlText = SqlText.Replace(CDATE, Date);
-            SqlText = SqlText.Replace(CBOOL, Bool);
-            SqlText = SqlText.Replace(CBLOB_TEXT, TextBlob);
-            SqlText = SqlText.Replace(CNBLOB_TEXT, NTextBlob);
-            SqlText = SqlText.Replace(CBLOB, Blob);
-            SqlText = SqlText.Replace(CNOT_NULL, NotNullable);
-            SqlText = SqlText.Replace(CNULL, Nullable);
+            if (SqlText.Contains(CPRIMARY_KEY, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CPRIMARY_KEY, PrimaryKey);
+            if (SqlText.Contains(CAUTO_INC, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CAUTO_INC, AutoInc);       
+            if (SqlText.Contains(CVARCHAR, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CVARCHAR, Varchar);
+            if (SqlText.Contains(CNVARCHAR, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CNVARCHAR, NVarchar);
+            if (SqlText.Contains(CFLOAT, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CFLOAT, Float);
+            if (SqlText.Contains(CDECIMAL_, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CDECIMAL_, Decimal_);  // CDECIMAL_ must execute before the CDECIMAL
+            if (SqlText.Contains(CDECIMAL, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CDECIMAL, Decimal);            
+            if (SqlText.Contains(CDATE_TIME, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CDATE_TIME, DateTime);
+            if (SqlText.Contains(CDATE, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CDATE, Date);
+            if (SqlText.Contains(CBOOL, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CBOOL, Bool);
+            if (SqlText.Contains(CBLOB_TEXT, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CBLOB_TEXT, TextBlob);
+            if (SqlText.Contains(CNBLOB_TEXT, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CNBLOB_TEXT, NTextBlob);
+            if (SqlText.Contains(CBLOB, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CBLOB, Blob);
+            if (SqlText.Contains(CNOT_NULL, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CNOT_NULL, NotNullable);
+            if (SqlText.Contains(CNULL, StringComparison.OrdinalIgnoreCase)) SqlText = SqlText.Replace(CNULL, Nullable);
 
             return SqlText;
         }
@@ -1138,7 +1138,8 @@
                 Parameter.ParameterName = PrefixToGlobal(Parameter.ParameterName);
         }
 
- 
+        /*
+        
         /// <summary>
         /// Creates and returns a connection string. The various conStrXXXX formats
         /// are used as string formats. 
@@ -1155,7 +1156,15 @@
         {
             return FormatConnectionString("localhost", FileOrDatabaseName);
         }
+        */
 
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public virtual string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            return string.Empty;
+        }
 
 
         /* properties */

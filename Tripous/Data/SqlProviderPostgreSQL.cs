@@ -103,7 +103,7 @@
                 {
                     using (var Cmd = Con.CreateCommand())
                     {
-                        Cmd.CommandText = $"create database {DatabaseName}";
+                        Cmd.CommandText = $"create database \"{DatabaseName}\" ENCODING = 'UTF8' ";
                         Cmd.ExecuteNonQuery();
 
                         // NOTE: There is a problem here: Although the database is created any attempt to connect to it
@@ -219,6 +219,13 @@ limit {RowLimit}";
             return Store.IntegerResult(Transaction, SqlText, -1);
         }
 
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public override string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            return string.Format(ConnectionStringTemplate, Server, Database, UserName, Password);
+        }
 
 
         /* properties */

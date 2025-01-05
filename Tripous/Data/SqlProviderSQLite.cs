@@ -143,7 +143,15 @@ limit {RowLimit}";
             int Result = Store.IntegerResult(Transaction, SqlText, 0);
             return Result;
         }
- 
+
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public override string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            return string.Format(ConnectionStringTemplate, Database);
+        }
+
         /* properties */
         /// <summary>
         /// Gets the Description this Provider

@@ -202,6 +202,16 @@ exec('ALTER TABLE {TableName} DROP CONSTRAINT ' +  @ConstraintName)
             return Result;
         }
 
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public override string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            if (string.IsNullOrWhiteSpace(UserName) && string.IsNullOrWhiteSpace(Password))
+                return string.Format("Data Source={0}; Initial Catalog={1}; Integrated Security=SSPI; TrustServerCertificate=true; ", Server, Database);
+
+            return string.Format(ConnectionStringTemplate, Server, Database, UserName, Password);
+        }
 
         /* properties */
         /// <summary>

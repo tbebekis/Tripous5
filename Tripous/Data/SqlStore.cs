@@ -135,9 +135,7 @@
                             EventId = SqlMonitor.GetEventId(SqlText);
                             ParamsText = SqlMonitor.GetParamsText(Cmd);
                             CommandText = SqlMonitor.CommandToText(StartTimeUtc, Cmd, Source, Scope);
-                        }
- 
-                            
+                        }                            
 
                         bool Flag = Table.AutoGenerateGuidKeys;
                         Table.AutoGenerateGuidKeys = false;

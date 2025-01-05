@@ -177,6 +177,13 @@ limit 0, {RowLimit}";
             return base.ReplaceDataTypePlaceholders(SqlText);
         }
 
+        /// <summary>
+        /// Creeates a connection string
+        /// </summary>
+        public override string CreateConnectionString(string Server, string Database, string UserName, string Password)
+        {
+            return string.Format(ConnectionStringTemplate, Server, Database, UserName, Password);
+        }
 
         /* properties */
         /// <summary>
