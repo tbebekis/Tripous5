@@ -1,5 +1,7 @@
 ﻿namespace Tripous.Data
 {
+    using Oracle.ManagedDataAccess.Client;
+
     /// <summary>
     /// Describes a Sql provider
     /// <para>NOTE: Add the NuGet package https://www.nuget.org/packages/Oracle.ManagedDataAccess/ 
@@ -7,6 +9,15 @@
     /// </summary>
     public class SqlProviderOracle : SqlProvider
     {
+        /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected override DbProviderFactory GetProviderFactory()
+        {
+            return OracleClientFactory.Instance;
+        }
+
+
         /* construction */
         /// <summary>
         /// Constructor.

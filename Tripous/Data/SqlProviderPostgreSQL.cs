@@ -7,6 +7,14 @@
     /// </summary>
     public class SqlProviderPostgreSQL: SqlProvider
     {
+        /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected override DbProviderFactory GetProviderFactory()
+        {
+            return Npgsql.NpgsqlFactory.Instance;
+        }
+
         /* construction */
         /// <summary>
         /// Constructor.

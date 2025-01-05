@@ -7,6 +7,14 @@
     /// </summary>
     public class SqlProviderMsSql: SqlProvider
     {
+        /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected override DbProviderFactory GetProviderFactory()
+        {
+            return Microsoft.Data.SqlClient.SqlClientFactory.Instance;
+        }
+
         /* construction */
         /// <summary>
         /// Constructor.

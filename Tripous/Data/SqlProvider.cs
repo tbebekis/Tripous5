@@ -162,6 +162,10 @@
 
         }
         /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected abstract DbProviderFactory GetProviderFactory();
+        /// <summary>
         /// Returns true if C is a name delimiter.
         /// </summary>
         protected bool IsNameDelimiter(char C)
@@ -1186,9 +1190,10 @@
             get
             {
                 if (fFactory == null)
-                {
+                    fFactory = GetProviderFactory();
+
+                if (fFactory == null)
                     fFactory = LoadDbProviderFactory(this.DbProviderFactoryTypeName, AssemblyFileName);
-                }
 
                 return fFactory;
             }

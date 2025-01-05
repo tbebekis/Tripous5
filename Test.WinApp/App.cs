@@ -48,8 +48,10 @@ namespace Test.WinApp
         /// </summary>
         static void RegisterDbProviderFactories()
         {
+            /*
             DbProviderFactories.RegisterFactory("System.Data.SQLite", System.Data.SQLite.SQLiteFactory.Instance);
             DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", Microsoft.Data.SqlClient.SqlClientFactory.Instance);
+            */
         }
 
         /// <summary>

@@ -11,6 +11,14 @@
     /// </summary>
     public class SqlProviderFirebird: SqlProvider
     {
+        /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected override DbProviderFactory GetProviderFactory()
+        {
+            return FirebirdSql.Data.FirebirdClient.FirebirdClientFactory.Instance;
+        }
+
         /* construction */
         /// <summary>
         /// Constructor.

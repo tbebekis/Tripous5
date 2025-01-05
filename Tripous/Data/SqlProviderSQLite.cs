@@ -6,6 +6,13 @@
     /// </summary>
     public class SqlProviderSQLite : SqlProvider
     {
+        /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected override DbProviderFactory GetProviderFactory()
+        {
+            return System.Data.SQLite.SQLiteFactory.Instance;
+        }
 
         /* construction */
         /// <summary>

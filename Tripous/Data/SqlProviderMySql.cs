@@ -1,11 +1,21 @@
 ﻿namespace Tripous.Data
 {
+    using MySql.Data.MySqlClient;
+
     /// <summary>
     /// Describes a Sql provider
     /// <para>NOTE: Add the NuGet package https://www.nuget.org/packages/MySql.Data  </para>
     /// </summary>
     public class SqlProviderMySql: SqlProvider
     {
+        /// <summary>
+        /// Return the <see cref="DbProviderFactory"/> provider factory instance.
+        /// </summary>
+        protected override DbProviderFactory GetProviderFactory()
+        {
+            return MySqlClientFactory.Instance;
+        }
+
         /* construction */
         /// <summary>
         /// Constructor.
