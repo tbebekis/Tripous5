@@ -112,20 +112,21 @@
                         // Page size for the database, in bytes. Possible values are 4096, 8192, 16384 and 32768. The default page size is 8192.
                         int PageSize = 32768;
                         Method.Invoke(null, new object[] { CS, PageSize, true, false });
+                    }
+                }
+
+                // NOTE: There is a problem here: Although the database is created any attempt to connect to it
+                // results in an exception. It seems that although the database is created, is not yet
+                // ready or attached or something. So the only solution I found is to wait for a while. 
+                for (int i = 0; i < 10; i++)
+                {
+                    if (CanConnect(ConnectionString, ThrowIfNot: false))
+                    {
                         Result = true;
-
-                        // NOTE: There is a problem here: Although the database is created any attempt to connect to it
-                        // results in an exception. It seems that although the database is created, is not yet
-                        // ready or attached or something. So the only solution I found is to wait for a while. 
-                        for (int i = 0; i < 10; i++)
-                        {
-                            if (CanConnect(ConnectionString, ThrowIfNot: false))
-                                break;
-
-                            System.Threading.Thread.Sleep(1000);
-                        }
+                        break;
                     }
 
+                    System.Threading.Thread.Sleep(1000);
                 }
             }
 
