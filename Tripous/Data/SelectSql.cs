@@ -240,12 +240,8 @@ from
             if (string.IsNullOrWhiteSpace(this.Name) || string.IsNullOrWhiteSpace(this.Select) || string.IsNullOrWhiteSpace(this.From))
                 Sys.Throw(Res.GS("E_SelectSql_NotFullyDefined", "SelectSql Name or SQL statement is empty"));
 
-            if (Sys.IsNullOrWhiteSpace(this.Name) || Sys.IsNullOrWhiteSpace(this.Select) || Sys.IsNullOrWhiteSpace(this.From))
-                Sys.Throw(Res.GS("E_SelectSql_NotFullyDefined", "SelectSql Name or SQL statement is empty"));
-
             this.Columns.ForEach((item) => { item.CheckDescriptor(); });
-            this.Filters.ForEach((item) => { item.CheckDescriptor(); }); 
-                
+            this.Filters.ForEach((item) => { item.CheckDescriptor(); });                 
         }
 
         /// <summary>
