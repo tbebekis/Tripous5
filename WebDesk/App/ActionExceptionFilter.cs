@@ -66,7 +66,7 @@
             // it is an Api controller or an AJAX request
             if (Context.IsWebApi || WSys.IsAjax(Context.ExceptionContext.HttpContext.Request)) 
             {
-                HttpActionResult ActionResult = new HttpActionResult();
+                HttpPacketResult ActionResult = new HttpPacketResult();
                 ActionResult.IsSuccess = false;
                 ActionResult.ErrorText = Context.ExceptionContext.Exception.Message;
 

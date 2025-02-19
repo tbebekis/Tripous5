@@ -2,15 +2,16 @@
 {
     /// <summary>
     /// To be used by controller action methods returning json data. 
+    /// <para><strong>NOTE: </strong> renamed from <strong>HttpActionResult</strong> because of name collision with internal Microsoft.AspNetCore.Mvc.HttpActionResult</para>
     /// </summary>
-    public class HttpActionResult
+    public class HttpPacketResult
     {
 
         /* construction */
         /// <summary>
         /// Constructor
         /// </summary>
-        public HttpActionResult()
+        public HttpPacketResult()
         {
         }
 
@@ -20,9 +21,9 @@
         /// <para>Use this when the caller waits the Packet to be serialized as JSON text.</para>
         /// <para>Mostly for AJAX calls. </para>
         /// </summary>
-        static public HttpActionResult SetPacket(object Packet, bool IsSuccess = true)
+        static public HttpPacketResult SetPacket(object Packet, bool IsSuccess = true)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             Result.SerializePacket(Packet);
             Result.IsSuccess = IsSuccess;
             return Result;
@@ -32,9 +33,9 @@
         /// Use this when the caller waits for the Entity to be part of the whole JSON returned.
         /// <para>Mostly for WebAPI calls. </para>
         /// </summary>
-        static public HttpActionResult SetEntity(object Entity, bool IsSuccess = true)
+        static public HttpPacketResult SetEntity(object Entity, bool IsSuccess = true)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             Result.Entity = Entity;
             Result.IsSuccess = IsSuccess;
             return Result;
@@ -42,9 +43,9 @@
         /// <summary>
         /// Creates and returns a failed result with an error message.
         /// </summary>
-        static public HttpActionResult Error(string ErrorText)
+        static public HttpPacketResult Error(string ErrorText)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             Result.ErrorText = ErrorText;
             Result.IsSuccess = false;
             return Result;

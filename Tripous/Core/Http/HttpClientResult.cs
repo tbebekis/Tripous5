@@ -5,7 +5,7 @@
     /// </summary>
     public class HttpClientResult 
     {
-        HttpActionResult fActionResult;
+        HttpPacketResult fPacketResult;
 
         /* construction */
         /// <summary>
@@ -155,10 +155,10 @@
         public HttpResponseMessage Response { get; set; }
         */
         /// <summary>
-        /// Deserializes and returns the response json text as a <see cref="HttpActionResult"/>.
+        /// Deserializes and returns the response json text as a <see cref="HttpPacketResult"/>.
         /// </summary>
         [JsonIgnore]
-        public HttpActionResult ActionResult { get { return fActionResult ?? (fActionResult = Deserialize<HttpActionResult>()); } }
+        public HttpPacketResult PacketResult { get { return fPacketResult ?? (fPacketResult = Deserialize<HttpPacketResult>()); } }
         /// <summary>
         /// The string list of cookies from the response, if any, else null.
         /// </summary>

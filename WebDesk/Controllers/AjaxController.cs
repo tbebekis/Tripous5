@@ -52,7 +52,7 @@
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 Result = DataStore.AjaxExecute(this, R);
@@ -72,7 +72,7 @@
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 Dictionary<string, string> StringList = DataStore.GetLanguageResourceStringList(CultureCode);
@@ -96,7 +96,7 @@
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 DataTable Table = SelectTable(SqlTextItem.SqlText, SqlTextItem.ConnectionName);
@@ -117,7 +117,7 @@
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 string Name, SqlText, ConnectionName;
@@ -158,7 +158,7 @@
         [Route("/Broker/Initialize")]
         public JsonResult BrokerInitialize(string BrokerName)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
@@ -180,7 +180,7 @@
         [Route("/Broker/Insert")]
         public JsonResult BrokerInsert(string BrokerName)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
@@ -201,7 +201,7 @@
         [Route("/Broker/Edit")]
         public JsonResult BrokerEdit(string BrokerName, string Id)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
@@ -222,7 +222,7 @@
         [Route("/Broker/Delete")]
         public JsonResult BrokerDelete(string BrokerName, string Id)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
@@ -242,7 +242,7 @@
         [Route("/Broker/Commit")]
         public JsonResult BrokerCommit([FromBody] JsonBroker Packet)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(Packet.Name, true, false);
@@ -265,7 +265,7 @@
         [Route("/Broker/SelectList")]
         public JsonResult BrokerSelectList(string BrokerName, string SqlText, bool UseRowLimit)
         {
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SqlBroker broker = SqlBroker.Create(BrokerName, true, false);
@@ -289,7 +289,7 @@
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
 
             LocatorDef Def = LocatorDef.FindDef(LocatorName);
             if (Def == null)
@@ -309,7 +309,7 @@
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
 
             LocatorDef Def = LocatorDef.FindDef(LocatorName);
             if (Def == null)
@@ -342,7 +342,7 @@ where
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult(); 
+            HttpPacketResult Result = new HttpPacketResult(); 
             try
             {
                 DataTable Table = DataStore.SysDataSelectList(DataType, NoBlobs);
@@ -362,7 +362,7 @@ where
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 SysDataItem Item = DataStore.SysDataSelectItemById(Id);
@@ -381,7 +381,7 @@ where
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
             try
             {
                 DataStore.SysDataSaveItem(Item);
@@ -403,7 +403,7 @@ where
         {
             await Task.CompletedTask;
 
-            HttpActionResult Result = new HttpActionResult();
+            HttpPacketResult Result = new HttpPacketResult();
 
             try
             {

@@ -7,14 +7,14 @@
 
         [HttpGet("supportedcultures")] // GET api/v1/supportedcultures
         [AllowAnonymous]
-        public ActionResult<HttpActionResult> SupportedCultures()
+        public ActionResult<HttpPacketResult> SupportedCultures()
         {
             Language[] Languages = DataStore.GetLanguages();
             List<string> List = new List<string>();
             foreach (Language Language in Languages)
                 List.Add(Language.CultureCode);
 
-            HttpActionResult Result = HttpActionResult.SetEntity(List, true);
+            HttpPacketResult Result = HttpPacketResult.SetEntity(List, true);
 
             return Result;
         }
@@ -55,7 +55,7 @@
                 new { Name = "Kostas", Age = 40 }
             };
 
-            HttpActionResult Result = HttpActionResult.SetEntity(Entity, true);
+            HttpPacketResult Result = HttpPacketResult.SetEntity(Entity, true);
             return Json(Result);
         }
     }
