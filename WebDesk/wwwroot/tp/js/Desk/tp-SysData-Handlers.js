@@ -348,7 +348,6 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             else {
                 let tblField = this.CreateEditFieldTable(Row);
                 let DialogBox = await tp.DatabaseFieldEditDialog.ShowModalAsync(tblField, false);  
-
                 if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
                     let FieldRow = tblField.Rows[0];
                     Row.CopyFromRow(FieldRow);
@@ -356,7 +355,18 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
             }
         }
     }
- 
+    /** Deletes a single row of the tblFields
+    */
+    async DeleteFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                this.tblFields.RemoveRow(Row);
+            }
+        }
+    }
+
     /* event handlers */
     /** Event handler
      * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
@@ -372,8 +382,7 @@ tp.SysDataHandlerTable = class extends tp.SysDataHandler {
                 this.EditFieldRow();
                 break;
             case 'GridRowDelete':
-                this.gridFields.DeleteFocusedRow(); 
-                // EDW : continue adding GridRowDelete for all grids
+                this.DeleteFieldRow(); 
                 break;
         }
 
@@ -1360,11 +1369,21 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
         let Row = this.gridFields.FocusedRow;
         if (tp.IsValid(Row)) {
             let tblField = this.CreateEditFieldTable(Row);
-            let DialogBox = await tp.LocatorFieldEditDialog.ShowModalAsync(tblField, false);  
-
+            let DialogBox = await tp.LocatorFieldEditDialog.ShowModalAsync(tblField, false); 
             if (tp.IsValid(DialogBox) && DialogBox.DialogResult === tp.DialogResult.OK) {
                 let FieldRow = tblField.Rows[0];
                 Row.CopyFromRow(FieldRow);
+            }
+        }
+    }
+    /** Deletes a single row of the tblFields 
+     */
+    async DeleteFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                this.tblFields.RemoveRow(Row);
             }
         }
     }
@@ -1384,7 +1403,7 @@ tp.SysDataHandlerLocator = class extends tp.SysDataHandler {
                 this.EditFieldRow();
                 break;
             case 'GridRowDelete':
-                tp.InfoNote('Clicked: ' + Args.Command);
+                this.DeleteFieldRow();
                 break;
         }
     }

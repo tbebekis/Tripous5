@@ -3873,7 +3873,7 @@ tp.DataColumn = class extends tp.Object {
     @type {string}
     */
     get Title() {
-        return !tp.IsBlank(this.fTitle) ? this.fTitle : this.Name;
+        return !tp.IsBlank(this.fTitle) ? this.fTitle : tp.SplitOnUpperCase(this.Name);
     }
     set Title(v) {
         this.fTitle = v;

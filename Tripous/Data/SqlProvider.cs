@@ -1,4 +1,6 @@
-﻿namespace Tripous.Data
+﻿using MySqlX.XDevAPI.Common;
+
+namespace Tripous.Data
 {
     /// <summary>
     /// Describes a Sql provider
@@ -258,7 +260,7 @@
         /// </summary>
         public virtual bool DatabaseExists(string ConnectionString)
         {
-            bool Result = false;
+ 
             try
             {
                 using (DbConnection Con = OpenConnection(ConnectionString))
@@ -266,13 +268,13 @@
                     Con.Close();
                 }
 
-                Result = true;
+                return true;
             }
             catch 
             {
+                return false;
             }
-
-            return Result;
+            
         }
         /// <summary>
         /// Creates a new database, if not exists. Returns true only if creates the database.

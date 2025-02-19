@@ -5297,6 +5297,8 @@ tp.Grid = class extends tp.Control  {
     @returns {tp.GridColumn} Returns the newly added grid column
     */
     InsertColumn(Index, Name, Text) {
+        if (!tp.IsValid(Text))
+            Text = tp.SplitOnUpperCase(Name);
         let Result = new tp.GridColumn(this, Name, Text || Name);
         tp.ListInsert(this.Columns, Index, Result);
         Result.Bind();
@@ -5327,6 +5329,8 @@ tp.Grid = class extends tp.Control  {
     @returns {tp.GridColumn} Returns the newly added grid column
     */
     InsertLookUpColumn(Index, Name, Text, ListValueField, ListDisplayField, ListSource) {
+        if (!tp.IsValid(Text))
+            Text = tp.SplitOnUpperCase(Name);
         let Result = this.InsertColumn(Index, Name, Text);
         Result.ListValueField = ListValueField;
         Result.ListDisplayField = ListDisplayField;
@@ -5353,6 +5357,8 @@ tp.Grid = class extends tp.Control  {
     @returns {tp.GridColumn} Returns the newly added grid column
     */
     InsertLocatorColumn(Index, Name, Text, Locator) {
+        if (!tp.IsValid(Text))
+            Text = tp.SplitOnUpperCase(Name);
         let Result = this.InsertColumn(Index, Name, Text);
         Result.LocatorName = Locator;
         return Result;

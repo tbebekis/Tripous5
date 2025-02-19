@@ -7,6 +7,8 @@
     /// </summary>
     static public class LogBox
     {
+        const string SLine = "-------------------------------------------------------------------";
+
         class LogBoxLogListener: LogListener
         {
             /// <summary>
@@ -86,7 +88,10 @@
         /// </summary>
         static public void AppendLine(string Text = "")
         {
-            Text = string.IsNullOrWhiteSpace(Text)? Environment.NewLine: Environment.NewLine + Text;
+            if (string.IsNullOrWhiteSpace(Text))
+                Text = Environment.NewLine;
+            else if (Text != SLine)
+                Text = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] {Text} {Environment.NewLine}";  
             fSyncContext.Post(o => DoLog(o as string), Text);
         }
         /// <summary>
@@ -101,8 +106,7 @@
         /// </summary>
         static public void AppendLine()
         {
-            string Text = "-------------------------------------------------------------------";
-            AppendLine(Text);
+            AppendLine(SLine);
         }
  
     }

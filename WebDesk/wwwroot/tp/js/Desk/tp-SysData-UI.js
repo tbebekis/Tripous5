@@ -876,16 +876,16 @@ tp.SelectSqlEditDialog = class extends tp.Window {
     }
     /** Deletes a single row of the tblSelectSqlList 
     */
-    DeleteFilterRow() {
+    async DeleteFilterRow() {
         let Row = this.gridFilters.FocusedRow;
+
         if (tp.IsValid(Row)) {
-            tp.YesNoBox('Delete selected row?', (Dialog) => {
-                if (Dialog.DialogResult === tp.DialogResult.Yes) {
-                    let Item = Row.OBJECT;
-                    tp.ListRemove(this.SelectSql.Filters, Item);
-                    this.tblFilters.RemoveRow(Row);
-                }
-            });
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                let Item = Row.OBJECT;
+                tp.ListRemove(this.SelectSql.Filters, Item);
+                this.tblFilters.RemoveRow(Row);
+            }
         }
     }
 
@@ -1506,6 +1506,20 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
             }
         }
     }
+    /** Called when deleting a single row of the tblFields 
+     */
+    async DeleteFieldRow() {
+        let Row = this.gridFields.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                this.tblFields.RemoveRow(Row);
+            }
+        }
+    }
+
+
     async JoinTableToField() {
         let Row = this.gridFields.FocusedRow;
 
@@ -1579,6 +1593,18 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
             }
         }
     }
+    /**  Called when deleting a single row of the tblStockTables
+     */
+    async DeleteStockTableRow() {
+        let Row = this.gridStockTables.FocusedRow;
+
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                this.tblStockTables.RemoveRow(Row);
+            }
+        }
+    }
 
 
     /** Override */
@@ -1622,7 +1648,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
                     this.EditFieldRow();
                     break;
                 case 'GridRowDelete':
-                    tp.InfoNote('Fiel Deleted.');
+                    this.DeleteFieldRow();
                     break;
                 case 'Field.JoinTable': // custom button
                     this.JoinTableToField();
@@ -1639,7 +1665,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
                     this.EditStockTableRow();
                     break;
                 case 'GridRowDelete':
-                    tp.InfoNote('StockTable Deleted.');
+                    this.DeleteStockTableRow();
                     break;
             }
         }
@@ -1652,7 +1678,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
                     this.EditJoinTableRow();
                     break;
                 case 'GridRowDelete':
-                    tp.InfoNote('StockTable Deleted.');
+                    tp.InfoNote('StockTable Deleted.'); // EDW
                     break;
             }
         }
