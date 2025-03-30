@@ -4,8 +4,8 @@
     /// <summary>
     /// Base class for application settings.
     /// <para>Watches for changes in the settings file and reloads this instance.</para>
-    /// <para><strong>NOTE: </strong> If this class contains lists, then override the <see cref="Load()"/> method, 
-    /// clean the lists, and after that call the base implementation.</para>
+    /// <para><strong>NOTE: </strong> If this class contains lists, 
+    /// then override the <see cref="BeforeLoad()"/> method and clean those lists.</para>
     /// </summary>
     public class AppSettingsBase
     {
@@ -34,12 +34,33 @@
             }
         }
 
+        /// <summary>
+        /// Called just before <see cref="Load()"/> method. Default implementation does nothing.
+        /// <para><strong>NOTE: </strong> If this class contains lists, 
+        /// then override the <see cref="BeforeLoad()"/> method and clean those lists.</para>
+        /// <para></para>
+        /// </summary>
+        protected virtual void BeforeLoad() { }
+        /// <summary>
+        /// Called just after <see cref="Load()"/> method. Default implementation does nothing.
+        /// </summary>
+        protected virtual void AfterLoad() { }
+        /// <summary>
+        /// Called just before <see cref="Save()"/> method. Default implementation does nothing.
+        /// <para><strong>NOTE: </strong> The <see cref="IsSaving"/> protected property is set to true when this method is called.</para>
+        /// </summary>
+        protected virtual void BeforeSave() { }
+        /// <summary>
+        /// Called just after <see cref="Save()"/> method. Default implementation does nothing.
+        /// <para><strong>NOTE: </strong> The <see cref="IsSaving"/> protected property is set to true when this method is called.</para>
+        /// </summary>
+        protected virtual void AfterSave() { }
 
         /* construction */
         /// <summary>
         /// Private constructor
         /// </summary>
-        AppSettingsBase()
+        private AppSettingsBase()
         {
         }
         /// <summary>
@@ -87,7 +108,9 @@
         /// </summary>
         public virtual void Load()
         {
+            BeforeLoad();
             Json.LoadFromFile(this, FilePath);
+            AfterLoad();  
         }
         /// <summary>
         /// Saves this instance to a disk file
@@ -97,7 +120,9 @@
             IsSaving = true;
             try
             {
+                BeforeSave();
                 Json.SaveToFile(this, FilePath);
+                AfterSave();
             }
             finally
             {

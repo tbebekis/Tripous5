@@ -23,4 +23,28 @@ Control
 	nothing
 
 
+-------------------------------------------
+Classes
+-------------------------------------------
+ViewDefComponent
+
+	== Panel Items ==
+	ViewDefContainerPanel : ViewDefComponent
+		ViewDef: ViewDefContainerPanel
+		ViewTabPageDef: ViewDefContainerPanel
+		ViewPanelListPanelDef : ViewDefContainerPanel
+		ViewAccordionPanelDef: ViewDefContainerPanel
+
+	== Panel Item Lists ==
+	ViewDefContainer<T> : ViewDefComponent where T : ViewDefComponent, new()
+		ViewTabControlDef : ViewDefContainer<ViewTabPageDef>
+		ViewPanelListDef : ViewDefContainer<ViewPanelListPanelDef>		
+		ViewAccordionDef : ViewDefContainer<ViewAccordionPanelDef>
+
+
+	ViewRowDef: ViewDefComponent
+	ViewColumnDef: ViewDefComponent
+	ViewControlDef: ViewDefComponent
+
+
  

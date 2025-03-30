@@ -86,13 +86,22 @@
         /// <summary>
         /// Appends a new text line in the box.
         /// </summary>
-        static public void AppendLine(string Text = "")
+        static public void AppendLine(string Text)
         {
             if (string.IsNullOrWhiteSpace(Text))
                 Text = Environment.NewLine;
+            else if (Text == SLine)
+                Text = Environment.NewLine + Text;
             else if (Text != SLine)
-                Text = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] {Text} {Environment.NewLine}";  
+                Text = $"{Environment.NewLine}[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] {Text} ";  
             fSyncContext.Post(o => DoLog(o as string), Text);
+        }
+        /// <summary>
+        /// Appends a new empty text line in the box.
+        /// </summary>
+        static public void AppendLineEmpty()
+        {
+            AppendLine(string.Empty);
         }
         /// <summary>
         /// Appends a new text line in the box.

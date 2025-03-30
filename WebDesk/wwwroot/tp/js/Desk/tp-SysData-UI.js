@@ -779,13 +779,9 @@ tp.SelectSqlEditDialog = class extends tp.Window {
         return true;
     }
  
-
-
-
     /* event handlers */
-    /** Event handler
-     * @param {tp.ToolBarItemClickEventArgs} Args The {@link tp.ToolBarItemClickEventArgs} arguments
-     */
+
+    /* NOT USED - we use tp.Grid's built-in functionality
     GridColumns_AnyButtonClick(Args) {
         Args.Handled = true;
 
@@ -801,15 +797,11 @@ tp.SelectSqlEditDialog = class extends tp.Window {
                 break;
         }
     }
-    /**
-    Event handler
-    @protected
-    @param {tp.EventArgs} Args The {@link tp.EventArgs} arguments
-    */
     GridColumns_DoubleClick(Args) {
         //Args.Handled = true;
         //this.EditFieldRow();
     }
+    */
 
     /** Called when a new data row is created and it is about to be added to the table
      * @param {tp.DataTableEventArgs} Args
@@ -1567,6 +1559,17 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
             }
         }
     }
+    /**  Called when deleting a single row of the tblJoinTables
+    */
+    async DeleteJoinTableRow() {
+        let Row = this.gridJoinTables.FocusedRow;
+        if (tp.IsValid(Row)) {
+            let Flag = await tp.YesNoBoxAsync('Delete selected row?');
+            if (Flag === true) {
+                this.tblJoinTables.RemoveRow(Row);
+            }
+        }
+    }
 
     /** Called when inserting a single row of the tblStockTables and displays the edit dialog
      */
@@ -1677,8 +1680,7 @@ tp.SqlBrokerTableDefEditDialog = class extends tp.Window {
                 case 'GridRowEdit':
                     this.EditJoinTableRow();
                     break;
-                case 'GridRowDelete':
-                    tp.InfoNote('StockTable Deleted.'); // EDW
+                    this.DeleteJoinTableRow();
                     break;
             }
         }
