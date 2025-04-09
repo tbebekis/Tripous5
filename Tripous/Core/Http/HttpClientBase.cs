@@ -1,7 +1,7 @@
 ﻿namespace Tripous.Http
 {
- 
- 
+
+
     /// <summary>
     /// A base "typed" <see cref="HttpClient"/>.
     /// <para>A typed <see cref="HttpClient"/> is a class that accepts a <see cref="HttpClient"/> instance in its constructor, 
@@ -22,6 +22,8 @@
     /// <item>https://www.aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/</item>
     /// <item>https://byterot.blogspot.com/2016/07/singleton-httpclient-dns.html</item>
     /// </list>
+    /// <para><strong>CAUTION:</strong> When Base Url is used, then Base Url must end with a slash, e.g. <c>https://example.com/</c>  </para> 
+    /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
     /// </summary>
     public class HttpClientBase<T>  where T: HttpClientResult
     {
@@ -49,8 +51,9 @@
         /// <summary>
         /// Authenticates with the Api in order to get the access token. On succes it assignes the AccessToken property.
         /// </summary>
-        protected virtual void Authenticate()
+        protected virtual async Task Authenticate()
         {
+            await Task.CompletedTask;
         }
 
         /// <summary>
@@ -69,7 +72,9 @@
             if (Client.DefaultRequestHeaders.Accept == null || !Client.DefaultRequestHeaders.Accept.Any(m => m.MediaType == MediaTypeNames.Application.Json))
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
 
-            PrepareAuthenticationHeaders(CallInfo);
+            if (!Authenticating)
+                PrepareAuthenticationHeaders(CallInfo);
+
             PrepareHeadersAfter(CallInfo);
         }
         /// <summary>
@@ -112,6 +117,56 @@
         protected virtual T CreateResult(HttpResponseMessage Response, string ActionUrl = "")
         {
             T Result = Activator.CreateInstance(typeof(T), new object[] { Response, ActionUrl }) as T;
+            return Result;
+        }
+
+
+        /// <summary>
+        /// Creates and returns a form post content
+        /// </summary>
+        protected virtual HttpContent GetFormPostContent(Dictionary<string, string> FormData)
+        {
+            if (FormData == null || FormData.Count == 0)
+                Sys.Throw("FormData is null or empty.");
+
+            if (this.FormPostContentType == FormPostContentType.FormUrlEncoded)
+            {
+                return new FormUrlEncodedContent(FormData);
+            }
+            else
+            {
+                /*
+                    HttpClient httpClient = new HttpClient();
+                    MultipartFormDataContent form = new MultipartFormDataContent();
+
+                    form.Add(new StringContent(username), "username");
+                    form.Add(new StringContent(useremail), "email");
+                    form.Add(new StringContent(password), "password");            
+                    form.Add(new ByteArrayContent(file_bytes, 0, file_bytes.Length), "profile_pic", "hello1.jpg");
+                    HttpResponseMessage response = await httpClient.PostAsync("PostUrl", form);                
+                 
+                 */
+                MultipartFormDataContent Result = new MultipartFormDataContent();
+                foreach (var Entry in FormData)
+                    Result.Add(new StringContent(Entry.Value), Entry.Key);
+                return Result;
+            }
+        }
+
+        /// <summary>
+        /// Normalizes the ActionUrl
+        /// <para><strong>CAUTION:</strong> When Base Url is used, then Base Url must end with a slash, e.g. <c>https://example.com/</c>  </para> 
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
+        /// </summary>
+        protected virtual string NormalizeActionUrl(string ActionUrl)
+        {
+            string Result = ActionUrl.Trim();
+
+            if (this.Client.BaseAddress != null && Result.StartsWith("/"))
+            {
+               Result = Result.Substring(1);
+            }           
+
             return Result;
         }
 
@@ -166,10 +221,19 @@
         /// <summary>
         /// Constructor.
         /// <para><strong>NOTE:</strong> Setting <see cref="HttpClient.BaseAddress"/> makes it impossible to reset it again. </para>
+        /// <para><strong>CAUTION:</strong> Base Url must end with a slash, e.g. <c>https://example.com/</c>  </para> 
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
         /// </summary>
         public HttpClientBase(string BaseUrl)
-            : this(new HttpClient() { BaseAddress = new Uri(BaseUrl) })
         {
+            if (!string.IsNullOrWhiteSpace(BaseUrl))
+            {
+                BaseUrl = BaseUrl.Trim();
+                if (!BaseUrl.EndsWith("/"))
+                    BaseUrl += "/";
+
+                this.Client = new HttpClient() { BaseAddress = new Uri(BaseUrl) };
+            }
         }
 
 
@@ -177,17 +241,23 @@
         /* public */
         /// <summary>
         /// Executes a GET Action to Api
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
         /// </summary>
         public async Task<T> GetAsync(string ActionUrl)
         {
+            ActionUrl = NormalizeActionUrl(ActionUrl);
+
             T Result = CreateResult(ActionUrl); // Activator.CreateInstance(typeof(T), new object[] { ActionUrl }) as T;
             try
             {
-                if (!IsAuthenticated)
-                    Authenticate();
+                if (!Authenticating)
+                {
+                    if (!IsAuthenticated)
+                        await Authenticate().ConfigureAwait(false);
 
-                if (!IsAuthenticated)
-                    Sys.Throw("Http Client is not authenticated.");
+                    if (!IsAuthenticated)
+                        Sys.Throw("Http Client is not authenticated.");
+                }
 
                 HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Get, ActionUrl);
                 PrepareHeaders(CallInfo);
@@ -221,26 +291,34 @@
         }
         /// <summary>
         /// Executes a POST Action to Api
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
         /// </summary>
         public async Task<T> PostFormAsync(string ActionUrl, Dictionary<string, string> FormData)
         {
+            ActionUrl = NormalizeActionUrl(ActionUrl);
             T Result = CreateResult(ActionUrl);
             try
             {
-                if (!IsAuthenticated)
-                    Authenticate();
+                // MultipartFormDataContent
+                if (!Authenticating)
+                {
+                    if (!IsAuthenticated)
+                        await Authenticate().ConfigureAwait(false);
 
-                if (!IsAuthenticated)
-                    Sys.Throw("Http Client is not authenticated.");
+                    if (!IsAuthenticated)
+                        Sys.Throw("Http Client is not authenticated.");
+                }
 
                 HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.PostForm, ActionUrl, FormData);
                 PrepareHeaders(CallInfo);
                 CallBefore(CallInfo);
 
+                HttpContent Content = GetFormPostContent(FormData);
+
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
                 // SEE: https://stackoverflow.com/a/10369275/1779320
                 // SEE ALSO: https://blog.stephencleary.com/2012/02/async-and-await.html
-                using (HttpResponseMessage Response = await Client.PostAsync(ActionUrl, new FormUrlEncodedContent(FormData)).ConfigureAwait(false))
+                using (HttpResponseMessage Response = await Client.PostAsync(ActionUrl, Content).ConfigureAwait(false))
                 {
                     //Result.Response = Response;
                     await Result.LoadFromResponseAsync(Response).ConfigureAwait(false);
@@ -266,17 +344,22 @@
         }
         /// <summary>
         /// Executes a POST Action to Api
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
         /// </summary>
         public async Task<T> PostAsync(string ActionUrl, object Packet)
         {
+            ActionUrl = NormalizeActionUrl(ActionUrl);
             T Result = CreateResult(ActionUrl);
             try
             {
-                if (!IsAuthenticated)
-                    Authenticate();
+                if (!Authenticating)
+                {
+                    if (!IsAuthenticated)
+                        await Authenticate().ConfigureAwait(false);
 
-                if (!IsAuthenticated)
-                    Sys.Throw("Http Client is not authenticated.");
+                    if (!IsAuthenticated)
+                        Sys.Throw("Http Client is not authenticated.");
+                }
 
                 HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Post, ActionUrl, Packet);
                 PrepareHeaders(CallInfo);               
@@ -314,17 +397,22 @@
         }
         /// <summary>
         /// Executes a PUT Action to Api
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
         /// </summary>
         public async Task<T> PutAsync(string ActionUrl, object Packet)
         {
+            ActionUrl = NormalizeActionUrl(ActionUrl);
             T Result = CreateResult(ActionUrl);
             try
             {
-                if (!IsAuthenticated)
-                    Authenticate();
+                if (!Authenticating)
+                {
+                    if (!IsAuthenticated)
+                        await Authenticate().ConfigureAwait(false);
 
-                if (!IsAuthenticated)
-                    Sys.Throw("Http Client is not authenticated.");
+                    if (!IsAuthenticated)
+                        Sys.Throw("Http Client is not authenticated.");
+                }
 
                 HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Put, ActionUrl, Packet);
                 PrepareHeaders(CallInfo);                
@@ -362,17 +450,22 @@
         }
         /// <summary>
         /// Executes a DELETE Action to Api
+        /// <para><strong>CAUTION:</strong> When BaseUrl is used, then Action Url must <strong>not</strong> start with a slash, e.g. <c>GetUsers</c> </para>
         /// </summary>
         public async Task<T> DeleteAsync(string ActionUrl)
         {
+            ActionUrl = NormalizeActionUrl(ActionUrl);
             T Result = CreateResult(ActionUrl);
             try
             {
-                if (!IsAuthenticated)
-                    Authenticate();
+                if (!Authenticating)
+                {
+                    if (!IsAuthenticated)
+                        await Authenticate().ConfigureAwait(false);
 
-                if (!IsAuthenticated)
-                    Sys.Throw("Http Client is not authenticated.");
+                    if (!IsAuthenticated)
+                        Sys.Throw("Http Client is not authenticated.");
+                }
 
                 HttpClientCallInfo CallInfo = new HttpClientCallInfo(HttpClientCallType.Delete, ActionUrl);
                 PrepareHeaders(CallInfo);                
@@ -482,8 +575,15 @@
             }).Unwrap().GetAwaiter().GetResult();
         }
 
- 
+
         /* properties */
+        /// <summary>
+        /// Indicates the <c>Content-Type</c> used in a Form POST with the <see cref="PostFormAsync"/> method.
+        /// <para><c>application/x-www-form-urlencoded</c> is the default and should be used in general, for simple text data, such as form fields. </para>
+        /// <para> <c>multipart/form-data</c> should be used for binary data, such as files.</para>
+        /// <para>In any case it is crucial what the server expects.</para>
+        /// </summary>
+        public FormPostContentType FormPostContentType { get; set; } = FormPostContentType.FormUrlEncoded;
         /// <summary>
         /// The access token returned by Api on authentication
         /// </summary>
@@ -492,7 +592,10 @@
         /// True when the client is authenticated and the access token is not null or empty.
         /// </summary>
         public virtual bool IsAuthenticated { get { return !string.IsNullOrWhiteSpace(AccessToken); } }
- 
+        /// <summary>
+        /// True while is authenticating
+        /// </summary>
+        public virtual bool Authenticating { get; protected set; }
 
 
         /* events */
