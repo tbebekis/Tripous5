@@ -64,8 +64,7 @@
                 LogBox.Box = Box;
                 if (UseLogListenerToo)
                     logListener = new LogBoxLogListener();
-            }
-            
+            }            
         }
 
         /// <summary>
@@ -73,14 +72,15 @@
         /// </summary>
         static public void Clear()
         {
-            fSyncContext.Post(o => DoClear(null), null);
+            if (IsInitialized)
+                fSyncContext.Post(o => DoClear(null), null);
         }
         /// <summary>
         /// Appends text in the box, in the last existing text line, if any.
         /// </summary>
         static public void Append(string Text)
         {
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (IsInitialized && !string.IsNullOrWhiteSpace(Text))
                 fSyncContext.Post(o => DoLog(o as string), Text);
         }
         /// <summary>
@@ -88,13 +88,16 @@
         /// </summary>
         static public void AppendLine(string Text)
         {
-            if (string.IsNullOrWhiteSpace(Text))
-                Text = Environment.NewLine;
-            else if (Text == SLine)
-                Text = Environment.NewLine + Text;
-            else if (Text != SLine)
-                Text = $"{Environment.NewLine}[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] {Text} ";  
-            fSyncContext.Post(o => DoLog(o as string), Text);
+            if (IsInitialized)
+            {
+                if (string.IsNullOrWhiteSpace(Text))
+                    Text = Environment.NewLine;
+                else if (Text == SLine)
+                    Text = Environment.NewLine + Text;
+                else if (Text != SLine)
+                    Text = $"{Environment.NewLine}[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] {Text} ";
+                fSyncContext.Post(o => DoLog(o as string), Text);
+            }
         }
         /// <summary>
         /// Appends a new empty text line in the box.
@@ -117,6 +120,10 @@
         {
             AppendLine(SLine);
         }
- 
+
+        /// <summary>
+        /// Returns true if this class has been initialized via <see cref="Initialize"/>
+        /// </summary>
+        static public bool IsInitialized => Box != null;
     }
 }

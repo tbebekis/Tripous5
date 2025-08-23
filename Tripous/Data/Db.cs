@@ -40,7 +40,16 @@
                     Db.Connections = ConnectionInfoList.SqlConnections;
             }
         }
+        static public void ForceAddConnection(SqlConnectionInfo sqlConnectionInfo)
+        {
+            if (fConnections == null)
+                fConnections = new List<SqlConnectionInfo>();
 
+            SqlConnectionInfo CS = fConnections.FirstOrDefault(item => item.Name.IsSameText(sqlConnectionInfo.Name));
+            
+            if (CS == null)
+                fConnections.Add(sqlConnectionInfo);
+        }
 
         /// <summary>
         /// Returns the default connection string, if any, else throws an exception.
