@@ -690,13 +690,29 @@ Large: 8       // 1201 ..
 
             return Result;
         }
+        
+        /// <summary>
+        /// Runs an action once.
+        /// <para>NOTE: The action is run on the main thread using a <see cref="System.Windows.Forms.Timer"/></para>
+        /// </summary>
+        static public void RunOnce(Action<object> Action, int IntervalInMilliseconds, object Info = null)
+        {
+            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+            timer.Interval = 1000;
+            timer.Tick += (s, e) =>
+            {
+                Action(Info);
+                timer.Stop();
+                timer.Dispose();
+            };
+            timer.Start();
+        }
+        
         /* properties */
         /// <summary>
         /// The main form of the application, if any, else null
         /// </summary>
         static public Form MainForm { get; set; }
-
-
 
         /// <summary>
         /// Gets a value indicating whether the caller must call an invoke method when making method calls 

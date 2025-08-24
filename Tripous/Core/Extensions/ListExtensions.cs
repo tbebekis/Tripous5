@@ -151,49 +151,52 @@
         }
         /// <summary>
         /// Returns true if item can change position.
-        /// <para>NOTE: Down = true means towards to 0, where false means towards to List.Count    </para>
+        /// <para>NOTE: Up = true means towards to 0, where Up = false means towards to List.Count    </para>
         /// </summary>
-        static public bool CanMove(this IList List, int Index, bool Down)
+        static public bool CanMove(this IList List, int Index, bool Up)
         {
-            if (Down)   // towards to 0
+            if (Up)   // towards to 0
                 return (Index > 0);
             else        // towards to List.Count   
-                return ((Index >= 0) && (Index <= List.Count - 1));
+                return ((Index >= 0) && (Index <= List.Count - 2));
         }
         /// <summary>
         /// Returns true if item can change position.
         /// </summary>
-        static public bool CanMove(this IList List, object Obj, bool Down)
+        static public bool CanMove(this IList List, object Obj, bool Up)
         {
-            return CanMove(List, List.IndexOf(Obj), Down);
-        }
-        /// <summary>
-        /// Moves item a position up or down.
-        /// Returns true if item can change position.
-        /// </summary>
-        static public bool Move(this IList List, int Index, bool Down)
-        {
-            bool Res = CanMove(List, Index, Down);
-
-            int NewIndex;
-
-            if (Down)
-                NewIndex = Index - 1;
-            else
-                NewIndex = Index + 1;
-
-            Exchange(List, Index, NewIndex);
-
-            return Res;
-
+            return CanMove(List, List.IndexOf(Obj), Up);
         }
         /// <summary>
         /// Moves item a position up or down.
         /// Returns true if item can change position.
         /// </summary>
-        static public bool Move(this IList List, object Obj, bool Down)
+        static public bool Move(this IList List, int Index, bool Up)
         {
-            return Move(List, List.IndexOf(Obj), Down);
+            bool Result = CanMove(List, Index, Up);
+
+            if (Result)
+            {
+                int NewIndex;
+
+                if (Up)
+                    NewIndex = Index - 1;
+                else
+                    NewIndex = Index + 1;
+
+                Exchange(List, Index, NewIndex);
+            }
+
+            return Result;
+
+        }
+        /// <summary>
+        /// Moves item a position up or down.
+        /// Returns true if item can change position.
+        /// </summary>
+        static public bool Move(this IList List, object Obj, bool Up)
+        {
+            return Move(List, List.IndexOf(Obj), Up);
         }
         /// <summary>
         /// Saves List to FileName
