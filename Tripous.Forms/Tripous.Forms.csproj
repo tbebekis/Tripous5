@@ -15,17 +15,17 @@
 		<!-- NUGET -->
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>Tripous5.Forms</Title>
-		<Version>5.25.02.19</Version>
+		<Version>5.25.08.24</Version>
 		<Authors>Theodoros Bebekis</Authors>
 		<Product>Tripous5.Forms</Product>
 		<Company>AntyxSoft</Company>		
 		<Description>A Library containing utility classes, base Form classes, and many dialog boxes for building Desktop Windows Applications.</Description>
-		<Copyright>Theodoros Bebekis 2024</Copyright>
+		<Copyright>Theodoros Bebekis 2025</Copyright>
 		<PackageProjectUrl>https://github.com/tbebekis/Tripous5.git</PackageProjectUrl>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/tbebekis/Tripous5.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<AssemblyVersion>5.25.02.19</AssemblyVersion>
+		<AssemblyVersion>5.25.08.24</AssemblyVersion>
 		<PackageLicenseFile>Licence.txt</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>		
