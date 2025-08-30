@@ -365,7 +365,7 @@
                 PrepareHeaders(CallInfo);               
                 CallBefore(CallInfo);
 
-                string JsonText = Json.ToJson(Packet);
+                string JsonText = Json.Serialize(Packet);
                 StringContent Content = new StringContent(JsonText, Encoding.UTF8, MediaTypeNames.Application.Json);
 
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.
@@ -418,7 +418,7 @@
                 PrepareHeaders(CallInfo);                
                 CallBefore(CallInfo);
 
-                string JsonText = Json.ToJson(Packet);
+                string JsonText = Json.Serialize(Packet);
                 StringContent Content = new StringContent(JsonText, Encoding.UTF8, MediaTypeNames.Application.Json);
 
                 // CAUTION: In WinForms the await may deadlock threads. Use ConfigureAwait() to avoid it.

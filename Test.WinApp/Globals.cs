@@ -17,6 +17,11 @@ global using Tripous.Data;
 global using Tripous.Forms;
 global using Tripous.Tokenizing;
 
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
+global using System.Text.Json.Nodes;
+
 
 
 

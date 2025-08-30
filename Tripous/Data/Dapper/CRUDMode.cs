@@ -1,10 +1,12 @@
-﻿namespace Tripous.Data
+﻿
+
+namespace Tripous.Data
 {
     /// <summary>
     /// Indicates the allowable CRUD operations in a database table
     /// </summary>
     [Flags]
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CRUDMode
     {
         /// <summary>

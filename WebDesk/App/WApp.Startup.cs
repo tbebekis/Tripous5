@@ -42,7 +42,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Caching.Memory;
 
-using Newtonsoft.Json.Serialization;
+
+
 
 using Tripous;
 using Tripous.Logging;
@@ -62,6 +63,14 @@ namespace WebDesk
         static IDisposable AppSettingsChangeToken;
         static WebAppContext AppContext = new WebAppContext();
         static FileLogListener fFileLogListener;
+
+        static void SetupJsonSerializerOptions(JsonSerializerOptions JsonOptions)
+        {
+            Json.SetupJsonOptions(
+                JsonOptions,
+                Decimals: 2
+                );
+        }
 
         /* private */
         /// <summary>
@@ -151,8 +160,6 @@ namespace WebDesk
         /// </summary>
         static void AddObjectMaps(object Configurator)
         {
-            //ObjectMapper.AddMap(typeof(LanguageItem), typeof(AntyxSoft.Language), TwoWay: true);
-
             DataStore.AddObjectMaps(Configurator);
 
             foreach (var EM in PluginList)
@@ -423,13 +430,14 @@ namespace WebDesk
             // https://github.com/aspnet/Announcements/issues/194
             .AddNewtonsoftJson(o => o.SerializerSettings.ContractResolver = new DefaultContractResolver());
             */
-            .AddNewtonsoftJson(o => o.SerializerSettings.ContractResolver = new DefaultContractResolver())
+            //.AddNewtonsoftJson(o => o.SerializerSettings.ContractResolver = new DefaultContractResolver())
             // or
             //.AddNewtonsoftJson()
             //.AddJsonOptions(opt => { opt.JsonSerializerOptions.PropertyNamingPolicy = null; })
             ;
 
-            
+            MvcBuilder.AddJsonOptions(options => SetupJsonSerializerOptions(options.JsonSerializerOptions));
+            services.ConfigureHttpJsonOptions(options => SetupJsonSerializerOptions(options.SerializerOptions));
 
             // ● Razor Runtime Compilation
             // see: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation

@@ -113,7 +113,7 @@ insert into {TableName} (
 ) values (
     '{Id}', 
     'teo', 
-    'tbebekis@antyxsoft.com',
+    'teo.bebekis@gmail.com',
     'Theo Bebekis',
     {UserLevel},
     1,
@@ -256,7 +256,7 @@ insert into {TableName} (
 ) values (
     '{Id}', 
     'admin', 
-    'tbebekis@antyxsoft.com',
+    'teo.bebekis@gmail.com',
     'WebDesk Admin',
     {UserLevel},
     1,

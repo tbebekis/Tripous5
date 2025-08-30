@@ -18,7 +18,7 @@
 		<Version>5.25.08.24</Version>
 		<Authors>Theodoros Bebekis</Authors>
 		<Product>Tripous5.Forms</Product>
-		<Company>AntyxSoft</Company>		
+
 		<Description>A Library containing utility classes, base Form classes, and many dialog boxes for building Desktop Windows Applications.</Description>
 		<Copyright>Theodoros Bebekis 2025</Copyright>
 		<PackageProjectUrl>https://github.com/tbebekis/Tripous5.git</PackageProjectUrl>
@@ -29,6 +29,14 @@
 		<PackageLicenseFile>Licence.txt</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>		
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;CS1591</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;CS1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

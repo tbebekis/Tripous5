@@ -12,7 +12,7 @@
         /// Boolean operators
         /// </summary>
         [Flags]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Bool
         {
             /// <summary>
@@ -42,7 +42,7 @@
         /// Conditions
         /// </summary>
         [Flags]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Condition
         {
             /// <summary>

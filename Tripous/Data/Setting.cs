@@ -122,7 +122,7 @@
                 Enum.TryParse(Row.AsString("DataType"), out SettingDataType vDataType);
                 DataType = vDataType;
 
-                SelectList = JsonConvert.DeserializeObject<List<SettingSelectItem>>(Row.AsString("SelectList"));
+                SelectList = Json.Deserialize<List<SettingSelectItem>>(Row.AsString("SelectList"));
                 SortSelectList();
             }
 
@@ -141,7 +141,7 @@
             Result["DisplayOrder"] = DisplayOrder;
             Result["DataType"] = DataType.ToString();
             Result["TextValue"] = TextValue;
-            Result["SelectList"] = JsonConvert.SerializeObject(SelectList);
+            Result["SelectList"] = Json.Serialize(SelectList);
 
             return Result;
         }
@@ -343,7 +343,7 @@ where
         public string GetValueAsJsonText()
         {
             object V = GetValueSafe();
-            string JsonText = JsonConvert.SerializeObject(V);
+            string JsonText = Json.Serialize(V);
             return JsonText;
         }
         /// <summary>
@@ -351,7 +351,7 @@ where
         /// </summary>
         public void SetValueFromJsonText(string JsonText)
         {
-            Value = JsonConvert.DeserializeObject(JsonText, GetValueType());
+            Value = Json.Deserialize(JsonText, GetValueType());
         }
 
         /* properties */

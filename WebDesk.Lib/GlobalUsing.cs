@@ -35,15 +35,22 @@ global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Text.Encodings.Web;
 global using System.ComponentModel.DataAnnotations;
- 
+
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
+global using System.Text.Json.Nodes;
+
 global using Dapper;
 global using System.Data.SQLite;
 
+/*
 //global using Newtonsoft;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Serialization;
 global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Converters;
+*/
 
 global using Microsoft.Net.Http.Headers;
 

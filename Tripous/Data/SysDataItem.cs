@@ -65,7 +65,7 @@
             {
                 Clear();
                 Stream.Position = 0;
-                Json.FromJsonStream(this, Stream);
+                Json.DeserializeFromStream(this, Stream);
             }
         }
         /// <summary>
@@ -75,7 +75,7 @@
         {
             if (Stream != null)
             {
-                Json.ToJsonStream(this, Stream);
+                Json.SerializeToStream(this, Stream);
             }
         }
 

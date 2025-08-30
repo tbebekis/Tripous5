@@ -6,7 +6,7 @@
     /// </summary>
     [Flags]
     [TypeStoreItem]
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum DataFieldType
     {
         /// <summary>

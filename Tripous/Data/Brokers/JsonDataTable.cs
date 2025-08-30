@@ -112,7 +112,7 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        public JsonDataTable(JObject JO)
+        public JsonDataTable(JsonObject JO)
         {
             FromJObject(JO, this);
         }
@@ -126,17 +126,17 @@
 
         /* static */
         /// <summary>
-        /// Converts a DataTable to JObject
+        /// Converts a DataTable to JsonObject
         /// </summary>
-        static public JObject ToJObject(DataTable Source, SqlBrokerTableDef Descriptor)
+        static public JsonObject ToJObject(DataTable Source, SqlBrokerTableDef Descriptor)
         {
             JsonDataTable Instance = new JsonDataTable(Source, Descriptor);
             return Instance.ToJObject();
         }
         /// <summary>
-        /// Converts a DataTable to JObject
+        /// Converts a DataTable to JsonObject
         /// </summary>
-        static public JObject ToJObject(DataTable Source)
+        static public JsonObject ToJObject(DataTable Source)
         {
             JsonDataTable Instance = new JsonDataTable(Source);
             return Instance.ToJObject();
@@ -155,22 +155,22 @@
         /// </summary>
         static public void FromJson(string JsonText, JsonDataTable Table)
         {
-            JObject JO = JObject.Parse(JsonText);
+            JsonObject JO = JsonNode.Parse(JsonText) as JsonObject;
             FromJObject(JO, Table);
         }
         /// <summary>
-        /// JObject to JsonDataTable
+        /// JsonObject to JsonDataTable
         /// </summary>
-        static public JsonDataTable FromJObject(JObject JO)
+        static public JsonDataTable FromJObject(JsonObject JO)
         {
             JsonDataTable Table = new JsonDataTable();
             FromJObject(JO, Table);
             return Table;
         }
         /// <summary>
-        /// JObject to JsonDataTable
+        /// JsonObject to JsonDataTable
         /// </summary>
-        static public void FromJObject(JObject JO, JsonDataTable Table)
+        static public void FromJObject(JsonObject JO, JsonDataTable Table)
         {
 
             Table.Clear();
@@ -288,11 +288,12 @@
             Deleted.Clear();
         }
         /// <summary>
-        /// Converts this instance to JObject
+        /// Converts this instance to JsonObject
         /// </summary>
-        public JObject ToJObject()
+        public JsonObject ToJObject()
         {
-            return JObject.FromObject(this);
+            string JsonText = Json.Serialize(this);
+            return JsonNode.Parse(JsonText) as JsonObject;
         }
         /// <summary>
         /// Copies rows from this JsonDataTable to a real DataTable, preserving row state (even for deleted rows).

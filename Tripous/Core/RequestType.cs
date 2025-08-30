@@ -3,7 +3,7 @@
     /// <summary>
     /// The request type.  Ui or Proc.  
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum RequestType
     {
         /// <summary>

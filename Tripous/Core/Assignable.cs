@@ -1,4 +1,6 @@
-﻿namespace Tripous
+﻿using System.Text.Json.Serialization;
+
+namespace Tripous
 {
     /// <summary>
     /// Provides the basic functionality for objects capable of performing 
@@ -111,14 +113,14 @@
         /// <summary>
         /// The "owner" of this instance.
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         [Browsable(false), ReadOnly(true)]
         public virtual object Owner { get; set; }
 
         /// <summary>
         /// Gets or sets the Collection this object belongs to. It can be null.
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         [Browsable(false), ReadOnly(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IList Collection
         {
@@ -141,7 +143,7 @@
         /// Returns the Owner of the Collection  this object belongs to. It can be null.
         /// <para>The Collection may be an IOwned and may have an Owner defined.</para>
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         [Browsable(false), ReadOnly(true), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object CollectionOwner
         {

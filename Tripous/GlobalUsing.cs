@@ -32,16 +32,22 @@ global using System.Web;
 global using System.Dynamic;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
-
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
+global using System.Text.Json.Nodes;
 global using System.Data.SQLite;
 global using Dapper;
 
-//global using Newtonsoft;
+/*
+global using Newtonsoft;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Serialization;
 global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Converters;
+*/
 
+global using Tripous.Http;
 global using Tripous.Data;
 global using Tripous.Data.Metadata;
 

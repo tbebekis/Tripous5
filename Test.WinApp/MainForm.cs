@@ -7,9 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-
-using Newtonsoft.Json.Linq;
+ 
 
 using Tripous;
 using Tripous.Data;
@@ -32,10 +30,11 @@ namespace Test.WinApp
             LogBox.Initialize(edtLog);
             App.Initialize(this);
 
+            /*
             SettingTest.LoadSettings();
-
             BrokerTest.TestJoinTables();
             TestStringList();
+            */
         }
         void Execute(Action Proc)
         {

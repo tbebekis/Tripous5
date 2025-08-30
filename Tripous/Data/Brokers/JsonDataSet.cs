@@ -54,17 +54,17 @@
 
         /* static */
         /// <summary>
-        /// Converts a DataSet to JObject
+        /// Converts a DataSet to JsonObject
         /// </summary>
-        static public JObject ToJObject(DataSet Source, SqlBrokerDef Descriptor)
+        static public JsonObject ToJObject(DataSet Source, SqlBrokerDef Descriptor)
         {
             JsonDataSet Instance = new JsonDataSet(Source, Descriptor);
             return Instance.ToJObject();
         }
         /// <summary>
-        /// Converts a DataSet to JObject
+        /// Converts a DataSet to JsonObject
         /// </summary>
-        static public JObject ToJObject(DataSet Source)
+        static public JsonObject ToJObject(DataSet Source)
         {
             JsonDataSet Instance = new JsonDataSet(Source);
             return Instance.ToJObject();
@@ -83,22 +83,22 @@
         /// </summary>
         static public void FromJson(string JsonText, JsonDataSet Target)
         {
-            JObject JO = JObject.Parse(JsonText);
+            JsonObject JO = JsonNode.Parse(JsonText) as JsonObject;
             FromJObject(JO, Target);
         }
         /// <summary>
-        /// JObject to JsonDataTable
+        /// JsonObject to JsonDataTable
         /// </summary>
-        static public JsonDataSet FromJObject(JObject JO)
+        static public JsonDataSet FromJObject(JsonObject JO)
         {
             JsonDataSet Target = new JsonDataSet();
             FromJObject(JO, Target);
             return Target;
         }
         /// <summary>
-        /// JObject to JsonDataTable
+        /// JsonObject to JsonDataTable
         /// </summary>
-        static public void FromJObject(JObject JO, JsonDataSet Target)
+        static public void FromJObject(JsonObject JO, JsonDataSet Target)
         {
 
             Target.Clear();
@@ -110,11 +110,11 @@
 
             // Tables
             JsonDataTable Table;
-            JObject JO2;
+            JsonObject JO2;
             dynamic jTables = jDS.Tables;
             foreach (dynamic C in jTables)
             {
-                JO2 = C as JObject;
+                JO2 = C as JsonObject;
                 Table = new JsonDataTable(JO2);
                 Target.Tables.Add(Table);
             }
@@ -134,11 +134,12 @@
             Tables.Clear();
         }
         /// <summary>
-        /// Converts this instance to JObject
+        /// Converts this instance to JsonObject
         /// </summary>
-        public JObject ToJObject()
+        public JsonObject ToJObject()
         {
-            return JObject.FromObject(this);
+            string JsonText = Json.Serialize(this);
+            return JsonNode.Parse(JsonText) as JsonObject;
         }
         /// <summary>
         /// Converts this to DataSet

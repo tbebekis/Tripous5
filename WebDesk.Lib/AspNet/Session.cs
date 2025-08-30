@@ -16,7 +16,7 @@
             if (JsonText == null)
                 return default(T);
 
-            return JsonConvert.DeserializeObject<T>(JsonText);
+            return Json.Deserialize<T>(JsonText);
         }
         /// <summary>
         /// Returns a value stored in session, found under a specified key or a default value if not found.
@@ -28,7 +28,7 @@
             if (JsonText == null)
                 return Default;
 
-            return JsonConvert.DeserializeObject<T>(JsonText);
+            return Json.Deserialize<T>(JsonText);
         }
         /// <summary>
         /// Stores a value in session under a specified key.
@@ -36,7 +36,7 @@
         static void Set<T>(this ISession Instance, string Key, T Value)
         {
             Key = Key.ToLowerInvariant();
-            string JsonText = JsonConvert.SerializeObject(Value);
+            string JsonText = Json.Serialize(Value);
             Instance.SetString(Key, JsonText);
         }
  

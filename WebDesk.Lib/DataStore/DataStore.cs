@@ -135,8 +135,8 @@
             DefText = Provider.ReplaceDataTypePlaceholders(DefText);
 
 
-            string JsonText = Json.ToJson(Table);
-            Table = Json.FromJson<DataTableDef>(JsonText);
+            string JsonText = Json.Serialize(Table);
+            Table = Json.Deserialize<DataTableDef>(JsonText);
             Table.Check();
         }
         static void Test()

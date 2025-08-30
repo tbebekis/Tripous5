@@ -1,5 +1,7 @@
 ﻿#pragma warning disable CS1591
 
+using System.Text.Json.Serialization;
+
 namespace Tripous 
 {
     public sealed class DynamicClass: DynamicObject, INotifyPropertyChanged, ICustomTypeDescriptor
@@ -97,11 +99,11 @@ namespace Tripous
  
         public string ToJson()
         {
-            return Json.ToJson(this);
+            return Json.Serialize(this);
         }
         public void FromJson(string JsonText)
         {
-            dynamic Dyn = Json.FromJson(typeof(DynamicClass), JsonText);
+            dynamic Dyn = Json.Deserialize<DynamicClass>(JsonText);
             DynamicClass Instance = Dyn as DynamicClass;
             this.Properties = Instance.Properties;
         }
@@ -132,7 +134,6 @@ namespace Tripous
                     OnPropertyChanged(PropName);
             }
         }
-        [JsonProperty]
         public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
         [JsonIgnore]
         public int PropertyCount { get { return Properties.Keys.Count; } }

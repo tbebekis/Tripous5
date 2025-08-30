@@ -47,7 +47,7 @@
                     {
                         string JsonText = Sys.Base64ToString(Base64, Encoding.UTF8);
                         if (!string.IsNullOrWhiteSpace(JsonText))
-                            Json.FromJson(this.Cookie, JsonText);
+                            Json.PopulateObject(this.Cookie, JsonText);
                     }
                 }
                 catch
@@ -66,7 +66,7 @@
         {
             if (!LoadingCookie)
             {
-                string JsonText = Json.ToJson(this.Cookie);
+                string JsonText = Json.Serialize(this.Cookie);
                 string Base64 = Sys.StringToBase64(JsonText, Encoding.UTF8);
                 HttpContext.Response.Cookies.Delete(SUserCookieName);
                 HttpContext.Response.Cookies.Append(SUserCookieName, Base64, CookieAuthHelper.GetUserCookieOptions());

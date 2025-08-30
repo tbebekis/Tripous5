@@ -49,7 +49,7 @@
         }
 
         /// <summary>
-        /// Occurs when a new <see cref="LogEntry"/ is available.>
+        /// Occurs when a new <see cref="LogEntry"/> is available.>
         /// </summary>
         public event EventHandler<LogEntryArgs> EntryEvent;
     }

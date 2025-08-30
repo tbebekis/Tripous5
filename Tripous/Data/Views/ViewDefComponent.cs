@@ -58,7 +58,7 @@
         {
             Dictionary<string, object> Temp = new Dictionary<string, object>();
             AssignTo(Temp);
-            string JsonText = Json.Serialize(Temp, Json.CreateDefaultSettings(false));
+            string JsonText = Json.Serialize(Temp, Formatted:false, CameCase: false);
             return JsonText;
         }
         

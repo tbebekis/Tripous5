@@ -5,7 +5,6 @@ namespace Tripous.Http
 
     /// <summary>
     /// Helper class providing user agent string in a random way.
-    /// <para>To be used with <c><see cref="HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd()"/></c> </para>
     /// <para>Example:</para>
     /// <code>MyApiClient.DefaultRequestHeaders.UserAgent.ParseAdd(HttpUserAgents.GetRandom());</code>
     /// </summary>

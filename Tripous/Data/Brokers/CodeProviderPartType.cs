@@ -1,4 +1,6 @@
-﻿namespace Tripous.Data
+﻿using System.Text.Json.Serialization;
+
+namespace Tripous.Data
 {
     /// <summary>
     /// <para>The <see cref="CodeProviderDef"/> decriptor provides information regarding the parts that make up a Code, passing a definition text to a <see cref="CodeProvider"/>.</para>
@@ -16,7 +18,7 @@
     /// <item><term>PO|YYYY-MM-DD|XXX-XXX</term><description><see cref="CodeProviderPartType.Literal"/> (Purchases Order), <see cref="CodeProviderPartType.Date"/> and <see cref="CodeProviderPartType.Pivot"/></description></item>
     /// </list>
     /// </summary>
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CodeProviderPartType
     {
 

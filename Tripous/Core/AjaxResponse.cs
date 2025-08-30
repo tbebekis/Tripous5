@@ -26,19 +26,23 @@
         /* public */
         /// <summary>
         /// Returns the packet object.
-        /// <para>The packet object goes to <see cref="HttpActionResult.Packet"/> property and it is the actual information that is returned to the caller.</para>
+        /// <para>The packet object goes to <see cref="HttpPacketResult.Packet"/> property and it is the actual information that is returned to the caller.</para>
         /// </summary>
         public object GetPacketObject()
         {
-            JObject Result = new JObject();
+            JsonObject Result = new();
 
             if (!string.IsNullOrWhiteSpace(OperationName))
                 Result["OperationName"] = OperationName;
 
+            string JsonText;
             if (Properties != null && Properties.Count > 0)
             {
                 foreach (var Entry in Properties)
-                    Result[Entry.Key] = JToken.FromObject(Entry.Value);
+                {
+                    JsonText = Json.Serialize(Entry.Value);
+                    Result[Entry.Key] = JsonNode.Parse(JsonText);
+                }
             }
 
             return Result;

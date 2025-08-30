@@ -1,4 +1,6 @@
-﻿namespace Tripous
+﻿using System.Text.Json.Serialization;
+
+namespace Tripous
 {
     /// <summary>
     /// A Descriptor is a class that describes other business classes.
@@ -116,35 +118,35 @@
         /// <summary>
         /// Gets or sets the descriptor mode. See DescriptorMode
         /// </summary>             
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual DescriptorMode DescriptorMode { get; set; }
         /// <summary>
         /// A descriptor registered by Tripous system code
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual bool IsSystem { get { return DescriptorMode == DescriptorMode.System; } }
         /// <summary>
         /// A descriptor registered by application code
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual bool IsApp { get { return DescriptorMode == DescriptorMode.Application; } }
         /// <summary>
         /// A descriptor created by user customization, based on an
         /// existing application descriptor. The new descriptor
         /// replaces the one it is based on.
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual bool IsReplica { get { return DescriptorMode == DescriptorMode.Replica; } }
         /// <summary>
         /// A tottaly new descriptor created by user customization
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual bool IsCustom { get { return DescriptorMode == DescriptorMode.Custom; } }
 
         /// <summary>
         /// When true the descriptor is in design mode in a a design form or something
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public bool DesignMode { get; set; }
 
     }

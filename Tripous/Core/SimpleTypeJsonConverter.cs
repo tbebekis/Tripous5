@@ -1,9 +1,10 @@
 ﻿namespace Tripous
 {
+    /*
     /// <summary>
     ///  A custom json converter for the SimpleType enum
     /// </summary>
-    internal class SimpleTypeJsonConverter : JsonConverter
+    internal class SimpleTypeJsonConverter_OLD : JsonConverter
     {
         /// <summary>
         ///  Writes the JSON representation of the object.
@@ -36,7 +37,7 @@
             return objectType == typeof(SimpleType);
         }
 
-        /* properties */
+         
         /// <summary>
         /// Gets a value indicating whether this instance can read JSON.
         /// </summary>
@@ -45,5 +46,23 @@
         /// Gets a value indicating whether this instance can write JSON.
         /// </summary>
         public override bool CanWrite { get { return true; } }
+    }
+    */
+
+    public class SimpleTypeJsonConverter : JsonConverter<SimpleType>
+    {
+        public override SimpleType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                string S = reader.GetString();
+                return Simple.SimpleTypeOf(S[0]);
+            }
+            throw new JsonException("Invalid JSON for SimpleType");
+        }
+        public override void Write(Utf8JsonWriter writer, SimpleType value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToChar().ToString());
+        }
     }
 }

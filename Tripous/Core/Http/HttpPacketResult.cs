@@ -58,14 +58,14 @@
         public void SerializePacket(object Packet)
         {
             if (Packet != null)
-                this.Packet = Json.ToJson(Packet);
+                this.Packet = Json.Serialize(Packet);
         }
         /// <summary>
         /// Deserializes Packet string property to an instance of a specified type
         /// </summary>
         public T DeserializePacket<T>()
         {
-            return Json.FromJson<T>(this.Packet);
+            return Json.Deserialize<T>(this.Packet);
         }
 
 

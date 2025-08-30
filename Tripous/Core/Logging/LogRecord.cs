@@ -1,6 +1,6 @@
 ﻿namespace Tripous.Logging
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
+ 
     public class LogRecord
     {
         public LogRecord(LogEntry Entry)

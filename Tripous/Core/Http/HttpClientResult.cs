@@ -1,4 +1,6 @@
-﻿namespace Tripous.Http
+﻿using System.Text.Json.Serialization;
+
+namespace Tripous.Http
 {
     /// <summary>
     /// Represents the response of a call to the WebApi

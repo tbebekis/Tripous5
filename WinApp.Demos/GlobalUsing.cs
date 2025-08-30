@@ -37,11 +37,13 @@ global using System.Security.Cryptography;
 global using Dapper;
 global using System.Data.SQLite;
 
+/*
 //global using Newtonsoft;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Serialization;
 global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Converters;
+*/
 
 global using Tripous;
 global using Tripous.Data;

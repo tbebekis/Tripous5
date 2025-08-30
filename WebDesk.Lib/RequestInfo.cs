@@ -58,7 +58,7 @@
         }
         public string[] ToLines()
         {
-            string JsonText = Json.ToJson(this);
+            string JsonText = Json.Serialize(this);
             JsonText = JsonText.Trim('{', '}').Trim();
             string[] Result = JsonText.Split(Environment.NewLine);
             for (int i = 0; i < Result.Length; i++)

@@ -21,7 +21,7 @@
         /// <summary>
         /// Url of the image
         /// </summary>
-        [JsonIgnore()]
+        [JsonIgnore]
         public string ImageUrl { get; set; }
     }
 }

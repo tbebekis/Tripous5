@@ -4,7 +4,7 @@
     /// View tool-bar flags. Indicates what buttons to display.
     /// </summary>
     [Flags]
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ViewToolBarFlags_NOT_USED
     {
         /// <summary>

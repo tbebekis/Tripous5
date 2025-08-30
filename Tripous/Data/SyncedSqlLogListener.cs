@@ -20,7 +20,7 @@
 
 
         /// <summary>
-        /// Occurs when a new <see cref="SqlLogEntry"/ is available.>
+        /// Occurs when a new <see cref="SqlLogEntry"/> is available.>
         /// </summary>
         public event EventHandler<SqlLogEntryArgs> EntryEvent;
     }

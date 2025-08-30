@@ -36,15 +36,21 @@ global using System.Security.Cryptography;
 global using System.Drawing;
 global using System.Drawing.Imaging;
 global using System.Drawing.Drawing2D;
- 
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
+global using System.Text.Json.Nodes;
+
 
 global using Dapper;
 
+/*
 //global using Newtonsoft;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Serialization;
 global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Converters;
+*/
 
 global using Tripous.Data;
 global using Tripous.Logging;
