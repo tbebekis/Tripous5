@@ -6,5 +6,6 @@
 
         string Id { get; set; }
         object Info { get; set; }
+        bool CloseableByUser { get; set; }
     }
 }

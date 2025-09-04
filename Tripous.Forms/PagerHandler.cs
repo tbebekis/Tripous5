@@ -44,7 +44,7 @@
                     if (e.Button == MouseButtons.Middle)
                     {
                         IPanel Panel = TabPage.Tag as IPanel;
-                        if (Panel != null)
+                        if (Panel != null && Panel.CloseableByUser)
                             Panel.Close();
                     }
                     else if (e.Button == MouseButtons.Left)
