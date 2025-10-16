@@ -231,6 +231,11 @@ namespace Tripous.Forms
                     MarkdownBox.IsChanged = value;
             }
         }
+        public string MarkdownText
+        {
+            get => MarkdownBox.Text;
+            set => MarkdownBox.Text = value;
+        }
 
         public event EventHandler SaveText;
     }
