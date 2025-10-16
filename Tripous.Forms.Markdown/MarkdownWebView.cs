@@ -1,7 +1,7 @@
 ﻿#pragma warning disable WFO1000 // Missing code serialization configuration for property content
 namespace Tripous.Forms
 {
-    public class MarkdownWriterWebView : WebView2
+    public class MarkdownWebView : WebView2
     {
         const string DefaultCssText = @"
 body {
@@ -168,9 +168,14 @@ blockquote p {
         // ● State
         bool IsAssetsMapped;
         string PendingHtmlText;
- 
-        // ● Scroll state
+
+        // ● scroll state
         double LastScrollY = 0;
+
+        // ● scroll sync
+        bool _scrollSyncEnabled;
+        bool _internalScroll;   // guard ώστε να μη στέλνουμε messages όταν εμείς προκαλούμε scroll
+        DateTime _lastSent = DateTime.MinValue;
 
         // ● private
         /// <summary>
@@ -238,6 +243,10 @@ blockquote p {
             }
 
             EnsureAssetsMapping();
+
+            // HookWebMessages();
+            CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+            CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
 
             if (!string.IsNullOrEmpty(PendingHtmlText))
             {
@@ -383,7 +392,7 @@ blockquote p {
             }
         }
 
-
+        // ● save/restore scroll point
         /// <summary>
         /// Reads current scrollY from the page.
         /// </summary>
@@ -422,6 +431,74 @@ blockquote p {
             catch { }
         }
 
+        // ● scroll sync
+        /*
+        void HookWebMessages()
+        {
+            CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+            CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+        }
+        */
+        void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                var json = e.WebMessageAsJson;
+                // αναμένουμε {"type":"scroll","pct":0.42}
+                var doc = System.Text.Json.JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("type", out var t) && t.GetString() == "scroll")
+                {
+                    if (doc.RootElement.TryGetProperty("pct", out var p))
+                    {
+                        var pct = Math.Clamp(p.GetDouble(), 0.0, 1.0);
+                        if (!_internalScroll && _scrollSyncEnabled)
+                            ScrollPercentChanged?.Invoke(this, pct);
+                    }
+                }
+            }
+            catch { /* ignore */ }
+        }
+        async void InjectScrollJs()
+        {
+            if (CoreWebView2 == null || !_scrollSyncEnabled)
+                return;
+
+            // JS helper που:
+            // 1) Στέλνει scroll ποσοστό προς .NET με throttle
+            // 2) Δέχεται εντολή να κάνει scroll σε συγκεκριμένο ποσοστό
+            string js = @"
+(function(){
+  if (window.__tripousScrollSyncInstalled) return;
+  window.__tripousScrollSyncInstalled = true;
+
+  const post = (pct) => {
+    try { chrome.webview.postMessage({ type: 'scroll', pct }); } catch(e){}
+  };
+
+  let lastSent = 0;
+  const onScroll = () => {
+    const doc = document.scrollingElement || document.documentElement || document.body;
+    const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
+    const pct = Math.min(1, Math.max(0, doc.scrollTop / max));
+    const now = Date.now();
+    if (now - lastSent > 50) { // throttle 50ms
+      lastSent = now;
+      post(pct);
+    }
+  };
+
+  document.addEventListener('scroll', onScroll, { passive: true });
+
+  window.__tripousScrollToPercent = (pct) => {
+    const doc = document.scrollingElement || document.documentElement || document.body;
+    const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
+    doc.scrollTop = pct * max;
+  };
+})();";
+
+            try { await CoreWebView2.ExecuteScriptAsync(js); } catch { /* ignore */ }
+        }
+ 
         // ● overrides
         /// <summary>
         /// Ensures WebView2 is initialized.
@@ -447,12 +524,36 @@ blockquote p {
             base.Dispose(disposing);
         }
 
-
+        // ● scroll sync
+        public void EnableScrollSync(bool enable = true)
+        {
+            _scrollSyncEnabled = enable;
+            if (CoreWebView2 != null)
+                InjectScrollJs();
+        }
+        /// <summary>Κύλιση στο δοσμένο ποσοστό (0..1) χωρίς να πυροδοτήσουμε προς τα έξω event.</summary>
+        public async Task ScrollToPercentAsync(double pct)
+        {
+            if (CoreWebView2 == null) return;
+            pct = Math.Clamp(pct, 0.0, 1.0);
+            _internalScroll = true;
+            try
+            {
+                await CoreWebView2.ExecuteScriptAsync($"window.__tripousScrollToPercent && window.__tripousScrollToPercent({pct.ToString(System.Globalization.CultureInfo.InvariantCulture)});");
+            }
+            catch { /* ignore */ }
+            finally
+            {
+                // μικρή καθυστέρηση ώστε το JS scroll event να εκτονωθεί πριν ξαναδεχτούμε messages
+                _ = Task.Delay(30).ContinueWith(_ => _internalScroll = false);
+            }
+        }
+ 
         // ● construction
         /// <summary>
         /// Constructor
         /// </summary>
-        public MarkdownWriterWebView()
+        public MarkdownWebView()
         {
             Dock = DockStyle.Fill;
 
@@ -461,6 +562,8 @@ blockquote p {
                 .Build(); 
 
             CoreWebView2InitializationCompleted += OnCoreWebView2InitializationCompleted;
+            NavigationCompleted += (_, __) => InjectScrollJs();
+ 
         }
 
         // ● public
@@ -547,8 +650,8 @@ blockquote p {
             }
         }
 
- 
-
+        // ● event
+        public event EventHandler<double> ScrollPercentChanged; // pct from 0.0 to 1.0
 
     }
 }

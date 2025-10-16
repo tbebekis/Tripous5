@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="MarkdownWriterWebView.cs">
+      <Compile Update="MarkdownWebView.cs">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Compile>
       <Compile Update="Properties\Resources.Designer.cs">
