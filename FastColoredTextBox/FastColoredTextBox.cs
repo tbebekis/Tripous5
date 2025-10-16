@@ -20,6 +20,7 @@
 //
 // #define Styles32
 #pragma warning disable WFO1000 // Missing code serialization configuration for property content
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,9 +34,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Channels;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
-using Microsoft.Win32;
 using Timer = System.Windows.Forms.Timer;
 
 namespace FastColoredTextBoxNS
@@ -532,7 +533,13 @@ namespace FastColoredTextBoxNS
                     //clear line's IsChanged property
                     lines.ClearIsChanged();
 
+                bool Flag = isChanged != value; // by tbebekis
+
                 isChanged = value;
+
+                // by tbebekis
+                if (Flag && ModifiedChanged != null) 
+                    ModifiedChanged(this, EventArgs.Empty);
             }
         }
 
@@ -2012,6 +2019,12 @@ namespace FastColoredTextBoxNS
         [Description("Occurs when custom wordwrap is needed.")]
         public event EventHandler<WordWrapNeededEventArgs> WordWrapNeeded;
 
+        /// <summary>
+        /// Occurs when IsChanged property is changed
+        /// </summary>
+        [Browsable(true)]
+        [Description("Occurs when IsChanged property is changed.")]
+        public event EventHandler ModifiedChanged;          // by tbebekis
 
         /// <summary>
         /// Returns list of styles of given place

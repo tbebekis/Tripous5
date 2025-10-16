@@ -1,6 +1,6 @@
 ﻿namespace Tripous.Forms
 {
-    partial class UC_MarkdownWriter
+    partial class MarkdownEditor
     {
         /// <summary> 
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new Container();
-            ComponentResourceManager resources = new ComponentResourceManager(typeof(UC_MarkdownWriter));
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(MarkdownEditor));
             MarkdownTextBox.MarkdownPolicy markdownPolicy1 = new MarkdownTextBox.MarkdownPolicy();
             Splitter = new SplitContainer();
             fMarkdownBox = new MarkdownTextBox();

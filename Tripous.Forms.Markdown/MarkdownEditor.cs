@@ -6,37 +6,22 @@ using Tripous.Forms.Properties;
 
 namespace Tripous.Forms
 {
-    public partial class UC_MarkdownWriter : UserControl, IPanel
+    public partial class MarkdownEditor : UserControl
     {
         static public readonly Font DefaultEditorFont = new Font("Consolas", 10.85f, FontStyle.Regular, GraphicsUnit.Point, 0);
 
         // ● private        
-        TabPage ParentTabPage { get { return this.Parent as TabPage; } }
+ 
         MarkdownWriterWebView WV;
 
         // --- NEW: Find/Replace panel πεδίο
         private MarkdownFindReplacePanel _findPanel;
         private bool _darkMode = true; // κράτα sync με το highlighter theme που εφαρμόζεις
-
-        string TitleText;
-        bool fIsMarkdownChanged = false;
-        bool IsMarkdownChanged
-        {
-            get { return fIsMarkdownChanged; }
-            set
-            {
-                if (fIsMarkdownChanged != value)
-                {
-                    fIsMarkdownChanged = value;
-                    AdjustTabTitle();
-                }
-            }
-        }
+         
 
         // ● private      
         void ControlInitialize()
         {
-            TitleChanged();
 
             ToolBar.Items.AddRange(new ToolStripItem[]{
                 CreateButton("Bold", Resources.bold, (s,e)=> MarkdownBox.ToggleBold(), "Bold (Ctrl + B)"),
@@ -67,11 +52,9 @@ namespace Tripous.Forms
                         ? MarkdownTextBox.MarkdownTheme.Light
                         : MarkdownTextBox.MarkdownTheme.Dark;
                     MarkdownBox.ApplyTheme(next);
-                }, "Toggle Light/Dark")
+                }, "Toggle Light/Dark"),
+                CreateButton("Index", Resources.save, (s,e)=> DoSaveText(),"Save (Ctrl + S)"),
             });
-
-
-
 
             WV = new MarkdownWriterWebView();
             Splitter.Panel2.Controls.Add(WV);
@@ -87,26 +70,11 @@ namespace Tripous.Forms
             Highlighter.ApplyDarkTheme();
             _darkMode = true;
 
+            MarkdownBox.TextChanged += (s, e) => MarkdownTextChanged();
+
             // --- NEW: optional — αν θες το panel να υπάρχει από την αρχή αλλά κρυφό
             EnsureFindPanel();
             _findPanel.Visible = false;
-
-            if (File.Exists(this.Id))
-            {
-                WV.LoadFromFile(this.Id);
-                string MarkdownText = File.ReadAllText(this.Id);
-                MarkdownBox.Text = MarkdownText;
-            }
-            else
-            {
-                string FilePath = Path.Combine(System.AppContext.BaseDirectory, "CheatSheet.md");
-                if (File.Exists(FilePath))
-                {
-                    WV.LoadFromFile(FilePath);
-                    string MarkdownText = File.ReadAllText(FilePath);
-                    MarkdownBox.Text = MarkdownText;
-                }
-            }
 
             MarkdownBox.TextChanged += (s, e) => MarkdownTextChanged();
 
@@ -182,13 +150,13 @@ namespace Tripous.Forms
 
         void MarkdownTextChanged()
         {
-            IsMarkdownChanged = true;
             string MarkdownText = MarkdownBox.Text;
             WV.MarkdownText = MarkdownText;
         }
-        void AdjustTabTitle()
+ 
+        void DoSaveText()
         {
-            ParentTabPage.Text = IsMarkdownChanged ? TitleText + "*" : TitleText;
+            SaveText?.Invoke(this, EventArgs.Empty);
         }
 
         // ● overrides  
@@ -203,6 +171,11 @@ namespace Tripous.Forms
         // --- NEW: shortcuts μέσα από το ίδιο UserControl
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            if (keyData == (Keys.Control | Keys.S))
+            {
+                DoSaveText();
+                return true;
+            }
             if (keyData == (Keys.Control | Keys.F))
             {
                 ShowFindPanel();
@@ -238,30 +211,28 @@ namespace Tripous.Forms
         }
 
 
-        // ● public
-        public void Close()
-        {
-            TabControl Pager = ParentTabPage.Parent as TabControl;
-            if ((Pager != null) && (Pager.TabPages.Contains(ParentTabPage)))
-                Pager.TabPages.Remove(ParentTabPage);
-        }
-        public void TitleChanged()
-        {
-            TitleText = File.Exists(this.Id) ? Path.GetFileName(this.Id) : Id;
-            AdjustTabTitle();
-        }
+ 
 
         // ● construction
-        public UC_MarkdownWriter()
+        public MarkdownEditor()
         {
             InitializeComponent();
         }
 
         // ● properties
         public MarkdownTextBox MarkdownBox => fMarkdownBox;
-        public string Id { get; set; }
-        public object Info { get; set; }
-        public bool CloseableByUser { get; set; } = true;
+        public MarkdownWriterWebView WebView => WV;
+        public bool Modified
+        {
+            get => MarkdownBox.IsChanged;
+            set 
+            {
+                if (MarkdownBox.IsChanged != value)
+                    MarkdownBox.IsChanged = value;
+            }
+        }
+
+        public event EventHandler SaveText;
     }
 }
 

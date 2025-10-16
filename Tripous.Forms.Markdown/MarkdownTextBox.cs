@@ -1397,5 +1397,19 @@ namespace Tripous.Forms
             return res;
         }
 
+
+        public void LoadCheatSheet()
+        {
+            string FilePath = Path.Combine(System.AppContext.BaseDirectory, "CheatSheet.md");
+            LoadFromFile(FilePath);
+        }
+        public void LoadFromFile(string FilePath)
+        {
+            if (File.Exists(FilePath))
+            {
+                string MarkdownText = File.ReadAllText(FilePath);
+                this.Text = MarkdownText;
+            }
+        }
     }
 }
