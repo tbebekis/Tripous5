@@ -1,6 +1,7 @@
 ﻿#pragma warning disable WFO1000 // Missing code serialization configuration for property content
 
-using Google.Protobuf.Reflection;
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Tripous.Forms.Properties;
 
@@ -8,19 +9,14 @@ namespace Tripous.Forms
 {
     public partial class MarkdownEditor : UserControl
     {
-        static public readonly Font DefaultEditorFont = new Font("Consolas", 10.85f, FontStyle.Regular, GraphicsUnit.Point, 0);
+        public static readonly Font DefaultEditorFont = new Font("Consolas", 10.85f, FontStyle.Regular, GraphicsUnit.Point, 0);
 
         // ● private        
         MarkdownWebView WV;
 
-        // --- NEW: Find/Replace panel πεδίο
+        // --- Find/Replace panel
         private MarkdownFindReplacePanel _findPanel;
-        private bool _darkMode = true; // κράτα sync με το highlighter theme που εφαρμόζεις
-
-        // --- SCROLL SYNC: guards + settings
-        bool _syncEnabled = true;
-        bool _internalEditorScroll = false;
-        DateTime _lastEditorSent = DateTime.MinValue;
+        private bool _darkMode = true; // sync με highlighter theme
 
         // ● private      
         void ControlInitialize()
@@ -67,26 +63,22 @@ namespace Tripous.Forms
             MarkdownBox.Language = FastColoredTextBoxNS.Language.Custom;
 
             var Highlighter = new MarkdownHighlighter(MarkdownBox);
-            // Highlighter.ApplyLightTheme();
             Highlighter.ApplyDarkTheme();
             _darkMode = true;
 
-            MarkdownBox.TextChanged += (s, e) => MarkdownTextChanged();
+            // Render → Preview (debounced μέσα στο WebView)
+            MarkdownBox.TextChanged += (s, e) =>
+            {
+                MarkdownTextChanged();
+            };
 
-            // --- NEW: optional — αν θες το panel να υπάρχει από την αρχή αλλά κρυφό
+            // Προαιρετικά: φτιάξε το Find panel από την αρχή αλλά κρυφό
             EnsureFindPanel();
             _findPanel.Visible = false;
 
-            MarkdownBox.TextChanged += (s, e) => MarkdownTextChanged();
-
-            // --- NEW: κάνε τον Form host να δίνει τα keyboard events εδώ
+            // Ο host form να δίνει keyboard events εδώ
             var form = this.FindForm();
             if (form != null) form.KeyPreview = true;
-
-            // --- SCROLL SYNC: wire up δύο κατευθύνσεις
-            MarkdownBox.VisibleRangeChanged += Editor_VisibleRangeChanged;
-            WV.EnableScrollSync(true);
-            WV.ScrollPercentChanged += WebView_ScrollPercentChanged;
         }
 
         private ToolStripButton CreateButton(string text, Image img, EventHandler onClick, string tooltip)
@@ -97,7 +89,7 @@ namespace Tripous.Forms
             return b;
         }
 
-        // --- NEW: δημιουργεί/επιστρέφει το panel και το “δένει” στο Panel1
+        // --- δημιουργεί/επιστρέφει το panel και το “δένει” στο Panel1
         private void EnsureFindPanel()
         {
             if (_findPanel == null)
@@ -125,7 +117,7 @@ namespace Tripous.Forms
             }
         }
 
-        // --- NEW: API για άνοιγμα Find/Replace από toolbar/μενού
+        // --- API για άνοιγμα Find/Replace από toolbar/μενού
         public void ShowFindPanel()
         {
             EnsureFindPanel();
@@ -140,7 +132,7 @@ namespace Tripous.Forms
             _findPanel.FocusReplace();
         }
 
-        // --- NEW: αν αλλάζεις theme στο editor, κράτα sync το panel
+        // --- theme sync
         public void ApplyEditorTheme(bool dark)
         {
             _darkMode = dark;
@@ -172,7 +164,7 @@ namespace Tripous.Forms
                 ControlInitialize();
         }
 
-        // --- NEW: shortcuts μέσα από το ίδιο UserControl
+        // --- shortcuts μέσα από το ίδιο UserControl
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == (Keys.Control | Keys.S))
@@ -213,71 +205,6 @@ namespace Tripous.Forms
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }
-
-        // -------------------------
-        // --- SCROLL SYNC REGION
-        // -------------------------
-
-        // Editor -> WebView (όταν αλλάζει το ορατό range)
-        void Editor_VisibleRangeChanged(object sender, EventArgs e)
-        {
-            if (!_syncEnabled || _internalEditorScroll) return;
-
-            // throttle ~50ms
-            if ((DateTime.Now - _lastEditorSent).TotalMilliseconds < 50)
-                return;
-            _lastEditorSent = DateTime.Now;
-
-            double pct = GetEditorScrollPercent();
-            _ = WV.ScrollToPercentAsync(pct);
-        }
-
-        double GetEditorScrollPercent()
-        {
-            int total = Math.Max(1, MarkdownBox.LinesCount - 1);
-            int firstVisible = Math.Max(0, MarkdownBox.VisibleRange.Start.iLine);
-            return total == 0 ? 0.0 : (double)firstVisible / total;
-        }
-
-        // WebView -> Editor
-        void WebView_ScrollPercentChanged(object sender, double pct)
-        {
-            if (!_syncEnabled) return;
-
-            int total = Math.Max(1, MarkdownBox.LinesCount - 1);
-            int targetLine = (int)Math.Round(Math.Clamp(pct, 0.0, 1.0) * total);
-            ScrollEditorToLine(targetLine);
-        }
-
-        void ScrollEditorToLine(int targetLine)
-        {
-            int line = Math.Clamp(targetLine, 0, Math.Max(0, MarkdownBox.LinesCount - 1));
-
-            _internalEditorScroll = true;
-            try
-            {
-                // Γενικός τρόπος που παίζει σε όλες τις εκδόσεις FCTB
-                var r = new FastColoredTextBoxNS.Range(MarkdownBox, 0, line, 0, line);
-                MarkdownBox.Selection = r;
-                MarkdownBox.DoSelectionVisible();
-            }
-            finally
-            {
-                // δώσε 30ms να «σβήσουν» τα internal events και έπειτα ξεκλείδωσε
-                _ = Task.Delay(30).ContinueWith(_ => _internalEditorScroll = false);
-            }
-        }
-
-        /// <summary>Enable/disable scroll synchronization και στις δύο πλευρές.</summary>
-        public void SetScrollSync(bool enable)
-        {
-            _syncEnabled = enable;
-            WV.EnableScrollSync(enable);
-        }
-
-        // -------------------------
-        // --- END SCROLL SYNC
-        // -------------------------
 
         // ● construction
         public MarkdownEditor()

@@ -841,7 +841,7 @@ namespace Tripous.Forms
 
         private string SafeGetLineText(int lineIndex)
         {
- 
+
             if (lineIndex < 0) lineIndex = 0;
             if (lineIndex >= this.LinesCount) return "";
             return this.Lines[lineIndex];
@@ -1013,7 +1013,7 @@ namespace Tripous.Forms
                 BuildOrUpdateIndex();
                 return true; // handled
             }
-      
+
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -1160,7 +1160,7 @@ namespace Tripous.Forms
             return false;
         }
 
- 
+
 
         private void ReplaceLines(int startLine, int endLine, string newTextWithNl)
         {

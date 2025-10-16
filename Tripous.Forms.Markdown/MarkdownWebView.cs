@@ -164,18 +164,13 @@ blockquote p {
         string fMarkdownFolderName;
 
         string fMarkdownText;
- 
+
         // ● State
         bool IsAssetsMapped;
         string PendingHtmlText;
 
-        // ● scroll state
+        // ● Scroll state
         double LastScrollY = 0;
-
-        // ● scroll sync
-        bool _scrollSyncEnabled;
-        bool _internalScroll;   // guard ώστε να μη στέλνουμε messages όταν εμείς προκαλούμε scroll
-        DateTime _lastSent = DateTime.MinValue;
 
         // ● private
         /// <summary>
@@ -183,7 +178,7 @@ blockquote p {
         /// </summary>
         async Task EnsureInitializedAsync()
         {
-            if (IsInitialized) 
+            if (IsInitialized)
                 return;
 
             try
@@ -244,19 +239,15 @@ blockquote p {
 
             EnsureAssetsMapping();
 
-            // HookWebMessages();
-            CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
-            CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-
             if (!string.IsNullOrEmpty(PendingHtmlText))
             {
-                try 
+                try
                 {
-                    _ = RenderHtmlTextAsync(PendingHtmlText); 
-                } 
-                catch 
-                { 
-                    /* ignore */ 
+                    _ = RenderHtmlTextAsync(PendingHtmlText);
+                }
+                catch
+                {
+                    /* ignore */
                 }
 
                 PendingHtmlText = null;
@@ -276,9 +267,9 @@ blockquote p {
             if (!string.IsNullOrWhiteSpace(MarkdownFolderName))
             {
                 string FolderName = Path.GetDirectoryName(AssetsRootPath);
-                if (string.Compare(MarkdownFolderName, FolderName, StringComparison.InvariantCultureIgnoreCase) != 0) 
+                if (string.Compare(MarkdownFolderName, FolderName, StringComparison.InvariantCultureIgnoreCase) != 0)
                     BaseRef = $"https://{AssetsHost}/{MarkdownFolderName}/";
-            } 
+            }
 
             return $@"<!DOCTYPE html>
 <html>
@@ -357,11 +348,11 @@ blockquote p {
         /// Renders Markdown to HTML.
         /// </summary>
         async Task RenderMarkdownAsync()
-        { 
+        {
             CTS?.Cancel();
             CTS = new CancellationTokenSource();
             var Token = CTS.Token;
- 
+
             string HtmlText;
             try
             {
@@ -371,28 +362,28 @@ blockquote p {
                     return Markdig.Markdown.ToHtml(MarkdownText, Pipeline);
                 }, Token).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) 
-            { 
-                return; 
+            catch (OperationCanceledException)
+            {
+                return;
             }
             catch (Exception ex)
             {
                 HtmlText = $"<pre>Markdown render error:\n{System.Net.WebUtility.HtmlEncode(ex.Message)}</pre>";
             }
 
-            if (Token.IsCancellationRequested) 
+            if (Token.IsCancellationRequested)
                 return;
 
             if (IsHandleCreated)
             {
-                if (InvokeRequired) 
+                if (InvokeRequired)
                     BeginInvoke(new Action(() => SetHtmlText(HtmlText)));
                 else
                     SetHtmlText(HtmlText);
             }
         }
 
-        // ● save/restore scroll point
+
         /// <summary>
         /// Reads current scrollY from the page.
         /// </summary>
@@ -423,82 +414,14 @@ blockquote p {
                     (function() {{
                         const y = {yStr};
                         window.scrollTo(0, y);
-                        setTimeout(() => window.scrollTo(0, y), 50);
-                        setTimeout(() => window.scrollTo(0, y), 200);
+                        //setTimeout(() => window.scrollTo(0, y), 50);
+                        //setTimeout(() => window.scrollTo(0, y), 200);
                     }})();
                 ");
             }
             catch { }
         }
 
-        // ● scroll sync
-        /*
-        void HookWebMessages()
-        {
-            CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
-            CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-        }
-        */
-        void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
-        {
-            try
-            {
-                var json = e.WebMessageAsJson;
-                // αναμένουμε {"type":"scroll","pct":0.42}
-                var doc = System.Text.Json.JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("type", out var t) && t.GetString() == "scroll")
-                {
-                    if (doc.RootElement.TryGetProperty("pct", out var p))
-                    {
-                        var pct = Math.Clamp(p.GetDouble(), 0.0, 1.0);
-                        if (!_internalScroll && _scrollSyncEnabled)
-                            ScrollPercentChanged?.Invoke(this, pct);
-                    }
-                }
-            }
-            catch { /* ignore */ }
-        }
-        async void InjectScrollJs()
-        {
-            if (CoreWebView2 == null || !_scrollSyncEnabled)
-                return;
-
-            // JS helper που:
-            // 1) Στέλνει scroll ποσοστό προς .NET με throttle
-            // 2) Δέχεται εντολή να κάνει scroll σε συγκεκριμένο ποσοστό
-            string js = @"
-(function(){
-  if (window.__tripousScrollSyncInstalled) return;
-  window.__tripousScrollSyncInstalled = true;
-
-  const post = (pct) => {
-    try { chrome.webview.postMessage({ type: 'scroll', pct }); } catch(e){}
-  };
-
-  let lastSent = 0;
-  const onScroll = () => {
-    const doc = document.scrollingElement || document.documentElement || document.body;
-    const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
-    const pct = Math.min(1, Math.max(0, doc.scrollTop / max));
-    const now = Date.now();
-    if (now - lastSent > 50) { // throttle 50ms
-      lastSent = now;
-      post(pct);
-    }
-  };
-
-  document.addEventListener('scroll', onScroll, { passive: true });
-
-  window.__tripousScrollToPercent = (pct) => {
-    const doc = document.scrollingElement || document.documentElement || document.body;
-    const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
-    doc.scrollTop = pct * max;
-  };
-})();";
-
-            try { await CoreWebView2.ExecuteScriptAsync(js); } catch { /* ignore */ }
-        }
- 
         // ● overrides
         /// <summary>
         /// Ensures WebView2 is initialized.
@@ -524,31 +447,7 @@ blockquote p {
             base.Dispose(disposing);
         }
 
-        // ● scroll sync
-        public void EnableScrollSync(bool enable = true)
-        {
-            _scrollSyncEnabled = enable;
-            if (CoreWebView2 != null)
-                InjectScrollJs();
-        }
-        /// <summary>Κύλιση στο δοσμένο ποσοστό (0..1) χωρίς να πυροδοτήσουμε προς τα έξω event.</summary>
-        public async Task ScrollToPercentAsync(double pct)
-        {
-            if (CoreWebView2 == null) return;
-            pct = Math.Clamp(pct, 0.0, 1.0);
-            _internalScroll = true;
-            try
-            {
-                await CoreWebView2.ExecuteScriptAsync($"window.__tripousScrollToPercent && window.__tripousScrollToPercent({pct.ToString(System.Globalization.CultureInfo.InvariantCulture)});");
-            }
-            catch { /* ignore */ }
-            finally
-            {
-                // μικρή καθυστέρηση ώστε το JS scroll event να εκτονωθεί πριν ξαναδεχτούμε messages
-                _ = Task.Delay(30).ContinueWith(_ => _internalScroll = false);
-            }
-        }
- 
+
         // ● construction
         /// <summary>
         /// Constructor
@@ -559,11 +458,9 @@ blockquote p {
 
             Pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
-                .Build(); 
+                .Build();
 
             CoreWebView2InitializationCompleted += OnCoreWebView2InitializationCompleted;
-            NavigationCompleted += (_, __) => InjectScrollJs();
- 
         }
 
         // ● public
@@ -630,7 +527,7 @@ blockquote p {
                     IsAssetsMapped = false;
                     CoreWebView2.ClearVirtualHostNameToFolderMapping(AssetsHost);
                     EnsureAssetsMapping();
-                }              
+                }
             }
         }
         /// <summary>
@@ -650,8 +547,8 @@ blockquote p {
             }
         }
 
-        // ● event
-        public event EventHandler<double> ScrollPercentChanged; // pct from 0.0 to 1.0
+
+
 
     }
 }
