@@ -19,6 +19,42 @@
 
     public sealed class FctbSyncScrollAdapter : ISyncScrollAdapter, IDisposable
     {
+        // P/Invoke
+        const int SB_VERT = 1;
+        const int SIF_RANGE = 0x1;
+        const int SIF_PAGE = 0x2;
+        const int SIF_POS = 0x4;
+        const int SIF_ALL = SIF_RANGE | SIF_PAGE | SIF_POS;
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        struct SCROLLINFO
+        {
+            public uint cbSize;
+            public uint fMask;
+            public int nMin;
+            public int nMax;
+            public uint nPage;
+            public int nPos;
+            public int nTrackPos;
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+        static extern bool GetScrollInfo(IntPtr hwnd, int nBar, ref SCROLLINFO si);
+
+        // Helper: δίνει πραγματικό range ή 0
+        int GetFctbTrueRange(FastColoredTextBox fctb)
+        {
+            SCROLLINFO si = new SCROLLINFO();
+            si.cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(SCROLLINFO));
+            si.fMask = SIF_ALL;
+            if (!GetScrollInfo(fctb.Handle, SB_VERT, ref si))
+                return 0; // fallback
+
+            long range = (long)si.nMax - (long)si.nPage; // προσοχή σε underflow
+            if (range < 0) range = 0;
+            return (int)range;
+        }
+ 
         private readonly FastColoredTextBox _fctb;
 
         public FctbSyncScrollAdapter(FastColoredTextBox fctb)
@@ -35,29 +71,12 @@
         }
 
         public bool IsReady { get { return !_fctb.IsDisposed && _fctb.IsHandleCreated; } }
-
-        public Task<double> GetRangeAsync()
-        {
-            int range = _fctb.VerticalScroll.Maximum - _fctb.VerticalScroll.LargeChange;
-            if (range < 0) range = 0;
-            return Task.FromResult((double)range);
-        }
-
+ 
         public Task<double> GetPositionAsync()
         {
             return Task.FromResult((double)_fctb.VerticalScroll.Value);
         }
-
-        public Task SetPositionAsync(double pos)
-        {
-            int v = (int)Math.Round(pos);
-            if (v < _fctb.VerticalScroll.Minimum) v = _fctb.VerticalScroll.Minimum;
-            if (v > _fctb.VerticalScroll.Maximum) v = _fctb.VerticalScroll.Maximum;
-            _fctb.VerticalScroll.Value = v;
-            _fctb.Invalidate();
-            return Task.CompletedTask;
-        }
-
+ 
         public async Task<double> GetRatioAsync()
         {
             double range = await GetRangeAsync().ConfigureAwait(false);
@@ -67,15 +86,38 @@
             if (r < 0) r = 0; else if (r > 1) r = 1;
             return r;
         }
+ 
+        public Task<double> GetRangeAsync()
+        {
+            int range = GetFctbTrueRange(_fctb);
+            return Task.FromResult((double)range);
+        }
+
+        public Task SetPositionAsync(double pos)
+        {
+            int range = GetFctbTrueRange(_fctb);
+            if (range <= 0)
+                return Task.CompletedTask; // no-op όταν δεν υπάρχει κύλιση
+
+            int v = (int)Math.Round(pos);
+            if (v < _fctb.VerticalScroll.Minimum) v = _fctb.VerticalScroll.Minimum;
+            if (v > _fctb.VerticalScroll.Maximum) v = _fctb.VerticalScroll.Maximum;
+            _fctb.VerticalScroll.Value = v;
+            _fctb.Invalidate();
+            return Task.CompletedTask;
+        }
 
         public async Task SetRatioAsync(double ratio)
         {
             if (ratio < 0) ratio = 0; else if (ratio > 1) ratio = 1;
             double range = await GetRangeAsync().ConfigureAwait(false);
-            double target = ratio * Math.Max(1.0, range);
+            if (range <= 0.0)
+                return; // no-op
+
+            double target = ratio * range;
             await SetPositionAsync(target).ConfigureAwait(false);
         }
-
+ 
         public event EventHandler Scrolled;
 
         private void OnFctbScroll(object sender, ScrollEventArgs e)
@@ -95,7 +137,7 @@
     public sealed class WebViewSyncScrollAdapter : ISyncScrollAdapter, IDisposable
     {
         private readonly WebView2 _web;
-        private bool _initialized;
+        //private bool _initialized;
 
         public WebViewSyncScrollAdapter(WebView2 webView)
         {
@@ -117,7 +159,7 @@
                 await InjectDocumentCreatedScript();
                 HookWebMessage();
             }
-            _initialized = true;
+            //_initialized = true;
         }
 
         public bool IsReady
@@ -382,7 +424,7 @@
             _debounce.Start();
         }
 
-        private async void OnDebounceTick(object sender, EventArgs e)
+        private async void OnDebounceTick_OLD(object sender, EventArgs e)
         {
             _debounce.Stop();
             if (_syncing || !_initialized) return;
@@ -404,6 +446,65 @@
                 _syncing = false;
             }
         }
+        private async void OnDebounceTick_2(object sender, EventArgs e)
+        {
+            _debounce.Stop();
+            if (_syncing || !_initialized || _lastSource == null) return;
+
+            var source = _lastSource;
+            var target = ReferenceEquals(source, _left) ? _right : _left;
+
+            if (!source.IsReady || !target.IsReady) return;
+
+            try
+            {
+                _syncing = true;
+
+                double targetRange = await target.GetRangeAsync();
+                if (targetRange <= 0.0)
+                {
+                    // Δεν υπάρχει κύλιση στο target: βεβαιώσου ότι είναι στην κορυφή και τέλος
+                    await target.SetRatioAsync(0.0);
+                    return;
+                }
+
+                double ratio = await source.GetRatioAsync();
+                await target.SetRatioAsync(ratio);
+            }
+            finally
+            {
+                _syncing = false;
+            }
+        }
+        private async void OnDebounceTick(object sender, EventArgs e)
+        {
+            _debounce.Stop();
+            if (_syncing || !_initialized || _lastSource == null) return;
+
+            ISyncScrollAdapter source = _lastSource;
+            ISyncScrollAdapter target = ReferenceEquals(source, _left) ? _right : _left;
+
+            if (!source.IsReady || !target.IsReady) return;
+
+            try
+            {
+                _syncing = true;
+
+                // Αν ο TARGET δεν έχει range, μην κάνεις ΤΙΠΟΤΑ (όχι SetRatio(0))
+                double targetRange = await target.GetRangeAsync();
+                if (targetRange <= 0.0)
+                    return;
+
+                double ratio = await source.GetRatioAsync();
+                await target.SetRatioAsync(ratio);
+            }
+            finally
+            {
+                _syncing = false;
+            }
+        }
+
+
 
         public void Dispose()
         {
