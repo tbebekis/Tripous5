@@ -13,6 +13,9 @@ namespace Tripous.Forms
 
         // ● private        
         MarkdownWebView WV;
+        FctbSyncScrollAdapter fctbAdapter;
+        WebViewSyncScrollAdapter webAdapter;
+        ScrollSynchronizer ScrollSync;
 
         // --- Find/Replace panel
         private MarkdownFindReplacePanel _findPanel;
@@ -78,7 +81,23 @@ namespace Tripous.Forms
 
             // Ο host form να δίνει keyboard events εδώ
             var form = this.FindForm();
-            if (form != null) form.KeyPreview = true;
+            if (form != null) 
+                form.KeyPreview = true;
+
+
+            fctbAdapter   = new FctbSyncScrollAdapter(MarkdownBox);
+            webAdapter = new WebViewSyncScrollAdapter(WV);
+
+            ScrollSync = new ScrollSynchronizer(fctbAdapter, webAdapter, debounceMs: 15);
+            ScrollSync.Start();
+
+
+            this.Disposed += (s, e) => 
+            {
+                ScrollSync.Dispose();
+                fctbAdapter.Dispose();
+                webAdapter.Dispose();
+            };
         }
 
         private ToolStripButton CreateButton(string text, Image img, EventHandler onClick, string tooltip)
