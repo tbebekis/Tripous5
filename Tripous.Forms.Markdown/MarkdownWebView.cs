@@ -194,8 +194,7 @@ blockquote p {
                 }
 
                 IsInitialized = true;
-
-                EnsureAssetsMapping();      // Map project root -> https://assets/
+ 
 
                 if (!string.IsNullOrEmpty(PendingHtmlText))
                 {
@@ -208,23 +207,7 @@ blockquote p {
                 System.Diagnostics.Debug.WriteLine("WebView2 init failed: " + ex);
             }
         }
-        /// <summary>
-        /// Maps the project root folder to a virtual host.
-        /// </summary>
-        void EnsureAssetsMapping()
-        {
-            if (IsAssetsMapped) return;
-            if (CoreWebView2 == null) return;
-            if (string.IsNullOrWhiteSpace(AssetsRootPath)) return;
-            if (!Directory.Exists(AssetsRootPath)) return;
-
-            CoreWebView2.SetVirtualHostNameToFolderMapping(
-                AssetsHost,
-                AssetsRootPath, // e.g., C:\Projects\Project1
-                CoreWebView2HostResourceAccessKind.Allow
-            );
-            IsAssetsMapped = true;
-        }
+ 
         /// <summary>
         /// Event handler for WebView2 initialization completion.
         /// </summary>
@@ -236,9 +219,7 @@ blockquote p {
                 System.Diagnostics.Debug.WriteLine("WebView2 init error: " + e.InitializationException?.Message);
                 return;
             }
-
-            EnsureAssetsMapping();
-
+ 
             if (!string.IsNullOrEmpty(PendingHtmlText))
             {
                 try
@@ -260,22 +241,45 @@ blockquote p {
         /// </summary>
         string WrapHtml(string HtmlText)
         {
-            string CssText = !string.IsNullOrWhiteSpace(ExternalCssText) ? ExternalCssText : DefaultCssText;
-
-            string BaseRef = $"https://{AssetsHost}/";
-
-            if (!string.IsNullOrWhiteSpace(MarkdownFolderName))
+            if (!IsAssetsMapped && !string.IsNullOrWhiteSpace(AssetsRootPath))
             {
-                string FolderName = Path.GetDirectoryName(AssetsRootPath);
-                if (string.Compare(MarkdownFolderName, FolderName, StringComparison.InvariantCultureIgnoreCase) != 0)
-                    BaseRef = $"https://{AssetsHost}/{MarkdownFolderName}/";
+                if (CoreWebView2 == null)
+                    return "<!DOCTYPE html><html><body>Cannot map assets: WebView2 IS NOT INITIALIZED!!!</body></html>";
+
+                if (!Directory.Exists(AssetsRootPath))
+                    return "<!DOCTYPE html><html><body>Cannot map assets: AssetsRootPath NOT EXISTS!!!</body></html>"; 
+
+                CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    AssetsHost,
+                    AssetsRootPath, // e.g., C:\Projects\Project1
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
+
+                Application.DoEvents();
+                                
+                IsAssetsMapped = true;
             }
+
+            string BaseRef = "";
+
+            if (IsAssetsMapped)
+            {
+                if (string.IsNullOrWhiteSpace(MarkdownFolderName))
+                    BaseRef = $"https://{AssetsHost}/";                
+                else
+                    BaseRef = $"https://{AssetsHost}/{MarkdownFolderName.Trim().TrimEnd('/')}/";
+
+                BaseRef = $"<base href=\"{BaseRef}\">";
+            }
+
+
+            string CssText = !string.IsNullOrWhiteSpace(ExternalCssText) ? ExternalCssText : DefaultCssText;
 
             return $@"<!DOCTYPE html>
 <html>
 <head>
 <meta charset=""utf-8"">
-<base href=""{BaseRef}"">
+{BaseRef}
 <style>{CssText}</style>
 </head>
 <body>
@@ -511,7 +515,8 @@ blockquote p {
         /// </summary>
         public int DebounceMsecs { get; set; } = 400;
         /// <summary>
-        /// A path to the assets folder.
+        /// <strong>Optional</strong>. A path to the assets folder.
+        /// <para><strong>NOTE: </strong>When it is set, it means that asset folder mapping is required.</para>
         /// <para>It must be the container of markdown and image files or folders.</para>
         /// <para>AssetsRootPath is the root folder (e.g., C:\Projects\Project1).</para>
         /// <para>MUST contain subfolders: MarkdownFiles, Images (sibling).</para>
@@ -521,12 +526,15 @@ blockquote p {
             get => fAssetsRootPath;
             set
             {
-                fAssetsRootPath = value;
-                if (IsAssetsMapped)
+                if (fAssetsRootPath != value)
                 {
-                    IsAssetsMapped = false;
-                    CoreWebView2.ClearVirtualHostNameToFolderMapping(AssetsHost);
-                    EnsureAssetsMapping();
+                    fAssetsRootPath = value;
+
+                    if (IsAssetsMapped)
+                    {
+                        IsAssetsMapped = false;
+                        CoreWebView2.ClearVirtualHostNameToFolderMapping(AssetsHost);
+                    }
                 }
             }
         }
