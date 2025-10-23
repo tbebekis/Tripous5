@@ -698,7 +698,7 @@ Large: 8       // 1201 ..
         static public void RunOnce(Action<object> Action, int IntervalInMilliseconds, object Info = null)
         {
             System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-            timer.Interval = 1000;
+            timer.Interval = IntervalInMilliseconds;
             timer.Tick += (s, e) =>
             {
                 Action(Info);
