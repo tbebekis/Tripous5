@@ -2,8 +2,8 @@
   "SqlConnections": [
     {
       "Name": "Default",
-      "Provider": "MsSql",
-      "ConnectionString": "Data Source=localhost; Initial Catalog=WebDesk; Integrated Security=SSPI; TrustServerCertificate=true",
+      "Provider": "SQLite",
+      "ConnectionString": "Data Source=[AppPath]/WebDesk.db3",
       "CommandTimeoutSeconds": 300
     }
   ],
@@ -17,7 +17,7 @@
     {
       "Name": "Default",
       "Provider": "MsSql",
-      "ConnectionString": "Data Source=localhost; Initial Catalog=WebDesk; Integrated Security=SSPI;",
+      "ConnectionString": "Data Source=localhost; Initial Catalog=WebDesk; Integrated Security=SSPI; TrustServerCertificate=true",
       "CommandTimeoutSeconds": 300
     },
     {
